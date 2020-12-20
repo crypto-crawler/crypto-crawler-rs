@@ -1,0 +1,5 @@
+[workspace]
+members = [
+  "crypto-pair",
+  "crypto-market",
+]
