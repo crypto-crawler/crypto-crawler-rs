@@ -3085,7 +3085,7 @@ fn parse_data(json_text: &str) -> HashMap<String, HashMap<String, String>> {
         }
         m.insert(String::from(key), base_quote_map);
     }
-    return m;
+    m
 }
 
 #[test]
