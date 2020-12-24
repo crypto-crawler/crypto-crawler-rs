@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use crate::normalize_pair;
 
-const JSON_DATA: &'static str = r#"
+const JSON_DATA: &str = r#"
 {
   "Biki": {
     "GUNG_ODIN": "gungodin"
