@@ -1,33 +1,14 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use strum_macros::{Display, EnumString};
 
 /// MarketType represents the type of a market
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(PartialEq, Serialize, Deserialize, Display, EnumString)]
 pub enum MarketType {
     Spot,
     Futures,
     Swap,
     Option,
-}
-
-impl std::fmt::Display for MarketType {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
-impl std::str::FromStr for MarketType {
-    type Err = String;
-
-    fn from_str(s: &str) -> ::std::result::Result<MarketType, Self::Err> {
-        match s {
-            "Spot" => ::std::result::Result::Ok(MarketType::Spot),
-            "Futures" => ::std::result::Result::Ok(MarketType::Futures),
-            "Swap" => ::std::result::Result::Ok(MarketType::Swap),
-            "Option" => ::std::result::Result::Ok(MarketType::Option),
-            _ => ::std::result::Result::Err(format!("{} is not a valid value for MarketType", s)),
-        }
-    }
 }
 
 #[derive(Serialize, Deserialize)]
