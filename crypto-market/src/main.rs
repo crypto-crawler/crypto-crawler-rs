@@ -1,6 +1,5 @@
 use crypto_market::fetch_markets;
 use crypto_market::MarketType;
-use serde_json;
 use std::{env, str::FromStr};
 
 fn main() {

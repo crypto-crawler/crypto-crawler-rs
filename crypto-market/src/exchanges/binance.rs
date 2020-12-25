@@ -73,11 +73,10 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Vec<Market> {
     }
 }
 
-fn parse_filter(filters: &Vec<HashMap<String, Value>>, filter_type: &str, field: &str) -> f64 {
+fn parse_filter(filters: &[HashMap<String, Value>], filter_type: &str, field: &str) -> f64 {
     filters
         .iter()
-        .filter(|x| x["filterType"] == filter_type)
-        .next()
+        .find(|x| x["filterType"] == filter_type)
         .unwrap()[field]
         .as_str()
         .unwrap()
