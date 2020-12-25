@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use strum_macros::{Display, EnumString};
@@ -57,5 +59,5 @@ pub struct Market {
     /// minimum quantity when placing orders
     pub min_quantity: MinQuantity,
     /// the original JSON string retrieved from the exchange
-    pub info: Value,
+    pub raw: HashMap<String, Value>,
 }

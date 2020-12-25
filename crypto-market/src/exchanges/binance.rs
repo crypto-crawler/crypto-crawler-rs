@@ -19,6 +19,8 @@ struct SpotMarket {
     quoteAssetPrecision: i32,
     isSpotTradingAllowed: bool,
     filters: Vec<HashMap<String, Value>>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -44,6 +46,8 @@ struct FuturesMarket {
     filters: Vec<HashMap<String, Value>>,
     orderTypes: Vec<String>,
     timeInForce: Vec<String>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -62,6 +66,8 @@ struct SwapMarket {
     filters: Vec<HashMap<String, Value>>,
     orderTypes: Vec<String>,
     timeInForce: Vec<String>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
 }
 
 pub(crate) fn fetch_markets(market_type: MarketType) -> Vec<Market> {
@@ -121,9 +127,16 @@ fn fetch_spot_markets() -> Vec<Market> {
                 base: Some(parse_filter(&pair.filters, "LOT_SIZE", "minQty")),
                 quote: Some(parse_filter(&pair.filters, "MIN_NOTIONAL", "minNotional")),
             },
-            info: serde_json::to_value(pair).unwrap(),
+            raw: serde_json::to_value(pair)
+                .unwrap()
+                .as_object()
+                .unwrap()
+                .into_iter()
+                .map(|x| (x.0.clone(), x.1.clone()))
+                .collect(),
         }
     };
+
     let result: Vec<Market> = symbols
         .into_iter()
         .filter(|m| m.isSpotTradingAllowed)
@@ -176,7 +189,13 @@ fn fetch_futures_markets_internal() -> Vec<Market> {
                 base: Some(parse_filter(&pair.filters, "LOT_SIZE", "minQty")),
                 quote: None,
             },
-            info: serde_json::to_value(pair).unwrap(),
+            raw: serde_json::to_value(pair)
+                .unwrap()
+                .as_object()
+                .unwrap()
+                .into_iter()
+                .map(|x| (x.0.clone(), x.1.clone()))
+                .collect(),
         }
     };
 
@@ -228,7 +247,13 @@ fn fetch_swap_markets() -> Vec<Market> {
                 base: Some(parse_filter(&pair.filters, "LOT_SIZE", "minQty")),
                 quote: None,
             },
-            info: serde_json::to_value(pair).unwrap(),
+            raw: serde_json::to_value(pair)
+                .unwrap()
+                .as_object()
+                .unwrap()
+                .into_iter()
+                .map(|x| (x.0.clone(), x.1.clone()))
+                .collect(),
         }
     };
 
