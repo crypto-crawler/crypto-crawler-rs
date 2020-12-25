@@ -3,6 +3,10 @@ name = "crypto-market"
 version = "0.1.0"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
+description   = "Get all trading pairs of a cryptocurrency exchange"
+license = "Apache-2.0"
+repository = "https://github.com/soulmachine/crypto-crawler-rs"
+homepage = "https://github.com/soulmachine/crypto-crawler-rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
