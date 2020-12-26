@@ -70,7 +70,7 @@ struct SwapMarket {
     extra: HashMap<String, Value>,
 }
 
-pub(crate) fn fetch_markets(market_type: MarketType) -> Vec<Market> {
+pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>, reqwest::Error> {
     match market_type {
         MarketType::Futures => fetch_futures_markets(),
         MarketType::Spot => fetch_spot_markets(),
@@ -92,15 +92,9 @@ fn parse_filter(filters: &[HashMap<String, Value>], filter_type: &str, field: &s
 
 // https://github.com/binance/binance-spot-api-docs
 // https://binance-docs.github.io/apidocs/spot/en/
-fn fetch_spot_markets() -> Vec<Market> {
-    let resp = reqwest::blocking::get("https://api.binance.com/api/v3/exchangeInfo")
-        .unwrap()
-        .json::<HashMap<String, Value>>();
-    if resp.is_err() {
-        return Vec::new();
-    }
-    let symbols =
-        serde_json::from_value::<Vec<SpotMarket>>(resp.unwrap()["symbols"].clone()).unwrap();
+fn fetch_spot_markets() -> Result<Vec<Market>, reqwest::Error> {
+    let parsed = reqwest::blocking::get("https://api.binance.com/api/v3/exchangeInfo")?.json::<HashMap<String, Value>>()?;
+    let symbols = serde_json::from_value::<Vec<SpotMarket>>(parsed["symbols"].clone()).unwrap();
 
     let transform = |pair: SpotMarket| -> Market {
         Market {
@@ -142,23 +136,13 @@ fn fetch_spot_markets() -> Vec<Market> {
         .filter(|m| m.isSpotTradingAllowed)
         .map(transform)
         .collect();
-    result
+    Ok(result)
 }
 
 // https://binance-docs.github.io/apidocs/delivery/en/
-fn fetch_futures_markets_internal() -> Vec<Market> {
-    let resp = reqwest::blocking::get("https://dapi.binance.com/dapi/v1/exchangeInfo")
-        .unwrap()
-        .json::<HashMap<String, Value>>();
-    if resp.is_err() {
-        return Vec::new();
-    }
-    let tmp = serde_json::from_value::<Vec<FuturesMarket>>(resp.unwrap()["symbols"].clone());
-    if tmp.is_err() {
-        println!("{:?}", tmp.err());
-        return Vec::new();
-    }
-    let symbols = tmp.unwrap();
+fn fetch_futures_markets_internal() -> Result<Vec<Market>, reqwest::Error> {
+    let parsed = reqwest::blocking::get("https://dapi.binance.com/dapi/v1/exchangeInfo")?.json::<HashMap<String, Value>>()?;
+    let symbols = serde_json::from_value::<Vec<FuturesMarket>>(parsed["symbols"].clone()).unwrap();
 
     let transform = |pair: FuturesMarket| -> Market {
         Market {
@@ -200,27 +184,24 @@ fn fetch_futures_markets_internal() -> Vec<Market> {
     };
 
     let result: Vec<Market> = symbols.into_iter().map(transform).collect();
-    result
+    Ok(result)
 }
 
-fn fetch_futures_markets() -> Vec<Market> {
-    let markets = fetch_futures_markets_internal();
-    markets
-        .into_iter()
-        .filter(|m| m.market_type == MarketType::Futures)
-        .collect()
+fn fetch_futures_markets() -> Result<Vec<Market>, reqwest::Error> {
+    let resp = fetch_futures_markets_internal();
+    match resp {
+        Ok(markets) => Ok(markets
+            .into_iter()
+            .filter(|m| m.market_type == MarketType::Futures)
+            .collect::<Vec<Market>>()),
+        Err(error) => Err(error),
+    }
 }
 
 // https://binance-docs.github.io/apidocs/futures/en/
-fn fetch_swap_markets() -> Vec<Market> {
-    let resp = reqwest::blocking::get("https://fapi.binance.com/fapi/v1/exchangeInfo")
-        .unwrap()
-        .json::<HashMap<String, Value>>();
-    if resp.is_err() {
-        return Vec::new();
-    }
-    let symbols =
-        serde_json::from_value::<Vec<SwapMarket>>(resp.unwrap()["symbols"].clone()).unwrap();
+fn fetch_swap_markets() -> Result<Vec<Market>, reqwest::Error> {
+    let parsed = reqwest::blocking::get("https://fapi.binance.com/fapi/v1/exchangeInfo")?.json::<HashMap<String, Value>>()?;
+    let symbols = serde_json::from_value::<Vec<SwapMarket>>(parsed["symbols"].clone()).unwrap();
 
     let transform = |pair: SwapMarket| -> Market {
         Market {
@@ -259,10 +240,10 @@ fn fetch_swap_markets() -> Vec<Market> {
 
     let mut usdt_futures: Vec<Market> = symbols.into_iter().map(transform).collect();
 
-    let mut coin_futures: Vec<Market> = fetch_futures_markets_internal()
+    let mut coin_futures: Vec<Market> = fetch_futures_markets_internal()?
         .into_iter()
         .filter(|m| m.market_type == MarketType::Swap)
         .collect();
     usdt_futures.append(&mut coin_futures);
-    usdt_futures
+    Ok(usdt_futures)
 }
