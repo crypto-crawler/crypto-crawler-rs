@@ -1,6 +1,4 @@
-#[macro_use]
-extern crate lazy_static;
-
+use lazy_static::lazy_static;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
@@ -101,7 +99,7 @@ lazy_static! {
         ("XCH", "XCHF"),
         ("YGG", "YEED"),
         ("YYW", "YOYOW"),
-    ].iter().cloned().collect();
+    ].into_iter().collect();
 
     static ref KRAKEN_QUOTE_SYMBOLS: HashSet<&'static str> = vec![
         "AUD",
