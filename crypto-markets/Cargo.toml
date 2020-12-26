@@ -1,5 +1,5 @@
 [package]
-name = "crypto-market"
+name = "crypto-markets"
 version = "0.1.0"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"

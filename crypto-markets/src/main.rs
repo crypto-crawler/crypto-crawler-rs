@@ -5,7 +5,7 @@ use std::{env, str::FromStr};
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() != 3 {
-        println!("Usage: crypto-market <exchange> <market_type>");
+        println!("Usage: crypto-markets <exchange> <market_type>");
         return;
     }
 
