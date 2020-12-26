@@ -10,7 +10,10 @@ pub use crate::market::{Market, MarketType};
 ///
 /// * `exchange` - The exchange name
 /// * `market_type` - The market type
-pub fn fetch_markets(exchange: &str, market_type: MarketType) -> Vec<Market> {
+pub fn fetch_markets(
+    exchange: &str,
+    market_type: MarketType,
+) -> Result<Vec<Market>, reqwest::Error> {
     match exchange {
         "Binance" => exchanges::binance::fetch_markets(market_type),
         "BitMEX" => exchanges::bitmex::fetch_markets(market_type),

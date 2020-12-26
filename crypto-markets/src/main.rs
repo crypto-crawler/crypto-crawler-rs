@@ -10,8 +10,15 @@ fn main() {
     }
 
     let exchange: &str = &args[1];
-    let market_type = MarketType::from_str(&args[2]).unwrap();
+    let market_type = MarketType::from_str(&args[2]);
+    if market_type.is_err() {
+        println!("Unknown market type: {}", &args[2]);
+        return;
+    }
 
-    let markets = fetch_markets(exchange, market_type);
-    println!("{}", serde_json::to_string_pretty(&markets).unwrap());
+    let resp = fetch_markets(exchange, market_type.unwrap());
+    match resp {
+        Ok(markets) => println!("{}", serde_json::to_string_pretty(&markets).unwrap()),
+        Err(err) => println!("{}", err),
+    }
 }
