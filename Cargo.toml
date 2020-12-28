@@ -2,4 +2,5 @@
 members = [
   "crypto-pair",
   "crypto-markets",
+  "crypto-ws-client",
 ]
