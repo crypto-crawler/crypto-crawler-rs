@@ -1,6 +1,6 @@
 # crypto-markets
 
-[![](https://img.shields.io/github/workflow/status/soulmachine/crypto-crawler-rs/CI/master)](https://github.com/soulmachine/crypto-crawler-rs/actions?query=branch%3Amaster)
+[![](https://img.shields.io/github/workflow/status/soulmachine/crypto-crawler-rs/CI/main)](https://github.com/soulmachine/crypto-crawler-rs/actions?query=branch%3Amain)
 [![](https://img.shields.io/crates/v/crypto-markets.svg)](https://crates.io/crates/crypto-markets)
 [![](https://docs.rs/crypto-markets/badge.svg)](https://docs.rs/crypto-markets)
 ==========

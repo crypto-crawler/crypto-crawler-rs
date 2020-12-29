@@ -1,6 +1,6 @@
 # crypto-crawler-rs
 
-[![](https://img.shields.io/github/workflow/status/soulmachine/crypto-crawler-rs/CI/master)](https://github.com/soulmachine/crypto-crawler-rs/actions?query=branch%3Amaster)
+[![](https://img.shields.io/github/workflow/status/soulmachine/crypto-crawler-rs/CI/main)](https://github.com/soulmachine/crypto-crawler-rs/actions?query=branch%3Amain)
 
 This project contains a list of useful cryptocurrency librarys:
 
