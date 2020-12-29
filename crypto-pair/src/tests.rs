@@ -6,7 +6,8 @@ use crate::normalize_pair;
 const JSON_DATA: &str = r#"
 {
   "Biki": {
-    "GUNG_ODIN": "gungodin"
+    "GUNG_ODIN": "gungodin",
+    "LGCY_USDL": "lgcyusdl"
   },
   "Binance": {
     "ADA_BNB": "ADABNB",
