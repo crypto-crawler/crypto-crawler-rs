@@ -1,6 +1,6 @@
 [package]
 name = "crypto-pair"
-version = "1.0.1"
+version = "1.0.2"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "Normalize cryptocurrency trade pairs"
