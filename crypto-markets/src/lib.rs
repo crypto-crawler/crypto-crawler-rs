@@ -10,6 +10,15 @@ pub use crate::market::{Market, MarketType};
 ///
 /// * `exchange` - The exchange name
 /// * `market_type` - The market type
+///
+/// # Example
+///
+/// ```
+/// use crypto_markets::{fetch_markets,MarketType};
+/// let markets = fetch_markets("Binance", MarketType::Spot).unwrap();
+/// assert!(!markets.is_empty());
+/// println!("{}", serde_json::to_string_pretty(&markets).unwrap())
+/// ```
 pub fn fetch_markets(
     exchange: &str,
     market_type: MarketType,
@@ -19,7 +28,7 @@ pub fn fetch_markets(
         "BitMEX" => exchanges::bitmex::fetch_markets(market_type),
         "Huobi" => exchanges::huobi::fetch_markets(market_type),
         "OKEx" => exchanges::okex::fetch_markets(market_type),
-        _ => panic!("Unknown exchange: {}", exchange),
+        _ => panic!("Unsupported exchange {}", exchange),
     }
 }
 
