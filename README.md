@@ -8,3 +8,7 @@ This project contains a list of useful cryptocurrency librarys:
 - [crypto-ws-client](./crypto-ws-client) Cryptocurrency Websocket Client
 - [crypto-markets](./crypto-markets) Get all trading pairs of a cryptocurrency exchange
 - [crypto-pair](./crypto-pair) Normalize cryptocurrency trade pairs
+
+**Dependency Relationship**:
+
+![](./crypto-client.svg)
