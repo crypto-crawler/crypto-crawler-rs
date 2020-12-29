@@ -1,6 +1,5 @@
 use crate::WSClient;
 use std::collections::HashMap;
-use std::time::{SystemTime, UNIX_EPOCH};
 
 use super::ws_client_internal::WSClientInternal;
 use serde_json::{json, Value};
@@ -24,7 +23,7 @@ pub struct BinanceDeliveryWSClient {
     client: WSClientInternal,
 }
 
-fn serialize_command(channels: &[String], subscribe: bool) -> String {
+fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
     let mut object = HashMap::<String, Value>::new();
     if subscribe {
         object.insert(
@@ -39,91 +38,19 @@ fn serialize_command(channels: &[String], subscribe: bool) -> String {
     }
 
     object.insert("params".to_string(), json!(channels));
+    object.insert("id".to_string(), json!(9527));
 
-    let id = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_secs()
-        % 9999;
-    object.insert("id".to_string(), json!(id));
-
-    serde_json::to_string(&object).unwrap()
+    vec![serde_json::to_string(&object).unwrap()]
 }
 
-impl WSClient for BinanceSpotWSClient {
-    type Exchange = BinanceSpotWSClient;
-
-    fn init(on_msg: fn(String)) -> BinanceSpotWSClient {
-        BinanceSpotWSClient {
-            client: WSClientInternal::new(SPOT_WEBSOCKET_URL, on_msg, serialize_command),
-        }
-    }
-
-    fn subscribe(&mut self, channels: &[String]) {
-        self.client.subscribe(channels);
-    }
-
-    fn unsubscribe(&mut self, channels: &[String]) {
-        self.client.unsubscribe(channels);
-    }
-
-    fn run(&mut self) {
-        self.client.run();
-    }
-
-    fn close(&mut self) {
-        self.client.close();
-    }
-}
-
-impl WSClient for BinanceFuturesWSClient {
-    type Exchange = BinanceFuturesWSClient;
-
-    fn init(on_msg: fn(String)) -> BinanceFuturesWSClient {
-        BinanceFuturesWSClient {
-            client: WSClientInternal::new(FUTURES_WEBSOCKET_URL, on_msg, serialize_command),
-        }
-    }
-
-    fn subscribe(&mut self, channels: &[String]) {
-        self.client.subscribe(channels);
-    }
-
-    fn unsubscribe(&mut self, channels: &[String]) {
-        self.client.unsubscribe(channels);
-    }
-
-    fn run(&mut self) {
-        self.client.run();
-    }
-
-    fn close(&mut self) {
-        self.client.close();
-    }
-}
-
-impl WSClient for BinanceDeliveryWSClient {
-    type Exchange = BinanceDeliveryWSClient;
-
-    fn init(on_msg: fn(String)) -> BinanceDeliveryWSClient {
-        BinanceDeliveryWSClient {
-            client: WSClientInternal::new(DELIVERY_WEBSOCKET_URL, on_msg, serialize_command),
-        }
-    }
-
-    fn subscribe(&mut self, channels: &[String]) {
-        self.client.subscribe(channels);
-    }
-
-    fn unsubscribe(&mut self, channels: &[String]) {
-        self.client.unsubscribe(channels);
-    }
-
-    fn run(&mut self) {
-        self.client.run();
-    }
-
-    fn close(&mut self) {
-        self.client.close();
-    }
-}
+define_client!(BinanceSpotWSClient, SPOT_WEBSOCKET_URL, serialize_command);
+define_client!(
+    BinanceFuturesWSClient,
+    FUTURES_WEBSOCKET_URL,
+    serialize_command
+);
+define_client!(
+    BinanceDeliveryWSClient,
+    DELIVERY_WEBSOCKET_URL,
+    serialize_command
+);

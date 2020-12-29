@@ -1,4 +1,7 @@
-pub mod binance;
+#[macro_use]
+mod ws_client_internal;
 
 mod utils;
-mod ws_client_internal;
+
+pub(super) mod binance;
+pub(super) mod huobi;

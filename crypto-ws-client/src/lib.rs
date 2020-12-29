@@ -1,6 +1,7 @@
 mod clients;
 
 pub use clients::binance::*;
+pub use clients::huobi::*;
 
 /// The public interface of every WebSocket client.
 pub trait WSClient {
@@ -8,7 +9,12 @@ pub trait WSClient {
     type Exchange;
 
     /// Create a new client.
-    fn init(on_msg: fn(String)) -> Self::Exchange;
+    ///
+    /// # Arguments
+    ///
+    /// * `on_msg` - The message handler
+    /// * `url` - Optional server url, usually you don't need specify it
+    fn init(on_msg: fn(String), url: Option<&str>) -> Self::Exchange;
 
     /// Subscribe channels.
     fn subscribe(&mut self, channels: &[String]);
