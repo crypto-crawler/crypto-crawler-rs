@@ -1,6 +1,6 @@
 [package]
 name = "crypto-pair"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "Normalize cryptocurrency trade pairs"
@@ -11,5 +11,7 @@ homepage = "https://github.com/soulmachine/crypto-crawler-rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-serde_json = "1.0"
 lazy_static = "1.4.0"
+
+[dev_dependencies]
+serde_json = "1.0"

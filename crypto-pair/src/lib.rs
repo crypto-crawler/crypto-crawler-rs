@@ -238,6 +238,18 @@ fn default_normalize_pair(raw_pair: &str) -> Option<String> {
 ///
 /// * `raw_pair` - The original pair of an exchange
 /// * `exchange` - The exchange name
+///
+/// # Examples
+///
+/// ```
+/// use crypto_pair::normalize_pair;
+///
+/// assert_eq!(Some("BTC_USD".to_string()), normalize_pair("XBTUSD", "BitMEX"));
+/// assert_eq!(Some("BTC_USD".to_string()), normalize_pair("XBTH21", "BitMEX"));
+/// assert_eq!(Some("BTC_USDT".to_string()), normalize_pair("BTCUSDT", "Binance"));
+/// assert_eq!(Some("BTC_USDT".to_string()), normalize_pair("btc_usdt", "Huobi"));
+/// assert_eq!(Some("BTC_USDT".to_string()), normalize_pair("btcust", "Bitfinex"));
+/// ```
 pub fn normalize_pair(raw_pair: &str, exchange: &str) -> Option<String> {
     assert!(
         !raw_pair.trim().is_empty(),
@@ -262,7 +274,7 @@ pub fn normalize_pair(raw_pair: &str, exchange: &str) -> Option<String> {
             }
         }
         "BitMEX" => {
-            if raw_pair[..(raw_pair.len() - 2)].parse::<f64>().is_ok() {
+            if raw_pair[(raw_pair.len() - 2)..].parse::<f64>().is_ok() {
                 raw_pair = &raw_pair[..(raw_pair.len() - 3)]
             }
 
