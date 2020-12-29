@@ -1,4 +1,4 @@
-//! A cryptocurrency websocket client that supports many cryptocurrency exchanges.
+//! A versatile websocket client that supports many cryptocurrency exchanges.
 //!
 //! ## Example
 //!
