@@ -13,27 +13,27 @@ const COIN_SWAP_WEBSOCKET_URL: &str = "wss://futures.huobi.com/swap-ws";
 const USDT_SWAP_WEBSOCKET_URL: &str = "wss://futures.huobi.com/linear-swap-ws";
 const OPTION_WEBSOCKET_URL: &str = "wss://futures.huobi.com/option-ws";
 
-/// The WebSocket client for Huobi Spot market(https://huobiapi.github.io/docs/spot/v1/en/).
+/// The WebSocket client for Huobi Spot market(<https://huobiapi.github.io/docs/spot/v1/en/>).
 pub struct HuobiSpotWSClient {
     client: WSClientInternal,
 }
 
-/// The WebSocket client for Huobi Futures market(https://huobiapi.github.io/docs/dm/v1/en/).
+/// The WebSocket client for Huobi Futures market(<https://huobiapi.github.io/docs/dm/v1/en/>).
 pub struct HuobiFuturesWSClient {
     client: WSClientInternal,
 }
 
-/// The WebSocket client for Huobi Coin Swap market(https://huobiapi.github.io/docs/coin_margined_swap/v1/en/).
+/// The WebSocket client for Huobi Coin Swap market(<https://huobiapi.github.io/docs/coin_margined_swap/v1/en/>).
 pub struct HuobiCoinSwapWSClient {
     client: WSClientInternal,
 }
 
-/// The WebSocket client for Huobi USDT Swap market(https://huobiapi.github.io/docs/usdt_swap/v1/en/).
+/// The WebSocket client for Huobi USDT Swap market(<https://huobiapi.github.io/docs/usdt_swap/v1/en/>).
 pub struct HuobiUsdtSwapWSClient {
     client: WSClientInternal,
 }
 
-/// The WebSocket client for Huobi Option market(https://huobiapi.github.io/docs/option/v1/en/).
+/// The WebSocket client for Huobi Option market(<https://huobiapi.github.io/docs/option/v1/en/>).
 pub struct HuobiOptionWSClient {
     client: WSClientInternal,
 }

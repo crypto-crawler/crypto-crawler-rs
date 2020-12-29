@@ -8,17 +8,17 @@ const SPOT_WEBSOCKET_URL: &str = "wss://stream.binance.com:9443/stream";
 const FUTURES_WEBSOCKET_URL: &str = "wss://fstream.binance.com/stream";
 const DELIVERY_WEBSOCKET_URL: &str = "wss://dstream.binance.com/stream";
 
-/// The WebSocket client for Binance Spot market(https://binance-docs.github.io/apidocs/spot/en/).
+/// The WebSocket client for Binance Spot market(<https://binance-docs.github.io/apidocs/spot/en/>).
 pub struct BinanceSpotWSClient {
     client: WSClientInternal,
 }
 
-/// The WebSocket client for Binance USDT Futures market(https://binance-docs.github.io/apidocs/futures/en/).
+/// The WebSocket client for Binance USDT Futures market(<https://binance-docs.github.io/apidocs/futures/en/>).
 pub struct BinanceFuturesWSClient {
     client: WSClientInternal,
 }
 
-/// The WebSocket client for Binance Coin Dilivery market(https://binance-docs.github.io/apidocs/delivery/en/).
+/// The WebSocket client for Binance Coin Dilivery market(<https://binance-docs.github.io/apidocs/delivery/en/>).
 pub struct BinanceDeliveryWSClient {
     client: WSClientInternal,
 }
