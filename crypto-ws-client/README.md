@@ -1,0 +1,22 @@
+# crypto-ws-client
+
+[![](https://img.shields.io/github/workflow/status/soulmachine/crypto-crawler-rs/CI/master)](https://github.com/soulmachine/crypto-crawler-rs/actions?query=branch%3Amaster)
+[![](https://img.shields.io/crates/v/crypto-ws-client.svg)](https://crates.io/crates/crypto-ws-client)
+[![](https://docs.rs/crypto-ws-client/badge.svg)](https://docs.rs/crypto-ws-client)
+==========
+
+Cryptocurrency Websocket Client.
+
+## Usage
+
+```rust
+use crypto_ws_client::{BinanceSpotWSClient, WSClient};
+
+fn main() {
+    let mut ws_client = BinanceSpotWSClient::init(|msg| println!("{}", msg));
+    let channels = vec!["btcusdt@aggTrade".to_string(), "btcusdt@depth".to_string(),];
+    ws_client.subscribe(&channels);
+    ws_client.run();
+    ws_client.close();
+}
+```
