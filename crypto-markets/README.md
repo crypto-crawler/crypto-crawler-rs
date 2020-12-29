@@ -7,11 +7,10 @@
 
 Get all trading pairs of a cryptocurrency exchange.
 
-## Usage
+## Example
 
 ```rust
 use crypto_markets::{fetch_markets, MarketType};
-use std::{env, str::FromStr};
 
 fn main() {
     let markets = fetch_markets("Binance", MarketType::Spot).unwrap();

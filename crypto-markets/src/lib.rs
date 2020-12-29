@@ -1,10 +1,23 @@
+//! Get all trading pairs of a cryptocurrency exchange.
+//!
+//! ## Example
+//!
+//! ```
+//! use crypto_markets::{fetch_markets, MarketType};
+//!
+//! fn main() {
+//!     let markets = fetch_markets("Binance", MarketType::Spot).unwrap();
+//!     println!("{}", serde_json::to_string_pretty(&markets).unwrap())
+//! }
+//! ```
+
 mod exchanges;
 mod market;
 mod utils;
 
 pub use crate::market::{Market, MarketType};
 
-/// Fetch trading markets of a crypto exchange.
+/// Fetch trading markets of a cryptocurrency exchange.
 ///
 /// # Arguments
 ///
