@@ -1,14 +1,12 @@
 [package]
 name = "crypto-markets"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "Get all trading pairs of a cryptocurrency exchange"
 license = "Apache-2.0"
-repository = "https://github.com/soulmachine/crypto-crawler-rs"
-homepage = "https://github.com/soulmachine/crypto-crawler-rs"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-markets"
+homepage = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-markets"
 
 [dependencies]
 reqwest = { version = "0.10", features = ["blocking", "json"] }
