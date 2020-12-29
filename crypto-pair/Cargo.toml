@@ -1,12 +1,12 @@
 [package]
 name = "crypto-pair"
-version = "1.0.2"
+version = "1.0.3"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "Normalize cryptocurrency trade pairs"
 license = "Apache-2.0"
-repository = "https://github.com/soulmachine/crypto-crawler-rs"
-homepage = "https://github.com/soulmachine/crypto-crawler-rs"
+repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-pair"
+homepage = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-pair"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
