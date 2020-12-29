@@ -5,7 +5,7 @@
 [![](https://docs.rs/crypto-ws-client/badge.svg)](https://docs.rs/crypto-ws-client)
 ==========
 
-Cryptocurrency Websocket Client.
+A cryptocurrency websocket client that supports many cryptocurrency exchanges.
 
 ## Usage
 
