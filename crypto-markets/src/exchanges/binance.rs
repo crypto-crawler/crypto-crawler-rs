@@ -93,7 +93,8 @@ fn parse_filter(filters: &[HashMap<String, Value>], filter_type: &str, field: &s
 // https://github.com/binance/binance-spot-api-docs
 // https://binance-docs.github.io/apidocs/spot/en/
 fn fetch_spot_markets() -> Result<Vec<Market>, reqwest::Error> {
-    let parsed = reqwest::blocking::get("https://api.binance.com/api/v3/exchangeInfo")?.json::<HashMap<String, Value>>()?;
+    let parsed = reqwest::blocking::get("https://api.binance.com/api/v3/exchangeInfo")?
+        .json::<HashMap<String, Value>>()?;
     let symbols = serde_json::from_value::<Vec<SpotMarket>>(parsed["symbols"].clone()).unwrap();
 
     let transform = |pair: SpotMarket| -> Market {
@@ -141,7 +142,8 @@ fn fetch_spot_markets() -> Result<Vec<Market>, reqwest::Error> {
 
 // https://binance-docs.github.io/apidocs/delivery/en/
 fn fetch_futures_markets_internal() -> Result<Vec<Market>, reqwest::Error> {
-    let parsed = reqwest::blocking::get("https://dapi.binance.com/dapi/v1/exchangeInfo")?.json::<HashMap<String, Value>>()?;
+    let parsed = reqwest::blocking::get("https://dapi.binance.com/dapi/v1/exchangeInfo")?
+        .json::<HashMap<String, Value>>()?;
     let symbols = serde_json::from_value::<Vec<FuturesMarket>>(parsed["symbols"].clone()).unwrap();
 
     let transform = |pair: FuturesMarket| -> Market {
@@ -192,7 +194,7 @@ fn fetch_futures_markets() -> Result<Vec<Market>, reqwest::Error> {
     match resp {
         Ok(markets) => Ok(markets
             .into_iter()
-            .filter(|m| m.market_type == MarketType::Futures)
+            .filter(|m| matches!(m.market_type, MarketType::Futures))
             .collect::<Vec<Market>>()),
         Err(error) => Err(error),
     }
@@ -200,7 +202,8 @@ fn fetch_futures_markets() -> Result<Vec<Market>, reqwest::Error> {
 
 // https://binance-docs.github.io/apidocs/futures/en/
 fn fetch_swap_markets() -> Result<Vec<Market>, reqwest::Error> {
-    let parsed = reqwest::blocking::get("https://fapi.binance.com/fapi/v1/exchangeInfo")?.json::<HashMap<String, Value>>()?;
+    let parsed = reqwest::blocking::get("https://fapi.binance.com/fapi/v1/exchangeInfo")?
+        .json::<HashMap<String, Value>>()?;
     let symbols = serde_json::from_value::<Vec<SwapMarket>>(parsed["symbols"].clone()).unwrap();
 
     let transform = |pair: SwapMarket| -> Market {
@@ -242,7 +245,7 @@ fn fetch_swap_markets() -> Result<Vec<Market>, reqwest::Error> {
 
     let mut coin_futures: Vec<Market> = fetch_futures_markets_internal()?
         .into_iter()
-        .filter(|m| m.market_type == MarketType::Swap)
+        .filter(|m| matches!(m.market_type, MarketType::Swap))
         .collect();
     usdt_futures.append(&mut coin_futures);
     Ok(usdt_futures)
