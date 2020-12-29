@@ -1,7 +1,7 @@
+use super::utils::connect_with_retry;
 use log::*;
 use std::collections::HashSet;
 use tungstenite::{client::AutoStream, Error, Message, WebSocket};
-use super::utils::connect_with_retry;
 
 pub(super) struct WSClientInternal {
     url: String, // Websocket base url
@@ -12,7 +12,11 @@ pub(super) struct WSClientInternal {
 }
 
 impl WSClientInternal {
-    pub fn new(url: &str, on_msg: fn(String), serialize_command: fn(&[String], bool) -> String) -> Self {
+    pub fn new(
+        url: &str,
+        on_msg: fn(String),
+        serialize_command: fn(&[String], bool) -> String,
+    ) -> Self {
         let ws_stream = connect_with_retry(url);
         WSClientInternal {
             url: url.to_string(),
@@ -59,7 +63,8 @@ impl WSClientInternal {
     fn reconnect(&mut self) {
         info!("Reconnecting to {}", &self.url);
         self.ws_stream = connect_with_retry(&self.url);
-        let channels = self.channels
+        let channels = self
+            .channels
             .iter()
             .map(|s| s.to_string())
             .collect::<Vec<String>>();

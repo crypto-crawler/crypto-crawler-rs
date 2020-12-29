@@ -2,8 +2,8 @@ use crate::WSClient;
 use std::collections::HashMap;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use serde_json::{Value, json};
 use super::ws_client_internal::WSClientInternal;
+use serde_json::{json, Value};
 
 const SPOT_WEBSOCKET_URL: &str = "wss://stream.binance.com:9443/stream";
 const FUTURES_WEBSOCKET_URL: &str = "wss://fstream.binance.com/stream";
@@ -27,14 +27,24 @@ pub struct BinanceDeliveryWSClient {
 fn serialize_command(channels: &[String], subscribe: bool) -> String {
     let mut object = HashMap::<String, Value>::new();
     if subscribe {
-        object.insert("method".to_string(), serde_json::to_value("SUBSCRIBE").unwrap());
+        object.insert(
+            "method".to_string(),
+            serde_json::to_value("SUBSCRIBE").unwrap(),
+        );
     } else {
-        object.insert("method".to_string(), serde_json::to_value("UNSUBSCRIBE").unwrap());
+        object.insert(
+            "method".to_string(),
+            serde_json::to_value("UNSUBSCRIBE").unwrap(),
+        );
     }
 
     object.insert("params".to_string(), json!(channels));
 
-    let id = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() % 9999;
+    let id = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
+        % 9999;
     object.insert("id".to_string(), json!(id));
 
     serde_json::to_string(&object).unwrap()
