@@ -5,8 +5,8 @@ authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "Cryptocurrency Websocket Client"
 license = "Apache-2.0"
-repository = "https://github.com/soulmachine/crypto-crawler-rs"
-homepage = "https://github.com/soulmachine/crypto-crawler-rs"
+repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-ws-client"
+homepage = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-ws-client"
 
 [dependencies]
 log = "0.4.11"
