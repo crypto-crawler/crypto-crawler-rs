@@ -5,7 +5,7 @@ use serde_json::Value;
 use strum_macros::{Display, EnumString};
 
 /// MarketType represents the type of a market
-#[derive(PartialEq, Serialize, Deserialize, Display, EnumString)]
+#[derive(Serialize, Deserialize, Display, EnumString)]
 pub enum MarketType {
     Spot,
     Futures,
