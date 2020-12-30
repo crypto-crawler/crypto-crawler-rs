@@ -6,7 +6,7 @@
 //! use crypto_ws_client::{BinanceSpotWSClient, WSClient};
 //!
 //! fn main() {
-//!     let mut ws_client = BinanceSpotWSClient::init(|msg| println!("{}", msg));
+//!     let mut ws_client = BinanceSpotWSClient::init(|msg| println!("{}", msg), None);
 //!     let channels = vec!["btcusdt@aggTrade".to_string(), "btcusdt@depth".to_string(),];
 //!     ws_client.subscribe(&channels);
 //!     ws_client.run();
