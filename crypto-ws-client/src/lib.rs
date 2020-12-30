@@ -9,7 +9,7 @@
 //!     let mut ws_client = BinanceSpotWSClient::init(|msg| println!("{}", msg), None);
 //!     let channels = vec!["btcusdt@aggTrade".to_string(), "btcusdt@depth".to_string(),];
 //!     ws_client.subscribe(&channels);
-//!     ws_client.run();
+//!     ws_client.run(Some(5)); // run for 5 seconds
 //!     ws_client.close();
 //! }
 //! ```
@@ -40,7 +40,11 @@ pub trait WSClient {
     fn unsubscribe(&mut self, channels: &[String]);
 
     /// Start the infinite loop until the server closes the connection.
-    fn run(&mut self);
+    ///
+    /// # Arguments
+    ///
+    /// * `duration` - How many seconds to run, None means infinite.
+    fn run(&mut self, duration: Option<u64>);
 
     /// Close the client.
     fn close(&mut self);

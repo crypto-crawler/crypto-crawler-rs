@@ -1,12 +1,13 @@
 use super::utils::connect_with_retry;
-use log::*;
-use serde_json::Value;
-use std::collections::{HashMap, HashSet};
 
-use tungstenite::{client::AutoStream, Error, Message, WebSocket};
+use std::collections::{HashMap, HashSet};
+use std::io::prelude::*;
+use std::time::{Duration, Instant};
 
 use flate2::read::{DeflateDecoder, GzDecoder};
-use std::io::prelude::*;
+use log::*;
+use serde_json::Value;
+use tungstenite::{client::AutoStream, Error, Message, WebSocket};
 
 pub(super) struct WSClientInternal {
     url: String, // Websocket base url
@@ -121,7 +122,8 @@ impl WSClientInternal {
         (self.on_msg)(txt);
     }
 
-    pub fn run(&mut self) {
+    pub fn run(&mut self, duration: Option<u64>) {
+        let now = Instant::now();
         loop {
             let resp = self.ws_stream.read_message();
             match resp {
@@ -167,6 +169,12 @@ impl WSClientInternal {
                     _ => error!("{}", err),
                 },
             }
+
+            if let Some(seconds) = duration {
+                if now.elapsed() > Duration::from_secs(seconds) {
+                    break;
+                }
+            }
         }
     }
 
@@ -202,8 +210,8 @@ macro_rules! define_client {
                 self.client.unsubscribe(channels);
             }
 
-            fn run(&mut self) {
-                self.client.run();
+            fn run(&mut self, duration: Option<u64>) {
+                self.client.run(duration);
             }
 
             fn close(&mut self) {
