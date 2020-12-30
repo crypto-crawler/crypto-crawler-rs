@@ -5,7 +5,6 @@ use crate::msg::*;
 use crypto_markets::{fetch_markets, Market, MarketType};
 use lazy_static::lazy_static;
 
-
 const EXCHANGE_NAME: &str = "Binance";
 
 lazy_static! {
