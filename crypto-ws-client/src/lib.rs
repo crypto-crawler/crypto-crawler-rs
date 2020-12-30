@@ -15,6 +15,7 @@
 mod clients;
 
 pub use clients::binance::*;
+pub use clients::bitmex::*;
 pub use clients::huobi::*;
 pub use clients::okex::*;
 
