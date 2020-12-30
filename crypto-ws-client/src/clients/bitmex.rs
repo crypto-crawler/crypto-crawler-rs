@@ -4,6 +4,8 @@ use std::collections::HashMap;
 use super::ws_client_internal::WSClientInternal;
 use serde_json::{json, Value};
 
+pub(super) const EXCHANGE_NAME: &str = "BitMEX";
+
 const WEBSOCKET_URL: &str = "wss://www.bitmex.com/realtime";
 
 // TODO: https://www.bitmex.com/app/wsAPI#Heartbeats
@@ -31,4 +33,9 @@ fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
     vec![serde_json::to_string(&object).unwrap()]
 }
 
-define_client!(BitMEXWSClient, WEBSOCKET_URL, serialize_command);
+define_client!(
+    BitMEXWSClient,
+    EXCHANGE_NAME,
+    WEBSOCKET_URL,
+    serialize_command
+);

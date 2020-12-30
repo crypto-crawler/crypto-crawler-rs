@@ -4,6 +4,8 @@ use std::collections::HashMap;
 use super::ws_client_internal::WSClientInternal;
 use serde_json::{json, Value};
 
+pub(super) const EXCHANGE_NAME: &str = "Binance";
+
 const SPOT_WEBSOCKET_URL: &str = "wss://stream.binance.com:9443/stream";
 const FUTURES_WEBSOCKET_URL: &str = "wss://fstream.binance.com/stream";
 const DELIVERY_WEBSOCKET_URL: &str = "wss://dstream.binance.com/stream";
@@ -42,14 +44,21 @@ fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
     vec![serde_json::to_string(&object).unwrap()]
 }
 
-define_client!(BinanceSpotWSClient, SPOT_WEBSOCKET_URL, serialize_command);
+define_client!(
+    BinanceSpotWSClient,
+    EXCHANGE_NAME,
+    SPOT_WEBSOCKET_URL,
+    serialize_command
+);
 define_client!(
     BinanceFuturesWSClient,
+    EXCHANGE_NAME,
     FUTURES_WEBSOCKET_URL,
     serialize_command
 );
 define_client!(
     BinanceDeliveryWSClient,
+    EXCHANGE_NAME,
     DELIVERY_WEBSOCKET_URL,
     serialize_command
 );

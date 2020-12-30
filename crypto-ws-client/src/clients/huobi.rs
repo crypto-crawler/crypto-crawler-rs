@@ -3,6 +3,8 @@ use std::collections::HashMap;
 
 use super::ws_client_internal::WSClientInternal;
 
+pub(super) const EXCHANGE_NAME: &str = "Huobi";
+
 const SPOT_WEBSOCKET_URL: &str = "wss://api.huobi.pro/ws";
 // const FUTURES_WEBSOCKET_URL: &str = "wss://www.hbdm.com/ws";
 // const COIN_SWAP_WEBSOCKET_URL: &str = "wss://api.hbdm.com/swap-ws";
@@ -51,20 +53,33 @@ fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
         .collect::<Vec<String>>()
 }
 
-define_client!(HuobiSpotWSClient, SPOT_WEBSOCKET_URL, serialize_command);
+define_client!(
+    HuobiSpotWSClient,
+    EXCHANGE_NAME,
+    SPOT_WEBSOCKET_URL,
+    serialize_command
+);
 define_client!(
     HuobiFuturesWSClient,
+    EXCHANGE_NAME,
     FUTURES_WEBSOCKET_URL,
     serialize_command
 );
 define_client!(
     HuobiCoinSwapWSClient,
+    EXCHANGE_NAME,
     COIN_SWAP_WEBSOCKET_URL,
     serialize_command
 );
 define_client!(
     HuobiUsdtSwapWSClient,
+    EXCHANGE_NAME,
     USDT_SWAP_WEBSOCKET_URL,
     serialize_command
 );
-define_client!(HuobiOptionWSClient, OPTION_WEBSOCKET_URL, serialize_command);
+define_client!(
+    HuobiOptionWSClient,
+    EXCHANGE_NAME,
+    OPTION_WEBSOCKET_URL,
+    serialize_command
+);
