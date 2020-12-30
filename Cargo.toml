@@ -5,4 +5,5 @@ members = [
   "crypto-markets",
   "crypto-rest-client",
   "crypto-ws-client",
+  "crypto-crawler",
 ]
