@@ -9,8 +9,8 @@ repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-
 homepage = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-crawler"
 
 [dependencies]
-crypto-markets = "*"
-crypto-ws-client = "*"
+crypto-markets = "0.1.4"
+crypto-ws-client = "0.1.7"
 flate2 = "1.0"
 futures = "0.3"
 lazy_static = "1.4.0"
