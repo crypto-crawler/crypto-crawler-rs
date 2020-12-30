@@ -9,21 +9,21 @@ use log::*;
 use serde_json::Value;
 use tungstenite::{client::AutoStream, Error, Message, WebSocket};
 
-pub(super) struct WSClientInternal {
+pub(super) struct WSClientInternal<'a> {
     url: String, // Websocket base url
     ws_stream: WebSocket<AutoStream>,
-    channels: HashSet<String>, // subscribed channels
-    on_msg: fn(String),        // message callback
+    channels: HashSet<String>,           // subscribed channels
+    on_msg: Box<dyn FnMut(String) + 'a>, // message callback
     serialize_command: fn(&[String], bool) -> Vec<String>,
 
     // For debugging only
     count: i64, // message received
 }
 
-impl WSClientInternal {
+impl<'a> WSClientInternal<'a> {
     pub fn new(
         url: &str,
-        on_msg: fn(String),
+        on_msg: Box<dyn FnMut(String) + 'a>,
         serialize_command: fn(&[String], bool) -> Vec<String>,
     ) -> Self {
         let ws_stream = connect_with_retry(url);
@@ -189,8 +189,8 @@ impl WSClientInternal {
 /// Define exchange specific client.
 macro_rules! define_client {
     ($struct_name:ident, $default_url:ident, $serialize_command:ident) => {
-        impl WSClient for $struct_name {
-            fn new(on_msg: fn(String), url: Option<&str>) -> $struct_name {
+        impl<'a> WSClient<'a> for $struct_name<'a> {
+            fn new(on_msg: Box<dyn FnMut(String) + 'a>, url: Option<&str>) -> $struct_name<'a> {
                 let real_url = match url {
                     Some(endpoint) => endpoint,
                     None => $default_url,
