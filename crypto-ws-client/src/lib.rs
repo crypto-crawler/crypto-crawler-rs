@@ -18,6 +18,7 @@ mod clients;
 
 pub use clients::binance::*;
 pub use clients::huobi::*;
+pub use clients::okex::*;
 
 /// The public interface of every WebSocket client.
 pub trait WSClient {

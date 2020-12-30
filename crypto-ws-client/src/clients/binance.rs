@@ -24,21 +24,20 @@ pub struct BinanceDeliveryWSClient {
 }
 
 fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
-    let mut object = HashMap::<String, Value>::new();
-    if subscribe {
-        object.insert(
-            "method".to_string(),
-            serde_json::to_value("SUBSCRIBE").unwrap(),
-        );
-    } else {
-        object.insert(
-            "method".to_string(),
-            serde_json::to_value("UNSUBSCRIBE").unwrap(),
-        );
-    }
+    let mut object = HashMap::<&str, Value>::new();
 
-    object.insert("params".to_string(), json!(channels));
-    object.insert("id".to_string(), json!(9527));
+    object.insert(
+        "method",
+        serde_json::to_value(if subscribe {
+            "SUBSCRIBE"
+        } else {
+            "UNSUBSCRIBE"
+        })
+        .unwrap(),
+    );
+
+    object.insert("params", json!(channels));
+    object.insert("id", json!(9527));
 
     vec![serde_json::to_string(&object).unwrap()]
 }
