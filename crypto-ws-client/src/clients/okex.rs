@@ -7,8 +7,8 @@ use serde_json::{json, Value};
 const WEBSOCKET_URL: &str = "wss://real.okex.com:8443/ws/v3";
 
 /// The WebSocket client for OKEx, including Spot, Futures, Swap and Option(<https://www.okex.com/docs/en/>).
-pub struct OKExWSClient {
-    client: WSClientInternal,
+pub struct OKExWSClient<'a> {
+    client: WSClientInternal<'a>,
 }
 
 fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {

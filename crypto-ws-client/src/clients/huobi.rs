@@ -14,28 +14,28 @@ const USDT_SWAP_WEBSOCKET_URL: &str = "wss://futures.huobi.com/linear-swap-ws";
 const OPTION_WEBSOCKET_URL: &str = "wss://futures.huobi.com/option-ws";
 
 /// The WebSocket client for Huobi Spot market(<https://huobiapi.github.io/docs/spot/v1/en/>).
-pub struct HuobiSpotWSClient {
-    client: WSClientInternal,
+pub struct HuobiSpotWSClient<'a> {
+    client: WSClientInternal<'a>,
 }
 
 /// The WebSocket client for Huobi Futures market(<https://huobiapi.github.io/docs/dm/v1/en/>).
-pub struct HuobiFuturesWSClient {
-    client: WSClientInternal,
+pub struct HuobiFuturesWSClient<'a> {
+    client: WSClientInternal<'a>,
 }
 
 /// The WebSocket client for Huobi Coin Swap market(<https://huobiapi.github.io/docs/coin_margined_swap/v1/en/>).
-pub struct HuobiCoinSwapWSClient {
-    client: WSClientInternal,
+pub struct HuobiCoinSwapWSClient<'a> {
+    client: WSClientInternal<'a>,
 }
 
 /// The WebSocket client for Huobi USDT Swap market(<https://huobiapi.github.io/docs/usdt_swap/v1/en/>).
-pub struct HuobiUsdtSwapWSClient {
-    client: WSClientInternal,
+pub struct HuobiUsdtSwapWSClient<'a> {
+    client: WSClientInternal<'a>,
 }
 
 /// The WebSocket client for Huobi Option market(<https://huobiapi.github.io/docs/option/v1/en/>).
-pub struct HuobiOptionWSClient {
-    client: WSClientInternal,
+pub struct HuobiOptionWSClient<'a> {
+    client: WSClientInternal<'a>,
 }
 
 fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {

@@ -6,7 +6,7 @@
 //! use crypto_ws_client::{BinanceSpotWSClient, WSClient};
 //!
 //! fn main() {
-//!     let mut ws_client = BinanceSpotWSClient::new(|msg| println!("{}", msg), None);
+//!     let mut ws_client = BinanceSpotWSClient::new(Box::new(|msg| println!("{}", msg)), None);
 //!     let channels = vec!["btcusdt@aggTrade".to_string(), "btcusdt@depth".to_string(),];
 //!     ws_client.subscribe(&channels);
 //!     ws_client.run(Some(5)); // run for 5 seconds
@@ -21,14 +21,14 @@ pub use clients::huobi::*;
 pub use clients::okex::*;
 
 /// The public interface of every WebSocket client.
-pub trait WSClient {
+pub trait WSClient<'a> {
     /// Create a new client.
     ///
     /// # Arguments
     ///
     /// * `on_msg` - The message handler
     /// * `url` - Optional server url, usually you don't need specify it
-    fn new(on_msg: fn(String), url: Option<&str>) -> Self;
+    fn new(on_msg: Box<dyn FnMut(String) + 'a>, url: Option<&str>) -> Self;
 
     /// Subscribe channels.
     fn subscribe(&mut self, channels: &[String]);
