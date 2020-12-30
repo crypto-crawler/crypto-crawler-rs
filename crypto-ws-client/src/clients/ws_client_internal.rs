@@ -5,7 +5,7 @@ use std::collections::{HashMap, HashSet};
 
 use tungstenite::{client::AutoStream, Error, Message, WebSocket};
 
-use flate2::read::GzDecoder;
+use flate2::read::{DeflateDecoder, GzDecoder};
 use std::io::prelude::*;
 
 pub(super) struct WSClientInternal {
@@ -74,7 +74,7 @@ impl WSClientInternal {
 
     // reconnect and subscribe all channels
     fn reconnect(&mut self) {
-        info!("Reconnecting to {}", &self.url);
+        warn!("Reconnecting to {}", &self.url);
         self.ws_stream = connect_with_retry(&self.url);
         let channels = self
             .channels
@@ -128,11 +128,20 @@ impl WSClientInternal {
                 Ok(msg) => match msg {
                     Message::Text(txt) => self.handle_msg(txt),
                     Message::Binary(binary) => {
-                        let mut gz = GzDecoder::new(&binary[..]);
                         let mut txt = String::new();
-                        match gz.read_to_string(&mut txt) {
+                        let resp = if self.url.contains("huobi.com") || self.url.contains("hbdm.com") || self.url.contains("huobi.pro") {
+                            let mut decoder = GzDecoder::new(&binary[..]);
+                            decoder.read_to_string(&mut txt)
+                        } else if self.url.contains("okex.com") {
+                            let mut decoder = DeflateDecoder::new(&binary[..]);
+                            decoder.read_to_string(&mut txt)
+                        } else {
+                            panic!("Unknown binary format from {}", self.url)
+                        };
+
+                        match resp {
                             Ok(_) => self.handle_msg(txt),
-                            Err(err) => error!("Decompress failed, {}", err),
+                            Err(err) => error!("Decompression failed, {}", err),
                         }
                     }
                     Message::Ping(resp) => {
@@ -144,15 +153,15 @@ impl WSClientInternal {
                         warn!("Received a pong frame: {}", tmp.unwrap());
                     }
                     Message::Close(resp) => {
-                        // need to reconnect
-                        error!("Received a close frame");
-                        if let Some(frame) = resp {
-                            error!("code: {}, reason: {}", frame.code, frame.reason);
+                        match resp {
+                            Some(frame) => warn!("Received a Message::Close message with a CloseFrame: code: {}, reason: {}", frame.code, frame.reason),
+                            None => warn!("Received a close message without CloseFrame"),
                         }
                     }
                 },
                 Err(err) => match err {
                     Error::ConnectionClosed => {
+                        warn!("tungstenite::Error::ConnectionClosed");
                         self.reconnect();
                     }
                     _ => error!("{}", err),
