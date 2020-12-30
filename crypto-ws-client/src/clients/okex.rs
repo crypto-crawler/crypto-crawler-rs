@@ -4,6 +4,8 @@ use std::collections::HashMap;
 use super::ws_client_internal::WSClientInternal;
 use serde_json::{json, Value};
 
+pub(super) const EXCHANGE_NAME: &str = "OKEx";
+
 const WEBSOCKET_URL: &str = "wss://real.okex.com:8443/ws/v3";
 
 /// The WebSocket client for OKEx, including Spot, Futures, Swap and Option(<https://www.okex.com/docs/en/>).
@@ -29,4 +31,9 @@ fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
     vec![serde_json::to_string(&object).unwrap()]
 }
 
-define_client!(OKExWSClient, WEBSOCKET_URL, serialize_command);
+define_client!(
+    OKExWSClient,
+    EXCHANGE_NAME,
+    WEBSOCKET_URL,
+    serialize_command
+);

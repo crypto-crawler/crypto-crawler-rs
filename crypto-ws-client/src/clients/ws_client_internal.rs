@@ -10,7 +10,8 @@ use serde_json::Value;
 use tungstenite::{client::AutoStream, Error, Message, WebSocket};
 
 pub(super) struct WSClientInternal<'a> {
-    url: String, // Websocket base url
+    exchange: String, // Eexchange name
+    url: String,      // Websocket base url
     ws_stream: WebSocket<AutoStream>,
     channels: HashSet<String>,           // subscribed channels
     on_msg: Box<dyn FnMut(String) + 'a>, // message callback
@@ -22,12 +23,14 @@ pub(super) struct WSClientInternal<'a> {
 
 impl<'a> WSClientInternal<'a> {
     pub fn new(
+        exchange: &str,
         url: &str,
         on_msg: Box<dyn FnMut(String) + 'a>,
         serialize_command: fn(&[String], bool) -> Vec<String>,
     ) -> Self {
         let ws_stream = connect_with_retry(url);
         WSClientInternal {
+            exchange: exchange.to_string(),
             url: url.to_string(),
             ws_stream,
             on_msg,
@@ -107,16 +110,59 @@ impl<'a> WSClientInternal<'a> {
             return;
         }
 
+        // Exchange specific handling
         let obj = resp.unwrap();
-        if obj.contains_key("ping") {
-            let value = obj.get("ping").unwrap();
-            let mut pong_msg = HashMap::<String, &Value>::new();
-            pong_msg.insert("pong".to_string(), value);
-            let response = Message::Text(serde_json::to_string(&pong_msg).unwrap());
-            if let Err(err) = self.ws_stream.write_message(response) {
-                error!("{}", err);
+        match self.exchange.as_str() {
+            super::binance::EXCHANGE_NAME => {
+                if obj.contains_key("stream") || obj.contains_key("data") {
+                    warn!("Received {} from {}", txt, self.url);
+                    return;
+                }
             }
-            return;
+            super::bitmex::EXCHANGE_NAME => {
+                if !obj.contains_key("table") {
+                    warn!("Received {} from {}", txt, self.url);
+                    return;
+                }
+            }
+            super::huobi::EXCHANGE_NAME => {
+                if obj.contains_key("ping") {
+                    let value = obj.get("ping").unwrap();
+                    let mut pong_msg = HashMap::<String, &Value>::new();
+                    pong_msg.insert("pong".to_string(), value);
+                    let response = Message::Text(serde_json::to_string(&pong_msg).unwrap());
+                    if let Err(err) = self.ws_stream.write_message(response) {
+                        error!("{}", err);
+                    }
+                    return;
+                }
+
+                if let Some(status) = obj.get("status") {
+                    if status.as_str().unwrap() != "ok" {
+                        error!("Received {} from {}", txt, self.url);
+                        return;
+                    }
+                }
+
+                if !obj.contains_key("ch") || !obj.contains_key("ts") {
+                    warn!("Received {} from {}", txt, self.url);
+                    return;
+                }
+            }
+            super::okex::EXCHANGE_NAME => {
+                if let Some(event) = obj.get("event") {
+                    if event.as_str().unwrap() == "error" {
+                        error!("Received {} from {}", txt, self.url);
+                        return;
+                    }
+                }
+
+                if !obj.contains_key("table") || !obj.contains_key("data") {
+                    warn!("Received {} from {}", txt, self.url);
+                    return;
+                }
+            }
+            _ => (),
         }
 
         (self.on_msg)(txt);
@@ -188,7 +234,7 @@ impl<'a> WSClientInternal<'a> {
 
 /// Define exchange specific client.
 macro_rules! define_client {
-    ($struct_name:ident, $default_url:ident, $serialize_command:ident) => {
+    ($struct_name:ident, $exchange:ident, $default_url:ident, $serialize_command:ident) => {
         impl<'a> WSClient<'a> for $struct_name<'a> {
             fn new(on_msg: Box<dyn FnMut(String) + 'a>, url: Option<&str>) -> $struct_name<'a> {
                 let real_url = match url {
@@ -196,7 +242,7 @@ macro_rules! define_client {
                     None => $default_url,
                 };
                 $struct_name {
-                    client: WSClientInternal::new(real_url, on_msg, $serialize_command),
+                    client: WSClientInternal::new($exchange, real_url, on_msg, $serialize_command),
                 }
             }
 
