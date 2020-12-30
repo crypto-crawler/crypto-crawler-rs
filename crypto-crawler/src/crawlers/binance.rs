@@ -82,7 +82,7 @@ where
     // retry 3 times
     let mut markets = Vec::<Market>::new();
     for _i in 0..3 {
-        let resp = fetch_markets(EXCHANGE_NAME, market_type);
+        let resp = fetch_markets(EXCHANGE_NAME, market_type.clone());
         if let Ok(m) = resp {
             markets = m;
             break;
