@@ -5,13 +5,11 @@
 //! ```
 //! use crypto_ws_client::{BinanceSpotWSClient, WSClient};
 //!
-//! fn main() {
-//!     let mut ws_client = BinanceSpotWSClient::new(Box::new(|msg| println!("{}", msg)), None);
-//!     let channels = vec!["btcusdt@aggTrade".to_string(), "btcusdt@depth".to_string(),];
-//!     ws_client.subscribe(&channels);
-//!     ws_client.run(Some(5)); // run for 5 seconds
-//!     ws_client.close();
-//! }
+//! let mut ws_client = BinanceSpotWSClient::new(Box::new(|msg| println!("{}", msg)), None);
+//! let channels = vec!["btcusdt@aggTrade".to_string(), "btcusdt@depth".to_string(),];
+//! ws_client.subscribe(&channels);
+//! ws_client.run(Some(2)); // run for 2 seconds
+//! ws_client.close();
 //! ```
 
 mod clients;
