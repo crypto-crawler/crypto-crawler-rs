@@ -30,3 +30,9 @@ fn huobi_coin_swap() {
 fn huobi_option() {
     gen_test!(HuobiOptionWSClient, "market.overview");
 }
+
+#[test]
+fn huobi_hb10() {
+    gen_test!(HuobiSpotWSClient, "market.hb10usdt.trade.detail");
+    gen_test!(HuobiSpotWSClient, "market.huobi10.kline.1min");
+}
