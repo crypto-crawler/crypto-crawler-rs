@@ -190,7 +190,7 @@ impl WSClientInternal {
 macro_rules! define_client {
     ($struct_name:ident, $default_url:ident, $serialize_command:ident) => {
         impl WSClient for $struct_name {
-            fn init(on_msg: fn(String), url: Option<&str>) -> $struct_name {
+            fn new(on_msg: fn(String), url: Option<&str>) -> $struct_name {
                 let real_url = match url {
                     Some(endpoint) => endpoint,
                     None => $default_url,
