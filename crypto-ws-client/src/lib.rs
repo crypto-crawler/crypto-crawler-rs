@@ -22,16 +22,13 @@ pub use clients::okex::*;
 
 /// The public interface of every WebSocket client.
 pub trait WSClient {
-    /// Exchange specific WebSocket client.
-    type Exchange;
-
     /// Create a new client.
     ///
     /// # Arguments
     ///
     /// * `on_msg` - The message handler
     /// * `url` - Optional server url, usually you don't need specify it
-    fn init(on_msg: fn(String), url: Option<&str>) -> Self::Exchange;
+    fn init(on_msg: fn(String), url: Option<&str>) -> Self;
 
     /// Subscribe channels.
     fn subscribe(&mut self, channels: &[String]);
