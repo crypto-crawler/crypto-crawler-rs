@@ -1,4 +1,4 @@
-# crypto-client
+# crypto-rest-client
 
 A restful client for all cryptocurrency exchanges.
 
@@ -23,6 +23,6 @@ fn main() {
 
 ## Supported Exchanges
 
-- Binance
-- Huobi
-- OKEx
+-   Binance
+-   Huobi
+-   OKEx

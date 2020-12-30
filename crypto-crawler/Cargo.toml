@@ -1,0 +1,20 @@
+[package]
+name = "crypto-crawler"
+version = "0.1.0"
+authors = ["soulmachine <soulmachine@gmail.com>"]
+edition = "2018"
+description   = "Crawl websocket messages from crypto exchanges."
+license = "Apache-2.0"
+repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-crawler"
+homepage = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-crawler"
+
+[dependencies]
+crypto-markets = { path = "../crypto-markets" }
+crypto-ws-client = { path = "../crypto-ws-client" }
+flate2 = "1.0"
+futures = "0.3"
+lazy_static = "1.4.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+strum = "0.20"
+strum_macros = "0.20"

@@ -1,3 +1,8 @@
+/// An unified restful client for all cryptocurrency exchanges.
+pub struct CryptoClient {
+    exchange: String,
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
