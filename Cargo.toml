@@ -3,5 +3,6 @@ members = [
   "crypto-client",
   "crypto-pair",
   "crypto-markets",
+  "crypto-rest-client",
   "crypto-ws-client",
 ]
