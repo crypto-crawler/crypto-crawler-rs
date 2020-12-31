@@ -23,9 +23,6 @@ pub(super) struct WSClientInternal<'a> {
     on_msg: Box<dyn FnMut(String) + 'a>,  // user defined message callback
     on_misc_msg: fn(&str) -> MiscMessage, // handle misc messages
     serialize_command: fn(&[String], bool) -> Vec<String>,
-
-    // For debugging only
-    count: i64, // message received
 }
 
 impl<'a> WSClientInternal<'a> {
@@ -45,7 +42,6 @@ impl<'a> WSClientInternal<'a> {
             on_misc_msg,
             channels: HashSet::new(),
             serialize_command,
-            count: 0,
         }
     }
 
@@ -111,7 +107,6 @@ impl<'a> WSClientInternal<'a> {
             error!("{}", txt);
             return;
         }
-        self.count += 1;
 
         match (self.on_misc_msg)(txt) {
             MiscMessage::Misc => {
@@ -128,7 +123,19 @@ impl<'a> WSClientInternal<'a> {
                 return;
             }
             MiscMessage::Normal => {
-                (self.on_msg)(txt.to_string());
+                if self.exchange == super::mxc::EXCHANGE_NAME && !txt.starts_with("{") { // special logic for MXC Spot
+                    match txt.strip_prefix("42") {
+                        Some(msg) => (self.on_msg)(msg.to_string()),
+                        None => {
+                            if txt == "1" { // disconnect
+                                self.reconnect();
+                            }
+                            warn!("Received {} from {}", txt, self.url);
+                        }
+                    }
+                } else {
+                    (self.on_msg)(txt.to_string());
+                }
             }
         }
     }

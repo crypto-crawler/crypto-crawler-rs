@@ -1,6 +1,11 @@
+use std::collections::HashMap;
+
 use crate::WSClient;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
+
+use log::*;
+use serde_json::Value;
 
 pub(super) const EXCHANGE_NAME: &str = "MXC";
 pub(super) const SOCKETIO_PREFIX: &str = "42";
@@ -85,8 +90,30 @@ fn swap_serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
     commands
 }
 
-fn on_misc_msg(_msg: &str) -> MiscMessage {
-    MiscMessage::Normal
+fn on_misc_msg(msg: &str) -> MiscMessage {
+    if !msg.starts_with("{") {
+        if !msg.starts_with("42") {
+            // see https://stackoverflow.com/a/65244958/381712
+            if msg.starts_with("0{") {
+                debug!("Connection opened {}", SPOT_WEBSOCKET_URL);
+            } else if msg == "40" {
+                debug!("Connected successfully {}", SPOT_WEBSOCKET_URL);
+            } else if msg == "3" { // pong
+                debug!("Received pong from {}", SPOT_WEBSOCKET_URL);
+            }
+            MiscMessage::Misc
+        } else {
+            MiscMessage::Normal
+        }
+    } else {
+        let obj = serde_json::from_str::<HashMap<String, Value>>(&msg).unwrap();
+        if obj.contains_key("channel") && obj.contains_key("data") && obj.contains_key("symbol") && obj.contains_key("ts") {
+            MiscMessage::Normal
+        } else {
+            error!("{} is not a JSON string, {}", msg, EXCHANGE_NAME);
+            MiscMessage::Misc
+        }
+    }
 }
 
 define_client!(
