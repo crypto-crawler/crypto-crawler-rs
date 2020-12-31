@@ -1,8 +1,12 @@
 use super::utils::connect_with_retry;
 
-use std::collections::HashSet;
 use std::io::prelude::*;
 use std::time::{Duration, Instant};
+use std::{
+    collections::HashSet,
+    sync::mpsc::{self, Receiver, Sender},
+    thread,
+};
 
 use flate2::read::{DeflateDecoder, GzDecoder};
 use log::*;
@@ -23,6 +27,10 @@ pub(super) struct WSClientInternal<'a> {
     on_msg: Box<dyn FnMut(String) + 'a>,  // user defined message callback
     on_misc_msg: fn(&str) -> MiscMessage, // handle misc messages
     serialize_command: fn(&[String], bool) -> Vec<String>,
+
+    // for ping thread
+    sender: Sender<Message>,
+    receiver: Receiver<Message>,
 }
 
 impl<'a> WSClientInternal<'a> {
@@ -33,6 +41,7 @@ impl<'a> WSClientInternal<'a> {
         on_misc_msg: fn(&str) -> MiscMessage,
         serialize_command: fn(&[String], bool) -> Vec<String>,
     ) -> Self {
+        let (sender, receiver) = mpsc::channel::<Message>();
         let ws_stream = connect_with_retry(url);
         WSClientInternal {
             exchange: exchange.to_string(),
@@ -42,6 +51,8 @@ impl<'a> WSClientInternal<'a> {
             on_misc_msg,
             channels: HashSet::new(),
             serialize_command,
+            sender,
+            receiver,
         }
     }
 
@@ -141,8 +152,14 @@ impl<'a> WSClientInternal<'a> {
     }
 
     pub fn run(&mut self, duration: Option<u64>) {
+        // start the ping thread
+        WSClientInternal::auto_ping(
+            self.exchange.to_string(),
+            self.url.to_string(),
+            self.sender.clone(),
+        );
+
         let now = Instant::now();
-        let mut last_received = Instant::now(); // for ping only
         loop {
             let resp = self.ws_stream.read_message();
             match resp {
@@ -189,35 +206,13 @@ impl<'a> WSClientInternal<'a> {
                 },
             }
 
-            // Exchange specific ping logic for
-            let ping_msg = match self.exchange.as_str() {
-                super::mxc::EXCHANGE_NAME => {
-                    if self.url.as_str() == super::mxc::SPOT_WEBSOCKET_URL {
-                        // ping per 5 seconds
-                        if last_received.elapsed() > Duration::from_secs(5) {
-                            Some(Message::Text("2".to_string())) // socket.io ping
-                        } else {
-                            None
-                        }
-                    } else if self.url.as_str() == super::mxc::SWAP_WEBSOCKET_URL {
-                        // ping per 10 seconds
-                        if last_received.elapsed() > Duration::from_secs(10) {
-                            Some(Message::Text(r#"{"method":"ping"}"#.to_string()))
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                }
-                _ => None,
-            };
-            if let Some(ping_msg) = ping_msg {
-                if let Err(err) = self.ws_stream.write_message(ping_msg) {
+            // Exchange specific ping logic
+            if let Ok(ping) = self.receiver.try_recv() {
+                let res = self.ws_stream.write_message(ping);
+                if let Err(err) = res {
                     error!("{}, {}", err, self.url);
                 }
             }
-            last_received = Instant::now(); // update time
 
             if let Some(seconds) = duration {
                 if now.elapsed() > Duration::from_secs(seconds) {
@@ -232,6 +227,37 @@ impl<'a> WSClientInternal<'a> {
         if let Err(err) = res {
             error!("{}", err);
         }
+    }
+
+    // Send ping per interval
+    fn auto_ping(exchange: String, url: String, sender: Sender<Message>) {
+        thread::spawn(move || {
+            loop {
+                let ping_msg = match exchange.as_str() {
+                    super::mxc::EXCHANGE_NAME => {
+                        if url.as_str() == super::mxc::SPOT_WEBSOCKET_URL {
+                            // ping per 5 seconds
+                            Some((5, Message::Text("2".to_string()))) // socket.io ping
+                        } else if url.as_str() == super::mxc::SWAP_WEBSOCKET_URL {
+                            // ping per 10 seconds
+                            Some((10, Message::Text(r#"{"method":"ping"}"#.to_string())))
+                        } else {
+                            None
+                        }
+                    }
+                    super::bitmex::EXCHANGE_NAME => Some((5, Message::Text("ping".to_string()))),
+                    _ => None,
+                };
+
+                match ping_msg {
+                    Some(msg) => {
+                        let _ = sender.send(msg.1);
+                        thread::sleep(Duration::from_secs(msg.0));
+                    }
+                    None => return,
+                }
+            }
+        });
     }
 }
 
