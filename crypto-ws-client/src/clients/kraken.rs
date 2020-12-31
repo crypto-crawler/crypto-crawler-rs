@@ -1,8 +1,11 @@
 use crate::WSClient;
 use std::collections::HashMap;
 
-use super::ws_client_internal::WSClientInternal;
+use super::ws_client_internal::{MiscMessage, WSClientInternal};
+
+use log::*;
 use serde_json::Value;
+use tungstenite::Message;
 
 pub(super) const EXCHANGE_NAME: &str = "Kraken";
 
@@ -52,9 +55,44 @@ fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
     commands
 }
 
+fn on_misc_msg(msg: &str) -> MiscMessage {
+    let resp = serde_json::from_str::<Value>(&msg);
+    if resp.is_err() {
+        error!("{} is not a JSON string, {}", msg, EXCHANGE_NAME);
+        return MiscMessage::Misc;
+    }
+    let value = resp.unwrap();
+
+    if value.is_object() {
+        let obj = value.as_object().unwrap();
+        let event = obj.get("event").unwrap().as_str().unwrap();
+        match event {
+            "heartbeat" => {
+                debug!("Received {} from {}", msg, EXCHANGE_NAME);
+                let ping = r#"{
+                    "event": "ping",
+                    "reqid": 9527
+                }"#;
+                MiscMessage::WebSocket(Message::Text(ping.to_string()))
+            }
+            "pong" => {
+                debug!("Received {} from {}", msg, EXCHANGE_NAME);
+                MiscMessage::Misc
+            }
+            _ => {
+                warn!("Received {} from {}", msg, EXCHANGE_NAME);
+                MiscMessage::Misc
+            }
+        }
+    } else {
+        MiscMessage::Normal
+    }
+}
+
 define_client!(
     KrakenSpotWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
-    serialize_command
+    serialize_command,
+    on_misc_msg
 );

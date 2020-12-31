@@ -1,6 +1,6 @@
 use crate::WSClient;
 
-use super::ws_client_internal::WSClientInternal;
+use super::ws_client_internal::{MiscMessage, WSClientInternal};
 
 pub(super) const EXCHANGE_NAME: &str = "MXC";
 pub(super) const SOCKETIO_PREFIX: &str = "42";
@@ -85,17 +85,23 @@ fn swap_serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
     commands
 }
 
+fn on_misc_msg(_msg: &str) -> MiscMessage {
+    MiscMessage::Normal
+}
+
 define_client!(
     MXCSpotWSClient,
     EXCHANGE_NAME,
     SPOT_WEBSOCKET_URL,
-    spot_serialize_command
+    spot_serialize_command,
+    on_misc_msg
 );
 define_client!(
     MXCSwapWSClient,
     EXCHANGE_NAME,
     SWAP_WEBSOCKET_URL,
-    swap_serialize_command
+    swap_serialize_command,
+    on_misc_msg
 );
 
 #[cfg(test)]
