@@ -5,15 +5,15 @@ mod utils;
 
 #[test]
 fn bitmex_swap() {
-    gen_test!(BitMEXWSClient, "trade:XBTUSD");
+    gen_test!(BitMEXWSClient, &vec!["trade:XBTUSD".to_string()]);
 }
 
 #[test]
 fn bitmex_futures() {
-    gen_test!(BitMEXWSClient, "trade:XBTM21");
+    gen_test!(BitMEXWSClient, &vec!["trade:XBTM21".to_string()]);
 }
 
 #[test]
 fn bitmex_instrument() {
-    gen_test!(BitMEXWSClient, "instrument");
+    gen_test!(BitMEXWSClient, &vec!["instrument".to_string()]);
 }

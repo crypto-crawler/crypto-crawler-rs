@@ -17,6 +17,7 @@ mod clients;
 pub use clients::binance::*;
 pub use clients::bitmex::*;
 pub use clients::huobi::*;
+pub use clients::kraken::*;
 pub use clients::okex::*;
 
 /// The public interface of every WebSocket client.
