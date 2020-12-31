@@ -104,30 +104,30 @@ impl<'a> WSClientInternal<'a> {
     // Handle a text msg from Message::Text or Message::Binary
     fn handle_msg(&mut self, txt: &str) {
         if txt.contains("error") {
-            error!("{}", txt);
+            error!("{} from {}", txt, self.url);
             return;
         }
 
         match (self.on_misc_msg)(txt) {
-            MiscMessage::Misc => {
-                return;
-            }
+            MiscMessage::Misc => (),
             MiscMessage::Reconnect => {
                 self.reconnect();
-                return;
             }
             MiscMessage::WebSocket(ws_msg) => {
                 if let Err(err) = self.ws_stream.write_message(ws_msg) {
                     error!("{}", err);
                 }
-                return;
             }
             MiscMessage::Normal => {
-                if self.exchange == super::mxc::EXCHANGE_NAME && !txt.starts_with("{") { // special logic for MXC Spot
+                if self.exchange == super::mxc::EXCHANGE_NAME
+                    && self.url.as_str() == super::mxc::SPOT_WEBSOCKET_URL
+                {
+                    // special logic for MXC Spot
                     match txt.strip_prefix("42") {
                         Some(msg) => (self.on_msg)(msg.to_string()),
                         None => {
-                            if txt == "1" { // disconnect
+                            if txt == "1" {
+                                // disconnect
                                 self.reconnect();
                             }
                             warn!("Received {} from {}", txt, self.url);
@@ -142,6 +142,7 @@ impl<'a> WSClientInternal<'a> {
 
     pub fn run(&mut self, duration: Option<u64>) {
         let now = Instant::now();
+        let mut last_received = Instant::now(); // for ping only
         loop {
             let resp = self.ws_stream.read_message();
             match resp {
@@ -187,6 +188,36 @@ impl<'a> WSClientInternal<'a> {
                     _ => error!("{}", err),
                 },
             }
+
+            // Exchange specific ping logic for
+            let ping_msg = match self.exchange.as_str() {
+                super::mxc::EXCHANGE_NAME => {
+                    if self.url.as_str() == super::mxc::SPOT_WEBSOCKET_URL {
+                        // ping per 5 seconds
+                        if last_received.elapsed() > Duration::from_secs(5) {
+                            Some(Message::Text("2".to_string())) // socket.io ping
+                        } else {
+                            None
+                        }
+                    } else if self.url.as_str() == super::mxc::SWAP_WEBSOCKET_URL {
+                        // ping per 10 seconds
+                        if last_received.elapsed() > Duration::from_secs(10) {
+                            Some(Message::Text(r#"{"method":"ping"}"#.to_string()))
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            };
+            if let Some(ping_msg) = ping_msg {
+                if let Err(err) = self.ws_stream.write_message(ping_msg) {
+                    error!("{}, {}", err, self.url);
+                }
+            }
+            last_received = Instant::now(); // update time
 
             if let Some(seconds) = duration {
                 if now.elapsed() > Duration::from_secs(seconds) {
