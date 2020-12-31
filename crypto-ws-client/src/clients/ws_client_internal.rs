@@ -97,7 +97,7 @@ impl<'a> WSClientInternal<'a> {
     }
 
     // Handle a text msg from Message::Text or Message::Binary
-    fn handle_msg(&mut self, txt: String) {
+    fn handle_msg(&mut self, txt: &str) {
         if txt.contains("error") {
             error!("{}", txt);
             return;
@@ -197,6 +197,7 @@ impl<'a> WSClientInternal<'a> {
                     return;
                 }
             }
+            super::mxc::EXCHANGE_NAME => (),
             super::okex::EXCHANGE_NAME => {
                 let obj = value.as_object().unwrap();
                 if let Some(event) = obj.get("event") {
@@ -214,7 +215,7 @@ impl<'a> WSClientInternal<'a> {
             _ => (),
         }
 
-        (self.on_msg)(txt);
+        (self.on_msg)(txt.to_string());
     }
 
     pub fn run(&mut self, duration: Option<u64>) {
@@ -223,7 +224,7 @@ impl<'a> WSClientInternal<'a> {
             let resp = self.ws_stream.read_message();
             match resp {
                 Ok(msg) => match msg {
-                    Message::Text(txt) => self.handle_msg(txt),
+                    Message::Text(txt) => self.handle_msg(&txt),
                     Message::Binary(binary) => {
                         let mut txt = String::new();
                         let resp = if self.url.contains("huobi.com") || self.url.contains("hbdm.com") || self.url.contains("huobi.pro") {
@@ -237,7 +238,7 @@ impl<'a> WSClientInternal<'a> {
                         };
 
                         match resp {
-                            Ok(_) => self.handle_msg(txt),
+                            Ok(_) => self.handle_msg(&txt),
                             Err(err) => error!("Decompression failed, {}", err),
                         }
                     }

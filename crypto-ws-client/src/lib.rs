@@ -19,6 +19,7 @@ pub use clients::bitmex::*;
 pub use clients::bitstamp::*;
 pub use clients::huobi::*;
 pub use clients::kraken::*;
+pub use clients::mxc::*;
 pub use clients::okex::*;
 
 /// The public interface of every WebSocket client.
