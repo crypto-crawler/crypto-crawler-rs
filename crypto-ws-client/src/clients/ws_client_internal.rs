@@ -127,6 +127,26 @@ impl<'a> WSClientInternal<'a> {
                     return;
                 }
             }
+            super::bitstamp::EXCHANGE_NAME => {
+                let obj = value.as_object().unwrap();
+                let event = obj.get("event").unwrap().as_str().unwrap();
+                match event {
+                    "bts:subscription_succeeded" | "bts:unsubscription_succeeded" => {
+                        debug!("Received {} from {}", txt, self.url);
+                        return;
+                    }
+                    "bts:error" => {
+                        error!("Received {} from {}", txt, self.url);
+                        return;
+                    }
+                    "bts:request_reconnect" => {
+                        warn!("Received {} from {}", txt, self.url);
+                        self.reconnect();
+                        return;
+                    }
+                    _ => (),
+                }
+            }
             super::huobi::EXCHANGE_NAME => {
                 let obj = value.as_object().unwrap();
                 if obj.contains_key("ping") {
