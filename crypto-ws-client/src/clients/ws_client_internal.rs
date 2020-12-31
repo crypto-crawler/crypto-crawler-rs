@@ -1,20 +1,27 @@
 use super::utils::connect_with_retry;
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::io::prelude::*;
 use std::time::{Duration, Instant};
 
 use flate2::read::{DeflateDecoder, GzDecoder};
 use log::*;
-use serde_json::Value;
 use tungstenite::{client::AutoStream, Error, Message, WebSocket};
+
+pub(super) enum MiscMessage {
+    WebSocket(Message), // WebSocket message that needs to be sent to the server
+    Reconnect,          // Needs to reconnect
+    Misc,               // Misc message
+    Normal,             // Normal message will be passed to on_msg
+}
 
 pub(super) struct WSClientInternal<'a> {
     exchange: String, // Eexchange name
     url: String,      // Websocket base url
     ws_stream: WebSocket<AutoStream>,
-    channels: HashSet<String>,           // subscribed channels
-    on_msg: Box<dyn FnMut(String) + 'a>, // message callback
+    channels: HashSet<String>,            // subscribed channels
+    on_msg: Box<dyn FnMut(String) + 'a>,  // user defined message callback
+    on_misc_msg: fn(&str) -> MiscMessage, // handle misc messages
     serialize_command: fn(&[String], bool) -> Vec<String>,
 
     // For debugging only
@@ -26,6 +33,7 @@ impl<'a> WSClientInternal<'a> {
         exchange: &str,
         url: &str,
         on_msg: Box<dyn FnMut(String) + 'a>,
+        on_misc_msg: fn(&str) -> MiscMessage,
         serialize_command: fn(&[String], bool) -> Vec<String>,
     ) -> Self {
         let ws_stream = connect_with_retry(url);
@@ -34,6 +42,7 @@ impl<'a> WSClientInternal<'a> {
             url: url.to_string(),
             ws_stream,
             on_msg,
+            on_misc_msg,
             channels: HashSet::new(),
             serialize_command,
             count: 0,
@@ -104,118 +113,24 @@ impl<'a> WSClientInternal<'a> {
         }
         self.count += 1;
 
-        let resp = serde_json::from_str::<Value>(&txt);
-        if resp.is_err() {
-            error!("{} is not a JSON string", txt);
-            return;
+        match (self.on_misc_msg)(txt) {
+            MiscMessage::Misc => {
+                return;
+            }
+            MiscMessage::Reconnect => {
+                self.reconnect();
+                return;
+            }
+            MiscMessage::WebSocket(ws_msg) => {
+                if let Err(err) = self.ws_stream.write_message(ws_msg) {
+                    error!("{}", err);
+                }
+                return;
+            }
+            MiscMessage::Normal => {
+                (self.on_msg)(txt.to_string());
+            }
         }
-        let value = resp.unwrap();
-
-        // Exchange specific handling
-        match self.exchange.as_str() {
-            super::binance::EXCHANGE_NAME => {
-                let obj = value.as_object().unwrap();
-                if obj.contains_key("stream") || obj.contains_key("data") {
-                    warn!("Received {} from {}", txt, self.url);
-                    return;
-                }
-            }
-            super::bitmex::EXCHANGE_NAME => {
-                let obj = value.as_object().unwrap();
-                if !obj.contains_key("table") {
-                    warn!("Received {} from {}", txt, self.url);
-                    return;
-                }
-            }
-            super::bitstamp::EXCHANGE_NAME => {
-                let obj = value.as_object().unwrap();
-                let event = obj.get("event").unwrap().as_str().unwrap();
-                match event {
-                    "bts:subscription_succeeded" | "bts:unsubscription_succeeded" => {
-                        debug!("Received {} from {}", txt, self.url);
-                        return;
-                    }
-                    "bts:error" => {
-                        error!("Received {} from {}", txt, self.url);
-                        return;
-                    }
-                    "bts:request_reconnect" => {
-                        warn!("Received {} from {}", txt, self.url);
-                        self.reconnect();
-                        return;
-                    }
-                    _ => (),
-                }
-            }
-            super::huobi::EXCHANGE_NAME => {
-                let obj = value.as_object().unwrap();
-                if obj.contains_key("ping") {
-                    let value = obj.get("ping").unwrap();
-                    let mut pong_msg = HashMap::<String, &Value>::new();
-                    pong_msg.insert("pong".to_string(), value);
-                    let response = Message::Text(serde_json::to_string(&pong_msg).unwrap());
-                    if let Err(err) = self.ws_stream.write_message(response) {
-                        error!("{}", err);
-                    }
-                    return;
-                }
-
-                if let Some(status) = obj.get("status") {
-                    if status.as_str().unwrap() != "ok" {
-                        error!("Received {} from {}", txt, self.url);
-                        return;
-                    }
-                }
-
-                if !obj.contains_key("ch") || !obj.contains_key("ts") {
-                    warn!("Received {} from {}", txt, self.url);
-                    return;
-                }
-            }
-            super::kraken::EXCHANGE_NAME => {
-                if value.is_object() {
-                    let obj = value.as_object().unwrap();
-                    let event = obj.get("event").unwrap().as_str().unwrap();
-                    match event {
-                        "heartbeat" => {
-                            debug!("Received {} from {}", txt, self.url);
-                            let ping = r#"{
-                                "event": "ping",
-                                "reqid": 9527
-                            }"#;
-                            let _ = self
-                                .ws_stream
-                                .write_message(Message::Text(ping.to_string()));
-                        }
-                        "pong" => {
-                            debug!("Received {} from {}", txt, self.url);
-                        }
-                        _ => {
-                            warn!("Received {} from {}", txt, self.url);
-                        }
-                    }
-                    return;
-                }
-            }
-            super::mxc::EXCHANGE_NAME => (),
-            super::okex::EXCHANGE_NAME => {
-                let obj = value.as_object().unwrap();
-                if let Some(event) = obj.get("event") {
-                    if event.as_str().unwrap() == "error" {
-                        error!("Received {} from {}", txt, self.url);
-                        return;
-                    }
-                }
-
-                if !obj.contains_key("table") || !obj.contains_key("data") {
-                    warn!("Received {} from {}", txt, self.url);
-                    return;
-                }
-            }
-            _ => (),
-        }
-
-        (self.on_msg)(txt.to_string());
     }
 
     pub fn run(&mut self, duration: Option<u64>) {
@@ -284,7 +199,7 @@ impl<'a> WSClientInternal<'a> {
 
 /// Define exchange specific client.
 macro_rules! define_client {
-    ($struct_name:ident, $exchange:ident, $default_url:ident, $serialize_command:ident) => {
+    ($struct_name:ident, $exchange:ident, $default_url:ident, $serialize_command:ident, $on_misc_msg:ident) => {
         impl<'a> WSClient<'a> for $struct_name<'a> {
             fn new(on_msg: Box<dyn FnMut(String) + 'a>, url: Option<&str>) -> $struct_name<'a> {
                 let real_url = match url {
@@ -292,7 +207,13 @@ macro_rules! define_client {
                     None => $default_url,
                 };
                 $struct_name {
-                    client: WSClientInternal::new($exchange, real_url, on_msg, $serialize_command),
+                    client: WSClientInternal::new(
+                        $exchange,
+                        real_url,
+                        on_msg,
+                        $on_misc_msg,
+                        $serialize_command,
+                    ),
                 }
             }
 

@@ -1,7 +1,11 @@
 use crate::WSClient;
 use std::collections::HashMap;
 
-use super::ws_client_internal::WSClientInternal;
+use log::*;
+use serde_json::Value;
+use tungstenite::Message;
+
+use super::ws_client_internal::{MiscMessage, WSClientInternal};
 
 pub(super) const EXCHANGE_NAME: &str = "Huobi";
 
@@ -34,7 +38,6 @@ pub struct HuobiCoinSwapWSClient<'a> {
 pub struct HuobiUsdtSwapWSClient<'a> {
     client: WSClientInternal<'a>,
 }
-
 /// The WebSocket client for Huobi Option market(<https://huobiapi.github.io/docs/option/v1/en/>).
 pub struct HuobiOptionWSClient<'a> {
     client: WSClientInternal<'a>,
@@ -53,33 +56,68 @@ fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
         .collect::<Vec<String>>()
 }
 
+fn on_misc_msg(msg: &str) -> MiscMessage {
+    let resp = serde_json::from_str::<HashMap<String, Value>>(&msg);
+    if resp.is_err() {
+        error!("{} is not a JSON string, {}", msg, EXCHANGE_NAME);
+        return MiscMessage::Misc;
+    }
+    let obj = resp.unwrap();
+
+    if obj.contains_key("ping") {
+        let value = obj.get("ping").unwrap();
+        let mut pong_msg = HashMap::<String, &Value>::new();
+        pong_msg.insert("pong".to_string(), value);
+        let ws_msg = Message::Text(serde_json::to_string(&pong_msg).unwrap());
+        return MiscMessage::WebSocket(ws_msg);
+    }
+
+    if let Some(status) = obj.get("status") {
+        if status.as_str().unwrap() != "ok" {
+            error!("Received {} from {}", msg, EXCHANGE_NAME);
+            return MiscMessage::Misc;
+        }
+    }
+
+    if !obj.contains_key("ch") || !obj.contains_key("ts") {
+        warn!("Received {} from {}", msg, EXCHANGE_NAME);
+        return MiscMessage::Misc;
+    }
+    MiscMessage::Normal
+}
+
 define_client!(
     HuobiSpotWSClient,
     EXCHANGE_NAME,
     SPOT_WEBSOCKET_URL,
-    serialize_command
+    serialize_command,
+    on_misc_msg
 );
 define_client!(
     HuobiFuturesWSClient,
     EXCHANGE_NAME,
     FUTURES_WEBSOCKET_URL,
-    serialize_command
+    serialize_command,
+    on_misc_msg
 );
 define_client!(
     HuobiCoinSwapWSClient,
     EXCHANGE_NAME,
     COIN_SWAP_WEBSOCKET_URL,
-    serialize_command
+    serialize_command,
+    on_misc_msg
 );
 define_client!(
     HuobiUsdtSwapWSClient,
     EXCHANGE_NAME,
     USDT_SWAP_WEBSOCKET_URL,
-    serialize_command
+    serialize_command,
+    on_misc_msg
 );
 define_client!(
     HuobiOptionWSClient,
     EXCHANGE_NAME,
     OPTION_WEBSOCKET_URL,
-    serialize_command
+    serialize_command,
+    on_misc_msg
 );

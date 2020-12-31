@@ -31,6 +31,8 @@ Define a struct in the file, with the same name as the file.
 
 Define a customized `serialize_command()`.
 
+Define a customized `on_misc_msg()` to handle misc messages.
+
 Use `define_client!` macro to implement the `WSClient` trait.
 
 #### 2. Add exchange specific handling logic in `handle_msg()` of `ws_client_internal.rs`
