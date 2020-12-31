@@ -104,28 +104,31 @@ impl<'a> WSClientInternal<'a> {
         }
         self.count += 1;
 
-        let resp = serde_json::from_str::<HashMap<String, Value>>(&txt);
+        let resp = serde_json::from_str::<Value>(&txt);
         if resp.is_err() {
             error!("{} is not a JSON string", txt);
             return;
         }
+        let value = resp.unwrap();
 
         // Exchange specific handling
-        let obj = resp.unwrap();
         match self.exchange.as_str() {
             super::binance::EXCHANGE_NAME => {
+                let obj = value.as_object().unwrap();
                 if obj.contains_key("stream") || obj.contains_key("data") {
                     warn!("Received {} from {}", txt, self.url);
                     return;
                 }
             }
             super::bitmex::EXCHANGE_NAME => {
+                let obj = value.as_object().unwrap();
                 if !obj.contains_key("table") {
                     warn!("Received {} from {}", txt, self.url);
                     return;
                 }
             }
             super::huobi::EXCHANGE_NAME => {
+                let obj = value.as_object().unwrap();
                 if obj.contains_key("ping") {
                     let value = obj.get("ping").unwrap();
                     let mut pong_msg = HashMap::<String, &Value>::new();
@@ -149,7 +152,33 @@ impl<'a> WSClientInternal<'a> {
                     return;
                 }
             }
+            super::kraken::EXCHANGE_NAME => {
+                if value.is_object() {
+                    let obj = value.as_object().unwrap();
+                    let event = obj.get("event").unwrap().as_str().unwrap();
+                    match event {
+                        "heartbeat" => {
+                            debug!("Received {} from {}", txt, self.url);
+                            let ping = r#"{
+                                "event": "ping",
+                                "reqid": 9527
+                            }"#;
+                            let _ = self
+                                .ws_stream
+                                .write_message(Message::Text(ping.to_string()));
+                        }
+                        "pong" => {
+                            debug!("Received {} from {}", txt, self.url);
+                        }
+                        _ => {
+                            warn!("Received {} from {}", txt, self.url);
+                        }
+                    }
+                    return;
+                }
+            }
             super::okex::EXCHANGE_NAME => {
+                let obj = value.as_object().unwrap();
                 if let Some(event) = obj.get("event") {
                     if event.as_str().unwrap() == "error" {
                         error!("Received {} from {}", txt, self.url);

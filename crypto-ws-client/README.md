@@ -20,3 +20,21 @@ fn main() {
     ws_client.close();
 }
 ```
+
+## Contribution
+
+### How to add support for a new exchange
+
+#### 1. Add a new file under `src/clients/`
+
+Define a struct in the file, with the same name as the file.
+
+Define a customized `serialize_command()`.
+
+Use `define_client!` macro to implement the `WSClient` trait.
+
+#### 2. Add exchange specific handling logic in `handle_msg()` of `ws_client_internal.rs`
+
+#### 3. Add a new file under `tests/`
+
+Add a new file under `tests/` and put some integration tests in it.
