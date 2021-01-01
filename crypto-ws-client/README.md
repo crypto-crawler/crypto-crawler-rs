@@ -34,8 +34,6 @@ Define a customized `on_misc_msg()` to handle misc messages.
 
 Use `define_client!` macro to implement the `WSClient` trait.
 
-#### 2. Add exchange specific handling logic in `handle_msg()` of `ws_client_internal.rs`
-
-#### 3. Add a new file under `tests/`
+#### 2. Add a new file under `tests/`
 
 Add a new file under `tests/` and put some integration tests in it.
