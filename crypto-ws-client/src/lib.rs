@@ -25,21 +25,31 @@ pub use clients::okex::*;
 
 /// The public interface of every WebSocket client.
 pub trait WSClient<'a> {
-    /// Create a new client.
+    /// Creates a new client.
     ///
     /// # Arguments
     ///
-    /// * `on_msg` - The message handler
+    /// * `on_msg` - message processing callback function
     /// * `url` - Optional server url, usually you don't need specify it
     fn new(on_msg: Box<dyn FnMut(String) + 'a>, url: Option<&str>) -> Self;
 
-    /// Subscribe channels.
-    fn subscribe(&mut self, channels: &[String]);
+    /// Subscribes channels.
+    ///
+    /// Usually a `raw_channel` is composed by a `channel` and a `pair`,
+    /// delimited by `,`. Sometimes the `pair` is optional, for example,
+    /// `instrument` of BitMEX, `market.overview` of Huobi.
+    ///
+    /// More examples:
+    ///
+    /// * BitMEX `trade:XBTUSD`, `quote:XBTM21`, `instrument`
+    /// * Binance `btcusdt`, `btcusd_perp`
+    /// * OKEx `spot/trade:BTC-USDT`
+    fn subscribe(&mut self, raw_channels: &[String]);
 
-    /// Unsubscribe channels.
-    fn unsubscribe(&mut self, channels: &[String]);
+    /// Unsubscribes channels.
+    fn unsubscribe(&mut self, raw_channels: &[String]);
 
-    /// Start the infinite loop until the server closes the connection.
+    /// Starts the infinite loop until time is up or the server closes the connection.
     ///
     /// # Arguments
     ///
