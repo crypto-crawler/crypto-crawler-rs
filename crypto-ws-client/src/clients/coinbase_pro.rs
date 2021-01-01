@@ -26,7 +26,7 @@ fn channel_pairs_to_command(channel: &str, pairs: &[String]) -> String {
     )
 }
 
-fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
+fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
     let mut channel_pairs = HashMap::<String, Vec<String>>::new();
     for s in channels {
         let v: Vec<&str> = s.split(CHANNEL_PAIR_DELIMITER).collect();
@@ -91,7 +91,7 @@ define_client!(
     CoinbaseProWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
-    serialize_command,
+    channels_to_commands,
     on_misc_msg
 );
 

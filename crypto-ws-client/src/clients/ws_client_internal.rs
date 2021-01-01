@@ -23,7 +23,7 @@ pub(super) struct WSClientInternal<'a> {
     channels: HashSet<String>,            // subscribed channels
     on_msg: Box<dyn FnMut(String) + 'a>,  // user defined message callback
     on_misc_msg: fn(&str) -> MiscMessage, // handle misc messages
-    serialize_command: fn(&[String], bool) -> Vec<String>,
+    channels_to_commands: fn(&[String], bool) -> Vec<String>, // converts raw channels to subscribe/unsubscribe commands
 }
 
 impl<'a> WSClientInternal<'a> {
@@ -32,7 +32,7 @@ impl<'a> WSClientInternal<'a> {
         url: &str,
         on_msg: Box<dyn FnMut(String) + 'a>,
         on_misc_msg: fn(&str) -> MiscMessage,
-        serialize_command: fn(&[String], bool) -> Vec<String>,
+        channels_to_commands: fn(&[String], bool) -> Vec<String>,
     ) -> Self {
         let stream = connect_with_retry(url);
         WSClientInternal {
@@ -42,7 +42,7 @@ impl<'a> WSClientInternal<'a> {
             on_msg,
             on_misc_msg,
             channels: HashSet::new(),
-            serialize_command,
+            channels_to_commands,
         }
     }
 
@@ -54,7 +54,7 @@ impl<'a> WSClientInternal<'a> {
             }
         }
         if !diff.is_empty() {
-            let commands = (self.serialize_command)(channels, true);
+            let commands = (self.channels_to_commands)(channels, true);
             commands.into_iter().for_each(|command| {
                 self.ws_stream.write_message(Message::Text(command));
             });
@@ -69,7 +69,7 @@ impl<'a> WSClientInternal<'a> {
             }
         }
         if !diff.is_empty() {
-            let commands = (self.serialize_command)(channels, false);
+            let commands = (self.channels_to_commands)(channels, false);
             commands.into_iter().for_each(|command| {
                 self.ws_stream.write_message(Message::Text(command));
             });
@@ -86,7 +86,7 @@ impl<'a> WSClientInternal<'a> {
             .map(|s| s.to_string())
             .collect::<Vec<String>>();
         if !channels.is_empty() {
-            let commands = (self.serialize_command)(&channels, true);
+            let commands = (self.channels_to_commands)(&channels, true);
             commands.into_iter().for_each(|command| {
                 self.ws_stream.write_message(Message::Text(command));
             });
@@ -224,7 +224,7 @@ impl<'a> WSClientInternal<'a> {
 
 /// Define exchange specific client.
 macro_rules! define_client {
-    ($struct_name:ident, $exchange:ident, $default_url:ident, $serialize_command:ident, $on_misc_msg:ident) => {
+    ($struct_name:ident, $exchange:ident, $default_url:ident, $channels_to_commands:ident, $on_misc_msg:ident) => {
         impl<'a> WSClient<'a> for $struct_name<'a> {
             fn new(on_msg: Box<dyn FnMut(String) + 'a>, url: Option<&str>) -> $struct_name<'a> {
                 let real_url = match url {
@@ -237,7 +237,7 @@ macro_rules! define_client {
                         real_url,
                         on_msg,
                         $on_misc_msg,
-                        $serialize_command,
+                        $channels_to_commands,
                     ),
                 }
             }

@@ -26,7 +26,7 @@ pub struct BinanceDeliveryWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
-fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
+fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
     vec![format!(
         r#"{{"id":9527,"method":"{}","params":{}}}"#,
         if subscribe {
@@ -64,21 +64,21 @@ define_client!(
     BinanceSpotWSClient,
     EXCHANGE_NAME,
     SPOT_WEBSOCKET_URL,
-    serialize_command,
+    channels_to_commands,
     on_misc_msg
 );
 define_client!(
     BinanceFuturesWSClient,
     EXCHANGE_NAME,
     FUTURES_WEBSOCKET_URL,
-    serialize_command,
+    channels_to_commands,
     on_misc_msg
 );
 define_client!(
     BinanceDeliveryWSClient,
     EXCHANGE_NAME,
     DELIVERY_WEBSOCKET_URL,
-    serialize_command,
+    channels_to_commands,
     on_misc_msg
 );
 
@@ -86,7 +86,7 @@ define_client!(
 mod tests {
     #[test]
     fn test_one_channel() {
-        let commands = super::serialize_command(&vec!["btcusdt@aggTrade".to_string()], true);
+        let commands = super::channels_to_commands(&vec!["btcusdt@aggTrade".to_string()], true);
         assert_eq!(1, commands.len());
         assert_eq!(
             r#"{"id":9527,"method":"SUBSCRIBE","params":["btcusdt@aggTrade"]}"#,
@@ -96,7 +96,7 @@ mod tests {
 
     #[test]
     fn test_two_channels() {
-        let commands = super::serialize_command(
+        let commands = super::channels_to_commands(
             &vec!["btcusdt@aggTrade".to_string(), "btcusdt@ticker".to_string()],
             true,
         );

@@ -34,7 +34,7 @@ fn channel_to_command(channel: &str, subscribe: bool) -> String {
     )
 }
 
-fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
+fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
     channels
         .iter()
         .map(|s| channel_to_command(s, subscribe))
@@ -70,7 +70,7 @@ define_client!(
     BitfinexWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
-    serialize_command,
+    channels_to_commands,
     on_misc_msg
 );
 

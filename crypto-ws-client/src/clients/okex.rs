@@ -15,7 +15,7 @@ pub struct OKExWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
-fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
+fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
     vec![format!(
         r#"{{"op":"{}","args":{}}}"#,
         if subscribe {
@@ -54,7 +54,7 @@ define_client!(
     OKExWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
-    serialize_command,
+    channels_to_commands,
     on_misc_msg
 );
 
@@ -62,7 +62,7 @@ define_client!(
 mod tests {
     #[test]
     fn test_one_channel() {
-        let commands = super::serialize_command(&vec!["spot/trade:BTC-USDT".to_string()], true);
+        let commands = super::channels_to_commands(&vec!["spot/trade:BTC-USDT".to_string()], true);
         assert_eq!(1, commands.len());
         assert_eq!(
             r#"{"op":"subscribe","args":["spot/trade:BTC-USDT"]}"#,
@@ -72,7 +72,7 @@ mod tests {
 
     #[test]
     fn test_two_channel() {
-        let commands = super::serialize_command(
+        let commands = super::channels_to_commands(
             &vec![
                 "spot/trade:BTC-USDT".to_string(),
                 "ticker/trade:BTC-USDT".to_string(),

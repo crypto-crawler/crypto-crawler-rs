@@ -14,7 +14,7 @@ pub struct BitMEXWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
-fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
+fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
     vec![format!(
         r#"{{"op":"{}","args":{}}}"#,
         if subscribe {
@@ -46,7 +46,7 @@ define_client!(
     BitMEXWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
-    serialize_command,
+    channels_to_commands,
     on_misc_msg
 );
 
@@ -54,14 +54,14 @@ define_client!(
 mod tests {
     #[test]
     fn test_one_channel() {
-        let commands = super::serialize_command(&vec!["trade:XBTUSD".to_string()], true);
+        let commands = super::channels_to_commands(&vec!["trade:XBTUSD".to_string()], true);
         assert_eq!(1, commands.len());
         assert_eq!(r#"{"op":"subscribe","args":["trade:XBTUSD"]}"#, commands[0]);
     }
 
     #[test]
     fn test_multiple_channels() {
-        let commands = super::serialize_command(
+        let commands = super::channels_to_commands(
             &vec![
                 "trade:XBTUSD".to_string(),
                 "quote:XBTUSD".to_string(),

@@ -28,7 +28,7 @@ fn main() {
 
 Define a struct in the file, with the same name as the file.
 
-Define a customized `serialize_command()`.
+Define a `channels_to_commands()` function which can convert raw channels to subscribe/unsubscribe commands.
 
 Define a customized `on_misc_msg()` to handle misc messages.
 
