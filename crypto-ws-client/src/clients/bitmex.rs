@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
 use log::*;
-use serde_json::{json, Value};
+use serde_json::Value;
 
 pub(super) const EXCHANGE_NAME: &str = "BitMEX";
 
@@ -15,21 +15,15 @@ pub struct BitMEXWSClient<'a> {
 }
 
 fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
-    let mut object = HashMap::<&str, Value>::new();
-
-    object.insert(
-        "op",
-        serde_json::to_value(if subscribe {
+    vec![format!(
+        r#"{{"op":"{}","args":{}}}"#,
+        if subscribe {
             "subscribe"
         } else {
             "unsubscribe"
-        })
-        .unwrap(),
-    );
-
-    object.insert("args", json!(channels));
-
-    vec![serde_json::to_string(&object).unwrap()]
+        },
+        serde_json::to_string(channels).unwrap()
+    )]
 }
 
 fn on_misc_msg(msg: &str) -> MiscMessage {
@@ -55,3 +49,31 @@ define_client!(
     serialize_command,
     on_misc_msg
 );
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_one_channel() {
+        let commands = super::serialize_command(&vec!["trade:XBTUSD".to_string()], true);
+        assert_eq!(1, commands.len());
+        assert_eq!(r#"{"op":"subscribe","args":["trade:XBTUSD"]}"#, commands[0]);
+    }
+
+    #[test]
+    fn test_multiple_channels() {
+        let commands = super::serialize_command(
+            &vec![
+                "trade:XBTUSD".to_string(),
+                "quote:XBTUSD".to_string(),
+                "orderBookL2_25:XBTUSD".to_string(),
+                "tradeBin1m:XBTUSD".to_string(),
+            ],
+            true,
+        );
+        assert_eq!(1, commands.len());
+        assert_eq!(
+            r#"{"op":"subscribe","args":["trade:XBTUSD","quote:XBTUSD","orderBookL2_25:XBTUSD","tradeBin1m:XBTUSD"]}"#,
+            commands[0]
+        );
+    }
+}

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
 use log::*;
-use serde_json::{json, Value};
+use serde_json::Value;
 
 pub(super) const EXCHANGE_NAME: &str = "Bitstamp";
 
@@ -14,29 +14,23 @@ pub struct BitstampSpotWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
+fn channel_to_command(channel: &str, subscribe: bool) -> String {
+    format!(
+        r#"{{"event":"bts:{}","data":{{"channel":"{}"}}}}"#,
+        if subscribe {
+            "subscribe"
+        } else {
+            "unsubscribe"
+        },
+        channel
+    )
+}
+
 fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
-    let mut commands = Vec::<String>::new();
-    for channel in channels {
-        let mut object = HashMap::<&str, Value>::new();
-
-        object.insert(
-            "event",
-            serde_json::to_value(if subscribe {
-                "bts:subscribe"
-            } else {
-                "bts:unsubscribe"
-            })
-            .unwrap(),
-        );
-
-        let mut data = HashMap::new();
-        data.insert("channel", channel);
-        object.insert("data", json!(data));
-
-        commands.push(serde_json::to_string(&object).unwrap());
-    }
-
-    commands
+    channels
+        .iter()
+        .map(|ch| channel_to_command(ch, subscribe))
+        .collect()
 }
 
 fn on_misc_msg(msg: &str) -> MiscMessage {
@@ -72,3 +66,19 @@ define_client!(
     serialize_command,
     on_misc_msg
 );
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_channel_to_command() {
+        assert_eq!(
+            r#"{"event":"bts:subscribe","data":{"channel":"live_trades_btcusd"}}"#,
+            super::channel_to_command("live_trades_btcusd", true)
+        );
+
+        assert_eq!(
+            r#"{"event":"bts:unsubscribe","data":{"channel":"live_trades_btcusd"}}"#,
+            super::channel_to_command("live_trades_btcusd", false)
+        );
+    }
+}

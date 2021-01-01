@@ -37,19 +37,13 @@ fn spot_channel_to_command(ch: &str, subscribe: bool) -> String {
     let channel = v[0];
     let pair = v[1];
 
-    let mut command = String::new();
-    command.push_str(
-        format!(
-            r#"{}["{}.{}","#,
-            SOCKETIO_PREFIX,
-            if subscribe { "sub" } else { "unsub" },
-            channel
-        )
-        .as_str(),
-    );
-    command.push_str(format!(r#"{{"symbol":"{}"}}]"#, pair).as_str());
-
-    command
+    format!(
+        r#"{}["{}.{}",{{"symbol":"{}"}}]"#,
+        SOCKETIO_PREFIX,
+        if subscribe { "sub" } else { "unsub" },
+        channel,
+        pair
+    )
 }
 
 fn spot_serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
@@ -68,19 +62,12 @@ fn swap_channel_to_command(ch: &str, subscribe: bool) -> String {
     let v: Vec<&str> = ch.split(CHANNEL_PAIR_DELIMITER).collect();
     let channel = v[0];
     let pair = v[1];
-
-    let mut command = String::new();
-    command.push_str(
-        format!(
-            r#"{{"method":"{}.{}","#,
-            if subscribe { "sub" } else { "unsub" },
-            channel
-        )
-        .as_str(),
-    );
-    command.push_str(format!(r#""param":{{"symbol":"{}"}}}}"#, pair).as_str());
-
-    command
+    format!(
+        r#"{{"method":"{}.{}","param":{{"symbol":"{}"}}}}"#,
+        if subscribe { "sub" } else { "unsub" },
+        channel,
+        pair
+    )
 }
 
 fn swap_serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
