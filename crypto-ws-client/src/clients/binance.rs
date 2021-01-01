@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
 use log::*;
-use serde_json::{json, Value};
+use serde_json::Value;
 
 pub(super) const EXCHANGE_NAME: &str = "Binance";
 
@@ -27,22 +27,15 @@ pub struct BinanceDeliveryWSClient<'a> {
 }
 
 fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
-    let mut object = HashMap::<&str, Value>::new();
-
-    object.insert(
-        "method",
-        serde_json::to_value(if subscribe {
+    vec![format!(
+        r#"{{"id":9527,"method":"{}","params":{}}}"#,
+        if subscribe {
             "SUBSCRIBE"
         } else {
             "UNSUBSCRIBE"
-        })
-        .unwrap(),
-    );
-
-    object.insert("params", json!(channels));
-    object.insert("id", json!(9527));
-
-    vec![serde_json::to_string(&object).unwrap()]
+        },
+        serde_json::to_string(channels).unwrap()
+    )]
 }
 
 fn on_misc_msg(msg: &str) -> MiscMessage {
@@ -88,3 +81,29 @@ define_client!(
     serialize_command,
     on_misc_msg
 );
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_one_channel() {
+        let commands = super::serialize_command(&vec!["btcusdt@aggTrade".to_string()], true);
+        assert_eq!(1, commands.len());
+        assert_eq!(
+            r#"{"id":9527,"method":"SUBSCRIBE","params":["btcusdt@aggTrade"]}"#,
+            commands[0]
+        );
+    }
+
+    #[test]
+    fn test_two_channels() {
+        let commands = super::serialize_command(
+            &vec!["btcusdt@aggTrade".to_string(), "btcusdt@ticker".to_string()],
+            true,
+        );
+        assert_eq!(1, commands.len());
+        assert_eq!(
+            r#"{"id":9527,"method":"SUBSCRIBE","params":["btcusdt@aggTrade","btcusdt@ticker"]}"#,
+            commands[0]
+        );
+    }
+}
