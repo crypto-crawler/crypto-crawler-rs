@@ -17,7 +17,6 @@ fn main() {
     let channels = vec!["btcusdt@aggTrade".to_string(), "btcusdt@depth".to_string(),];
     ws_client.subscribe(&channels);
     ws_client.run(None);
-    ws_client.close();
 }
 ```
 
