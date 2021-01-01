@@ -209,6 +209,7 @@ impl<'a> WSClientInternal<'a> {
                             None
                         }
                     }
+                    // https://www.bitmex.com/app/wsAPI#Heartbeats
                     super::bitmex::EXCHANGE_NAME => Some((5, Message::Text("ping".to_string()))),
                     _ => None,
                 };
