@@ -25,3 +25,5 @@ pub(super) fn connect_with_retry(url: &str) -> WebSocket<AutoStream> {
         }
     }
 }
+
+pub(super) const CHANNEL_PAIR_DELIMITER: char = ':';

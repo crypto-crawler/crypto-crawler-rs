@@ -1,7 +1,10 @@
 use crate::WSClient;
 use std::collections::HashMap;
 
-use super::ws_client_internal::{MiscMessage, WSClientInternal};
+use super::{
+    utils::CHANNEL_PAIR_DELIMITER,
+    ws_client_internal::{MiscMessage, WSClientInternal},
+};
 
 use log::*;
 use serde_json::Value;
@@ -19,7 +22,7 @@ pub struct KrakenSpotWSClient<'a> {
 fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
     let mut name_pairs = HashMap::<String, Vec<String>>::new();
     for s in channels {
-        let v: Vec<&str> = s.split(':').collect();
+        let v: Vec<&str> = s.split(CHANNEL_PAIR_DELIMITER).collect();
         let name = v[0];
         let pair = v[1];
         match name_pairs.get_mut(name) {
