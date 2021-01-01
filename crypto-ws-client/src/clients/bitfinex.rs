@@ -92,13 +92,13 @@ mod tests {
     #[test]
     fn test_swap_command() {
         assert_eq!(
-            r#"{"event": "subscribe", "channel": "trades", "symbol": "BTCF0:USTF0"}"#,
-            super::channel_to_command("trades:BTCF0:USTF0", true)
+            r#"{"event": "subscribe", "channel": "trades", "symbol": "tBTCF0:USTF0"}"#,
+            super::channel_to_command("trades:tBTCF0:USTF0", true)
         );
 
         assert_eq!(
-            r#"{"event": "unsubscribe", "channel": "trades", "symbol": "BTCF0:USTF0"}"#,
-            super::channel_to_command("trades:BTCF0:USTF0", false)
+            r#"{"event": "unsubscribe", "channel": "trades", "symbol": "tBTCF0:USTF0"}"#,
+            super::channel_to_command("trades:tBTCF0:USTF0", false)
         );
     }
 }

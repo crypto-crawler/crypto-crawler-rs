@@ -17,8 +17,8 @@ pub(super) enum MiscMessage {
 }
 
 pub(super) struct WSClientInternal<'a> {
-    exchange: String, // Eexchange name
-    url: String,      // Websocket base url
+    exchange: &'static str, // Eexchange name
+    url: String,            // Websocket base url
     ws_stream: WebSocketStream,
     channels: HashSet<String>,            // subscribed channels
     on_msg: Box<dyn FnMut(String) + 'a>,  // user defined message callback
@@ -28,7 +28,7 @@ pub(super) struct WSClientInternal<'a> {
 
 impl<'a> WSClientInternal<'a> {
     pub fn new(
-        exchange: &str,
+        exchange: &'static str,
         url: &str,
         on_msg: Box<dyn FnMut(String) + 'a>,
         on_misc_msg: fn(&str) -> MiscMessage,
@@ -36,7 +36,7 @@ impl<'a> WSClientInternal<'a> {
     ) -> Self {
         let stream = connect_with_retry(url);
         WSClientInternal {
-            exchange: exchange.to_string(),
+            exchange,
             url: url.to_string(),
             ws_stream: WebSocketStream::new(stream),
             on_msg,
@@ -132,11 +132,7 @@ impl<'a> WSClientInternal<'a> {
 
     pub fn run(&mut self, duration: Option<u64>) {
         // start the ping thread
-        WSClientInternal::auto_ping(
-            self.exchange.to_string(),
-            self.url.to_string(),
-            self.ws_stream.clone(),
-        );
+        WSClientInternal::auto_ping(self.exchange, self.url.to_string(), self.ws_stream.clone());
 
         let now = Instant::now();
         loop {
@@ -194,10 +190,10 @@ impl<'a> WSClientInternal<'a> {
     }
 
     // Send ping per interval
-    fn auto_ping(exchange: String, url: String, ws_stream: WebSocketStream) {
+    fn auto_ping(exchange: &'static str, url: String, ws_stream: WebSocketStream) {
         thread::spawn(move || {
             loop {
-                let ping_msg = match exchange.as_str() {
+                let ping_msg = match exchange {
                     super::mxc::EXCHANGE_NAME => {
                         if url.as_str() == super::mxc::SPOT_WEBSOCKET_URL {
                             // ping per 5 seconds
