@@ -9,8 +9,6 @@ pub(super) const EXCHANGE_NAME: &str = "BitMEX";
 
 const WEBSOCKET_URL: &str = "wss://www.bitmex.com/realtime";
 
-// TODO: https://www.bitmex.com/app/wsAPI#Heartbeats
-
 /// The WebSocket client for BitMEX, including Swap and Futures(<https://www.bitmex.com/app/wsAPI>).
 pub struct BitMEXWSClient<'a> {
     client: WSClientInternal<'a>,
