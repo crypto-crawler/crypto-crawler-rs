@@ -7,7 +7,10 @@ mod utils;
 
 #[test]
 fn binance_spot() {
-    gen_test!(BinanceSpotWSClient, &vec!["btcusdt@aggTrade".to_string()]);
+    gen_test!(
+        BinanceSpotWSClient,
+        &vec!["btcusdt@aggTrade".to_string(), "btcusdt@ticker".to_string()]
+    );
 }
 
 #[test]
