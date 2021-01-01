@@ -32,7 +32,7 @@ fn name_pairs_to_command(name: &str, pairs: &[String], subscribe: bool) -> Strin
     )
 }
 
-fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
+fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
     let mut name_pairs = HashMap::<String, Vec<String>>::new();
     for s in channels {
         let v: Vec<&str> = s.split(CHANNEL_PAIR_DELIMITER).collect();
@@ -93,7 +93,7 @@ define_client!(
     KrakenSpotWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
-    serialize_command,
+    channels_to_commands,
     on_misc_msg
 );
 

@@ -51,7 +51,7 @@ fn channel_to_command(channel: &str, subscribe: bool) -> String {
     )
 }
 
-fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
+fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
     channels
         .iter()
         .map(|ch| channel_to_command(ch, subscribe))
@@ -92,35 +92,35 @@ define_client!(
     HuobiSpotWSClient,
     EXCHANGE_NAME,
     SPOT_WEBSOCKET_URL,
-    serialize_command,
+    channels_to_commands,
     on_misc_msg
 );
 define_client!(
     HuobiFuturesWSClient,
     EXCHANGE_NAME,
     FUTURES_WEBSOCKET_URL,
-    serialize_command,
+    channels_to_commands,
     on_misc_msg
 );
 define_client!(
     HuobiCoinSwapWSClient,
     EXCHANGE_NAME,
     COIN_SWAP_WEBSOCKET_URL,
-    serialize_command,
+    channels_to_commands,
     on_misc_msg
 );
 define_client!(
     HuobiUsdtSwapWSClient,
     EXCHANGE_NAME,
     USDT_SWAP_WEBSOCKET_URL,
-    serialize_command,
+    channels_to_commands,
     on_misc_msg
 );
 define_client!(
     HuobiOptionWSClient,
     EXCHANGE_NAME,
     OPTION_WEBSOCKET_URL,
-    serialize_command,
+    channels_to_commands,
     on_misc_msg
 );
 

@@ -26,7 +26,7 @@ fn channel_to_command(channel: &str, subscribe: bool) -> String {
     )
 }
 
-fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
+fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
     channels
         .iter()
         .map(|ch| channel_to_command(ch, subscribe))
@@ -63,7 +63,7 @@ define_client!(
     BitstampSpotWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
-    serialize_command,
+    channels_to_commands,
     on_misc_msg
 );
 

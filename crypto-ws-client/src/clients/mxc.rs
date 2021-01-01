@@ -46,7 +46,7 @@ fn spot_channel_to_command(ch: &str, subscribe: bool) -> String {
     )
 }
 
-fn spot_serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
+fn spot_channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
     let mut commands = Vec::<String>::new();
 
     for s in channels.iter() {
@@ -70,7 +70,7 @@ fn swap_channel_to_command(ch: &str, subscribe: bool) -> String {
     )
 }
 
-fn swap_serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
+fn swap_channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
     let mut commands = Vec::<String>::new();
 
     for s in channels.iter() {
@@ -116,14 +116,14 @@ define_client!(
     MXCSpotWSClient,
     EXCHANGE_NAME,
     SPOT_WEBSOCKET_URL,
-    spot_serialize_command,
+    spot_channels_to_commands,
     on_misc_msg
 );
 define_client!(
     MXCSwapWSClient,
     EXCHANGE_NAME,
     SWAP_WEBSOCKET_URL,
-    swap_serialize_command,
+    swap_channels_to_commands,
     on_misc_msg
 );
 
