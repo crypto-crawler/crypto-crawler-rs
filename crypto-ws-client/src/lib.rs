@@ -29,7 +29,7 @@ pub trait WSClient<'a> {
     ///
     /// # Arguments
     ///
-    /// * `on_msg` - message processing callback function
+    /// * `on_msg` - A callback function to process original JSON messages
     /// * `url` - Optional server url, usually you don't need specify it
     fn new(on_msg: Box<dyn FnMut(String) + 'a>, url: Option<&str>) -> Self;
 
