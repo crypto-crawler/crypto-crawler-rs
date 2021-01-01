@@ -1,3 +1,4 @@
+mod ws_stream;
 #[macro_use]
 mod ws_client_internal;
 

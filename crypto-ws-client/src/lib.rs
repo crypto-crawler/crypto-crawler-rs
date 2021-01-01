@@ -9,7 +9,6 @@
 //! let channels = vec!["btcusdt@aggTrade".to_string(), "btcusdt@depth".to_string(),];
 //! ws_client.subscribe(&channels);
 //! ws_client.run(Some(2)); // run for 2 seconds
-//! ws_client.close();
 //! ```
 
 mod clients;
@@ -44,7 +43,4 @@ pub trait WSClient<'a> {
     ///
     /// * `duration` - How many seconds to run, None means infinite.
     fn run(&mut self, duration: Option<u64>);
-
-    /// Close the client.
-    fn close(&mut self);
 }
