@@ -43,17 +43,19 @@ pub struct HuobiOptionWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
+fn channel_to_command(channel: &str, subscribe: bool) -> String {
+    format!(
+        r#"{{"{}":"{}","id":"crypto-ws-client"}}"#,
+        if subscribe { "sub" } else { "unsub" },
+        channel
+    )
+}
+
 fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
     channels
         .iter()
-        .map(|ch| {
-            let mut command = HashMap::new();
-            command.insert(if subscribe { "sub" } else { "unsub" }, ch.as_str());
-            command.insert("id", "crypto-ws-client");
-            command
-        })
-        .map(|m| serde_json::to_string(&m).unwrap())
-        .collect::<Vec<String>>()
+        .map(|ch| channel_to_command(ch, subscribe))
+        .collect()
 }
 
 fn on_misc_msg(msg: &str) -> MiscMessage {
@@ -121,3 +123,19 @@ define_client!(
     serialize_command,
     on_misc_msg
 );
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_channel_to_command() {
+        assert_eq!(
+            r#"{"sub":"market.btcusdt.trade.detail","id":"crypto-ws-client"}"#,
+            super::channel_to_command("market.btcusdt.trade.detail", true)
+        );
+
+        assert_eq!(
+            r#"{"unsub":"market.btcusdt.trade.detail","id":"crypto-ws-client"}"#,
+            super::channel_to_command("market.btcusdt.trade.detail", false)
+        );
+    }
+}

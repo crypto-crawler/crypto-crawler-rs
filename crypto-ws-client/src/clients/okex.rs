@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
 
 use log::*;
-use serde_json::{json, Value};
+use serde_json::Value;
 
 pub(super) const EXCHANGE_NAME: &str = "OKEx";
 
@@ -16,21 +16,15 @@ pub struct OKExWSClient<'a> {
 }
 
 fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
-    let mut object = HashMap::<&str, Value>::new();
-
-    object.insert(
-        "op",
-        serde_json::to_value(if subscribe {
+    vec![format!(
+        r#"{{"op":"{}","args":{}}}"#,
+        if subscribe {
             "subscribe"
         } else {
             "unsubscribe"
-        })
-        .unwrap(),
-    );
-
-    object.insert("args", json!(channels));
-
-    vec![serde_json::to_string(&object).unwrap()]
+        },
+        serde_json::to_string(channels).unwrap()
+    )]
 }
 
 fn on_misc_msg(msg: &str) -> MiscMessage {
@@ -63,3 +57,32 @@ define_client!(
     serialize_command,
     on_misc_msg
 );
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_one_channel() {
+        let commands = super::serialize_command(&vec!["spot/trade:BTC-USDT".to_string()], true);
+        assert_eq!(1, commands.len());
+        assert_eq!(
+            r#"{"op":"subscribe","args":["spot/trade:BTC-USDT"]}"#,
+            commands[0]
+        );
+    }
+
+    #[test]
+    fn test_two_channel() {
+        let commands = super::serialize_command(
+            &vec![
+                "spot/trade:BTC-USDT".to_string(),
+                "ticker/trade:BTC-USDT".to_string(),
+            ],
+            true,
+        );
+        assert_eq!(1, commands.len());
+        assert_eq!(
+            r#"{"op":"subscribe","args":["spot/trade:BTC-USDT","ticker/trade:BTC-USDT"]}"#,
+            commands[0]
+        );
+    }
+}

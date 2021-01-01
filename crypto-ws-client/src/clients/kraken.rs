@@ -19,6 +19,19 @@ pub struct KrakenSpotWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
+fn name_pairs_to_command(name: &str, pairs: &[String], subscribe: bool) -> String {
+    format!(
+        r#"{{"event":"{}","pair":{},"subscription":{{"name":"{}"}}}}"#,
+        if subscribe {
+            "subscribe"
+        } else {
+            "unsubscribe"
+        },
+        serde_json::to_string(pairs).unwrap(),
+        name
+    )
+}
+
 fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
     let mut name_pairs = HashMap::<String, Vec<String>>::new();
     for s in channels {
@@ -36,23 +49,7 @@ fn serialize_command(channels: &[String], subscribe: bool) -> Vec<String> {
     let mut commands = Vec::<String>::new();
 
     for (name, pairs) in name_pairs.iter() {
-        let mut command = HashMap::<&str, Value>::new();
-        command.insert(
-            "event",
-            serde_json::to_value(if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            })
-            .unwrap(),
-        );
-        command.insert("pair", serde_json::to_value(pairs).unwrap());
-
-        let mut subscription = HashMap::<&str, &str>::new();
-        subscription.insert("name", name);
-        command.insert("subscription", serde_json::to_value(subscription).unwrap());
-
-        commands.push(serde_json::to_string(&command).unwrap());
+        commands.push(name_pairs_to_command(name, pairs, subscribe));
     }
 
     commands
@@ -99,3 +96,40 @@ define_client!(
     serialize_command,
     on_misc_msg
 );
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_one_pair() {
+        assert_eq!(
+            r#"{"event":"subscribe","pair":["XBT/USD"],"subscription":{"name":"trade"}}"#,
+            super::name_pairs_to_command("trade", &vec!["XBT/USD".to_string()], true)
+        );
+
+        assert_eq!(
+            r#"{"event":"unsubscribe","pair":["XBT/USD"],"subscription":{"name":"trade"}}"#,
+            super::name_pairs_to_command("trade", &vec!["XBT/USD".to_string()], false)
+        );
+    }
+
+    #[test]
+    fn test_two_pairs() {
+        assert_eq!(
+            r#"{"event":"subscribe","pair":["XBT/USD","ETH/USD"],"subscription":{"name":"trade"}}"#,
+            super::name_pairs_to_command(
+                "trade",
+                &vec!["XBT/USD".to_string(), "ETH/USD".to_string()],
+                true
+            )
+        );
+
+        assert_eq!(
+            r#"{"event":"unsubscribe","pair":["XBT/USD","ETH/USD"],"subscription":{"name":"trade"}}"#,
+            super::name_pairs_to_command(
+                "trade",
+                &vec!["XBT/USD".to_string(), "ETH/USD".to_string()],
+                false
+            )
+        );
+    }
+}
