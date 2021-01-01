@@ -1,16 +1,13 @@
 use super::utils::connect_with_retry;
+use super::ws_stream::WebSocketStream;
 
 use std::io::prelude::*;
 use std::time::{Duration, Instant};
-use std::{
-    collections::HashSet,
-    sync::mpsc::{self, Receiver, Sender},
-    thread,
-};
+use std::{collections::HashSet, thread};
 
 use flate2::read::{DeflateDecoder, GzDecoder};
 use log::*;
-use tungstenite::{client::AutoStream, Error, Message, WebSocket};
+use tungstenite::{Error, Message};
 
 pub(super) enum MiscMessage {
     WebSocket(Message), // WebSocket message that needs to be sent to the server
@@ -22,15 +19,11 @@ pub(super) enum MiscMessage {
 pub(super) struct WSClientInternal<'a> {
     exchange: String, // Eexchange name
     url: String,      // Websocket base url
-    ws_stream: WebSocket<AutoStream>,
+    ws_stream: WebSocketStream,
     channels: HashSet<String>,            // subscribed channels
     on_msg: Box<dyn FnMut(String) + 'a>,  // user defined message callback
     on_misc_msg: fn(&str) -> MiscMessage, // handle misc messages
     serialize_command: fn(&[String], bool) -> Vec<String>,
-
-    // for ping thread
-    sender: Sender<Message>,
-    receiver: Receiver<Message>,
 }
 
 impl<'a> WSClientInternal<'a> {
@@ -41,18 +34,15 @@ impl<'a> WSClientInternal<'a> {
         on_misc_msg: fn(&str) -> MiscMessage,
         serialize_command: fn(&[String], bool) -> Vec<String>,
     ) -> Self {
-        let (sender, receiver) = mpsc::channel::<Message>();
-        let ws_stream = connect_with_retry(url);
+        let stream = connect_with_retry(url);
         WSClientInternal {
             exchange: exchange.to_string(),
             url: url.to_string(),
-            ws_stream,
+            ws_stream: WebSocketStream::new(stream),
             on_msg,
             on_misc_msg,
             channels: HashSet::new(),
             serialize_command,
-            sender,
-            receiver,
         }
     }
 
@@ -66,10 +56,7 @@ impl<'a> WSClientInternal<'a> {
         if !diff.is_empty() {
             let commands = (self.serialize_command)(channels, true);
             commands.into_iter().for_each(|command| {
-                let res = self.ws_stream.write_message(Message::Text(command));
-                if let Err(err) = res {
-                    error!("{}", err);
-                }
+                self.ws_stream.write_message(Message::Text(command));
             });
         }
     }
@@ -84,10 +71,7 @@ impl<'a> WSClientInternal<'a> {
         if !diff.is_empty() {
             let commands = (self.serialize_command)(channels, false);
             commands.into_iter().for_each(|command| {
-                let res = self.ws_stream.write_message(Message::Text(command));
-                if let Err(err) = res {
-                    error!("{}", err);
-                }
+                self.ws_stream.write_message(Message::Text(command));
             });
         }
     }
@@ -95,7 +79,7 @@ impl<'a> WSClientInternal<'a> {
     // reconnect and subscribe all channels
     fn reconnect(&mut self) {
         warn!("Reconnecting to {}", &self.url);
-        self.ws_stream = connect_with_retry(&self.url);
+        self.ws_stream = WebSocketStream::new(connect_with_retry(self.url.as_str()));
         let channels = self
             .channels
             .iter()
@@ -104,10 +88,7 @@ impl<'a> WSClientInternal<'a> {
         if !channels.is_empty() {
             let commands = (self.serialize_command)(&channels, true);
             commands.into_iter().for_each(|command| {
-                let resp = self.ws_stream.write_message(Message::Text(command));
-                if let Err(err) = resp {
-                    error!("{}", err);
-                }
+                self.ws_stream.write_message(Message::Text(command));
             });
         }
     }
@@ -125,9 +106,7 @@ impl<'a> WSClientInternal<'a> {
                 self.reconnect();
             }
             MiscMessage::WebSocket(ws_msg) => {
-                if let Err(err) = self.ws_stream.write_message(ws_msg) {
-                    error!("{}", err);
-                }
+                self.ws_stream.write_message(ws_msg);
             }
             MiscMessage::Normal => {
                 if self.exchange == super::mxc::EXCHANGE_NAME
@@ -156,7 +135,7 @@ impl<'a> WSClientInternal<'a> {
         WSClientInternal::auto_ping(
             self.exchange.to_string(),
             self.url.to_string(),
-            self.sender.clone(),
+            self.ws_stream.clone(),
         );
 
         let now = Instant::now();
@@ -206,14 +185,6 @@ impl<'a> WSClientInternal<'a> {
                 },
             }
 
-            // Exchange specific ping logic
-            if let Ok(ping) = self.receiver.try_recv() {
-                let res = self.ws_stream.write_message(ping);
-                if let Err(err) = res {
-                    error!("{}, {}", err, self.url);
-                }
-            }
-
             if let Some(seconds) = duration {
                 if now.elapsed() > Duration::from_secs(seconds) {
                     break;
@@ -222,15 +193,8 @@ impl<'a> WSClientInternal<'a> {
         }
     }
 
-    pub fn close(&mut self) {
-        let res = self.ws_stream.close(None);
-        if let Err(err) = res {
-            error!("{}", err);
-        }
-    }
-
     // Send ping per interval
-    fn auto_ping(exchange: String, url: String, sender: Sender<Message>) {
+    fn auto_ping(exchange: String, url: String, ws_stream: WebSocketStream) {
         thread::spawn(move || {
             loop {
                 let ping_msg = match exchange.as_str() {
@@ -251,7 +215,7 @@ impl<'a> WSClientInternal<'a> {
 
                 match ping_msg {
                     Some(msg) => {
-                        let _ = sender.send(msg.1);
+                        ws_stream.write_message(msg.1);
                         thread::sleep(Duration::from_secs(msg.0));
                     }
                     None => return,
@@ -291,10 +255,6 @@ macro_rules! define_client {
 
             fn run(&mut self, duration: Option<u64>) {
                 self.client.run(duration);
-            }
-
-            fn close(&mut self) {
-                self.client.close();
             }
         }
     };
