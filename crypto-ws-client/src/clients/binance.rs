@@ -62,18 +62,6 @@ impl<'a> BinanceWSClient<'a> {
 
         MiscMessage::Normal
     }
-
-    fn subscribe(&mut self, channels: &[String]) {
-        self.client.subscribe(channels);
-    }
-
-    fn unsubscribe(&mut self, channels: &[String]) {
-        self.client.unsubscribe(channels);
-    }
-
-    fn run(&mut self, duration: Option<u64>) {
-        self.client.run(duration);
-    }
 }
 
 /// Define market specific client.
@@ -91,15 +79,15 @@ macro_rules! define_market_client {
             }
 
             fn subscribe(&mut self, channels: &[String]) {
-                self.client.subscribe(channels);
+                self.client.client.subscribe(channels);
             }
 
             fn unsubscribe(&mut self, channels: &[String]) {
-                self.client.unsubscribe(channels);
+                self.client.client.unsubscribe(channels);
             }
 
             fn run(&mut self, duration: Option<u64>) {
-                self.client.run(duration);
+                self.client.client.run(duration);
             }
         }
     };
