@@ -1,17 +1,25 @@
-use crypto_ws_client::{KrakenSpotWSClient, WSClient};
+use crypto_ws_client::{KrakenWSClient, Trade, WSClient};
 
 #[macro_use]
 mod utils;
 
 #[test]
-fn kraken_spot() {
+fn subscribe() {
     gen_test_subscribe!(
-        KrakenSpotWSClient,
+        KrakenWSClient,
         &vec![
             "trade:XBT/USD".to_string(),
             "ticker:XBT/USD".to_string(),
             "spread:XBT/USD".to_string(),
             "book:XBT/USD".to_string()
         ]
+    );
+}
+
+#[test]
+fn subscribe_trade() {
+    gen_test_subscribe_trade!(
+        KrakenWSClient,
+        &vec!["XBT/USD".to_string(), "ETH/USD".to_string()]
     );
 }
