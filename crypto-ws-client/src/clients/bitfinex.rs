@@ -12,7 +12,12 @@ pub(super) const EXCHANGE_NAME: &str = "Bitfinex";
 
 const WEBSOCKET_URL: &str = "wss://api-pub.bitfinex.com/ws/2";
 
-/// The WebSocket client for Bitfinex, including all markets(<https://docs.bitfinex.com/docs/ws-general>).
+/// The WebSocket client for Bitfinex, including all markets.
+///
+/// * WebSocket API doc: <https://docs.bitfinex.com/docs/ws-general>
+/// * Spot: <https://trading.bitfinex.com/trading>
+/// * Swap: <https://trading.bitfinex.com/t/BTCF0:USTF0>
+/// * Funding: <https://trading.bitfinex.com/funding>
 pub struct BitfinexWSClient<'a> {
     client: WSClientInternal<'a>,
 }
