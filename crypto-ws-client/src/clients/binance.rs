@@ -16,40 +16,6 @@ struct BinanceWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
-fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-    vec![format!(
-        r#"{{"id":9527,"method":"{}","params":{}}}"#,
-        if subscribe {
-            "SUBSCRIBE"
-        } else {
-            "UNSUBSCRIBE"
-        },
-        serde_json::to_string(channels).unwrap()
-    )]
-}
-
-fn on_misc_msg(msg: &str) -> MiscMessage {
-    let resp = serde_json::from_str::<HashMap<String, Value>>(&msg);
-    if resp.is_err() {
-        error!("{} is not a JSON string, {}", msg, EXCHANGE_NAME);
-        return MiscMessage::Misc;
-    }
-    let obj = resp.unwrap();
-
-    if let Some(result) = obj.get("result") {
-        if serde_json::Value::Null == *result {
-            return MiscMessage::Misc;
-        }
-    }
-
-    if !obj.contains_key("stream") || !obj.contains_key("data") {
-        warn!("Received {} from {}", msg, EXCHANGE_NAME);
-        return MiscMessage::Misc;
-    }
-
-    MiscMessage::Normal
-}
-
 impl<'a> BinanceWSClient<'a> {
     fn new(url: &str, on_msg: Box<dyn FnMut(String) + 'a>) -> Self {
         BinanceWSClient {
@@ -57,10 +23,44 @@ impl<'a> BinanceWSClient<'a> {
                 EXCHANGE_NAME,
                 url,
                 on_msg,
-                on_misc_msg,
-                channels_to_commands,
+                Self::on_misc_msg,
+                Self::channels_to_commands,
             ),
         }
+    }
+
+    fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
+        vec![format!(
+            r#"{{"id":9527,"method":"{}","params":{}}}"#,
+            if subscribe {
+                "SUBSCRIBE"
+            } else {
+                "UNSUBSCRIBE"
+            },
+            serde_json::to_string(channels).unwrap()
+        )]
+    }
+
+    fn on_misc_msg(msg: &str) -> MiscMessage {
+        let resp = serde_json::from_str::<HashMap<String, Value>>(&msg);
+        if resp.is_err() {
+            error!("{} is not a JSON string, {}", msg, EXCHANGE_NAME);
+            return MiscMessage::Misc;
+        }
+        let obj = resp.unwrap();
+
+        if let Some(result) = obj.get("result") {
+            if serde_json::Value::Null == *result {
+                return MiscMessage::Misc;
+            }
+        }
+
+        if !obj.contains_key("stream") || !obj.contains_key("data") {
+            warn!("Received {} from {}", msg, EXCHANGE_NAME);
+            return MiscMessage::Misc;
+        }
+
+        MiscMessage::Normal
     }
 
     fn subscribe(&mut self, channels: &[String]) {
@@ -146,7 +146,10 @@ define_market_client!(BinanceInverseSwapWSClient, DELIVERY_WEBSOCKET_URL);
 mod tests {
     #[test]
     fn test_one_channel() {
-        let commands = super::channels_to_commands(&vec!["btcusdt@aggTrade".to_string()], true);
+        let commands = super::BinanceWSClient::channels_to_commands(
+            &vec!["btcusdt@aggTrade".to_string()],
+            true,
+        );
         assert_eq!(1, commands.len());
         assert_eq!(
             r#"{"id":9527,"method":"SUBSCRIBE","params":["btcusdt@aggTrade"]}"#,
@@ -156,7 +159,7 @@ mod tests {
 
     #[test]
     fn test_two_channels() {
-        let commands = super::channels_to_commands(
+        let commands = super::BinanceWSClient::channels_to_commands(
             &vec!["btcusdt@aggTrade".to_string(), "btcusdt@ticker".to_string()],
             true,
         );
