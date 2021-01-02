@@ -11,6 +11,8 @@ macro_rules! gen_test_subscribe {
     };
 }
 
+// TODO: this macro is actually being used
+#[allow(unused_macros)]
 macro_rules! gen_test_subscribe_trade {
     ($client:ident, $pairs:expr) => {
         let mut messages = Vec::<String>::new();

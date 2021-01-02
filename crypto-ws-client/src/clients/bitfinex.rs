@@ -1,4 +1,4 @@
-use crate::WSClient;
+use crate::{Trade, WSClient};
 use std::collections::HashMap;
 
 use super::{
@@ -69,6 +69,16 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     }
 
     MiscMessage::Misc
+}
+
+impl<'a> Trade for BitfinexWSClient<'a> {
+    fn subscribe_trade(&mut self, pairs: &[String]) {
+        let channels = pairs
+            .iter()
+            .map(|pair| format!("trades:t{}", pair))
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
+    }
 }
 
 define_client!(
