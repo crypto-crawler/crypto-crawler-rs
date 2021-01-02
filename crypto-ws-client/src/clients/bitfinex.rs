@@ -73,9 +73,11 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
 
 impl<'a> Trade for BitfinexWSClient<'a> {
     fn subscribe_trade(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel = |pair: &String| format!("trades:t{}", pair);
+
         let channels = pairs
             .iter()
-            .map(|pair| format!("trades:t{}", pair))
+            .map(pair_to_raw_channel)
             .collect::<Vec<String>>();
         self.client.subscribe(&channels);
     }
