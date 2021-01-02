@@ -3,7 +3,7 @@ mod utils;
 
 #[cfg(test)]
 mod spot {
-    use crypto_ws_client::{BinanceSpotWSClient, WSClient};
+    use crypto_ws_client::{BinanceSpotWSClient, Trade, WSClient};
 
     #[test]
     fn test_subscribe() {
@@ -12,11 +12,19 @@ mod spot {
             &vec!["btcusdt@aggTrade".to_string(), "btcusdt@ticker".to_string()]
         );
     }
+
+    #[test]
+    fn test_subscribe_trade() {
+        gen_test_subscribe_trade!(
+            BinanceSpotWSClient,
+            &vec!["btcusdt".to_string(), "ethusdt".to_string()]
+        );
+    }
 }
 
 #[cfg(test)]
 mod future {
-    use crypto_ws_client::{BinanceFutureWSClient, WSClient};
+    use crypto_ws_client::{BinanceFutureWSClient, Trade, WSClient};
 
     #[test]
     fn test_subscribe() {
@@ -25,11 +33,19 @@ mod future {
             &vec!["btcusd_210625@aggTrade".to_string()]
         );
     }
+
+    #[test]
+    fn test_subscribe_trade() {
+        gen_test_subscribe_trade!(
+            BinanceFutureWSClient,
+            &vec!["btcusd_210625".to_string(), "ethusd_210625".to_string()]
+        );
+    }
 }
 
 #[cfg(test)]
 mod inverse_swap {
-    use crypto_ws_client::{BinanceInverseSwapWSClient, WSClient};
+    use crypto_ws_client::{BinanceInverseSwapWSClient, Trade, WSClient};
 
     #[test]
     fn test_subscribe() {
@@ -38,17 +54,33 @@ mod inverse_swap {
             &vec!["btcusd_perp@aggTrade".to_string()]
         );
     }
+
+    #[test]
+    fn test_subscribe_trade() {
+        gen_test_subscribe_trade!(
+            BinanceInverseSwapWSClient,
+            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
+        );
+    }
 }
 
 #[cfg(test)]
 mod linear_swap {
-    use crypto_ws_client::{BinanceLinearSwapWSClient, WSClient};
+    use crypto_ws_client::{BinanceLinearSwapWSClient, Trade, WSClient};
 
     #[test]
     fn test_subscribe() {
         gen_test_subscribe!(
             BinanceLinearSwapWSClient,
             &vec!["btcusdt@aggTrade".to_string()]
+        );
+    }
+
+    #[test]
+    fn test_subscribe_trade() {
+        gen_test_subscribe_trade!(
+            BinanceLinearSwapWSClient,
+            &vec!["btcusdt".to_string(), "ethusdt".to_string()]
         );
     }
 }
