@@ -12,7 +12,12 @@ pub(super) const EXCHANGE_NAME: &str = "BitMEX";
 
 const WEBSOCKET_URL: &str = "wss://www.bitmex.com/realtime";
 
-/// The WebSocket client for BitMEX, including Swap and Futures(<https://www.bitmex.com/app/wsAPI>).
+/// The WebSocket client for BitMEX.
+///
+/// BitMEX has Swap and Future markets.
+///
+///   * WebSocket API doc: <https://www.bitmex.com/app/wsAPI>
+///   * Trading at: <https://www.bitmex.com/app/trade/>
 pub struct BitMEXWSClient<'a> {
     client: WSClientInternal<'a>,
 }
@@ -49,6 +54,7 @@ impl<'a> Trade for BitMEXWSClient<'a> {
     fn subscribe_trade(&mut self, pairs: &[String]) {
         let pair_to_raw_channel =
             |pair: &String| format!("trade{}{}", CHANNEL_PAIR_DELIMITER, pair);
+
         let channels = pairs
             .iter()
             .map(pair_to_raw_channel)

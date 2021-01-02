@@ -66,9 +66,11 @@ impl<'a> BinanceWSClient<'a> {
 
 impl<'a> Trade for BinanceWSClient<'a> {
     fn subscribe_trade(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel = |pair: &String| format!("{}@aggTrade", pair);
+
         let channels = pairs
             .iter()
-            .map(|pair| format!("{}@aggTrade", pair))
+            .map(pair_to_raw_channel)
             .collect::<Vec<String>>();
         self.client.subscribe(&channels);
     }
