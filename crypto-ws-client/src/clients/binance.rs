@@ -1,4 +1,4 @@
-use crate::WSClient;
+use crate::{Trade, WSClient};
 use std::collections::HashMap;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
@@ -64,33 +64,14 @@ impl<'a> BinanceWSClient<'a> {
     }
 }
 
-/// Define market specific client.
-macro_rules! define_market_client {
-    ($struct_name:ident, $default_url:ident) => {
-        impl<'a> WSClient<'a> for $struct_name<'a> {
-            fn new(on_msg: Box<dyn FnMut(String) + 'a>, url: Option<&str>) -> Self {
-                let real_url = match url {
-                    Some(endpoint) => endpoint,
-                    None => $default_url,
-                };
-                $struct_name {
-                    client: BinanceWSClient::new(real_url, on_msg),
-                }
-            }
-
-            fn subscribe(&mut self, channels: &[String]) {
-                self.client.client.subscribe(channels);
-            }
-
-            fn unsubscribe(&mut self, channels: &[String]) {
-                self.client.client.unsubscribe(channels);
-            }
-
-            fn run(&mut self, duration: Option<u64>) {
-                self.client.client.run(duration);
-            }
-        }
-    };
+impl<'a> Trade for BinanceWSClient<'a> {
+    fn subscribe_trade(&mut self, pairs: &[String]) {
+        let channels = pairs
+            .iter()
+            .map(|pair| format!("{}@aggTrade", pair))
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
+    }
 }
 
 /// Binance Spot market.
@@ -125,10 +106,54 @@ pub struct BinanceInverseSwapWSClient<'a> {
     client: BinanceWSClient<'a>,
 }
 
+/// Define market specific client.
+macro_rules! define_market_client {
+    ($struct_name:ident, $default_url:ident) => {
+        impl<'a> WSClient<'a> for $struct_name<'a> {
+            fn new(on_msg: Box<dyn FnMut(String) + 'a>, url: Option<&str>) -> Self {
+                let real_url = match url {
+                    Some(endpoint) => endpoint,
+                    None => $default_url,
+                };
+                $struct_name {
+                    client: BinanceWSClient::new(real_url, on_msg),
+                }
+            }
+
+            fn subscribe(&mut self, channels: &[String]) {
+                self.client.client.subscribe(channels);
+            }
+
+            fn unsubscribe(&mut self, channels: &[String]) {
+                self.client.client.unsubscribe(channels);
+            }
+
+            fn run(&mut self, duration: Option<u64>) {
+                self.client.client.run(duration);
+            }
+        }
+    };
+}
+
 define_market_client!(BinanceSpotWSClient, SPOT_WEBSOCKET_URL);
 define_market_client!(BinanceFutureWSClient, DELIVERY_WEBSOCKET_URL);
 define_market_client!(BinanceLinearSwapWSClient, FUTURES_WEBSOCKET_URL);
 define_market_client!(BinanceInverseSwapWSClient, DELIVERY_WEBSOCKET_URL);
+
+macro_rules! impl_trade {
+    ($struct_name:ident) => {
+        impl<'a> Trade for $struct_name<'a> {
+            fn subscribe_trade(&mut self, pairs: &[String]) {
+                self.client.subscribe_trade(pairs);
+            }
+        }
+    };
+}
+
+impl_trade!(BinanceSpotWSClient);
+impl_trade!(BinanceFutureWSClient);
+impl_trade!(BinanceLinearSwapWSClient);
+impl_trade!(BinanceInverseSwapWSClient);
 
 #[cfg(test)]
 mod tests {

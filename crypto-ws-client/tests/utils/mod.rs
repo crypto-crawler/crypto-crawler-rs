@@ -10,3 +10,16 @@ macro_rules! gen_test_subscribe {
         assert!(!messages.is_empty());
     };
 }
+
+macro_rules! gen_test_subscribe_trade {
+    ($client:ident, $pairs:expr) => {
+        let mut messages = Vec::<String>::new();
+        {
+            let on_msg = |msg: String| messages.push(msg);
+            let mut ws_client = $client::new(Box::new(on_msg), None);
+            ws_client.subscribe_trade($pairs);
+            ws_client.run(Some(1)); // run for 1 second
+        }
+        assert!(!messages.is_empty());
+    };
+}
