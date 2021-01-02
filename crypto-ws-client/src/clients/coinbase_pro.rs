@@ -1,4 +1,4 @@
-use crate::WSClient;
+use crate::{Trade, WSClient};
 use std::collections::HashMap;
 
 use super::{
@@ -13,7 +13,12 @@ pub(super) const EXCHANGE_NAME: &str = "CoinbasePro";
 
 const WEBSOCKET_URL: &str = "wss://ws-feed.pro.coinbase.com";
 
-/// The WebSocket client for CoinbasePro, which has only Spot market for now(<https://docs.pro.coinbase.com/>).
+/// The WebSocket client for CoinbasePro.
+///
+/// CoinbasePro has only Spot market.
+///
+///   * WebSocket API doc: <https://docs.pro.coinbase.com/>
+///   * Trading at: <https://pro.coinbase.com/>
 pub struct CoinbaseProWSClient<'a> {
     client: WSClientInternal<'a>,
 }
@@ -84,6 +89,19 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
             MiscMessage::Misc
         }
         _ => MiscMessage::Normal,
+    }
+}
+
+impl<'a> Trade for CoinbaseProWSClient<'a> {
+    fn subscribe_trade(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel =
+            |pair: &String| format!("matches{}{}", CHANNEL_PAIR_DELIMITER, pair);
+
+        let channels = pairs
+            .iter()
+            .map(pair_to_raw_channel)
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
     }
 }
 
