@@ -1,4 +1,4 @@
-use crate::WSClient;
+use crate::{Trade, WSClient};
 use std::collections::HashMap;
 
 use super::{
@@ -14,8 +14,14 @@ pub(super) const EXCHANGE_NAME: &str = "Kraken";
 
 const WEBSOCKET_URL: &str = "wss://ws.kraken.com";
 
-/// The WebSocket client for Kraken Spot market(<https://docs.kraken.com/websockets/>).
-pub struct KrakenSpotWSClient<'a> {
+/// The WebSocket client for Kraken.
+///
+/// Kraken has only Spot market.
+///
+///   * WebSocket API doc: <https://docs.kraken.com/websockets/>
+///   * Trading at: <https://trade.kraken.com/>
+
+pub struct KrakenWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
@@ -89,8 +95,21 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     }
 }
 
+impl<'a> Trade for KrakenWSClient<'a> {
+    fn subscribe_trade(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel =
+            |pair: &String| format!("trade{}{}", CHANNEL_PAIR_DELIMITER, pair);
+
+        let channels = pairs
+            .iter()
+            .map(pair_to_raw_channel)
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
+    }
+}
+
 define_client!(
-    KrakenSpotWSClient,
+    KrakenWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
     channels_to_commands,
