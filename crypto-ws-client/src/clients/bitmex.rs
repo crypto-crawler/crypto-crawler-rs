@@ -1,7 +1,10 @@
-use crate::WSClient;
+use crate::{Trade, WSClient};
 use std::collections::HashMap;
 
-use super::ws_client_internal::{MiscMessage, WSClientInternal};
+use super::{
+    utils::CHANNEL_PAIR_DELIMITER,
+    ws_client_internal::{MiscMessage, WSClientInternal},
+};
 use log::*;
 use serde_json::Value;
 
@@ -39,6 +42,18 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
         MiscMessage::Misc
     } else {
         MiscMessage::Normal
+    }
+}
+
+impl<'a> Trade for BitMEXWSClient<'a> {
+    fn subscribe_trade(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel =
+            |pair: &String| format!("trade{}{}", CHANNEL_PAIR_DELIMITER, pair);
+        let channels = pairs
+            .iter()
+            .map(pair_to_raw_channel)
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
     }
 }
 
