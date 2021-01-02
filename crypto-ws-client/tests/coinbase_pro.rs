@@ -5,7 +5,7 @@ mod utils;
 
 #[test]
 fn coinbase_pro_spot() {
-    gen_test!(
+    gen_test_subscribe!(
         CoinbaseProWSClient,
         &vec![
             "matches:BTC-USD".to_string(),

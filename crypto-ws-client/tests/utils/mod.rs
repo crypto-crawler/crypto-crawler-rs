@@ -1,4 +1,4 @@
-macro_rules! gen_test {
+macro_rules! gen_test_subscribe {
     ($client:ident, $channels:expr) => {
         let mut messages = Vec::<String>::new();
         {

@@ -8,7 +8,7 @@ mod utils;
 
 #[test]
 fn binance_spot() {
-    gen_test!(
+    gen_test_subscribe!(
         BinanceSpotWSClient,
         &vec!["btcusdt@aggTrade".to_string(), "btcusdt@ticker".to_string()]
     );
@@ -16,7 +16,7 @@ fn binance_spot() {
 
 #[test]
 fn binance_futures() {
-    gen_test!(
+    gen_test_subscribe!(
         BinanceFutureWSClient,
         &vec!["btcusd_210625@aggTrade".to_string()]
     );
@@ -24,7 +24,7 @@ fn binance_futures() {
 
 #[test]
 fn binance_inverse_swap() {
-    gen_test!(
+    gen_test_subscribe!(
         BinanceInverseSwapWSClient,
         &vec!["btcusd_perp@aggTrade".to_string()]
     );
@@ -32,7 +32,7 @@ fn binance_inverse_swap() {
 
 #[test]
 fn binance_linear_swap() {
-    gen_test!(
+    gen_test_subscribe!(
         BinanceLinearSwapWSClient,
         &vec!["btcusdt@aggTrade".to_string()]
     );

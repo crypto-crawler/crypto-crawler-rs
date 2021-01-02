@@ -56,3 +56,7 @@ pub trait WSClient<'a> {
     /// * `duration` - How many seconds to run, None means infinite.
     fn run(&mut self, duration: Option<u64>);
 }
+
+pub trait Trade {
+    fn subscribe_trade(&mut self, pairs: &[String]);
+}

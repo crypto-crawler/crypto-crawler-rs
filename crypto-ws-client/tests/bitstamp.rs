@@ -5,7 +5,7 @@ mod utils;
 
 #[test]
 fn bitstamp_spot() {
-    gen_test!(
+    gen_test_subscribe!(
         BitstampSpotWSClient,
         &vec![
             "live_trades_btcusd".to_string(),
