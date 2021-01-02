@@ -11,18 +11,35 @@ const SPOT_WEBSOCKET_URL: &str = "wss://stream.binance.com:9443/stream";
 const FUTURES_WEBSOCKET_URL: &str = "wss://fstream.binance.com/stream";
 const DELIVERY_WEBSOCKET_URL: &str = "wss://dstream.binance.com/stream";
 
-/// The WebSocket client for Binance Spot market(<https://binance-docs.github.io/apidocs/spot/en/>).
+/// Binance Spot market.
+///
+///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/spot/en/>
+///   * Trading at: <https://www.binance.com/en/trade/BTC_USDT>
 pub struct BinanceSpotWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
-/// The WebSocket client for Binance USDT Futures market(<https://binance-docs.github.io/apidocs/futures/en/>).
-pub struct BinanceFuturesWSClient<'a> {
+/// Binance Coin-margined Future market.
+///
+///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/delivery/en/>
+///   * Trading at: <https://www.binance.com/en/delivery/btcusd_quarter>
+pub struct BinanceFutureWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
-/// The WebSocket client for Binance Coin Dilivery market(<https://binance-docs.github.io/apidocs/delivery/en/>).
-pub struct BinanceDeliveryWSClient<'a> {
+/// Binance USDT-margined Perpetual Swap market.
+///
+///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/futures/en/>
+///   * Trading at: <https://www.binance.com/en/futures/BTC_USDT>
+pub struct BinanceLinearSwapWSClient<'a> {
+    client: WSClientInternal<'a>,
+}
+
+/// Binance Coin-margined Perpetual Swap market
+///
+///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/delivery/en/>
+///   * Trading at: <https://www.binance.com/en/delivery/btcusd_perpetual>
+pub struct BinanceInverseSwapWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
@@ -68,14 +85,21 @@ define_client!(
     on_misc_msg
 );
 define_client!(
-    BinanceFuturesWSClient,
+    BinanceFutureWSClient,
+    EXCHANGE_NAME,
+    DELIVERY_WEBSOCKET_URL,
+    channels_to_commands,
+    on_misc_msg
+);
+define_client!(
+    BinanceLinearSwapWSClient,
     EXCHANGE_NAME,
     FUTURES_WEBSOCKET_URL,
     channels_to_commands,
     on_misc_msg
 );
 define_client!(
-    BinanceDeliveryWSClient,
+    BinanceInverseSwapWSClient,
     EXCHANGE_NAME,
     DELIVERY_WEBSOCKET_URL,
     channels_to_commands,

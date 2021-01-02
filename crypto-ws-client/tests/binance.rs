@@ -1,5 +1,6 @@
 use crypto_ws_client::{
-    BinanceDeliveryWSClient, BinanceFuturesWSClient, BinanceSpotWSClient, WSClient,
+    BinanceFutureWSClient, BinanceInverseSwapWSClient, BinanceLinearSwapWSClient,
+    BinanceSpotWSClient, WSClient,
 };
 
 #[macro_use]
@@ -16,15 +17,23 @@ fn binance_spot() {
 #[test]
 fn binance_futures() {
     gen_test!(
-        BinanceFuturesWSClient,
-        &vec!["btcusdt@aggTrade".to_string()]
+        BinanceFutureWSClient,
+        &vec!["btcusd_210625@aggTrade".to_string()]
     );
 }
 
 #[test]
-fn binance_delivery() {
+fn binance_inverse_swap() {
     gen_test!(
-        BinanceDeliveryWSClient,
+        BinanceInverseSwapWSClient,
         &vec!["btcusd_perp@aggTrade".to_string()]
+    );
+}
+
+#[test]
+fn binance_linear_swap() {
+    gen_test!(
+        BinanceLinearSwapWSClient,
+        &vec!["btcusdt@aggTrade".to_string()]
     );
 }
