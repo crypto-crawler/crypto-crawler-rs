@@ -5,7 +5,7 @@ mod utils;
 
 #[test]
 fn kraken_spot() {
-    gen_test!(
+    gen_test_subscribe!(
         KrakenSpotWSClient,
         &vec![
             "trade:XBT/USD".to_string(),
