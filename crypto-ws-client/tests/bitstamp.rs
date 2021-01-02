@@ -1,15 +1,23 @@
-use crypto_ws_client::{BitstampSpotWSClient, WSClient};
+use crypto_ws_client::{BitstampWSClient, Trade, WSClient};
 
 #[macro_use]
 mod utils;
 
 #[test]
-fn bitstamp_spot() {
+fn subscribe() {
     gen_test_subscribe!(
-        BitstampSpotWSClient,
+        BitstampWSClient,
         &vec![
             "live_trades_btcusd".to_string(),
             "diff_order_book_btcusd".to_string()
         ]
+    );
+}
+
+#[test]
+fn subscribe_trade() {
+    gen_test_subscribe_trade!(
+        BitstampWSClient,
+        &vec!["btcusd".to_string(), "ethusd".to_string()]
     );
 }

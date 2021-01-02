@@ -1,4 +1,4 @@
-use crate::WSClient;
+use crate::{Trade, WSClient};
 use std::collections::HashMap;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
@@ -9,8 +9,13 @@ pub(super) const EXCHANGE_NAME: &str = "Bitstamp";
 
 const WEBSOCKET_URL: &str = "wss://ws.bitstamp.net";
 
-/// The WebSocket client for Bitstamp Spot market(<https://www.bitstamp.net/websocket/v2/>).
-pub struct BitstampSpotWSClient<'a> {
+/// The WebSocket client for Bitstamp Spot market.
+///
+/// Bitstamp has only Spot market.
+///
+///   * WebSocket API doc: <https://www.bitstamp.net/websocket/v2/>
+///   * Trading at: <https://www.bitstamp.net/market/tradeview/>
+pub struct BitstampWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
@@ -59,8 +64,20 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     }
 }
 
+impl<'a> Trade for BitstampWSClient<'a> {
+    fn subscribe_trade(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel = |pair: &String| format!("live_trades_{}", pair);
+
+        let channels = pairs
+            .iter()
+            .map(pair_to_raw_channel)
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
+    }
+}
+
 define_client!(
-    BitstampSpotWSClient,
+    BitstampWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
     channels_to_commands,
