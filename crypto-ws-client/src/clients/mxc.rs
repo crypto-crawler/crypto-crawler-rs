@@ -82,6 +82,10 @@ fn swap_channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String
 }
 
 fn on_misc_msg(msg: &str) -> MiscMessage {
+    if msg == "1" {
+        return MiscMessage::Reconnect;
+    }
+
     if !msg.starts_with('{') {
         if !msg.starts_with("42") {
             // see https://stackoverflow.com/a/65244958/381712

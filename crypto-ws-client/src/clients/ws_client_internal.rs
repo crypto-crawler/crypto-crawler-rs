@@ -94,19 +94,22 @@ impl<'a> WSClientInternal<'a> {
     }
 
     // Handle a text msg from Message::Text or Message::Binary
-    fn handle_msg(&mut self, txt: &str) {
+    // Returns true if gets a normal message, otherwise false
+    fn handle_msg(&mut self, txt: &str) -> bool {
         if txt.contains("error") {
             error!("{} from {}", txt, self.url);
-            return;
+            return false;
         }
 
         match (self.on_misc_msg)(txt) {
-            MiscMessage::Misc => (),
+            MiscMessage::Misc => false,
             MiscMessage::Reconnect => {
                 self.reconnect();
+                false
             }
             MiscMessage::WebSocket(ws_msg) => {
                 self.ws_stream.write_message(ws_msg);
+                false
             }
             MiscMessage::Normal => {
                 if self.exchange == super::mxc::EXCHANGE_NAME
@@ -115,17 +118,15 @@ impl<'a> WSClientInternal<'a> {
                     // special logic for MXC Spot
                     match txt.strip_prefix("42") {
                         Some(msg) => (self.on_msg)(msg.to_string()),
-                        None => {
-                            if txt == "1" {
-                                // disconnect
-                                self.reconnect();
-                            }
-                            warn!("Received {} from {}", txt, self.url);
-                        }
+                        None => error!(
+                            "{}, Not possible, should be handled by {}.on_misc_msg() previously",
+                            txt, self.exchange
+                        ),
                     }
                 } else {
                     (self.on_msg)(txt.to_string());
                 }
+                true
             }
         }
     }
@@ -137,7 +138,7 @@ impl<'a> WSClientInternal<'a> {
         let now = Instant::now();
         loop {
             let resp = self.ws_stream.read_message();
-            match resp {
+            let normal = match resp {
                 Ok(msg) => match msg {
                     Message::Text(txt) => self.handle_msg(&txt),
                     Message::Binary(binary) => {
@@ -154,35 +155,44 @@ impl<'a> WSClientInternal<'a> {
 
                         match resp {
                             Ok(_) => self.handle_msg(&txt),
-                            Err(err) => error!("Decompression failed, {}", err),
+                            Err(err) => {
+                                error!("Decompression failed, {}", err);
+                                false
+                            }
                         }
                     }
                     Message::Ping(resp) => {
                         let tmp = std::str::from_utf8(&resp);
                         warn!("Received a ping frame: {}", tmp.unwrap());
+                        false
                     }
                     Message::Pong(resp) => {
                         let tmp = std::str::from_utf8(&resp);
                         warn!("Received a pong frame: {}", tmp.unwrap());
+                        false
                     }
                     Message::Close(resp) => {
                         match resp {
                             Some(frame) => warn!("Received a Message::Close message with a CloseFrame: code: {}, reason: {}", frame.code, frame.reason),
                             None => warn!("Received a close message without CloseFrame"),
                         }
+                        false
                     }
                 },
-                Err(err) => match err {
-                    Error::ConnectionClosed => {
-                        warn!("tungstenite::Error::ConnectionClosed");
-                        self.reconnect();
-                    }
-                    _ => error!("{}", err),
-                },
-            }
+                Err(err) => {
+                    match err {
+                        Error::ConnectionClosed => {
+                            warn!("tungstenite::Error::ConnectionClosed");
+                            self.reconnect();
+                        }
+                        _ => error!("{}", err),
+                    };
+                    false
+                }
+            };
 
             if let Some(seconds) = duration {
-                if now.elapsed() > Duration::from_secs(seconds) {
+                if now.elapsed() > Duration::from_secs(seconds) && normal {
                     break;
                 }
             }
