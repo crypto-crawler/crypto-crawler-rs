@@ -1,4 +1,4 @@
-use crypto_ws_client::{BitstampWSClient, WSClient};
+use crypto_ws_client::{BitstampWSClient, OrderBook, WSClient};
 
 #[macro_use]
 mod utils;
@@ -25,6 +25,14 @@ fn subscribe_raw_json() {
 #[test]
 fn subscribe_trade() {
     gen_test_subscribe_trade!(
+        BitstampWSClient,
+        &vec!["btcusd".to_string(), "ethusd".to_string()]
+    );
+}
+
+#[test]
+fn subscribe_orderbook() {
+    gen_test_subscribe_orderbook!(
         BitstampWSClient,
         &vec!["btcusd".to_string(), "ethusd".to_string()]
     );

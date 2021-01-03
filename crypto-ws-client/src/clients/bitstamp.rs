@@ -2,7 +2,7 @@ use crate::WSClient;
 use std::collections::HashMap;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{Ticker, Trade, BBO};
+use super::{OrderBook, Ticker, Trade, BBO};
 use log::*;
 use serde_json::Value;
 
@@ -74,6 +74,8 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
 
 #[rustfmt::skip]
 impl_trait!(Trade, BitstampWSClient, subscribe_trade, "live_trades", to_raw_channel);
+#[rustfmt::skip]
+impl_trait!(OrderBook, BitstampWSClient, subscribe_orderbook, "diff_order_book", to_raw_channel);
 
 impl<'a> Ticker for BitstampWSClient<'a> {
     fn subscribe_ticker(&mut self, _pairs: &[String]) {
