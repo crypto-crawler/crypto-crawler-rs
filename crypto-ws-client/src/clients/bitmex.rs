@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Ticker, Trade,
+    Ticker, Trade, BBO,
 };
 use log::*;
 use serde_json::Value;
@@ -51,6 +51,10 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     }
 }
 
+fn to_raw_channel(channel: &str, pair: &str) -> String {
+    format!("{}{}{}", channel, CHANNEL_PAIR_DELIMITER, pair)
+}
+
 impl<'a> Trade for BitMEXWSClient<'a> {
     fn subscribe_trade(&mut self, pairs: &[String]) {
         let pair_to_raw_channel =
@@ -69,6 +73,8 @@ impl<'a> Ticker for BitMEXWSClient<'a> {
         panic!("BitMEX WebSocket does NOT have ticker channel");
     }
 }
+
+impl_trait!(BBO, BitMEXWSClient, subscribe_bbo, "quote", to_raw_channel);
 
 define_client!(
     BitMEXWSClient,
