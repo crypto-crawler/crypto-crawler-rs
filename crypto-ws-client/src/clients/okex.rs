@@ -2,7 +2,7 @@ use crate::WSClient;
 use std::collections::HashMap;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{Ticker, Trade};
+use super::{Ticker, Trade, BBO};
 
 use log::*;
 use serde_json::Value;
@@ -98,6 +98,12 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
 impl_trait!(Trade, OKExWSClient, subscribe_trade, "trade", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(Ticker, OKExWSClient, subscribe_ticker, "ticker", to_raw_channel);
+
+impl<'a> BBO for OKExWSClient<'a> {
+    fn subscribe_bbo(&mut self, _pairs: &[String]) {
+        panic!("OKEx WebSocket does NOT have BBO channel");
+    }
+}
 
 define_client!(
     OKExWSClient,
