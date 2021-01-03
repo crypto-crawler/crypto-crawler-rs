@@ -1,4 +1,4 @@
-use crypto_ws_client::{CoinbaseProWSClient, WSClient};
+use crypto_ws_client::{CoinbaseProWSClient, Ticker, WSClient};
 
 #[macro_use]
 mod utils;
@@ -17,6 +17,14 @@ fn subscribe() {
 #[test]
 fn subscribe_trade() {
     gen_test_subscribe_trade!(
+        CoinbaseProWSClient,
+        &vec!["BTC-USD".to_string(), "ETH-USD".to_string()]
+    );
+}
+
+#[test]
+fn subscribe_ticker() {
+    gen_test_subscribe_ticker!(
         CoinbaseProWSClient,
         &vec!["BTC-USD".to_string(), "ETH-USD".to_string()]
     );

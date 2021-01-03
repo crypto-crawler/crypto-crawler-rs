@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Trade,
+    Ticker, Trade,
 };
 
 use log::*;
@@ -18,7 +18,7 @@ const WEBSOCKET_URL: &str = "wss://ws-feed.pro.coinbase.com";
 ///
 /// CoinbasePro has only Spot market.
 ///
-///   * WebSocket API doc: <https://docs.pro.coinbase.com/>
+///   * WebSocket API doc: <https://docs.pro.coinbase.com/#websocket-feed>
 ///   * Trading at: <https://pro.coinbase.com/>
 pub struct CoinbaseProWSClient<'a> {
     client: WSClientInternal<'a>,
@@ -97,6 +97,19 @@ impl<'a> Trade for CoinbaseProWSClient<'a> {
     fn subscribe_trade(&mut self, pairs: &[String]) {
         let pair_to_raw_channel =
             |pair: &String| format!("matches{}{}", CHANNEL_PAIR_DELIMITER, pair);
+
+        let channels = pairs
+            .iter()
+            .map(pair_to_raw_channel)
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
+    }
+}
+
+impl<'a> Ticker for CoinbaseProWSClient<'a> {
+    fn subscribe_ticker(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel =
+            |pair: &String| format!("ticker{}{}", CHANNEL_PAIR_DELIMITER, pair);
 
         let channels = pairs
             .iter()
