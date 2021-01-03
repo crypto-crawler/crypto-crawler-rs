@@ -10,7 +10,40 @@
 //! ws_client.subscribe(&channels);
 //! ws_client.run(Some(2)); // run for 2 seconds
 //! ```
-
+//! ## High Level APIs
+//! The following APIs are high-level APIs with ease of use:
+//!
+//! * subscribe_trade(&mut self, pairs: &[String])
+//! * subscribe_ticker(&mut self, pairs: &[String])
+//! * subscribe_bbo(&mut self, pairs: &[String])
+//!
+//! They are easier to use and cover mostly used scenarios.
+//!
+//! ## Low Level APIs
+//!
+//! Sometimes high-level APIs can NOT meet our needs, this package provides two low-level APIs:
+//!
+//! * subscribe(&mut self, raw_channels: &[String])
+//! * unsubscribe(&mut self, raw_channels: &[String])
+//!
+//！ A `raw_channel` can be:
+//!
+//! * `channel:pair`
+//! * `channel`
+//! * A JSON string
+//!
+//! Usually a `raw_channel` is composed by a `channel` and a `pair`,
+//! delimited by `,`. Sometimes the `pair` is optional, for example,
+//! `instrument` of BitMEX, `market.overview` of Huobi.
+//!
+//! If a `raw_channel` starts with `{`, which means it is a JSON string,
+//! then it will be sent out directly without any parsing.
+//!
+//! More examples:
+//!
+//! * BitMEX `trade:XBTUSD`, `quote:XBTM21`, `instrument`
+//! * Binance `btcusdt`, `btcusd_perp`
+//! * OKEx `spot/trade:BTC-USDT`
 mod clients;
 
 pub use clients::binance::*;
