@@ -1,4 +1,4 @@
-use crate::WSClient;
+use crate::{Trade, WSClient};
 use std::collections::HashMap;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
@@ -10,7 +10,16 @@ pub(super) const EXCHANGE_NAME: &str = "OKEx";
 
 const WEBSOCKET_URL: &str = "wss://real.okex.com:8443/ws/v3";
 
-/// The WebSocket client for OKEx, including Spot, Futures, Swap and Option(<https://www.okex.com/docs/en/>).
+/// The WebSocket client for OKEx.
+///
+/// OKEx has Spot, Future, Swap and Option markets.
+///
+/// * WebSocket API doc: <https://www.okex.com/docs/en/>
+/// * Trading at:
+///     * Spot <https://www.bitmex.com/app/trade/>
+///     * Future <https://www.okex.com/derivatives/futures>
+///     * Swap <https://www.okex.com/derivatives/swap>
+///     * Option <https://www.okex.com/derivatives/options>
 pub struct OKExWSClient<'a> {
     client: WSClientInternal<'a>,
 }
@@ -48,6 +57,35 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     }
 
     MiscMessage::Normal
+}
+
+impl<'a> Trade for OKExWSClient<'a> {
+    fn subscribe_trade(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel = |pair: &String| {
+            let market_type = if pair.ends_with("-SWAP") {
+                "swap"
+            } else {
+                let c = pair.matches('-').count();
+                if c == 1 {
+                    "spot"
+                } else if c == 2 {
+                    let date = &pair[(pair.len() - 6)..];
+                    debug_assert!(date.parse::<i64>().is_ok());
+                    "futures"
+                } else {
+                    debug_assert!(pair.ends_with("-C") || pair.ends_with("-P"));
+                    "option"
+                }
+            };
+            format!("{}/trade:{}", market_type, pair)
+        };
+
+        let channels = pairs
+            .iter()
+            .map(pair_to_raw_channel)
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
+    }
 }
 
 define_client!(
