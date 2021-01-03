@@ -33,6 +33,15 @@ pub trait WSClient<'a> {
     /// * `url` - Optional server url, usually you don't need specify it
     fn new(on_msg: Box<dyn FnMut(String) + 'a>, url: Option<&str>) -> Self;
 
+    /// Subscribe trade channels.
+    ///
+    /// Each exchange has its own pair formats, for example:
+    ///
+    /// * BitMEX `XBTUSD`, `XBTM21`
+    /// * Binance `btcusdt`, `btcusd_perp`
+    /// * OKEx `BTC-USDT`
+    fn subscribe_trade(&mut self, pairs: &[String]);
+
     /// Subscribes channels.
     ///
     /// Usually a `raw_channel` is composed by a `channel` and a `pair`,
@@ -55,8 +64,4 @@ pub trait WSClient<'a> {
     ///
     /// * `duration` - How many seconds to run, None means infinite.
     fn run(&mut self, duration: Option<u64>);
-}
-
-pub trait Trade {
-    fn subscribe_trade(&mut self, pairs: &[String]);
 }

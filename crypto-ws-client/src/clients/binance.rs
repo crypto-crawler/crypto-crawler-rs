@@ -1,7 +1,10 @@
-use crate::{Trade, WSClient};
+use crate::WSClient;
 use std::collections::HashMap;
 
-use super::ws_client_internal::{MiscMessage, WSClientInternal};
+use super::{
+    ws_client_internal::{MiscMessage, WSClientInternal},
+    Trade,
+};
 use log::*;
 use serde_json::Value;
 
@@ -120,6 +123,10 @@ macro_rules! define_market_client {
                 $struct_name {
                     client: BinanceWSClient::new(real_url, on_msg),
                 }
+            }
+
+            fn subscribe_trade(&mut self, channels: &[String]) {
+                <$struct_name as Trade>::subscribe_trade(self, channels);
             }
 
             fn subscribe(&mut self, channels: &[String]) {

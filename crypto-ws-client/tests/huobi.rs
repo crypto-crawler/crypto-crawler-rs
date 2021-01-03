@@ -3,7 +3,7 @@ mod utils;
 
 #[cfg(test)]
 mod huobi_spot {
-    use crypto_ws_client::{HuobiSpotWSClient, Trade, WSClient};
+    use crypto_ws_client::{HuobiSpotWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -32,7 +32,7 @@ mod huobi_spot {
 
 #[cfg(test)]
 mod huobi_future {
-    use crypto_ws_client::{HuobiFutureWSClient, Trade, WSClient};
+    use crypto_ws_client::{HuobiFutureWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -50,7 +50,7 @@ mod huobi_future {
 
 #[cfg(test)]
 mod huobi_linear_swap {
-    use crypto_ws_client::{HuobiLinearSwapWSClient, Trade, WSClient};
+    use crypto_ws_client::{HuobiLinearSwapWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -68,7 +68,7 @@ mod huobi_linear_swap {
 
 #[cfg(test)]
 mod huobi_inverse_swap {
-    use crypto_ws_client::{HuobiInverseSwapWSClient, Trade, WSClient};
+    use crypto_ws_client::{HuobiInverseSwapWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -86,7 +86,7 @@ mod huobi_inverse_swap {
 
 #[cfg(test)]
 mod huobi_option {
-    use crypto_ws_client::{HuobiOptionWSClient, Trade, WSClient};
+    use crypto_ws_client::{HuobiOptionWSClient, WSClient};
 
     #[test]
     fn subscribe() {

@@ -1,4 +1,4 @@
-use crypto_ws_client::{BitstampWSClient, Trade, WSClient};
+use crypto_ws_client::{BitstampWSClient, WSClient};
 
 #[macro_use]
 mod utils;

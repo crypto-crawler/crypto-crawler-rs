@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 
-use crate::{Trade, WSClient};
+use crate::WSClient;
 
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
+    Trade,
 };
 
 use log::*;
