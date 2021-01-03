@@ -3,7 +3,7 @@ mod utils;
 
 #[cfg(test)]
 mod huobi_spot {
-    use crypto_ws_client::{HuobiSpotWSClient, WSClient};
+    use crypto_ws_client::{HuobiSpotWSClient, WSClient, BBO};
 
     #[test]
     fn subscribe() {
@@ -32,6 +32,11 @@ mod huobi_spot {
     }
 
     #[test]
+    fn subscribe_bbo() {
+        gen_test_subscribe_bbo!(HuobiSpotWSClient, &vec!["btcusdt".to_string()]);
+    }
+
+    #[test]
     fn huobi_hb10() {
         gen_test_subscribe!(
             HuobiSpotWSClient,
@@ -45,7 +50,7 @@ mod huobi_spot {
 
 #[cfg(test)]
 mod huobi_future {
-    use crypto_ws_client::{HuobiFutureWSClient, WSClient};
+    use crypto_ws_client::{HuobiFutureWSClient, WSClient, BBO};
 
     #[test]
     fn subscribe() {
@@ -64,11 +69,16 @@ mod huobi_future {
     fn subscribe_ticker() {
         gen_test_subscribe_ticker!(HuobiFutureWSClient, &vec!["BTC_CQ".to_string()]);
     }
+
+    #[test]
+    fn subscribe_bbo() {
+        gen_test_subscribe_bbo!(HuobiFutureWSClient, &vec!["BTC_CQ".to_string()]);
+    }
 }
 
 #[cfg(test)]
 mod huobi_linear_swap {
-    use crypto_ws_client::{HuobiLinearSwapWSClient, WSClient};
+    use crypto_ws_client::{HuobiLinearSwapWSClient, WSClient, BBO};
 
     #[test]
     fn subscribe() {
@@ -87,11 +97,16 @@ mod huobi_linear_swap {
     fn subscribe_ticker() {
         gen_test_subscribe_ticker!(HuobiLinearSwapWSClient, &vec!["BTC-USDT".to_string()]);
     }
+
+    #[test]
+    fn subscribe_bbo() {
+        gen_test_subscribe_bbo!(HuobiLinearSwapWSClient, &vec!["BTC-USDT".to_string()]);
+    }
 }
 
 #[cfg(test)]
 mod huobi_inverse_swap {
-    use crypto_ws_client::{HuobiInverseSwapWSClient, WSClient};
+    use crypto_ws_client::{HuobiInverseSwapWSClient, WSClient, BBO};
 
     #[test]
     fn subscribe() {
@@ -110,11 +125,16 @@ mod huobi_inverse_swap {
     fn subscribe_ticker() {
         gen_test_subscribe_ticker!(HuobiInverseSwapWSClient, &vec!["BTC-USD".to_string()]);
     }
+
+    #[test]
+    fn subscribe_bbo() {
+        gen_test_subscribe_bbo!(HuobiInverseSwapWSClient, &vec!["BTC-USD".to_string()]);
+    }
 }
 
 #[cfg(test)]
 mod huobi_option {
-    use crypto_ws_client::{HuobiOptionWSClient, WSClient};
+    use crypto_ws_client::{HuobiOptionWSClient, WSClient, BBO};
 
     #[test]
     fn subscribe() {
@@ -135,6 +155,14 @@ mod huobi_option {
     #[test]
     fn subscribe_ticker() {
         gen_test_subscribe_ticker!(
+            HuobiOptionWSClient,
+            &vec!["BTC-USDT-210326-C-32000".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_bbo() {
+        gen_test_subscribe_bbo!(
             HuobiOptionWSClient,
             &vec!["BTC-USDT-210326-C-32000".to_string()]
         );

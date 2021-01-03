@@ -2,7 +2,7 @@ use crate::WSClient;
 use std::collections::HashMap;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{BBO, Ticker, Trade};
+use super::{Ticker, Trade, BBO};
 use log::*;
 use serde_json::Value;
 
