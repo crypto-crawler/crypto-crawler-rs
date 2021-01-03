@@ -2,7 +2,7 @@ use crate::WSClient;
 use std::collections::HashMap;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::Trade;
+use super::{Ticker, Trade};
 
 use log::*;
 use serde_json::Value;
@@ -82,6 +82,19 @@ impl<'a> Trade for OKExWSClient<'a> {
     fn subscribe_trade(&mut self, pairs: &[String]) {
         let pair_to_raw_channel =
             |pair: &String| format!("{}/trade:{}", pair_to_market_type(pair), pair);
+
+        let channels = pairs
+            .iter()
+            .map(pair_to_raw_channel)
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
+    }
+}
+
+impl<'a> Ticker for OKExWSClient<'a> {
+    fn subscribe_ticker(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel =
+            |pair: &String| format!("{}/ticker:{}", pair_to_market_type(pair), pair);
 
         let channels = pairs
             .iter()
