@@ -2,7 +2,7 @@ use crate::WSClient;
 use std::collections::HashMap;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{Ticker, Trade};
+use super::{BBO, Ticker, Trade};
 use log::*;
 use serde_json::Value;
 
@@ -78,6 +78,12 @@ impl_trait!(Trade, BitstampWSClient, subscribe_trade, "live_trades", to_raw_chan
 impl<'a> Ticker for BitstampWSClient<'a> {
     fn subscribe_ticker(&mut self, _pairs: &[String]) {
         panic!("Bitstamp WebSocket does NOT have ticker channel");
+    }
+}
+
+impl<'a> BBO for BitstampWSClient<'a> {
+    fn subscribe_bbo(&mut self, _pairs: &[String]) {
+        panic!("Bitstamp WebSocket does NOT have BBO channel");
     }
 }
 
