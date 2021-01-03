@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::WSClient;
+use crate::{Trade, WSClient};
 
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
@@ -113,6 +113,31 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
             error!("{} is not a JSON string, {}", msg, EXCHANGE_NAME);
             MiscMessage::Misc
         }
+    }
+}
+
+impl<'a> Trade for MXCSpotWSClient<'a> {
+    fn subscribe_trade(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel =
+            |pair: &String| format!("symbol{}{}", CHANNEL_PAIR_DELIMITER, pair);
+
+        let channels = pairs
+            .iter()
+            .map(pair_to_raw_channel)
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
+    }
+}
+
+impl<'a> Trade for MXCSwapWSClient<'a> {
+    fn subscribe_trade(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel = |pair: &String| format!("deal{}{}", CHANNEL_PAIR_DELIMITER, pair);
+
+        let channels = pairs
+            .iter()
+            .map(pair_to_raw_channel)
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
     }
 }
 
