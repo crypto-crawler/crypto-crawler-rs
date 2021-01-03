@@ -6,7 +6,7 @@ use serde_json::Value;
 use tungstenite::Message;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::Trade;
+use super::{Ticker, Trade};
 
 pub(super) const EXCHANGE_NAME: &str = "Huobi";
 
@@ -87,6 +87,18 @@ impl<'a> HuobiWSClient<'a> {
 impl<'a> Trade for HuobiWSClient<'a> {
     fn subscribe_trade(&mut self, pairs: &[String]) {
         let pair_to_raw_channel = |pair: &String| format!("market.{}.trade.detail", pair);
+
+        let channels = pairs
+            .iter()
+            .map(pair_to_raw_channel)
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
+    }
+}
+
+impl<'a> Ticker for HuobiWSClient<'a> {
+    fn subscribe_ticker(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel = |pair: &String| format!("market.{}.detail", pair);
 
         let channels = pairs
             .iter()
@@ -194,6 +206,22 @@ impl_trade!(HuobiFutureWSClient);
 impl_trade!(HuobiInverseSwapWSClient);
 impl_trade!(HuobiLinearSwapWSClient);
 impl_trade!(HuobiOptionWSClient);
+
+macro_rules! impl_ticker {
+    ($struct_name:ident) => {
+        impl<'a> Ticker for $struct_name<'a> {
+            fn subscribe_ticker(&mut self, pairs: &[String]) {
+                self.client.subscribe_ticker(pairs);
+            }
+        }
+    };
+}
+
+impl_ticker!(HuobiSpotWSClient);
+impl_ticker!(HuobiFutureWSClient);
+impl_ticker!(HuobiInverseSwapWSClient);
+impl_ticker!(HuobiLinearSwapWSClient);
+impl_ticker!(HuobiOptionWSClient);
 
 #[cfg(test)]
 mod tests {
