@@ -56,11 +56,20 @@ pub trait WSClient<'a> {
     /// Bitstamp, MXC Spot, etc.
     fn subscribe_ticker(&mut self, pairs: &[String]);
 
-    /// Subscribes to channels.
+    /// Subscribes to channels, lower level API.
+    ///
+    /// A `raw_channel` can be:
+    ///
+    /// * `channel:pair`
+    /// * `channel`
+    /// * A JSON string
     ///
     /// Usually a `raw_channel` is composed by a `channel` and a `pair`,
     /// delimited by `,`. Sometimes the `pair` is optional, for example,
     /// `instrument` of BitMEX, `market.overview` of Huobi.
+    ///
+    /// If a `raw_channel` starts with `{`, which means it is a JSON string,
+    /// then it will be sent out directly without any parsing.
     ///
     /// More examples:
     ///
@@ -69,7 +78,7 @@ pub trait WSClient<'a> {
     /// * OKEx `spot/trade:BTC-USDT`
     fn subscribe(&mut self, raw_channels: &[String]);
 
-    /// Unsubscribes from channels.
+    /// Unsubscribes from channels, lower level API.
     fn unsubscribe(&mut self, raw_channels: &[String]);
 
     /// Starts the infinite loop until time is up or the server closes the connection.

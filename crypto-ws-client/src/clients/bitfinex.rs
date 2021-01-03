@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Ticker, Trade,
+    Ticker, Trade, BBO,
 };
 use log::*;
 use serde_json::Value;
@@ -24,6 +24,9 @@ pub struct BitfinexWSClient<'a> {
 }
 
 fn channel_to_command(channel: &str, subscribe: bool) -> String {
+    if channel.starts_with('{') {
+        return channel.to_string();
+    }
     let delim = channel.find(CHANNEL_PAIR_DELIMITER).unwrap();
     let ch = &channel[..delim];
     let symbol = &channel[(delim + 1)..];
@@ -76,8 +79,43 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
     format!("{}:t{}", channel, pair)
 }
 
-impl_trait!(Trade, BitfinexWSClient, subscribe_trade, "trades", to_raw_channel);
-impl_trait!(Ticker, BitfinexWSClient, subscribe_ticker, "ticker", to_raw_channel);
+impl_trait!(
+    Trade,
+    BitfinexWSClient,
+    subscribe_trade,
+    "trades",
+    to_raw_channel
+);
+impl_trait!(
+    Ticker,
+    BitfinexWSClient,
+    subscribe_ticker,
+    "ticker",
+    to_raw_channel
+);
+
+impl<'a> BBO for BitfinexWSClient<'a> {
+    fn subscribe_bbo(&mut self, pairs: &[String]) {
+        let raw_channels = pairs
+            .iter()
+            .map(|pair| {
+                format!(
+                    r#"{{
+                "event": "subscribe",
+                "channel": "book",
+                "symbol": "t{}",
+                "prec": "P0",
+                "freq": "F0",
+                "len": 1
+              }}"#,
+                    pair
+                )
+            })
+            .collect::<Vec<String>>();
+
+        self.client.subscribe(&raw_channels);
+    }
+}
 
 define_client!(
     BitfinexWSClient,
