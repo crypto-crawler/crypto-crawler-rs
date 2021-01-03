@@ -119,30 +119,11 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     }
 }
 
-impl<'a> Trade for MXCSpotWSClient<'a> {
-    fn subscribe_trade(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel =
-            |pair: &String| format!("symbol{}{}", CHANNEL_PAIR_DELIMITER, pair);
-
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
-    }
+fn to_raw_channel(channel: &str, pair: &str) -> String {
+    format!("{}{}{}", channel, CHANNEL_PAIR_DELIMITER, pair)
 }
 
-impl<'a> Trade for MXCSwapWSClient<'a> {
-    fn subscribe_trade(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel = |pair: &String| format!("deal{}{}", CHANNEL_PAIR_DELIMITER, pair);
-
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
-    }
-}
+impl_trait!(Trade, MXCSpotWSClient, subscribe_trade, "symbol", to_raw_channel);
 
 impl<'a> Ticker for MXCSpotWSClient<'a> {
     fn subscribe_ticker(&mut self, _pairs: &[String]) {
@@ -150,18 +131,8 @@ impl<'a> Ticker for MXCSpotWSClient<'a> {
     }
 }
 
-impl<'a> Ticker for MXCSwapWSClient<'a> {
-    fn subscribe_ticker(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel =
-            |pair: &String| format!("ticker{}{}", CHANNEL_PAIR_DELIMITER, pair);
-
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
-    }
-}
+impl_trait!(Trade, MXCSwapWSClient, subscribe_trade, "deal", to_raw_channel);
+impl_trait!(Ticker, MXCSwapWSClient, subscribe_ticker, "ticker", to_raw_channel);
 
 define_client!(
     MXCSpotWSClient,

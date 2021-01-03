@@ -65,17 +65,11 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     }
 }
 
-impl<'a> Trade for BitstampWSClient<'a> {
-    fn subscribe_trade(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel = |pair: &String| format!("live_trades_{}", pair);
-
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
-    }
+fn to_raw_channel(channel: &str, pair: &str) -> String {
+    format!("{}_{}", channel, pair)
 }
+
+impl_trait!(Trade, BitstampWSClient, subscribe_trade, "live_trades", to_raw_channel);
 
 impl<'a> Ticker for BitstampWSClient<'a> {
     fn subscribe_ticker(&mut self, _pairs: &[String]) {

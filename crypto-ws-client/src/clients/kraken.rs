@@ -96,31 +96,12 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     }
 }
 
-impl<'a> Trade for KrakenWSClient<'a> {
-    fn subscribe_trade(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel =
-            |pair: &String| format!("trade{}{}", CHANNEL_PAIR_DELIMITER, pair);
-
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
-    }
+fn to_raw_channel(channel: &str, pair: &str) -> String {
+    format!("{}{}{}", channel, CHANNEL_PAIR_DELIMITER, pair)
 }
 
-impl<'a> Ticker for KrakenWSClient<'a> {
-    fn subscribe_ticker(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel =
-            |pair: &String| format!("ticker{}{}", CHANNEL_PAIR_DELIMITER, pair);
-
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
-    }
-}
+impl_trait!(Trade, KrakenWSClient, subscribe_trade, "trade", to_raw_channel);
+impl_trait!(Ticker, KrakenWSClient, subscribe_ticker, "ticker", to_raw_channel);
 
 define_client!(
     KrakenWSClient,

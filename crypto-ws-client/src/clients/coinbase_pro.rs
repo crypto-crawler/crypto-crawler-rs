@@ -93,31 +93,12 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     }
 }
 
-impl<'a> Trade for CoinbaseProWSClient<'a> {
-    fn subscribe_trade(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel =
-            |pair: &String| format!("matches{}{}", CHANNEL_PAIR_DELIMITER, pair);
-
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
-    }
+fn to_raw_channel(channel: &str, pair: &str) -> String {
+    format!("{}{}{}", channel, CHANNEL_PAIR_DELIMITER, pair)
 }
 
-impl<'a> Ticker for CoinbaseProWSClient<'a> {
-    fn subscribe_ticker(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel =
-            |pair: &String| format!("ticker{}{}", CHANNEL_PAIR_DELIMITER, pair);
-
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
-    }
-}
+impl_trait!(Trade, CoinbaseProWSClient, subscribe_trade, "matches", to_raw_channel);
+impl_trait!(Ticker, CoinbaseProWSClient, subscribe_ticker, "ticker", to_raw_channel);
 
 define_client!(
     CoinbaseProWSClient,

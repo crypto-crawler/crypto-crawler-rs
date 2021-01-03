@@ -67,41 +67,14 @@ impl<'a> BinanceWSClient<'a> {
     }
 }
 
-impl<'a> Trade for BinanceWSClient<'a> {
-    fn subscribe_trade(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel = |pair: &String| format!("{}@aggTrade", pair);
 
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
-    }
+fn to_raw_channel(channel: &str, pair: &str) -> String {
+    format!("{}@{}", pair, channel)
 }
 
-impl<'a> Ticker for BinanceWSClient<'a> {
-    fn subscribe_ticker(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel = |pair: &String| format!("{}@ticker", pair);
-
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
-    }
-}
-
-impl<'a> BBO for BinanceWSClient<'a> {
-    fn subscribe_bbo(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel = |pair: &String| format!("{}@bookTicker", pair);
-
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
-    }
-}
+impl_trait!(Trade, BinanceWSClient, subscribe_trade, "aggTrade", to_raw_channel);
+impl_trait!(Ticker, BinanceWSClient, subscribe_ticker, "ticker", to_raw_channel);
+impl_trait!(BBO, BinanceWSClient, subscribe_bbo, "bookTicker", to_raw_channel);
 
 /// Binance Spot market.
 ///
