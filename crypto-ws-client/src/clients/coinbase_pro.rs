@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Ticker, Trade, BBO,
+    OrderBook, Ticker, Trade, BBO,
 };
 
 use log::*;
@@ -117,6 +117,9 @@ impl<'a> BBO for CoinbaseProWSClient<'a> {
         panic!("CoinbasePro WebSocket does NOT have BBO channel");
     }
 }
+
+#[rustfmt::skip]
+impl_trait!(OrderBook, CoinbaseProWSClient, subscribe_orderbook, "level2", to_raw_channel);
 
 define_client!(
     CoinbaseProWSClient,

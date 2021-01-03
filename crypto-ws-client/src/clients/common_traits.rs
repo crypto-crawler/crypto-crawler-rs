@@ -13,6 +13,11 @@ pub(super) trait BBO {
     fn subscribe_bbo(&mut self, pairs: &[String]);
 }
 
+// An orderbook snapshot followed by realtime updates.
+pub trait OrderBook {
+    fn subscribe_orderbook(&mut self, pairs: &[String]);
+}
+
 macro_rules! impl_trait {
     ($trait_name:ident, $struct_name:ident, $method_name:ident, $channel_name:expr, $to_raw_channel: ident) => {
         impl<'a> $trait_name for $struct_name<'a> {

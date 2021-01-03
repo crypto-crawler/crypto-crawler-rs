@@ -1,4 +1,4 @@
-use crypto_ws_client::{CoinbaseProWSClient, WSClient};
+use crypto_ws_client::{CoinbaseProWSClient, OrderBook, WSClient};
 
 #[macro_use]
 mod utils;
@@ -53,4 +53,9 @@ fn subscribe_ticker() {
         CoinbaseProWSClient,
         &vec!["BTC-USD".to_string(), "ETH-USD".to_string()]
     );
+}
+
+#[test]
+fn subscribe_orderbook() {
+    gen_test_subscribe_orderbook!(CoinbaseProWSClient, &vec!["BTC-USD".to_string()]);
 }
