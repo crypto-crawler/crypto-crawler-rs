@@ -13,8 +13,6 @@
 
 mod clients;
 
-pub use clients::Ticker;
-
 pub use clients::binance::*;
 pub use clients::bitfinex::*;
 pub use clients::bitmex::*;
@@ -35,7 +33,7 @@ pub trait WSClient<'a> {
     /// * `url` - Optional server url, usually you don't need specify it
     fn new(on_msg: Box<dyn FnMut(String) + 'a>, url: Option<&str>) -> Self;
 
-    /// Subscribe trade channels.
+    /// Subscribes trade channels.
     ///
     /// Each exchange has its own pair formats, for example:
     ///
@@ -43,6 +41,15 @@ pub trait WSClient<'a> {
     /// * Binance `btcusdt`, `btcusd_perp`
     /// * OKEx `BTC-USDT`
     fn subscribe_trade(&mut self, pairs: &[String]);
+
+    /// Subscribes ticker channels.
+    ///
+    /// The ticker channel pushes realtime 24hr rolling window ticker messages,
+    /// which contains OHLCV information.
+    ///
+    /// Not all exchanges have the ticker channel, for example, BitMEX,
+    /// Bitstamp, MXC Spot, etc.
+    fn subscribe_ticker(&mut self, pairs: &[String]);
 
     /// Subscribes channels.
     ///

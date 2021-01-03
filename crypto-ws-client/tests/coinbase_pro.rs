@@ -1,4 +1,4 @@
-use crypto_ws_client::{CoinbaseProWSClient, Ticker, WSClient};
+use crypto_ws_client::{CoinbaseProWSClient, WSClient};
 
 #[macro_use]
 mod utils;

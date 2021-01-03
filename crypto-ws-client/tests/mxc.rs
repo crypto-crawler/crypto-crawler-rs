@@ -18,7 +18,7 @@ mod mxc_spot {
 
 #[cfg(test)]
 mod mxc_swap {
-    use crypto_ws_client::{MXCSwapWSClient, Ticker, WSClient};
+    use crypto_ws_client::{MXCSwapWSClient, WSClient};
 
     #[test]
     fn subscribe() {

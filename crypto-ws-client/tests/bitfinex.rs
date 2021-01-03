@@ -3,7 +3,7 @@ mod utils;
 
 #[cfg(test)]
 mod bitfinex_spot {
-    use crypto_ws_client::{BitfinexWSClient, Ticker, WSClient};
+    use crypto_ws_client::{BitfinexWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -23,7 +23,7 @@ mod bitfinex_spot {
 
 #[cfg(test)]
 mod bitfinex_swap {
-    use crypto_ws_client::{BitfinexWSClient, Ticker, WSClient};
+    use crypto_ws_client::{BitfinexWSClient, WSClient};
 
     #[test]
     fn subscribe() {
