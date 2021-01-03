@@ -1,7 +1,10 @@
 use crate::WSClient;
 use std::collections::HashMap;
 
-use super::{Ticker, Trade, ws_client_internal::{MiscMessage, WSClientInternal}};
+use super::{
+    ws_client_internal::{MiscMessage, WSClientInternal},
+    Ticker, Trade,
+};
 use log::*;
 use serde_json::Value;
 
