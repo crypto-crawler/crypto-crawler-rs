@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Ticker, Trade, BBO,
+    OrderBook, Ticker, Trade, BBO,
 };
 
 use log::*;
@@ -113,6 +113,18 @@ impl_trait!(Trade, KrakenWSClient, subscribe_trade, "trade", to_raw_channel);
 impl_trait!(Ticker, KrakenWSClient, subscribe_ticker, "ticker", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(BBO, KrakenWSClient, subscribe_bbo, "spread", to_raw_channel);
+
+impl<'a> OrderBook for KrakenWSClient<'a> {
+    fn subscribe_orderbook(&mut self, pairs: &[String]) {
+        let command = format!(
+            r#"{{"event":"subscribe","pair":{},"subscription":{{"name":"book", "depth":25}}}}"#,
+            serde_json::to_string(pairs).unwrap(),
+        );
+        let channels = vec![command];
+
+        self.client.subscribe(&channels);
+    }
+}
 
 define_client!(
     KrakenWSClient,
