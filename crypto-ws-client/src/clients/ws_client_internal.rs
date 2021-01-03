@@ -256,6 +256,10 @@ macro_rules! define_client {
                 <$struct_name as Trade>::subscribe_trade(self, channels);
             }
 
+            fn subscribe_ticker(&mut self, channels: &[String]) {
+                <$struct_name as Ticker>::subscribe_ticker(self, channels);
+            }
+
             fn subscribe(&mut self, channels: &[String]) {
                 self.client.subscribe(channels);
             }
