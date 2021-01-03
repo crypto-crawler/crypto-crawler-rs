@@ -4,29 +4,72 @@ use crypto_ws_client::{OKExWSClient, WSClient};
 mod utils;
 
 #[test]
-fn okex_spot() {
-    gen_test_subscribe!(OKExWSClient, &vec!["spot/trade:BTC-USDT".to_string()]);
-}
-
-#[test]
-fn okex_futures() {
-    gen_test_subscribe!(
-        OKExWSClient,
-        &vec!["futures/trade:BTC-USDT-210625".to_string()]
-    );
-}
-
-#[test]
-fn okex_swap() {
-    gen_test_subscribe!(OKExWSClient, &vec!["swap/trade:BTC-USDT-SWAP".to_string()]);
-}
-
-#[test]
-fn okex_option() {
-    gen_test_subscribe!(OKExWSClient, &vec!["option/summary:BTC-USD".to_string()]);
-}
-
-#[test]
 fn okex_index() {
     gen_test_subscribe!(OKExWSClient, &vec!["index/ticker:BTC-USDT".to_string()]);
+}
+
+#[cfg(test)]
+mod okex_spot {
+    use crypto_ws_client::{OKExWSClient, Trade, WSClient};
+
+    #[test]
+    fn subscribe() {
+        gen_test_subscribe!(OKExWSClient, &vec!["spot/trade:BTC-USDT".to_string()]);
+    }
+
+    #[test]
+    fn subscribe_trade() {
+        gen_test_subscribe_trade!(OKExWSClient, &vec!["BTC-USDT".to_string()]);
+    }
+}
+
+#[cfg(test)]
+mod okex_future {
+    use crypto_ws_client::{OKExWSClient, Trade, WSClient};
+
+    #[test]
+    fn subscribe() {
+        gen_test_subscribe!(
+            OKExWSClient,
+            &vec!["futures/trade:BTC-USDT-210625".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_trade() {
+        gen_test_subscribe_trade!(OKExWSClient, &vec!["BTC-USDT-210625".to_string()]);
+    }
+}
+
+#[cfg(test)]
+mod okex_swap {
+    use crypto_ws_client::{OKExWSClient, Trade, WSClient};
+
+    #[test]
+    fn subscribe() {
+        gen_test_subscribe!(OKExWSClient, &vec!["swap/trade:BTC-USDT-SWAP".to_string()]);
+    }
+
+    #[test]
+    fn subscribe_trade() {
+        gen_test_subscribe_trade!(OKExWSClient, &vec!["BTC-USDT-SWAP".to_string()]);
+    }
+}
+
+#[cfg(test)]
+mod okex_option {
+    use crypto_ws_client::{OKExWSClient, Trade, WSClient};
+
+    #[test]
+    fn subscribe() {
+        gen_test_subscribe!(
+            OKExWSClient,
+            &vec!["option/trade:BTC-USD-210625-72000-C".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_trade() {
+        gen_test_subscribe_trade!(OKExWSClient, &vec!["BTC-USD-210625-72000-C".to_string()]);
+    }
 }
