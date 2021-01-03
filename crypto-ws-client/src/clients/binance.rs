@@ -1,10 +1,7 @@
 use crate::WSClient;
 use std::collections::HashMap;
 
-use super::{
-    ws_client_internal::{MiscMessage, WSClientInternal},
-    Trade,
-};
+use super::{Ticker, Trade, ws_client_internal::{MiscMessage, WSClientInternal}};
 use log::*;
 use serde_json::Value;
 
@@ -70,6 +67,18 @@ impl<'a> BinanceWSClient<'a> {
 impl<'a> Trade for BinanceWSClient<'a> {
     fn subscribe_trade(&mut self, pairs: &[String]) {
         let pair_to_raw_channel = |pair: &String| format!("{}@aggTrade", pair);
+
+        let channels = pairs
+            .iter()
+            .map(pair_to_raw_channel)
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
+    }
+}
+
+impl<'a> Ticker for BinanceWSClient<'a> {
+    fn subscribe_ticker(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel = |pair: &String| format!("{}@ticker", pair);
 
         let channels = pairs
             .iter()
@@ -163,6 +172,21 @@ impl_trade!(BinanceSpotWSClient);
 impl_trade!(BinanceFutureWSClient);
 impl_trade!(BinanceLinearSwapWSClient);
 impl_trade!(BinanceInverseSwapWSClient);
+
+macro_rules! impl_ticker {
+    ($struct_name:ident) => {
+        impl<'a> Ticker for $struct_name<'a> {
+            fn subscribe_ticker(&mut self, pairs: &[String]) {
+                self.client.subscribe_ticker(pairs);
+            }
+        }
+    };
+}
+
+impl_ticker!(BinanceSpotWSClient);
+impl_ticker!(BinanceFutureWSClient);
+impl_ticker!(BinanceLinearSwapWSClient);
+impl_ticker!(BinanceInverseSwapWSClient);
 
 #[cfg(test)]
 mod tests {
