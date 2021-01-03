@@ -59,26 +59,28 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     MiscMessage::Normal
 }
 
+fn pair_to_market_type(pair: &str) -> &'static str {
+    if pair.ends_with("-SWAP") {
+        "swap"
+    } else {
+        let c = pair.matches('-').count();
+        if c == 1 {
+            "spot"
+        } else if c == 2 {
+            let date = &pair[(pair.len() - 6)..];
+            debug_assert!(date.parse::<i64>().is_ok());
+            "futures"
+        } else {
+            debug_assert!(pair.ends_with("-C") || pair.ends_with("-P"));
+            "option"
+        }
+    }
+}
+
 impl<'a> Trade for OKExWSClient<'a> {
     fn subscribe_trade(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel = |pair: &String| {
-            let market_type = if pair.ends_with("-SWAP") {
-                "swap"
-            } else {
-                let c = pair.matches('-').count();
-                if c == 1 {
-                    "spot"
-                } else if c == 2 {
-                    let date = &pair[(pair.len() - 6)..];
-                    debug_assert!(date.parse::<i64>().is_ok());
-                    "futures"
-                } else {
-                    debug_assert!(pair.ends_with("-C") || pair.ends_with("-P"));
-                    "option"
-                }
-            };
-            format!("{}/trade:{}", market_type, pair)
-        };
+        let pair_to_raw_channel =
+            |pair: &String| format!("{}/trade:{}", pair_to_market_type(pair), pair);
 
         let channels = pairs
             .iter()
@@ -121,6 +123,17 @@ mod tests {
         assert_eq!(
             r#"{"op":"subscribe","args":["spot/trade:BTC-USDT","ticker/trade:BTC-USDT"]}"#,
             commands[0]
+        );
+    }
+
+    #[test]
+    fn test_pair_to_market_type() {
+        assert_eq!("spot", super::pair_to_market_type("BTC-USDT"));
+        assert_eq!("futures", super::pair_to_market_type("BTC-USDT-210625"));
+        assert_eq!("swap", super::pair_to_market_type("BTC-USDT-SWAP"));
+        assert_eq!(
+            "option",
+            super::pair_to_market_type("BTC-USD-210625-72000-C")
         );
     }
 }
