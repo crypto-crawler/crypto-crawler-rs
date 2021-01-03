@@ -39,6 +39,9 @@ impl<'a> HuobiWSClient<'a> {
     }
 
     fn channel_to_command(channel: &str, subscribe: bool) -> String {
+        if channel.starts_with('{') {
+            return channel.to_string();
+        }
         format!(
             r#"{{"{}":"{}","id":"crypto-ws-client"}}"#,
             if subscribe { "sub" } else { "unsub" },

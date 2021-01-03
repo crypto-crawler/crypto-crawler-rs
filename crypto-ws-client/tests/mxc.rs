@@ -11,6 +11,14 @@ mod mxc_spot {
     }
 
     #[test]
+    fn subscribe_raw_json() {
+        gen_test_subscribe!(
+            MXCSpotWSClient,
+            &vec![r#"["sub.symbol",{"symbol":"BTC_USDT"}]"#.to_string()]
+        );
+    }
+
+    #[test]
     fn subscribe_trade() {
         gen_test_subscribe_trade!(MXCSpotWSClient, &vec!["BTC_USDT".to_string()]);
     }
@@ -23,6 +31,14 @@ mod mxc_swap {
     #[test]
     fn subscribe() {
         gen_test_subscribe!(MXCSwapWSClient, &vec!["deal:BTC_USDT".to_string()]);
+    }
+
+    #[test]
+    fn subscribe_raw_json() {
+        gen_test_subscribe!(
+            MXCSwapWSClient,
+            &vec![r#"{"method":"sub.deal","param":{"symbol":"BTC_USDT"}}"#.to_string()]
+        );
     }
 
     #[test]
