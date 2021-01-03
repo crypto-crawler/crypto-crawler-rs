@@ -33,7 +33,10 @@ pub trait WSClient<'a> {
     /// * `url` - Optional server url, usually you don't need specify it
     fn new(on_msg: Box<dyn FnMut(String) + 'a>, url: Option<&str>) -> Self;
 
-    /// Subscribes trade channels.
+    /// Subscribes to trade channels.
+    ///
+    /// A trade channel sends tick-by-tick trade data,  which is the complete
+    /// copy of a market's trading information.
     ///
     /// Each exchange has its own pair formats, for example:
     ///
@@ -42,16 +45,16 @@ pub trait WSClient<'a> {
     /// * OKEx `BTC-USDT`
     fn subscribe_trade(&mut self, pairs: &[String]);
 
-    /// Subscribes ticker channels.
+    /// Subscribes to ticker channels.
     ///
-    /// The ticker channel pushes realtime 24hr rolling window ticker messages,
+    /// A ticker channel pushes realtime 24hr rolling window ticker messages,
     /// which contains OHLCV information.
     ///
     /// Not all exchanges have the ticker channel, for example, BitMEX,
     /// Bitstamp, MXC Spot, etc.
     fn subscribe_ticker(&mut self, pairs: &[String]);
 
-    /// Subscribes channels.
+    /// Subscribes to channels.
     ///
     /// Usually a `raw_channel` is composed by a `channel` and a `pair`,
     /// delimited by `,`. Sometimes the `pair` is optional, for example,
@@ -64,7 +67,7 @@ pub trait WSClient<'a> {
     /// * OKEx `spot/trade:BTC-USDT`
     fn subscribe(&mut self, raw_channels: &[String]);
 
-    /// Unsubscribes channels.
+    /// Unsubscribes from channels.
     fn unsubscribe(&mut self, raw_channels: &[String]);
 
     /// Starts the infinite loop until time is up or the server closes the connection.
