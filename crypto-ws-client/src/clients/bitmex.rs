@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Trade,
+    Ticker, Trade,
 };
 use log::*;
 use serde_json::Value;
@@ -61,6 +61,12 @@ impl<'a> Trade for BitMEXWSClient<'a> {
             .map(pair_to_raw_channel)
             .collect::<Vec<String>>();
         self.client.subscribe(&channels);
+    }
+}
+
+impl<'a> Ticker for BitMEXWSClient<'a> {
+    fn subscribe_ticker(&mut self, _pairs: &[String]) {
+        panic!("BitMEX WebSocket does NOT have ticker channel");
     }
 }
 
