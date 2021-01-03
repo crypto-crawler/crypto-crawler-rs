@@ -264,7 +264,7 @@ impl<'a> OrderBook for HuobiSpotWSClient<'a> {
                 .iter()
                 .map(pair_to_raw_channel)
                 .collect::<Vec<String>>();
-            self.client.subscribe(&channels);
+            self.client.client.subscribe(&channels);
         } else {
             panic!("Huobi Spot market.$symbol.mbp.$levels must use wss://api.huobi.pro/feed or wss://api-aws.huobi.pro/feed");
         }
