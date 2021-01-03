@@ -14,6 +14,14 @@ mod huobi_spot {
     }
 
     #[test]
+    fn subscribe_raw_json() {
+        gen_test_subscribe!(
+            HuobiSpotWSClient,
+            &vec![r#"{"sub":"market.btcusdt.trade.detail","id":"crypto-ws-client"}"#.to_string()]
+        );
+    }
+
+    #[test]
     fn subscribe_trade() {
         gen_test_subscribe_trade!(HuobiSpotWSClient, &vec!["btcusdt".to_string()]);
     }

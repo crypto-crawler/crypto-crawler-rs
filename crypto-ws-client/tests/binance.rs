@@ -14,6 +14,14 @@ mod binance_spot {
     }
 
     #[test]
+    fn subscribe_raw_json() {
+        gen_test_subscribe!(
+            BinanceSpotWSClient,
+            &vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["btcusdt@aggTrade","btcusdt@ticker"]}"#.to_string()]
+        );
+    }
+
+    #[test]
     fn subscribe_trade() {
         gen_test_subscribe_trade!(
             BinanceSpotWSClient,

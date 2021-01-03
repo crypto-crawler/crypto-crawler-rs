@@ -18,6 +18,14 @@ mod okex_spot {
     }
 
     #[test]
+    fn subscribe_raw_json() {
+        gen_test_subscribe!(
+            OKExWSClient,
+            &vec![r#"{"op":"subscribe","args":["spot/trade:BTC-USDT"]}"#.to_string()]
+        );
+    }
+
+    #[test]
     fn subscribe_trade() {
         gen_test_subscribe_trade!(OKExWSClient, &vec!["BTC-USDT".to_string()]);
     }

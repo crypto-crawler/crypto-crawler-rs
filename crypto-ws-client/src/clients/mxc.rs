@@ -36,6 +36,9 @@ pub struct MXCSwapWSClient<'a> {
 
 // Example: symbol:BTC_USDT -> 42["sub.symbol",{"symbol":"BTC_USDT"}]
 fn spot_channel_to_command(ch: &str, subscribe: bool) -> String {
+    if ch.starts_with('[') {
+        return format!("{}{}", SOCKETIO_PREFIX, ch);
+    }
     let v: Vec<&str> = ch.split(CHANNEL_PAIR_DELIMITER).collect();
     let channel = v[0];
     let pair = v[1];
@@ -62,6 +65,9 @@ fn spot_channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String
 
 // Example: deal:BTC_USDT -> {"method":"sub.deal","param":{"symbol":"BTC_USDT"}}
 fn swap_channel_to_command(ch: &str, subscribe: bool) -> String {
+    if ch.starts_with('{') {
+        return ch.to_string();
+    }
     let v: Vec<&str> = ch.split(CHANNEL_PAIR_DELIMITER).collect();
     let channel = v[0];
     let pair = v[1];

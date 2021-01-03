@@ -17,6 +17,17 @@ fn subscribe() {
 }
 
 #[test]
+fn subscribe_raw_json() {
+    gen_test_subscribe!(
+        KrakenWSClient,
+        &vec![
+            r#"{"event":"subscribe","pair":["XBT/USD"],"subscription":{"name":"trade"}}"#
+                .to_string()
+        ]
+    );
+}
+
+#[test]
 fn subscribe_trade() {
     gen_test_subscribe_trade!(
         KrakenWSClient,

@@ -33,15 +33,27 @@ impl<'a> BinanceWSClient<'a> {
     }
 
     fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-        vec![format!(
-            r#"{{"id":9527,"method":"{}","params":{}}}"#,
-            if subscribe {
-                "SUBSCRIBE"
-            } else {
-                "UNSUBSCRIBE"
-            },
-            serde_json::to_string(channels).unwrap()
-        )]
+        let channels_to_parse: Vec<&String> =
+            channels.iter().filter(|ch| !ch.starts_with('{')).collect();
+        let mut all_commands: Vec<String> = channels
+            .iter()
+            .filter(|ch| ch.starts_with('{'))
+            .map(|s| s.to_string())
+            .collect();
+
+        if !channels_to_parse.is_empty() {
+            all_commands.append(&mut vec![format!(
+                r#"{{"id":9527,"method":"{}","params":{}}}"#,
+                if subscribe {
+                    "SUBSCRIBE"
+                } else {
+                    "UNSUBSCRIBE"
+                },
+                serde_json::to_string(&channels_to_parse).unwrap()
+            )])
+        };
+
+        all_commands
     }
 
     fn on_misc_msg(msg: &str) -> MiscMessage {
@@ -51,6 +63,11 @@ impl<'a> BinanceWSClient<'a> {
             return MiscMessage::Misc;
         }
         let obj = resp.unwrap();
+
+        if obj.contains_key("error") {
+            error!("Received {} from {}", msg, EXCHANGE_NAME);
+            return MiscMessage::Misc;
+        }
 
         if let Some(result) = obj.get("result") {
             if serde_json::Value::Null == *result {

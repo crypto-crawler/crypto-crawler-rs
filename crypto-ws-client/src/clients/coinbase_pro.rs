@@ -33,8 +33,14 @@ fn channel_pairs_to_command(channel: &str, pairs: &[String]) -> String {
 }
 
 fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
+    let mut all_commands: Vec<String> = channels
+        .iter()
+        .filter(|ch| ch.starts_with('{'))
+        .map(|s| s.to_string())
+        .collect();
+
     let mut channel_pairs = HashMap::<String, Vec<String>>::new();
-    for s in channels {
+    for s in channels.iter().filter(|ch| !ch.starts_with('{')) {
         let v: Vec<&str> = s.split(CHANNEL_PAIR_DELIMITER).collect();
         let channel = v[0];
         let pair = v[1];
@@ -46,26 +52,30 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
         }
     }
 
-    let mut command = String::new();
-    command.push_str(
-        format!(
-            r#"{{"type":"{}","channels": ["#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            }
-        )
-        .as_str(),
-    );
-    for (channel, pairs) in channel_pairs.iter() {
-        command.push_str(channel_pairs_to_command(channel, pairs).as_str());
-        command.push(',')
-    }
-    command.pop();
-    command.push_str("]}");
+    if !channel_pairs.is_empty() {
+        let mut command = String::new();
+        command.push_str(
+            format!(
+                r#"{{"type":"{}","channels": ["#,
+                if subscribe {
+                    "subscribe"
+                } else {
+                    "unsubscribe"
+                }
+            )
+            .as_str(),
+        );
+        for (channel, pairs) in channel_pairs.iter() {
+            command.push_str(channel_pairs_to_command(channel, pairs).as_str());
+            command.push(',')
+        }
+        command.pop();
+        command.push_str("]}");
 
-    vec![command]
+        all_commands.push(command);
+    }
+
+    all_commands
 }
 
 fn on_misc_msg(msg: &str) -> MiscMessage {

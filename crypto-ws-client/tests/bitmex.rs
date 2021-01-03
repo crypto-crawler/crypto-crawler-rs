@@ -21,6 +21,14 @@ mod bitmex_swap {
     }
 
     #[test]
+    fn subscribe_raw_json() {
+        gen_test_subscribe!(
+            BitMEXWSClient,
+            &vec![r#"{"op":"subscribe","args":["trade:XBTUSD","quote:XBTUSD"]}"#.to_string()]
+        );
+    }
+
+    #[test]
     fn subscribe_trade() {
         gen_test_subscribe_trade!(
             BitMEXWSClient,

@@ -15,6 +15,14 @@ fn subscribe() {
 }
 
 #[test]
+fn subscribe_raw_json() {
+    gen_test_subscribe!(
+        BitstampWSClient,
+        &vec![r#"{"event":"bts:subscribe","data":{"channel":"live_trades_btcusd"}}"#.to_string()]
+    );
+}
+
+#[test]
 fn subscribe_trade() {
     gen_test_subscribe_trade!(
         BitstampWSClient,
