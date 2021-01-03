@@ -1,4 +1,4 @@
-use crypto_ws_client::{KrakenWSClient, WSClient};
+use crypto_ws_client::{KrakenWSClient, WSClient, BBO};
 
 #[macro_use]
 mod utils;
@@ -38,6 +38,14 @@ fn subscribe_trade() {
 #[test]
 fn subscribe_ticker() {
     gen_test_subscribe_ticker!(
+        KrakenWSClient,
+        &vec!["XBT/USD".to_string(), "ETH/USD".to_string()]
+    );
+}
+
+#[test]
+fn subscribe_bbo() {
+    gen_test_subscribe_bbo!(
         KrakenWSClient,
         &vec!["XBT/USD".to_string(), "ETH/USD".to_string()]
     );
