@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Trade,
+    Ticker, Trade,
 };
 use log::*;
 use serde_json::Value;
@@ -75,6 +75,18 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
 impl<'a> Trade for BitfinexWSClient<'a> {
     fn subscribe_trade(&mut self, pairs: &[String]) {
         let pair_to_raw_channel = |pair: &String| format!("trades:t{}", pair);
+
+        let channels = pairs
+            .iter()
+            .map(pair_to_raw_channel)
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
+    }
+}
+
+impl<'a> Ticker for BitfinexWSClient<'a> {
+    fn subscribe_ticker(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel = |pair: &String| format!("ticker:t{}", pair);
 
         let channels = pairs
             .iter()

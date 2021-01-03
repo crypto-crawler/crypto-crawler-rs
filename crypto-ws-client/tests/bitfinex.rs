@@ -3,7 +3,7 @@ mod utils;
 
 #[cfg(test)]
 mod bitfinex_spot {
-    use crypto_ws_client::{BitfinexWSClient, WSClient};
+    use crypto_ws_client::{BitfinexWSClient, Ticker, WSClient};
 
     #[test]
     fn subscribe() {
@@ -14,11 +14,16 @@ mod bitfinex_spot {
     fn subscribe_trade() {
         gen_test_subscribe_trade!(BitfinexWSClient, &vec!["BTCUST".to_string()]);
     }
+
+    #[test]
+    fn subscribe_ticker() {
+        gen_test_subscribe_ticker!(BitfinexWSClient, &vec!["BTCUST".to_string()]);
+    }
 }
 
 #[cfg(test)]
 mod bitfinex_swap {
-    use crypto_ws_client::{BitfinexWSClient, WSClient};
+    use crypto_ws_client::{BitfinexWSClient, Ticker, WSClient};
 
     #[test]
     fn subscribe() {
@@ -28,5 +33,10 @@ mod bitfinex_swap {
     #[test]
     fn subscribe_trade() {
         gen_test_subscribe_trade!(BitfinexWSClient, &vec!["BTCF0:USTF0".to_string()]);
+    }
+
+    #[test]
+    fn subscribe_ticker() {
+        gen_test_subscribe_ticker!(BitfinexWSClient, &vec!["BTCF0:USTF0".to_string()]);
     }
 }
