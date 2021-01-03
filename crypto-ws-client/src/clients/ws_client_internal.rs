@@ -96,11 +96,6 @@ impl<'a> WSClientInternal<'a> {
     // Handle a text msg from Message::Text or Message::Binary
     // Returns true if gets a normal message, otherwise false
     fn handle_msg(&mut self, txt: &str) -> bool {
-        if txt.contains("error") {
-            error!("{} from {}", txt, self.url);
-            return false;
-        }
-
         match (self.on_misc_msg)(txt) {
             MiscMessage::Misc => false,
             MiscMessage::Reconnect => {
@@ -258,6 +253,10 @@ macro_rules! define_client {
 
             fn subscribe_ticker(&mut self, channels: &[String]) {
                 <$struct_name as Ticker>::subscribe_ticker(self, channels);
+            }
+
+            fn subscribe_bbo(&mut self, channels: &[String]) {
+                <$struct_name as BBO>::subscribe_bbo(self, channels);
             }
 
             fn subscribe(&mut self, channels: &[String]) {

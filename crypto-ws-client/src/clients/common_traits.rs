@@ -9,7 +9,7 @@ pub(super) trait Ticker {
 }
 
 // Best Bid & Offer
-pub trait BBO {
+pub(super) trait BBO {
     fn subscribe_bbo(&mut self, pairs: &[String]);
 }
 

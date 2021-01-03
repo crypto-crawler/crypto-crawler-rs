@@ -8,7 +8,7 @@ mod ws_client_internal;
 
 mod utils;
 
-pub use common_traits::*;
+use common_traits::*;
 
 pub(super) mod binance;
 pub(super) mod bitfinex;

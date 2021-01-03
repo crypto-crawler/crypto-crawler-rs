@@ -13,8 +13,6 @@
 
 mod clients;
 
-pub use clients::BBO;
-
 pub use clients::binance::*;
 pub use clients::bitfinex::*;
 pub use clients::bitmex::*;
@@ -55,6 +53,17 @@ pub trait WSClient<'a> {
     /// Not all exchanges have the ticker channel, for example, BitMEX,
     /// Bitstamp, MXC Spot, etc.
     fn subscribe_ticker(&mut self, pairs: &[String]);
+
+    /// Subscribes to best bid & offer(BBO) channels.
+    ///
+    /// BBO represents best bid and offer, i.e., level1 orderbook.
+    ///
+    /// Not all exchanges have the BBO channel, calling this function with
+    /// these exchanges will panic.
+    ///
+    /// * Binance, BitMEX, Huobi and Kraken have BBO directly.
+    /// * Bitfinex uses `book` channel with `len` set to 1 to get BBO data.
+    fn subscribe_bbo(&mut self, pairs: &[String]);
 
     /// Subscribes to channels, lower level API.
     ///

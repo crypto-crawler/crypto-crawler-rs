@@ -164,6 +164,10 @@ macro_rules! define_market_client {
                 <$struct_name as Ticker>::subscribe_ticker(self, channels);
             }
 
+            fn subscribe_bbo(&mut self, channels: &[String]) {
+                <$struct_name as BBO>::subscribe_bbo(self, channels);
+            }
+
             fn subscribe(&mut self, channels: &[String]) {
                 self.client.client.subscribe(channels);
             }
