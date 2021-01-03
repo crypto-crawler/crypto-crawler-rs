@@ -123,6 +123,7 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
     format!("{}{}{}", channel, CHANNEL_PAIR_DELIMITER, pair)
 }
 
+#[rustfmt::skip]
 impl_trait!(Trade, MXCSpotWSClient, subscribe_trade, "symbol", to_raw_channel);
 
 impl<'a> Ticker for MXCSpotWSClient<'a> {
@@ -131,7 +132,9 @@ impl<'a> Ticker for MXCSpotWSClient<'a> {
     }
 }
 
+#[rustfmt::skip]
 impl_trait!(Trade, MXCSwapWSClient, subscribe_trade, "deal", to_raw_channel);
+#[rustfmt::skip]
 impl_trait!(Ticker, MXCSwapWSClient, subscribe_ticker, "ticker", to_raw_channel);
 
 define_client!(

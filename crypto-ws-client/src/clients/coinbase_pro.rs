@@ -97,7 +97,9 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
     format!("{}{}{}", channel, CHANNEL_PAIR_DELIMITER, pair)
 }
 
+#[rustfmt::skip]
 impl_trait!(Trade, CoinbaseProWSClient, subscribe_trade, "matches", to_raw_channel);
+#[rustfmt::skip]
 impl_trait!(Ticker, CoinbaseProWSClient, subscribe_ticker, "ticker", to_raw_channel);
 
 define_client!(

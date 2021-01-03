@@ -69,6 +69,7 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
     format!("{}_{}", channel, pair)
 }
 
+#[rustfmt::skip]
 impl_trait!(Trade, BitstampWSClient, subscribe_trade, "live_trades", to_raw_channel);
 
 impl<'a> Ticker for BitstampWSClient<'a> {

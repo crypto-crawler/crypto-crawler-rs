@@ -100,7 +100,9 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
     format!("{}{}{}", channel, CHANNEL_PAIR_DELIMITER, pair)
 }
 
+#[rustfmt::skip]
 impl_trait!(Trade, KrakenWSClient, subscribe_trade, "trade", to_raw_channel);
+#[rustfmt::skip]
 impl_trait!(Ticker, KrakenWSClient, subscribe_ticker, "ticker", to_raw_channel);
 
 define_client!(

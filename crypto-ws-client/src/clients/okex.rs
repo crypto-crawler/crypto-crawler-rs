@@ -82,7 +82,9 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
     format!("{}/{}:{}", pair_to_market_type(pair), channel, pair)
 }
 
+#[rustfmt::skip]
 impl_trait!(Trade, OKExWSClient, subscribe_trade, "trade", to_raw_channel);
+#[rustfmt::skip]
 impl_trait!(Ticker, OKExWSClient, subscribe_ticker, "ticker", to_raw_channel);
 
 define_client!(
