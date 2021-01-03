@@ -17,3 +17,7 @@ pub(super) mod okex;
 trait Trade {
     fn subscribe_trade(&mut self, pairs: &[String]);
 }
+
+pub trait Ticker {
+    fn subscribe_ticker(&mut self, pairs: &[String]);
+}
