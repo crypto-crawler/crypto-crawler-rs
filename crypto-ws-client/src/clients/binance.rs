@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use super::{
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Ticker, Trade, BBO,
+    OrderBook, Ticker, Trade, BBO,
 };
 use log::*;
 use serde_json::Value;
@@ -126,8 +126,8 @@ impl_trait!(Trade, BinanceWSClient, subscribe_trade, "aggTrade", to_raw_channel)
 impl_trait!(Ticker, BinanceWSClient, subscribe_ticker, "ticker", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(BBO, BinanceWSClient, subscribe_bbo, "bookTicker", to_raw_channel);
-
-
+#[rustfmt::skip]
+impl_trait!(OrderBook, BinanceWSClient, subscribe_orderbook, "depth@100ms", to_raw_channel);
 
 /// Define market specific client.
 macro_rules! define_market_client {
@@ -219,6 +219,21 @@ impl_bbo!(BinanceSpotWSClient);
 impl_bbo!(BinanceFutureWSClient);
 impl_bbo!(BinanceLinearSwapWSClient);
 impl_bbo!(BinanceInverseSwapWSClient);
+
+macro_rules! impl_orderbook {
+    ($struct_name:ident) => {
+        impl<'a> OrderBook for $struct_name<'a> {
+            fn subscribe_orderbook(&mut self, pairs: &[String]) {
+                self.client.subscribe_orderbook(pairs);
+            }
+        }
+    };
+}
+
+impl_orderbook!(BinanceSpotWSClient);
+impl_orderbook!(BinanceFutureWSClient);
+impl_orderbook!(BinanceLinearSwapWSClient);
+impl_orderbook!(BinanceInverseSwapWSClient);
 
 #[cfg(test)]
 mod tests {
