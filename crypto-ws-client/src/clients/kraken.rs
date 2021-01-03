@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Trade,
+    Ticker, Trade,
 };
 
 use log::*;
@@ -100,6 +100,19 @@ impl<'a> Trade for KrakenWSClient<'a> {
     fn subscribe_trade(&mut self, pairs: &[String]) {
         let pair_to_raw_channel =
             |pair: &String| format!("trade{}{}", CHANNEL_PAIR_DELIMITER, pair);
+
+        let channels = pairs
+            .iter()
+            .map(pair_to_raw_channel)
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
+    }
+}
+
+impl<'a> Ticker for KrakenWSClient<'a> {
+    fn subscribe_ticker(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel =
+            |pair: &String| format!("ticker{}{}", CHANNEL_PAIR_DELIMITER, pair);
 
         let channels = pairs
             .iter()
