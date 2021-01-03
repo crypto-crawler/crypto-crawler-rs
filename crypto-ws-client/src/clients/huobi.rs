@@ -1,4 +1,4 @@
-use crate::{Trade, WSClient};
+use crate::WSClient;
 use std::collections::HashMap;
 
 use log::*;
@@ -6,6 +6,7 @@ use serde_json::Value;
 use tungstenite::Message;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
+use super::Trade;
 
 pub(super) const EXCHANGE_NAME: &str = "Huobi";
 
@@ -151,6 +152,10 @@ macro_rules! define_market_client {
                 $struct_name {
                     client: HuobiWSClient::new(real_url, on_msg),
                 }
+            }
+
+            fn subscribe_trade(&mut self, channels: &[String]) {
+                <$struct_name as Trade>::subscribe_trade(self, channels);
             }
 
             fn subscribe(&mut self, channels: &[String]) {

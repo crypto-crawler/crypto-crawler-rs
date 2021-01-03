@@ -1,7 +1,8 @@
-use crate::{Trade, WSClient};
+use crate::WSClient;
 use std::collections::HashMap;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
+use super::Trade;
 
 use log::*;
 use serde_json::Value;

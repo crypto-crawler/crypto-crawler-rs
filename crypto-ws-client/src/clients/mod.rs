@@ -13,3 +13,7 @@ pub(super) mod huobi;
 pub(super) mod kraken;
 pub(super) mod mxc;
 pub(super) mod okex;
+
+trait Trade {
+    fn subscribe_trade(&mut self, pairs: &[String]);
+}

@@ -1,4 +1,4 @@
-use crypto_ws_client::{KrakenWSClient, Trade, WSClient};
+use crypto_ws_client::{KrakenWSClient, WSClient};
 
 #[macro_use]
 mod utils;
