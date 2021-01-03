@@ -13,6 +13,8 @@
 
 mod clients;
 
+pub use clients::BBO;
+
 pub use clients::binance::*;
 pub use clients::bitfinex::*;
 pub use clients::bitmex::*;
