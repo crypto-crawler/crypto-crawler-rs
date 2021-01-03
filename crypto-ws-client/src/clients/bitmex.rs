@@ -55,26 +55,14 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
     format!("{}{}{}", channel, CHANNEL_PAIR_DELIMITER, pair)
 }
 
-impl<'a> Trade for BitMEXWSClient<'a> {
-    fn subscribe_trade(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel =
-            |pair: &String| format!("trade{}{}", CHANNEL_PAIR_DELIMITER, pair);
-
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
-    }
-}
+impl_trait!(Trade, BitMEXWSClient, subscribe_trade, "trade", to_raw_channel);
+impl_trait!(BBO, BitMEXWSClient, subscribe_bbo, "quote", to_raw_channel);
 
 impl<'a> Ticker for BitMEXWSClient<'a> {
     fn subscribe_ticker(&mut self, _pairs: &[String]) {
         panic!("BitMEX WebSocket does NOT have ticker channel");
     }
 }
-
-impl_trait!(BBO, BitMEXWSClient, subscribe_bbo, "quote", to_raw_channel);
 
 define_client!(
     BitMEXWSClient,

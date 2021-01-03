@@ -84,29 +84,12 @@ impl<'a> HuobiWSClient<'a> {
     }
 }
 
-impl<'a> Trade for HuobiWSClient<'a> {
-    fn subscribe_trade(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel = |pair: &String| format!("market.{}.trade.detail", pair);
-
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
-    }
+fn to_raw_channel(channel: &str, pair: &str) -> String {
+    format!("market.{}.{}", pair, channel)
 }
 
-impl<'a> Ticker for HuobiWSClient<'a> {
-    fn subscribe_ticker(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel = |pair: &String| format!("market.{}.detail", pair);
-
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
-    }
-}
+impl_trait!(Trade, HuobiWSClient, subscribe_trade, "trade.detail", to_raw_channel);
+impl_trait!(Ticker, HuobiWSClient, subscribe_ticker, "detail", to_raw_channel);
 
 /// Huobi Spot market.
 ///

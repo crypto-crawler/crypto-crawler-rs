@@ -78,31 +78,12 @@ fn pair_to_market_type(pair: &str) -> &'static str {
     }
 }
 
-impl<'a> Trade for OKExWSClient<'a> {
-    fn subscribe_trade(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel =
-            |pair: &String| format!("{}/trade:{}", pair_to_market_type(pair), pair);
-
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
-    }
+fn to_raw_channel(channel: &str, pair: &str) -> String {
+    format!("{}/{}:{}", pair_to_market_type(pair), channel, pair)
 }
 
-impl<'a> Ticker for OKExWSClient<'a> {
-    fn subscribe_ticker(&mut self, pairs: &[String]) {
-        let pair_to_raw_channel =
-            |pair: &String| format!("{}/ticker:{}", pair_to_market_type(pair), pair);
-
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
-    }
-}
+impl_trait!(Trade, OKExWSClient, subscribe_trade, "trade", to_raw_channel);
+impl_trait!(Ticker, OKExWSClient, subscribe_ticker, "ticker", to_raw_channel);
 
 define_client!(
     OKExWSClient,
