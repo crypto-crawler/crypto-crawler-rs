@@ -19,6 +19,38 @@ struct BinanceWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
+/// Binance Spot market.
+///
+///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/spot/en/>
+///   * Trading at: <https://www.binance.com/en/trade/BTC_USDT>
+pub struct BinanceSpotWSClient<'a> {
+    client: BinanceWSClient<'a>,
+}
+
+/// Binance Coin-margined Future market.
+///
+///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/delivery/en/>
+///   * Trading at: <https://www.binance.com/en/delivery/btcusd_quarter>
+pub struct BinanceFutureWSClient<'a> {
+    client: BinanceWSClient<'a>,
+}
+
+/// Binance USDT-margined Perpetual Swap market.
+///
+///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/futures/en/>
+///   * Trading at: <https://www.binance.com/en/futures/BTC_USDT>
+pub struct BinanceLinearSwapWSClient<'a> {
+    client: BinanceWSClient<'a>,
+}
+
+/// Binance Coin-margined Perpetual Swap market
+///
+///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/delivery/en/>
+///   * Trading at: <https://www.binance.com/en/delivery/btcusd_perpetual>
+pub struct BinanceInverseSwapWSClient<'a> {
+    client: BinanceWSClient<'a>,
+}
+
 impl<'a> BinanceWSClient<'a> {
     fn new(url: &str, on_msg: Box<dyn FnMut(String) + 'a>) -> Self {
         BinanceWSClient {
@@ -95,37 +127,7 @@ impl_trait!(Ticker, BinanceWSClient, subscribe_ticker, "ticker", to_raw_channel)
 #[rustfmt::skip]
 impl_trait!(BBO, BinanceWSClient, subscribe_bbo, "bookTicker", to_raw_channel);
 
-/// Binance Spot market.
-///
-///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/spot/en/>
-///   * Trading at: <https://www.binance.com/en/trade/BTC_USDT>
-pub struct BinanceSpotWSClient<'a> {
-    client: BinanceWSClient<'a>,
-}
 
-/// Binance Coin-margined Future market.
-///
-///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/delivery/en/>
-///   * Trading at: <https://www.binance.com/en/delivery/btcusd_quarter>
-pub struct BinanceFutureWSClient<'a> {
-    client: BinanceWSClient<'a>,
-}
-
-/// Binance USDT-margined Perpetual Swap market.
-///
-///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/futures/en/>
-///   * Trading at: <https://www.binance.com/en/futures/BTC_USDT>
-pub struct BinanceLinearSwapWSClient<'a> {
-    client: BinanceWSClient<'a>,
-}
-
-/// Binance Coin-margined Perpetual Swap market
-///
-///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/delivery/en/>
-///   * Trading at: <https://www.binance.com/en/delivery/btcusd_perpetual>
-pub struct BinanceInverseSwapWSClient<'a> {
-    client: BinanceWSClient<'a>,
-}
 
 /// Define market specific client.
 macro_rules! define_market_client {

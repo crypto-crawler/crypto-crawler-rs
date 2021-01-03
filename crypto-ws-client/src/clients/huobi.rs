@@ -25,6 +25,50 @@ struct HuobiWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
+/// Huobi Spot market.
+///
+/// * WebSocket API doc: <https://huobiapi.github.io/docs/spot/v1/en/>
+/// * Trading at: <https://www.huobi.com/en-us/exchange/>
+pub struct HuobiSpotWSClient<'a> {
+    client: HuobiWSClient<'a>,
+}
+
+/// Huobi Future market.
+///
+/// * WebSocket API doc: <https://huobiapi.github.io/docs/dm/v1/en/>
+/// * Trading at: <https://futures.huobi.com/en-us/contract/exchange/>
+pub struct HuobiFutureWSClient<'a> {
+    client: HuobiWSClient<'a>,
+}
+
+/// Huobi Inverse Swap market.
+///
+/// Inverse Swap market uses coins like BTC as collateral.
+///
+/// * WebSocket API doc: <<https://huobiapi.github.io/docs/coin_margined_swap/v1/en/>>
+/// * Trading at: <https://futures.huobi.com/en-us/swap/exchange/>
+pub struct HuobiInverseSwapWSClient<'a> {
+    client: HuobiWSClient<'a>,
+}
+
+/// Huobi Linear Swap market.
+///
+/// Linear Swap market uses USDT as collateral.
+///
+/// * WebSocket API doc: <https://huobiapi.github.io/docs/usdt_swap/v1/en/>
+/// * Trading at: <https://futures.huobi.com/en-us/linear_swap/exchange/>
+pub struct HuobiLinearSwapWSClient<'a> {
+    client: HuobiWSClient<'a>,
+}
+/// Huobi Option market.
+///
+///
+/// * WebSocket API doc: <https://huobiapi.github.io/docs/option/v1/en/>
+/// * Trading at: <https://futures.huobi.com/en-us/option/exchange/>
+pub struct HuobiOptionWSClient<'a> {
+    client: HuobiWSClient<'a>,
+}
+
 impl<'a> HuobiWSClient<'a> {
     fn new(url: &str, on_msg: Box<dyn FnMut(String) + 'a>) -> Self {
         HuobiWSClient {
@@ -97,50 +141,6 @@ impl_trait!(Trade, HuobiWSClient, subscribe_trade, "trade.detail", to_raw_channe
 impl_trait!(Ticker, HuobiWSClient, subscribe_ticker, "detail", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(BBO, HuobiWSClient, subscribe_bbo, "bbo", to_raw_channel);
-
-/// Huobi Spot market.
-///
-/// * WebSocket API doc: <https://huobiapi.github.io/docs/spot/v1/en/>
-/// * Trading at: <https://www.huobi.com/en-us/exchange/>
-pub struct HuobiSpotWSClient<'a> {
-    client: HuobiWSClient<'a>,
-}
-
-/// Huobi Future market.
-///
-/// * WebSocket API doc: <https://huobiapi.github.io/docs/dm/v1/en/>
-/// * Trading at: <https://futures.huobi.com/en-us/contract/exchange/>
-pub struct HuobiFutureWSClient<'a> {
-    client: HuobiWSClient<'a>,
-}
-
-/// Huobi Inverse Swap market.
-///
-/// Inverse Swap market uses coins like BTC as collateral.
-///
-/// * WebSocket API doc: <<https://huobiapi.github.io/docs/coin_margined_swap/v1/en/>>
-/// * Trading at: <https://futures.huobi.com/en-us/swap/exchange/>
-pub struct HuobiInverseSwapWSClient<'a> {
-    client: HuobiWSClient<'a>,
-}
-
-/// Huobi Linear Swap market.
-///
-/// Linear Swap market uses USDT as collateral.
-///
-/// * WebSocket API doc: <https://huobiapi.github.io/docs/usdt_swap/v1/en/>
-/// * Trading at: <https://futures.huobi.com/en-us/linear_swap/exchange/>
-pub struct HuobiLinearSwapWSClient<'a> {
-    client: HuobiWSClient<'a>,
-}
-/// Huobi Option market.
-///
-///
-/// * WebSocket API doc: <https://huobiapi.github.io/docs/option/v1/en/>
-/// * Trading at: <https://futures.huobi.com/en-us/option/exchange/>
-pub struct HuobiOptionWSClient<'a> {
-    client: HuobiWSClient<'a>,
-}
 
 /// Define market specific client.
 macro_rules! define_market_client {
