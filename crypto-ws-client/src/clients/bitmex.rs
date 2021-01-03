@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Ticker, Trade, BBO,
+    OrderBook, Ticker, Trade, BBO,
 };
 use log::*;
 use serde_json::Value;
@@ -74,6 +74,8 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
 impl_trait!(Trade, BitMEXWSClient, subscribe_trade, "trade", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(BBO, BitMEXWSClient, subscribe_bbo, "quote", to_raw_channel);
+#[rustfmt::skip]
+impl_trait!(OrderBook, BitMEXWSClient, subscribe_orderbook, "orderBookL2_25", to_raw_channel);
 
 impl<'a> Ticker for BitMEXWSClient<'a> {
     fn subscribe_ticker(&mut self, _pairs: &[String]) {

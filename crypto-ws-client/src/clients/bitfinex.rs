@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Ticker, Trade, BBO,
+    OrderBook, Ticker, Trade, BBO,
 };
 use log::*;
 use serde_json::Value;
@@ -94,9 +94,31 @@ impl<'a> BBO for BitfinexWSClient<'a> {
                 "event": "subscribe",
                 "channel": "book",
                 "symbol": "t{}",
-                "prec": "P0",
-                "freq": "F0",
+                "prec": "R0",
                 "len": 1
+              }}"#,
+                    pair
+                )
+            })
+            .collect::<Vec<String>>();
+
+        self.client.subscribe(&raw_channels);
+    }
+}
+
+impl<'a> OrderBook for BitfinexWSClient<'a> {
+    fn subscribe_orderbook(&mut self, pairs: &[String]) {
+        let raw_channels = pairs
+            .iter()
+            .map(|pair| {
+                format!(
+                    r#"{{
+                "event": "subscribe",
+                "channel": "book",
+                "symbol": "t{}",
+                "prec": "P0",
+                "frec": "F0",
+                "len": 25
               }}"#,
                     pair
                 )
