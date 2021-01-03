@@ -41,9 +41,10 @@ mod huobi_spot {
         let mut messages = Vec::<String>::new();
         {
             let on_msg = |msg: String| messages.push(msg);
-            let mut ws_client = HuobiSpotWSClient::new(Box::new(on_msg), None);
+            let mut ws_client =
+                HuobiSpotWSClient::new(Box::new(on_msg), Some("wss://api.huobi.pro/feed"));
             ws_client.subscribe_orderbook(&vec!["btcusdt".to_string()]);
-            ws_client.run(Some(0)); // return immediately once after a normal message
+            ws_client.run(Some(0)); // return immediately once after getting a normal message
         }
         assert!(!messages.is_empty());
     }
