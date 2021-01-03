@@ -6,7 +6,7 @@ use serde_json::Value;
 use tungstenite::Message;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{Ticker, Trade};
+use super::{Ticker, Trade, BBO};
 
 pub(super) const EXCHANGE_NAME: &str = "Huobi";
 
@@ -95,6 +95,8 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
 impl_trait!(Trade, HuobiWSClient, subscribe_trade, "trade.detail", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(Ticker, HuobiWSClient, subscribe_ticker, "detail", to_raw_channel);
+#[rustfmt::skip]
+impl_trait!(BBO, HuobiWSClient, subscribe_bbo, "bbo", to_raw_channel);
 
 /// Huobi Spot market.
 ///
@@ -214,6 +216,22 @@ impl_ticker!(HuobiFutureWSClient);
 impl_ticker!(HuobiInverseSwapWSClient);
 impl_ticker!(HuobiLinearSwapWSClient);
 impl_ticker!(HuobiOptionWSClient);
+
+macro_rules! impl_bbo {
+    ($struct_name:ident) => {
+        impl<'a> BBO for $struct_name<'a> {
+            fn subscribe_bbo(&mut self, pairs: &[String]) {
+                self.client.subscribe_bbo(pairs);
+            }
+        }
+    };
+}
+
+impl_bbo!(HuobiSpotWSClient);
+impl_bbo!(HuobiFutureWSClient);
+impl_bbo!(HuobiInverseSwapWSClient);
+impl_bbo!(HuobiLinearSwapWSClient);
+impl_bbo!(HuobiOptionWSClient);
 
 #[cfg(test)]
 mod tests {
