@@ -5,7 +5,7 @@ use crate::WSClient;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Ticker, Trade,
+    Ticker, Trade, BBO,
 };
 
 use log::*;
@@ -142,6 +142,17 @@ impl<'a> Ticker for MXCSpotWSClient<'a> {
 impl_trait!(Trade, MXCSwapWSClient, subscribe_trade, "deal", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(Ticker, MXCSwapWSClient, subscribe_ticker, "ticker", to_raw_channel);
+
+impl<'a> BBO for MXCSpotWSClient<'a> {
+    fn subscribe_bbo(&mut self, _pairs: &[String]) {
+        panic!("MXC Spot WebSocket does NOT have BBO channel");
+    }
+}
+impl<'a> BBO for MXCSwapWSClient<'a> {
+    fn subscribe_bbo(&mut self, _pairs: &[String]) {
+        panic!("MXC Swap WebSocket does NOT have BBO channel");
+    }
+}
 
 define_client!(
     MXCSpotWSClient,
