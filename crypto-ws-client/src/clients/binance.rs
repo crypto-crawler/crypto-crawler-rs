@@ -67,7 +67,6 @@ impl<'a> BinanceWSClient<'a> {
     }
 }
 
-
 fn to_raw_channel(channel: &str, pair: &str) -> String {
     format!("{}@{}", pair, channel)
 }
