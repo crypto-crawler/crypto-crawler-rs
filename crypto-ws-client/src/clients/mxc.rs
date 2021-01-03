@@ -5,7 +5,7 @@ use crate::WSClient;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Trade,
+    Ticker, Trade,
 };
 
 use log::*;
@@ -18,16 +18,18 @@ pub(super) const SPOT_WEBSOCKET_URL: &str =
     "wss://wbs.mxc.com/socket.io/?EIO=3&transport=websocket";
 pub(super) const SWAP_WEBSOCKET_URL: &str = "wss://contract.mxc.com/ws";
 
-/// The WebSocket client for MXC Spot market.
+/// MXC Spot market.
 ///
-/// Official doc: <https://github.com/mxcdevelop/APIDoc/blob/master/websocket/websocket-api.md>.
-///
-/// ## Channel format
+///   * WebSocket API doc: <https://github.com/mxcdevelop/APIDoc/blob/master/websocket/websocket-api.md>
+///   * Trading at: <https://www.mxc.com/trade/pro>
 pub struct MXCSpotWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
-/// The WebSocket client for MXC Swap market(<https://github.com/mxcdevelop/APIDoc/blob/master/contract/contract-api.md>).
+/// MXC Swap market.
+///
+///   * WebSocket API doc: <https://github.com/mxcdevelop/APIDoc/blob/master/contract/contract-api.md>
+///   * Trading at: <https://contract.mxc.com/exchange>
 pub struct MXCSwapWSClient<'a> {
     client: WSClientInternal<'a>,
 }
@@ -133,6 +135,25 @@ impl<'a> Trade for MXCSpotWSClient<'a> {
 impl<'a> Trade for MXCSwapWSClient<'a> {
     fn subscribe_trade(&mut self, pairs: &[String]) {
         let pair_to_raw_channel = |pair: &String| format!("deal{}{}", CHANNEL_PAIR_DELIMITER, pair);
+
+        let channels = pairs
+            .iter()
+            .map(pair_to_raw_channel)
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
+    }
+}
+
+impl<'a> Ticker for MXCSpotWSClient<'a> {
+    fn subscribe_ticker(&mut self, _pairs: &[String]) {
+        panic!("MXC Spot WebSocket does NOT have ticker channel");
+    }
+}
+
+impl<'a> Ticker for MXCSwapWSClient<'a> {
+    fn subscribe_ticker(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel =
+            |pair: &String| format!("ticker{}{}", CHANNEL_PAIR_DELIMITER, pair);
 
         let channels = pairs
             .iter()

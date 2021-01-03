@@ -18,7 +18,7 @@ mod mxc_spot {
 
 #[cfg(test)]
 mod mxc_swap {
-    use crypto_ws_client::{MXCSwapWSClient, WSClient};
+    use crypto_ws_client::{MXCSwapWSClient, Ticker, WSClient};
 
     #[test]
     fn subscribe() {
@@ -28,5 +28,10 @@ mod mxc_swap {
     #[test]
     fn subscribe_trade() {
         gen_test_subscribe_trade!(MXCSwapWSClient, &vec!["BTC_USDT".to_string()]);
+    }
+
+    #[test]
+    fn subscribe_ticker() {
+        gen_test_subscribe_ticker!(MXCSwapWSClient, &vec!["BTC_USDT".to_string()]);
     }
 }
