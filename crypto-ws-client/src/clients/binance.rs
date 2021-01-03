@@ -72,8 +72,11 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
     format!("{}@{}", pair, channel)
 }
 
+#[rustfmt::skip]
 impl_trait!(Trade, BinanceWSClient, subscribe_trade, "aggTrade", to_raw_channel);
+#[rustfmt::skip]
 impl_trait!(Ticker, BinanceWSClient, subscribe_ticker, "ticker", to_raw_channel);
+#[rustfmt::skip]
 impl_trait!(BBO, BinanceWSClient, subscribe_bbo, "bookTicker", to_raw_channel);
 
 /// Binance Spot market.

@@ -79,20 +79,10 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
     format!("{}:t{}", channel, pair)
 }
 
-impl_trait!(
-    Trade,
-    BitfinexWSClient,
-    subscribe_trade,
-    "trades",
-    to_raw_channel
-);
-impl_trait!(
-    Ticker,
-    BitfinexWSClient,
-    subscribe_ticker,
-    "ticker",
-    to_raw_channel
-);
+#[rustfmt::skip]
+impl_trait!(Trade, BitfinexWSClient, subscribe_trade, "trades", to_raw_channel);
+#[rustfmt::skip]
+impl_trait!(Ticker, BitfinexWSClient, subscribe_ticker, "ticker", to_raw_channel);
 
 impl<'a> BBO for BitfinexWSClient<'a> {
     fn subscribe_bbo(&mut self, pairs: &[String]) {

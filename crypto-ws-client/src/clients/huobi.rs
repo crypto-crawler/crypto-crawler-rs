@@ -88,7 +88,9 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
     format!("market.{}.{}", pair, channel)
 }
 
+#[rustfmt::skip]
 impl_trait!(Trade, HuobiWSClient, subscribe_trade, "trade.detail", to_raw_channel);
+#[rustfmt::skip]
 impl_trait!(Ticker, HuobiWSClient, subscribe_ticker, "detail", to_raw_channel);
 
 /// Huobi Spot market.
