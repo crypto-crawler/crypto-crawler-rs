@@ -3,7 +3,7 @@ mod utils;
 
 #[cfg(test)]
 mod binance_spot {
-    use crypto_ws_client::{BinanceSpotWSClient, WSClient};
+    use crypto_ws_client::{BinanceSpotWSClient, WSClient, BBO};
 
     #[test]
     fn subscribe() {
@@ -28,11 +28,19 @@ mod binance_spot {
             &vec!["btcusdt".to_string(), "ethusdt".to_string()]
         );
     }
+
+    #[test]
+    fn subscribe_bbo() {
+        gen_test_subscribe_bbo!(
+            BinanceSpotWSClient,
+            &vec!["btcusdt".to_string(), "ethusdt".to_string()]
+        );
+    }
 }
 
 #[cfg(test)]
 mod binance_future {
-    use crypto_ws_client::{BinanceFutureWSClient, WSClient};
+    use crypto_ws_client::{BinanceFutureWSClient, WSClient, BBO};
 
     #[test]
     fn subscribe() {
@@ -57,11 +65,19 @@ mod binance_future {
             &vec!["btcusd_210625".to_string(), "ethusd_210625".to_string()]
         );
     }
+
+    #[test]
+    fn subscribe_bbo() {
+        gen_test_subscribe_bbo!(
+            BinanceFutureWSClient,
+            &vec!["btcusd_210625".to_string(), "ethusd_210625".to_string()]
+        );
+    }
 }
 
 #[cfg(test)]
 mod binance_inverse_swap {
-    use crypto_ws_client::{BinanceInverseSwapWSClient, WSClient};
+    use crypto_ws_client::{BinanceInverseSwapWSClient, WSClient, BBO};
 
     #[test]
     fn subscribe() {
@@ -86,11 +102,19 @@ mod binance_inverse_swap {
             &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
         );
     }
+
+    #[test]
+    fn subscribe_bbo() {
+        gen_test_subscribe_bbo!(
+            BinanceInverseSwapWSClient,
+            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
+        );
+    }
 }
 
 #[cfg(test)]
 mod binance_linear_swap {
-    use crypto_ws_client::{BinanceLinearSwapWSClient, WSClient};
+    use crypto_ws_client::{BinanceLinearSwapWSClient, WSClient, BBO};
 
     #[test]
     fn subscribe() {
@@ -111,6 +135,14 @@ mod binance_linear_swap {
     #[test]
     fn subscribe_ticker() {
         gen_test_subscribe_ticker!(
+            BinanceLinearSwapWSClient,
+            &vec!["btcusdt".to_string(), "ethusdt".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_bbo() {
+        gen_test_subscribe_bbo!(
             BinanceLinearSwapWSClient,
             &vec!["btcusdt".to_string(), "ethusdt".to_string()]
         );
