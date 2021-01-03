@@ -18,7 +18,7 @@ pub(super) enum MiscMessage {
 
 pub(super) struct WSClientInternal<'a> {
     exchange: &'static str, // Eexchange name
-    url: String,            // Websocket base url
+    pub(super) url: String, // Websocket base url
     ws_stream: WebSocketStream,
     channels: HashSet<String>,            // subscribed channels
     on_msg: Box<dyn FnMut(String) + 'a>,  // user defined message callback

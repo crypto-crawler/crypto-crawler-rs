@@ -6,7 +6,7 @@ use serde_json::Value;
 use tungstenite::Message;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{Ticker, Trade, BBO};
+use super::{OrderBook, Ticker, Trade, BBO};
 
 pub(super) const EXCHANGE_NAME: &str = "Huobi";
 
@@ -141,6 +141,8 @@ impl_trait!(Trade, HuobiWSClient, subscribe_trade, "trade.detail", to_raw_channe
 impl_trait!(Ticker, HuobiWSClient, subscribe_ticker, "detail", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(BBO, HuobiWSClient, subscribe_bbo, "bbo", to_raw_channel);
+#[rustfmt::skip]
+impl_trait!(OrderBook, HuobiWSClient, subscribe_orderbook, "depth.size_20.high_freq", to_raw_channel);
 
 /// Define market specific client.
 macro_rules! define_market_client {
@@ -236,6 +238,39 @@ impl_bbo!(HuobiFutureWSClient);
 impl_bbo!(HuobiInverseSwapWSClient);
 impl_bbo!(HuobiLinearSwapWSClient);
 impl_bbo!(HuobiOptionWSClient);
+
+macro_rules! impl_orderbook {
+    ($struct_name:ident) => {
+        impl<'a> OrderBook for $struct_name<'a> {
+            fn subscribe_orderbook(&mut self, pairs: &[String]) {
+                self.client.subscribe_orderbook(pairs);
+            }
+        }
+    };
+}
+
+impl_orderbook!(HuobiFutureWSClient);
+impl_orderbook!(HuobiInverseSwapWSClient);
+impl_orderbook!(HuobiLinearSwapWSClient);
+impl_orderbook!(HuobiOptionWSClient);
+impl<'a> OrderBook for HuobiSpotWSClient<'a> {
+    fn subscribe_orderbook(&mut self, pairs: &[String]) {
+        if self.client.client.url.as_str() == "wss://api.huobi.pro/feed"
+            || self.client.client.url.as_str() == "wss://api-aws.huobi.pro/feed"
+        {
+            let pair_to_raw_channel = |pair: &String| to_raw_channel("mbp.20", pair);
+
+            let channels = pairs
+                .iter()
+                .map(pair_to_raw_channel)
+                .collect::<Vec<String>>();
+            self.client.subscribe(&channels);
+        } else {
+            panic!("Huobi Spot market.$symbol.mbp.$levels must use wss://api.huobi.pro/feed or wss://api-aws.huobi.pro/feed");
+        }
+        self.client.subscribe_orderbook(pairs);
+    }
+}
 
 #[cfg(test)]
 mod tests {
