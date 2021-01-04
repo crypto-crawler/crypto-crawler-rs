@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use super::{
     ws_client_internal::{MiscMessage, WSClientInternal},
-    OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
+    Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
 };
 use log::*;
 use serde_json::Value;
@@ -130,6 +130,13 @@ impl_trait!(BBO, BinanceWSClient, subscribe_bbo, "bookTicker", to_raw_channel);
 impl_trait!(OrderBook, BinanceWSClient, subscribe_orderbook, "depth@100ms", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBookSnapshot, BinanceWSClient, subscribe_orderbook_snapshot, "depth10", to_raw_channel);
+
+fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+    let interval_str = super::interval_to_string(interval, None);
+    format!("{}@kline_{}", pair, interval_str)
+}
+
+impl_candlestick!(BinanceWSClient);
 
 /// Define market specific client.
 macro_rules! define_market_client {
@@ -259,6 +266,21 @@ impl_orderbook_snapshot!(BinanceSpotWSClient);
 impl_orderbook_snapshot!(BinanceFutureWSClient);
 impl_orderbook_snapshot!(BinanceLinearSwapWSClient);
 impl_orderbook_snapshot!(BinanceInverseSwapWSClient);
+
+macro_rules! impl_candlestick {
+    ($struct_name:ident) => {
+        impl<'a> Candlestick for $struct_name<'a> {
+            fn subscribe_candlestick(&mut self, pairs: &[String], interval: u32) {
+                self.client.subscribe_candlestick(pairs, interval);
+            }
+        }
+    };
+}
+
+impl_candlestick!(BinanceSpotWSClient);
+impl_candlestick!(BinanceFutureWSClient);
+impl_candlestick!(BinanceLinearSwapWSClient);
+impl_candlestick!(BinanceInverseSwapWSClient);
 
 #[cfg(test)]
 mod tests {
