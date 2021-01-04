@@ -78,6 +78,23 @@ pub trait WSClient<'a> {
     /// * OKEx `BTC-USDT`
     fn subscribe_trade(&mut self, pairs: &[String]);
 
+    /// Subscribes to inremental orderbook channels.
+    ///
+    /// A inremental orderbook channel sends a snapshot followed by tick-by-tick updates.
+    ///
+    /// This function subscribes to exchange specific channels as the following:
+    ///
+    /// * Binance `depth@100ms`
+    /// * Bitfinex `book` channel with `prec=P0`, `frec=F0` and `len=25`
+    /// * BitMEX `orderBookL2_25`
+    /// * Bitstamp `diff_order_book`
+    /// * CoinbasePro `level2`
+    /// * Huobi `depth.size_20.high_freq` for contracts, `mbp.20` for Spot
+    /// * Kraken `book` with `depth=25`
+    /// * MXC `depth` for Swap, `symbol` for Spot
+    /// * OKEx `depth_l2_tbt`
+    fn subscribe_orderbook(&mut self, pairs: &[String]);
+
     /// Subscribes to ticker channels.
     ///
     /// A ticker channel pushes realtime 24hr rolling window ticker messages,
@@ -95,7 +112,7 @@ pub trait WSClient<'a> {
     /// these exchanges will panic.
     ///
     /// * Binance, BitMEX, Huobi and Kraken have BBO directly.
-    /// * Bitfinex uses `book` channel with `len` set to 1 to get BBO data.
+    /// * Bitfinex uses `book` channel with `len=1` and `prec="R0"` to get BBO data.
     fn subscribe_bbo(&mut self, pairs: &[String]);
 
     /// Subscribes to channels, lower level API.

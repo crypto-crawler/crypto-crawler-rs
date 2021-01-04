@@ -3,7 +3,7 @@ mod utils;
 
 #[cfg(test)]
 mod binance_spot {
-    use crypto_ws_client::{BinanceSpotWSClient, OrderBook, WSClient};
+    use crypto_ws_client::{BinanceSpotWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -56,7 +56,7 @@ mod binance_spot {
 
 #[cfg(test)]
 mod binance_future {
-    use crypto_ws_client::{BinanceFutureWSClient, OrderBook, WSClient};
+    use crypto_ws_client::{BinanceFutureWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -101,7 +101,7 @@ mod binance_future {
 
 #[cfg(test)]
 mod binance_inverse_swap {
-    use crypto_ws_client::{BinanceInverseSwapWSClient, OrderBook, WSClient};
+    use crypto_ws_client::{BinanceInverseSwapWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -146,7 +146,7 @@ mod binance_inverse_swap {
 
 #[cfg(test)]
 mod binance_linear_swap {
-    use crypto_ws_client::{BinanceLinearSwapWSClient, OrderBook, WSClient};
+    use crypto_ws_client::{BinanceLinearSwapWSClient, WSClient};
 
     #[test]
     fn subscribe() {
