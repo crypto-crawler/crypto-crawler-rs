@@ -1,10 +1,11 @@
 use crate::WSClient;
-use std::collections::HashMap;
+use core::panic;
+use std::collections::{HashMap, HashSet};
 
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
+    Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
 };
 use log::*;
 use serde_json::Value;
@@ -134,6 +135,39 @@ impl<'a> OrderBookSnapshot for BitfinexWSClient<'a> {
         panic!("Bitfinex does NOT have orderbook snapshot channel");
     }
 }
+
+fn interval_to_string(interval: u32) -> String {
+    let ret = match interval {
+        60 => "1m",
+        300 => "5m",
+        900 => "15m",
+        1800 => "30m",
+        3600 => "1h",
+        10800 => "3h",
+        21600 => "6h",
+        43200 => "12h",
+        86400 => "1D",
+        604800 => "7D",
+        1209600 => "14D",
+        _ => panic!("Supports only 1m,5m,15m,30m,1h,3h,6h,12h,1D,7D,14D"),
+    };
+    ret.to_string()
+}
+
+fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+    let interval_str = interval_to_string(interval);
+
+    format!(
+        r#"{{
+            "event": "subscribe",
+            "channel": "candles",
+            "key": "trade:{}:t{}"
+        }}"#,
+        interval_str, pair
+    )
+}
+
+impl_candlestick!(BitfinexWSClient);
 
 define_client!(
     BitfinexWSClient,
