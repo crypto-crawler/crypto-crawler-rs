@@ -14,8 +14,27 @@ pub(super) trait BBO {
 }
 
 // An orderbook snapshot followed by realtime updates.
-pub trait OrderBook {
+pub(super) trait OrderBook {
     fn subscribe_orderbook(&mut self, pairs: &[String]);
+}
+
+pub trait OrderBookSnapshot {
+    /// Subscribes to orderbook snapshot channels.
+    ///
+    /// A orderbook snapshot channel sends a complete snapshot every interval.
+    ///
+    /// This function subscribes to exchange specific channels as the following:
+    ///
+    /// * Binance `depth10`, every 100ms
+    /// * Bitfinex `xxx` channel with `prec=P0`, `frec=F0` and `len=25`
+    /// * BitMEX `orderBook10`
+    /// * Bitstamp `xxx`
+    /// * CoinbasePro `xxx`
+    /// * Huobi `xxxx` for contracts, `mbp.20` for Spot
+    /// * Kraken `xxx` with `depth=25`
+    /// * MXC `depth.full` for Swap, `symbol` for Spot
+    /// * OKEx `depth5`
+    fn subscribe_orderbook_snapshot(&mut self, pairs: &[String]);
 }
 
 macro_rules! impl_trait {
