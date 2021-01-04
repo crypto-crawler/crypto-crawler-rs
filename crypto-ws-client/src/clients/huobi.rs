@@ -6,7 +6,7 @@ use serde_json::Value;
 use tungstenite::Message;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{OrderBook, Ticker, Trade, BBO};
+use super::{OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
 
 pub(super) const EXCHANGE_NAME: &str = "Huobi";
 
@@ -143,6 +143,8 @@ impl_trait!(Ticker, HuobiWSClient, subscribe_ticker, "detail", to_raw_channel);
 impl_trait!(BBO, HuobiWSClient, subscribe_bbo, "bbo", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, HuobiWSClient, subscribe_orderbook, "depth.size_20.high_freq", to_raw_channel);
+#[rustfmt::skip]
+impl_trait!(OrderBookSnapshot, HuobiWSClient, subscribe_orderbook_snapshot, "depth.step7", to_raw_channel);
 
 /// Define market specific client.
 macro_rules! define_market_client {
@@ -273,6 +275,32 @@ impl<'a> OrderBook for HuobiSpotWSClient<'a> {
             panic!("Huobi Spot market.$symbol.mbp.$levels must use wss://api.huobi.pro/feed or wss://api-aws.huobi.pro/feed");
         }
         self.client.subscribe_orderbook(pairs);
+    }
+}
+
+macro_rules! impl_orderbook_snapshot {
+    ($struct_name:ident) => {
+        impl<'a> OrderBookSnapshot for $struct_name<'a> {
+            fn subscribe_orderbook_snapshot(&mut self, pairs: &[String]) {
+                self.client.subscribe_orderbook_snapshot(pairs);
+            }
+        }
+    };
+}
+
+impl_orderbook_snapshot!(HuobiFutureWSClient);
+impl_orderbook_snapshot!(HuobiInverseSwapWSClient);
+impl_orderbook_snapshot!(HuobiLinearSwapWSClient);
+impl_orderbook_snapshot!(HuobiOptionWSClient);
+impl<'a> OrderBookSnapshot for HuobiSpotWSClient<'a> {
+    fn subscribe_orderbook_snapshot(&mut self, pairs: &[String]) {
+        let pair_to_raw_channel = |pair: &String| to_raw_channel("depth.step1", pair);
+
+        let channels = pairs
+            .iter()
+            .map(pair_to_raw_channel)
+            .collect::<Vec<String>>();
+        self.client.client.subscribe(&channels);
     }
 }
 
