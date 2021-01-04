@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
+    Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
 };
 use log::*;
 use serde_json::Value;
@@ -84,6 +84,13 @@ impl<'a> Ticker for BitMEXWSClient<'a> {
         panic!("BitMEX WebSocket does NOT have ticker channel");
     }
 }
+
+fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+    let interval_str = super::interval_to_string(interval, None);
+    format!("tradeBin{}:{}", interval_str, pair)
+}
+
+impl_candlestick!(BitMEXWSClient);
 
 define_client!(
     BitMEXWSClient,
