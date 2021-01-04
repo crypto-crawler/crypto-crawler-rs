@@ -44,6 +44,20 @@
 //! * BitMEX `trade:XBTUSD`, `quote:XBTM21`, `instrument`
 //! * Binance `btcusdt`, `btcusd_perp`
 //! * OKEx `spot/trade:BTC-USDT`
+//!
+//! ## OrderBook Data Categories
+//!
+//! Each orderbook has three properties: `aggregation`, `frequency` and `depth`.
+//!
+//! |                      | Aggregated        | Non-Aggregated |
+//! | -------------------- | ----------------- | -------------- |
+//! | Updated per Tick     | Inremental Level2 | Level3         |
+//! | Updated per Interval | Snapshot Level2   | Not Usefull    |
+//!
+//! * Level1 data is non-aggregated, updated per tick, top 1 bid & ask from the original orderbook.
+//! * Level2 data is aggregated by price level, updated per tick.
+//! * Level3 data is the original orderbook, which is not aggregated by price level, updated per tick.
+
 mod clients;
 
 pub use clients::binance::*;
