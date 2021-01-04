@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    OrderBook, Ticker, Trade, BBO,
+    OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
 };
 
 use log::*;
@@ -117,6 +117,12 @@ impl_trait!(OrderBook, CoinbaseProWSClient, subscribe_orderbook, "level2", to_ra
 impl<'a> BBO for CoinbaseProWSClient<'a> {
     fn subscribe_bbo(&mut self, _pairs: &[String]) {
         panic!("CoinbasePro WebSocket does NOT have BBO channel");
+    }
+}
+
+impl<'a> OrderBookSnapshot for CoinbaseProWSClient<'a> {
+    fn subscribe_orderbook_snapshot(&mut self, _pairs: &[String]) {
+        panic!("CoinbasePro does NOT have orderbook snapshot channel");
     }
 }
 
