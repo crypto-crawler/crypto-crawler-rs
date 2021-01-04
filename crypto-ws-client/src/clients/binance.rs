@@ -153,6 +153,10 @@ macro_rules! define_market_client {
                 <$struct_name as OrderBook>::subscribe_orderbook(self, channels);
             }
 
+            fn subscribe_orderbook_snapshot(&mut self, channels: &[String]) {
+                <$struct_name as OrderBookSnapshot>::subscribe_orderbook_snapshot(self, channels);
+            }
+
             fn subscribe_ticker(&mut self, channels: &[String]) {
                 <$struct_name as Ticker>::subscribe_ticker(self, channels);
             }

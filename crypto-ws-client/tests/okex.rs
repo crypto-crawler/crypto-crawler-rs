@@ -10,7 +10,7 @@ fn okex_index() {
 
 #[cfg(test)]
 mod okex_spot {
-    use crypto_ws_client::{OKExWSClient, OrderBookSnapshot, WSClient};
+    use crypto_ws_client::{OKExWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -48,7 +48,7 @@ mod okex_spot {
 
 #[cfg(test)]
 mod okex_future {
-    use crypto_ws_client::{OKExWSClient, OrderBookSnapshot, WSClient};
+    use crypto_ws_client::{OKExWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -81,7 +81,7 @@ mod okex_future {
 
 #[cfg(test)]
 mod okex_swap {
-    use crypto_ws_client::{OKExWSClient, OrderBookSnapshot, WSClient};
+    use crypto_ws_client::{OKExWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -111,7 +111,7 @@ mod okex_swap {
 
 #[cfg(test)]
 mod okex_option {
-    use crypto_ws_client::{OKExWSClient, OrderBookSnapshot, WSClient};
+    use crypto_ws_client::{OKExWSClient, WSClient};
 
     #[test]
     fn subscribe() {

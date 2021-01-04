@@ -18,22 +18,8 @@ pub(super) trait OrderBook {
     fn subscribe_orderbook(&mut self, pairs: &[String]);
 }
 
-pub trait OrderBookSnapshot {
+pub(super) trait OrderBookSnapshot {
     /// Subscribes to level2 orderbook snapshot channels.
-    ///
-    /// A level2 orderbook snapshot channel sends a complete snapshot every interval.
-    ///
-    /// This function subscribes to exchange specific channels as the following:
-    ///
-    /// * Binance `depth10`, top 10, every 100ms
-    /// * Bitfinex None
-    /// * BitMEX `orderBook10`, top 10, every tick
-    /// * Bitstamp `order_book`, top 100, every 100ms
-    /// * CoinbasePro None
-    /// * Huobi `xxxx` for contracts, `mbp.20` for Spot
-    /// * Kraken `xxx` with `depth=25`
-    /// * MXC `depth.full` for Swap, top 20, every 100ms; `get.depth` for Spot, full, every 26s
-    /// * OKEx `depth5`, top 5, every 100ms
     fn subscribe_orderbook_snapshot(&mut self, pairs: &[String]);
 }
 
