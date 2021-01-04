@@ -78,9 +78,11 @@ pub trait WSClient<'a> {
     /// * OKEx `BTC-USDT`
     fn subscribe_trade(&mut self, pairs: &[String]);
 
-    /// Subscribes to best bid & offer(BBO) channels.
+    /// Subscribes to BBO(best bid & offer) channels.
     ///
-    /// BBO represents best bid and offer, i.e., level1 orderbook.
+    /// BBO represents best bid and offer, which is also refered to as level1
+    /// data. It is the top 1 bid and ask from the orginal orderbook, so BBO
+    /// is updated per tick and non-aggregated.
     ///
     /// Not all exchanges have the BBO channel, calling this function with
     /// these exchanges will panic.
@@ -89,9 +91,10 @@ pub trait WSClient<'a> {
     /// * Bitfinex uses `book` channel with `len=1` and `prec="R0"` to get BBO data.
     fn subscribe_bbo(&mut self, pairs: &[String]);
 
-    /// Subscribes to level2 orderbook channels.
+    /// Subscribes to incremental level2 orderbook channels.
     ///
-    /// A level2 orderbook channel sends a snapshot followed by tick-by-tick updates.
+    /// An incremental level2 orderbook channel sends a snapshot followed by
+    /// tick-by-tick updates.
     ///
     /// Level2 orderbook is the raw orderbook(Level3) aggregated by price level, it is
     /// also refered to as "market by price level" data.
