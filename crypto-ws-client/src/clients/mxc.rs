@@ -5,7 +5,7 @@ use crate::WSClient;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    OrderBook, Ticker, Trade, BBO,
+    OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
 };
 
 use log::*;
@@ -35,20 +35,23 @@ pub struct MXCSwapWSClient<'a> {
 }
 
 // Example: symbol:BTC_USDT -> 42["sub.symbol",{"symbol":"BTC_USDT"}]
-fn spot_channel_to_command(ch: &str, subscribe: bool) -> String {
-    if ch.starts_with('[') {
-        return format!("{}{}", SOCKETIO_PREFIX, ch);
+fn spot_channel_to_command(raw_channel: &str, subscribe: bool) -> String {
+    if raw_channel.starts_with('[') {
+        return format!("{}{}", SOCKETIO_PREFIX, raw_channel);
     }
-    let v: Vec<&str> = ch.split(CHANNEL_PAIR_DELIMITER).collect();
+    let v: Vec<&str> = raw_channel.split(CHANNEL_PAIR_DELIMITER).collect();
     let channel = v[0];
     let pair = v[1];
 
+    let (command, ch) = if channel.starts_with("get.") {
+        let v: Vec<&str> = channel.split('.').collect();
+        (v[0], v[1])
+    } else {
+        (if subscribe { "sub" } else { "unsub" }, channel)
+    };
     format!(
         r#"{}["{}.{}",{{"symbol":"{}"}}]"#,
-        SOCKETIO_PREFIX,
-        if subscribe { "sub" } else { "unsub" },
-        channel,
-        pair
+        SOCKETIO_PREFIX, command, ch, pair
     )
 }
 
@@ -146,6 +149,10 @@ impl_trait!(Ticker, MXCSwapWSClient, subscribe_ticker, "ticker", to_raw_channel)
 impl_trait!(OrderBook, MXCSpotWSClient, subscribe_orderbook, "symbol", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, MXCSwapWSClient, subscribe_orderbook, "depth", to_raw_channel);
+#[rustfmt::skip]
+impl_trait!(OrderBookSnapshot, MXCSpotWSClient, subscribe_orderbook_snapshot, "get.depth", to_raw_channel);
+#[rustfmt::skip]
+impl_trait!(OrderBookSnapshot, MXCSwapWSClient, subscribe_orderbook_snapshot, "depth.full", to_raw_channel);
 
 impl<'a> BBO for MXCSpotWSClient<'a> {
     fn subscribe_bbo(&mut self, _pairs: &[String]) {

@@ -3,7 +3,7 @@ mod utils;
 
 #[cfg(test)]
 mod mxc_spot {
-    use crypto_ws_client::{MXCSpotWSClient, WSClient};
+    use crypto_ws_client::{MXCSpotWSClient, OrderBookSnapshot, WSClient};
 
     #[test]
     fn subscribe() {
@@ -27,11 +27,16 @@ mod mxc_spot {
     fn subscribe_orderbook() {
         gen_test_subscribe_orderbook!(MXCSpotWSClient, &vec!["BTC_USDT".to_string()]);
     }
+
+    #[test]
+    fn subscribe_orderbook_snapshot() {
+        gen_test_subscribe_orderbook_snapshot!(MXCSpotWSClient, &vec!["BTC_USDT".to_string()]);
+    }
 }
 
 #[cfg(test)]
 mod mxc_swap {
-    use crypto_ws_client::{MXCSwapWSClient, WSClient};
+    use crypto_ws_client::{MXCSwapWSClient, OrderBookSnapshot, WSClient};
 
     #[test]
     fn subscribe() {
@@ -59,5 +64,10 @@ mod mxc_swap {
     #[test]
     fn subscribe_orderbook() {
         gen_test_subscribe_orderbook!(MXCSwapWSClient, &vec!["BTC_USDT".to_string()]);
+    }
+
+    #[test]
+    fn subscribe_orderbook_snapshot() {
+        gen_test_subscribe_orderbook_snapshot!(MXCSwapWSClient, &vec!["BTC_USDT".to_string()]);
     }
 }
