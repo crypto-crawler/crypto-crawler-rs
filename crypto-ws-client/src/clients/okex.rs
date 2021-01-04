@@ -2,7 +2,7 @@ use crate::WSClient;
 use std::collections::HashMap;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{OrderBook, Ticker, Trade, BBO};
+use super::{OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
 
 use log::*;
 use serde_json::Value;
@@ -100,6 +100,13 @@ impl_trait!(Trade, OKExWSClient, subscribe_trade, "trade", to_raw_channel);
 impl_trait!(Ticker, OKExWSClient, subscribe_ticker, "ticker", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, OKExWSClient, subscribe_orderbook, "depth_l2_tbt", to_raw_channel);
+impl_trait!(
+    OrderBookSnapshot,
+    OKExWSClient,
+    subscribe_orderbook_snapshot,
+    "depth5",
+    to_raw_channel
+);
 
 impl<'a> BBO for OKExWSClient<'a> {
     fn subscribe_bbo(&mut self, _pairs: &[String]) {
