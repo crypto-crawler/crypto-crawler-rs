@@ -10,7 +10,7 @@ fn bitmex_instrument() {
 
 #[cfg(test)]
 mod bitmex_swap {
-    use crypto_ws_client::{BitMEXWSClient, WSClient};
+    use crypto_ws_client::{BitMEXWSClient, OrderBookSnapshot, WSClient};
 
     #[test]
     fn subscribe() {
@@ -51,11 +51,19 @@ mod bitmex_swap {
             &vec!["XBTUSD".to_string(), "ETHUSD".to_string()]
         );
     }
+
+    #[test]
+    fn subscribe_orderbook_snapshot() {
+        gen_test_subscribe_orderbook_snapshot!(
+            BitMEXWSClient,
+            &vec!["XBTUSD".to_string(), "ETHUSD".to_string()]
+        );
+    }
 }
 
 #[cfg(test)]
 mod bitmex_future {
-    use crypto_ws_client::{BitMEXWSClient, WSClient};
+    use crypto_ws_client::{BitMEXWSClient, OrderBookSnapshot, WSClient};
 
     #[test]
     fn subscribe() {
@@ -84,6 +92,14 @@ mod bitmex_future {
     #[test]
     fn subscribe_orderbook() {
         gen_test_subscribe_orderbook!(
+            BitMEXWSClient,
+            &vec!["XBTM21".to_string(), "ETHH21".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_orderbook_snapshot() {
+        gen_test_subscribe_orderbook_snapshot!(
             BitMEXWSClient,
             &vec!["XBTM21".to_string(), "ETHH21".to_string()]
         );
