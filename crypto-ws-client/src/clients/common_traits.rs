@@ -27,7 +27,7 @@ pub trait OrderBookSnapshot {
     ///
     /// * Binance `depth10`, every 100ms
     /// * Bitfinex `xxx` channel with `prec=P0`, `frec=F0` and `len=25`
-    /// * BitMEX `orderBook10`
+    /// * BitMEX `orderBook10`, every tick
     /// * Bitstamp `xxx`
     /// * CoinbasePro `xxx`
     /// * Huobi `xxxx` for contracts, `mbp.20` for Spot
