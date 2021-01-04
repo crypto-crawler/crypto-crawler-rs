@@ -78,9 +78,23 @@ pub trait WSClient<'a> {
     /// * OKEx `BTC-USDT`
     fn subscribe_trade(&mut self, pairs: &[String]);
 
-    /// Subscribes to inremental orderbook channels.
+    /// Subscribes to best bid & offer(BBO) channels.
     ///
-    /// A inremental orderbook channel sends a snapshot followed by tick-by-tick updates.
+    /// BBO represents best bid and offer, i.e., level1 orderbook.
+    ///
+    /// Not all exchanges have the BBO channel, calling this function with
+    /// these exchanges will panic.
+    ///
+    /// * Binance, BitMEX, Huobi and Kraken have BBO directly.
+    /// * Bitfinex uses `book` channel with `len=1` and `prec="R0"` to get BBO data.
+    fn subscribe_bbo(&mut self, pairs: &[String]);
+
+    /// Subscribes to level2 orderbook channels.
+    ///
+    /// A level2 orderbook channel sends a snapshot followed by tick-by-tick updates.
+    ///
+    /// Level2 orderbook is the raw orderbook(Level3) aggregated by price level, it is
+    /// also refered to as "market by price level" data.
     ///
     /// This function subscribes to exchange specific channels as the following:
     ///
@@ -103,17 +117,6 @@ pub trait WSClient<'a> {
     /// Not all exchanges have the ticker channel, for example, BitMEX,
     /// Bitstamp, MXC Spot, etc.
     fn subscribe_ticker(&mut self, pairs: &[String]);
-
-    /// Subscribes to best bid & offer(BBO) channels.
-    ///
-    /// BBO represents best bid and offer, i.e., level1 orderbook.
-    ///
-    /// Not all exchanges have the BBO channel, calling this function with
-    /// these exchanges will panic.
-    ///
-    /// * Binance, BitMEX, Huobi and Kraken have BBO directly.
-    /// * Bitfinex uses `book` channel with `len=1` and `prec="R0"` to get BBO data.
-    fn subscribe_bbo(&mut self, pairs: &[String]);
 
     /// Subscribes to channels, lower level API.
     ///
