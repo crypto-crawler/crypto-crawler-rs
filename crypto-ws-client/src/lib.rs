@@ -135,7 +135,7 @@ pub trait WSClient<'a> {
     /// Bitstamp, MXC Spot, etc.
     fn subscribe_ticker(&mut self, pairs: &[String]);
 
-    /// Subscribes to channels, lower level API.
+    /// Subscribes to raw channels, lower level API.
     ///
     /// A `raw_channel` can be:
     ///
@@ -153,7 +153,7 @@ pub trait WSClient<'a> {
     /// sent out directly without parsing.
     fn subscribe(&mut self, raw_channels: &[String]);
 
-    /// Unsubscribes from channels, lower level API.
+    /// Unsubscribes from raw channels, lower level API.
     fn unsubscribe(&mut self, raw_channels: &[String]);
 
     /// Starts the infinite loop until time is up or the server closes the connection.
