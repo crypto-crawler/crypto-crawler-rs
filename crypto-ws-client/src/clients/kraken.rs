@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    OrderBook, Ticker, Trade, BBO,
+    OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
 };
 
 use log::*;
@@ -123,6 +123,12 @@ impl<'a> OrderBook for KrakenWSClient<'a> {
         let channels = vec![command];
 
         self.client.subscribe(&channels);
+    }
+}
+
+impl<'a> OrderBookSnapshot for KrakenWSClient<'a> {
+    fn subscribe_orderbook_snapshot(&mut self, _pairs: &[String]) {
+        panic!("Kraken does NOT have orderbook snapshot channel");
     }
 }
 

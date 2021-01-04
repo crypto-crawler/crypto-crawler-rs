@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    OrderBook, Ticker, Trade, BBO,
+    OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
 };
 use log::*;
 use serde_json::Value;
@@ -126,6 +126,12 @@ impl<'a> OrderBook for BitfinexWSClient<'a> {
             .collect::<Vec<String>>();
 
         self.client.subscribe(&raw_channels);
+    }
+}
+
+impl<'a> OrderBookSnapshot for BitfinexWSClient<'a> {
+    fn subscribe_orderbook_snapshot(&mut self, _pairs: &[String]) {
+        panic!("Bitfinex does NOT have orderbook snapshot channel");
     }
 }
 

@@ -126,6 +126,23 @@ pub trait WSClient<'a> {
     /// * OKEx `depth_l2_tbt`
     fn subscribe_orderbook(&mut self, pairs: &[String]);
 
+    /// Subscribes to level2 orderbook snapshot channels.
+    ///
+    /// A level2 orderbook snapshot channel sends a complete snapshot every interval.
+    ///
+    /// This function subscribes to exchange specific channels as the following:
+    ///
+    /// * Binance `depth10`, top 10, every 100ms
+    /// * Bitfinex has no snapshot channel
+    /// * BitMEX `orderBook10`, top 10, every tick
+    /// * Bitstamp `order_book`, top 100, every 100ms
+    /// * CoinbasePro has no snapshot channel
+    /// * Huobi `depth.step7` for contracts, `depth.step1` for Spot, both are top 20, every 1s
+    /// * Kraken has no snapshot channel
+    /// * MXC `depth.full` for Swap, top 20, every 100ms; `get.depth` for Spot, full, every 26s
+    /// * OKEx `depth5`, top 5, every 100ms
+    fn subscribe_orderbook_snapshot(&mut self, pairs: &[String]);
+
     /// Subscribes to ticker channels.
     ///
     /// A ticker channel pushes realtime 24hr rolling window ticker messages,
