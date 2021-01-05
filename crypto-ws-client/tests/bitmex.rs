@@ -64,7 +64,13 @@ mod bitmex_swap {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BitMEXWSClient,
-            &vec!["XBTUSD".to_string(), "ETHUSD".to_string()]
+            &vec!["XBTUSD".to_string(), "ETHUSD".to_string()],
+            60
+        );
+        gen_test_subscribe_candlestick!(
+            BitMEXWSClient,
+            &vec!["XBTUSD".to_string(), "ETHUSD".to_string()],
+            86400
         );
     }
 }
@@ -117,7 +123,13 @@ mod bitmex_future {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BitMEXWSClient,
-            &vec!["XBTM21".to_string(), "ETHH21".to_string()]
+            &vec!["XBTM21".to_string(), "ETHH21".to_string()],
+            60
+        );
+        gen_test_subscribe_candlestick!(
+            BitMEXWSClient,
+            &vec!["XBTM21".to_string(), "ETHH21".to_string()],
+            86400
         );
     }
 }

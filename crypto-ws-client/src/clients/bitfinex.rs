@@ -1,6 +1,6 @@
 use crate::WSClient;
 use core::panic;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
@@ -136,8 +136,8 @@ impl<'a> OrderBookSnapshot for BitfinexWSClient<'a> {
     }
 }
 
-fn interval_to_string(interval: u32) -> String {
-    let ret = match interval {
+fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+    let interval_str = match interval {
         60 => "1m",
         300 => "5m",
         900 => "15m",
@@ -149,13 +149,9 @@ fn interval_to_string(interval: u32) -> String {
         86400 => "1D",
         604800 => "7D",
         1209600 => "14D",
-        _ => panic!("Supports only 1m,5m,15m,30m,1h,3h,6h,12h,1D,7D,14D"),
+        2592000 => "1M",
+        _ => panic!("Bitfinex has intervals 1m,5m,15m,30m,1h,3h,6h,12h,1D,7D,14D,1M"),
     };
-    ret.to_string()
-}
-
-fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
-    let interval_str = interval_to_string(interval);
 
     format!(
         r#"{{

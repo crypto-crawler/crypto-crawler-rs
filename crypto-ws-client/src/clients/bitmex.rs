@@ -86,7 +86,13 @@ impl<'a> Ticker for BitMEXWSClient<'a> {
 }
 
 fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
-    let interval_str = super::interval_to_string(interval, None);
+    let interval_str = match interval {
+        60 => "1m",
+        300 => "5m",
+        3600 => "1h",
+        86400 => "1d",
+        _ => panic!("BitMEX has intervals 1m,5m,1h,1d"),
+    };
     format!("tradeBin{}:{}", interval_str, pair)
 }
 
