@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
+    Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
 };
 
 use log::*;
@@ -129,6 +129,32 @@ impl<'a> OrderBook for KrakenWSClient<'a> {
 impl<'a> OrderBookSnapshot for KrakenWSClient<'a> {
     fn subscribe_orderbook_snapshot(&mut self, _pairs: &[String]) {
         panic!("Kraken does NOT have orderbook snapshot channel");
+    }
+}
+
+impl<'a> Candlestick for KrakenWSClient<'a> {
+    fn subscribe_candlestick(&mut self, pairs: &[String], interval: u32) {
+        let valid_set: Vec<u32> = vec![1, 5, 15, 30, 60, 240, 1440, 10080, 21600]
+            .into_iter()
+            .map(|x| x * 60)
+            .collect();
+        if !valid_set.contains(&interval) {
+            let joined = valid_set
+                .into_iter()
+                .map(|x| (x / 60).to_string())
+                .collect::<Vec<String>>()
+                .join(",");
+            panic!("Kraken has intervals {}", joined);
+        }
+
+        let command = format!(
+            r#"{{"event":"subscribe","pair":{},"subscription":{{"name":"ohlc", "interval":{}}}}}"#,
+            serde_json::to_string(pairs).unwrap(),
+            interval / 60
+        );
+        let channels = vec![command];
+
+        self.client.subscribe(&channels);
     }
 }
 
