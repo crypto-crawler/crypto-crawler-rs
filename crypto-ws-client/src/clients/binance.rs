@@ -189,6 +189,10 @@ macro_rules! define_market_client {
                 <$struct_name as BBO>::subscribe_bbo(self, channels);
             }
 
+            fn subscribe_candlestick(&mut self, pairs: &[String], interval: u32) {
+                <$struct_name as Candlestick>::subscribe_candlestick(self, pairs, interval);
+            }
+
             fn subscribe(&mut self, channels: &[String]) {
                 self.client.client.subscribe(channels);
             }

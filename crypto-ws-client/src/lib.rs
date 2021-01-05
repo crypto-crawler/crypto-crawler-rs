@@ -11,6 +11,7 @@
 //! ws_client.run(Some(2)); // run for 2 seconds
 //! ```
 //! ## High Level APIs
+//!
 //! The following APIs are high-level APIs with ease of use:
 //!
 //! * subscribe_trade(&mut self, pairs: &[String])
@@ -56,7 +57,7 @@
 //!
 //! * Level1 data is non-aggregated, updated per tick, top 1 bid & ask from the original orderbook.
 //! * Level2 data is aggregated by price level, updated per tick.
-//! * Level3 data is the original orderbook, which is not aggregated by price level, updated per tick.
+//! * Level3 data is the original orderbook, which is not aggregated.
 
 mod clients;
 
@@ -118,12 +119,12 @@ pub trait WSClient<'a> {
     /// * Binance `depth@100ms`
     /// * Bitfinex `book` channel with `prec=P0`, `frec=F0` and `len=25`
     /// * BitMEX `orderBookL2_25`
-    /// * Bitstamp `diff_order_book`
+    /// * Bitstamp `diff_order_book`, top 100
     /// * CoinbasePro `level2`
     /// * Huobi `depth.size_20.high_freq` for contracts, `mbp.20` for Spot
     /// * Kraken `book` with `depth=25`
     /// * MXC `depth` for Swap, `symbol` for Spot
-    /// * OKEx `depth_l2_tbt`
+    /// * OKEx `depth_l2_tbt`, top 100
     fn subscribe_orderbook(&mut self, pairs: &[String]);
 
     /// Subscribes to level2 orderbook snapshot channels.
@@ -151,6 +152,16 @@ pub trait WSClient<'a> {
     /// Not all exchanges have the ticker channel, for example, BitMEX,
     /// Bitstamp, MXC Spot, etc.
     fn subscribe_ticker(&mut self, pairs: &[String]);
+
+    /// Subscribes to candlestick channels.
+    ///
+    /// The candlestick channel sends OHLCV messages at interval.
+    ///
+    /// `interval` specifies the interval of candlesticks in seconds.
+    ///
+    /// Not all exchanges have candlestick channels, for example, Bitstamp
+    /// and CoinbasePro.
+    fn subscribe_candlestick(&mut self, pairs: &[String], interval: u32);
 
     /// Subscribes to raw channels, lower level API.
     ///
