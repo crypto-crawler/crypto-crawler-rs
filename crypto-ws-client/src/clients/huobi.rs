@@ -6,7 +6,7 @@ use serde_json::Value;
 use tungstenite::Message;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
+use super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
 
 pub(super) const EXCHANGE_NAME: &str = "Huobi";
 
@@ -82,6 +82,10 @@ impl<'a> HuobiWSClient<'a> {
         }
     }
 
+    fn subscribe(&mut self, channels: &[String]) {
+        self.client.subscribe(channels);
+    }
+
     fn channel_to_command(channel: &str, subscribe: bool) -> String {
         if channel.starts_with('{') {
             return channel.to_string();
@@ -146,6 +150,24 @@ impl_trait!(OrderBook, HuobiWSClient, subscribe_orderbook, "depth.size_20.high_f
 #[rustfmt::skip]
 impl_trait!(OrderBookSnapshot, HuobiWSClient, subscribe_orderbook_snapshot, "depth.step7", to_raw_channel);
 
+fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+    let interval_str = match interval {
+        60 => "1min",
+        300 => "5min",
+        900 => "15min",
+        1800 => "30min",
+        3600 => "60min",
+        14400 => "4hour",
+        86400 => "1day",
+        604800 => "1week",
+        2592000 => "1mon",
+        _ => panic!("Huobi has intervals 1min,5min,15min,30min,60min,4hour,1day,1week,1mon"),
+    };
+    format!("market.{}.kline.{}", pair, interval_str)
+}
+
+impl_candlestick!(HuobiWSClient);
+
 /// Define market specific client.
 macro_rules! define_market_client {
     ($struct_name:ident, $default_url:ident) => {
@@ -181,7 +203,7 @@ macro_rules! define_market_client {
             }
 
             fn subscribe(&mut self, channels: &[String]) {
-                self.client.client.subscribe(channels);
+                self.client.subscribe(channels);
             }
 
             fn unsubscribe(&mut self, channels: &[String]) {
@@ -281,6 +303,12 @@ impl<'a> OrderBook for HuobiSpotWSClient<'a> {
         self.client.subscribe_orderbook(pairs);
     }
 }
+
+impl_candlestick!(HuobiSpotWSClient);
+impl_candlestick!(HuobiFutureWSClient);
+impl_candlestick!(HuobiInverseSwapWSClient);
+impl_candlestick!(HuobiLinearSwapWSClient);
+impl_candlestick!(HuobiOptionWSClient);
 
 macro_rules! impl_orderbook_snapshot {
     ($struct_name:ident) => {
