@@ -1,4 +1,4 @@
-use crypto_ws_client::{KrakenWSClient, WSClient};
+use crypto_ws_client::{Candlestick, KrakenWSClient, WSClient};
 
 #[macro_use]
 mod utils;
@@ -56,5 +56,20 @@ fn subscribe_orderbook() {
     gen_test_subscribe_orderbook!(
         KrakenWSClient,
         &vec!["XBT/USD".to_string(), "ETH/USD".to_string()]
+    );
+}
+
+#[test]
+fn subscribe_candlestick() {
+    gen_test_subscribe_candlestick!(
+        KrakenWSClient,
+        &vec!["XBT/USD".to_string(), "ETH/USD".to_string()],
+        60
+    );
+
+    gen_test_subscribe_candlestick!(
+        KrakenWSClient,
+        &vec!["XBT/USD".to_string(), "ETH/USD".to_string()],
+        1296000
     );
 }
