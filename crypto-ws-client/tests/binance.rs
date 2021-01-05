@@ -65,7 +65,13 @@ mod binance_spot {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceSpotWSClient,
-            &vec!["btcusdt".to_string(), "ethusdt".to_string()]
+            &vec!["btcusdt".to_string(), "ethusdt".to_string()],
+            60
+        );
+        gen_test_subscribe_candlestick!(
+            BinanceSpotWSClient,
+            &vec!["btcusdt".to_string(), "ethusdt".to_string()],
+            2592000
         );
     }
 }
@@ -126,7 +132,13 @@ mod binance_future {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceFutureWSClient,
-            &vec!["btcusd_210625".to_string(), "ethusd_210625".to_string()]
+            &vec!["btcusd_210625".to_string(), "ethusd_210625".to_string()],
+            60
+        );
+        gen_test_subscribe_candlestick!(
+            BinanceFutureWSClient,
+            &vec!["btcusd_210625".to_string(), "ethusd_210625".to_string()],
+            2592000
         );
     }
 }
@@ -187,7 +199,13 @@ mod binance_inverse_swap {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceInverseSwapWSClient,
-            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
+            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()],
+            60
+        );
+        gen_test_subscribe_candlestick!(
+            BinanceInverseSwapWSClient,
+            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()],
+            2592000
         );
     }
 }
@@ -248,7 +266,13 @@ mod binance_linear_swap {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceLinearSwapWSClient,
-            &vec!["btcusdt".to_string(), "ethusdt".to_string()]
+            &vec!["btcusdt".to_string(), "ethusdt".to_string()],
+            60
+        );
+        gen_test_subscribe_candlestick!(
+            BinanceLinearSwapWSClient,
+            &vec!["btcusdt".to_string(), "ethusdt".to_string()],
+            2592000
         );
     }
 }

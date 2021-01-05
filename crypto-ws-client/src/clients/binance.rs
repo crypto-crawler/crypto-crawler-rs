@@ -132,7 +132,24 @@ impl_trait!(OrderBook, BinanceWSClient, subscribe_orderbook, "depth@100ms", to_r
 impl_trait!(OrderBookSnapshot, BinanceWSClient, subscribe_orderbook_snapshot, "depth10", to_raw_channel);
 
 fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
-    let interval_str = super::interval_to_string(interval, None);
+    let interval_str = match interval {
+        60 => "1m",
+        180 => "3m",
+        300 => "5m",
+        900 => "15m",
+        1800 => "30m",
+        3600 => "1h",
+        7200 => "2h",
+        14400 => "4h",
+        21600 => "6h",
+        28800 => "8h",
+        43200 => "12h",
+        86400 => "1d",
+        259200 => "3d",
+        604800 => "1w",
+        2592000 => "1M",
+        _ => panic!("Binance has intervals 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M"),
+    };
     format!("{}@kline_{}", pair, interval_str)
 }
 
