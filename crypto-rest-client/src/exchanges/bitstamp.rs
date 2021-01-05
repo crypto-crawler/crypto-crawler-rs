@@ -30,7 +30,6 @@ impl BitstampRestClient {
     /// to be returned. Possible values are "minute", "hour" (default) or "day".
     ///
     /// For example: <https://www.bitstamp.net/api/v2/transactions/btcusd/?time=hour>
-    #[allow(non_snake_case)]
     pub fn fetch_trades(symbol: &str, time: Option<String>) -> Result<String, reqwest::Error> {
         gen_api!(format!("/v2/transactions/{}/", symbol), time)
     }

@@ -7,6 +7,7 @@ pub use exchanges::binance::binance_spot::BinanceSpotRestClient;
 pub use exchanges::bitfinex::BitfinexRestClient;
 pub use exchanges::bitmex::BitMEXRestClient;
 pub use exchanges::bitstamp::BitstampRestClient;
+pub use exchanges::coinbase_pro::CoinbaseProRestClient;
 
 #[cfg(test)]
 mod tests {
