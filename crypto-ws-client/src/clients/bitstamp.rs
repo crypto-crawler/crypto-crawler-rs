@@ -2,7 +2,7 @@ use crate::WSClient;
 use std::collections::HashMap;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
+use super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
 use log::*;
 use serde_json::Value;
 
@@ -88,6 +88,12 @@ impl<'a> Ticker for BitstampWSClient<'a> {
 impl<'a> BBO for BitstampWSClient<'a> {
     fn subscribe_bbo(&mut self, _pairs: &[String]) {
         panic!("Bitstamp WebSocket does NOT have BBO channel");
+    }
+}
+
+impl<'a> Candlestick for BitstampWSClient<'a> {
+    fn subscribe_candlestick(&mut self, _pairs: &[String], interval: u32) {
+        panic!("Bitstamp does NOT have candlestick channel");
     }
 }
 
