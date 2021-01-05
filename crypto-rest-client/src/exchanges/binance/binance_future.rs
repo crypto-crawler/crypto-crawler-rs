@@ -24,7 +24,6 @@ impl BinanceFutureRestClient {
     ///
     /// Equivalent to `/dapi/v1/aggTrades` with `limit=1000`
     ///
-    ///
     /// For example: <https://dapi.binance.com/dapi/v1/aggTrades?symbol=BTCUSD_210625&limit=1000>
     pub fn fetch_agg_trades(
         symbol: &str,
