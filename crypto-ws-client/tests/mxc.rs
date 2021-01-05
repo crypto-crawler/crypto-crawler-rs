@@ -3,7 +3,7 @@ mod utils;
 
 #[cfg(test)]
 mod mxc_spot {
-    use crypto_ws_client::{MXCSpotWSClient, WSClient};
+    use crypto_ws_client::{Candlestick, MXCSpotWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -32,11 +32,17 @@ mod mxc_spot {
     fn subscribe_orderbook_snapshot() {
         gen_test_subscribe_orderbook_snapshot!(MXCSpotWSClient, &vec!["BTC_USDT".to_string()]);
     }
+
+    #[test]
+    fn subscribe_candlestick() {
+        gen_test_subscribe_candlestick!(MXCSpotWSClient, &vec!["BTC_USDT".to_string()], 60);
+        gen_test_subscribe_candlestick!(MXCSpotWSClient, &vec!["BTC_USDT".to_string()], 2592000);
+    }
 }
 
 #[cfg(test)]
 mod mxc_swap {
-    use crypto_ws_client::{MXCSwapWSClient, WSClient};
+    use crypto_ws_client::{Candlestick, MXCSwapWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -69,5 +75,11 @@ mod mxc_swap {
     #[test]
     fn subscribe_orderbook_snapshot() {
         gen_test_subscribe_orderbook_snapshot!(MXCSwapWSClient, &vec!["BTC_USDT".to_string()]);
+    }
+
+    #[test]
+    fn subscribe_candlestick() {
+        gen_test_subscribe_candlestick!(MXCSwapWSClient, &vec!["BTC_USDT".to_string()], 60);
+        gen_test_subscribe_candlestick!(MXCSwapWSClient, &vec!["BTC_USDT".to_string()], 2592000);
     }
 }
