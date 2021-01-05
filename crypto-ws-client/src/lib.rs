@@ -14,37 +14,36 @@
 //!
 //! The following APIs are high-level APIs with ease of use:
 //!
-//! * subscribe_trade(&mut self, pairs: &[String])
-//! * subscribe_ticker(&mut self, pairs: &[String])
-//! * subscribe_bbo(&mut self, pairs: &[String])
+//! * `subscribe_trade(&mut self, pairs: &[String])`
+//! * `subscribe_bbo(&mut self, pairs: &[String])`
+//! * `subscribe_orderbook(&mut self, pairs: &[String])`
+//! * `subscribe_ticker(&mut self, pairs: &[String])`
+//! * `subscribe_candlestick(&mut self, pairs: &[String], interval: u32)`
 //!
 //! They are easier to use and cover mostly used scenarios.
 //!
 //! ## Low Level APIs
 //!
-//! Sometimes high-level APIs can NOT meet our needs, this package provides two low-level APIs:
+//! Sometimes high-level APIs can NOT meet our needs, this package provides two
+//! low-level APIs:
 //!
-//! * subscribe(&mut self, raw_channels: &[String])
-//! * unsubscribe(&mut self, raw_channels: &[String])
+//! * `subscribe(&mut self, raw_channels: &[String])`
+//! * `unsubscribe(&mut self, raw_channels: &[String])`
 //!
-//！ A `raw_channel` can be:
+//! A `raw_channel` can be:
 //!
-//! * `channel:pair`
-//! * `channel`
-//! * A JSON string
-//!
-//! Usually a `raw_channel` is composed by a `channel` and a `pair`,
-//! delimited by `,`. Sometimes the `pair` is optional, for example,
-//! `instrument` of BitMEX, `market.overview` of Huobi.
-//!
-//! If a `raw_channel` starts with `{`, which means it is a JSON string,
-//! then it will be sent out directly without any parsing.
-//!
-//! More examples:
-//!
-//! * BitMEX `trade:XBTUSD`, `quote:XBTM21`, `instrument`
-//! * Binance `btcusdt`, `btcusd_perp`
-//! * OKEx `spot/trade:BTC-USDT`
+//! * A plain string, supported by Binance, BitMEX, Bitstamp, Huobi, OKEx.
+//! For example, Binance `btcusdt@aggTrade`, BitMEX `trade:XBTUSD,
+//! `instrument`, Bitstamp `live_trades_btcusd`,
+//! Huobi `market.btcusdt.trade.detail`, `market.overview`,
+//! OKEx `spot/trade:BTC-USDT`.
+//! * channel:pair. For exchanges not supporting plain string channels,
+//! this library will split this kind of `raw_channel` by `:`, then
+//! compose a JSON string. For example, Bitfinex `trades:tBTCUST`,
+//! CoinbasePro `matches:BTC-USD`, Kraken `trade:XBT/USD`
+//! * A JSON string, supported by all exchanges. If a `raw_channel` starts
+//! with `{`, which means it is the final JSON string, thus it will be
+//! sent out directly without parsing.
 //!
 //! ## OrderBook Data Categories
 //!
