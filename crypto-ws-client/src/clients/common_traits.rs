@@ -23,7 +23,7 @@ pub(super) trait OrderBookSnapshot {
     fn subscribe_orderbook_snapshot(&mut self, pairs: &[String]);
 }
 
-pub trait Candlestick {
+pub(super) trait Candlestick {
     /// Subscribes to candlestick channels which send OHLCV messages.
     ///
     /// `interval` specifies the interval of candlesticks in second unit.
