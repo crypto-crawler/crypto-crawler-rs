@@ -1,5 +1,3 @@
-use core::panic;
-
 // tick-by-tick trade
 pub(super) trait Trade {
     fn subscribe_trade(&mut self, pairs: &[String]);
@@ -48,43 +46,6 @@ macro_rules! impl_trait {
     };
 }
 
-pub(super) fn interval_to_string(interval: u32, exchange: Option<&'static str>) -> String {
-    let result = if interval < 60 {
-        panic!("interval can NOT be less than 60 seconds")
-    } else if interval < 3600 {
-        (interval / 60, 'm')
-    } else if interval < 3600 * 24 {
-        (interval / 3600, 'h')
-    } else if interval < 3600 * 24 * 7 {
-        (interval / (3600 * 24), 'd')
-    } else if interval <= 3600 * 24 * 7 * 4 {
-        (interval / (3600 * 24 * 7), 'w')
-    } else {
-        panic!("interval greater than 4 weeks is not supported")
-    };
-
-    let suffix = match exchange {
-        Some(ex) => {
-            if ex == "Huobi" {
-                match result.1 {
-                    'm' => "min".to_string(),
-                    'h' => "hour".to_string(),
-                    'd' => "day".to_string(),
-                    'w' => "week".to_string(),
-                    _ => panic!("Unsupported interval {}", interval),
-                }
-            } else {
-                result.1.to_string()
-            }
-        }
-        None => result.1.to_string(),
-    };
-
-    let mut ret = result.0.to_string();
-    ret.push_str(suffix.as_str());
-    ret
-}
-
 macro_rules! impl_candlestick {
     ($struct_name:ident) => {
         impl<'a> Candlestick for $struct_name<'a> {
@@ -97,42 +58,4 @@ macro_rules! impl_candlestick {
             }
         }
     };
-}
-
-#[cfg(test)]
-mod tests {
-    use super::interval_to_string;
-
-    #[test]
-    #[should_panic]
-    fn test_less_than_60s() {
-        interval_to_string(59, None);
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_greater_than_4week() {
-        interval_to_string(3600 * 24 * 29, None);
-    }
-
-    #[test]
-    fn test_normal_interval() {
-        assert_eq!("1m".to_string(), interval_to_string(60, None));
-        assert_eq!("3m".to_string(), interval_to_string(180, None));
-        assert_eq!("5m".to_string(), interval_to_string(300, None));
-        assert_eq!("30m".to_string(), interval_to_string(1800, None));
-        assert_eq!("1h".to_string(), interval_to_string(3600, None));
-        assert_eq!("1hour".to_string(), interval_to_string(3600, Some("Huobi")));
-        assert_eq!("2h".to_string(), interval_to_string(7200, None));
-        assert_eq!("4h".to_string(), interval_to_string(3600 * 4, None));
-        assert_eq!("1d".to_string(), interval_to_string(3600 * 24, None));
-        assert_eq!(
-            "1day".to_string(),
-            interval_to_string(3600 * 24, Some("Huobi"))
-        );
-        assert_eq!("6d".to_string(), interval_to_string(3600 * 24 * 6, None));
-        assert_eq!("1w".to_string(), interval_to_string(3600 * 24 * 7, None));
-        assert_eq!("2w".to_string(), interval_to_string(3600 * 24 * 14, None));
-        assert_eq!("4w".to_string(), interval_to_string(3600 * 24 * 28, None));
-    }
 }
