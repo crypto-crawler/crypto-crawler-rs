@@ -5,7 +5,7 @@ use crate::WSClient;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
+    Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
 };
 
 use log::*;
@@ -162,6 +162,59 @@ impl<'a> BBO for MXCSpotWSClient<'a> {
 impl<'a> BBO for MXCSwapWSClient<'a> {
     fn subscribe_bbo(&mut self, _pairs: &[String]) {
         panic!("MXC Swap WebSocket does NOT have BBO channel");
+    }
+}
+
+fn interval_to_string(interval: u32) -> String {
+    let tmp = match interval {
+        60 => "Min1",
+        300 => "Min5",
+        900 => "Min15",
+        1800 => "Min30",
+        3600 => "Min60",
+        14400 => "Hour4",
+        28800 => "Hour8",
+        86400 => "Day1",
+        604800 => "Week1",
+        2592000 => "Month1",
+        _ => panic!("MXC has intervals Min1,Min5,Min15,Min30,Min60,Hour4,Hour8,Day1,Week1,Month1"),
+    };
+    tmp.to_string()
+}
+
+impl<'a> Candlestick for MXCSpotWSClient<'a> {
+    fn subscribe_candlestick(&mut self, pairs: &[String], interval: u32) {
+        let interval_str = interval_to_string(interval);
+
+        let channels = pairs
+            .iter()
+            .map(|pair| {
+                format!(
+                    r#"["sub.kline",{{"symbol":"{}","interval":"{}"}}]"#,
+                    pair, interval_str
+                )
+            })
+            .collect::<Vec<String>>();
+
+        self.client.subscribe(&channels);
+    }
+}
+
+impl<'a> Candlestick for MXCSwapWSClient<'a> {
+    fn subscribe_candlestick(&mut self, pairs: &[String], interval: u32) {
+        let interval_str = interval_to_string(interval);
+
+        let channels = pairs
+            .iter()
+            .map(|pair| {
+                format!(
+                    r#"{{"method":"sub.kline","param":{{"symbol":"{}","interval":"{}"}}}}"#,
+                    pair, interval_str
+                )
+            })
+            .collect::<Vec<String>>();
+
+        self.client.subscribe(&channels);
     }
 }
 
