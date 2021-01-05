@@ -10,7 +10,7 @@ fn okex_index() {
 
 #[cfg(test)]
 mod okex_spot {
-    use crypto_ws_client::{OKExWSClient, WSClient};
+    use crypto_ws_client::{Candlestick, OKExWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -44,11 +44,17 @@ mod okex_spot {
     fn subscribe_orderbook_snapshot() {
         gen_test_subscribe_orderbook_snapshot!(OKExWSClient, &vec!["BTC-USDT".to_string()]);
     }
+
+    #[test]
+    fn subscribe_candlestick() {
+        gen_test_subscribe_candlestick!(OKExWSClient, &vec!["BTC-USDT".to_string()], 60);
+        gen_test_subscribe_candlestick!(OKExWSClient, &vec!["BTC-USDT".to_string()], 604800);
+    }
 }
 
 #[cfg(test)]
 mod okex_future {
-    use crypto_ws_client::{OKExWSClient, WSClient};
+    use crypto_ws_client::{Candlestick, OKExWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -77,11 +83,17 @@ mod okex_future {
     fn subscribe_orderbook_snapshot() {
         gen_test_subscribe_orderbook_snapshot!(OKExWSClient, &vec!["BTC-USDT-210625".to_string()]);
     }
+
+    #[test]
+    fn subscribe_candlestick() {
+        gen_test_subscribe_candlestick!(OKExWSClient, &vec!["BTC-USDT-210625".to_string()], 60);
+        gen_test_subscribe_candlestick!(OKExWSClient, &vec!["BTC-USDT-210625".to_string()], 604800);
+    }
 }
 
 #[cfg(test)]
 mod okex_swap {
-    use crypto_ws_client::{OKExWSClient, WSClient};
+    use crypto_ws_client::{Candlestick, OKExWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -107,11 +119,17 @@ mod okex_swap {
     fn subscribe_orderbook_snapshot() {
         gen_test_subscribe_orderbook_snapshot!(OKExWSClient, &vec!["BTC-USDT-SWAP".to_string()]);
     }
+
+    #[test]
+    fn subscribe_candlestick() {
+        gen_test_subscribe_candlestick!(OKExWSClient, &vec!["BTC-USDT-SWAP".to_string()], 60);
+        gen_test_subscribe_candlestick!(OKExWSClient, &vec!["BTC-USDT-SWAP".to_string()], 604800);
+    }
 }
 
 #[cfg(test)]
 mod okex_option {
-    use crypto_ws_client::{OKExWSClient, WSClient};
+    use crypto_ws_client::{Candlestick, OKExWSClient, WSClient};
 
     #[test]
     fn subscribe() {
@@ -141,6 +159,20 @@ mod okex_option {
         gen_test_subscribe_orderbook_snapshot!(
             OKExWSClient,
             &vec!["BTC-USD-210625-72000-C".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_candlestick() {
+        gen_test_subscribe_candlestick!(
+            OKExWSClient,
+            &vec!["BTC-USD-210625-72000-C".to_string()],
+            60
+        );
+        gen_test_subscribe_candlestick!(
+            OKExWSClient,
+            &vec!["BTC-USD-210625-72000-C".to_string()],
+            604800
         );
     }
 }

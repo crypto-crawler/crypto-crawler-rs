@@ -2,7 +2,7 @@ use crate::WSClient;
 use std::collections::HashMap;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
+use super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
 
 use log::*;
 use serde_json::Value;
@@ -113,6 +113,24 @@ impl<'a> BBO for OKExWSClient<'a> {
         panic!("OKEx WebSocket does NOT have BBO channel");
     }
 }
+
+fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+    let valid_set: Vec<u32> = vec![
+        60, 180, 300, 900, 1800, 3600, 7200, 14400, 21600, 43200, 86400, 604800,
+    ];
+    if !valid_set.contains(&interval) {
+        let joined = valid_set
+            .into_iter()
+            .map(|x| x.to_string())
+            .collect::<Vec<String>>()
+            .join(",");
+        panic!("OKEx has intervals {}", joined);
+    }
+    let channel = format!("candle{}s", interval);
+    to_raw_channel(&channel, pair)
+}
+
+impl_candlestick!(OKExWSClient);
 
 define_client!(
     OKExWSClient,
