@@ -14,15 +14,16 @@ pub(super) fn http_get(
             full_url.push_str(format!("&{}={}", k, v).as_str());
         }
     }
-    println!("{}", full_url);
+    // println!("{}", full_url);
 
     let response = reqwest::blocking::get(full_url.as_str())?.text()?;
     Ok(response)
 }
 
 macro_rules! gen_api {
-    ( $path:expr, $( $param_name:ident ),* ) => {
+    ( $path:expr$(, $param_name:ident )* ) => {
         {
+            #[allow(unused_mut)]
             let mut params = HashMap::new();
             $(
                 if let Some(param_name) = $param_name {
