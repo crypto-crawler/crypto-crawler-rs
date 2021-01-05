@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
+    Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
 };
 
 use log::*;
@@ -123,6 +123,12 @@ impl<'a> BBO for CoinbaseProWSClient<'a> {
 impl<'a> OrderBookSnapshot for CoinbaseProWSClient<'a> {
     fn subscribe_orderbook_snapshot(&mut self, _pairs: &[String]) {
         panic!("CoinbasePro does NOT have orderbook snapshot channel");
+    }
+}
+
+impl<'a> Candlestick for CoinbaseProWSClient<'a> {
+    fn subscribe_candlestick(&mut self, _pairs: &[String], _interval: u32) {
+        panic!("CoinbasePro does NOT have candlestick channel");
     }
 }
 
