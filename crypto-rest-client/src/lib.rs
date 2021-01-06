@@ -8,6 +8,11 @@ pub use exchanges::bitfinex::BitfinexRestClient;
 pub use exchanges::bitmex::BitMEXRestClient;
 pub use exchanges::bitstamp::BitstampRestClient;
 pub use exchanges::coinbase_pro::CoinbaseProRestClient;
+pub use exchanges::huobi::huobi_future::HuobiFutureRestClient;
+pub use exchanges::huobi::huobi_inverse_swap::HuobiInverseSwapRestClient;
+pub use exchanges::huobi::huobi_linear_swap::HuobiLinearSwapRestClient;
+pub use exchanges::huobi::huobi_option::HuobiOptionRestClient;
+pub use exchanges::huobi::huobi_spot::HuobiSpotRestClient;
 
 #[cfg(test)]
 mod tests {
