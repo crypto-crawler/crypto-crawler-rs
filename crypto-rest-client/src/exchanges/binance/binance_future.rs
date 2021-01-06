@@ -5,7 +5,7 @@ const BASE_URL: &'static str = "https://dapi.binance.com";
 
 /// Binance Coin-margined Future market.
 ///
-///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/delivery/en/>
+///   * REST API doc: <https://binance-docs.github.io/apidocs/delivery/en/>
 ///   * Trading at: <https://www.binance.com/en/delivery/btcusd_quarter>
 pub struct BinanceFutureRestClient {
     _api_key: Option<String>,
