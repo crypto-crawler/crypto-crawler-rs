@@ -1,4 +1,5 @@
 use super::super::utils::http_get;
+use crate::error::Result;
 use std::collections::HashMap;
 
 const BASE_URL: &'static str = "https://contract.mxc.com";
@@ -23,7 +24,7 @@ impl MXCSwapRestClient {
     /// Get most recent trades.
     ///
     /// For example: <https://contract.mxc.com/api/v1/contract/deals/BTC_USDT>
-    pub fn fetch_trades(symbol: &str) -> Result<String, reqwest::Error> {
+    pub fn fetch_trades(symbol: &str) -> Result<String> {
         gen_api!(format!("/api/v1/contract/deals/{}", symbol))
     }
 
@@ -32,7 +33,7 @@ impl MXCSwapRestClient {
     /// Top 1000 bids and asks will be returned.
     ///
     /// For example: <https://contract.mxc.com/api/v1/contract/depth_commits/BTC_USDT/1000>
-    pub fn fetch_l2_snapshot(symbol: &str) -> Result<String, reqwest::Error> {
+    pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         gen_api!(format!("/api/v1/contract/depth_commits/{}/1000", symbol))
     }
 }

@@ -1,4 +1,5 @@
 use super::utils::http_get;
+use crate::error::Result;
 use std::collections::HashMap;
 
 const BASE_URL: &'static str = "https://api.kraken.com";
@@ -28,7 +29,7 @@ impl KrakenRestClient {
     ///
     /// For example: <https://api.kraken.com/0/public/Trades?pair=XXBTZUSD&since=1609893937598797338>
     #[allow(non_snake_case)]
-    pub fn fetch_trades(symbol: &str, since: Option<String>) -> Result<String, reqwest::Error> {
+    pub fn fetch_trades(symbol: &str, since: Option<String>) -> Result<String> {
         gen_api!(format!("/0/public/Trades?pair={}", symbol), since)
     }
 
@@ -37,7 +38,7 @@ impl KrakenRestClient {
     /// Top 500 bids and asks are returned.
     ///
     /// For example: <https://api.kraken.com/0/public/Depth?pair=XXBTZUSD&count=500>
-    pub fn fetch_l2_snapshot(symbol: &str) -> Result<String, reqwest::Error> {
+    pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         gen_api!(format!("/0/public/Depth?pair={}&count=500", symbol))
     }
 }

@@ -1,4 +1,5 @@
 use super::utils::http_get;
+use crate::error::Result;
 use std::collections::HashMap;
 
 const BASE_URL: &'static str = "https://www.okex.com/api";
@@ -31,7 +32,7 @@ impl OKExRestClient {
     /// 100 trades are returned.
     ///
     /// For example: <https://www.okex.com/api/spot/v3/instruments/BTC-USDT/trades>
-    pub fn fetch_trades(symbol: &str) -> Result<String, reqwest::Error> {
+    pub fn fetch_trades(symbol: &str) -> Result<String> {
         gen_api!(format!(
             "/{}/v3/instruments/{}/trades",
             pair_to_market_type(symbol),
@@ -44,7 +45,7 @@ impl OKExRestClient {
     /// Top 200 bids and asks are returned.
     ///
     /// For example: <https://www.okex.com/api/spot/v3/instruments/BTC-USDT/book>
-    pub fn fetch_l2_snapshot(symbol: &str) -> Result<String, reqwest::Error> {
+    pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         gen_api!(format!(
             "/{}/v3/instruments/{}/book",
             pair_to_market_type(symbol),

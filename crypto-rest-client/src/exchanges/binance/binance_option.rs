@@ -1,4 +1,6 @@
 use super::super::utils::http_get;
+use super::utils::*;
+use crate::error::Result;
 use std::collections::HashMap;
 
 const BASE_URL: &str = "https://voptions.binance.com/options-api/v1";
@@ -25,9 +27,10 @@ impl BinanceOptionRestClient {
     /// 500 recent trades are returned.
     ///
     /// For example: <https://voptions.binance.com/options-api/v1/public/market/trades?symbol=BTC-210129-40000-C&limit=500&t=1609956688000>
-    pub fn fetch_trades(symbol: &str, start_time: Option<u64>) -> Result<String, reqwest::Error> {
+    pub fn fetch_trades(symbol: &str, start_time: Option<u64>) -> Result<String> {
+        check_symbol(symbol)?;
         let t = start_time;
-        gen_api!(
+        gen_api_binance!(
             format!("/public/market/trades?symbol={}&limit=500", symbol),
             t
         )
@@ -38,7 +41,8 @@ impl BinanceOptionRestClient {
     /// Equivalent to `/dapi/v1/depth` with `limit=1000`
     ///
     /// For example: <https://voptions.binance.com/options-api/v1/public/market/depth?symbol=BTC-210129-40000-C&limit=1000>
-    pub fn fetch_l2_snapshot(symbol: &str) -> Result<String, reqwest::Error> {
-        gen_api!(format!("/public/market/depth?symbol={}&limit=1000", symbol))
+    pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
+        check_symbol(symbol)?;
+        gen_api_binance!(format!("/public/market/depth?symbol={}&limit=1000", symbol))
     }
 }
