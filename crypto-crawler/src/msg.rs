@@ -6,9 +6,9 @@ use strum_macros::{Display, EnumString};
 #[derive(PartialEq, Serialize, Deserialize, Display, Debug, EnumString)]
 pub enum MessageType {
     Trade,
-    L2Update,
+    L2Event,
     L2Snapshot,
-    L3Update,
+    L3Event,
     L3Snapshot,
     BBO,
     Ticker,
