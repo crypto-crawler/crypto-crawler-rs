@@ -5,7 +5,7 @@ const BASE_URL: &'static str = "https://fapi.binance.com";
 
 /// Binance USDT-margined Perpetual Swap market.
 ///
-///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/futures/en/>
+///   * REST API doc: <https://binance-docs.github.io/apidocs/futures/en/>
 ///   * Trading at: <https://www.binance.com/en/futures/BTC_USDT>
 pub struct BinanceLinearSwapRestClient {
     _api_key: Option<String>,
