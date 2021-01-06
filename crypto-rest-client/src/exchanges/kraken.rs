@@ -32,7 +32,7 @@ impl KrakenRestClient {
         gen_api!(format!("/0/public/Trades?pair={}", symbol), since)
     }
 
-    /// Get a L2 snapshot of orderbook.
+    /// Get a Level2 snapshot of orderbook.
     ///
     /// Top 500 bids and asks are returned.
     ///

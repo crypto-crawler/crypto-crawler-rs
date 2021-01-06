@@ -31,7 +31,7 @@ impl CoinbaseProRestClient {
         gen_api!(format!("/products/{}/trades", symbol))
     }
 
-    /// Get the latest L2 orderbook snapshot.
+    /// Get the latest Level2 orderbook snapshot.
     ///
     /// Top 50 bids and asks (aggregated) are returned.
     ///
@@ -40,7 +40,7 @@ impl CoinbaseProRestClient {
         gen_api!(format!("/products/{}/book?level=2", symbol))
     }
 
-    /// Get the latest L3 orderbook snapshot.
+    /// Get the latest Level3 orderbook snapshot.
     ///
     /// Full order book (non aggregated) are returned.
     ///

@@ -37,7 +37,7 @@ impl BitMEXRestClient {
         gen_api!("/trade", symbol, startTime)
     }
 
-    /// Get a full L2 snapshot of orderbook.
+    /// Get a full Level2 snapshot of orderbook.
     ///
     /// Equivalent to `/orderBook/L2` with `depth=0`
     ///

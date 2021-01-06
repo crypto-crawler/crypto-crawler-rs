@@ -43,7 +43,7 @@ impl BinanceSpotRestClient {
         )
     }
 
-    /// Get a L2 snapshot of orderbook.
+    /// Get a Level2 snapshot of orderbook.
     ///
     /// Equivalent to `/api/v3/depth` with `limit=1000`
     ///

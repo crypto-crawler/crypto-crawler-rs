@@ -39,7 +39,7 @@ impl BitfinexRestClient {
         )
     }
 
-    /// Get a L2 snapshot of orderbook.
+    /// Get a Level2 snapshot of orderbook.
     ///
     /// Equivalent to `/v2/book/Symbol/P0` with `len=100`
     ///
@@ -50,7 +50,7 @@ impl BitfinexRestClient {
         gen_api!(format!("/v2/book/{}/{}", symbol, "P0"), len)
     }
 
-    /// Get a L3 snapshot of orderbook.
+    /// Get a Level3 snapshot of orderbook.
     ///
     /// Equivalent to `/v2/book/Symbol/R0` with `len=100`
     ///
