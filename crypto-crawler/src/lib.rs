@@ -1,22 +1,25 @@
-use std::future::Future;
-
-use crate::msg::*;
-use crypto_markets::MarketType;
-
 mod crawlers;
+mod market_type;
 mod msg;
 
-pub async fn crawl<Fut>(
+pub use market_type::MarketType;
+pub use msg::*;
+
+/// Crawl trades.
+///
+/// `market_type` specifies the market type, true means contract markets
+/// including future, swap and option, false means spot market.
+pub fn crawl_trade<'a>(
     exchange: &str,
     market_type: MarketType,
-    channel_types: &[ChannelType],
-    pairs: &[&str],
-    msg_callback: impl Fn(Msg) -> Fut,
-) -> ()
-where
-    Fut: Future<Output = ()>,
-{
-    return;
+    symbols: &[String],
+    on_msg: Box<dyn FnMut(Message) + 'a>,
+    duration: Option<u64>,
+) {
+    match exchange {
+        "Binance" => crawlers::binance::crawl_trade(market_type, symbols, on_msg, duration),
+        _ => panic!("Unknown exchange {}", exchange),
+    }
 }
 
 #[cfg(test)]

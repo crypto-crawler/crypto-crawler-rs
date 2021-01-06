@@ -10,7 +10,8 @@ homepage = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-cr
 
 [dependencies]
 crypto-markets = "0.1.4"
-crypto-ws-client = "0.1.7"
+crypto-ws-client = {path = "../crypto-ws-client" }
+crypto-rest-client = {path = "../crypto-rest-client" }
 flate2 = "1.0"
 futures = "0.3"
 lazy_static = "1.4.0"

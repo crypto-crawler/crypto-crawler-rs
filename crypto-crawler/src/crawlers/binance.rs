@@ -1,98 +1,102 @@
 use std::collections::HashMap;
-use std::future::Future;
+use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::msg::*;
-use crypto_markets::{fetch_markets, Market, MarketType};
-use lazy_static::lazy_static;
+use crate::{msg::Message, MarketType, MessageType};
+use crypto_ws_client::{BinanceSpotWSClient, WSClient};
+use serde_json::Value;
 
 const EXCHANGE_NAME: &str = "Binance";
 
-lazy_static! {
-    static ref PERIOD_NAMES: HashMap<&'static str, &'static str> =
-        vec![("1m", "1m"), ("3m", "3m"), ("5m", "5m"), ("15m", "15m"),]
-            .into_iter()
-            .collect();
-    static ref WEBSOCKET_ENDPOINTS: HashMap<&'static str, &'static str> = vec![
-        ("Spot", "wss://stream.binance.com:9443"),
-        ("Swap", "wss://fstream.binance.com"),
-        ("Futures", "wss://dstream.binance.com"),
-    ]
-    .into_iter()
-    .collect();
+fn detect_symbol_market_type(is_contract: bool, symbol: &str) -> MarketType {
+    if symbol.ends_with("_PERP") {
+        MarketType::Swap
+    } else if symbol.ends_with("-C") || symbol.ends_with("-P") {
+        MarketType::Option
+    } else if symbol.contains('_') {
+        let date = &symbol[(symbol.len() - 6)..];
+        debug_assert!(date.parse::<i64>().is_ok());
+        MarketType::Future
+    } else {
+        if is_contract {
+            MarketType::Swap
+        } else {
+            MarketType::Spot
+        }
+    }
 }
 
-fn get_channel(
-    market_type: MarketType,
-    channel_type: ChannelType,
-    pair: &str,
-    markets: &[Market],
-) -> Vec<String> {
-    let market = markets
+fn check_symbols(market_type: MarketType, symbols: &[String]) {
+    let is_contract = market_type != MarketType::Spot;
+    let illegal_symbols: Vec<String> = symbols
         .iter()
-        .find(|x| x.pair == pair && matches!(x.market_type, market_type))
-        .unwrap();
-    assert_eq!(market.exchange, EXCHANGE_NAME);
-
-    let raw_pair: &str = &market.id.to_lowercase();
-    match channel_type {
-        ChannelType::BBO => vec![format!("{}@bookTicker", raw_pair)],
-        ChannelType::FundingRate => vec![format!("{}@markPrice", raw_pair)],
-        ChannelType::Kline => PERIOD_NAMES
-            .keys()
-            .into_iter()
-            .map(|x| format!("{}@kline_{}", raw_pair, x))
-            .collect::<Vec<String>>(),
-        ChannelType::OrderBook => vec![format!("{}@depth", raw_pair)],
-        ChannelType::Ticker => vec![format!("{}@ticker", raw_pair)],
-        ChannelType::Trade => vec![format!("{}@aggTrade", raw_pair)], // trade or aggTrade
+        .filter(|symbol| detect_symbol_market_type(is_contract, symbol) != market_type)
+        .map(|s| s.clone())
+        .collect();
+    if !illegal_symbols.is_empty() {
+        panic!(
+            "{} don't belong to {}",
+            illegal_symbols.join(", "),
+            market_type
+        );
     }
-}
 
-fn get_channel_type(channel: &str) -> ChannelType {
-    assert!(channel.contains('@'));
-    let suffix = channel.split('@').nth(1).unwrap();
-
-    match suffix {
-        "bookTicker" => ChannelType::BBO,
-        "markPrice" => ChannelType::FundingRate,
-        "depth" => ChannelType::OrderBook,
-        "ticker" => ChannelType::Ticker,
-        "trade" => ChannelType::Trade,
-        "aggTrade" => ChannelType::Trade,
-        _ => {
-            if suffix.starts_with("kline_") {
-                ChannelType::Kline
-            } else {
-                panic!("Unknown channel: {}", channel)
-            }
+    if market_type == MarketType::Swap {
+        let linear_swap: Vec<String> = symbols
+            .iter()
+            .filter(|symbol| symbol.ends_with("USDT"))
+            .map(|s| s.clone())
+            .collect();
+        let inverse_swap: Vec<String> = symbols
+            .iter()
+            .filter(|symbol| !symbol.ends_with("USDT"))
+            .map(|s| s.clone())
+            .collect();
+        if linear_swap.len() > 0 && inverse_swap.len() > 0 {
+            panic!("{} belong to linear swap, while {} belong to inverse swap, please split them into two lists", linear_swap.join(", "), inverse_swap.join(", "));
         }
     }
 }
 
-pub async fn crawl<Fut>(
+fn extract_symbol(json: &str) -> String {
+    let obj = serde_json::from_str::<HashMap<String, Value>>(&json).unwrap();
+    obj.get("data")
+        .unwrap()
+        .as_object()
+        .unwrap()
+        .get("s")
+        .unwrap()
+        .as_str()
+        .unwrap()
+        .to_string()
+}
+
+fn convert_to_message(json: String, market_type: MarketType, msg_type: MessageType) -> Message {
+    Message {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type: market_type,
+        msg_type,
+        symbol: extract_symbol(&json),
+        received_at: SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis(),
+        json,
+    }
+}
+
+pub(crate) fn crawl_trade<'a>(
     market_type: MarketType,
-    channel_types: &[ChannelType],
-    pairs: &[&str],
-    msg_callback: impl Fn(Msg) -> Fut,
-) -> ()
-where
-    Fut: Future<Output = ()>,
-{
-    // retry 3 times
-    let mut markets = Vec::<Market>::new();
-    for _i in 0..3 {
-        let resp = fetch_markets(EXCHANGE_NAME, market_type.clone());
-        if let Ok(m) = resp {
-            markets = m;
-            break;
-        }
-        match resp {
-            Ok(res) => {
-                markets = res;
-                break;
-            }
-            Err(err) => (),
-        }
-    }
-    return;
+    symbols: &[String],
+    mut on_msg: Box<dyn FnMut(Message) + 'a>,
+    duration: Option<u64>,
+) {
+    check_symbols(market_type, symbols);
+
+    let on_msg_ext = |msg: String| {
+        let message = convert_to_message(msg.to_string(), MarketType::Spot, MessageType::Trade);
+        on_msg(message);
+    };
+    let mut ws_client = BinanceSpotWSClient::new(Box::new(on_msg_ext), None);
+    ws_client.subscribe_trade(symbols);
+    ws_client.run(duration);
 }
