@@ -1,8 +1,13 @@
-use std::collections::HashMap;
 use std::time::{SystemTime, UNIX_EPOCH};
+use std::{
+    collections::HashMap,
+    time::{Duration, Instant},
+};
 
 use crate::{msg::Message, MarketType, MessageType};
-use crypto_ws_client::{BinanceSpotWSClient, WSClient};
+use crypto_rest_client::*;
+use crypto_ws_client::*;
+use log::*;
 use serde_json::Value;
 
 const EXCHANGE_NAME: &str = "Binance";
@@ -93,10 +98,84 @@ pub(crate) fn crawl_trade<'a>(
     check_symbols(market_type, symbols);
 
     let on_msg_ext = |msg: String| {
-        let message = convert_to_message(msg.to_string(), MarketType::Spot, MessageType::Trade);
+        let message = convert_to_message(msg.to_string(), market_type, MessageType::Trade);
         on_msg(message);
     };
     let mut ws_client = BinanceSpotWSClient::new(Box::new(on_msg_ext), None);
     ws_client.subscribe_trade(symbols);
     ws_client.run(duration);
+}
+
+pub(crate) fn crawl_l2_event<'a>(
+    market_type: MarketType,
+    symbols: &[String],
+    mut on_msg: Box<dyn FnMut(Message) + 'a>,
+    duration: Option<u64>,
+) {
+    check_symbols(market_type, symbols);
+
+    let on_msg_ext = |msg: String| {
+        let message = convert_to_message(msg.to_string(), market_type, MessageType::L2Event);
+        on_msg(message);
+    };
+    let mut ws_client = BinanceSpotWSClient::new(Box::new(on_msg_ext), None);
+    ws_client.subscribe_orderbook(symbols);
+    ws_client.run(duration);
+}
+
+pub(crate) fn crawl_l2_snapshot<'a>(
+    market_type: MarketType,
+    symbols: &[String],
+    mut on_msg: Box<dyn FnMut(Message) + 'a>,
+    duration: Option<u64>,
+) {
+    let mut on_msg_ext = |json: String, symbol: String| {
+        let message = Message {
+            exchange: EXCHANGE_NAME.to_string(),
+            market_type,
+            msg_type: MessageType::L2Snapshot,
+            symbol,
+            received_at: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_millis(),
+            json,
+        };
+        on_msg(message);
+    };
+
+    let now = Instant::now();
+    loop {
+        let mut succeeded = false;
+        for symbol in symbols.iter() {
+            let resp = match market_type {
+                MarketType::Spot => BinanceSpotRestClient::fetch_l2_snapshot(symbol),
+                MarketType::Future => BinanceFutureRestClient::fetch_l2_snapshot(symbol),
+                MarketType::Swap => {
+                    if symbol.ends_with("USDT") {
+                        BinanceLinearSwapRestClient::fetch_l2_snapshot(symbol)
+                    } else {
+                        BinanceInverseSwapRestClient::fetch_l2_snapshot(symbol)
+                    }
+                }
+                MarketType::Option => BinanceOptionRestClient::fetch_l2_snapshot(symbol),
+            };
+            match resp {
+                Ok(msg) => {
+                    on_msg_ext(msg, symbol.to_string());
+                    succeeded = true
+                }
+                Err(err) => error!(
+                    "{} {} {}, error: {}",
+                    EXCHANGE_NAME, market_type, symbol, err
+                ),
+            }
+        }
+
+        if let Some(seconds) = duration {
+            if now.elapsed() > Duration::from_secs(seconds) && succeeded {
+                break;
+            }
+        }
+    }
 }
