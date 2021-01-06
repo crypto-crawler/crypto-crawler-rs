@@ -129,7 +129,7 @@ impl_trait!(BBO, BinanceWSClient, subscribe_bbo, "bookTicker", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, BinanceWSClient, subscribe_orderbook, "depth@100ms", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, BinanceWSClient, subscribe_orderbook_snapshot, "depth10", to_raw_channel);
+impl_trait!(OrderBookSnapshot, BinanceWSClient, subscribe_orderbook_snapshot, "depth20", to_raw_channel);
 
 fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
     let interval_str = match interval {
