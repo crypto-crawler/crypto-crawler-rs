@@ -43,7 +43,7 @@ impl BinanceFutureRestClient {
         )
     }
 
-    /// Get a L2 snapshot of orderbook.
+    /// Get a Level2 snapshot of orderbook.
     ///
     /// Equivalent to `/dapi/v1/depth` with `limit=1000`
     ///

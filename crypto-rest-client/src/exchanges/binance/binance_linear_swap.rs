@@ -43,7 +43,7 @@ impl BinanceLinearSwapRestClient {
         )
     }
 
-    /// Get a L2 snapshot of orderbook.
+    /// Get a Level2 snapshot of orderbook.
     ///
     /// Equivalent to `/fapi/v1/depth` with `limit=1000`
     ///

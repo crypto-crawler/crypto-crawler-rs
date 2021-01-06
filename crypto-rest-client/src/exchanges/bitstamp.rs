@@ -34,7 +34,7 @@ impl BitstampRestClient {
         gen_api!(format!("/v2/transactions/{}/", symbol), time)
     }
 
-    /// Get a full L2 orderbook snapshot.
+    /// Get a full Level2 orderbook snapshot.
     ///
     /// /// Equivalent to `/order_book/symbol` with `group=1`
     ///
@@ -43,7 +43,7 @@ impl BitstampRestClient {
         gen_api!(format!("/order_book/{}", symbol))
     }
 
-    /// Get a full L3 orderbook snapshot.
+    /// Get a full Level3 orderbook snapshot.
     ///
     /// Equivalent to `/order_book/symbol` with `group=2`
     ///

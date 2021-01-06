@@ -17,7 +17,7 @@ macro_rules! impl_contract {
                 gen_api!(format!("/market/history/trade?symbol={}&size=2000", symbol))
             }
 
-            /// Get the latest L2 orderbook snapshot.
+            /// Get the latest Level2 orderbook snapshot.
             ///
             /// Top 150 bids and asks (aggregated) are returned.
             ///
