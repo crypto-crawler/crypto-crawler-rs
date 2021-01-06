@@ -21,11 +21,3 @@ pub fn crawl_trade<'a>(
         _ => panic!("Unknown exchange {}", exchange),
     }
 }
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
