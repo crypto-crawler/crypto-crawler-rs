@@ -1,4 +1,5 @@
 use super::super::utils::http_get;
+use crate::error::Result;
 use std::collections::HashMap;
 
 const BASE_URL: &'static str = "https://www.mxc.co";
@@ -26,7 +27,7 @@ impl MXCSpotRestClient {
     ///
     /// For example: <https://www.mxc.co/open/api/v2/market/deals?symbol=BTC_USDT&limit=1000&api_key=your-access-key>
     #[allow(non_snake_case)]
-    pub fn fetch_trades(&self, symbol: &str) -> Result<String, reqwest::Error> {
+    pub fn fetch_trades(&self, symbol: &str) -> Result<String> {
         gen_api!(format!(
             "/open/api/v2/market/deals?symbol={}&limit=1000&api_key={}",
             symbol, self.access_key
@@ -38,7 +39,7 @@ impl MXCSpotRestClient {
     /// Top 2000 bids and asks will be returned.
     ///
     /// For example: <https://www.mxc.co/open/api/v2/market/depth?symbol=BTC_USDT&depth=2000&api_key=your-access-key>
-    pub fn fetch_l2_snapshot(&self, symbol: &str) -> Result<String, reqwest::Error> {
+    pub fn fetch_l2_snapshot(&self, symbol: &str) -> Result<String> {
         gen_api!(format!(
             "/open/api/v2/market/depth?symbol={}&depth=2000&api_key={}",
             symbol, self.access_key

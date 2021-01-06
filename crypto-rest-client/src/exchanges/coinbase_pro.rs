@@ -1,4 +1,5 @@
 use super::utils::http_get;
+use crate::error::Result;
 use std::collections::HashMap;
 
 const BASE_URL: &'static str = "https://api.pro.coinbase.com";
@@ -27,7 +28,7 @@ impl CoinbaseProRestClient {
     /// `/products/{symbol}/trades`
     ///
     /// For example: <https://api.pro.coinbase.com/products/BTC-USD/trades>
-    pub fn fetch_trades(symbol: &str) -> Result<String, reqwest::Error> {
+    pub fn fetch_trades(symbol: &str) -> Result<String> {
         gen_api!(format!("/products/{}/trades", symbol))
     }
 
@@ -36,7 +37,7 @@ impl CoinbaseProRestClient {
     /// Top 50 bids and asks (aggregated) are returned.
     ///
     /// For example: <https://api.pro.coinbase.com/products/BTC-USD/book?level=2>
-    pub fn fetch_l2_snapshot(symbol: &str) -> Result<String, reqwest::Error> {
+    pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         gen_api!(format!("/products/{}/book?level=2", symbol))
     }
 
@@ -45,7 +46,7 @@ impl CoinbaseProRestClient {
     /// Full order book (non aggregated) are returned.
     ///
     /// For example: <https://api.pro.coinbase.com/products/BTC-USD/book?level=3>
-    pub fn fetch_l3_snapshot(symbol: &str) -> Result<String, reqwest::Error> {
+    pub fn fetch_l3_snapshot(symbol: &str) -> Result<String> {
         gen_api!(format!("/products/{}/book?level=3", symbol))
     }
 }

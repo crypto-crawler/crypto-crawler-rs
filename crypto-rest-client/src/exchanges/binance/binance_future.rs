@@ -1,4 +1,6 @@
 use super::super::utils::http_get;
+use super::utils::*;
+use crate::error::Result;
 use std::collections::HashMap;
 
 const BASE_URL: &'static str = "https://dapi.binance.com";
@@ -30,10 +32,11 @@ impl BinanceFutureRestClient {
         from_id: Option<u64>,
         start_time: Option<u64>,
         end_time: Option<u64>,
-    ) -> Result<String, reqwest::Error> {
+    ) -> Result<String> {
+        check_symbol(symbol)?;
         let symbol = Some(symbol);
         let limit = Some(1000);
-        gen_api!(
+        gen_api_binance!(
             "/dapi/v1/aggTrades",
             symbol,
             from_id,
@@ -48,9 +51,10 @@ impl BinanceFutureRestClient {
     /// Equivalent to `/dapi/v1/depth` with `limit=1000`
     ///
     /// For example: <https://dapi.binance.com/dapi/v1/depth?symbol=BTCUSD_210625&limit=1000>
-    pub fn fetch_l2_snapshot(symbol: &str) -> Result<String, reqwest::Error> {
+    pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
+        check_symbol(symbol)?;
         let symbol = Some(symbol);
         let limit = Some(1000);
-        gen_api!("/dapi/v1/depth", symbol, limit)
+        gen_api_binance!("/dapi/v1/depth", symbol, limit)
     }
 }

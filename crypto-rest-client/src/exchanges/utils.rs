@@ -1,9 +1,7 @@
+use crate::error::Result;
 use std::collections::HashMap;
 
-pub(super) fn http_get(
-    url: &str,
-    params: &HashMap<String, String>,
-) -> Result<String, reqwest::Error> {
+pub(super) fn http_get(url: &str, params: &HashMap<String, String>) -> Result<String> {
     let mut full_url = url.to_string();
     let mut first = true;
     for (k, v) in params.iter() {
