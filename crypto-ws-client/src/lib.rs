@@ -132,7 +132,7 @@ pub trait WSClient<'a> {
     ///
     /// This function subscribes to exchange specific channels as the following:
     ///
-    /// * Binance `depth10`, top 10, every 100ms
+    /// * Binance `depth20`, every 1000ms
     /// * Bitfinex has no snapshot channel
     /// * BitMEX `orderBook10`, top 10, every tick
     /// * Bitstamp `order_book`, top 100, every 100ms
