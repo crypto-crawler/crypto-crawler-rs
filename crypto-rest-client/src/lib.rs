@@ -13,6 +13,7 @@ pub use exchanges::huobi::huobi_inverse_swap::HuobiInverseSwapRestClient;
 pub use exchanges::huobi::huobi_linear_swap::HuobiLinearSwapRestClient;
 pub use exchanges::huobi::huobi_option::HuobiOptionRestClient;
 pub use exchanges::huobi::huobi_spot::HuobiSpotRestClient;
+pub use exchanges::kraken::KrakenRestClient;
 
 #[cfg(test)]
 mod tests {
