@@ -138,7 +138,9 @@ impl<'a> WSClientInternal<'a> {
                     Message::Text(txt) => self.handle_msg(&txt),
                     Message::Binary(binary) => {
                         let mut txt = String::new();
-                        let resp = if self.exchange == super::huobi::EXCHANGE_NAME {
+                        let resp = if self.exchange == super::huobi::EXCHANGE_NAME
+                            || self.exchange == super::binance::EXCHANGE_NAME
+                        {
                             let mut decoder = GzDecoder::new(&binary[..]);
                             decoder.read_to_string(&mut txt)
                         } else if self.exchange == super::okex::EXCHANGE_NAME {
