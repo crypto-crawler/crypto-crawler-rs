@@ -2,14 +2,16 @@
 mod mxc_spot {
     use crypto_rest_client::MXCSpotRestClient;
 
-    #[test] #[ignore]
+    #[test]
+    #[ignore]
     fn test_trades() {
         let client = MXCSpotRestClient::new("your_access_key".to_string(), None);
         let text = client.fetch_trades("BTC_USDT").unwrap();
         assert!(text.starts_with("{"));
     }
 
-    #[test] #[ignore]
+    #[test]
+    #[ignore]
     fn test_l2_snapshot() {
         let client = MXCSpotRestClient::new("your_access_key".to_string(), None);
         let text = client.fetch_l2_snapshot("BTC_USDT").unwrap();
