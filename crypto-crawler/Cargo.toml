@@ -1,6 +1,6 @@
 [package]
 name = "crypto-crawler"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "Crawl websocket messages from crypto exchanges."
