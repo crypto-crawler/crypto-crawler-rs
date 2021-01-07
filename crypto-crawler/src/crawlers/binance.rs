@@ -130,17 +130,13 @@ pub(crate) fn crawl_l2_snapshot<'a>(
     duration: Option<u64>,
 ) {
     let mut on_msg_ext = |json: String, symbol: String| {
-        let message = Message {
-            exchange: EXCHANGE_NAME.to_string(),
+        let message = Message::new(
+            EXCHANGE_NAME.to_string(),
             market_type,
-            msg_type: MessageType::L2Snapshot,
             symbol,
-            received_at: SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_millis(),
+            MessageType::L2Snapshot,
             json,
-        };
+        );
         on_msg(message);
     };
 
