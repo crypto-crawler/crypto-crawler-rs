@@ -12,9 +12,10 @@ use serde_json::Value;
 const EXCHANGE_NAME: &str = "Binance";
 
 fn detect_symbol_market_type(is_contract: bool, symbol: &str) -> MarketType {
-    if symbol.ends_with("_PERP") {
+    let symbol = symbol.to_lowercase();
+    if symbol.ends_with("_perp") {
         MarketType::Swap
-    } else if symbol.ends_with("-C") || symbol.ends_with("-P") {
+    } else if symbol.ends_with("-c") || symbol.ends_with("-p") {
         MarketType::Option
     } else if symbol.contains('_') {
         let date = &symbol[(symbol.len() - 6)..];
@@ -75,9 +76,74 @@ fn extract_symbol(json: &str) -> String {
 }
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade, market_type, symbols, on_msg, duration, BinanceSpotWSClient, MessageType::Trade, subscribe_trade);
+gen_crawl_event!(crawl_trade_spot, market_type, symbols, on_msg, duration, BinanceSpotWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event, market_type, symbols, on_msg, duration, BinanceSpotWSClient, MessageType::L2Event, subscribe_orderbook);
+gen_crawl_event!(crawl_l2_event_spot, market_type, symbols, on_msg, duration, BinanceSpotWSClient, MessageType::L2Event, subscribe_orderbook);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_trade_future, market_type, symbols, on_msg, duration, BinanceFutureWSClient, MessageType::Trade, subscribe_trade);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_event_future, market_type, symbols, on_msg, duration, BinanceFutureWSClient, MessageType::L2Event, subscribe_orderbook);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_trade_linear_swap, market_type, symbols, on_msg, duration, BinanceLinearSwapWSClient, MessageType::Trade, subscribe_trade);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_event_linear_swap, market_type, symbols, on_msg, duration, BinanceLinearSwapWSClient, MessageType::L2Event, subscribe_orderbook);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_trade_inverse_swap, market_type, symbols, on_msg, duration, BinanceInverseSwapWSClient, MessageType::Trade, subscribe_trade);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_event_inverse_swap, market_type, symbols, on_msg, duration, BinanceInverseSwapWSClient, MessageType::L2Event, subscribe_orderbook);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_trade_option, market_type, symbols, on_msg, duration, BinanceOptionWSClient, MessageType::Trade, subscribe_trade);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_event_option, market_type, symbols, on_msg, duration, BinanceOptionWSClient, MessageType::L2Event, subscribe_orderbook);
+
+pub(crate) fn crawl_trade<'a>(
+    market_type: MarketType,
+    symbols: &[String],
+    on_msg: Box<dyn FnMut(Message) + 'a>,
+    duration: Option<u64>,
+) {
+    let symbols: Vec<String> = symbols.iter().map(|symbol| symbol.to_lowercase()).collect();
+    check_args(market_type, &symbols);
+
+    match market_type {
+        MarketType::Spot => crawl_trade_spot(market_type, &symbols, on_msg, duration),
+        MarketType::Future => crawl_trade_future(market_type, &symbols, on_msg, duration),
+        MarketType::Swap => {
+            if symbols[0].ends_with("usdt") {
+                crawl_trade_linear_swap(market_type, &symbols, on_msg, duration);
+            } else {
+                crawl_trade_inverse_swap(market_type, &symbols, on_msg, duration);
+            }
+        }
+        MarketType::Option => {
+            let symbols: Vec<String> = symbols.iter().map(|symbol| symbol.to_uppercase()).collect();
+            crawl_trade_option(market_type, &symbols, on_msg, duration);
+        }
+    }
+}
+
+pub(crate) fn crawl_l2_event<'a>(
+    market_type: MarketType,
+    symbols: &[String],
+    on_msg: Box<dyn FnMut(Message) + 'a>,
+    duration: Option<u64>,
+) {
+    let symbols: Vec<String> = symbols.iter().map(|symbol| symbol.to_lowercase()).collect();
+    check_args(market_type, &symbols);
+
+    match market_type {
+        MarketType::Spot => crawl_l2_event_spot(market_type, &symbols, on_msg, duration),
+        MarketType::Future => crawl_l2_event_future(market_type, &symbols, on_msg, duration),
+        MarketType::Swap => {
+            if symbols[0].ends_with("usdt") {
+                crawl_l2_event_linear_swap(market_type, &symbols, on_msg, duration);
+            } else {
+                crawl_l2_event_inverse_swap(market_type, &symbols, on_msg, duration);
+            }
+        }
+        MarketType::Option => crawl_l2_event_option(market_type, &symbols, on_msg, duration),
+    }
+}
 
 pub(crate) fn crawl_l2_snapshot<'a>(
     market_type: MarketType,
@@ -95,6 +161,8 @@ pub(crate) fn crawl_l2_snapshot<'a>(
         );
         on_msg(message);
     };
+
+    let symbols: Vec<String> = symbols.iter().map(|symbol| symbol.to_uppercase()).collect();
 
     let now = Instant::now();
     loop {
