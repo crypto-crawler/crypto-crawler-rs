@@ -1,5 +1,6 @@
 use super::MarketType;
 use serde::{Deserialize, Serialize};
+use std::time::{SystemTime, UNIX_EPOCH};
 use strum_macros::{Display, EnumString};
 
 /// DataType represents the type of a message
@@ -30,4 +31,26 @@ pub struct Message {
     pub received_at: u128,
     /// the original message
     pub json: String,
+}
+
+impl Message {
+    pub fn new(
+        exchange: String,
+        market_type: MarketType,
+        symbol: String,
+        msg_type: MessageType,
+        json: String,
+    ) -> Self {
+        Message {
+            exchange,
+            market_type,
+            symbol,
+            msg_type,
+            received_at: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_millis(),
+            json,
+        }
+    }
 }

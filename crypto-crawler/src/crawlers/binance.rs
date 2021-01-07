@@ -177,5 +177,7 @@ pub(crate) fn crawl_l2_snapshot<'a>(
                 break;
             }
         }
+
+        std::thread::sleep(Duration::from_secs(crate::SNAPSHOT_INTERVAL));
     }
 }
