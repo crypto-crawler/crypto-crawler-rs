@@ -1,61 +1,40 @@
+#[macro_use]
+mod utils;
+
 #[cfg(test)]
 mod binance_spot {
     use crypto_crawler::*;
 
     #[test]
     fn test_crawl_trade() {
-        let mut messages = Vec::<Message>::new();
-
-        let on_msg = |msg: Message| messages.push(msg);
-        crawl_trade(
+        gen_test_code!(
+            crawl_trade,
             "Binance",
             MarketType::Spot,
-            &vec!["btcusdt".to_string()],
-            Box::new(on_msg),
-            Some(0),
-        );
-
-        assert!(!messages.is_empty());
-        assert_eq!(messages[0].market_type, MarketType::Spot);
-        assert_eq!(messages[0].symbol, "BTCUSDT".to_string());
-        assert_eq!(messages[0].msg_type, MessageType::Trade);
+            "btcusdt",
+            MessageType::Trade
+        )
     }
 
     #[test]
     fn test_crawl_l2_event() {
-        let mut messages = Vec::<Message>::new();
-
-        let on_msg = |msg: Message| messages.push(msg);
-        crawl_l2_event(
+        gen_test_code!(
+            crawl_l2_event,
             "Binance",
             MarketType::Spot,
-            &vec!["btcusdt".to_string()],
-            Box::new(on_msg),
-            Some(0),
-        );
-
-        assert!(!messages.is_empty());
-        assert_eq!(messages[0].market_type, MarketType::Spot);
-        assert_eq!(messages[0].symbol, "BTCUSDT".to_string());
-        assert_eq!(messages[0].msg_type, MessageType::L2Event);
+            "btcusdt",
+            MessageType::L2Event
+        )
     }
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        let mut messages = Vec::<Message>::new();
-
-        let on_msg = |msg: Message| messages.push(msg);
-        crawl_l2_snapshot(
+        gen_test_code!(
+            crawl_l2_snapshot,
             "Binance",
             MarketType::Spot,
-            &vec!["BTCUSDT".to_string()],
-            Box::new(on_msg),
-            Some(0),
-        );
-
-        assert!(!messages.is_empty());
-        assert_eq!(messages[0].market_type, MarketType::Spot);
-        assert_eq!(messages[0].symbol, "BTCUSDT".to_string());
-        assert_eq!(messages[0].msg_type, MessageType::L2Snapshot);
+            "BTCUSDT",
+            MessageType::L2Snapshot
+        )
     }
 }
