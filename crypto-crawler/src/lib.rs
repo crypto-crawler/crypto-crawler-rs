@@ -18,6 +18,7 @@ pub fn crawl_trade<'a>(
     let func = match exchange {
         "Binance" => crawlers::binance::crawl_trade,
         "Bitfinex" => crawlers::bitfinex::crawl_trade,
+        "BitMEX" => crawlers::bitmex::crawl_trade,
         "Bitstamp" => crawlers::bitstamp::crawl_trade,
         "CoinbasePro" => crawlers::coinbase_pro::crawl_trade,
         _ => panic!("Unknown exchange {}", exchange),
@@ -36,6 +37,7 @@ pub fn crawl_l2_event<'a>(
     let func = match exchange {
         "Binance" => crawlers::binance::crawl_l2_event,
         "Bitfinex" => crawlers::bitfinex::crawl_l2_event,
+        "BitMEX" => crawlers::bitmex::crawl_l2_event,
         "Bitstamp" => crawlers::bitstamp::crawl_l2_event,
         "CoinbasePro" => crawlers::coinbase_pro::crawl_l2_event,
         _ => panic!("Unknown exchange {}", exchange),
@@ -54,6 +56,7 @@ pub fn crawl_l2_snapshot<'a>(
     let func = match exchange {
         "Binance" => crawlers::binance::crawl_l2_snapshot,
         "Bitfinex" => crawlers::bitfinex::crawl_l2_snapshot,
+        "BitMEX" => crawlers::bitmex::crawl_l2_snapshot,
         "Bitstamp" => crawlers::bitstamp::crawl_l2_snapshot,
         "CoinbasePro" => crawlers::coinbase_pro::crawl_l2_snapshot,
         _ => panic!("Unknown exchange {}", exchange),
