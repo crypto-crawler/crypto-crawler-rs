@@ -33,7 +33,7 @@ impl BinanceSpotRestClient {
         start_time: Option<u64>,
         end_time: Option<u64>,
     ) -> Result<String> {
-        check_symbol(symbol)?;
+        check_symbol(symbol);
         let symbol = Some(symbol);
         let limit = Some(1000);
         gen_api_binance!(
@@ -52,7 +52,7 @@ impl BinanceSpotRestClient {
     ///
     /// For example: <https://api.binance.com/api/v3/depth?symbol=BTCUSDT&limit=1000>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        check_symbol(symbol)?;
+        check_symbol(symbol);
         let symbol = Some(symbol);
         let limit = Some(1000);
         gen_api_binance!("/api/v3/depth", symbol, limit)

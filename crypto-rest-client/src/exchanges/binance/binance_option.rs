@@ -28,7 +28,7 @@ impl BinanceOptionRestClient {
     ///
     /// For example: <https://voptions.binance.com/options-api/v1/public/market/trades?symbol=BTC-210129-40000-C&limit=500&t=1609956688000>
     pub fn fetch_trades(symbol: &str, start_time: Option<u64>) -> Result<String> {
-        check_symbol(symbol)?;
+        check_symbol(symbol);
         let t = start_time;
         gen_api_binance!(
             format!("/public/market/trades?symbol={}&limit=500", symbol),
@@ -42,7 +42,7 @@ impl BinanceOptionRestClient {
     ///
     /// For example: <https://voptions.binance.com/options-api/v1/public/market/depth?symbol=BTC-210129-40000-C&limit=1000>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        check_symbol(symbol)?;
+        check_symbol(symbol);
         gen_api_binance!(format!("/public/market/depth?symbol={}&limit=1000", symbol))
     }
 }
