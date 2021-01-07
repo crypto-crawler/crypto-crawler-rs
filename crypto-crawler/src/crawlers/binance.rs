@@ -31,10 +31,10 @@ fn detect_symbol_market_type(is_contract: bool, symbol: &str) -> MarketType {
 fn check_args(market_type: MarketType, symbols: &[String]) {
     let is_contract = market_type != MarketType::Spot;
     let illegal_symbols: Vec<String> = symbols
-         .iter()
-         .filter(|symbol| detect_symbol_market_type(is_contract, symbol) != market_type)
-         .cloned()
-         .collect();
+        .iter()
+        .filter(|symbol| detect_symbol_market_type(is_contract, symbol) != market_type)
+        .cloned()
+        .collect();
     if !illegal_symbols.is_empty() {
         panic!(
             "{} don't belong to {}",
