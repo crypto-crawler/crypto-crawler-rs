@@ -1,40 +1,68 @@
 macro_rules! gen_crawl_snapshot {
-    ($market_type:ident, $symbols:ident, $on_msg:ident, $duration:ident, $msg_type:expr, $fetch_snapshot:expr) => {{
-        let mut on_msg_ext = |json: String, symbol: String| {
-            let message = Message::new(
-                EXCHANGE_NAME.to_string(),
-                $market_type,
-                symbol,
-                $msg_type,
-                json,
-            );
-            ($on_msg)(message);
-        };
+    ($func_name:ident, $market_type:ident, $symbols:ident, $on_msg:ident, $duration:ident, $msg_type:expr, $fetch_snapshot:expr) => {
+        pub(crate) fn $func_name<'a>(
+            $market_type: MarketType,
+            $symbols: &[String],
+            mut $on_msg: Box<dyn FnMut(Message) + 'a>,
+            $duration: Option<u64>,
+        ) {
+            check_args($market_type, $symbols);
+            let mut on_msg_ext = |json: String, symbol: String| {
+                let message = Message::new(
+                    EXCHANGE_NAME.to_string(),
+                    $market_type,
+                    symbol,
+                    $msg_type,
+                    json,
+                );
+                ($on_msg)(message);
+            };
 
-        let now = Instant::now();
-        loop {
-            let mut succeeded = false;
-            for symbol in $symbols.iter() {
-                let resp = ($fetch_snapshot)(symbol);
-                match resp {
-                    Ok(msg) => {
-                        on_msg_ext(msg, symbol.to_string());
-                        succeeded = true
+            let now = Instant::now();
+            loop {
+                let mut succeeded = false;
+                for symbol in $symbols.iter() {
+                    let resp = ($fetch_snapshot)(symbol);
+                    match resp {
+                        Ok(msg) => {
+                            on_msg_ext(msg, symbol.to_string());
+                            succeeded = true
+                        }
+                        Err(err) => error!(
+                            "{} {} {}, error: {}",
+                            EXCHANGE_NAME, $market_type, symbol, err
+                        ),
                     }
-                    Err(err) => error!(
-                        "{} {} {}, error: {}",
-                        EXCHANGE_NAME, $market_type, symbol, err
-                    ),
                 }
-            }
 
-            if let Some(seconds) = $duration {
-                if now.elapsed() > Duration::from_secs(seconds) && succeeded {
-                    break;
+                if let Some(seconds) = $duration {
+                    if now.elapsed() > Duration::from_secs(seconds) && succeeded {
+                        break;
+                    }
                 }
-            }
 
-            std::thread::sleep(Duration::from_secs(crate::SNAPSHOT_INTERVAL));
+                std::thread::sleep(Duration::from_secs(crate::SNAPSHOT_INTERVAL));
+            }
         }
-    }};
+    };
+}
+
+macro_rules! gen_crawl_event {
+    ($func_name:ident, $market_type:ident, $symbols:ident, $on_msg:ident, $duration:ident, $struct_name:ident, $msg_type:expr, $crawl_func:ident) => {
+        pub(crate) fn $func_name<'a>(
+            $market_type: MarketType,
+            $symbols: &[String],
+            mut $on_msg: Box<dyn FnMut(Message) + 'a>,
+            $duration: Option<u64>,
+        ) {
+            check_args($market_type, $symbols);
+            let on_msg_ext = |msg: String| {
+                let message = convert_to_message(msg.to_string(), $market_type, $msg_type);
+                $on_msg(message);
+            };
+            let mut ws_client = $struct_name::new(Box::new(on_msg_ext), None);
+            ws_client.$crawl_func($symbols);
+            ws_client.run($duration);
+        }
+    };
 }
