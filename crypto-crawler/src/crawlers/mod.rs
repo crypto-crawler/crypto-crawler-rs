@@ -2,5 +2,6 @@
 mod utils;
 
 pub(super) mod binance;
+pub(super) mod bitfinex;
 pub(super) mod bitstamp;
 pub(super) mod coinbase_pro;
