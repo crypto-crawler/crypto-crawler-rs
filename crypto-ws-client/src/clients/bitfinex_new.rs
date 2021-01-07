@@ -60,19 +60,19 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
         .collect()
 }
 
-fn to_raw_channel(channel: &str, pair: &str) -> String {
-    format!("{}:t{}", channel, pair)
+fn to_raw_channel(channel: &str, symbol: &str) -> String {
+    format!("{}:{}", channel, symbol)
 }
 
 macro_rules! impl_trait_for_bitfinex {
     ($trait_name:ident, $method_name:ident, $channel_name:expr) => {
         impl<'a> $trait_name for BitfinexWSClient<'a> {
-            fn $method_name(&mut self, pairs: &[String]) {
-                let pair_to_raw_channel = |pair: &String| to_raw_channel($channel_name, pair);
+            fn $method_name(&mut self, symbols: &[String]) {
+                let symbol_to_raw_channel = |symbol: &String| to_raw_channel($channel_name, symbol);
 
-                let channels = pairs
+                let channels = symbols
                     .iter()
-                    .map(pair_to_raw_channel)
+                    .map(symbol_to_raw_channel)
                     .collect::<Vec<String>>();
                 self.subscribe(&channels);
             }
@@ -84,19 +84,19 @@ impl_trait_for_bitfinex!(Trade, subscribe_trade, "trades");
 impl_trait_for_bitfinex!(Ticker, subscribe_ticker, "ticker");
 
 impl<'a> BBO for BitfinexWSClient<'a> {
-    fn subscribe_bbo(&mut self, pairs: &[String]) {
-        let raw_channels = pairs
+    fn subscribe_bbo(&mut self, symbols: &[String]) {
+        let raw_channels = symbols
             .iter()
-            .map(|pair| {
+            .map(|symbol| {
                 format!(
                     r#"{{
                 "event": "subscribe",
                 "channel": "book",
-                "symbol": "t{}",
+                "symbol": "{}",
                 "prec": "R0",
                 "len": 1
               }}"#,
-                    pair
+                    symbol
                 )
             })
             .collect::<Vec<String>>();
@@ -106,20 +106,20 @@ impl<'a> BBO for BitfinexWSClient<'a> {
 }
 
 impl<'a> OrderBook for BitfinexWSClient<'a> {
-    fn subscribe_orderbook(&mut self, pairs: &[String]) {
-        let raw_channels = pairs
+    fn subscribe_orderbook(&mut self, symbols: &[String]) {
+        let raw_channels = symbols
             .iter()
-            .map(|pair| {
+            .map(|symbol| {
                 format!(
                     r#"{{
                 "event": "subscribe",
                 "channel": "book",
-                "symbol": "t{}",
+                "symbol": "{}",
                 "prec": "P0",
                 "frec": "F0",
                 "len": 25
               }}"#,
-                    pair
+                    symbol
                 )
             })
             .collect::<Vec<String>>();
@@ -129,7 +129,7 @@ impl<'a> OrderBook for BitfinexWSClient<'a> {
 }
 
 impl<'a> OrderBookSnapshot for BitfinexWSClient<'a> {
-    fn subscribe_orderbook_snapshot(&mut self, _pairs: &[String]) {
+    fn subscribe_orderbook_snapshot(&mut self, _symbols: &[String]) {
         panic!("Bitfinex does NOT have orderbook snapshot channel");
     }
 }
@@ -138,16 +138,16 @@ impl<'a> Level3OrderBook for BitfinexWSClient<'a> {
     fn subscribe_l3_orderbook(&mut self, symbols: &[String]) {
         let raw_channels = symbols
             .iter()
-            .map(|pair| {
+            .map(|symbol| {
                 format!(
                     r#"{{
                         "event": "subscribe",
                         "channel": "book",
-                        "symbol": "t{}",
+                        "symbol": "{}",
                         "prec": "R0",
                         "len": 250
                     }}"#,
-                    pair
+                    symbol
                 )
             })
             .collect::<Vec<String>>();
@@ -156,7 +156,7 @@ impl<'a> Level3OrderBook for BitfinexWSClient<'a> {
     }
 }
 
-fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+fn to_candlestick_raw_channel(symbol: &str, interval: u32) -> String {
     let interval_str = match interval {
         60 => "1m",
         300 => "5m",
@@ -177,17 +177,17 @@ fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
         r#"{{
             "event": "subscribe",
             "channel": "candles",
-            "key": "trade:{}:t{}"
+            "key": "trade:{}:{}"
         }}"#,
-        interval_str, pair
+        interval_str, symbol
     )
 }
 
 impl<'a> Candlestick for BitfinexWSClient<'a> {
-    fn subscribe_candlestick(&mut self, pairs: &[String], interval: u32) {
-        let raw_channels: Vec<String> = pairs
+    fn subscribe_candlestick(&mut self, symbols: &[String], interval: u32) {
+        let raw_channels: Vec<String> = symbols
             .iter()
-            .map(|pair| to_candlestick_raw_channel(pair, interval))
+            .map(|symbol| to_candlestick_raw_channel(symbol, interval))
             .collect();
         self.subscribe(&raw_channels);
     }
@@ -294,8 +294,8 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
         <Self as BBO>::subscribe_bbo(self, channels);
     }
 
-    fn subscribe_candlestick(&mut self, pairs: &[String], interval: u32) {
-        <Self as Candlestick>::subscribe_candlestick(self, pairs, interval);
+    fn subscribe_candlestick(&mut self, symbols: &[String], interval: u32) {
+        <Self as Candlestick>::subscribe_candlestick(self, symbols, interval);
     }
 
     fn subscribe(&mut self, channels: &[String]) {
