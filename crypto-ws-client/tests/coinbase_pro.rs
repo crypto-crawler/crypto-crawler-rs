@@ -1,4 +1,4 @@
-use crypto_ws_client::{CoinbaseProWSClient, WSClient};
+use crypto_ws_client::{CoinbaseProWSClient, Level3OrderBook, WSClient};
 
 #[macro_use]
 mod utils;
@@ -68,12 +68,5 @@ fn subscribe_orderbook() {
 
 #[test]
 fn subscribe_l3_orderbook() {
-    let mut messages = Vec::<String>::new();
-    {
-        let on_msg = |msg: String| messages.push(msg);
-        let mut ws_client = CoinbaseProWSClient::new(Box::new(on_msg), None);
-        ws_client.subscribe_orderbook(&vec!["BTC-USD".to_string()]);
-        ws_client.run(Some(0)); // return immediately once after a normal message
-    }
-    assert!(!messages.is_empty());
+    gen_test_subscribe_l3_orderbook!(CoinbaseProWSClient, &vec!["BTC-USD".to_string()]);
 }
