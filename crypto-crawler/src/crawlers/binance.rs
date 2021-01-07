@@ -21,22 +21,20 @@ fn detect_symbol_market_type(is_contract: bool, symbol: &str) -> MarketType {
         let date = &symbol[(symbol.len() - 6)..];
         debug_assert!(date.parse::<i64>().is_ok());
         MarketType::Future
+    } else if is_contract {
+        MarketType::Swap
     } else {
-        if is_contract {
-            MarketType::Swap
-        } else {
-            MarketType::Spot
-        }
+        MarketType::Spot
     }
 }
 
 fn check_args(market_type: MarketType, symbols: &[String]) {
     let is_contract = market_type != MarketType::Spot;
     let illegal_symbols: Vec<String> = symbols
-        .iter()
-        .filter(|symbol| detect_symbol_market_type(is_contract, symbol) != market_type)
-        .map(|s| s.clone())
-        .collect();
+         .iter()
+         .filter(|symbol| detect_symbol_market_type(is_contract, symbol) != market_type)
+         .cloned()
+         .collect();
     if !illegal_symbols.is_empty() {
         panic!(
             "{} don't belong to {}",
@@ -49,14 +47,14 @@ fn check_args(market_type: MarketType, symbols: &[String]) {
         let linear_swap: Vec<String> = symbols
             .iter()
             .filter(|symbol| symbol.ends_with("USDT"))
-            .map(|s| s.clone())
+            .cloned()
             .collect();
         let inverse_swap: Vec<String> = symbols
             .iter()
             .filter(|symbol| !symbol.ends_with("USDT"))
-            .map(|s| s.clone())
+            .cloned()
             .collect();
-        if linear_swap.len() > 0 && inverse_swap.len() > 0 {
+        if !linear_swap.is_empty() && !inverse_swap.is_empty() {
             panic!("{} belong to linear swap, while {} belong to inverse swap, please split them into two lists", linear_swap.join(", "), inverse_swap.join(", "));
         }
     }
