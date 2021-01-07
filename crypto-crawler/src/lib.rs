@@ -22,6 +22,7 @@ pub fn crawl_trade<'a>(
         "Bitstamp" => crawlers::bitstamp::crawl_trade,
         "CoinbasePro" => crawlers::coinbase_pro::crawl_trade,
         "Huobi" => crawlers::huobi::crawl_trade,
+        "Kraken" => crawlers::kraken::crawl_trade,
         _ => panic!("Unknown exchange {}", exchange),
     };
     func(market_type, symbols, on_msg, duration);
@@ -42,6 +43,7 @@ pub fn crawl_l2_event<'a>(
         "Bitstamp" => crawlers::bitstamp::crawl_l2_event,
         "CoinbasePro" => crawlers::coinbase_pro::crawl_l2_event,
         "Huobi" => crawlers::huobi::crawl_l2_event,
+        "Kraken" => crawlers::kraken::crawl_l2_event,
         _ => panic!("Unknown exchange {}", exchange),
     };
     func(market_type, symbols, on_msg, duration);
@@ -62,6 +64,7 @@ pub fn crawl_l2_snapshot<'a>(
         "Bitstamp" => crawlers::bitstamp::crawl_l2_snapshot,
         "CoinbasePro" => crawlers::coinbase_pro::crawl_l2_snapshot,
         "Huobi" => crawlers::huobi::crawl_l2_snapshot,
+        "Kraken" => crawlers::kraken::crawl_l2_snapshot,
         _ => panic!("Unknown exchange {}", exchange),
     };
     func(market_type, symbols, on_msg, duration);
