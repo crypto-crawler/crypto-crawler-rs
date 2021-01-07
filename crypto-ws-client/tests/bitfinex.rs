@@ -11,6 +11,12 @@ mod bitfinex_spot {
     }
 
     #[test]
+    #[should_panic]
+    fn subscribe_illegal_symbol() {
+        gen_test_subscribe!(BitfinexWSClient, &vec!["trades:tXXXYYY".to_string()]);
+    }
+
+    #[test]
     fn subscribe_trade() {
         gen_test_subscribe_trade!(BitfinexWSClient, &vec!["BTCUST".to_string()]);
     }

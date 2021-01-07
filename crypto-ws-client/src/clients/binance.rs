@@ -98,7 +98,7 @@ impl<'a> BinanceWSClient<'a> {
 
         if obj.contains_key("error") {
             error!("Received {} from {}", msg, EXCHANGE_NAME);
-            return MiscMessage::Misc;
+            panic!("Received {} from {}", msg, EXCHANGE_NAME);
         }
 
         if let Some(result) = obj.get("result") {
