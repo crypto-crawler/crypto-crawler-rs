@@ -1,4 +1,3 @@
-use std::time::{SystemTime, UNIX_EPOCH};
 use std::{
     collections::HashMap,
     time::{Duration, Instant},
@@ -73,20 +72,6 @@ fn extract_symbol(json: &str) -> String {
         .as_str()
         .unwrap()
         .to_string()
-}
-
-fn convert_to_message(json: String, market_type: MarketType, msg_type: MessageType) -> Message {
-    Message {
-        exchange: EXCHANGE_NAME.to_string(),
-        market_type: market_type,
-        msg_type,
-        symbol: extract_symbol(&json),
-        received_at: SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_millis(),
-        json,
-    }
 }
 
 #[rustfmt::skip]

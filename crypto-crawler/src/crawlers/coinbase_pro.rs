@@ -16,16 +16,6 @@ fn extract_symbol(json: &str) -> String {
     obj.get("product_id").unwrap().as_str().unwrap().to_string()
 }
 
-fn convert_to_message(json: String, market_type: MarketType, msg_type: MessageType) -> Message {
-    Message::new(
-        EXCHANGE_NAME.to_string(),
-        market_type,
-        extract_symbol(&json),
-        msg_type,
-        json,
-    )
-}
-
 fn check_args(market_type: MarketType, _symbols: &[String]) {
     if market_type != MarketType::Spot {
         error!("CoinbasePro has only Spot market");
