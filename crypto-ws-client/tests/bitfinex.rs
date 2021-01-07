@@ -50,7 +50,7 @@ mod bitfinex_spot {
 
 #[cfg(test)]
 mod bitfinex_swap {
-    use crypto_ws_client::{BitfinexWSClient, WSClient};
+    use crypto_ws_client::{BitfinexWSClient, Level3OrderBook, WSClient};
 
     #[test]
     fn subscribe() {
@@ -75,6 +75,11 @@ mod bitfinex_swap {
     #[test]
     fn subscribe_orderbook() {
         gen_test_subscribe_orderbook!(BitfinexWSClient, &vec!["BTCUST".to_string()]);
+    }
+
+    #[test]
+    fn subscribe_l3_orderbook() {
+        gen_test_subscribe_l3_orderbook!(BitfinexWSClient, &vec!["BTCUST".to_string()]);
     }
 
     #[test]
