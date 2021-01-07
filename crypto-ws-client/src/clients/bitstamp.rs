@@ -58,7 +58,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
         }
         "bts:error" => {
             error!("Received {} from {}", msg, EXCHANGE_NAME);
-            MiscMessage::Misc
+            panic!("Received {} from {}", msg, EXCHANGE_NAME);
         }
         "bts:request_reconnect" => {
             warn!("Received {} from {}", msg, EXCHANGE_NAME);

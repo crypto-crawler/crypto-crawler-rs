@@ -61,7 +61,10 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
 
     let event = obj.get("event").unwrap().as_str().unwrap();
     match event {
-        "error" => error!("{} from {}", msg, EXCHANGE_NAME),
+        "error" => {
+            error!("{} from {}", msg, EXCHANGE_NAME);
+            panic!("{} from {}", msg, EXCHANGE_NAME);
+        }
         "info" => info!("{} from {}", msg, EXCHANGE_NAME),
         "pong" => debug!("{} from {}", msg, EXCHANGE_NAME),
         "conf" => warn!("{} from {}", msg, EXCHANGE_NAME),
