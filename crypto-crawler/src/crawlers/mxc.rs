@@ -78,11 +78,9 @@ pub(crate) fn crawl_l2_snapshot<'a>(
     duration: Option<u64>,
 ) {
     check_args(market_type, symbols);
-    if market_type == MarketType::Spot {
-        if let Err(_) = std::env::var("MXC_ACCESS_KEY") {
-            error!("MXC Spot REST APIs require access key, please set it to the MXC_ACCESS_KEY environment variable");
-            panic!("MXC Spot REST APIs require access key, please set it to the MXC_ACCESS_KEY environment variable");
-        }
+    if market_type == MarketType::Spot && std::env::var("MXC_ACCESS_KEY").is_err() {
+        error!("MXC Spot REST APIs require access key, please set it to the MXC_ACCESS_KEY environment variable");
+        panic!("MXC Spot REST APIs require access key, please set it to the MXC_ACCESS_KEY environment variable");
     }
 
     let mut on_msg_ext = |json: String, symbol: String| {
