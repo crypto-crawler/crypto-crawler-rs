@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 use strum_macros::{Display, EnumString};
 
-/// DataType represents the type of a message
+/// The type of a message
 #[derive(PartialEq, Serialize, Deserialize, Display, Debug, EnumString)]
 pub enum MessageType {
     Trade,
