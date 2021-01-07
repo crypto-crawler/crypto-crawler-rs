@@ -1,4 +1,4 @@
-use crate::WSClient;
+use crate::{Level3OrderBook, WSClient};
 use core::panic;
 use std::collections::HashMap;
 
@@ -136,6 +136,28 @@ impl<'a> OrderBook for BitfinexWSClient<'a> {
 impl<'a> OrderBookSnapshot for BitfinexWSClient<'a> {
     fn subscribe_orderbook_snapshot(&mut self, _pairs: &[String]) {
         panic!("Bitfinex does NOT have orderbook snapshot channel");
+    }
+}
+
+impl<'a> Level3OrderBook for BitfinexWSClient<'a> {
+    fn subscribe_l3_orderbook(&mut self, symbols: &[String]) {
+        let raw_channels = symbols
+            .iter()
+            .map(|pair| {
+                format!(
+                    r#"{{
+                        "event": "subscribe",
+                        "channel": "book",
+                        "symbol": "t{}",
+                        "prec": "R0",
+                        "len": 250
+                    }}"#,
+                    pair
+                )
+            })
+            .collect::<Vec<String>>();
+
+        self.client.subscribe(&raw_channels);
     }
 }
 
