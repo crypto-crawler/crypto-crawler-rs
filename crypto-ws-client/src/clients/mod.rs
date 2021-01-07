@@ -13,6 +13,7 @@ use common_traits::*;
 pub(super) mod binance;
 pub(super) mod binance_option;
 pub(super) mod bitfinex;
+pub(super) mod bitfinex_new;
 pub(super) mod bitmex;
 pub(super) mod bitstamp;
 pub(super) mod coinbase_pro;
