@@ -10,14 +10,12 @@ lazy_static! {
     static ref SYMBOL_PATTERN: Regex = Regex::new("^[A-Z0-9-_.]{1,20}$").unwrap();
 }
 
-pub(super) fn check_symbol(symbol: &str) -> Result<bool> {
+pub(super) fn check_symbol(symbol: &str) {
     if !SYMBOL_PATTERN.is_match(symbol) {
-        Err(Error(format!(
+        panic!(
             "Illegal symbol {}, legal symbol should be '^[A-Z0-9-_.]{{1,20}}$'.",
             symbol
-        )))
-    } else {
-        Ok(true)
+        );
     }
 }
 

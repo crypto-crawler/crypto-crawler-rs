@@ -33,7 +33,7 @@ impl BinanceLinearSwapRestClient {
         start_time: Option<u64>,
         end_time: Option<u64>,
     ) -> Result<String> {
-        check_symbol(symbol)?;
+        check_symbol(symbol);
         let symbol = Some(symbol);
         let limit = Some(1000);
         gen_api_binance!(
@@ -52,7 +52,7 @@ impl BinanceLinearSwapRestClient {
     ///
     /// For example: <https://fapi.binance.com/fapi/v1/depth?symbol=BTCUSDT&limit=1000>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        check_symbol(symbol)?;
+        check_symbol(symbol);
         let symbol = Some(symbol);
         let limit = Some(1000);
         gen_api_binance!("/fapi/v1/depth", symbol, limit)
