@@ -57,7 +57,13 @@ macro_rules! gen_crawl_event {
         ) {
             check_args($market_type, $symbols);
             let on_msg_ext = |msg: String| {
-                let message = convert_to_message(msg.to_string(), $market_type, $msg_type);
+                let message = Message::new(
+                    EXCHANGE_NAME.to_string(),
+                    $market_type,
+                    extract_symbol(&msg),
+                    $msg_type,
+                    msg.to_string(),
+                );
                 $on_msg(message);
             };
             let mut ws_client = $struct_name::new(Box::new(on_msg_ext), None);
