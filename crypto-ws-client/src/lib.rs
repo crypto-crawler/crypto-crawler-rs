@@ -191,3 +191,12 @@ pub trait WSClient<'a> {
     /// * `duration` - How many seconds to run, None means infinite.
     fn run(&mut self, duration: Option<u64>);
 }
+
+/// Level3 orderbook data.
+pub trait Level3OrderBook {
+    /// Subscribes to level3 orderebook channels.
+    ///
+    /// The level3 orderbook is the orginal orderbook of an exchange, it is
+    /// non-aggregated by price level and updated tick-by-tick.
+    fn subscribe_l3_orderbook(&mut self, symbols: &[String]);
+}

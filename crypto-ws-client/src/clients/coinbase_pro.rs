@@ -1,4 +1,4 @@
-use crate::WSClient;
+use crate::{Level3OrderBook, WSClient};
 use std::collections::HashMap;
 
 use super::{
@@ -89,7 +89,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     match obj.get("type").unwrap().as_str().unwrap() {
         "error" => {
             error!("Received {} from {}", msg, EXCHANGE_NAME);
-            MiscMessage::Misc
+            panic!("Received {} from {}", msg, EXCHANGE_NAME);
         }
         "subscriptions" => {
             info!("Received {} from {}", msg, EXCHANGE_NAME);
@@ -129,6 +129,16 @@ impl<'a> OrderBookSnapshot for CoinbaseProWSClient<'a> {
 impl<'a> Candlestick for CoinbaseProWSClient<'a> {
     fn subscribe_candlestick(&mut self, _pairs: &[String], _interval: u32) {
         panic!("CoinbasePro does NOT have candlestick channel");
+    }
+}
+
+impl<'a> Level3OrderBook for CoinbaseProWSClient<'a> {
+    fn subscribe_l3_orderbook(&mut self, symbols: &[String]) {
+        let raw_channels: Vec<String> = symbols
+            .iter()
+            .map(|symbol| to_raw_channel("full", symbol))
+            .collect();
+        self.client.subscribe(&raw_channels);
     }
 }
 
