@@ -30,7 +30,7 @@ fn detect_symbol_market_type(is_contract: bool, symbol: &str) -> MarketType {
     }
 }
 
-fn check_symbols(market_type: MarketType, symbols: &[String]) {
+fn check_args(market_type: MarketType, symbols: &[String]) {
     let is_contract = market_type != MarketType::Spot;
     let illegal_symbols: Vec<String> = symbols
         .iter()
@@ -89,39 +89,10 @@ fn convert_to_message(json: String, market_type: MarketType, msg_type: MessageTy
     }
 }
 
-pub(crate) fn crawl_trade<'a>(
-    market_type: MarketType,
-    symbols: &[String],
-    mut on_msg: Box<dyn FnMut(Message) + 'a>,
-    duration: Option<u64>,
-) {
-    check_symbols(market_type, symbols);
-
-    let on_msg_ext = |msg: String| {
-        let message = convert_to_message(msg.to_string(), market_type, MessageType::Trade);
-        on_msg(message);
-    };
-    let mut ws_client = BinanceSpotWSClient::new(Box::new(on_msg_ext), None);
-    ws_client.subscribe_trade(symbols);
-    ws_client.run(duration);
-}
-
-pub(crate) fn crawl_l2_event<'a>(
-    market_type: MarketType,
-    symbols: &[String],
-    mut on_msg: Box<dyn FnMut(Message) + 'a>,
-    duration: Option<u64>,
-) {
-    check_symbols(market_type, symbols);
-
-    let on_msg_ext = |msg: String| {
-        let message = convert_to_message(msg.to_string(), market_type, MessageType::L2Event);
-        on_msg(message);
-    };
-    let mut ws_client = BinanceSpotWSClient::new(Box::new(on_msg_ext), None);
-    ws_client.subscribe_orderbook(symbols);
-    ws_client.run(duration);
-}
+#[rustfmt::skip]
+gen_crawl_event!(crawl_trade, market_type, symbols, on_msg, duration, BinanceSpotWSClient, MessageType::Trade, subscribe_trade);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_event, market_type, symbols, on_msg, duration, BinanceSpotWSClient, MessageType::L2Event, subscribe_orderbook);
 
 pub(crate) fn crawl_l2_snapshot<'a>(
     market_type: MarketType,
