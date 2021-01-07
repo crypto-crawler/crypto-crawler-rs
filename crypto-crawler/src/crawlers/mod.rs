@@ -9,3 +9,4 @@ pub(super) mod coinbase_pro;
 pub(super) mod huobi;
 pub(super) mod kraken;
 pub(super) mod mxc;
+pub(super) mod okex;

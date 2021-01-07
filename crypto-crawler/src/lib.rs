@@ -24,6 +24,7 @@ pub fn crawl_trade<'a>(
         "Huobi" => crawlers::huobi::crawl_trade,
         "Kraken" => crawlers::kraken::crawl_trade,
         "MXC" => crawlers::mxc::crawl_trade,
+        "OKEx" => crawlers::okex::crawl_trade,
         _ => panic!("Unknown exchange {}", exchange),
     };
     func(market_type, symbols, on_msg, duration);
@@ -46,6 +47,7 @@ pub fn crawl_l2_event<'a>(
         "Huobi" => crawlers::huobi::crawl_l2_event,
         "Kraken" => crawlers::kraken::crawl_l2_event,
         "MXC" => crawlers::mxc::crawl_l2_event,
+        "OKEx" => crawlers::okex::crawl_l2_event,
         _ => panic!("Unknown exchange {}", exchange),
     };
     func(market_type, symbols, on_msg, duration);
@@ -68,6 +70,7 @@ pub fn crawl_l2_snapshot<'a>(
         "Huobi" => crawlers::huobi::crawl_l2_snapshot,
         "Kraken" => crawlers::kraken::crawl_l2_snapshot,
         "MXC" => crawlers::mxc::crawl_l2_snapshot,
+        "OKEx" => crawlers::okex::crawl_l2_snapshot,
         _ => panic!("Unknown exchange {}", exchange),
     };
     func(market_type, symbols, on_msg, duration);
