@@ -1,4 +1,4 @@
-use crate::WSClient;
+use crate::{Level3OrderBook, WSClient};
 use std::collections::HashMap;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
@@ -78,6 +78,8 @@ impl_trait!(Trade, BitstampWSClient, subscribe_trade, "live_trades", to_raw_chan
 impl_trait!(OrderBook, BitstampWSClient, subscribe_orderbook, "diff_order_book", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBookSnapshot, BitstampWSClient, subscribe_orderbook_snapshot, "order_book", to_raw_channel);
+#[rustfmt::skip]
+impl_trait!(Level3OrderBook, BitstampWSClient, subscribe_l3_orderbook, "live_orders", to_raw_channel);
 
 impl<'a> Ticker for BitstampWSClient<'a> {
     fn subscribe_ticker(&mut self, _pairs: &[String]) {
