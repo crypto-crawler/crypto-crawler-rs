@@ -218,8 +218,24 @@ impl<'a> BitfinexWSClient<'a> {
             let event = obj.get("event").unwrap().as_str().unwrap();
             match event {
                 "error" => {
-                    error!("{} from {}", txt, EXCHANGE_NAME);
-                    panic!("{} from {}", txt, EXCHANGE_NAME);
+                    let code = obj.get("code").unwrap().as_i64().unwrap();
+                    match code {
+                        10301 | 10401 => {
+                            // 10301: Already subscribed
+                            // 10401: Not subscribed
+                            // 10000: Unknown event
+                            warn!("{} from {}", txt, EXCHANGE_NAME);
+                        }
+                        10300 | 10400 | 10302 => {
+                            // 10300, 10400:Subscription failed
+                            // 10302: Unknown channel
+                            // 10001: Unknown pair
+                            // 10305: Reached limit of open channels
+                            error!("{} from {}", txt, EXCHANGE_NAME);
+                            panic!("{} from {}", txt, EXCHANGE_NAME);
+                        }
+                        _ => warn!("{} from {}", txt, EXCHANGE_NAME),
+                    }
                 }
                 "info" => info!("{} from {}", txt, EXCHANGE_NAME),
                 "pong" => debug!("{} from {}", txt, EXCHANGE_NAME),
