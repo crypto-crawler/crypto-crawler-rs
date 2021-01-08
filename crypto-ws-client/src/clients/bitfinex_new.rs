@@ -216,7 +216,6 @@ impl<'a> BitfinexWSClient<'a> {
     // Handle a text msg from Message::Text or Message::Binary
     // Returns true if gets a normal message, otherwise false
     fn handle_msg(&mut self, txt: &str) -> bool {
-        println!("{}", txt);
         if txt.starts_with('{') {
             let mut obj = serde_json::from_str::<HashMap<String, Value>>(txt).unwrap();
             let event = obj.get("event").unwrap().as_str().unwrap();
@@ -249,7 +248,6 @@ impl<'a> BitfinexWSClient<'a> {
             let channel_id = (&txt[1..i]).parse::<i64>().unwrap();
             let channel_info = self.channel_id_meta.get(&channel_id).unwrap();
             let new_txt = format!("[{}{}", channel_info, &txt[i..]);
-            println!("{}", new_txt);
 
             (self.on_msg)(new_txt);
             true
@@ -310,7 +308,6 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
         if !diff.is_empty() {
             let commands = channels_to_commands(channels, true);
             commands.into_iter().for_each(|command| {
-                println!("{}", command);
                 self.ws_stream.write_message(Message::Text(command));
             });
         }
