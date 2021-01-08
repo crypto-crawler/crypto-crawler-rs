@@ -1,5 +1,5 @@
 use crate::WSClient;
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
@@ -47,6 +47,7 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
     all_commands
 }
 
+// see https://www.bitmex.com/app/wsAPI#Response-Format
 fn on_misc_msg(msg: &str) -> MiscMessage {
     if msg == "pong" {
         return MiscMessage::Misc;
@@ -58,11 +59,29 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     }
     let obj = resp.unwrap();
 
-    if !obj.contains_key("table") {
+    if obj.contains_key("error") {
+        let code = obj.get("status").unwrap().as_i64().unwrap();
+        error!("Received {} from {}", msg, EXCHANGE_NAME);
+        match code {
+            // Rate limit exceeded
+            429 => {
+                std::thread::sleep(Duration::from_secs(3));
+                MiscMessage::Misc
+            }
+            // You are already subscribed to this topic
+            400 => MiscMessage::Misc,
+            _ => MiscMessage::Misc,
+        }
+    } else if obj.contains_key("success") {
+        info!("{} is not a JSON string, {}", msg, EXCHANGE_NAME);
+        MiscMessage::Misc
+    } else if obj.contains_key("table") {
+        debug_assert!(obj.contains_key("action"));
+        debug_assert!(obj.contains_key("data"));
+        MiscMessage::Normal
+    } else {
         warn!("Received {} from {}", msg, EXCHANGE_NAME);
         MiscMessage::Misc
-    } else {
-        MiscMessage::Normal
     }
 }
 
