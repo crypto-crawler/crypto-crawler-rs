@@ -27,6 +27,7 @@ fn subscribe_trade() {
 }
 
 #[test]
+#[ignore]
 fn subscribe_ticker() {
     gen_test_subscribe_ticker!(
         BinanceOptionWSClient,
@@ -62,6 +63,7 @@ fn subscribe_orderbook() {
 }
 
 #[test]
+#[ignore]
 fn subscribe_orderbook_snapshot() {
     gen_test_subscribe_orderbook_snapshot!(
         BinanceOptionWSClient,

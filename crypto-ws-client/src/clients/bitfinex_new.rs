@@ -431,6 +431,10 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
             }
         }
     }
+
+    fn close(&mut self) {
+        self.ws_stream.close();
+    }
 }
 
 #[cfg(test)]
