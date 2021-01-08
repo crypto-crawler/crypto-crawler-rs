@@ -5,7 +5,7 @@ mod utils;
 
 #[test]
 fn bitmex_instrument() {
-    gen_test_subscribe!(BitMEXWSClient, &vec!["instrument".to_string()]);
+    gen_test_code!(BitMEXWSClient, subscribe, &vec!["instrument".to_string()]);
 }
 
 #[cfg(test)]
@@ -14,48 +14,54 @@ mod bitmex_swap {
 
     #[test]
     fn subscribe() {
-        gen_test_subscribe!(
+        gen_test_code!(
             BitMEXWSClient,
+            subscribe,
             &vec!["trade:XBTUSD".to_string(), "quote:XBTUSD".to_string()]
         );
     }
 
     #[test]
     fn subscribe_raw_json() {
-        gen_test_subscribe!(
+        gen_test_code!(
             BitMEXWSClient,
+            subscribe,
             &vec![r#"{"op":"subscribe","args":["trade:XBTUSD","quote:XBTUSD"]}"#.to_string()]
         );
     }
 
     #[test]
     fn subscribe_trade() {
-        gen_test_subscribe_trade!(
+        gen_test_code!(
             BitMEXWSClient,
+            subscribe_trade,
             &vec!["XBTUSD".to_string(), "ETHUSD".to_string()]
         );
     }
 
     #[test]
     fn subscribe_bbo() {
-        gen_test_subscribe_bbo!(
+        gen_test_code!(
             BitMEXWSClient,
+            subscribe_bbo,
             &vec!["XBTUSD".to_string(), "ETHUSD".to_string()]
         );
     }
 
     #[test]
     fn subscribe_orderbook() {
-        gen_test_subscribe_orderbook!(
+        gen_test_code!(
             BitMEXWSClient,
+            subscribe_orderbook,
             &vec!["XBTUSD".to_string(), "ETHUSD".to_string()]
         );
     }
 
     #[test]
     fn subscribe_orderbook_snapshot() {
-        gen_test_subscribe_orderbook_snapshot!(
+        gen_test_code!(
             BitMEXWSClient,
+            subscribe_orderbook_snapshot,
             &vec!["XBTUSD".to_string(), "ETHUSD".to_string()]
         );
     }
@@ -81,40 +87,45 @@ mod bitmex_future {
 
     #[test]
     fn subscribe() {
-        gen_test_subscribe!(
+        gen_test_code!(
             BitMEXWSClient,
+            subscribe,
             &vec!["trade:XBTM21".to_string(), "quote:XBTM21".to_string()]
         );
     }
 
     #[test]
     fn subscribe_trade() {
-        gen_test_subscribe_trade!(
+        gen_test_code!(
             BitMEXWSClient,
+            subscribe_trade,
             &vec!["XBTM21".to_string(), "ETHH21".to_string()]
         );
     }
 
     #[test]
     fn subscribe_bbo() {
-        gen_test_subscribe_bbo!(
+        gen_test_code!(
             BitMEXWSClient,
+            subscribe_bbo,
             &vec!["XBTM21".to_string(), "ETHH21".to_string()]
         );
     }
 
     #[test]
     fn subscribe_orderbook() {
-        gen_test_subscribe_orderbook!(
+        gen_test_code!(
             BitMEXWSClient,
+            subscribe_orderbook,
             &vec!["XBTM21".to_string(), "ETHH21".to_string()]
         );
     }
 
     #[test]
     fn subscribe_orderbook_snapshot() {
-        gen_test_subscribe_orderbook_snapshot!(
+        gen_test_code!(
             BitMEXWSClient,
+            subscribe_orderbook_snapshot,
             &vec!["XBTM21".to_string(), "ETHH21".to_string()]
         );
     }

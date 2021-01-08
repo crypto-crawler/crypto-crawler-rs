@@ -5,8 +5,9 @@ mod utils;
 #[test]
 #[ignore]
 fn subscribe() {
-    gen_test_subscribe!(
+    gen_test_code!(
         BinanceOptionWSClient,
+        subscribe,
         &vec![
             "BTC-210108-38000-C@trade".to_string(),
             "BTC-210129-40000-C".to_string()
@@ -17,8 +18,9 @@ fn subscribe() {
 #[test]
 #[ignore]
 fn subscribe_trade() {
-    gen_test_subscribe_trade!(
+    gen_test_code!(
         BinanceOptionWSClient,
+        subscribe_trade,
         &vec![
             "BTC-210108-38000-C".to_string(),
             "BTC-210129-40000-C".to_string()
@@ -29,8 +31,9 @@ fn subscribe_trade() {
 #[test]
 #[ignore]
 fn subscribe_ticker() {
-    gen_test_subscribe_ticker!(
+    gen_test_code!(
         BinanceOptionWSClient,
+        subscribe_ticker,
         &vec![
             "BTC-210108-38000-C".to_string(),
             "BTC-210129-40000-C".to_string()
@@ -41,8 +44,9 @@ fn subscribe_ticker() {
 #[test]
 #[ignore]
 fn subscribe_bbo() {
-    gen_test_subscribe_bbo!(
+    gen_test_code!(
         BinanceOptionWSClient,
+        subscribe_bbo,
         &vec![
             "BTC-210108-38000-C".to_string(),
             "BTC-210129-40000-C".to_string()
@@ -53,8 +57,9 @@ fn subscribe_bbo() {
 #[test]
 #[ignore]
 fn subscribe_orderbook() {
-    gen_test_subscribe_orderbook!(
+    gen_test_code!(
         BinanceOptionWSClient,
+        subscribe_orderbook,
         &vec![
             "BTC-210108-38000-C".to_string(),
             "BTC-210129-40000-C".to_string()
@@ -65,8 +70,9 @@ fn subscribe_orderbook() {
 #[test]
 #[ignore]
 fn subscribe_orderbook_snapshot() {
-    gen_test_subscribe_orderbook_snapshot!(
+    gen_test_code!(
         BinanceOptionWSClient,
+        subscribe_orderbook_snapshot,
         &vec![
             "BTC-210108-38000-C".to_string(),
             "BTC-210129-40000-C".to_string()
