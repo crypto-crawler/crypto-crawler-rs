@@ -29,3 +29,12 @@ impl WebSocketStream {
         }
     }
 }
+
+impl Drop for WebSocketStream {
+    fn drop(&mut self) {
+        let mut guard = self.stream.lock().unwrap();
+        if let Err(err) = guard.close(None) {
+            error!("{}", err);
+        }
+    }
+}
