@@ -64,7 +64,8 @@ macro_rules! impl_trait_for_bitfinex {
     ($trait_name:ident, $method_name:ident, $channel_name:expr) => {
         impl<'a> $trait_name for BitfinexWSClient<'a> {
             fn $method_name(&mut self, symbols: &[String]) {
-                let symbol_to_raw_channel = |symbol: &String| format!("{}:{}", $channel_name, symbol);
+                let symbol_to_raw_channel =
+                    |symbol: &String| format!("{}:{}", $channel_name, symbol);
 
                 let channels = symbols
                     .iter()
