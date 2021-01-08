@@ -237,7 +237,35 @@ impl<'a> BitfinexWSClient<'a> {
                         _ => warn!("{} from {}", txt, EXCHANGE_NAME),
                     }
                 }
-                "info" => info!("{} from {}", txt, EXCHANGE_NAME),
+                "info" => {
+                    let code = obj.get("code").unwrap().as_i64().unwrap();
+                    match code {
+                        20051 => {
+                            // Stop/Restart Websocket Server (please reconnect)
+                            self.reconnect();
+                        }
+                        20060 => {
+                            // Entering in Maintenance mode. Please pause any activity and resume
+                            // after receiving the info message 20061 (it should take 120 seconds
+                            // at most).
+                            std::thread::sleep(Duration::from_secs(15));
+                        }
+                        20061 => {
+                            // Maintenance ended. You can resume normal activity. It is advised
+                            // to unsubscribe/subscribe again all channels.
+                            let channels = self
+                                .channels
+                                .iter()
+                                .map(|s| s.to_string())
+                                .collect::<Vec<String>>();
+                            let commands = channels_to_commands(&channels, true);
+                            commands.into_iter().for_each(|command| {
+                                self.ws_stream.write_message(Message::Text(command));
+                            });
+                        }
+                        _ => info!("{} from {}", txt, EXCHANGE_NAME),
+                    }
+                }
                 "pong" => debug!("{} from {}", txt, EXCHANGE_NAME),
                 "conf" => warn!("{} from {}", txt, EXCHANGE_NAME),
                 "subscribed" => {
