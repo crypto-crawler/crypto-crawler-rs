@@ -7,38 +7,66 @@ mod bitfinex_spot {
 
     #[test]
     fn subscribe() {
-        gen_test_subscribe!(BitfinexWSClient, &vec!["trades:tBTCUST".to_string()]);
+        gen_test_code!(
+            BitfinexWSClient,
+            subscribe,
+            &vec!["trades:tBTCUST".to_string()]
+        );
     }
 
     #[test]
     #[should_panic]
     fn subscribe_illegal_symbol() {
-        gen_test_subscribe!(BitfinexWSClient, &vec!["trades:tXXXYYY".to_string()]);
+        gen_test_code!(
+            BitfinexWSClient,
+            subscribe,
+            &vec!["trades:tXXXYYY".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_trade() {
-        gen_test_subscribe_trade!(BitfinexWSClient, &vec!["tBTCUST".to_string()]);
+        gen_test_code!(
+            BitfinexWSClient,
+            subscribe_trade,
+            &vec!["tBTCUST".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_ticker() {
-        gen_test_subscribe_ticker!(BitfinexWSClient, &vec!["tBTCUST".to_string()]);
+        gen_test_code!(
+            BitfinexWSClient,
+            subscribe_ticker,
+            &vec!["tBTCUST".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_bbo() {
-        gen_test_subscribe_bbo!(BitfinexWSClient, &vec!["tBTCUST".to_string()]);
+        gen_test_code!(
+            BitfinexWSClient,
+            subscribe_bbo,
+            &vec!["tBTCUST".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_orderbook() {
-        gen_test_subscribe_orderbook!(BitfinexWSClient, &vec!["tBTCUST".to_string()]);
+        gen_test_code!(
+            BitfinexWSClient,
+            subscribe_orderbook,
+            &vec!["tBTCUST".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_l3_orderbook() {
-        gen_test_subscribe_l3_orderbook!(BitfinexWSClient, &vec!["tBTCUST".to_string()]);
+        gen_test_code!(
+            BitfinexWSClient,
+            subscribe_l3_orderbook,
+            &vec!["tBTCUST".to_string()]
+        );
     }
 
     #[test]
@@ -54,32 +82,56 @@ mod bitfinex_swap {
 
     #[test]
     fn subscribe() {
-        gen_test_subscribe!(BitfinexWSClient, &vec!["trades:tBTCF0:USTF0".to_string()]);
+        gen_test_code!(
+            BitfinexWSClient,
+            subscribe,
+            &vec!["trades:tBTCF0:USTF0".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_trade() {
-        gen_test_subscribe_trade!(BitfinexWSClient, &vec!["tBTCF0:USTF0".to_string()]);
+        gen_test_code!(
+            BitfinexWSClient,
+            subscribe_trade,
+            &vec!["tBTCF0:USTF0".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_ticker() {
-        gen_test_subscribe_ticker!(BitfinexWSClient, &vec!["tBTCF0:USTF0".to_string()]);
+        gen_test_code!(
+            BitfinexWSClient,
+            subscribe_ticker,
+            &vec!["tBTCF0:USTF0".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_bbo() {
-        gen_test_subscribe_bbo!(BitfinexWSClient, &vec!["tBTCF0:USTF0".to_string()]);
+        gen_test_code!(
+            BitfinexWSClient,
+            subscribe_bbo,
+            &vec!["tBTCF0:USTF0".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_orderbook() {
-        gen_test_subscribe_orderbook!(BitfinexWSClient, &vec!["tBTCUST".to_string()]);
+        gen_test_code!(
+            BitfinexWSClient,
+            subscribe_orderbook,
+            &vec!["tBTCUST".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_l3_orderbook() {
-        gen_test_subscribe_l3_orderbook!(BitfinexWSClient, &vec!["tBTCUST".to_string()]);
+        gen_test_code!(
+            BitfinexWSClient,
+            subscribe_l3_orderbook,
+            &vec!["tBTCUST".to_string()]
+        );
     }
 
     #[test]

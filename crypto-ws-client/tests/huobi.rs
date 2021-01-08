@@ -7,33 +7,47 @@ mod huobi_spot {
 
     #[test]
     fn subscribe() {
-        gen_test_subscribe!(
+        gen_test_code!(
             HuobiSpotWSClient,
+            subscribe,
             &vec!["market.btcusdt.trade.detail".to_string()]
         );
     }
 
     #[test]
     fn subscribe_raw_json() {
-        gen_test_subscribe!(
+        gen_test_code!(
             HuobiSpotWSClient,
+            subscribe,
             &vec![r#"{"sub":"market.btcusdt.trade.detail","id":"crypto-ws-client"}"#.to_string()]
         );
     }
 
     #[test]
     fn subscribe_trade() {
-        gen_test_subscribe_trade!(HuobiSpotWSClient, &vec!["btcusdt".to_string()]);
+        gen_test_code!(
+            HuobiSpotWSClient,
+            subscribe_trade,
+            &vec!["btcusdt".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_ticker() {
-        gen_test_subscribe_ticker!(HuobiSpotWSClient, &vec!["btcusdt".to_string()]);
+        gen_test_code!(
+            HuobiSpotWSClient,
+            subscribe_ticker,
+            &vec!["btcusdt".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_bbo() {
-        gen_test_subscribe_bbo!(HuobiSpotWSClient, &vec!["btcusdt".to_string()]);
+        gen_test_code!(
+            HuobiSpotWSClient,
+            subscribe_bbo,
+            &vec!["btcusdt".to_string()]
+        );
     }
 
     #[test]
@@ -51,7 +65,11 @@ mod huobi_spot {
 
     #[test]
     fn subscribe_orderbook_snapshot() {
-        gen_test_subscribe_orderbook_snapshot!(HuobiSpotWSClient, &vec!["btcusdt".to_string()]);
+        gen_test_code!(
+            HuobiSpotWSClient,
+            subscribe_orderbook_snapshot,
+            &vec!["btcusdt".to_string()]
+        );
     }
 
     #[test]
@@ -62,8 +80,9 @@ mod huobi_spot {
 
     #[test]
     fn huobi_hb10() {
-        gen_test_subscribe!(
+        gen_test_code!(
             HuobiSpotWSClient,
+            subscribe,
             &vec![
                 "market.hb10usdt.trade.detail".to_string(),
                 "market.huobi10.kline.1min".to_string()
@@ -78,35 +97,56 @@ mod huobi_future {
 
     #[test]
     fn subscribe() {
-        gen_test_subscribe!(
+        gen_test_code!(
             HuobiFutureWSClient,
+            subscribe,
             &vec!["market.BTC_CQ.trade.detail".to_string()]
         );
     }
 
     #[test]
     fn subscribe_trade() {
-        gen_test_subscribe_trade!(HuobiFutureWSClient, &vec!["BTC_CQ".to_string()]);
+        gen_test_code!(
+            HuobiFutureWSClient,
+            subscribe_trade,
+            &vec!["BTC_CQ".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_ticker() {
-        gen_test_subscribe_ticker!(HuobiFutureWSClient, &vec!["BTC_CQ".to_string()]);
+        gen_test_code!(
+            HuobiFutureWSClient,
+            subscribe_ticker,
+            &vec!["BTC_CQ".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_bbo() {
-        gen_test_subscribe_bbo!(HuobiFutureWSClient, &vec!["BTC_CQ".to_string()]);
+        gen_test_code!(
+            HuobiFutureWSClient,
+            subscribe_bbo,
+            &vec!["BTC_CQ".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_orderbook() {
-        gen_test_subscribe_orderbook!(HuobiFutureWSClient, &vec!["BTC_CQ".to_string()]);
+        gen_test_code!(
+            HuobiFutureWSClient,
+            subscribe_orderbook,
+            &vec!["BTC_CQ".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_orderbook_snapshot() {
-        gen_test_subscribe_orderbook_snapshot!(HuobiFutureWSClient, &vec!["BTC_CQ".to_string()]);
+        gen_test_code!(
+            HuobiFutureWSClient,
+            subscribe_orderbook_snapshot,
+            &vec!["BTC_CQ".to_string()]
+        );
     }
 
     #[test]
@@ -122,36 +162,54 @@ mod huobi_linear_swap {
 
     #[test]
     fn subscribe() {
-        gen_test_subscribe!(
+        gen_test_code!(
             HuobiLinearSwapWSClient,
+            subscribe,
             &vec!["market.BTC-USDT.trade.detail".to_string()]
         );
     }
 
     #[test]
     fn subscribe_trade() {
-        gen_test_subscribe_trade!(HuobiLinearSwapWSClient, &vec!["BTC-USDT".to_string()]);
+        gen_test_code!(
+            HuobiLinearSwapWSClient,
+            subscribe_trade,
+            &vec!["BTC-USDT".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_ticker() {
-        gen_test_subscribe_ticker!(HuobiLinearSwapWSClient, &vec!["BTC-USDT".to_string()]);
+        gen_test_code!(
+            HuobiLinearSwapWSClient,
+            subscribe_ticker,
+            &vec!["BTC-USDT".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_bbo() {
-        gen_test_subscribe_bbo!(HuobiLinearSwapWSClient, &vec!["BTC-USDT".to_string()]);
+        gen_test_code!(
+            HuobiLinearSwapWSClient,
+            subscribe_bbo,
+            &vec!["BTC-USDT".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_orderbook() {
-        gen_test_subscribe_orderbook!(HuobiLinearSwapWSClient, &vec!["BTC-USDT".to_string()]);
+        gen_test_code!(
+            HuobiLinearSwapWSClient,
+            subscribe_orderbook,
+            &vec!["BTC-USDT".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_orderbook_snapshot() {
-        gen_test_subscribe_orderbook_snapshot!(
+        gen_test_code!(
             HuobiLinearSwapWSClient,
+            subscribe_orderbook_snapshot,
             &vec!["BTC-USDT".to_string()]
         );
     }
@@ -173,36 +231,54 @@ mod huobi_inverse_swap {
 
     #[test]
     fn subscribe() {
-        gen_test_subscribe!(
+        gen_test_code!(
             HuobiInverseSwapWSClient,
+            subscribe,
             &vec!["market.BTC-USD.trade.detail".to_string()]
         );
     }
 
     #[test]
     fn subscribe_trade() {
-        gen_test_subscribe_trade!(HuobiInverseSwapWSClient, &vec!["BTC-USD".to_string()]);
+        gen_test_code!(
+            HuobiInverseSwapWSClient,
+            subscribe_trade,
+            &vec!["BTC-USD".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_ticker() {
-        gen_test_subscribe_ticker!(HuobiInverseSwapWSClient, &vec!["BTC-USD".to_string()]);
+        gen_test_code!(
+            HuobiInverseSwapWSClient,
+            subscribe_ticker,
+            &vec!["BTC-USD".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_bbo() {
-        gen_test_subscribe_bbo!(HuobiInverseSwapWSClient, &vec!["BTC-USD".to_string()]);
+        gen_test_code!(
+            HuobiInverseSwapWSClient,
+            subscribe_bbo,
+            &vec!["BTC-USD".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_orderbook() {
-        gen_test_subscribe_orderbook!(HuobiInverseSwapWSClient, &vec!["BTC-USD".to_string()]);
+        gen_test_code!(
+            HuobiInverseSwapWSClient,
+            subscribe_orderbook,
+            &vec!["BTC-USD".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_orderbook_snapshot() {
-        gen_test_subscribe_orderbook_snapshot!(
+        gen_test_code!(
             HuobiInverseSwapWSClient,
+            subscribe_orderbook_snapshot,
             &vec!["BTC-USD".to_string()]
         );
     }
@@ -224,48 +300,54 @@ mod huobi_option {
 
     #[test]
     fn subscribe() {
-        gen_test_subscribe!(
+        gen_test_code!(
             HuobiOptionWSClient,
+            subscribe,
             &vec!["market.BTC-USDT-210326-C-32000.trade.detail".to_string()]
         );
     }
 
     #[test]
     fn subscribe_trade() {
-        gen_test_subscribe_trade!(
+        gen_test_code!(
             HuobiOptionWSClient,
+            subscribe_trade,
             &vec!["BTC-USDT-210326-C-32000".to_string()]
         );
     }
 
     #[test]
     fn subscribe_ticker() {
-        gen_test_subscribe_ticker!(
+        gen_test_code!(
             HuobiOptionWSClient,
+            subscribe_ticker,
             &vec!["BTC-USDT-210326-C-32000".to_string()]
         );
     }
 
     #[test]
     fn subscribe_bbo() {
-        gen_test_subscribe_bbo!(
+        gen_test_code!(
             HuobiOptionWSClient,
+            subscribe_bbo,
             &vec!["BTC-USDT-210326-C-32000".to_string()]
         );
     }
 
     #[test]
     fn subscribe_orderbook() {
-        gen_test_subscribe_orderbook!(
+        gen_test_code!(
             HuobiOptionWSClient,
+            subscribe_orderbook,
             &vec!["BTC-USDT-210326-C-32000".to_string()]
         );
     }
 
     #[test]
     fn subscribe_orderbook_snapshot() {
-        gen_test_subscribe_orderbook_snapshot!(
+        gen_test_code!(
             HuobiOptionWSClient,
+            subscribe_orderbook_snapshot,
             &vec!["BTC-USDT-210326-C-32000".to_string()]
         );
     }
@@ -286,6 +368,10 @@ mod huobi_option {
 
     #[test]
     fn subscribe_overview() {
-        gen_test_subscribe!(HuobiOptionWSClient, &vec!["market.overview".to_string()]);
+        gen_test_code!(
+            HuobiOptionWSClient,
+            subscribe,
+            &vec!["market.overview".to_string()]
+        );
     }
 }

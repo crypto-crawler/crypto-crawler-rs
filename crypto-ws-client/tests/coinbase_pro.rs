@@ -5,8 +5,9 @@ mod utils;
 
 #[test]
 fn subscribe() {
-    gen_test_subscribe!(
+    gen_test_code!(
         CoinbaseProWSClient,
+        subscribe,
         &vec![
             "matches:BTC-USD".to_string(),
             "heartbeat:BTC-USD".to_string()
@@ -17,13 +18,18 @@ fn subscribe() {
 #[test]
 #[should_panic]
 fn subscribe_illegal_symbol() {
-    gen_test_subscribe!(CoinbaseProWSClient, &vec!["matches:XXX-YYY".to_string(),]);
+    gen_test_code!(
+        CoinbaseProWSClient,
+        subscribe,
+        &vec!["matches:XXX-YYY".to_string(),]
+    );
 }
 
 #[test]
 fn subscribe_raw_json() {
-    gen_test_subscribe!(
+    gen_test_code!(
         CoinbaseProWSClient,
+        subscribe,
         &vec![r#"{
                 "type":"subscribe",
                 "channels":[
@@ -47,26 +53,36 @@ fn subscribe_raw_json() {
 
 #[test]
 fn subscribe_trade() {
-    gen_test_subscribe_trade!(
+    gen_test_code!(
         CoinbaseProWSClient,
+        subscribe_trade,
         &vec!["BTC-USD".to_string(), "ETH-USD".to_string()]
     );
 }
 
 #[test]
 fn subscribe_ticker() {
-    gen_test_subscribe_ticker!(
+    gen_test_code!(
         CoinbaseProWSClient,
+        subscribe_ticker,
         &vec!["BTC-USD".to_string(), "ETH-USD".to_string()]
     );
 }
 
 #[test]
 fn subscribe_orderbook() {
-    gen_test_subscribe_orderbook!(CoinbaseProWSClient, &vec!["BTC-USD".to_string()]);
+    gen_test_code!(
+        CoinbaseProWSClient,
+        subscribe_orderbook,
+        &vec!["BTC-USD".to_string()]
+    );
 }
 
 #[test]
 fn subscribe_l3_orderbook() {
-    gen_test_subscribe_l3_orderbook!(CoinbaseProWSClient, &vec!["BTC-USD".to_string()]);
+    gen_test_code!(
+        CoinbaseProWSClient,
+        subscribe_l3_orderbook,
+        &vec!["BTC-USD".to_string()]
+    );
 }

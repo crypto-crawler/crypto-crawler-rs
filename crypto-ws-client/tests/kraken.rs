@@ -5,8 +5,9 @@ mod utils;
 
 #[test]
 fn subscribe() {
-    gen_test_subscribe!(
+    gen_test_code!(
         KrakenWSClient,
+        subscribe,
         &vec![
             "trade:XBT/USD".to_string(),
             "ticker:XBT/USD".to_string(),
@@ -18,8 +19,9 @@ fn subscribe() {
 
 #[test]
 fn subscribe_raw_json() {
-    gen_test_subscribe!(
+    gen_test_code!(
         KrakenWSClient,
+        subscribe,
         &vec![
             r#"{"event":"subscribe","pair":["XBT/USD"],"subscription":{"name":"trade"}}"#
                 .to_string()
@@ -29,32 +31,36 @@ fn subscribe_raw_json() {
 
 #[test]
 fn subscribe_trade() {
-    gen_test_subscribe_trade!(
+    gen_test_code!(
         KrakenWSClient,
+        subscribe_trade,
         &vec!["XBT/USD".to_string(), "ETH/USD".to_string()]
     );
 }
 
 #[test]
 fn subscribe_ticker() {
-    gen_test_subscribe_ticker!(
+    gen_test_code!(
         KrakenWSClient,
+        subscribe_ticker,
         &vec!["XBT/USD".to_string(), "ETH/USD".to_string()]
     );
 }
 
 #[test]
 fn subscribe_bbo() {
-    gen_test_subscribe_bbo!(
+    gen_test_code!(
         KrakenWSClient,
+        subscribe_bbo,
         &vec!["XBT/USD".to_string(), "ETH/USD".to_string()]
     );
 }
 
 #[test]
 fn subscribe_orderbook() {
-    gen_test_subscribe_orderbook!(
+    gen_test_code!(
         KrakenWSClient,
+        subscribe_orderbook,
         &vec!["XBT/USD".to_string(), "ETH/USD".to_string()]
     );
 }

@@ -7,30 +7,47 @@ mod mxc_spot {
 
     #[test]
     fn subscribe() {
-        gen_test_subscribe!(MXCSpotWSClient, &vec!["symbol:BTC_USDT".to_string()]);
+        gen_test_code!(
+            MXCSpotWSClient,
+            subscribe,
+            &vec!["symbol:BTC_USDT".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_raw_json() {
-        gen_test_subscribe!(
+        gen_test_code!(
             MXCSpotWSClient,
+            subscribe,
             &vec![r#"["sub.symbol",{"symbol":"BTC_USDT"}]"#.to_string()]
         );
     }
 
     #[test]
     fn subscribe_trade() {
-        gen_test_subscribe_trade!(MXCSpotWSClient, &vec!["BTC_USDT".to_string()]);
+        gen_test_code!(
+            MXCSpotWSClient,
+            subscribe_trade,
+            &vec!["BTC_USDT".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_orderbook() {
-        gen_test_subscribe_orderbook!(MXCSpotWSClient, &vec!["BTC_USDT".to_string()]);
+        gen_test_code!(
+            MXCSpotWSClient,
+            subscribe_orderbook,
+            &vec!["BTC_USDT".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_orderbook_snapshot() {
-        gen_test_subscribe_orderbook_snapshot!(MXCSpotWSClient, &vec!["BTC_USDT".to_string()]);
+        gen_test_code!(
+            MXCSpotWSClient,
+            subscribe_orderbook_snapshot,
+            &vec!["BTC_USDT".to_string()]
+        );
     }
 
     #[test]
@@ -46,35 +63,56 @@ mod mxc_swap {
 
     #[test]
     fn subscribe() {
-        gen_test_subscribe!(MXCSwapWSClient, &vec!["deal:BTC_USDT".to_string()]);
+        gen_test_code!(
+            MXCSwapWSClient,
+            subscribe,
+            &vec!["deal:BTC_USDT".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_raw_json() {
-        gen_test_subscribe!(
+        gen_test_code!(
             MXCSwapWSClient,
+            subscribe,
             &vec![r#"{"method":"sub.deal","param":{"symbol":"BTC_USDT"}}"#.to_string()]
         );
     }
 
     #[test]
     fn subscribe_trade() {
-        gen_test_subscribe_trade!(MXCSwapWSClient, &vec!["BTC_USDT".to_string()]);
+        gen_test_code!(
+            MXCSwapWSClient,
+            subscribe_trade,
+            &vec!["BTC_USDT".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_ticker() {
-        gen_test_subscribe_ticker!(MXCSwapWSClient, &vec!["BTC_USDT".to_string()]);
+        gen_test_code!(
+            MXCSwapWSClient,
+            subscribe_ticker,
+            &vec!["BTC_USDT".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_orderbook() {
-        gen_test_subscribe_orderbook!(MXCSwapWSClient, &vec!["BTC_USDT".to_string()]);
+        gen_test_code!(
+            MXCSwapWSClient,
+            subscribe_orderbook,
+            &vec!["BTC_USDT".to_string()]
+        );
     }
 
     #[test]
     fn subscribe_orderbook_snapshot() {
-        gen_test_subscribe_orderbook_snapshot!(MXCSwapWSClient, &vec!["BTC_USDT".to_string()]);
+        gen_test_code!(
+            MXCSwapWSClient,
+            subscribe_orderbook_snapshot,
+            &vec!["BTC_USDT".to_string()]
+        );
     }
 
     #[test]
