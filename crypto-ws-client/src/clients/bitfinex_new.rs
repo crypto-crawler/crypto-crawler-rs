@@ -209,6 +209,8 @@ impl<'a> BitfinexWSClient<'a> {
                 self.ws_stream.write_message(Message::Text(command));
             });
         }
+        // avoid too frequent reconnect
+        std::thread::sleep(Duration::from_secs(5));
     }
 
     // Handle a text msg from Message::Text or Message::Binary
