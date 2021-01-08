@@ -60,15 +60,11 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
         .collect()
 }
 
-fn to_raw_channel(channel: &str, symbol: &str) -> String {
-    format!("{}:{}", channel, symbol)
-}
-
 macro_rules! impl_trait_for_bitfinex {
     ($trait_name:ident, $method_name:ident, $channel_name:expr) => {
         impl<'a> $trait_name for BitfinexWSClient<'a> {
             fn $method_name(&mut self, symbols: &[String]) {
-                let symbol_to_raw_channel = |symbol: &String| to_raw_channel($channel_name, symbol);
+                let symbol_to_raw_channel = |symbol: &String| format!("{}:{}", $channel_name, symbol);
 
                 let channels = symbols
                     .iter()
