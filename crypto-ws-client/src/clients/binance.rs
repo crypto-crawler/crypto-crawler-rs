@@ -204,6 +204,10 @@ macro_rules! define_market_client {
             fn run(&mut self, duration: Option<u64>) {
                 self.client.client.run(duration);
             }
+
+            fn close(&mut self) {
+                self.client.client.close();
+            }
         }
     };
 }

@@ -1,9 +1,15 @@
 use super::utils::connect_with_retry;
 use super::ws_stream::WebSocketStream;
 
-use std::io::prelude::*;
 use std::time::{Duration, Instant};
 use std::{collections::HashSet, thread};
+use std::{
+    io::prelude::*,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+};
 
 use flate2::read::{DeflateDecoder, GzDecoder};
 use log::*;
@@ -23,7 +29,9 @@ pub(super) struct WSClientInternal<'a> {
     channels: HashSet<String>,            // subscribed channels
     on_msg: Box<dyn FnMut(String) + 'a>,  // user defined message callback
     on_misc_msg: fn(&str) -> MiscMessage, // handle misc messages
-    channels_to_commands: fn(&[String], bool) -> Vec<String>, // converts raw channels to subscribe/unsubscribe commands
+    // converts raw channels to subscribe/unsubscribe commands
+    channels_to_commands: fn(&[String], bool) -> Vec<String>,
+    should_stop: Arc<AtomicBool>, // used by close() and run()
 }
 
 impl<'a> WSClientInternal<'a> {
@@ -43,6 +51,7 @@ impl<'a> WSClientInternal<'a> {
             on_misc_msg,
             channels: HashSet::new(),
             channels_to_commands,
+            should_stop: Arc::new(AtomicBool::new(false)),
         }
     }
 
@@ -133,7 +142,7 @@ impl<'a> WSClientInternal<'a> {
         WSClientInternal::auto_ping(self.exchange, self.url.to_string(), self.ws_stream.clone());
 
         let now = Instant::now();
-        loop {
+        while !self.should_stop.load(Ordering::Relaxed) {
             let resp = self.ws_stream.read_message();
             let normal = match resp {
                 Ok(msg) => match msg {
@@ -196,6 +205,11 @@ impl<'a> WSClientInternal<'a> {
                 }
             }
         }
+    }
+
+    pub fn close(&mut self) {
+        self.should_stop.store(true, Ordering::Relaxed);
+        self.ws_stream.close();
     }
 
     // Send ping per interval
@@ -285,6 +299,10 @@ macro_rules! define_client {
 
             fn run(&mut self, duration: Option<u64>) {
                 self.client.run(duration);
+            }
+
+            fn close(&mut self) {
+                self.client.close();
             }
         }
     };

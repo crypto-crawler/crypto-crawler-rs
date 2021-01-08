@@ -6,6 +6,7 @@ macro_rules! gen_test_subscribe {
             let mut ws_client = $client::new(Box::new(on_msg), None);
             ws_client.subscribe($channels);
             ws_client.run(Some(0)); // return immediately once after a normal message
+            ws_client.close();
         }
         assert!(!messages.is_empty());
     };
@@ -21,6 +22,7 @@ macro_rules! gen_test_subscribe_trade {
             let mut ws_client = $client::new(Box::new(on_msg), None);
             ws_client.subscribe_trade($pairs);
             ws_client.run(Some(0)); // return immediately once after a normal message
+            ws_client.close();
         }
         assert!(!messages.is_empty());
     };
@@ -36,6 +38,7 @@ macro_rules! gen_test_subscribe_ticker {
             let mut ws_client = $client::new(Box::new(on_msg), None);
             ws_client.subscribe_ticker($pairs);
             ws_client.run(Some(0)); // return immediately once after a normal message
+            ws_client.close();
         }
         assert!(!messages.is_empty());
     };
@@ -51,6 +54,7 @@ macro_rules! gen_test_subscribe_bbo {
             let mut ws_client = $client::new(Box::new(on_msg), None);
             ws_client.subscribe_bbo($pairs);
             ws_client.run(Some(0)); // return immediately once after a normal message
+            ws_client.close();
         }
         assert!(!messages.is_empty());
     };
@@ -66,6 +70,7 @@ macro_rules! gen_test_subscribe_orderbook {
             let mut ws_client = $client::new(Box::new(on_msg), None);
             ws_client.subscribe_orderbook($pairs);
             ws_client.run(Some(0)); // return immediately once after a normal message
+            ws_client.close();
         }
         assert!(!messages.is_empty());
     };
@@ -81,6 +86,7 @@ macro_rules! gen_test_subscribe_orderbook_snapshot {
             let mut ws_client = $client::new(Box::new(on_msg), None);
             ws_client.subscribe_orderbook_snapshot($pairs);
             ws_client.run(Some(0)); // return immediately once after a normal message
+            ws_client.close();
         }
         assert!(!messages.is_empty());
     };
@@ -96,6 +102,7 @@ macro_rules! gen_test_subscribe_l3_orderbook {
             let mut ws_client = $client::new(Box::new(on_msg), None);
             ws_client.subscribe_l3_orderbook($pairs);
             ws_client.run(Some(0)); // return immediately once after a normal message
+            ws_client.close();
         }
         assert!(!messages.is_empty());
     };
@@ -111,6 +118,7 @@ macro_rules! gen_test_subscribe_candlestick {
             let mut ws_client = $client::new(Box::new(on_msg), None);
             ws_client.subscribe_candlestick($pairs, $interval);
             ws_client.run(Some(0)); // return immediately once after a normal message
+            ws_client.close();
         }
         assert!(!messages.is_empty());
     };

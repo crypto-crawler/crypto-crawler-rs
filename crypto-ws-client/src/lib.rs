@@ -191,6 +191,9 @@ pub trait WSClient<'a> {
     ///
     /// * `duration` - How many seconds to run, None means infinite.
     fn run(&mut self, duration: Option<u64>);
+
+    /// Breaks the loop and closes the connection.
+    fn close(&mut self);
 }
 
 /// Level3 orderbook data.
