@@ -1,5 +1,6 @@
 use crate::{Level3OrderBook, WSClient};
 
+use std::{cell::RefCell, rc::Rc};
 use std::{
     collections::{HashMap, HashSet},
     thread,
@@ -28,9 +29,9 @@ const WEBSOCKET_URL: &str = "wss://api-pub.bitfinex.com/ws/2";
 /// * Funding: <https://trading.bitfinex.com/funding>
 pub struct BitfinexWSClient<'a> {
     ws_stream: WebSocketStream,
-    channels: HashSet<String>,             // subscribed channels
-    on_msg: Box<dyn FnMut(String) + 'a>,   // user defined message callback
-    channel_id_meta: HashMap<i64, String>, // CHANNEL_ID information
+    channels: HashSet<String>,                   // subscribed channels
+    on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>, // user defined message callback
+    channel_id_meta: HashMap<i64, String>,       // CHANNEL_ID information
 }
 
 fn channel_to_command(channel: &str, subscribe: bool) -> String {
@@ -238,7 +239,6 @@ impl<'a> BitfinexWSClient<'a> {
                     }
                 }
                 "info" => {
-                    println!("{}", txt);
                     if let Some(_) = obj.get("version") {
                         // 1 for operative, 0 for maintenance
                         let status = obj
@@ -307,7 +307,7 @@ impl<'a> BitfinexWSClient<'a> {
             let channel_info = self.channel_id_meta.get(&channel_id).unwrap();
             let new_txt = format!("[{}{}", channel_info, &txt[i..]);
 
-            (self.on_msg)(new_txt);
+            (self.on_msg.borrow_mut())(new_txt);
             true
         }
     }
@@ -322,7 +322,7 @@ impl<'a> BitfinexWSClient<'a> {
 }
 
 impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
-    fn new(on_msg: Box<dyn FnMut(String) + 'a>, _url: Option<&str>) -> Self {
+    fn new(on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>, _url: Option<&str>) -> Self {
         let stream = connect_with_retry(WEBSOCKET_URL);
         BitfinexWSClient {
             ws_stream: WebSocketStream::new(stream),

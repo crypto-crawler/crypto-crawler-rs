@@ -1,5 +1,6 @@
 use super::utils::connect_with_retry;
 use super::ws_stream::WebSocketStream;
+use std::{cell::RefCell, rc::Rc};
 
 use std::time::{Duration, Instant};
 use std::{collections::HashSet, thread};
@@ -26,9 +27,9 @@ pub(super) struct WSClientInternal<'a> {
     exchange: &'static str, // Eexchange name
     pub(super) url: String, // Websocket base url
     ws_stream: WebSocketStream,
-    channels: HashSet<String>,            // subscribed channels
-    on_msg: Box<dyn FnMut(String) + 'a>,  // user defined message callback
-    on_misc_msg: fn(&str) -> MiscMessage, // handle misc messages
+    channels: HashSet<String>,                   // subscribed channels
+    on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>, // user defined message callback
+    on_misc_msg: fn(&str) -> MiscMessage,        // handle misc messages
     // converts raw channels to subscribe/unsubscribe commands
     channels_to_commands: fn(&[String], bool) -> Vec<String>,
     should_stop: Arc<AtomicBool>, // used by close() and run()
@@ -38,7 +39,7 @@ impl<'a> WSClientInternal<'a> {
     pub fn new(
         exchange: &'static str,
         url: &str,
-        on_msg: Box<dyn FnMut(String) + 'a>,
+        on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>,
         on_misc_msg: fn(&str) -> MiscMessage,
         channels_to_commands: fn(&[String], bool) -> Vec<String>,
     ) -> Self {
@@ -123,14 +124,14 @@ impl<'a> WSClientInternal<'a> {
                 {
                     // special logic for MXC Spot
                     match txt.strip_prefix("42") {
-                        Some(msg) => (self.on_msg)(msg.to_string()),
+                        Some(msg) => (self.on_msg.borrow_mut())(msg.to_string()),
                         None => error!(
                             "{}, Not possible, should be handled by {}.on_misc_msg() previously",
                             txt, self.exchange
                         ),
                     }
                 } else {
-                    (self.on_msg)(txt.to_string());
+                    (self.on_msg.borrow_mut())(txt.to_string());
                 }
                 true
             }
@@ -249,7 +250,10 @@ impl<'a> WSClientInternal<'a> {
 macro_rules! define_client {
     ($struct_name:ident, $exchange:ident, $default_url:ident, $channels_to_commands:ident, $on_misc_msg:ident) => {
         impl<'a> WSClient<'a> for $struct_name<'a> {
-            fn new(on_msg: Box<dyn FnMut(String) + 'a>, url: Option<&str>) -> $struct_name<'a> {
+            fn new(
+                on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>,
+                url: Option<&str>,
+            ) -> $struct_name<'a> {
                 let real_url = match url {
                     Some(endpoint) => endpoint,
                     None => $default_url,

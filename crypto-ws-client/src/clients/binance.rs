@@ -1,5 +1,6 @@
 use crate::WSClient;
 use std::collections::HashMap;
+use std::{cell::RefCell, rc::Rc};
 
 use super::{
     ws_client_internal::{MiscMessage, WSClientInternal},
@@ -52,7 +53,7 @@ pub struct BinanceInverseSwapWSClient<'a> {
 }
 
 impl<'a> BinanceWSClient<'a> {
-    fn new(url: &str, on_msg: Box<dyn FnMut(String) + 'a>) -> Self {
+    fn new(url: &str, on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>) -> Self {
         BinanceWSClient {
             client: WSClientInternal::new(
                 EXCHANGE_NAME,
@@ -159,7 +160,7 @@ impl_candlestick!(BinanceWSClient);
 macro_rules! define_market_client {
     ($struct_name:ident, $default_url:ident) => {
         impl<'a> WSClient<'a> for $struct_name<'a> {
-            fn new(on_msg: Box<dyn FnMut(String) + 'a>, url: Option<&str>) -> Self {
+            fn new(on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>, url: Option<&str>) -> Self {
                 let real_url = match url {
                     Some(endpoint) => endpoint,
                     None => $default_url,

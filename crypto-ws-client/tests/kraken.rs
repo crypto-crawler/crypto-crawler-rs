@@ -1,4 +1,5 @@
 use crypto_ws_client::{KrakenWSClient, WSClient};
+use std::{cell::RefCell, rc::Rc};
 
 #[macro_use]
 mod utils;
