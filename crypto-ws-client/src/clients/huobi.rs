@@ -1,5 +1,6 @@
 use crate::WSClient;
 use std::collections::HashMap;
+use std::{cell::RefCell, rc::Rc};
 
 use log::*;
 use serde_json::Value;
@@ -70,7 +71,7 @@ pub struct HuobiOptionWSClient<'a> {
 }
 
 impl<'a> HuobiWSClient<'a> {
-    fn new(url: &str, on_msg: Box<dyn FnMut(String) + 'a>) -> Self {
+    fn new(url: &str, on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>) -> Self {
         HuobiWSClient {
             client: WSClientInternal::new(
                 EXCHANGE_NAME,
@@ -172,7 +173,7 @@ impl_candlestick!(HuobiWSClient);
 macro_rules! define_market_client {
     ($struct_name:ident, $default_url:ident) => {
         impl<'a> WSClient<'a> for $struct_name<'a> {
-            fn new(on_msg: Box<dyn FnMut(String) + 'a>, url: Option<&str>) -> Self {
+            fn new(on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>, url: Option<&str>) -> Self {
                 let real_url = match url {
                     Some(endpoint) => endpoint,
                     None => $default_url,

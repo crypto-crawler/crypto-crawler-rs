@@ -4,6 +4,7 @@ mod utils;
 #[cfg(test)]
 mod binance_spot {
     use crypto_ws_client::{BinanceSpotWSClient, WSClient};
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn subscribe() {
@@ -86,6 +87,7 @@ mod binance_spot {
 #[cfg(test)]
 mod binance_future {
     use crypto_ws_client::{BinanceFutureWSClient, WSClient};
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn subscribe() {
@@ -159,6 +161,7 @@ mod binance_future {
 #[cfg(test)]
 mod binance_inverse_swap {
     use crypto_ws_client::{BinanceInverseSwapWSClient, WSClient};
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn subscribe() {
@@ -232,6 +235,7 @@ mod binance_inverse_swap {
 #[cfg(test)]
 mod binance_linear_swap {
     use crypto_ws_client::{BinanceLinearSwapWSClient, WSClient};
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn subscribe() {

@@ -3,9 +3,10 @@
 //! ## Example
 //!
 //! ```
+//! use std::{cell::RefCell, rc::Rc};
 //! use crypto_ws_client::{BinanceSpotWSClient, WSClient};
 //!
-//! let mut ws_client = BinanceSpotWSClient::new(Box::new(|msg| println!("{}", msg)), None);
+//! let mut ws_client = BinanceSpotWSClient::new(Rc::new(RefCell::new(|msg| println!("{}", msg))), None);
 //! let channels = vec!["btcusdt@aggTrade".to_string(), "btcusdt@depth".to_string(),];
 //! ws_client.subscribe(&channels);
 //! ws_client.run(Some(2)); // run for 2 seconds
@@ -60,6 +61,8 @@
 
 mod clients;
 
+use std::{cell::RefCell, rc::Rc};
+
 pub use clients::binance::*;
 pub use clients::binance_option::*;
 // pub use clients::bitfinex::*;
@@ -80,7 +83,7 @@ pub trait WSClient<'a> {
     ///
     /// * `on_msg` - A callback function to process original JSON messages
     /// * `url` - Optional server url, usually you don't need specify it
-    fn new(on_msg: Box<dyn FnMut(String) + 'a>, url: Option<&str>) -> Self;
+    fn new(on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>, url: Option<&str>) -> Self;
 
     /// Subscribes to trade channels.
     ///

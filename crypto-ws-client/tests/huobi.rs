@@ -4,6 +4,7 @@ mod utils;
 #[cfg(test)]
 mod huobi_spot {
     use crypto_ws_client::{HuobiSpotWSClient, WSClient};
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn subscribe() {
@@ -55,8 +56,10 @@ mod huobi_spot {
         let mut messages = Vec::<String>::new();
         {
             let on_msg = |msg: String| messages.push(msg);
-            let mut ws_client =
-                HuobiSpotWSClient::new(Box::new(on_msg), Some("wss://api.huobi.pro/feed"));
+            let mut ws_client = HuobiSpotWSClient::new(
+                Rc::new(RefCell::new(on_msg)),
+                Some("wss://api.huobi.pro/feed"),
+            );
             ws_client.subscribe_orderbook(&vec!["btcusdt".to_string()]);
             ws_client.run(Some(0)); // return immediately once after getting a normal message
         }
@@ -94,6 +97,7 @@ mod huobi_spot {
 #[cfg(test)]
 mod huobi_future {
     use crypto_ws_client::{HuobiFutureWSClient, WSClient};
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn subscribe() {
@@ -159,6 +163,7 @@ mod huobi_future {
 #[cfg(test)]
 mod huobi_linear_swap {
     use crypto_ws_client::{HuobiLinearSwapWSClient, WSClient};
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn subscribe() {
@@ -228,6 +233,7 @@ mod huobi_linear_swap {
 #[cfg(test)]
 mod huobi_inverse_swap {
     use crypto_ws_client::{HuobiInverseSwapWSClient, WSClient};
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn subscribe() {
@@ -297,6 +303,7 @@ mod huobi_inverse_swap {
 #[cfg(test)]
 mod huobi_option {
     use crypto_ws_client::{HuobiOptionWSClient, WSClient};
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn subscribe() {
