@@ -1,8 +1,8 @@
 macro_rules! gen_test_code {
     ($client:ident, $func_name:ident, $pairs:expr) => {
         let mut messages = Vec::<String>::new();
+        let on_msg = |msg: String| messages.push(msg);
         {
-            let on_msg = |msg: String| messages.push(msg);
             let mut ws_client = $client::new(Box::new(on_msg), None);
             ws_client.$func_name($pairs);
             ws_client.run(Some(0)); // return immediately once after a normal message
@@ -17,8 +17,8 @@ macro_rules! gen_test_code {
 macro_rules! gen_test_subscribe_candlestick {
     ($client:ident, $pairs:expr, $interval:expr) => {
         let mut messages = Vec::<String>::new();
+        let on_msg = |msg: String| messages.push(msg);
         {
-            let on_msg = |msg: String| messages.push(msg);
             let mut ws_client = $client::new(Box::new(on_msg), None);
             ws_client.subscribe_candlestick($pairs, $interval);
             ws_client.run(Some(0)); // return immediately once after a normal message
