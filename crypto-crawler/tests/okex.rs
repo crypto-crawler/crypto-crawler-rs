@@ -4,6 +4,7 @@ mod utils;
 #[cfg(test)]
 mod okex_spot {
     use crypto_crawler::*;
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn test_crawl_trade() {
@@ -42,6 +43,7 @@ mod okex_spot {
 #[cfg(test)]
 mod okex_future {
     use crypto_crawler::*;
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn test_crawl_trade() {
@@ -80,6 +82,7 @@ mod okex_future {
 #[cfg(test)]
 mod okex_swap {
     use crypto_crawler::*;
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn test_crawl_trade() {
@@ -118,6 +121,7 @@ mod okex_swap {
 #[cfg(test)]
 mod okex_option {
     use crypto_crawler::*;
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn test_crawl_trade() {

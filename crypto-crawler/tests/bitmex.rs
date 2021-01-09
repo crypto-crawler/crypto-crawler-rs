@@ -4,6 +4,7 @@ mod utils;
 #[cfg(test)]
 mod bitmex_swap {
     use crypto_crawler::*;
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn test_crawl_trade() {
@@ -42,6 +43,7 @@ mod bitmex_swap {
 #[cfg(test)]
 mod bitmex_future {
     use crypto_crawler::*;
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn test_crawl_trade() {

@@ -4,6 +4,7 @@ mod utils;
 #[cfg(test)]
 mod bitfinex_spot {
     use crypto_crawler::*;
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn test_crawl_trade() {
@@ -64,6 +65,7 @@ mod bitfinex_spot {
 #[cfg(test)]
 mod bitfinex_swap {
     use crypto_crawler::*;
+    use std::{cell::RefCell, rc::Rc};
 
     #[test]
     fn test_crawl_trade() {

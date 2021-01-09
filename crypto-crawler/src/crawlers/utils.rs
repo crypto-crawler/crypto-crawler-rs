@@ -3,11 +3,11 @@ macro_rules! gen_crawl_snapshot {
         pub(crate) fn $func_name<'a>(
             $market_type: MarketType,
             $symbols: &[String],
-            mut $on_msg: Box<dyn FnMut(Message) + 'a>,
+            $on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
             $duration: Option<u64>,
         ) {
             check_args($market_type, $symbols);
-            let mut on_msg_ext = |json: String, symbol: String| {
+            let on_msg_ext = |json: String, symbol: String| {
                 let message = Message::new(
                     EXCHANGE_NAME.to_string(),
                     $market_type,
@@ -15,7 +15,7 @@ macro_rules! gen_crawl_snapshot {
                     $msg_type,
                     json,
                 );
-                ($on_msg)(message);
+                ($on_msg.borrow_mut())(message);
             };
 
             let now = Instant::now();
@@ -52,7 +52,7 @@ macro_rules! gen_crawl_event {
         pub(crate) fn $func_name<'a>(
             $market_type: MarketType,
             $symbols: &[String],
-            mut $on_msg: Box<dyn FnMut(Message) + 'a>,
+            $on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
             $duration: Option<u64>,
         ) {
             check_args($market_type, $symbols);
@@ -64,9 +64,9 @@ macro_rules! gen_crawl_event {
                     $msg_type,
                     msg.to_string(),
                 );
-                $on_msg(message);
+                ($on_msg.borrow_mut())(message);
             };
-            let mut ws_client = $struct_name::new(Box::new(on_msg_ext), None);
+            let mut ws_client = $struct_name::new(Rc::new(RefCell::new(on_msg_ext)), None);
             ws_client.$crawl_func($symbols);
             ws_client.run($duration);
         }
