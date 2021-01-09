@@ -1,3 +1,4 @@
+use std::{cell::RefCell, rc::Rc};
 use std::{
     collections::HashMap,
     time::{Duration, Instant},
@@ -72,7 +73,6 @@ fn extract_symbol(json: &str) -> String {
         .unwrap()
         .to_string()
 }
-
 #[rustfmt::skip]
 gen_crawl_event!(crawl_trade_spot, market_type, symbols, on_msg, duration, BinanceSpotWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
@@ -97,7 +97,7 @@ gen_crawl_event!(crawl_l2_event_option, market_type, symbols, on_msg, duration, 
 pub(crate) fn crawl_trade<'a>(
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Box<dyn FnMut(Message) + 'a>,
+    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
     duration: Option<u64>,
 ) {
     let symbols: Vec<String> = symbols.iter().map(|symbol| symbol.to_lowercase()).collect();
@@ -113,17 +113,14 @@ pub(crate) fn crawl_trade<'a>(
                 crawl_trade_inverse_swap(market_type, &symbols, on_msg, duration);
             }
         }
-        MarketType::Option => {
-            let symbols: Vec<String> = symbols.iter().map(|symbol| symbol.to_uppercase()).collect();
-            crawl_trade_option(market_type, &symbols, on_msg, duration);
-        }
+        MarketType::Option => crawl_trade_option(market_type, &symbols, on_msg, duration),
     }
 }
 
 pub(crate) fn crawl_l2_event<'a>(
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Box<dyn FnMut(Message) + 'a>,
+    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
     duration: Option<u64>,
 ) {
     let symbols: Vec<String> = symbols.iter().map(|symbol| symbol.to_lowercase()).collect();
@@ -146,10 +143,10 @@ pub(crate) fn crawl_l2_event<'a>(
 pub(crate) fn crawl_l2_snapshot<'a>(
     market_type: MarketType,
     symbols: &[String],
-    mut on_msg: Box<dyn FnMut(Message) + 'a>,
+    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
     duration: Option<u64>,
 ) {
-    let mut on_msg_ext = |json: String, symbol: String| {
+    let on_msg_ext = |json: String, symbol: String| {
         let message = Message::new(
             EXCHANGE_NAME.to_string(),
             market_type,
@@ -157,7 +154,7 @@ pub(crate) fn crawl_l2_snapshot<'a>(
             MessageType::L2Snapshot,
             json,
         );
-        on_msg(message);
+        (on_msg.borrow_mut())(message);
     };
 
     let symbols: Vec<String> = symbols.iter().map(|symbol| symbol.to_uppercase()).collect();

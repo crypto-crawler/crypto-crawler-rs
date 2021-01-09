@@ -2,17 +2,22 @@ mod crawlers;
 mod market_type;
 mod msg;
 
+use std::{cell::RefCell, rc::Rc};
+
 pub use market_type::MarketType;
 pub use msg::*;
 
 pub(crate) const SNAPSHOT_INTERVAL: u64 = 30; // 30 seconds
 
 /// Crawl trades.
+///
+/// If `symbols` is None, this function will crawl all trading symbols of in the `market_type`,
+/// and fetch the latest symbols every hour.
 pub fn crawl_trade<'a>(
     exchange: &str,
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Box<dyn FnMut(Message) + 'a>,
+    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
     duration: Option<u64>,
 ) {
     let func = match exchange {
@@ -35,7 +40,7 @@ pub fn crawl_l2_event<'a>(
     exchange: &str,
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Box<dyn FnMut(Message) + 'a>,
+    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
     duration: Option<u64>,
 ) {
     let func = match exchange {
@@ -58,7 +63,7 @@ pub fn crawl_l2_snapshot<'a>(
     exchange: &str,
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Box<dyn FnMut(Message) + 'a>,
+    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
     duration: Option<u64>,
 ) {
     let func = match exchange {
@@ -81,7 +86,7 @@ pub fn crawl_l3_event<'a>(
     exchange: &str,
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Box<dyn FnMut(Message) + 'a>,
+    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
     duration: Option<u64>,
 ) {
     let func = match exchange {
@@ -99,7 +104,7 @@ pub fn crawl_l3_snapshot<'a>(
     exchange: &str,
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Box<dyn FnMut(Message) + 'a>,
+    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
     duration: Option<u64>,
 ) {
     let func = match exchange {

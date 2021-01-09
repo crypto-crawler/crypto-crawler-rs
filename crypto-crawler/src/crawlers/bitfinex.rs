@@ -1,4 +1,5 @@
 use std::time::{Duration, Instant};
+use std::{cell::RefCell, rc::Rc};
 
 use crate::{msg::Message, MarketType, MessageType};
 use crypto_rest_client::*;
@@ -7,6 +8,9 @@ use log::*;
 use serde_json::Value;
 
 const EXCHANGE_NAME: &str = "Bitfinex";
+// Each websocket connection has a limit of 30 subscriptions to public market
+// data feed channels, see https://docs.bitfinex.com/docs/ws-general
+const MAX_CHANNELS: usize = 30;
 
 fn extract_symbol(json: &str) -> String {
     let arr = serde_json::from_str::<Vec<Value>>(&json).unwrap();
@@ -14,10 +18,14 @@ fn extract_symbol(json: &str) -> String {
     obj.get("symbol").unwrap().as_str().unwrap().to_string()
 }
 
-fn check_args(market_type: MarketType, _symbols: &[String]) {
+fn check_args(market_type: MarketType, symbols: &[String]) {
     if market_type != MarketType::Spot && market_type != MarketType::Swap {
         error!("Bitfinex has only Spot and Swap markets");
         panic!("Bitfinex has only Spot and Swap markets");
+    }
+    if symbols.len() > MAX_CHANNELS {
+        error!("Each websocket connection has a limit of 30 subscriptions");
+        panic!("Each websocket connection has a limit of 30 subscriptions");
     }
 }
 

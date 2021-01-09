@@ -1,4 +1,5 @@
 use std::time::{Duration, Instant};
+use std::{cell::RefCell, rc::Rc};
 
 use crate::{msg::Message, MarketType, MessageType};
 use crypto_rest_client::*;

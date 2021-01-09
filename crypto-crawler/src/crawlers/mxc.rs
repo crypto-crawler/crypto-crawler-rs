@@ -1,3 +1,4 @@
+use std::{cell::RefCell, rc::Rc};
 use std::{
     collections::HashMap,
     time::{Duration, Instant},
@@ -40,7 +41,7 @@ gen_crawl_event!(crawl_trade_swap, market_type, symbols, on_msg, duration, MXCSw
 pub(crate) fn crawl_trade<'a>(
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Box<dyn FnMut(Message) + 'a>,
+    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
     duration: Option<u64>,
 ) {
     check_args(market_type, symbols);
@@ -57,7 +58,7 @@ pub(crate) fn crawl_trade<'a>(
 pub(crate) fn crawl_l2_event<'a>(
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Box<dyn FnMut(Message) + 'a>,
+    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
     duration: Option<u64>,
 ) {
     check_args(market_type, symbols);
@@ -74,7 +75,7 @@ pub(crate) fn crawl_l2_event<'a>(
 pub(crate) fn crawl_l2_snapshot<'a>(
     market_type: MarketType,
     symbols: &[String],
-    mut on_msg: Box<dyn FnMut(Message) + 'a>,
+    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
     duration: Option<u64>,
 ) {
     check_args(market_type, symbols);
@@ -83,7 +84,7 @@ pub(crate) fn crawl_l2_snapshot<'a>(
         panic!("MXC Spot REST APIs require access key, please set it to the MXC_ACCESS_KEY environment variable");
     }
 
-    let mut on_msg_ext = |json: String, symbol: String| {
+    let on_msg_ext = |json: String, symbol: String| {
         let message = Message::new(
             EXCHANGE_NAME.to_string(),
             market_type,
@@ -91,7 +92,7 @@ pub(crate) fn crawl_l2_snapshot<'a>(
             MessageType::L2Snapshot,
             json,
         );
-        on_msg(message);
+        (on_msg.borrow_mut())(message);
     };
 
     let now = Instant::now();
