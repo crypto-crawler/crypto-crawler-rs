@@ -170,43 +170,43 @@ macro_rules! define_market_client {
                 }
             }
 
-            fn subscribe_trade(&mut self, channels: &[String]) {
+            fn subscribe_trade(&self, channels: &[String]) {
                 <$struct_name as Trade>::subscribe_trade(self, channels);
             }
 
-            fn subscribe_orderbook(&mut self, channels: &[String]) {
+            fn subscribe_orderbook(&self, channels: &[String]) {
                 <$struct_name as OrderBook>::subscribe_orderbook(self, channels);
             }
 
-            fn subscribe_orderbook_snapshot(&mut self, channels: &[String]) {
+            fn subscribe_orderbook_snapshot(&self, channels: &[String]) {
                 <$struct_name as OrderBookSnapshot>::subscribe_orderbook_snapshot(self, channels);
             }
 
-            fn subscribe_ticker(&mut self, channels: &[String]) {
+            fn subscribe_ticker(&self, channels: &[String]) {
                 <$struct_name as Ticker>::subscribe_ticker(self, channels);
             }
 
-            fn subscribe_bbo(&mut self, channels: &[String]) {
+            fn subscribe_bbo(&self, channels: &[String]) {
                 <$struct_name as BBO>::subscribe_bbo(self, channels);
             }
 
-            fn subscribe_candlestick(&mut self, pairs: &[String], interval: u32) {
+            fn subscribe_candlestick(&self, pairs: &[String], interval: u32) {
                 <$struct_name as Candlestick>::subscribe_candlestick(self, pairs, interval);
             }
 
-            fn subscribe(&mut self, channels: &[String]) {
+            fn subscribe(&self, channels: &[String]) {
                 self.client.client.subscribe(channels);
             }
 
-            fn unsubscribe(&mut self, channels: &[String]) {
+            fn unsubscribe(&self, channels: &[String]) {
                 self.client.client.unsubscribe(channels);
             }
 
-            fn run(&mut self, duration: Option<u64>) {
+            fn run(&self, duration: Option<u64>) {
                 self.client.client.run(duration);
             }
 
-            fn close(&mut self) {
+            fn close(&self) {
                 self.client.client.close();
             }
         }
@@ -221,7 +221,7 @@ define_market_client!(BinanceInverseSwapWSClient, DELIVERY_WEBSOCKET_URL);
 macro_rules! impl_trade {
     ($struct_name:ident) => {
         impl<'a> Trade for $struct_name<'a> {
-            fn subscribe_trade(&mut self, pairs: &[String]) {
+            fn subscribe_trade(&self, pairs: &[String]) {
                 self.client.subscribe_trade(pairs);
             }
         }
@@ -236,7 +236,7 @@ impl_trade!(BinanceInverseSwapWSClient);
 macro_rules! impl_ticker {
     ($struct_name:ident) => {
         impl<'a> Ticker for $struct_name<'a> {
-            fn subscribe_ticker(&mut self, pairs: &[String]) {
+            fn subscribe_ticker(&self, pairs: &[String]) {
                 self.client.subscribe_ticker(pairs);
             }
         }
@@ -251,7 +251,7 @@ impl_ticker!(BinanceInverseSwapWSClient);
 macro_rules! impl_bbo {
     ($struct_name:ident) => {
         impl<'a> BBO for $struct_name<'a> {
-            fn subscribe_bbo(&mut self, pairs: &[String]) {
+            fn subscribe_bbo(&self, pairs: &[String]) {
                 self.client.subscribe_bbo(pairs);
             }
         }
@@ -266,7 +266,7 @@ impl_bbo!(BinanceInverseSwapWSClient);
 macro_rules! impl_orderbook {
     ($struct_name:ident) => {
         impl<'a> OrderBook for $struct_name<'a> {
-            fn subscribe_orderbook(&mut self, pairs: &[String]) {
+            fn subscribe_orderbook(&self, pairs: &[String]) {
                 self.client.subscribe_orderbook(pairs);
             }
         }
@@ -281,7 +281,7 @@ impl_orderbook!(BinanceInverseSwapWSClient);
 macro_rules! impl_orderbook_snapshot {
     ($struct_name:ident) => {
         impl<'a> OrderBookSnapshot for $struct_name<'a> {
-            fn subscribe_orderbook_snapshot(&mut self, pairs: &[String]) {
+            fn subscribe_orderbook_snapshot(&self, pairs: &[String]) {
                 self.client.subscribe_orderbook_snapshot(pairs);
             }
         }
@@ -296,7 +296,7 @@ impl_orderbook_snapshot!(BinanceInverseSwapWSClient);
 macro_rules! impl_candlestick {
     ($struct_name:ident) => {
         impl<'a> Candlestick for $struct_name<'a> {
-            fn subscribe_candlestick(&mut self, pairs: &[String], interval: u32) {
+            fn subscribe_candlestick(&self, pairs: &[String], interval: u32) {
                 self.client.subscribe_candlestick(pairs, interval);
             }
         }

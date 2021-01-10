@@ -95,7 +95,7 @@ pub trait WSClient<'a> {
     /// * BitMEX `XBTUSD`, `XBTM21`
     /// * Binance `btcusdt`, `btcusd_perp`
     /// * OKEx `BTC-USDT`
-    fn subscribe_trade(&mut self, pairs: &[String]);
+    fn subscribe_trade(&self, pairs: &[String]);
 
     /// Subscribes to BBO(best bid & offer) channels.
     ///
@@ -108,7 +108,7 @@ pub trait WSClient<'a> {
     ///
     /// * Binance, BitMEX, Huobi and Kraken have BBO directly.
     /// * Bitfinex uses `book` channel with `len=1` and `prec="R0"` to get BBO data.
-    fn subscribe_bbo(&mut self, pairs: &[String]);
+    fn subscribe_bbo(&self, pairs: &[String]);
 
     /// Subscribes to incremental level2 orderbook channels.
     ///
@@ -129,7 +129,7 @@ pub trait WSClient<'a> {
     /// * Kraken `book` with `depth=25`
     /// * MXC `depth` for Swap, `symbol` for Spot
     /// * OKEx `depth_l2_tbt`, top 100
-    fn subscribe_orderbook(&mut self, pairs: &[String]);
+    fn subscribe_orderbook(&self, pairs: &[String]);
 
     /// Subscribes to level2 orderbook snapshot channels.
     ///
@@ -146,7 +146,7 @@ pub trait WSClient<'a> {
     /// * Kraken has no snapshot channel
     /// * MXC `depth.full` for Swap, top 20, every 100ms; `get.depth` for Spot, full, every 26s
     /// * OKEx `depth5`, top 5, every 100ms
-    fn subscribe_orderbook_snapshot(&mut self, pairs: &[String]);
+    fn subscribe_orderbook_snapshot(&self, pairs: &[String]);
 
     /// Subscribes to ticker channels.
     ///
@@ -155,7 +155,7 @@ pub trait WSClient<'a> {
     ///
     /// Not all exchanges have the ticker channel, for example, BitMEX,
     /// Bitstamp, MXC Spot, etc.
-    fn subscribe_ticker(&mut self, pairs: &[String]);
+    fn subscribe_ticker(&self, pairs: &[String]);
 
     /// Subscribes to candlestick channels.
     ///
@@ -165,7 +165,7 @@ pub trait WSClient<'a> {
     ///
     /// Not all exchanges have candlestick channels, for example, Bitstamp
     /// and CoinbasePro.
-    fn subscribe_candlestick(&mut self, pairs: &[String], interval: u32);
+    fn subscribe_candlestick(&self, pairs: &[String], interval: u32);
 
     /// Subscribes to raw channels, lower level API.
     ///
@@ -183,20 +183,20 @@ pub trait WSClient<'a> {
     /// * A JSON string, supported by all exchanges. If a `raw_channel` starts
     /// with `{`, which means it is the final JSON string, thus it will be
     /// sent out directly without parsing.
-    fn subscribe(&mut self, raw_channels: &[String]);
+    fn subscribe(&self, raw_channels: &[String]);
 
     /// Unsubscribes from raw channels, lower level API.
-    fn unsubscribe(&mut self, raw_channels: &[String]);
+    fn unsubscribe(&self, raw_channels: &[String]);
 
     /// Starts the infinite loop until time is up or the server closes the connection.
     ///
     /// # Arguments
     ///
     /// * `duration` - How many seconds to run, None means infinite.
-    fn run(&mut self, duration: Option<u64>);
+    fn run(&self, duration: Option<u64>);
 
     /// Breaks the loop and closes the connection.
-    fn close(&mut self);
+    fn close(&self);
 }
 
 /// Level3 orderbook data.
@@ -205,5 +205,5 @@ pub trait Level3OrderBook {
     ///
     /// The level3 orderbook is the orginal orderbook of an exchange, it is
     /// non-aggregated by price level and updated tick-by-tick.
-    fn subscribe_l3_orderbook(&mut self, symbols: &[String]);
+    fn subscribe_l3_orderbook(&self, symbols: &[String]);
 }

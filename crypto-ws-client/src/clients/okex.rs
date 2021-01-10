@@ -110,7 +110,7 @@ impl_trait!(
 );
 
 impl<'a> BBO for OKExWSClient<'a> {
-    fn subscribe_bbo(&mut self, _pairs: &[String]) {
+    fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("OKEx WebSocket does NOT have BBO channel");
     }
 }

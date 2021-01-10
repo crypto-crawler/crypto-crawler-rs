@@ -139,7 +139,7 @@ impl_trait!(Trade, MXCSpotWSClient, subscribe_trade, "symbol", to_raw_channel);
 impl_trait!(Trade, MXCSwapWSClient, subscribe_trade, "deal", to_raw_channel);
 
 impl<'a> Ticker for MXCSpotWSClient<'a> {
-    fn subscribe_ticker(&mut self, _pairs: &[String]) {
+    fn subscribe_ticker(&self, _pairs: &[String]) {
         panic!("MXC Spot WebSocket does NOT have ticker channel");
     }
 }
@@ -156,12 +156,12 @@ impl_trait!(OrderBookSnapshot, MXCSpotWSClient, subscribe_orderbook_snapshot, "g
 impl_trait!(OrderBookSnapshot, MXCSwapWSClient, subscribe_orderbook_snapshot, "depth.full", to_raw_channel);
 
 impl<'a> BBO for MXCSpotWSClient<'a> {
-    fn subscribe_bbo(&mut self, _pairs: &[String]) {
+    fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("MXC Spot WebSocket does NOT have BBO channel");
     }
 }
 impl<'a> BBO for MXCSwapWSClient<'a> {
-    fn subscribe_bbo(&mut self, _pairs: &[String]) {
+    fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("MXC Swap WebSocket does NOT have BBO channel");
     }
 }
@@ -184,7 +184,7 @@ fn interval_to_string(interval: u32) -> String {
 }
 
 impl<'a> Candlestick for MXCSpotWSClient<'a> {
-    fn subscribe_candlestick(&mut self, pairs: &[String], interval: u32) {
+    fn subscribe_candlestick(&self, pairs: &[String], interval: u32) {
         let interval_str = interval_to_string(interval);
 
         let channels = pairs
@@ -202,7 +202,7 @@ impl<'a> Candlestick for MXCSpotWSClient<'a> {
 }
 
 impl<'a> Candlestick for MXCSwapWSClient<'a> {
-    fn subscribe_candlestick(&mut self, pairs: &[String], interval: u32) {
+    fn subscribe_candlestick(&self, pairs: &[String], interval: u32) {
         let interval_str = interval_to_string(interval);
 
         let channels = pairs

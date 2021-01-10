@@ -116,7 +116,7 @@ impl_trait!(Ticker, KrakenWSClient, subscribe_ticker, "ticker", to_raw_channel);
 impl_trait!(BBO, KrakenWSClient, subscribe_bbo, "spread", to_raw_channel);
 
 impl<'a> OrderBook for KrakenWSClient<'a> {
-    fn subscribe_orderbook(&mut self, pairs: &[String]) {
+    fn subscribe_orderbook(&self, pairs: &[String]) {
         let command = format!(
             r#"{{"event":"subscribe","pair":{},"subscription":{{"name":"book", "depth":25}}}}"#,
             serde_json::to_string(pairs).unwrap(),
@@ -128,13 +128,13 @@ impl<'a> OrderBook for KrakenWSClient<'a> {
 }
 
 impl<'a> OrderBookSnapshot for KrakenWSClient<'a> {
-    fn subscribe_orderbook_snapshot(&mut self, _pairs: &[String]) {
+    fn subscribe_orderbook_snapshot(&self, _pairs: &[String]) {
         panic!("Kraken does NOT have orderbook snapshot channel");
     }
 }
 
 impl<'a> Candlestick for KrakenWSClient<'a> {
-    fn subscribe_candlestick(&mut self, pairs: &[String], interval: u32) {
+    fn subscribe_candlestick(&self, pairs: &[String], interval: u32) {
         let valid_set: Vec<u32> = vec![1, 5, 15, 30, 60, 240, 1440, 10080, 21600]
             .into_iter()
             .map(|x| x * 60)

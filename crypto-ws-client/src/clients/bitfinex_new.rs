@@ -28,10 +28,10 @@ const WEBSOCKET_URL: &str = "wss://api-pub.bitfinex.com/ws/2";
 /// * Swap: <https://trading.bitfinex.com/t/BTCF0:USTF0>
 /// * Funding: <https://trading.bitfinex.com/funding>
 pub struct BitfinexWSClient<'a> {
-    ws_stream: WebSocketStream,
-    channels: HashSet<String>,                   // subscribed channels
+    ws_stream: RefCell<WebSocketStream>,
+    channels: RefCell<HashSet<String>>, // subscribed channels
     on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>, // user defined message callback
-    channel_id_meta: HashMap<i64, String>,       // CHANNEL_ID information
+    channel_id_meta: RefCell<HashMap<i64, String>>, // CHANNEL_ID information
 }
 
 fn channel_to_command(channel: &str, subscribe: bool) -> String {
@@ -64,7 +64,7 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
 macro_rules! impl_trait_for_bitfinex {
     ($trait_name:ident, $method_name:ident, $channel_name:expr) => {
         impl<'a> $trait_name for BitfinexWSClient<'a> {
-            fn $method_name(&mut self, symbols: &[String]) {
+            fn $method_name(&self, symbols: &[String]) {
                 let symbol_to_raw_channel =
                     |symbol: &String| format!("{}:{}", $channel_name, symbol);
 
@@ -82,7 +82,7 @@ impl_trait_for_bitfinex!(Trade, subscribe_trade, "trades");
 impl_trait_for_bitfinex!(Ticker, subscribe_ticker, "ticker");
 
 impl<'a> BBO for BitfinexWSClient<'a> {
-    fn subscribe_bbo(&mut self, symbols: &[String]) {
+    fn subscribe_bbo(&self, symbols: &[String]) {
         let raw_channels = symbols
             .iter()
             .map(|symbol| {
@@ -104,7 +104,7 @@ impl<'a> BBO for BitfinexWSClient<'a> {
 }
 
 impl<'a> OrderBook for BitfinexWSClient<'a> {
-    fn subscribe_orderbook(&mut self, symbols: &[String]) {
+    fn subscribe_orderbook(&self, symbols: &[String]) {
         let raw_channels = symbols
             .iter()
             .map(|symbol| {
@@ -127,13 +127,13 @@ impl<'a> OrderBook for BitfinexWSClient<'a> {
 }
 
 impl<'a> OrderBookSnapshot for BitfinexWSClient<'a> {
-    fn subscribe_orderbook_snapshot(&mut self, _symbols: &[String]) {
+    fn subscribe_orderbook_snapshot(&self, _symbols: &[String]) {
         panic!("Bitfinex does NOT have orderbook snapshot channel");
     }
 }
 
 impl<'a> Level3OrderBook for BitfinexWSClient<'a> {
-    fn subscribe_l3_orderbook(&mut self, symbols: &[String]) {
+    fn subscribe_l3_orderbook(&self, symbols: &[String]) {
         let raw_channels = symbols
             .iter()
             .map(|symbol| {
@@ -182,7 +182,7 @@ fn to_candlestick_raw_channel(symbol: &str, interval: u32) -> String {
 }
 
 impl<'a> Candlestick for BitfinexWSClient<'a> {
-    fn subscribe_candlestick(&mut self, symbols: &[String], interval: u32) {
+    fn subscribe_candlestick(&self, symbols: &[String], interval: u32) {
         let raw_channels: Vec<String> = symbols
             .iter()
             .map(|symbol| to_candlestick_raw_channel(symbol, interval))
@@ -193,18 +193,22 @@ impl<'a> Candlestick for BitfinexWSClient<'a> {
 
 impl<'a> BitfinexWSClient<'a> {
     // reconnect and subscribe all channels
-    fn reconnect(&mut self) {
+    fn reconnect(&self) {
         warn!("Reconnecting to {}", WEBSOCKET_URL);
-        self.ws_stream = WebSocketStream::new(connect_with_retry(WEBSOCKET_URL));
+        self.ws_stream
+            .replace(WebSocketStream::new(connect_with_retry(WEBSOCKET_URL)));
         let channels = self
             .channels
+            .borrow()
             .iter()
             .map(|s| s.to_string())
             .collect::<Vec<String>>();
         if !channels.is_empty() {
             let commands = channels_to_commands(&channels, true);
             commands.into_iter().for_each(|command| {
-                self.ws_stream.write_message(Message::Text(command));
+                self.ws_stream
+                    .borrow()
+                    .write_message(Message::Text(command));
             });
         }
         // avoid too frequent reconnect
@@ -213,7 +217,7 @@ impl<'a> BitfinexWSClient<'a> {
 
     // Handle a text msg from Message::Text or Message::Binary
     // Returns true if gets a normal message, otherwise false
-    fn handle_msg(&mut self, txt: &str) -> bool {
+    fn handle_msg(&self, txt: &str) -> bool {
         if txt.starts_with('{') {
             let mut obj = serde_json::from_str::<HashMap<String, Value>>(txt).unwrap();
             let event = obj.get("event").unwrap().as_str().unwrap();
@@ -271,12 +275,15 @@ impl<'a> BitfinexWSClient<'a> {
                                 // to unsubscribe/subscribe again all channels.
                                 let channels = self
                                     .channels
+                                    .borrow()
                                     .iter()
                                     .map(|s| s.to_string())
                                     .collect::<Vec<String>>();
                                 let commands = channels_to_commands(&channels, true);
                                 commands.into_iter().for_each(|command| {
-                                    self.ws_stream.write_message(Message::Text(command));
+                                    self.ws_stream
+                                        .borrow()
+                                        .write_message(Message::Text(command));
                                 });
                             }
                             _ => info!("{} from {}", txt, EXCHANGE_NAME),
@@ -290,11 +297,12 @@ impl<'a> BitfinexWSClient<'a> {
                     obj.remove("event");
                     obj.remove("chanId");
                     self.channel_id_meta
+                        .borrow_mut()
                         .insert(chan_id, serde_json::to_string(&obj).unwrap());
                 }
                 "unsubscribed" => {
                     let chan_id = obj.get("chanId").unwrap().as_i64().unwrap();
-                    self.channel_id_meta.remove(&chan_id);
+                    self.channel_id_meta.borrow_mut().remove(&chan_id);
                 }
                 _ => (),
             }
@@ -304,7 +312,12 @@ impl<'a> BitfinexWSClient<'a> {
             // replace CHANNEL_ID with meta info
             let i = txt.find(",[").unwrap();
             let channel_id = (&txt[1..i]).parse::<i64>().unwrap();
-            let channel_info = self.channel_id_meta.get(&channel_id).unwrap();
+            let channel_info = self
+                .channel_id_meta
+                .borrow()
+                .get(&channel_id)
+                .unwrap()
+                .clone();
             let new_txt = format!("[{}{}", channel_info, &txt[i..]);
 
             (self.on_msg.borrow_mut())(new_txt);
@@ -325,74 +338,78 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
     fn new(on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>, _url: Option<&str>) -> Self {
         let stream = connect_with_retry(WEBSOCKET_URL);
         BitfinexWSClient {
-            ws_stream: WebSocketStream::new(stream),
-            channels: HashSet::new(),
+            ws_stream: RefCell::new(WebSocketStream::new(stream)),
+            channels: RefCell::new(HashSet::new()),
             on_msg,
-            channel_id_meta: HashMap::new(),
+            channel_id_meta: RefCell::new(HashMap::new()),
         }
     }
 
-    fn subscribe_trade(&mut self, channels: &[String]) {
+    fn subscribe_trade(&self, channels: &[String]) {
         <Self as Trade>::subscribe_trade(self, channels);
     }
 
-    fn subscribe_orderbook(&mut self, channels: &[String]) {
+    fn subscribe_orderbook(&self, channels: &[String]) {
         <Self as OrderBook>::subscribe_orderbook(self, channels);
     }
 
-    fn subscribe_orderbook_snapshot(&mut self, channels: &[String]) {
+    fn subscribe_orderbook_snapshot(&self, channels: &[String]) {
         <Self as OrderBookSnapshot>::subscribe_orderbook_snapshot(self, channels);
     }
 
-    fn subscribe_ticker(&mut self, channels: &[String]) {
+    fn subscribe_ticker(&self, channels: &[String]) {
         <Self as Ticker>::subscribe_ticker(self, channels);
     }
 
-    fn subscribe_bbo(&mut self, channels: &[String]) {
+    fn subscribe_bbo(&self, channels: &[String]) {
         <Self as BBO>::subscribe_bbo(self, channels);
     }
 
-    fn subscribe_candlestick(&mut self, symbols: &[String], interval: u32) {
+    fn subscribe_candlestick(&self, symbols: &[String], interval: u32) {
         <Self as Candlestick>::subscribe_candlestick(self, symbols, interval);
     }
 
-    fn subscribe(&mut self, channels: &[String]) {
+    fn subscribe(&self, channels: &[String]) {
         let mut diff = Vec::<String>::new();
         for ch in channels.iter() {
-            if self.channels.insert(ch.clone()) {
+            if self.channels.borrow_mut().insert(ch.clone()) {
                 diff.push(ch.clone());
             }
         }
         if !diff.is_empty() {
             let commands = channels_to_commands(channels, true);
             commands.into_iter().for_each(|command| {
-                self.ws_stream.write_message(Message::Text(command));
+                self.ws_stream
+                    .borrow()
+                    .write_message(Message::Text(command));
             });
         }
     }
 
-    fn unsubscribe(&mut self, channels: &[String]) {
+    fn unsubscribe(&self, channels: &[String]) {
         let mut diff = Vec::<String>::new();
         for ch in channels.iter() {
-            if self.channels.remove(ch) {
+            if self.channels.borrow_mut().remove(ch) {
                 diff.push(ch.clone());
             }
         }
         if !diff.is_empty() {
             let commands = channels_to_commands(channels, false);
             commands.into_iter().for_each(|command| {
-                self.ws_stream.write_message(Message::Text(command));
+                self.ws_stream
+                    .borrow()
+                    .write_message(Message::Text(command));
             });
         }
     }
 
-    fn run(&mut self, duration: Option<u64>) {
+    fn run(&self, duration: Option<u64>) {
         // start the ping thread
-        Self::auto_ping(self.ws_stream.clone());
+        Self::auto_ping(self.ws_stream.borrow().clone());
 
         let now = Instant::now();
         loop {
-            let resp = self.ws_stream.read_message();
+            let resp = self.ws_stream.borrow().read_message();
             let mut succeeded = false;
             match resp {
                 Ok(msg) => match msg {
@@ -432,8 +449,8 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
         }
     }
 
-    fn close(&mut self) {
-        self.ws_stream.close();
+    fn close(&self) {
+        self.ws_stream.borrow().close();
     }
 }
 

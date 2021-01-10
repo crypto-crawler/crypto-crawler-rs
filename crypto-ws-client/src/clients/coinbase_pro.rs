@@ -116,25 +116,25 @@ impl_trait!(Ticker, CoinbaseProWSClient, subscribe_ticker, "ticker", to_raw_chan
 impl_trait!(OrderBook, CoinbaseProWSClient, subscribe_orderbook, "level2", to_raw_channel);
 
 impl<'a> BBO for CoinbaseProWSClient<'a> {
-    fn subscribe_bbo(&mut self, _pairs: &[String]) {
+    fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("CoinbasePro WebSocket does NOT have BBO channel");
     }
 }
 
 impl<'a> OrderBookSnapshot for CoinbaseProWSClient<'a> {
-    fn subscribe_orderbook_snapshot(&mut self, _pairs: &[String]) {
+    fn subscribe_orderbook_snapshot(&self, _pairs: &[String]) {
         panic!("CoinbasePro does NOT have orderbook snapshot channel");
     }
 }
 
 impl<'a> Candlestick for CoinbaseProWSClient<'a> {
-    fn subscribe_candlestick(&mut self, _pairs: &[String], _interval: u32) {
+    fn subscribe_candlestick(&self, _pairs: &[String], _interval: u32) {
         panic!("CoinbasePro does NOT have candlestick channel");
     }
 }
 
 impl<'a> Level3OrderBook for CoinbaseProWSClient<'a> {
-    fn subscribe_l3_orderbook(&mut self, symbols: &[String]) {
+    fn subscribe_l3_orderbook(&self, symbols: &[String]) {
         let raw_channels: Vec<String> = symbols
             .iter()
             .map(|symbol| to_raw_channel("full", symbol))

@@ -29,7 +29,7 @@ impl WebSocketStream {
         }
     }
 
-    pub fn close(&mut self) {
+    pub fn close(&self) {
         let mut guard = self.stream.lock().unwrap();
         if let Err(err) = guard.close(None) {
             error!("{}", err);
