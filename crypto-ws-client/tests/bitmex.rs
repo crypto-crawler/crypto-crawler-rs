@@ -1,5 +1,5 @@
 use crypto_ws_client::{BitMEXWSClient, WSClient};
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 
 #[macro_use]
 mod utils;
@@ -12,7 +12,7 @@ fn bitmex_instrument() {
 #[cfg(test)]
 mod bitmex_swap {
     use crypto_ws_client::{BitMEXWSClient, WSClient};
-    use std::{cell::RefCell, rc::Rc};
+    use std::sync::{Arc, Mutex};
 
     #[test]
     fn subscribe() {
@@ -86,7 +86,7 @@ mod bitmex_swap {
 #[cfg(test)]
 mod bitmex_future {
     use crypto_ws_client::{BitMEXWSClient, WSClient};
-    use std::{cell::RefCell, rc::Rc};
+    use std::sync::{Arc, Mutex};
 
     #[test]
     fn subscribe() {

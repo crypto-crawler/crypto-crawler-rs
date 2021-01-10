@@ -1,6 +1,6 @@
 use crate::{Level3OrderBook, WSClient};
 
-use std::{cell::RefCell, rc::Rc, sync::Mutex};
+use std::sync::{Arc, Mutex};
 use std::{
     collections::{HashMap, HashSet},
     thread,
@@ -28,10 +28,10 @@ const WEBSOCKET_URL: &str = "wss://api-pub.bitfinex.com/ws/2";
 /// * Swap: <https://trading.bitfinex.com/t/BTCF0:USTF0>
 /// * Funding: <https://trading.bitfinex.com/funding>
 pub struct BitfinexWSClient<'a> {
-    ws_stream: RefCell<WebSocketStream>,
+    ws_stream: Mutex<WebSocketStream>,
     channels: Mutex<HashSet<String>>, // subscribed channels
-    on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>, // user defined message callback
-    channel_id_meta: RefCell<HashMap<i64, String>>, // CHANNEL_ID information
+    on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, // user defined message callback
+    channel_id_meta: Mutex<HashMap<i64, String>>, // CHANNEL_ID information
 }
 
 fn channel_to_command(channel: &str, subscribe: bool) -> String {
@@ -194,9 +194,12 @@ impl<'a> Candlestick for BitfinexWSClient<'a> {
 impl<'a> BitfinexWSClient<'a> {
     // reconnect and subscribe all channels
     fn reconnect(&self) {
-        warn!("Reconnecting to {}", WEBSOCKET_URL);
-        self.ws_stream
-            .replace(WebSocketStream::new(connect_with_retry(WEBSOCKET_URL)));
+        {
+            warn!("Reconnecting to {}", WEBSOCKET_URL);
+            let mut guard = self.ws_stream.lock().unwrap();
+            *guard = WebSocketStream::new(connect_with_retry(WEBSOCKET_URL));
+        }
+
         let channels = self
             .channels
             .lock()
@@ -208,7 +211,8 @@ impl<'a> BitfinexWSClient<'a> {
             let commands = channels_to_commands(&channels, true);
             commands.into_iter().for_each(|command| {
                 self.ws_stream
-                    .borrow()
+                    .lock()
+                    .unwrap()
                     .write_message(Message::Text(command));
             });
         }
@@ -284,7 +288,8 @@ impl<'a> BitfinexWSClient<'a> {
                                 let commands = channels_to_commands(&channels, true);
                                 commands.into_iter().for_each(|command| {
                                     self.ws_stream
-                                        .borrow()
+                                        .lock()
+                                        .unwrap()
                                         .write_message(Message::Text(command));
                                 });
                             }
@@ -299,12 +304,13 @@ impl<'a> BitfinexWSClient<'a> {
                     obj.remove("event");
                     obj.remove("chanId");
                     self.channel_id_meta
-                        .borrow_mut()
+                        .lock()
+                        .unwrap()
                         .insert(chan_id, serde_json::to_string(&obj).unwrap());
                 }
                 "unsubscribed" => {
                     let chan_id = obj.get("chanId").unwrap().as_i64().unwrap();
-                    self.channel_id_meta.borrow_mut().remove(&chan_id);
+                    self.channel_id_meta.lock().unwrap().remove(&chan_id);
                 }
                 _ => (),
             }
@@ -316,13 +322,14 @@ impl<'a> BitfinexWSClient<'a> {
             let channel_id = (&txt[1..i]).parse::<i64>().unwrap();
             let channel_info = self
                 .channel_id_meta
-                .borrow()
+                .lock()
+                .unwrap()
                 .get(&channel_id)
                 .unwrap()
                 .clone();
             let new_txt = format!("[{}{}", channel_info, &txt[i..]);
 
-            (self.on_msg.borrow_mut())(new_txt);
+            (self.on_msg.lock().unwrap())(new_txt);
             true
         }
     }
@@ -337,13 +344,13 @@ impl<'a> BitfinexWSClient<'a> {
 }
 
 impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
-    fn new(on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>, _url: Option<&str>) -> Self {
+    fn new(on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, _url: Option<&str>) -> Self {
         let stream = connect_with_retry(WEBSOCKET_URL);
         BitfinexWSClient {
-            ws_stream: RefCell::new(WebSocketStream::new(stream)),
+            ws_stream: Mutex::new(WebSocketStream::new(stream)),
             channels: Mutex::new(HashSet::new()),
             on_msg,
-            channel_id_meta: RefCell::new(HashMap::new()),
+            channel_id_meta: Mutex::new(HashMap::new()),
         }
     }
 
@@ -386,7 +393,8 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
             let commands = channels_to_commands(&diff, true);
             commands.into_iter().for_each(|command| {
                 self.ws_stream
-                    .borrow()
+                    .lock()
+                    .unwrap()
                     .write_message(Message::Text(command));
             });
         }
@@ -407,7 +415,8 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
             let commands = channels_to_commands(&diff, false);
             commands.into_iter().for_each(|command| {
                 self.ws_stream
-                    .borrow()
+                    .lock()
+                    .unwrap()
                     .write_message(Message::Text(command));
             });
         }
@@ -415,11 +424,11 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
 
     fn run(&self, duration: Option<u64>) {
         // start the ping thread
-        Self::auto_ping(self.ws_stream.borrow().clone());
+        Self::auto_ping(self.ws_stream.lock().unwrap().clone());
 
         let now = Instant::now();
         loop {
-            let resp = self.ws_stream.borrow().read_message();
+            let resp = self.ws_stream.lock().unwrap().read_message();
             let mut succeeded = false;
             match resp {
                 Ok(msg) => match msg {
@@ -460,7 +469,7 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
     }
 
     fn close(&self) {
-        self.ws_stream.borrow().close();
+        self.ws_stream.lock().unwrap().close();
     }
 }
 

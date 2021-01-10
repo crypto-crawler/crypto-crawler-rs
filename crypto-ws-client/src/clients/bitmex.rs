@@ -1,5 +1,5 @@
 use crate::WSClient;
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 use std::{collections::HashMap, time::Duration};
 
 use super::{

@@ -1,15 +1,12 @@
 use super::utils::connect_with_retry;
 use super::ws_stream::WebSocketStream;
-use std::{cell::RefCell, rc::Rc, sync::Mutex};
+use std::sync::{Arc, Mutex};
 
 use std::time::{Duration, Instant};
 use std::{collections::HashSet, thread};
 use std::{
     io::prelude::*,
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        Arc,
-    },
+    sync::atomic::{AtomicBool, Ordering},
 };
 
 use flate2::read::{DeflateDecoder, GzDecoder};
@@ -26,9 +23,9 @@ pub(super) enum MiscMessage {
 pub(super) struct WSClientInternal<'a> {
     exchange: &'static str, // Eexchange name
     pub(super) url: String, // Websocket base url
-    ws_stream: RefCell<WebSocketStream>,
+    ws_stream: Mutex<WebSocketStream>,
     channels: Mutex<HashSet<String>>, // subscribed channels
-    on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>, // user defined message callback
+    on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, // user defined message callback
     on_misc_msg: fn(&str) -> MiscMessage, // handle misc messages
     // converts raw channels to subscribe/unsubscribe commands
     channels_to_commands: fn(&[String], bool) -> Vec<String>,
@@ -39,7 +36,7 @@ impl<'a> WSClientInternal<'a> {
     pub fn new(
         exchange: &'static str,
         url: &str,
-        on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>,
+        on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>,
         on_misc_msg: fn(&str) -> MiscMessage,
         channels_to_commands: fn(&[String], bool) -> Vec<String>,
     ) -> Self {
@@ -47,7 +44,7 @@ impl<'a> WSClientInternal<'a> {
         WSClientInternal {
             exchange,
             url: url.to_string(),
-            ws_stream: RefCell::new(WebSocketStream::new(stream)),
+            ws_stream: Mutex::new(WebSocketStream::new(stream)),
             on_msg,
             on_misc_msg,
             channels: Mutex::new(HashSet::new()),
@@ -71,7 +68,8 @@ impl<'a> WSClientInternal<'a> {
             let commands = (self.channels_to_commands)(&diff, true);
             commands.into_iter().for_each(|command| {
                 self.ws_stream
-                    .borrow()
+                    .lock()
+                    .unwrap()
                     .write_message(Message::Text(command));
             });
         }
@@ -92,7 +90,8 @@ impl<'a> WSClientInternal<'a> {
             let commands = (self.channels_to_commands)(&diff, false);
             commands.into_iter().for_each(|command| {
                 self.ws_stream
-                    .borrow()
+                    .lock()
+                    .unwrap()
                     .write_message(Message::Text(command));
             });
         }
@@ -100,9 +99,12 @@ impl<'a> WSClientInternal<'a> {
 
     // reconnect and subscribe all channels
     fn reconnect(&self) {
-        warn!("Reconnecting to {}", &self.url);
-        self.ws_stream
-            .replace(WebSocketStream::new(connect_with_retry(self.url.as_str())));
+        {
+            warn!("Reconnecting to {}", &self.url);
+            let mut guard = self.ws_stream.lock().unwrap();
+            *guard = WebSocketStream::new(connect_with_retry(self.url.as_str()));
+        }
+
         let channels = self
             .channels
             .lock()
@@ -114,7 +116,8 @@ impl<'a> WSClientInternal<'a> {
             let commands = (self.channels_to_commands)(&channels, true);
             commands.into_iter().for_each(|command| {
                 self.ws_stream
-                    .borrow()
+                    .lock()
+                    .unwrap()
                     .write_message(Message::Text(command));
             });
         }
@@ -132,7 +135,7 @@ impl<'a> WSClientInternal<'a> {
                 false
             }
             MiscMessage::WebSocket(ws_msg) => {
-                self.ws_stream.borrow().write_message(ws_msg);
+                self.ws_stream.lock().unwrap().write_message(ws_msg);
                 false
             }
             MiscMessage::Normal => {
@@ -141,14 +144,14 @@ impl<'a> WSClientInternal<'a> {
                 {
                     // special logic for MXC Spot
                     match txt.strip_prefix("42") {
-                        Some(msg) => (self.on_msg.borrow_mut())(msg.to_string()),
+                        Some(msg) => (self.on_msg.lock().unwrap())(msg.to_string()),
                         None => error!(
                             "{}, Not possible, should be handled by {}.on_misc_msg() previously",
                             txt, self.exchange
                         ),
                     }
                 } else {
-                    (self.on_msg.borrow_mut())(txt.to_string());
+                    (self.on_msg.lock().unwrap())(txt.to_string());
                 }
                 true
             }
@@ -160,12 +163,12 @@ impl<'a> WSClientInternal<'a> {
         WSClientInternal::auto_ping(
             self.exchange,
             self.url.to_string(),
-            self.ws_stream.borrow().clone(),
+            self.ws_stream.lock().unwrap().clone(),
         );
 
         let now = Instant::now();
         while !self.should_stop.load(Ordering::Relaxed) {
-            let resp = self.ws_stream.borrow().read_message();
+            let resp = self.ws_stream.lock().unwrap().read_message();
             let normal = match resp {
                 Ok(msg) => match msg {
                     Message::Text(txt) => self.handle_msg(&txt),
@@ -231,7 +234,7 @@ impl<'a> WSClientInternal<'a> {
 
     pub fn close(&self) {
         self.should_stop.store(true, Ordering::Relaxed);
-        self.ws_stream.borrow().close();
+        self.ws_stream.lock().unwrap().close();
     }
 
     // Send ping per interval
@@ -272,7 +275,7 @@ macro_rules! define_client {
     ($struct_name:ident, $exchange:ident, $default_url:ident, $channels_to_commands:ident, $on_misc_msg:ident) => {
         impl<'a> WSClient<'a> for $struct_name<'a> {
             fn new(
-                on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>,
+                on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>,
                 url: Option<&str>,
             ) -> $struct_name<'a> {
                 let real_url = match url {
