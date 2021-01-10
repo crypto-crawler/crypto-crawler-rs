@@ -167,7 +167,7 @@ impl<'a> WSClientInternal<'a> {
         );
 
         let now = Instant::now();
-        while !self.should_stop.load(Ordering::Relaxed) {
+        while !self.should_stop.load(Ordering::Acquire) {
             let resp = self.ws_stream.lock().unwrap().read_message();
             let normal = match resp {
                 Ok(msg) => match msg {
@@ -233,7 +233,7 @@ impl<'a> WSClientInternal<'a> {
     }
 
     pub fn close(&self) {
-        self.should_stop.store(true, Ordering::Relaxed);
+        self.should_stop.store(true, Ordering::Release);
         self.ws_stream.lock().unwrap().close();
     }
 
