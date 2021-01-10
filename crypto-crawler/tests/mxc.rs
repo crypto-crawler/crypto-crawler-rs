@@ -4,7 +4,7 @@ mod utils;
 #[cfg(test)]
 mod mxc_spot {
     use crypto_crawler::*;
-    use std::{cell::RefCell, rc::Rc};
+    use std::sync::{Arc, Mutex};
 
     #[test]
     fn test_crawl_trade() {
@@ -44,7 +44,7 @@ mod mxc_spot {
 #[cfg(test)]
 mod mxc_swap {
     use crypto_crawler::*;
-    use std::{cell::RefCell, rc::Rc};
+    use std::sync::{Arc, Mutex};
 
     #[test]
     fn test_crawl_trade() {

@@ -2,7 +2,7 @@ macro_rules! gen_test_code {
     ($crawl_func:ident, $exchange:expr, $market_type:expr, $symbol:expr, $msg_type:expr) => {{
         let mut messages = Vec::<Message>::new();
 
-        let on_msg = Rc::new(RefCell::new(|msg: Message| messages.push(msg)));
+        let on_msg = Arc::new(Mutex::new(|msg: Message| messages.push(msg)));
         $crawl_func(
             $exchange,
             $market_type,

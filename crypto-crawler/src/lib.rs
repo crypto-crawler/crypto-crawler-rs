@@ -2,7 +2,7 @@ mod crawlers;
 mod market_type;
 mod msg;
 
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 
 pub use market_type::MarketType;
 pub use msg::*;
@@ -17,7 +17,7 @@ pub fn crawl_trade<'a>(
     exchange: &str,
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'a + Send>>,
     duration: Option<u64>,
 ) {
     let func = match exchange {
@@ -40,7 +40,7 @@ pub fn crawl_l2_event<'a>(
     exchange: &str,
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'a + Send>>,
     duration: Option<u64>,
 ) {
     let func = match exchange {
@@ -63,7 +63,7 @@ pub fn crawl_l2_snapshot<'a>(
     exchange: &str,
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'a + Send>>,
     duration: Option<u64>,
 ) {
     let func = match exchange {
@@ -86,7 +86,7 @@ pub fn crawl_l3_event<'a>(
     exchange: &str,
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'a + Send>>,
     duration: Option<u64>,
 ) {
     let func = match exchange {
@@ -104,7 +104,7 @@ pub fn crawl_l3_snapshot<'a>(
     exchange: &str,
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'a + Send>>,
     duration: Option<u64>,
 ) {
     let func = match exchange {
