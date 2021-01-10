@@ -1,5 +1,5 @@
 use crypto_ws_client::{OKExWSClient, WSClient};
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 
 #[macro_use]
 mod utils;
@@ -16,7 +16,7 @@ fn okex_index() {
 #[cfg(test)]
 mod okex_spot {
     use crypto_ws_client::{OKExWSClient, WSClient};
-    use std::{cell::RefCell, rc::Rc};
+    use std::sync::{Arc, Mutex};
 
     #[test]
     fn subscribe() {
@@ -78,7 +78,7 @@ mod okex_spot {
 #[cfg(test)]
 mod okex_future {
     use crypto_ws_client::{OKExWSClient, WSClient};
-    use std::{cell::RefCell, rc::Rc};
+    use std::sync::{Arc, Mutex};
 
     #[test]
     fn subscribe() {
@@ -135,7 +135,7 @@ mod okex_future {
 #[cfg(test)]
 mod okex_swap {
     use crypto_ws_client::{OKExWSClient, WSClient};
-    use std::{cell::RefCell, rc::Rc};
+    use std::sync::{Arc, Mutex};
 
     #[test]
     fn subscribe() {
@@ -192,7 +192,7 @@ mod okex_swap {
 #[cfg(test)]
 mod okex_option {
     use crypto_ws_client::{OKExWSClient, WSClient};
-    use std::{cell::RefCell, rc::Rc};
+    use std::sync::{Arc, Mutex};
 
     #[test]
     fn subscribe() {

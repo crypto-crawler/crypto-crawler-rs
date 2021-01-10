@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 
 use crate::WSClient;
 

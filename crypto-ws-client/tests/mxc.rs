@@ -4,7 +4,7 @@ mod utils;
 #[cfg(test)]
 mod mxc_spot {
     use crypto_ws_client::{MXCSpotWSClient, WSClient};
-    use std::{cell::RefCell, rc::Rc};
+    use std::sync::{Arc, Mutex};
 
     #[test]
     fn subscribe() {
@@ -61,7 +61,7 @@ mod mxc_spot {
 #[cfg(test)]
 mod mxc_swap {
     use crypto_ws_client::{MXCSwapWSClient, WSClient};
-    use std::{cell::RefCell, rc::Rc};
+    use std::sync::{Arc, Mutex};
 
     #[test]
     fn subscribe() {

@@ -1,5 +1,5 @@
 use crypto_ws_client::{BitstampWSClient, Level3OrderBook, WSClient};
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 
 #[macro_use]
 mod utils;

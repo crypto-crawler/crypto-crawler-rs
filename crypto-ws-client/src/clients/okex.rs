@@ -1,6 +1,6 @@
 use crate::WSClient;
 use std::collections::HashMap;
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
 use super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
