@@ -1,6 +1,6 @@
 use super::utils::connect_with_retry;
 use super::ws_stream::WebSocketStream;
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc, sync::Mutex};
 
 use std::time::{Duration, Instant};
 use std::{collections::HashSet, thread};
@@ -27,7 +27,7 @@ pub(super) struct WSClientInternal<'a> {
     exchange: &'static str, // Eexchange name
     pub(super) url: String, // Websocket base url
     ws_stream: RefCell<WebSocketStream>,
-    channels: RefCell<HashSet<String>>, // subscribed channels
+    channels: Mutex<HashSet<String>>, // subscribed channels
     on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>, // user defined message callback
     on_misc_msg: fn(&str) -> MiscMessage, // handle misc messages
     // converts raw channels to subscribe/unsubscribe commands
@@ -50,7 +50,7 @@ impl<'a> WSClientInternal<'a> {
             ws_stream: RefCell::new(WebSocketStream::new(stream)),
             on_msg,
             on_misc_msg,
-            channels: RefCell::new(HashSet::new()),
+            channels: Mutex::new(HashSet::new()),
             channels_to_commands,
             should_stop: Arc::new(AtomicBool::new(false)),
         }
@@ -58,13 +58,17 @@ impl<'a> WSClientInternal<'a> {
 
     pub fn subscribe(&self, channels: &[String]) {
         let mut diff = Vec::<String>::new();
-        for ch in channels.iter() {
-            if self.channels.borrow_mut().insert(ch.clone()) {
-                diff.push(ch.clone());
+        {
+            let mut guard = self.channels.lock().unwrap();
+            for ch in channels.iter() {
+                if guard.insert(ch.clone()) {
+                    diff.push(ch.clone());
+                }
             }
         }
+
         if !diff.is_empty() {
-            let commands = (self.channels_to_commands)(channels, true);
+            let commands = (self.channels_to_commands)(&diff, true);
             commands.into_iter().for_each(|command| {
                 self.ws_stream
                     .borrow()
@@ -75,13 +79,17 @@ impl<'a> WSClientInternal<'a> {
 
     pub fn unsubscribe(&self, channels: &[String]) {
         let mut diff = Vec::<String>::new();
-        for ch in channels.iter() {
-            if self.channels.borrow_mut().remove(ch) {
-                diff.push(ch.clone());
+        {
+            let mut guard = self.channels.lock().unwrap();
+            for ch in channels.iter() {
+                if guard.remove(ch) {
+                    diff.push(ch.clone());
+                }
             }
         }
+
         if !diff.is_empty() {
-            let commands = (self.channels_to_commands)(channels, false);
+            let commands = (self.channels_to_commands)(&diff, false);
             commands.into_iter().for_each(|command| {
                 self.ws_stream
                     .borrow()
@@ -97,7 +105,8 @@ impl<'a> WSClientInternal<'a> {
             .replace(WebSocketStream::new(connect_with_retry(self.url.as_str())));
         let channels = self
             .channels
-            .borrow()
+            .lock()
+            .unwrap()
             .iter()
             .map(|s| s.to_string())
             .collect::<Vec<String>>();

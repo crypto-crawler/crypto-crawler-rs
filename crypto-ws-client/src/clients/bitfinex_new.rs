@@ -1,6 +1,6 @@
 use crate::{Level3OrderBook, WSClient};
 
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc, sync::Mutex};
 use std::{
     collections::{HashMap, HashSet},
     thread,
@@ -29,7 +29,7 @@ const WEBSOCKET_URL: &str = "wss://api-pub.bitfinex.com/ws/2";
 /// * Funding: <https://trading.bitfinex.com/funding>
 pub struct BitfinexWSClient<'a> {
     ws_stream: RefCell<WebSocketStream>,
-    channels: RefCell<HashSet<String>>, // subscribed channels
+    channels: Mutex<HashSet<String>>, // subscribed channels
     on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>, // user defined message callback
     channel_id_meta: RefCell<HashMap<i64, String>>, // CHANNEL_ID information
 }
@@ -199,7 +199,8 @@ impl<'a> BitfinexWSClient<'a> {
             .replace(WebSocketStream::new(connect_with_retry(WEBSOCKET_URL)));
         let channels = self
             .channels
-            .borrow()
+            .lock()
+            .unwrap()
             .iter()
             .map(|s| s.to_string())
             .collect::<Vec<String>>();
@@ -275,7 +276,8 @@ impl<'a> BitfinexWSClient<'a> {
                                 // to unsubscribe/subscribe again all channels.
                                 let channels = self
                                     .channels
-                                    .borrow()
+                                    .lock()
+                                    .unwrap()
                                     .iter()
                                     .map(|s| s.to_string())
                                     .collect::<Vec<String>>();
@@ -339,7 +341,7 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
         let stream = connect_with_retry(WEBSOCKET_URL);
         BitfinexWSClient {
             ws_stream: RefCell::new(WebSocketStream::new(stream)),
-            channels: RefCell::new(HashSet::new()),
+            channels: Mutex::new(HashSet::new()),
             on_msg,
             channel_id_meta: RefCell::new(HashMap::new()),
         }
@@ -371,13 +373,17 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
 
     fn subscribe(&self, channels: &[String]) {
         let mut diff = Vec::<String>::new();
-        for ch in channels.iter() {
-            if self.channels.borrow_mut().insert(ch.clone()) {
-                diff.push(ch.clone());
+        {
+            let mut guard = self.channels.lock().unwrap();
+            for ch in channels.iter() {
+                if guard.insert(ch.clone()) {
+                    diff.push(ch.clone());
+                }
             }
         }
+
         if !diff.is_empty() {
-            let commands = channels_to_commands(channels, true);
+            let commands = channels_to_commands(&diff, true);
             commands.into_iter().for_each(|command| {
                 self.ws_stream
                     .borrow()
@@ -388,13 +394,17 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
 
     fn unsubscribe(&self, channels: &[String]) {
         let mut diff = Vec::<String>::new();
-        for ch in channels.iter() {
-            if self.channels.borrow_mut().remove(ch) {
-                diff.push(ch.clone());
+        {
+            let mut guard = self.channels.lock().unwrap();
+            for ch in channels.iter() {
+                if guard.remove(ch) {
+                    diff.push(ch.clone());
+                }
             }
         }
+
         if !diff.is_empty() {
-            let commands = channels_to_commands(channels, false);
+            let commands = channels_to_commands(&diff, false);
             commands.into_iter().for_each(|command| {
                 self.ws_stream
                     .borrow()
