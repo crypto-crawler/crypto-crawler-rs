@@ -1,6 +1,6 @@
-use std::{cell::RefCell, rc::Rc};
 use std::{
     collections::HashMap,
+    sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
 
@@ -73,6 +73,7 @@ fn extract_symbol(json: &str) -> String {
         .unwrap()
         .to_string()
 }
+
 #[rustfmt::skip]
 gen_crawl_event!(crawl_trade_spot, market_type, symbols, on_msg, duration, BinanceSpotWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
@@ -97,7 +98,7 @@ gen_crawl_event!(crawl_l2_event_option, market_type, symbols, on_msg, duration, 
 pub(crate) fn crawl_trade<'a>(
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'a + Send>>,
     duration: Option<u64>,
 ) {
     let symbols: Vec<String> = symbols.iter().map(|symbol| symbol.to_lowercase()).collect();
@@ -120,7 +121,7 @@ pub(crate) fn crawl_trade<'a>(
 pub(crate) fn crawl_l2_event<'a>(
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'a + Send>>,
     duration: Option<u64>,
 ) {
     let symbols: Vec<String> = symbols.iter().map(|symbol| symbol.to_lowercase()).collect();
@@ -143,7 +144,7 @@ pub(crate) fn crawl_l2_event<'a>(
 pub(crate) fn crawl_l2_snapshot<'a>(
     market_type: MarketType,
     symbols: &[String],
-    on_msg: Rc<RefCell<dyn FnMut(Message) + 'a>>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'a + Send>>,
     duration: Option<u64>,
 ) {
     let on_msg_ext = |json: String, symbol: String| {
@@ -154,7 +155,7 @@ pub(crate) fn crawl_l2_snapshot<'a>(
             MessageType::L2Snapshot,
             json,
         );
-        (on_msg.borrow_mut())(message);
+        (on_msg.lock().unwrap())(message);
     };
 
     let symbols: Vec<String> = symbols.iter().map(|symbol| symbol.to_uppercase()).collect();

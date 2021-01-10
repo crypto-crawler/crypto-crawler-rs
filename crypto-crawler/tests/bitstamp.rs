@@ -1,5 +1,5 @@
 use crypto_crawler::*;
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, Mutex};
 
 #[macro_use]
 mod utils;

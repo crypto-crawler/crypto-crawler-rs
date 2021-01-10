@@ -4,7 +4,7 @@ mod utils;
 #[cfg(test)]
 mod huobi_spot {
     use crypto_crawler::*;
-    use std::{cell::RefCell, rc::Rc};
+    use std::sync::{Arc, Mutex};
 
     #[test]
     fn test_crawl_trade() {
@@ -43,7 +43,7 @@ mod huobi_spot {
 #[cfg(test)]
 mod huobi_future {
     use crypto_crawler::*;
-    use std::{cell::RefCell, rc::Rc};
+    use std::sync::{Arc, Mutex};
 
     #[test]
     fn test_crawl_trade() {
@@ -82,7 +82,7 @@ mod huobi_future {
 #[cfg(test)]
 mod huobi_linear_swap {
     use crypto_crawler::*;
-    use std::{cell::RefCell, rc::Rc};
+    use std::sync::{Arc, Mutex};
 
     #[test]
     fn test_crawl_trade() {
@@ -121,7 +121,7 @@ mod huobi_linear_swap {
 #[cfg(test)]
 mod huobi_inverse_swap {
     use crypto_crawler::*;
-    use std::{cell::RefCell, rc::Rc};
+    use std::sync::{Arc, Mutex};
 
     #[test]
     fn test_crawl_trade() {
@@ -160,7 +160,7 @@ mod huobi_inverse_swap {
 #[cfg(test)]
 mod huobi_option {
     use crypto_crawler::*;
-    use std::{cell::RefCell, rc::Rc};
+    use std::sync::{Arc, Mutex};
 
     #[test]
     fn test_crawl_trade() {
