@@ -100,7 +100,7 @@ impl_trait!(OrderBook, BitMEXWSClient, subscribe_orderbook, "orderBookL2_25", to
 impl_trait!(OrderBookSnapshot, BitMEXWSClient, subscribe_orderbook_snapshot, "orderBook10", to_raw_channel);
 
 impl<'a> Ticker for BitMEXWSClient<'a> {
-    fn subscribe_ticker(&mut self, _pairs: &[String]) {
+    fn subscribe_ticker(&self, _pairs: &[String]) {
         panic!("BitMEX WebSocket does NOT have ticker channel");
     }
 }

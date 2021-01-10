@@ -56,7 +56,7 @@ mod huobi_spot {
         let mut messages = Vec::<String>::new();
         {
             let on_msg = |msg: String| messages.push(msg);
-            let mut ws_client = HuobiSpotWSClient::new(
+            let ws_client = HuobiSpotWSClient::new(
                 Rc::new(RefCell::new(on_msg)),
                 Some("wss://api.huobi.pro/feed"),
             );

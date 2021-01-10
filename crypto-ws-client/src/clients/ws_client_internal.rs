@@ -26,10 +26,10 @@ pub(super) enum MiscMessage {
 pub(super) struct WSClientInternal<'a> {
     exchange: &'static str, // Eexchange name
     pub(super) url: String, // Websocket base url
-    ws_stream: WebSocketStream,
-    channels: HashSet<String>,                   // subscribed channels
+    ws_stream: RefCell<WebSocketStream>,
+    channels: RefCell<HashSet<String>>, // subscribed channels
     on_msg: Rc<RefCell<dyn FnMut(String) + 'a>>, // user defined message callback
-    on_misc_msg: fn(&str) -> MiscMessage,        // handle misc messages
+    on_misc_msg: fn(&str) -> MiscMessage, // handle misc messages
     // converts raw channels to subscribe/unsubscribe commands
     channels_to_commands: fn(&[String], bool) -> Vec<String>,
     should_stop: Arc<AtomicBool>, // used by close() and run()
@@ -47,58 +47,66 @@ impl<'a> WSClientInternal<'a> {
         WSClientInternal {
             exchange,
             url: url.to_string(),
-            ws_stream: WebSocketStream::new(stream),
+            ws_stream: RefCell::new(WebSocketStream::new(stream)),
             on_msg,
             on_misc_msg,
-            channels: HashSet::new(),
+            channels: RefCell::new(HashSet::new()),
             channels_to_commands,
             should_stop: Arc::new(AtomicBool::new(false)),
         }
     }
 
-    pub fn subscribe(&mut self, channels: &[String]) {
+    pub fn subscribe(&self, channels: &[String]) {
         let mut diff = Vec::<String>::new();
         for ch in channels.iter() {
-            if self.channels.insert(ch.clone()) {
+            if self.channels.borrow_mut().insert(ch.clone()) {
                 diff.push(ch.clone());
             }
         }
         if !diff.is_empty() {
             let commands = (self.channels_to_commands)(channels, true);
             commands.into_iter().for_each(|command| {
-                self.ws_stream.write_message(Message::Text(command));
+                self.ws_stream
+                    .borrow()
+                    .write_message(Message::Text(command));
             });
         }
     }
 
-    pub fn unsubscribe(&mut self, channels: &[String]) {
+    pub fn unsubscribe(&self, channels: &[String]) {
         let mut diff = Vec::<String>::new();
         for ch in channels.iter() {
-            if self.channels.remove(ch) {
+            if self.channels.borrow_mut().remove(ch) {
                 diff.push(ch.clone());
             }
         }
         if !diff.is_empty() {
             let commands = (self.channels_to_commands)(channels, false);
             commands.into_iter().for_each(|command| {
-                self.ws_stream.write_message(Message::Text(command));
+                self.ws_stream
+                    .borrow()
+                    .write_message(Message::Text(command));
             });
         }
     }
 
     // reconnect and subscribe all channels
-    fn reconnect(&mut self) {
+    fn reconnect(&self) {
         warn!("Reconnecting to {}", &self.url);
-        self.ws_stream = WebSocketStream::new(connect_with_retry(self.url.as_str()));
+        self.ws_stream
+            .replace(WebSocketStream::new(connect_with_retry(self.url.as_str())));
         let channels = self
             .channels
+            .borrow()
             .iter()
             .map(|s| s.to_string())
             .collect::<Vec<String>>();
         if !channels.is_empty() {
             let commands = (self.channels_to_commands)(&channels, true);
             commands.into_iter().for_each(|command| {
-                self.ws_stream.write_message(Message::Text(command));
+                self.ws_stream
+                    .borrow()
+                    .write_message(Message::Text(command));
             });
         }
         // avoid too frequent reconnect
@@ -107,7 +115,7 @@ impl<'a> WSClientInternal<'a> {
 
     // Handle a text msg from Message::Text or Message::Binary
     // Returns true if gets a normal message, otherwise false
-    fn handle_msg(&mut self, txt: &str) -> bool {
+    fn handle_msg(&self, txt: &str) -> bool {
         match (self.on_misc_msg)(txt) {
             MiscMessage::Misc => false,
             MiscMessage::Reconnect => {
@@ -115,7 +123,7 @@ impl<'a> WSClientInternal<'a> {
                 false
             }
             MiscMessage::WebSocket(ws_msg) => {
-                self.ws_stream.write_message(ws_msg);
+                self.ws_stream.borrow().write_message(ws_msg);
                 false
             }
             MiscMessage::Normal => {
@@ -138,13 +146,17 @@ impl<'a> WSClientInternal<'a> {
         }
     }
 
-    pub fn run(&mut self, duration: Option<u64>) {
+    pub fn run(&self, duration: Option<u64>) {
         // start the ping thread
-        WSClientInternal::auto_ping(self.exchange, self.url.to_string(), self.ws_stream.clone());
+        WSClientInternal::auto_ping(
+            self.exchange,
+            self.url.to_string(),
+            self.ws_stream.borrow().clone(),
+        );
 
         let now = Instant::now();
         while !self.should_stop.load(Ordering::Relaxed) {
-            let resp = self.ws_stream.read_message();
+            let resp = self.ws_stream.borrow().read_message();
             let normal = match resp {
                 Ok(msg) => match msg {
                     Message::Text(txt) => self.handle_msg(&txt),
@@ -208,9 +220,9 @@ impl<'a> WSClientInternal<'a> {
         }
     }
 
-    pub fn close(&mut self) {
+    pub fn close(&self) {
         self.should_stop.store(true, Ordering::Relaxed);
-        self.ws_stream.close();
+        self.ws_stream.borrow().close();
     }
 
     // Send ping per interval
@@ -269,43 +281,43 @@ macro_rules! define_client {
                 }
             }
 
-            fn subscribe_trade(&mut self, channels: &[String]) {
+            fn subscribe_trade(&self, channels: &[String]) {
                 <$struct_name as Trade>::subscribe_trade(self, channels);
             }
 
-            fn subscribe_orderbook(&mut self, channels: &[String]) {
+            fn subscribe_orderbook(&self, channels: &[String]) {
                 <$struct_name as OrderBook>::subscribe_orderbook(self, channels);
             }
 
-            fn subscribe_orderbook_snapshot(&mut self, channels: &[String]) {
+            fn subscribe_orderbook_snapshot(&self, channels: &[String]) {
                 <$struct_name as OrderBookSnapshot>::subscribe_orderbook_snapshot(self, channels);
             }
 
-            fn subscribe_ticker(&mut self, channels: &[String]) {
+            fn subscribe_ticker(&self, channels: &[String]) {
                 <$struct_name as Ticker>::subscribe_ticker(self, channels);
             }
 
-            fn subscribe_bbo(&mut self, channels: &[String]) {
+            fn subscribe_bbo(&self, channels: &[String]) {
                 <$struct_name as BBO>::subscribe_bbo(self, channels);
             }
 
-            fn subscribe_candlestick(&mut self, pairs: &[String], interval: u32) {
+            fn subscribe_candlestick(&self, pairs: &[String], interval: u32) {
                 <$struct_name as Candlestick>::subscribe_candlestick(self, pairs, interval);
             }
 
-            fn subscribe(&mut self, channels: &[String]) {
+            fn subscribe(&self, channels: &[String]) {
                 self.client.subscribe(channels);
             }
 
-            fn unsubscribe(&mut self, channels: &[String]) {
+            fn unsubscribe(&self, channels: &[String]) {
                 self.client.unsubscribe(channels);
             }
 
-            fn run(&mut self, duration: Option<u64>) {
+            fn run(&self, duration: Option<u64>) {
                 self.client.run(duration);
             }
 
-            fn close(&mut self) {
+            fn close(&self) {
                 self.client.close();
             }
         }

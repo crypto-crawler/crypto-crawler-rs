@@ -83,19 +83,19 @@ impl_trait!(OrderBookSnapshot, BitstampWSClient, subscribe_orderbook_snapshot, "
 impl_trait!(Level3OrderBook, BitstampWSClient, subscribe_l3_orderbook, "live_orders", to_raw_channel);
 
 impl<'a> Ticker for BitstampWSClient<'a> {
-    fn subscribe_ticker(&mut self, _pairs: &[String]) {
+    fn subscribe_ticker(&self, _pairs: &[String]) {
         panic!("Bitstamp WebSocket does NOT have ticker channel");
     }
 }
 
 impl<'a> BBO for BitstampWSClient<'a> {
-    fn subscribe_bbo(&mut self, _pairs: &[String]) {
+    fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("Bitstamp WebSocket does NOT have BBO channel");
     }
 }
 
 impl<'a> Candlestick for BitstampWSClient<'a> {
-    fn subscribe_candlestick(&mut self, _pairs: &[String], _interval: u32) {
+    fn subscribe_candlestick(&self, _pairs: &[String], _interval: u32) {
         panic!("Bitstamp does NOT have candlestick channel");
     }
 }

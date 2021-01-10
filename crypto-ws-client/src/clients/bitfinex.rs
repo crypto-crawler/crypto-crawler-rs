@@ -90,7 +90,7 @@ impl_trait!(Trade, BitfinexWSClient, subscribe_trade, "trades", to_raw_channel);
 impl_trait!(Ticker, BitfinexWSClient, subscribe_ticker, "ticker", to_raw_channel);
 
 impl<'a> BBO for BitfinexWSClient<'a> {
-    fn subscribe_bbo(&mut self, pairs: &[String]) {
+    fn subscribe_bbo(&self, pairs: &[String]) {
         let raw_channels = pairs
             .iter()
             .map(|pair| {
@@ -112,7 +112,7 @@ impl<'a> BBO for BitfinexWSClient<'a> {
 }
 
 impl<'a> OrderBook for BitfinexWSClient<'a> {
-    fn subscribe_orderbook(&mut self, pairs: &[String]) {
+    fn subscribe_orderbook(&self, pairs: &[String]) {
         let raw_channels = pairs
             .iter()
             .map(|pair| {
@@ -135,13 +135,13 @@ impl<'a> OrderBook for BitfinexWSClient<'a> {
 }
 
 impl<'a> OrderBookSnapshot for BitfinexWSClient<'a> {
-    fn subscribe_orderbook_snapshot(&mut self, _pairs: &[String]) {
+    fn subscribe_orderbook_snapshot(&self, _pairs: &[String]) {
         panic!("Bitfinex does NOT have orderbook snapshot channel");
     }
 }
 
 impl<'a> Level3OrderBook for BitfinexWSClient<'a> {
-    fn subscribe_l3_orderbook(&mut self, symbols: &[String]) {
+    fn subscribe_l3_orderbook(&self, symbols: &[String]) {
         let raw_channels = symbols
             .iter()
             .map(|pair| {
