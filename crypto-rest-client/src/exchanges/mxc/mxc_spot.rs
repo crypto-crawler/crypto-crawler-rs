@@ -1,3 +1,5 @@
+use serde_json::Value;
+
 use super::super::utils::http_get;
 use crate::error::Result;
 use std::collections::HashMap;
@@ -19,6 +21,29 @@ impl MXCSpotRestClient {
             access_key,
             _secret_key: secret_key,
         }
+    }
+
+    /// Get active trading symbols.
+    pub fn fetch_symbols(&self) -> Result<Vec<String>> {
+        let text = gen_api!(format!(
+            "/open/api/v2/market/symbols?api_key={}",
+            self.access_key
+        ))?;
+        let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
+        if obj.get("code").unwrap().as_i64().unwrap() != 200 {
+            return Err(crate::Error(text));
+        }
+
+        let symbols = obj
+            .get("data")
+            .unwrap()
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|x| x.get("state").unwrap().as_str().unwrap() == "ENABLED")
+            .map(|x| x.get("symbol").unwrap().as_str().unwrap().to_string())
+            .collect::<Vec<String>>();
+        Ok(symbols)
     }
 
     /// Get latest trades.
