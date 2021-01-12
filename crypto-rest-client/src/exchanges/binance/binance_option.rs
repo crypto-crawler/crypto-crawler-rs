@@ -32,7 +32,15 @@ impl BinanceOptionRestClient {
             return Err(crate::Error(txt));
         }
 
-        let arr = obj.get("data").unwrap().as_object().unwrap().get("optionSymbols").unwrap().as_array().unwrap();
+        let arr = obj
+            .get("data")
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .get("optionSymbols")
+            .unwrap()
+            .as_array()
+            .unwrap();
         let symbols = arr
             .iter()
             .map(|x| x.as_object().unwrap())
