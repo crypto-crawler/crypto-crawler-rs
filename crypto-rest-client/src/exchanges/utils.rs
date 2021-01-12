@@ -14,7 +14,11 @@ pub(super) fn http_get(url: &str, params: &HashMap<String, String>) -> Result<St
     }
     // println!("{}", full_url);
 
-    let response = reqwest::blocking::get(full_url.as_str())?.text()?;
+    let client = reqwest::blocking::Client::builder()
+         .user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
+         .build()?;
+    let response = client.get(full_url.as_str()).send()?.text()?;
+
     Ok(response)
 }
 
