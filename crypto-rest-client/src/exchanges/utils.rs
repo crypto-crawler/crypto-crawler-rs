@@ -28,7 +28,8 @@ macro_rules! gen_api {
                     params.insert(stringify!($param_name).to_string(), param_name.to_string());
                 }
             )*
-            http_get(format!("{}{}",BASE_URL, $path).as_str(), &params)
+            let url = if $path.starts_with("http") { $path.to_string() } else { format!("{}{}",BASE_URL, $path) };
+            http_get(&url, &params)
         }
     }
 }
