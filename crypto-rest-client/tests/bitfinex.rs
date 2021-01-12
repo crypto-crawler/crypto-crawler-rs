@@ -1,6 +1,18 @@
 use crypto_rest_client::BitfinexRestClient;
 
 #[test]
+fn test_spot_symbols() {
+    let symbols = BitfinexRestClient::fetch_spot_symbols().unwrap();
+    assert!(!symbols.is_empty());
+}
+
+#[test]
+fn test_swap_symbols() {
+    let symbols = BitfinexRestClient::fetch_swap_symbols().unwrap();
+    assert!(!symbols.is_empty());
+}
+
+#[test]
 fn test_trades() {
     let text = BitfinexRestClient::fetch_trades("tBTCUSD", None, None, None, None).unwrap();
     assert!(text.starts_with("[["));
