@@ -1,6 +1,8 @@
 #[cfg(test)]
 mod huobi_spot {
     use crypto_rest_client::HuobiSpotRestClient;
+    use serde_json::Value;
+    use std::collections::HashMap;
 
     #[test]
     fn test_fetch_symbols() {
@@ -16,14 +18,40 @@ mod huobi_spot {
 
     #[test]
     fn test_l2_snapshot() {
-        let text = HuobiSpotRestClient::fetch_l2_snapshot("btcusdt", 0).unwrap();
+        let text = HuobiSpotRestClient::fetch_l2_snapshot("btcusdt").unwrap();
         assert!(text.starts_with("{"));
+
+        let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
+        assert_eq!("ok", obj.get("status").unwrap().as_str().unwrap());
+
+        let bids = obj
+            .get("tick")
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .get("bids")
+            .unwrap()
+            .as_array()
+            .unwrap();
+        assert_eq!(150, bids.len());
+        let asks = obj
+            .get("tick")
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .get("asks")
+            .unwrap()
+            .as_array()
+            .unwrap();
+        assert_eq!(150, asks.len());
     }
 }
 
 #[cfg(test)]
 mod huobi_future {
     use crypto_rest_client::HuobiFutureRestClient;
+    use serde_json::Value;
+    use std::collections::HashMap;
 
     #[test]
     fn test_fetch_symbols() {
@@ -47,14 +75,40 @@ mod huobi_future {
 
     #[test]
     fn test_l2_snapshot() {
-        let text = HuobiFutureRestClient::fetch_l2_snapshot("BTC_CQ", 0).unwrap();
+        let text = HuobiFutureRestClient::fetch_l2_snapshot("BTC_CQ").unwrap();
         assert!(text.starts_with("{"));
+
+        let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
+        assert_eq!("ok", obj.get("status").unwrap().as_str().unwrap());
+
+        let bids = obj
+            .get("tick")
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .get("bids")
+            .unwrap()
+            .as_array()
+            .unwrap();
+        assert_eq!(150, bids.len());
+        let asks = obj
+            .get("tick")
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .get("asks")
+            .unwrap()
+            .as_array()
+            .unwrap();
+        assert_eq!(150, asks.len());
     }
 }
 
 #[cfg(test)]
 mod huobi_linear_swap {
     use crypto_rest_client::HuobiLinearSwapRestClient;
+    use serde_json::Value;
+    use std::collections::HashMap;
 
     #[test]
     fn test_fetch_symbols() {
@@ -73,14 +127,40 @@ mod huobi_linear_swap {
 
     #[test]
     fn test_l2_snapshot() {
-        let text = HuobiLinearSwapRestClient::fetch_l2_snapshot("BTC-USDT", 0).unwrap();
+        let text = HuobiLinearSwapRestClient::fetch_l2_snapshot("BTC-USDT").unwrap();
         assert!(text.starts_with("{"));
+
+        let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
+        assert_eq!("ok", obj.get("status").unwrap().as_str().unwrap());
+
+        let bids = obj
+            .get("tick")
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .get("bids")
+            .unwrap()
+            .as_array()
+            .unwrap();
+        assert_eq!(150, bids.len());
+        let asks = obj
+            .get("tick")
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .get("asks")
+            .unwrap()
+            .as_array()
+            .unwrap();
+        assert_eq!(150, asks.len());
     }
 }
 
 #[cfg(test)]
 mod huobi_inverse_swap {
     use crypto_rest_client::HuobiInverseSwapRestClient;
+    use serde_json::Value;
+    use std::collections::HashMap;
 
     #[test]
     fn test_fetch_symbols() {
@@ -99,14 +179,40 @@ mod huobi_inverse_swap {
 
     #[test]
     fn test_l2_snapshot() {
-        let text = HuobiInverseSwapRestClient::fetch_l2_snapshot("BTC-USD", 0).unwrap();
+        let text = HuobiInverseSwapRestClient::fetch_l2_snapshot("BTC-USD").unwrap();
         assert!(text.starts_with("{"));
+
+        let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
+        assert_eq!("ok", obj.get("status").unwrap().as_str().unwrap());
+
+        let bids = obj
+            .get("tick")
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .get("bids")
+            .unwrap()
+            .as_array()
+            .unwrap();
+        assert_eq!(150, bids.len());
+        let asks = obj
+            .get("tick")
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .get("asks")
+            .unwrap()
+            .as_array()
+            .unwrap();
+        assert_eq!(150, asks.len());
     }
 }
 
 #[cfg(test)]
 mod huobi_option {
     use crypto_rest_client::HuobiOptionRestClient;
+    use serde_json::Value;
+    use std::collections::HashMap;
 
     #[test]
     fn test_fetch_symbols() {
@@ -125,7 +231,31 @@ mod huobi_option {
 
     #[test]
     fn test_l2_snapshot() {
-        let text = HuobiOptionRestClient::fetch_l2_snapshot("BTC-USDT-210326-C-32000", 0).unwrap();
+        let text = HuobiOptionRestClient::fetch_l2_snapshot("BTC-USDT-210326-C-32000").unwrap();
         assert!(text.starts_with("{"));
+
+        let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
+        assert_eq!("ok", obj.get("status").unwrap().as_str().unwrap());
+
+        let bids = obj
+            .get("tick")
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .get("bids")
+            .unwrap()
+            .as_array()
+            .unwrap();
+        assert!(!bids.is_empty());
+        let asks = obj
+            .get("tick")
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .get("asks")
+            .unwrap()
+            .as_array()
+            .unwrap();
+        assert!(!asks.is_empty());
     }
 }

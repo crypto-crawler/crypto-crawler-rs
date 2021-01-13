@@ -16,18 +16,6 @@ macro_rules! impl_contract {
             pub fn fetch_trades(symbol: &str) -> Result<String> {
                 gen_api!(format!("/market/history/trade?symbol={}&size=2000", symbol))
             }
-
-            /// Get the latest Level2 orderbook snapshot.
-            ///
-            /// Top 150 bids and asks (aggregated) are returned.
-            ///
-            /// `step` controls the aggregaton precision, valid values are
-            /// 0, 1, 2, 3, 4, 5, 14, 15
-            ///
-            /// For example: <https://api.hbdm.com/market/depth?symbol=BTC_CQ&type=step5>
-            pub fn fetch_l2_snapshot(symbol: &str, step: i8) -> Result<String> {
-                gen_api!(format!("/market/depth?symbol={}&type=step{}", symbol, step))
-            }
         }
     };
 }
