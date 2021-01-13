@@ -147,9 +147,28 @@ impl_trait!(Ticker, HuobiWSClient, subscribe_ticker, "detail", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(BBO, HuobiWSClient, subscribe_bbo, "bbo", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBook, HuobiWSClient, subscribe_orderbook, "depth.size_20.high_freq", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, HuobiWSClient, subscribe_orderbook_snapshot, "depth.step7", to_raw_channel);
+impl_trait!(OrderBookSnapshot, HuobiWSClient, subscribe_orderbook_snapshot, "depth.step0", to_raw_channel);
+
+impl<'a> OrderBook for HuobiWSClient<'a> {
+    fn subscribe_orderbook(&self, pairs: &[String]) {
+        let pair_to_raw_channel = |pair: &String| {
+            format!(
+                r#"{{
+            "sub": "market.{}.depth.size_150.high_freq",
+            "data_type":"incremental",
+            "id": "crypto-ws-client"
+        }}"#,
+                pair
+            )
+        };
+
+        let channels = pairs
+            .iter()
+            .map(pair_to_raw_channel)
+            .collect::<Vec<String>>();
+        self.client.subscribe(&channels);
+    }
+}
 
 fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
     let interval_str = match interval {
@@ -299,7 +318,7 @@ impl<'a> OrderBook for HuobiSpotWSClient<'a> {
         if self.client.client.url.as_str() == "wss://api.huobi.pro/feed"
             || self.client.client.url.as_str() == "wss://api-aws.huobi.pro/feed"
         {
-            let pair_to_raw_channel = |pair: &String| to_raw_channel("mbp.20", pair);
+            let pair_to_raw_channel = |pair: &String| to_raw_channel("mbp.150", pair);
 
             let channels = pairs
                 .iter()
@@ -329,21 +348,11 @@ macro_rules! impl_orderbook_snapshot {
     };
 }
 
+impl_orderbook_snapshot!(HuobiSpotWSClient);
 impl_orderbook_snapshot!(HuobiFutureWSClient);
 impl_orderbook_snapshot!(HuobiInverseSwapWSClient);
 impl_orderbook_snapshot!(HuobiLinearSwapWSClient);
 impl_orderbook_snapshot!(HuobiOptionWSClient);
-impl<'a> OrderBookSnapshot for HuobiSpotWSClient<'a> {
-    fn subscribe_orderbook_snapshot(&self, pairs: &[String]) {
-        let pair_to_raw_channel = |pair: &String| to_raw_channel("depth.step1", pair);
-
-        let channels = pairs
-            .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.client.subscribe(&channels);
-    }
-}
 
 #[cfg(test)]
 mod tests {

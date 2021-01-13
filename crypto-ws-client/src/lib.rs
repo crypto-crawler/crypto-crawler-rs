@@ -125,7 +125,7 @@ pub trait WSClient<'a> {
     /// * BitMEX `orderBookL2_25`
     /// * Bitstamp `diff_order_book`, top 100
     /// * CoinbasePro `level2`
-    /// * Huobi `depth.size_20.high_freq` for contracts, `mbp.20` for Spot
+    /// * Huobi `depth.size_150.high_freq` with `data_type=incremental` for contracts, `mbp.150` for Spot
     /// * Kraken `book` with `depth=25`
     /// * MXC `depth` for Swap, `symbol` for Spot
     /// * OKEx `depth_l2_tbt`, top 100
@@ -142,7 +142,7 @@ pub trait WSClient<'a> {
     /// * BitMEX `orderBook10`, top 10, every tick
     /// * Bitstamp `order_book`, top 100, every 100ms
     /// * CoinbasePro has no snapshot channel
-    /// * Huobi `depth.step7` for contracts, `depth.step1` for Spot, both are top 20, every 1s
+    /// * Huobi `depth.step0`, top 150, every 1s
     /// * Kraken has no snapshot channel
     /// * MXC `depth.full` for Swap, top 20, every 100ms; `get.depth` for Spot, full, every 26s
     /// * OKEx `depth5`, top 5, every 100ms
