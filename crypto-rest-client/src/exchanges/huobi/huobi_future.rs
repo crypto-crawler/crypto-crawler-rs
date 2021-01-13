@@ -44,4 +44,13 @@ impl HuobiFutureRestClient {
             .collect::<Vec<String>>();
         Ok(symbols)
     }
+
+    /// Get the latest Level2 orderbook snapshot.
+    ///
+    /// Top 150 bids and asks (aggregated) are returned.
+    ///
+    /// For example: <https://api.hbdm.com/market/depth?symbol=BTC_CQ&type=step0>
+    pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
+        gen_api!(format!("/market/depth?symbol={}&type=step0", symbol))
+    }
 }
