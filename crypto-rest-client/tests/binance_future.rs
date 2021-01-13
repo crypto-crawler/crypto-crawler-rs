@@ -7,6 +7,9 @@ fn test_fetch_symbols() {
     for symbol in symbols.iter() {
         let date = &symbol[(symbol.len() - 6)..];
         assert!(date.parse::<i64>().is_ok());
+
+        let quote = &symbol[(symbol.len() - 10)..(symbol.len() - 7)];
+        assert_eq!(quote, "USD");
     }
 }
 
