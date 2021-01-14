@@ -1,17 +1,7 @@
-use std::collections::HashMap;
+use crate::MarketType;
 
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use strum_macros::{Display, EnumString};
-
-/// MarketType represents the type of a market
-#[derive(Copy, Clone, Serialize, Deserialize, Display, EnumString)]
-pub enum MarketType {
-    Spot,
-    Futures,
-    Swap,
-    Option,
-}
+use serde_json::{Map, Value};
 
 #[derive(Serialize, Deserialize)]
 pub struct Fees {
@@ -38,9 +28,10 @@ pub struct Market {
     /// exchange name
     pub exchange: String,
     /// Market type
+    #[serde(rename = "type")]
     pub market_type: MarketType,
-    /// exchange-specific pair of trading currencies if Spot, or raw symbol if Fetures, Swap, Option
-    pub id: String,
+    /// exchange-specific trading symbol, used by RESTful API
+    pub symbol: String,
     /// unified pair of trading currencies, e.g., BTC_USDT
     pub pair: String,
     /// unified base currency, e.g., BTC
@@ -53,11 +44,16 @@ pub struct Market {
     pub quote_id: String,
     /// market status
     pub active: bool,
+    /// Margin enabled.
+    ///
+    /// * All contract markets are margin enabled, including future, swap and option.
+    /// * Only a few exchanges have spot market with margin enabled.
+    pub margin: bool,
     pub fees: Fees,
     /// number of decimal digits "after the dot"
     pub precision: Precision,
     /// minimum quantity when placing orders
     pub min_quantity: MinQuantity,
     /// the original JSON string retrieved from the exchange
-    pub raw: HashMap<String, Value>,
+    pub info: Map<String, Value>,
 }
