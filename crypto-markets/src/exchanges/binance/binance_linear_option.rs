@@ -1,4 +1,4 @@
-use super::utils::{binance_http_get, parse_filter};
+use super::utils::binance_http_get;
 use crate::{error::Result, market::*, Market, MarketType};
 
 use serde::{Deserialize, Serialize};
