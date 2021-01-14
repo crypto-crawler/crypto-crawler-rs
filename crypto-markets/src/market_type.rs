@@ -35,10 +35,8 @@ pub enum MarketType {
     LinearSwap,
     #[serde(rename = "inverse_swap")]
     InverseSwap,
-    #[serde(rename = "linear_option")]
-    LinearOption,
-    #[serde(rename = "inverse_option")]
-    InverseOption,
+    #[serde(rename = "option")]
+    Option,
 
     #[serde(rename = "quanto_future")]
     QuantoFuture,
@@ -54,7 +52,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::InverseFuture,
             MarketType::LinearSwap,
             MarketType::InverseSwap,
-            MarketType::LinearOption,
+            MarketType::Option,
         ],
         "bitfinex" => vec![MarketType::Spot, MarketType::LinearSwap],
         "bitmex" => vec![
@@ -71,7 +69,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::InverseFuture,
             MarketType::LinearSwap,
             MarketType::InverseSwap,
-            MarketType::LinearOption,
+            MarketType::Option,
         ],
         "kraken" => vec![MarketType::Spot],
         "mxc" => vec![
@@ -85,7 +83,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::InverseFuture,
             MarketType::LinearSwap,
             MarketType::InverseSwap,
-            MarketType::InverseOption,
+            MarketType::Option,
         ],
         _ => panic!("Unknown exchange {}", exchange),
     }

@@ -38,7 +38,7 @@ fn fetch_option_markets_raw() -> Result<Vec<OptionMarket>> {
     Ok(resp.data)
 }
 
-pub(super) fn fetch_linear_option_symbols() -> Result<Vec<String>> {
+pub(super) fn fetch_option_symbols() -> Result<Vec<String>> {
     let symbols = fetch_option_markets_raw()?
         .into_iter()
         .filter(|m| m.contract_status == 1)

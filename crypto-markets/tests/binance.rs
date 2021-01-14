@@ -41,8 +41,8 @@ fn fetch_linear_swap_symbols() {
 }
 
 #[test]
-fn fetch_linear_option_symbols() {
-    let symbols = fetch_symbols("binance", MarketType::LinearOption).unwrap();
+fn fetch_option_symbols() {
+    let symbols = fetch_symbols("binance", MarketType::Option).unwrap();
     assert!(!symbols.is_empty());
 
     for symbol in symbols.iter() {
@@ -75,7 +75,7 @@ fn fetch_linear_swap_markets() {
 }
 
 #[test]
-fn fetch_linear_option_markets() {
-    let markets = fetch_markets("binance", MarketType::LinearOption).unwrap();
+fn fetch_option_markets() {
+    let markets = fetch_markets("binance", MarketType::Option).unwrap();
     assert!(!markets.is_empty());
 }
