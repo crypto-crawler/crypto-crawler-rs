@@ -11,7 +11,7 @@ struct BinanceResponse<T: Sized> {
 
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
-struct LinearOptionMarket {
+struct OptionMarket {
     id: i64,
     contractId: i64,
     underlying: String,
@@ -30,7 +30,7 @@ struct LinearOptionMarket {
     extra: HashMap<String, Value>,
 }
 
-fn fetch_linear_option_markets_raw() -> Result<Vec<LinearOptionMarket>> {
+fn fetch_option_markets_raw() -> Result<Vec<OptionMarket>> {
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
     struct OptionData {
@@ -38,7 +38,7 @@ fn fetch_linear_option_markets_raw() -> Result<Vec<LinearOptionMarket>> {
         serverTime: i64,
         optionContracts: Vec<Value>,
         optionAssets: Vec<Value>,
-        optionSymbols: Vec<LinearOptionMarket>,
+        optionSymbols: Vec<OptionMarket>,
     }
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -54,23 +54,23 @@ fn fetch_linear_option_markets_raw() -> Result<Vec<LinearOptionMarket>> {
     Ok(resp.data.optionSymbols)
 }
 
-pub(super) fn fetch_linear_option_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_linear_option_markets_raw()?
+pub(super) fn fetch_option_symbols() -> Result<Vec<String>> {
+    let symbols = fetch_option_markets_raw()?
         .into_iter()
         .map(|m| m.symbol)
         .collect::<Vec<String>>();
     Ok(symbols)
 }
 
-pub(super) fn fetch_linear_option_markets() -> Result<Vec<Market>> {
-    let raw_markets = fetch_linear_option_markets_raw()?;
+pub(super) fn fetch_option_markets() -> Result<Vec<Market>> {
+    let raw_markets = fetch_option_markets_raw()?;
     let markets = raw_markets
         .into_iter()
         .map(|m| {
             let base_currency = m.underlying.strip_suffix(m.quoteAsset.as_str()).unwrap();
             Market {
                 exchange: "binance".to_string(),
-                market_type: MarketType::LinearOption,
+                market_type: MarketType::Option,
                 symbol: m.symbol.clone(),
                 pair: format!("{}/{}", base_currency, m.quoteAsset),
                 base: base_currency.to_string(),

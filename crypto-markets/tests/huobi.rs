@@ -39,8 +39,8 @@ fn fetch_linear_swap_symbols() {
 }
 
 #[test]
-fn fetch_linear_option_symbols() {
-    let symbols = fetch_symbols("huobi", MarketType::LinearOption).unwrap();
+fn fetch_option_symbols() {
+    let symbols = fetch_symbols("huobi", MarketType::Option).unwrap();
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.contains("-C-") || symbol.contains("-P-"));
