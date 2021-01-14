@@ -5,10 +5,8 @@
 //! ```
 //! use crypto_markets::{fetch_markets, MarketType};
 //!
-//! fn main() {
-//!     let markets = fetch_markets("binance", MarketType::Spot).unwrap();
-//!     println!("{}", serde_json::to_string_pretty(&markets).unwrap())
-//! }
+//! let markets = fetch_markets("binance", MarketType::Spot).unwrap();
+//! println!("{}", serde_json::to_string_pretty(&markets).unwrap())
 //! ```
 
 mod error;
