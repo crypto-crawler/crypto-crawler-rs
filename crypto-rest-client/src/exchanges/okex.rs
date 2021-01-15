@@ -14,14 +14,14 @@ const BASE_URL: &'static str = "https://www.okex.com/api";
 ///     * Future <https://www.okex.com/derivatives/futures>
 ///     * Swap <https://www.okex.com/derivatives/swap>
 ///     * Option <https://www.okex.com/derivatives/options>
-pub struct OKExRestClient {
+pub struct OkexRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
 }
 
-impl OKExRestClient {
+impl OkexRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        OKExRestClient {
+        OkexRestClient {
             _api_key: api_key,
             _api_secret: api_secret,
         }

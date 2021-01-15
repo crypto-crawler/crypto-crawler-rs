@@ -8,14 +8,14 @@ const BASE_URL: &'static str = "https://www.mxc.co";
 ///
 /// * REST API doc: <https://mxcdevelop.github.io/APIDoc/>
 /// * Trading at: <https://www.mxc.com/trade/pro>
-pub struct MXCSpotRestClient {
+pub struct MxcSpotRestClient {
     access_key: String,
     _secret_key: Option<String>,
 }
 
-impl MXCSpotRestClient {
+impl MxcSpotRestClient {
     pub fn new(access_key: String, secret_key: Option<String>) -> Self {
-        MXCSpotRestClient {
+        MxcSpotRestClient {
             access_key,
             _secret_key: secret_key,
         }
