@@ -9,7 +9,7 @@ use tungstenite::Message;
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
 use super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
 
-pub(super) const EXCHANGE_NAME: &str = "Huobi";
+pub(super) const EXCHANGE_NAME: &str = "huobi";
 
 const SPOT_WEBSOCKET_URL: &str = "wss://api.huobi.pro/ws";
 // const FUTURES_WEBSOCKET_URL: &str = "wss://www.hbdm.com/ws";

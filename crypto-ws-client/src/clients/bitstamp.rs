@@ -7,7 +7,7 @@ use super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
 use log::*;
 use serde_json::Value;
 
-pub(super) const EXCHANGE_NAME: &str = "Bitstamp";
+pub(super) const EXCHANGE_NAME: &str = "bitstamp";
 
 const WEBSOCKET_URL: &str = "wss://ws.bitstamp.net";
 

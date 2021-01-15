@@ -11,7 +11,7 @@ use super::{
 use log::*;
 use serde_json::Value;
 
-pub(super) const EXCHANGE_NAME: &str = "CoinbasePro";
+pub(super) const EXCHANGE_NAME: &str = "coinbase_pro";
 
 const WEBSOCKET_URL: &str = "wss://ws-feed.pro.coinbase.com";
 

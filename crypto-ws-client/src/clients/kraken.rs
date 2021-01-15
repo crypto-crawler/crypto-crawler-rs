@@ -12,7 +12,7 @@ use log::*;
 use serde_json::Value;
 use tungstenite::Message;
 
-pub(super) const EXCHANGE_NAME: &str = "Kraken";
+pub(super) const EXCHANGE_NAME: &str = "kraken";
 
 const WEBSOCKET_URL: &str = "wss://ws.kraken.com";
 

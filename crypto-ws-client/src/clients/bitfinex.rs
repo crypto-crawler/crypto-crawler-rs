@@ -11,7 +11,7 @@ use super::{
 use log::*;
 use serde_json::Value;
 
-pub(super) const EXCHANGE_NAME: &str = "Bitfinex";
+pub(super) const EXCHANGE_NAME: &str = "bitfinex";
 
 const WEBSOCKET_URL: &str = "wss://api-pub.bitfinex.com/ws/2";
 

@@ -9,7 +9,7 @@ use super::{
 use log::*;
 use serde_json::Value;
 
-pub(super) const EXCHANGE_NAME: &str = "Binance";
+pub(super) const EXCHANGE_NAME: &str = "binance";
 
 const SPOT_WEBSOCKET_URL: &str = "wss://stream.binance.com:9443/stream";
 const FUTURES_WEBSOCKET_URL: &str = "wss://fstream.binance.com/stream";
