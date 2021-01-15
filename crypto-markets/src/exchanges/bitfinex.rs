@@ -13,28 +13,32 @@ pub(crate) fn fetch_markets(_market_type: MarketType) -> Result<Vec<Market>> {
     Ok(Vec::new())
 }
 
+// see <https://docs.bitfinex.com/reference#rest-public-conf>
 fn fetch_spot_symbols() -> Result<Vec<String>> {
     let text = http_get(
         "https://api-pub.bitfinex.com/v2/conf/pub:list:pair:exchange",
         None,
     )?;
-    let symbols = serde_json::from_str::<Vec<Vec<String>>>(&text).unwrap();
-    Ok(symbols[0]
+    let pairs = serde_json::from_str::<Vec<Vec<String>>>(&text).unwrap();
+    let symbols = pairs[0]
         .iter()
         .filter(|x| !x.starts_with("TEST"))
-        .cloned()
-        .collect::<Vec<String>>())
+        .map(|p| format!("t{}", p))
+        .collect::<Vec<String>>();
+    Ok(symbols)
 }
 
+// see <https://docs.bitfinex.com/reference#rest-public-conf>
 fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
     let text = http_get(
         "https://api-pub.bitfinex.com/v2/conf/pub:list:pair:futures",
         None,
     )?;
-    let symbols = serde_json::from_str::<Vec<Vec<String>>>(&text).unwrap();
-    Ok(symbols[0]
+    let pairs = serde_json::from_str::<Vec<Vec<String>>>(&text).unwrap();
+    let symbols = pairs[0]
         .iter()
         .filter(|x| !x.starts_with("TEST"))
-        .cloned()
-        .collect::<Vec<String>>())
+        .map(|p| format!("t{}", p))
+        .collect::<Vec<String>>();
+    Ok(symbols)
 }
