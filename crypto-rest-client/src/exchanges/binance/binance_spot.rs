@@ -1,5 +1,3 @@
-use serde_json::Value;
-
 use super::super::utils::http_get;
 use super::utils::*;
 use crate::error::Result;
@@ -22,20 +20,6 @@ impl BinanceSpotRestClient {
             _api_key: api_key,
             _api_secret: api_secret,
         }
-    }
-
-    /// Get active trading symbols.
-    pub fn fetch_symbols() -> Result<Vec<String>> {
-        let txt = gen_api_binance!("/api/v3/exchangeInfo")?;
-        let obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();
-        let arr = obj.get("symbols").unwrap().as_array().unwrap();
-        let symbols = arr
-            .iter()
-            .map(|x| x.as_object().unwrap())
-            .filter(|obj| obj.get("status").unwrap() == "TRADING")
-            .map(|obj| obj.get("symbol").unwrap().as_str().unwrap().to_string())
-            .collect::<Vec<String>>();
-        Ok(symbols)
     }
 
     /// Get compressed, aggregate trades.

@@ -23,24 +23,6 @@ impl BitfinexRestClient {
         }
     }
 
-    /// Get active trading symbols.
-    ///
-    /// For example: <https://api-pub.bitfinex.com/v2/conf/pub:list:pair:exchange>
-    pub fn fetch_spot_symbols() -> Result<Vec<String>> {
-        let text = gen_api!("/v2/conf/pub:list:pair:exchange")?;
-        let symbols = serde_json::from_str::<Vec<Vec<String>>>(&text).unwrap();
-        Ok(symbols[0].clone())
-    }
-
-    /// Get active trading symbols.
-    ///
-    /// For example: <https://api-pub.bitfinex.com/v2/conf/pub:list:pair:futures>
-    pub fn fetch_swap_symbols() -> Result<Vec<String>> {
-        let text = gen_api!("/v2/conf/pub:list:pair:futures")?;
-        let symbols = serde_json::from_str::<Vec<Vec<String>>>(&text).unwrap();
-        Ok(symbols[0].clone())
-    }
-
     /// /v2/trades/Symbol/hist
     pub fn fetch_trades(
         symbol: &str,
