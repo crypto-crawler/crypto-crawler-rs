@@ -12,7 +12,7 @@ use super::{
 use log::*;
 use serde_json::Value;
 
-pub(super) const EXCHANGE_NAME: &str = "MXC";
+pub(super) const EXCHANGE_NAME: &str = "mxc";
 pub(super) const SOCKETIO_PREFIX: &str = "42";
 
 pub(super) const SPOT_WEBSOCKET_URL: &str =
@@ -23,7 +23,7 @@ pub(super) const SWAP_WEBSOCKET_URL: &str = "wss://contract.mxc.com/ws";
 ///
 ///   * WebSocket API doc: <https://github.com/mxcdevelop/APIDoc/blob/master/websocket/websocket-api.md>
 ///   * Trading at: <https://www.mxc.com/trade/pro>
-pub struct MXCSpotWSClient<'a> {
+pub struct MxcSpotWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
@@ -31,7 +31,7 @@ pub struct MXCSpotWSClient<'a> {
 ///
 ///   * WebSocket API doc: <https://github.com/mxcdevelop/APIDoc/blob/master/contract/contract-api.md>
 ///   * Trading at: <https://contract.mxc.com/exchange>
-pub struct MXCSwapWSClient<'a> {
+pub struct MxcSwapWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
@@ -134,33 +134,33 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
 }
 
 #[rustfmt::skip]
-impl_trait!(Trade, MXCSpotWSClient, subscribe_trade, "symbol", to_raw_channel);
+impl_trait!(Trade, MxcSpotWSClient, subscribe_trade, "symbol", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(Trade, MXCSwapWSClient, subscribe_trade, "deal", to_raw_channel);
+impl_trait!(Trade, MxcSwapWSClient, subscribe_trade, "deal", to_raw_channel);
 
-impl<'a> Ticker for MXCSpotWSClient<'a> {
+impl<'a> Ticker for MxcSpotWSClient<'a> {
     fn subscribe_ticker(&self, _pairs: &[String]) {
         panic!("MXC Spot WebSocket does NOT have ticker channel");
     }
 }
 #[rustfmt::skip]
-impl_trait!(Ticker, MXCSwapWSClient, subscribe_ticker, "ticker", to_raw_channel);
+impl_trait!(Ticker, MxcSwapWSClient, subscribe_ticker, "ticker", to_raw_channel);
 
 #[rustfmt::skip]
-impl_trait!(OrderBook, MXCSpotWSClient, subscribe_orderbook, "symbol", to_raw_channel);
+impl_trait!(OrderBook, MxcSpotWSClient, subscribe_orderbook, "symbol", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBook, MXCSwapWSClient, subscribe_orderbook, "depth", to_raw_channel);
+impl_trait!(OrderBook, MxcSwapWSClient, subscribe_orderbook, "depth", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, MXCSpotWSClient, subscribe_orderbook_snapshot, "get.depth", to_raw_channel);
+impl_trait!(OrderBookSnapshot, MxcSpotWSClient, subscribe_orderbook_snapshot, "get.depth", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, MXCSwapWSClient, subscribe_orderbook_snapshot, "depth.full", to_raw_channel);
+impl_trait!(OrderBookSnapshot, MxcSwapWSClient, subscribe_orderbook_snapshot, "depth.full", to_raw_channel);
 
-impl<'a> BBO for MXCSpotWSClient<'a> {
+impl<'a> BBO for MxcSpotWSClient<'a> {
     fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("MXC Spot WebSocket does NOT have BBO channel");
     }
 }
-impl<'a> BBO for MXCSwapWSClient<'a> {
+impl<'a> BBO for MxcSwapWSClient<'a> {
     fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("MXC Swap WebSocket does NOT have BBO channel");
     }
@@ -183,7 +183,7 @@ fn interval_to_string(interval: u32) -> String {
     tmp.to_string()
 }
 
-impl<'a> Candlestick for MXCSpotWSClient<'a> {
+impl<'a> Candlestick for MxcSpotWSClient<'a> {
     fn subscribe_candlestick(&self, pairs: &[String], interval: u32) {
         let interval_str = interval_to_string(interval);
 
@@ -201,7 +201,7 @@ impl<'a> Candlestick for MXCSpotWSClient<'a> {
     }
 }
 
-impl<'a> Candlestick for MXCSwapWSClient<'a> {
+impl<'a> Candlestick for MxcSwapWSClient<'a> {
     fn subscribe_candlestick(&self, pairs: &[String], interval: u32) {
         let interval_str = interval_to_string(interval);
 
@@ -220,14 +220,14 @@ impl<'a> Candlestick for MXCSwapWSClient<'a> {
 }
 
 define_client!(
-    MXCSpotWSClient,
+    MxcSpotWSClient,
     EXCHANGE_NAME,
     SPOT_WEBSOCKET_URL,
     spot_channels_to_commands,
     on_misc_msg
 );
 define_client!(
-    MXCSwapWSClient,
+    MxcSwapWSClient,
     EXCHANGE_NAME,
     SWAP_WEBSOCKET_URL,
     swap_channels_to_commands,

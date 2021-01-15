@@ -10,7 +10,7 @@ use super::{
 use log::*;
 use serde_json::Value;
 
-pub(super) const EXCHANGE_NAME: &str = "BitMEX";
+pub(super) const EXCHANGE_NAME: &str = "bitmex";
 
 const WEBSOCKET_URL: &str = "wss://www.bitmex.com/realtime";
 
@@ -20,7 +20,7 @@ const WEBSOCKET_URL: &str = "wss://www.bitmex.com/realtime";
 ///
 ///   * WebSocket API doc: <https://www.bitmex.com/app/wsAPI>
 ///   * Trading at: <https://www.bitmex.com/app/trade/>
-pub struct BitMEXWSClient<'a> {
+pub struct BitmexWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
@@ -91,15 +91,15 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
 }
 
 #[rustfmt::skip]
-impl_trait!(Trade, BitMEXWSClient, subscribe_trade, "trade", to_raw_channel);
+impl_trait!(Trade, BitmexWSClient, subscribe_trade, "trade", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(BBO, BitMEXWSClient, subscribe_bbo, "quote", to_raw_channel);
+impl_trait!(BBO, BitmexWSClient, subscribe_bbo, "quote", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBook, BitMEXWSClient, subscribe_orderbook, "orderBookL2_25", to_raw_channel);
+impl_trait!(OrderBook, BitmexWSClient, subscribe_orderbook, "orderBookL2_25", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, BitMEXWSClient, subscribe_orderbook_snapshot, "orderBook10", to_raw_channel);
+impl_trait!(OrderBookSnapshot, BitmexWSClient, subscribe_orderbook_snapshot, "orderBook10", to_raw_channel);
 
-impl<'a> Ticker for BitMEXWSClient<'a> {
+impl<'a> Ticker for BitmexWSClient<'a> {
     fn subscribe_ticker(&self, _pairs: &[String]) {
         panic!("BitMEX WebSocket does NOT have ticker channel");
     }
@@ -116,10 +116,10 @@ fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
     format!("tradeBin{}:{}", interval_str, pair)
 }
 
-impl_candlestick!(BitMEXWSClient);
+impl_candlestick!(BitmexWSClient);
 
 define_client!(
-    BitMEXWSClient,
+    BitmexWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
     channels_to_commands,

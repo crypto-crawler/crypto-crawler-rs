@@ -1,4 +1,4 @@
-use crypto_ws_client::{OKExWSClient, WSClient};
+use crypto_ws_client::{OkexWSClient, WSClient};
 use std::sync::{Arc, Mutex};
 
 #[macro_use]
@@ -7,7 +7,7 @@ mod utils;
 #[test]
 fn okex_index() {
     gen_test_code!(
-        OKExWSClient,
+        OkexWSClient,
         subscribe,
         &vec!["index/ticker:BTC-USDT".to_string()]
     );
@@ -15,13 +15,13 @@ fn okex_index() {
 
 #[cfg(test)]
 mod okex_spot {
-    use crypto_ws_client::{OKExWSClient, WSClient};
+    use crypto_ws_client::{OkexWSClient, WSClient};
     use std::sync::{Arc, Mutex};
 
     #[test]
     fn subscribe() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe,
             &vec!["spot/trade:BTC-USDT".to_string()]
         );
@@ -30,7 +30,7 @@ mod okex_spot {
     #[test]
     fn subscribe_raw_json() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe,
             &vec![r#"{"op":"subscribe","args":["spot/trade:BTC-USDT"]}"#.to_string()]
         );
@@ -38,13 +38,13 @@ mod okex_spot {
 
     #[test]
     fn subscribe_trade() {
-        gen_test_code!(OKExWSClient, subscribe_trade, &vec!["BTC-USDT".to_string()]);
+        gen_test_code!(OkexWSClient, subscribe_trade, &vec!["BTC-USDT".to_string()]);
     }
 
     #[test]
     fn subscribe_ticker() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe_ticker,
             &vec!["BTC-USDT".to_string()]
         );
@@ -53,7 +53,7 @@ mod okex_spot {
     #[test]
     fn subscribe_orderbook() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe_orderbook,
             &vec!["BTC-USDT".to_string()]
         );
@@ -62,7 +62,7 @@ mod okex_spot {
     #[test]
     fn subscribe_orderbook_snapshot() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe_orderbook_snapshot,
             &vec!["BTC-USDT".to_string()]
         );
@@ -70,20 +70,20 @@ mod okex_spot {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(OKExWSClient, &vec!["BTC-USDT".to_string()], 60);
-        gen_test_subscribe_candlestick!(OKExWSClient, &vec!["BTC-USDT".to_string()], 604800);
+        gen_test_subscribe_candlestick!(OkexWSClient, &vec!["BTC-USDT".to_string()], 60);
+        gen_test_subscribe_candlestick!(OkexWSClient, &vec!["BTC-USDT".to_string()], 604800);
     }
 }
 
 #[cfg(test)]
 mod okex_future {
-    use crypto_ws_client::{OKExWSClient, WSClient};
+    use crypto_ws_client::{OkexWSClient, WSClient};
     use std::sync::{Arc, Mutex};
 
     #[test]
     fn subscribe() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe,
             &vec!["futures/trade:BTC-USDT-210625".to_string()]
         );
@@ -92,7 +92,7 @@ mod okex_future {
     #[test]
     fn subscribe_trade() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe_trade,
             &vec!["BTC-USDT-210625".to_string()]
         );
@@ -101,7 +101,7 @@ mod okex_future {
     #[test]
     fn subscribe_ticker() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe_ticker,
             &vec!["BTC-USDT-210625".to_string()]
         );
@@ -110,7 +110,7 @@ mod okex_future {
     #[test]
     fn subscribe_orderbook() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe_orderbook,
             &vec!["BTC-USDT-210625".to_string()]
         );
@@ -119,7 +119,7 @@ mod okex_future {
     #[test]
     fn subscribe_orderbook_snapshot() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe_orderbook_snapshot,
             &vec!["BTC-USDT-210625".to_string()]
         );
@@ -127,20 +127,20 @@ mod okex_future {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(OKExWSClient, &vec!["BTC-USDT-210625".to_string()], 60);
-        gen_test_subscribe_candlestick!(OKExWSClient, &vec!["BTC-USDT-210625".to_string()], 604800);
+        gen_test_subscribe_candlestick!(OkexWSClient, &vec!["BTC-USDT-210625".to_string()], 60);
+        gen_test_subscribe_candlestick!(OkexWSClient, &vec!["BTC-USDT-210625".to_string()], 604800);
     }
 }
 
 #[cfg(test)]
 mod okex_swap {
-    use crypto_ws_client::{OKExWSClient, WSClient};
+    use crypto_ws_client::{OkexWSClient, WSClient};
     use std::sync::{Arc, Mutex};
 
     #[test]
     fn subscribe() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe,
             &vec!["swap/trade:BTC-USDT-SWAP".to_string()]
         );
@@ -149,7 +149,7 @@ mod okex_swap {
     #[test]
     fn subscribe_trade() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe_trade,
             &vec!["BTC-USDT-SWAP".to_string()]
         );
@@ -158,7 +158,7 @@ mod okex_swap {
     #[test]
     fn subscribe_ticker() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe_ticker,
             &vec!["BTC-USDT-SWAP".to_string()]
         );
@@ -167,7 +167,7 @@ mod okex_swap {
     #[test]
     fn subscribe_orderbook() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe_orderbook,
             &vec!["BTC-USDT-SWAP".to_string()]
         );
@@ -176,7 +176,7 @@ mod okex_swap {
     #[test]
     fn subscribe_orderbook_snapshot() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe_orderbook_snapshot,
             &vec!["BTC-USDT-SWAP".to_string()]
         );
@@ -184,20 +184,20 @@ mod okex_swap {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(OKExWSClient, &vec!["BTC-USDT-SWAP".to_string()], 60);
-        gen_test_subscribe_candlestick!(OKExWSClient, &vec!["BTC-USDT-SWAP".to_string()], 604800);
+        gen_test_subscribe_candlestick!(OkexWSClient, &vec!["BTC-USDT-SWAP".to_string()], 60);
+        gen_test_subscribe_candlestick!(OkexWSClient, &vec!["BTC-USDT-SWAP".to_string()], 604800);
     }
 }
 
 #[cfg(test)]
 mod okex_option {
-    use crypto_ws_client::{OKExWSClient, WSClient};
+    use crypto_ws_client::{OkexWSClient, WSClient};
     use std::sync::{Arc, Mutex};
 
     #[test]
     fn subscribe() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe,
             &vec!["option/trade:BTC-USD-210625-72000-C".to_string()]
         );
@@ -206,7 +206,7 @@ mod okex_option {
     #[test]
     fn subscribe_trade() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe_trade,
             &vec!["BTC-USD-210625-72000-C".to_string()]
         );
@@ -215,7 +215,7 @@ mod okex_option {
     #[test]
     fn subscribe_ticker() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe_ticker,
             &vec!["BTC-USD-210625-72000-C".to_string()]
         );
@@ -224,7 +224,7 @@ mod okex_option {
     #[test]
     fn subscribe_orderbook() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe_orderbook,
             &vec!["BTC-USD-210625-72000-C".to_string()]
         );
@@ -233,7 +233,7 @@ mod okex_option {
     #[test]
     fn subscribe_orderbook_snapshot() {
         gen_test_code!(
-            OKExWSClient,
+            OkexWSClient,
             subscribe_orderbook_snapshot,
             &vec!["BTC-USD-210625-72000-C".to_string()]
         );
@@ -242,12 +242,12 @@ mod okex_option {
     #[test]
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
-            OKExWSClient,
+            OkexWSClient,
             &vec!["BTC-USD-210625-72000-C".to_string()],
             60
         );
         gen_test_subscribe_candlestick!(
-            OKExWSClient,
+            OkexWSClient,
             &vec!["BTC-USD-210625-72000-C".to_string()],
             604800
         );

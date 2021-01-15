@@ -8,7 +8,7 @@ use super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
 use log::*;
 use serde_json::Value;
 
-pub(super) const EXCHANGE_NAME: &str = "OKEx";
+pub(super) const EXCHANGE_NAME: &str = "okex";
 
 const WEBSOCKET_URL: &str = "wss://real.okex.com:8443/ws/v3";
 
@@ -22,7 +22,7 @@ const WEBSOCKET_URL: &str = "wss://real.okex.com:8443/ws/v3";
 ///     * Future <https://www.okex.com/derivatives/futures>
 ///     * Swap <https://www.okex.com/derivatives/swap>
 ///     * Option <https://www.okex.com/derivatives/options>
-pub struct OKExWSClient<'a> {
+pub struct OkexWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
@@ -96,20 +96,20 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
 }
 
 #[rustfmt::skip]
-impl_trait!(Trade, OKExWSClient, subscribe_trade, "trade", to_raw_channel);
+impl_trait!(Trade, OkexWSClient, subscribe_trade, "trade", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(Ticker, OKExWSClient, subscribe_ticker, "ticker", to_raw_channel);
+impl_trait!(Ticker, OkexWSClient, subscribe_ticker, "ticker", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBook, OKExWSClient, subscribe_orderbook, "depth_l2_tbt", to_raw_channel);
+impl_trait!(OrderBook, OkexWSClient, subscribe_orderbook, "depth_l2_tbt", to_raw_channel);
 impl_trait!(
     OrderBookSnapshot,
-    OKExWSClient,
+    OkexWSClient,
     subscribe_orderbook_snapshot,
     "depth5",
     to_raw_channel
 );
 
-impl<'a> BBO for OKExWSClient<'a> {
+impl<'a> BBO for OkexWSClient<'a> {
     fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("OKEx WebSocket does NOT have BBO channel");
     }
@@ -131,10 +131,10 @@ fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
     to_raw_channel(&channel, pair)
 }
 
-impl_candlestick!(OKExWSClient);
+impl_candlestick!(OkexWSClient);
 
 define_client!(
-    OKExWSClient,
+    OkexWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
     channels_to_commands,
