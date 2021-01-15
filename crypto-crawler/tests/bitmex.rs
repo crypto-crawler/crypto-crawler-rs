@@ -2,16 +2,21 @@
 mod utils;
 
 #[cfg(test)]
-mod bitmex_swap {
+mod bitmex_inverse_swap {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "BitMEX",
-            MarketType::Swap,
+            "bitmex",
+            MarketType::InverseSwap,
             "XBTUSD",
             MessageType::Trade
         )
@@ -21,8 +26,8 @@ mod bitmex_swap {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "BitMEX",
-            MarketType::Swap,
+            "bitmex",
+            MarketType::InverseSwap,
             "XBTUSD",
             MessageType::L2Event
         )
@@ -30,10 +35,10 @@ mod bitmex_swap {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "BitMEX",
-            MarketType::Swap,
+            "bitmex",
+            MarketType::InverseSwap,
             "XBTUSD",
             MessageType::L2Snapshot
         )
@@ -41,16 +46,21 @@ mod bitmex_swap {
 }
 
 #[cfg(test)]
-mod bitmex_future {
+mod bitmex_inverse_future {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "BitMEX",
-            MarketType::Future,
+            "bitmex",
+            MarketType::InverseFuture,
             "XBTM21",
             MessageType::Trade
         )
@@ -60,8 +70,8 @@ mod bitmex_future {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "BitMEX",
-            MarketType::Future,
+            "bitmex",
+            MarketType::InverseFuture,
             "XBTM21",
             MessageType::L2Event
         )
@@ -69,10 +79,10 @@ mod bitmex_future {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "BitMEX",
-            MarketType::Future,
+            "bitmex",
+            MarketType::InverseFuture,
             "XBTM21",
             MessageType::L2Snapshot
         )

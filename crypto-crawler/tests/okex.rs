@@ -4,13 +4,18 @@ mod utils;
 #[cfg(test)]
 mod okex_spot {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "OKEx",
+            "okex",
             MarketType::Spot,
             "BTC-USDT",
             MessageType::Trade
@@ -21,7 +26,7 @@ mod okex_spot {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "OKEx",
+            "okex",
             MarketType::Spot,
             "BTC-USDT",
             MessageType::L2Event
@@ -30,9 +35,9 @@ mod okex_spot {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "OKEx",
+            "okex",
             MarketType::Spot,
             "BTC-USDT",
             MessageType::L2Snapshot
@@ -41,16 +46,21 @@ mod okex_spot {
 }
 
 #[cfg(test)]
-mod okex_future {
+mod okex_linear_future {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "OKEx",
-            MarketType::Future,
+            "okex",
+            MarketType::LinearFuture,
             "BTC-USDT-210625",
             MessageType::Trade
         )
@@ -60,8 +70,8 @@ mod okex_future {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "OKEx",
-            MarketType::Future,
+            "okex",
+            MarketType::LinearFuture,
             "BTC-USDT-210625",
             MessageType::L2Event
         )
@@ -69,10 +79,10 @@ mod okex_future {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "OKEx",
-            MarketType::Future,
+            "okex",
+            MarketType::LinearFuture,
             "BTC-USDT-210625",
             MessageType::L2Snapshot
         )
@@ -80,16 +90,21 @@ mod okex_future {
 }
 
 #[cfg(test)]
-mod okex_swap {
+mod okex_linear_swap {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "OKEx",
-            MarketType::Swap,
+            "okex",
+            MarketType::LinearSwap,
             "BTC-USDT-SWAP",
             MessageType::Trade
         )
@@ -99,8 +114,8 @@ mod okex_swap {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "OKEx",
-            MarketType::Swap,
+            "okex",
+            MarketType::LinearSwap,
             "BTC-USDT-SWAP",
             MessageType::L2Event
         )
@@ -108,10 +123,10 @@ mod okex_swap {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "OKEx",
-            MarketType::Swap,
+            "okex",
+            MarketType::LinearSwap,
             "BTC-USDT-SWAP",
             MessageType::L2Snapshot
         )
@@ -121,13 +136,18 @@ mod okex_swap {
 #[cfg(test)]
 mod okex_option {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "OKEx",
+            "okex",
             MarketType::Option,
             "BTC-USD-210625-72000-C",
             MessageType::Trade
@@ -138,7 +158,7 @@ mod okex_option {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "OKEx",
+            "okex",
             MarketType::Option,
             "BTC-USD-210625-72000-C",
             MessageType::L2Event
@@ -147,9 +167,9 @@ mod okex_option {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "OKEx",
+            "okex",
             MarketType::Option,
             "BTC-USD-210625-72000-C",
             MessageType::L2Snapshot

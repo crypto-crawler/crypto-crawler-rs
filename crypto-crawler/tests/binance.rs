@@ -4,13 +4,18 @@ mod utils;
 #[cfg(test)]
 mod binance_spot {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "Binance",
+            "binance",
             MarketType::Spot,
             "btcusdt",
             MessageType::Trade
@@ -21,7 +26,7 @@ mod binance_spot {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "Binance",
+            "binance",
             MarketType::Spot,
             "btcusdt",
             MessageType::L2Event
@@ -30,9 +35,9 @@ mod binance_spot {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "Binance",
+            "binance",
             MarketType::Spot,
             "BTCUSDT",
             MessageType::L2Snapshot
@@ -43,14 +48,19 @@ mod binance_spot {
 #[cfg(test)]
 mod binance_future {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "Binance",
-            MarketType::Future,
+            "binance",
+            MarketType::InverseFuture,
             "btcusd_210625",
             MessageType::Trade
         )
@@ -60,8 +70,8 @@ mod binance_future {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "Binance",
-            MarketType::Future,
+            "binance",
+            MarketType::InverseFuture,
             "btcusd_210625",
             MessageType::L2Event
         )
@@ -69,10 +79,10 @@ mod binance_future {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "Binance",
-            MarketType::Future,
+            "binance",
+            MarketType::InverseFuture,
             "BTCUSD_210625",
             MessageType::L2Snapshot
         )
@@ -82,14 +92,19 @@ mod binance_future {
 #[cfg(test)]
 mod binance_linear_swap {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "Binance",
-            MarketType::Swap,
+            "binance",
+            MarketType::LinearSwap,
             "btcusdt",
             MessageType::Trade
         )
@@ -99,8 +114,8 @@ mod binance_linear_swap {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "Binance",
-            MarketType::Swap,
+            "binance",
+            MarketType::LinearSwap,
             "btcusdt",
             MessageType::L2Event
         )
@@ -108,10 +123,10 @@ mod binance_linear_swap {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "Binance",
-            MarketType::Swap,
+            "binance",
+            MarketType::LinearSwap,
             "BTCUSDT",
             MessageType::L2Snapshot
         )
@@ -121,14 +136,19 @@ mod binance_linear_swap {
 #[cfg(test)]
 mod binance_inverse_swap {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "Binance",
-            MarketType::Swap,
+            "binance",
+            MarketType::InverseSwap,
             "btcusd_perp",
             MessageType::Trade
         )
@@ -138,8 +158,8 @@ mod binance_inverse_swap {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "Binance",
-            MarketType::Swap,
+            "binance",
+            MarketType::InverseSwap,
             "btcusd_perp",
             MessageType::L2Event
         )
@@ -147,10 +167,10 @@ mod binance_inverse_swap {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "Binance",
-            MarketType::Swap,
+            "binance",
+            MarketType::InverseSwap,
             "BTCUSD_PERP",
             MessageType::L2Snapshot
         )
@@ -160,14 +180,19 @@ mod binance_inverse_swap {
 #[cfg(test)]
 mod binance_option {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     #[ignore]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "Binance",
+            "binance",
             MarketType::Option,
             "BTC-210129-40000-C",
             MessageType::Trade
@@ -179,7 +204,7 @@ mod binance_option {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "Binance",
+            "binance",
             MarketType::Option,
             "BTC-210129-40000-C",
             MessageType::L2Event
@@ -189,9 +214,9 @@ mod binance_option {
     #[test]
     #[ignore]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "Binance",
+            "binance",
             MarketType::Option,
             "BTC-210129-40000-C",
             MessageType::L2Snapshot

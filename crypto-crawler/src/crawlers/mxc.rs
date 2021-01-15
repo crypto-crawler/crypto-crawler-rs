@@ -1,17 +1,18 @@
-use std::sync::{Arc, Mutex};
-
-use std::{
-    collections::HashMap,
-    time::{Duration, Instant},
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc, Mutex,
 };
 
-use crate::{msg::Message, MarketType, MessageType};
+use std::{collections::HashMap, time::Duration};
+
+use crate::{msg::Message, MessageType};
+use crypto_markets::{fetch_symbols, MarketType};
 use crypto_rest_client::*;
 use crypto_ws_client::*;
 use log::*;
 use serde_json::Value;
 
-const EXCHANGE_NAME: &str = "MXC";
+const EXCHANGE_NAME: &str = "mxc";
 
 fn extract_symbol(json: &str) -> String {
     if json.starts_with('[') {
@@ -23,113 +24,101 @@ fn extract_symbol(json: &str) -> String {
     }
 }
 
-fn check_args(market_type: MarketType, _symbols: &[String]) {
-    if market_type != MarketType::Spot && market_type != MarketType::Swap {
-        error!("MXC has only Spot and Swap markets");
-        panic!("MXC has only Spot and Swap markets");
-    }
-}
+gen_check_args!(EXCHANGE_NAME);
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_spot, market_type, symbols, on_msg, duration, MXCSpotWSClient, MessageType::Trade, subscribe_trade);
+gen_crawl_event!(crawl_trade_spot, market_type, symbols, on_msg, duration, MxcSpotWSClient, MessageType::Trade, subscribe_trade, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_spot, market_type, symbols, on_msg, duration, MXCSpotWSClient, MessageType::L2Event, subscribe_orderbook);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_swap, market_type, symbols, on_msg, duration, MXCSwapWSClient, MessageType::L2Event, subscribe_orderbook);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_trade_swap, market_type, symbols, on_msg, duration, MXCSwapWSClient, MessageType::Trade, subscribe_trade);
+gen_crawl_event!(crawl_trade_swap, market_type, symbols, on_msg, duration, MxcSwapWSClient, MessageType::Trade, subscribe_trade, true);
 
-pub(crate) fn crawl_trade<'a>(
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_event_spot, market_type, symbols, on_msg, duration, MxcSpotWSClient, MessageType::L2Event, subscribe_orderbook, true);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_event_swap, market_type, symbols, on_msg, duration, MxcSwapWSClient, MessageType::L2Event, subscribe_orderbook, true);
+
+pub(crate) fn crawl_trade(
     market_type: MarketType,
-    symbols: &[String],
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'a + Send>>,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) {
-    check_args(market_type, symbols);
+) -> Option<std::thread::JoinHandle<()>> {
     match market_type {
         MarketType::Spot => crawl_trade_spot(market_type, symbols, on_msg, duration),
-        MarketType::Swap => crawl_trade_swap(market_type, symbols, on_msg, duration),
+        MarketType::LinearSwap | MarketType::InverseSwap => {
+            crawl_trade_swap(market_type, symbols, on_msg, duration)
+        }
         _ => {
-            error!("Unknown market type {} of MXC", market_type);
-            panic!("Unknown market type {} of MXC", market_type);
+            error!("Unknown market type {} of {}", market_type, EXCHANGE_NAME);
+            panic!("Unknown market type {} of {}", market_type, EXCHANGE_NAME);
         }
     }
 }
 
-pub(crate) fn crawl_l2_event<'a>(
+pub(crate) fn crawl_l2_event(
     market_type: MarketType,
-    symbols: &[String],
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'a + Send>>,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) {
-    check_args(market_type, symbols);
+) -> Option<std::thread::JoinHandle<()>> {
     match market_type {
         MarketType::Spot => crawl_l2_event_spot(market_type, symbols, on_msg, duration),
-        MarketType::Swap => crawl_l2_event_swap(market_type, symbols, on_msg, duration),
+        MarketType::LinearSwap | MarketType::InverseSwap => {
+            crawl_l2_event_swap(market_type, symbols, on_msg, duration)
+        }
         _ => {
-            error!("Unknown market type {} of MXC", market_type);
-            panic!("Unknown market type {} of MXC", market_type);
+            error!("Unknown market type {} of {}", market_type, EXCHANGE_NAME);
+            panic!("Unknown market type {} of {}", market_type, EXCHANGE_NAME);
         }
     }
 }
 
-pub(crate) fn crawl_l2_snapshot<'a>(
+pub(crate) fn crawl_l2_snapshot(
     market_type: MarketType,
-    symbols: &[String],
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'a + Send>>,
-    duration: Option<u64>,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
 ) {
-    check_args(market_type, symbols);
-    if market_type == MarketType::Spot && std::env::var("MXC_ACCESS_KEY").is_err() {
-        error!("MXC Spot REST APIs require access key, please set it to the MXC_ACCESS_KEY environment variable");
-        panic!("MXC Spot REST APIs require access key, please set it to the MXC_ACCESS_KEY environment variable");
-    }
-
-    let on_msg_ext = |json: String, symbol: String| {
-        let message = Message::new(
-            EXCHANGE_NAME.to_string(),
-            market_type,
-            symbol,
-            MessageType::L2Snapshot,
-            json,
-        );
-        (on_msg.lock().unwrap())(message);
+    let real_symbols = match symbols {
+        Some(list) => {
+            if list.is_empty() {
+                fetch_symbols(EXCHANGE_NAME, market_type).unwrap()
+            } else {
+                check_args(market_type, &list);
+                symbols.unwrap().to_vec()
+            }
+        }
+        None => fetch_symbols(EXCHANGE_NAME, market_type).unwrap(),
     };
 
-    let now = Instant::now();
-    loop {
-        let mut succeeded = false;
-        for symbol in symbols.iter() {
-            let resp = match market_type {
-                MarketType::Spot => {
-                    let access_key = std::env::var("MXC_ACCESS_KEY").unwrap();
-                    let client = MXCSpotRestClient::new(access_key, None);
-                    client.fetch_l2_snapshot(symbol)
-                }
-                MarketType::Swap => MXCSwapRestClient::fetch_l2_snapshot(symbol),
-                _ => {
-                    error!("Unknown market type {} of MXC", market_type);
-                    panic!("Unknown market type {} of MXC", market_type);
-                }
-            };
-            match resp {
-                Ok(msg) => {
-                    on_msg_ext(msg, symbol.to_string());
-                    succeeded = true
-                }
-                Err(err) => error!(
-                    "{} {} {}, error: {}",
-                    EXCHANGE_NAME, market_type, symbol, err
-                ),
+    for symbol in real_symbols.iter() {
+        let resp = match market_type {
+            MarketType::Spot => {
+                let access_key = std::env::var("MXC_ACCESS_KEY").unwrap();
+                let client = MxcSpotRestClient::new(access_key, None);
+                client.fetch_l2_snapshot(symbol)
             }
-        }
-
-        if let Some(seconds) = duration {
-            if now.elapsed() > Duration::from_secs(seconds) && succeeded {
-                break;
+            MarketType::LinearSwap | MarketType::InverseSwap => {
+                MxcSwapRestClient::fetch_l2_snapshot(symbol)
             }
+            _ => {
+                error!("Unknown market type {} of {}", market_type, EXCHANGE_NAME);
+                panic!("Unknown market type {} of {}", market_type, EXCHANGE_NAME);
+            }
+        };
+        match resp {
+            Ok(msg) => {
+                let message = Message::new(
+                    EXCHANGE_NAME.to_string(),
+                    market_type,
+                    symbol.to_string(),
+                    MessageType::L2Snapshot,
+                    msg,
+                );
+                (on_msg.lock().unwrap())(message);
+            }
+            Err(err) => error!(
+                "{} {} {}, error: {}",
+                EXCHANGE_NAME, market_type, symbol, err
+            ),
         }
-
-        std::thread::sleep(Duration::from_secs(crate::SNAPSHOT_INTERVAL));
     }
 }

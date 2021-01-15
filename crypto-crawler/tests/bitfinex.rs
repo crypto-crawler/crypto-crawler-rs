@@ -4,13 +4,18 @@ mod utils;
 #[cfg(test)]
 mod bitfinex_spot {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "Bitfinex",
+            "bitfinex",
             MarketType::Spot,
             "tBTCUSD",
             MessageType::Trade
@@ -21,7 +26,7 @@ mod bitfinex_spot {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "Bitfinex",
+            "bitfinex",
             MarketType::Spot,
             "tBTCUSD",
             MessageType::L2Event
@@ -30,9 +35,9 @@ mod bitfinex_spot {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "Bitfinex",
+            "bitfinex",
             MarketType::Spot,
             "tBTCUSD",
             MessageType::L2Snapshot
@@ -43,7 +48,7 @@ mod bitfinex_spot {
     fn test_crawl_l3_event() {
         gen_test_code!(
             crawl_l3_event,
-            "Bitfinex",
+            "bitfinex",
             MarketType::Spot,
             "tBTCUSD",
             MessageType::L3Event
@@ -52,9 +57,9 @@ mod bitfinex_spot {
 
     #[test]
     fn test_crawl_l3_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l3_snapshot,
-            "Bitfinex",
+            "bitfinex",
             MarketType::Spot,
             "tBTCUSD",
             MessageType::L3Snapshot
@@ -63,16 +68,21 @@ mod bitfinex_spot {
 }
 
 #[cfg(test)]
-mod bitfinex_swap {
+mod bitfinex_linear_swap {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "Bitfinex",
-            MarketType::Swap,
+            "bitfinex",
+            MarketType::LinearSwap,
             "tBTCF0:USTF0",
             MessageType::Trade
         )
@@ -82,8 +92,8 @@ mod bitfinex_swap {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "Bitfinex",
-            MarketType::Swap,
+            "bitfinex",
+            MarketType::LinearSwap,
             "tBTCF0:USTF0",
             MessageType::L2Event
         )
@@ -91,10 +101,10 @@ mod bitfinex_swap {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "Bitfinex",
-            MarketType::Swap,
+            "bitfinex",
+            MarketType::LinearSwap,
             "tBTCF0:USTF0",
             MessageType::L2Snapshot
         )
@@ -104,8 +114,8 @@ mod bitfinex_swap {
     fn test_crawl_l3_event() {
         gen_test_code!(
             crawl_l3_event,
-            "Bitfinex",
-            MarketType::Swap,
+            "bitfinex",
+            MarketType::LinearSwap,
             "tBTCF0:USTF0",
             MessageType::L3Event
         )
@@ -113,10 +123,10 @@ mod bitfinex_swap {
 
     #[test]
     fn test_crawl_l3_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l3_snapshot,
-            "Bitfinex",
-            MarketType::Swap,
+            "bitfinex",
+            MarketType::LinearSwap,
             "tBTCF0:USTF0",
             MessageType::L3Snapshot
         )
