@@ -5,12 +5,6 @@ mod huobi_spot {
     use std::collections::HashMap;
 
     #[test]
-    fn test_fetch_symbols() {
-        let symbols = HuobiSpotRestClient::fetch_symbols().unwrap();
-        assert!(!symbols.is_empty());
-    }
-
-    #[test]
     fn test_trades() {
         let text = HuobiSpotRestClient::fetch_trades("btcusdt").unwrap();
         assert!(text.starts_with("{"));
@@ -52,20 +46,6 @@ mod huobi_future {
     use crypto_rest_client::HuobiFutureRestClient;
     use serde_json::Value;
     use std::collections::HashMap;
-
-    #[test]
-    fn test_fetch_symbols() {
-        let symbols = HuobiFutureRestClient::fetch_symbols().unwrap();
-        assert!(!symbols.is_empty());
-        for symbol in symbols.iter() {
-            assert!(
-                symbol.ends_with("_CW")
-                    || symbol.ends_with("_NW")
-                    || symbol.ends_with("_CQ")
-                    || symbol.ends_with("_NQ")
-            );
-        }
-    }
 
     #[test]
     fn test_trades() {
@@ -111,15 +91,6 @@ mod huobi_linear_swap {
     use std::collections::HashMap;
 
     #[test]
-    fn test_fetch_symbols() {
-        let symbols = HuobiLinearSwapRestClient::fetch_symbols().unwrap();
-        assert!(!symbols.is_empty());
-        for symbol in symbols.iter() {
-            assert!(symbol.ends_with("-USDT"));
-        }
-    }
-
-    #[test]
     fn test_trades() {
         let text = HuobiLinearSwapRestClient::fetch_trades("BTC-USDT").unwrap();
         assert!(text.starts_with("{"));
@@ -163,15 +134,6 @@ mod huobi_inverse_swap {
     use std::collections::HashMap;
 
     #[test]
-    fn test_fetch_symbols() {
-        let symbols = HuobiInverseSwapRestClient::fetch_symbols().unwrap();
-        assert!(!symbols.is_empty());
-        for symbol in symbols.iter() {
-            assert!(symbol.ends_with("-USD"));
-        }
-    }
-
-    #[test]
     fn test_trades() {
         let text = HuobiInverseSwapRestClient::fetch_trades("BTC-USD").unwrap();
         assert!(text.starts_with("{"));
@@ -213,15 +175,6 @@ mod huobi_option {
     use crypto_rest_client::HuobiOptionRestClient;
     use serde_json::Value;
     use std::collections::HashMap;
-
-    #[test]
-    fn test_fetch_symbols() {
-        let symbols = HuobiOptionRestClient::fetch_symbols().unwrap();
-        assert!(!symbols.is_empty());
-        for symbol in symbols.iter() {
-            assert!(symbol.contains("-C-") || symbol.contains("-P-"));
-        }
-    }
 
     #[test]
     fn test_trades() {
