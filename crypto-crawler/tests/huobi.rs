@@ -4,13 +4,18 @@ mod utils;
 #[cfg(test)]
 mod huobi_spot {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "Huobi",
+            "huobi",
             MarketType::Spot,
             "btcusdt",
             MessageType::Trade
@@ -21,7 +26,7 @@ mod huobi_spot {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "Huobi",
+            "huobi",
             MarketType::Spot,
             "btcusdt",
             MessageType::L2Event
@@ -30,9 +35,9 @@ mod huobi_spot {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "Huobi",
+            "huobi",
             MarketType::Spot,
             "btcusdt",
             MessageType::L2Snapshot
@@ -41,16 +46,21 @@ mod huobi_spot {
 }
 
 #[cfg(test)]
-mod huobi_future {
+mod huobi_inverse_future {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "Huobi",
-            MarketType::Future,
+            "huobi",
+            MarketType::InverseFuture,
             "BTC_CQ",
             MessageType::Trade
         )
@@ -60,8 +70,8 @@ mod huobi_future {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "Huobi",
-            MarketType::Future,
+            "huobi",
+            MarketType::InverseFuture,
             "BTC_CQ",
             MessageType::L2Event
         )
@@ -69,10 +79,10 @@ mod huobi_future {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "Huobi",
-            MarketType::Future,
+            "huobi",
+            MarketType::InverseFuture,
             "BTC_CQ",
             MessageType::L2Snapshot
         )
@@ -82,14 +92,19 @@ mod huobi_future {
 #[cfg(test)]
 mod huobi_linear_swap {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "Huobi",
-            MarketType::Swap,
+            "huobi",
+            MarketType::LinearSwap,
             "BTC-USDT",
             MessageType::Trade
         )
@@ -99,8 +114,8 @@ mod huobi_linear_swap {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "Huobi",
-            MarketType::Swap,
+            "huobi",
+            MarketType::LinearSwap,
             "BTC-USDT",
             MessageType::L2Event
         )
@@ -108,10 +123,10 @@ mod huobi_linear_swap {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "Huobi",
-            MarketType::Swap,
+            "huobi",
+            MarketType::LinearSwap,
             "BTC-USDT",
             MessageType::L2Snapshot
         )
@@ -121,14 +136,19 @@ mod huobi_linear_swap {
 #[cfg(test)]
 mod huobi_inverse_swap {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "Huobi",
-            MarketType::Swap,
+            "huobi",
+            MarketType::InverseSwap,
             "BTC-USD",
             MessageType::Trade
         )
@@ -138,8 +158,8 @@ mod huobi_inverse_swap {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "Huobi",
-            MarketType::Swap,
+            "huobi",
+            MarketType::InverseSwap,
             "BTC-USD",
             MessageType::L2Event
         )
@@ -147,10 +167,10 @@ mod huobi_inverse_swap {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "Huobi",
-            MarketType::Swap,
+            "huobi",
+            MarketType::InverseSwap,
             "BTC-USD",
             MessageType::L2Snapshot
         )
@@ -160,13 +180,18 @@ mod huobi_inverse_swap {
 #[cfg(test)]
 mod huobi_option {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "Huobi",
+            "huobi",
             MarketType::Option,
             "BTC-USDT-210326-C-32000",
             MessageType::Trade
@@ -177,7 +202,7 @@ mod huobi_option {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "Huobi",
+            "huobi",
             MarketType::Option,
             "BTC-USDT-210326-C-32000",
             MessageType::L2Event
@@ -186,9 +211,9 @@ mod huobi_option {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "Huobi",
+            "huobi",
             MarketType::Option,
             "BTC-USDT-210326-C-32000",
             MessageType::L2Snapshot

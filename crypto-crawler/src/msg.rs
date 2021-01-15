@@ -5,12 +5,15 @@ use strum_macros::{Display, EnumString};
 
 /// The type of a message
 #[derive(PartialEq, Serialize, Deserialize, Display, Debug, EnumString)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
 pub enum MessageType {
     Trade,
     L2Event,
     L2Snapshot,
     L3Event,
     L3Snapshot,
+    #[serde(rename = "bbo")]
     BBO,
     Ticker,
     Candlestick,

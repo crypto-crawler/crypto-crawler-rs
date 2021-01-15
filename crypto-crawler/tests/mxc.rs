@@ -4,13 +4,18 @@ mod utils;
 #[cfg(test)]
 mod mxc_spot {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "MXC",
+            "mxc",
             MarketType::Spot,
             "BTC_USDT",
             MessageType::Trade
@@ -21,7 +26,7 @@ mod mxc_spot {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "MXC",
+            "mxc",
             MarketType::Spot,
             "BTC_USDT",
             MessageType::L2Event
@@ -31,9 +36,9 @@ mod mxc_spot {
     #[test]
     #[ignore]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "MXC",
+            "mxc",
             MarketType::Spot,
             "BTC_USDT",
             MessageType::L2Snapshot
@@ -42,16 +47,21 @@ mod mxc_spot {
 }
 
 #[cfg(test)]
-mod mxc_swap {
+mod mxc_linear_swap {
     use crypto_crawler::*;
-    use std::sync::{Arc, Mutex};
+    use crypto_markets::MarketType;
+    use std::thread_local;
+    use std::{
+        cell::RefCell,
+        sync::{Arc, Mutex},
+    };
 
     #[test]
     fn test_crawl_trade() {
         gen_test_code!(
             crawl_trade,
-            "MXC",
-            MarketType::Swap,
+            "mxc",
+            MarketType::LinearSwap,
             "BTC_USDT",
             MessageType::Trade
         )
@@ -61,8 +71,8 @@ mod mxc_swap {
     fn test_crawl_l2_event() {
         gen_test_code!(
             crawl_l2_event,
-            "MXC",
-            MarketType::Swap,
+            "mxc",
+            MarketType::LinearSwap,
             "BTC_USDT",
             MessageType::L2Event
         )
@@ -70,10 +80,10 @@ mod mxc_swap {
 
     #[test]
     fn test_crawl_l2_snapshot() {
-        gen_test_code!(
+        gen_test_snapshot_code!(
             crawl_l2_snapshot,
-            "MXC",
-            MarketType::Swap,
+            "mxc",
+            MarketType::LinearSwap,
             "BTC_USDT",
             MessageType::L2Snapshot
         )
