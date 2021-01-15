@@ -4,9 +4,6 @@ use crypto_markets::{fetch_symbols, MarketType};
 fn fetch_spot_symbols() {
     let symbols = fetch_symbols("bitfinex", MarketType::Spot).unwrap();
     assert!(!symbols.is_empty());
-    for symbol in symbols.iter() {
-        println!("{}", symbol);
-    }
 }
 
 #[test]
