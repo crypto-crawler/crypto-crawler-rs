@@ -24,31 +24,17 @@ use strum_macros::{Display, EnumString};
 ///
 /// **Margin and Inverse are orthogonal.**
 #[derive(Copy, Clone, Serialize, Deserialize, Display, Debug, EnumString, PartialEq)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
 pub enum MarketType {
-    #[strum(serialize = "spot")]
-    #[serde(rename = "spot")]
     Spot,
-    #[strum(serialize = "linear_future")]
-    #[serde(rename = "linear_future")]
     LinearFuture,
-    #[strum(serialize = "inverse_future")]
-    #[serde(rename = "inverse_future")]
     InverseFuture,
-    #[strum(serialize = "linear_swap")]
-    #[serde(rename = "linear_swap")]
     LinearSwap,
-    #[strum(serialize = "inverse_swap")]
-    #[serde(rename = "inverse_swap")]
     InverseSwap,
-    #[strum(serialize = "option")]
-    #[serde(rename = "option")]
     Option,
 
-    #[strum(serialize = "quanto_future")]
-    #[serde(rename = "quanto_future")]
     QuantoFuture,
-    #[strum(serialize = "quanto_swap")]
-    #[serde(rename = "quanto_swap")]
     QuantoSwap,
 }
 
