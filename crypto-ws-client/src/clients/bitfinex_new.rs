@@ -248,7 +248,7 @@ impl<'a> BitfinexWSClient<'a> {
                     }
                 }
                 "info" => {
-                    if let Some(_) = obj.get("version") {
+                    if obj.get("version").is_some() {
                         // 1 for operative, 0 for maintenance
                         let status = obj
                             .get("platform")
