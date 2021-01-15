@@ -39,7 +39,6 @@ fn fetch_inverse_swap_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("-USD-SWAP"));
-        println!("{}", symbol);
     }
 }
 
@@ -49,7 +48,6 @@ fn fetch_linear_swap_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("-USDT-SWAP"));
-        println!("{}", symbol);
     }
 }
 
