@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod mxc_spot {
-    use crypto_rest_client::MXCSpotRestClient;
+    use crypto_rest_client::MxcSpotRestClient;
 
     #[test]
     #[ignore]
     fn test_trades() {
-        let client = MXCSpotRestClient::new("your_access_key".to_string(), None);
+        let client = MxcSpotRestClient::new("your_access_key".to_string(), None);
         let text = client.fetch_trades("BTC_USDT").unwrap();
         assert!(text.starts_with("{"));
     }
@@ -13,7 +13,7 @@ mod mxc_spot {
     #[test]
     #[ignore]
     fn test_l2_snapshot() {
-        let client = MXCSpotRestClient::new("your_access_key".to_string(), None);
+        let client = MxcSpotRestClient::new("your_access_key".to_string(), None);
         let text = client.fetch_l2_snapshot("BTC_USDT").unwrap();
         assert!(text.starts_with("{"));
     }
@@ -21,17 +21,17 @@ mod mxc_spot {
 
 #[cfg(test)]
 mod mxc_swap {
-    use crypto_rest_client::MXCSwapRestClient;
+    use crypto_rest_client::MxcSwapRestClient;
 
     #[test]
     fn test_trades() {
-        let text = MXCSwapRestClient::fetch_trades("BTC_USDT").unwrap();
+        let text = MxcSwapRestClient::fetch_trades("BTC_USDT").unwrap();
         assert!(text.starts_with("{"));
     }
 
     #[test]
     fn test_l2_snapshot() {
-        let text = MXCSwapRestClient::fetch_l2_snapshot("BTC_USDT").unwrap();
+        let text = MxcSwapRestClient::fetch_l2_snapshot("BTC_USDT").unwrap();
         assert!(text.starts_with("{"));
     }
 }

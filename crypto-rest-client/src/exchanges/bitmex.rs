@@ -10,14 +10,14 @@ const BASE_URL: &'static str = "https://www.bitmex.com/api/v1";
 ///
 ///   * REST API doc: <https://www.bitmex.com/api/explorer/>
 ///   * Trading at: <https://www.bitmex.com/app/trade/>
-pub struct BitMEXRestClient {
+pub struct BitmexRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
 }
 
-impl BitMEXRestClient {
+impl BitmexRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        BitMEXRestClient {
+        BitmexRestClient {
             _api_key: api_key,
             _api_secret: api_secret,
         }
