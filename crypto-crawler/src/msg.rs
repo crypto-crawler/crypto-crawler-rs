@@ -26,7 +26,7 @@ pub struct Message {
     pub exchange: String,
     /// Market type
     pub market_type: MarketType,
-    /// Exchange specific symbol
+    /// Exchange specific symbol, used by RESTful APIs and websocket
     pub symbol: String,
     /// Data type
     pub msg_type: MessageType,
