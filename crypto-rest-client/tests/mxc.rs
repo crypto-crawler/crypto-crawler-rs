@@ -3,7 +3,6 @@ mod mxc_spot {
     use crypto_rest_client::MxcSpotRestClient;
 
     #[test]
-    #[ignore]
     fn test_trades() {
         let client = MxcSpotRestClient::new("your_access_key".to_string(), None);
         let text = client.fetch_trades("BTC_USDT").unwrap();
@@ -11,7 +10,6 @@ mod mxc_spot {
     }
 
     #[test]
-    #[ignore]
     fn test_l2_snapshot() {
         let client = MxcSpotRestClient::new("your_access_key".to_string(), None);
         let text = client.fetch_l2_snapshot("BTC_USDT").unwrap();

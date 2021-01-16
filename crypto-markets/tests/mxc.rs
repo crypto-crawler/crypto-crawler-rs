@@ -3,7 +3,6 @@ use crypto_markets::{fetch_symbols, MarketType};
 const EXCHANGE_NAME: &str = "mxc";
 
 #[test]
-#[ignore]
 fn fetch_spot_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::Spot).unwrap();
     assert!(!symbols.is_empty());
