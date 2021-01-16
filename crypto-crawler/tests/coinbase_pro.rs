@@ -1,3 +1,8 @@
+#[macro_use]
+mod utils;
+
+use test_case::test_case;
+
 use crypto_crawler::*;
 use crypto_markets::MarketType;
 use std::thread_local;
@@ -6,60 +11,59 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-#[macro_use]
-mod utils;
+const EXCHANGE_NAME: &str = "coinbase_pro";
 
-#[test]
-fn test_crawl_trade() {
+#[test_case(MarketType::Spot, "BTC-USD")]
+fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_trade,
-        "coinbase_pro",
-        MarketType::Spot,
-        "BTC-USD",
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
         MessageType::Trade
     )
 }
 
-#[test]
-fn test_crawl_l2_event() {
+#[test_case(MarketType::Spot, "BTC-USD")]
+fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_l2_event,
-        "coinbase_pro",
-        MarketType::Spot,
-        "BTC-USD",
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
         MessageType::L2Event
     )
 }
 
-#[test]
-fn test_crawl_l2_snapshot() {
+#[test_case(MarketType::Spot, "BTC-USD")]
+fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     gen_test_snapshot_code!(
         crawl_l2_snapshot,
-        "coinbase_pro",
-        MarketType::Spot,
-        "BTC-USD",
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
         MessageType::L2Snapshot
     )
 }
 
-#[test]
-fn test_crawl_l3_event() {
+#[test_case(MarketType::Spot, "BTC-USD")]
+fn test_crawl_l3_event(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_l3_event,
-        "coinbase_pro",
-        MarketType::Spot,
-        "BTC-USD",
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
         MessageType::L3Event
     )
 }
 
-#[test]
-fn test_crawl_l3_snapshot() {
+#[test_case(MarketType::Spot, "BTC-USD")]
+fn test_crawl_l3_snapshot(market_type: MarketType, symbol: &str) {
     gen_test_snapshot_code!(
         crawl_l3_snapshot,
-        "coinbase_pro",
-        MarketType::Spot,
-        "BTC-USD",
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
         MessageType::L3Snapshot
     )
 }
