@@ -1,90 +1,59 @@
 #[macro_use]
 mod utils;
 
-#[cfg(test)]
-mod bitmex_inverse_swap {
-    use crypto_crawler::*;
-    use crypto_markets::MarketType;
-    use std::thread_local;
-    use std::{
-        cell::RefCell,
-        sync::{Arc, Mutex},
-    };
+use test_case::test_case;
 
-    #[test]
-    fn test_crawl_trade() {
-        gen_test_code!(
-            crawl_trade,
-            "bitmex",
-            MarketType::InverseSwap,
-            "XBTUSD",
-            MessageType::Trade
-        )
-    }
+use crypto_crawler::*;
+use crypto_markets::MarketType;
+use std::thread_local;
+use std::{
+    cell::RefCell,
+    sync::{Arc, Mutex},
+};
 
-    #[test]
-    fn test_crawl_l2_event() {
-        gen_test_code!(
-            crawl_l2_event,
-            "bitmex",
-            MarketType::InverseSwap,
-            "XBTUSD",
-            MessageType::L2Event
-        )
-    }
+const EXCHANGE_NAME: &str = "bitmex";
 
-    #[test]
-    fn test_crawl_l2_snapshot() {
-        gen_test_snapshot_code!(
-            crawl_l2_snapshot,
-            "bitmex",
-            MarketType::InverseSwap,
-            "XBTUSD",
-            MessageType::L2Snapshot
-        )
-    }
+#[test_case(MarketType::InverseFuture, "XBTM21")]
+#[test_case(MarketType::LinearFuture, "ETHH21")]
+#[test_case(MarketType::QuantoFuture, "ETHUSDH21")]
+#[test_case(MarketType::InverseSwap, "XBTUSD")]
+#[test_case(MarketType::QuantoSwap, "ETHUSD")]
+fn test_crawl_trade(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_trade,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::Trade
+    )
 }
 
-#[cfg(test)]
-mod bitmex_inverse_future {
-    use crypto_crawler::*;
-    use crypto_markets::MarketType;
-    use std::thread_local;
-    use std::{
-        cell::RefCell,
-        sync::{Arc, Mutex},
-    };
+#[test_case(MarketType::InverseFuture, "XBTM21")]
+#[test_case(MarketType::LinearFuture, "ETHH21")]
+#[test_case(MarketType::QuantoFuture, "ETHUSDH21")]
+#[test_case(MarketType::InverseSwap, "XBTUSD")]
+#[test_case(MarketType::QuantoSwap, "ETHUSD")]
+fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_l2_event,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::L2Event
+    )
+}
 
-    #[test]
-    fn test_crawl_trade() {
-        gen_test_code!(
-            crawl_trade,
-            "bitmex",
-            MarketType::InverseFuture,
-            "XBTM21",
-            MessageType::Trade
-        )
-    }
-
-    #[test]
-    fn test_crawl_l2_event() {
-        gen_test_code!(
-            crawl_l2_event,
-            "bitmex",
-            MarketType::InverseFuture,
-            "XBTM21",
-            MessageType::L2Event
-        )
-    }
-
-    #[test]
-    fn test_crawl_l2_snapshot() {
-        gen_test_snapshot_code!(
-            crawl_l2_snapshot,
-            "bitmex",
-            MarketType::InverseFuture,
-            "XBTM21",
-            MessageType::L2Snapshot
-        )
-    }
+#[test_case(MarketType::InverseFuture, "XBTM21")]
+#[test_case(MarketType::LinearFuture, "ETHH21")]
+#[test_case(MarketType::QuantoFuture, "ETHUSDH21")]
+#[test_case(MarketType::InverseSwap, "XBTUSD")]
+#[test_case(MarketType::QuantoSwap, "ETHUSD")]
+fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
+    gen_test_snapshot_code!(
+        crawl_l2_snapshot,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::L2Snapshot
+    )
 }

@@ -1,91 +1,53 @@
 #[macro_use]
 mod utils;
 
-#[cfg(test)]
-mod mxc_spot {
-    use crypto_crawler::*;
-    use crypto_markets::MarketType;
-    use std::thread_local;
-    use std::{
-        cell::RefCell,
-        sync::{Arc, Mutex},
-    };
+use test_case::test_case;
 
-    #[test]
-    fn test_crawl_trade() {
-        gen_test_code!(
-            crawl_trade,
-            "mxc",
-            MarketType::Spot,
-            "BTC_USDT",
-            MessageType::Trade
-        )
-    }
+use crypto_crawler::*;
+use crypto_markets::MarketType;
+use std::thread_local;
+use std::{
+    cell::RefCell,
+    sync::{Arc, Mutex},
+};
 
-    #[test]
-    fn test_crawl_l2_event() {
-        gen_test_code!(
-            crawl_l2_event,
-            "mxc",
-            MarketType::Spot,
-            "BTC_USDT",
-            MessageType::L2Event
-        )
-    }
+const EXCHANGE_NAME: &str = "mxc";
 
-    #[test]
-    #[ignore]
-    fn test_crawl_l2_snapshot() {
-        gen_test_snapshot_code!(
-            crawl_l2_snapshot,
-            "mxc",
-            MarketType::Spot,
-            "BTC_USDT",
-            MessageType::L2Snapshot
-        )
-    }
+#[test_case(MarketType::Spot, "BTC_USDT")]
+#[test_case(MarketType::LinearSwap, "BTC_USDT")]
+#[test_case(MarketType::InverseSwap, "BTC_USD")]
+fn test_crawl_trade(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_trade,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::Trade
+    )
 }
 
-#[cfg(test)]
-mod mxc_linear_swap {
-    use crypto_crawler::*;
-    use crypto_markets::MarketType;
-    use std::thread_local;
-    use std::{
-        cell::RefCell,
-        sync::{Arc, Mutex},
-    };
+#[test_case(MarketType::Spot, "BTC_USDT")]
+#[test_case(MarketType::LinearSwap, "BTC_USDT")]
+#[test_case(MarketType::InverseSwap, "BTC_USD")]
+fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_l2_event,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::L2Event
+    )
+}
 
-    #[test]
-    fn test_crawl_trade() {
-        gen_test_code!(
-            crawl_trade,
-            "mxc",
-            MarketType::LinearSwap,
-            "BTC_USDT",
-            MessageType::Trade
-        )
-    }
-
-    #[test]
-    fn test_crawl_l2_event() {
-        gen_test_code!(
-            crawl_l2_event,
-            "mxc",
-            MarketType::LinearSwap,
-            "BTC_USDT",
-            MessageType::L2Event
-        )
-    }
-
-    #[test]
-    fn test_crawl_l2_snapshot() {
-        gen_test_snapshot_code!(
-            crawl_l2_snapshot,
-            "mxc",
-            MarketType::LinearSwap,
-            "BTC_USDT",
-            MessageType::L2Snapshot
-        )
-    }
+#[test_case(MarketType::Spot, "BTC_USDT")]
+#[test_case(MarketType::LinearSwap, "BTC_USDT")]
+#[test_case(MarketType::InverseSwap, "BTC_USD")]
+fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
+    gen_test_snapshot_code!(
+        crawl_l2_snapshot,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::L2Snapshot
+    )
 }
