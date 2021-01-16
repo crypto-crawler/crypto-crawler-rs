@@ -26,7 +26,7 @@ fn extract_symbol(json: &str) -> String {
 #[rustfmt::skip]
 gen_crawl_event!(crawl_trade_spot, market_type, symbols, on_msg, duration, HuobiSpotWSClient, MessageType::Trade, subscribe_trade, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_future, market_type, symbols, on_msg, duration, HuobiFutureWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_inverse_future, market_type, symbols, on_msg, duration, HuobiFutureWSClient, MessageType::Trade, subscribe_trade, true);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_trade_linear_swap, market_type, symbols, on_msg, duration, HuobiLinearSwapWSClient, MessageType::Trade, subscribe_trade, true);
 #[rustfmt::skip]
@@ -35,7 +35,7 @@ gen_crawl_event!(crawl_trade_inverse_swap, market_type, symbols, on_msg, duratio
 gen_crawl_event!(crawl_trade_option, market_type, symbols, on_msg, duration, HuobiOptionWSClient, MessageType::Trade, subscribe_trade, true);
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_future, market_type, symbols, on_msg, duration, HuobiFutureWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_inverse_future, market_type, symbols, on_msg, duration, HuobiFutureWSClient, MessageType::L2Event, subscribe_orderbook, true);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event_linear_swap, market_type, symbols, on_msg, duration, HuobiLinearSwapWSClient, MessageType::L2Event, subscribe_orderbook, true);
 #[rustfmt::skip]
@@ -46,7 +46,7 @@ gen_crawl_event!(crawl_l2_event_option, market_type, symbols, on_msg, duration, 
 #[rustfmt::skip]
 gen_crawl_snapshot!(crawl_l2_snapshot_spot, market_type, symbols, on_msg, MessageType::L2Snapshot, HuobiSpotRestClient::fetch_l2_snapshot);
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot_future, market_type, symbols, on_msg, MessageType::L2Snapshot, HuobiFutureRestClient::fetch_l2_snapshot);
+gen_crawl_snapshot!(crawl_l2_snapshot_inverse_future, market_type, symbols, on_msg, MessageType::L2Snapshot, HuobiFutureRestClient::fetch_l2_snapshot);
 #[rustfmt::skip]
 gen_crawl_snapshot!(crawl_l2_snapshot_linear_swap, market_type, symbols, on_msg, MessageType::L2Snapshot, HuobiLinearSwapRestClient::fetch_l2_snapshot);
 #[rustfmt::skip]
@@ -62,8 +62,8 @@ pub(crate) fn crawl_trade(
 ) -> Option<std::thread::JoinHandle<()>> {
     match market_type {
         MarketType::Spot => crawl_trade_spot(market_type, symbols, on_msg, duration),
-        MarketType::LinearFuture | MarketType::InverseFuture => {
-            crawl_trade_future(market_type, symbols, on_msg, duration)
+        MarketType::InverseFuture => {
+            crawl_trade_inverse_future(market_type, symbols, on_msg, duration)
         }
         MarketType::LinearSwap => crawl_trade_linear_swap(market_type, symbols, on_msg, duration),
         MarketType::InverseSwap => crawl_trade_inverse_swap(market_type, symbols, on_msg, duration),
@@ -100,8 +100,8 @@ pub(crate) fn crawl_l2_event(
             ws_client.run(duration);
             None
         }
-        MarketType::LinearFuture | MarketType::InverseFuture => {
-            crawl_l2_event_future(market_type, symbols, on_msg, duration)
+        MarketType::InverseFuture => {
+            crawl_l2_event_inverse_future(market_type, symbols, on_msg, duration)
         }
         MarketType::LinearSwap => {
             crawl_l2_event_linear_swap(market_type, symbols, on_msg, duration)
@@ -121,9 +121,7 @@ pub(crate) fn crawl_l2_snapshot(
 ) {
     match market_type {
         MarketType::Spot => crawl_l2_snapshot_spot(market_type, symbols, on_msg),
-        MarketType::LinearFuture | MarketType::InverseFuture => {
-            crawl_l2_snapshot_future(market_type, symbols, on_msg)
-        }
+        MarketType::InverseFuture => crawl_l2_snapshot_inverse_future(market_type, symbols, on_msg),
         MarketType::LinearSwap => crawl_l2_snapshot_linear_swap(market_type, symbols, on_msg),
         MarketType::InverseSwap => crawl_l2_snapshot_inverse_swap(market_type, symbols, on_msg),
         MarketType::Option => crawl_l2_snapshot_option(market_type, symbols, on_msg),

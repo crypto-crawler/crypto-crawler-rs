@@ -157,10 +157,7 @@ pub(crate) fn crawl_l2_event(
     };
 
     match market_type {
-        MarketType::Spot => {
-            println!("##### {} #####", market_type);
-            crawl_l2_event_spot(market_type, symbols, on_msg, duration)
-        }
+        MarketType::Spot => crawl_l2_event_spot(market_type, symbols, on_msg, duration),
         MarketType::InverseFuture => {
             crawl_l2_event_inverse_future(market_type, symbols, on_msg, duration)
         }
