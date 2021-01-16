@@ -1,14 +1,24 @@
-use crypto_markets::{fetch_markets, fetch_symbols, MarketType};
+use crypto_markets::{fetch_markets, fetch_symbols, get_market_types, MarketType};
+
+#[macro_use]
+mod utils;
+
+const EXCHANGE_NAME: &str = "binance";
+
+#[test]
+fn fetch_all_symbols() {
+    gen_all_symbols!();
+}
 
 #[test]
 fn fetch_spot_symbols() {
-    let symbols = fetch_symbols("binance", MarketType::Spot).unwrap();
+    let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::Spot).unwrap();
     assert!(!symbols.is_empty());
 }
 
 #[test]
 fn fetch_inverse_future_symbols() {
-    let symbols = fetch_symbols("binance", MarketType::InverseFuture).unwrap();
+    let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
     assert!(!symbols.is_empty());
 
     for symbol in symbols.iter() {
@@ -22,7 +32,7 @@ fn fetch_inverse_future_symbols() {
 
 #[test]
 fn fetch_inverse_swap_symbols() {
-    let symbols = fetch_symbols("binance", MarketType::InverseSwap).unwrap();
+    let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
     assert!(!symbols.is_empty());
 
     for symbol in symbols.iter() {
@@ -32,7 +42,7 @@ fn fetch_inverse_swap_symbols() {
 
 #[test]
 fn fetch_linear_swap_symbols() {
-    let symbols = fetch_symbols("binance", MarketType::LinearSwap).unwrap();
+    let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
     assert!(!symbols.is_empty());
 
     for symbol in symbols.iter() {
@@ -42,7 +52,7 @@ fn fetch_linear_swap_symbols() {
 
 #[test]
 fn fetch_option_symbols() {
-    let symbols = fetch_symbols("binance", MarketType::Option).unwrap();
+    let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::Option).unwrap();
     assert!(!symbols.is_empty());
 
     for symbol in symbols.iter() {
@@ -52,30 +62,30 @@ fn fetch_option_symbols() {
 
 #[test]
 fn fetch_spot_markets() {
-    let markets = fetch_markets("binance", MarketType::Spot).unwrap();
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::Spot).unwrap();
     assert!(!markets.is_empty());
 }
 
 #[test]
 fn fetch_inverse_future_markets() {
-    let markets = fetch_markets("binance", MarketType::InverseFuture).unwrap();
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
     assert!(!markets.is_empty());
 }
 
 #[test]
 fn fetch_inverse_swap_markets() {
-    let markets = fetch_markets("binance", MarketType::InverseSwap).unwrap();
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
     assert!(!markets.is_empty());
 }
 
 #[test]
 fn fetch_linear_swap_markets() {
-    let markets = fetch_markets("binance", MarketType::LinearSwap).unwrap();
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
     assert!(!markets.is_empty());
 }
 
 #[test]
 fn fetch_option_markets() {
-    let markets = fetch_markets("binance", MarketType::Option).unwrap();
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::Option).unwrap();
     assert!(!markets.is_empty());
 }
