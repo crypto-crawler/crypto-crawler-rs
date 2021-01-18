@@ -100,25 +100,6 @@ pub(crate) fn crawl_trade(
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
 ) -> Option<std::thread::JoinHandle<()>> {
-    let lowercase = match symbols {
-        Some(list) => list
-            .iter()
-            .map(|symbol| symbol.to_lowercase())
-            .collect::<Vec<String>>(),
-        None => Vec::new(),
-    };
-    let symbols = match symbols {
-        Some(list) => {
-            if list.is_empty() {
-                None
-            } else {
-                let tmp: &[String] = &lowercase;
-                Some(tmp)
-            }
-        }
-        None => None,
-    };
-
     match market_type {
         MarketType::Spot => crawl_trade_spot(market_type, symbols, on_msg, duration),
         MarketType::InverseFuture => {
@@ -137,25 +118,6 @@ pub(crate) fn crawl_l2_event(
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
 ) -> Option<std::thread::JoinHandle<()>> {
-    let lowercase = match symbols {
-        Some(list) => list
-            .iter()
-            .map(|symbol| symbol.to_lowercase())
-            .collect::<Vec<String>>(),
-        None => Vec::new(),
-    };
-    let symbols = match symbols {
-        Some(list) => {
-            if list.is_empty() {
-                None
-            } else {
-                let tmp: &[String] = &lowercase;
-                Some(tmp)
-            }
-        }
-        None => None,
-    };
-
     match market_type {
         MarketType::Spot => crawl_l2_event_spot(market_type, symbols, on_msg, duration),
         MarketType::InverseFuture => {
@@ -177,25 +139,6 @@ pub(crate) fn crawl_l2_snapshot(
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
 ) {
-    let uppercase = match symbols {
-        Some(list) => list
-            .iter()
-            .map(|symbol| symbol.to_uppercase())
-            .collect::<Vec<String>>(),
-        None => Vec::new(),
-    };
-    let symbols = match symbols {
-        Some(list) => {
-            if list.is_empty() {
-                None
-            } else {
-                let tmp: &[String] = &uppercase;
-                Some(tmp)
-            }
-        }
-        None => None,
-    };
-
     match market_type {
         MarketType::Spot => crawl_l2_snapshot_spot(market_type, symbols, on_msg),
         MarketType::InverseFuture => crawl_l2_snapshot_inverse_future(market_type, symbols, on_msg),
