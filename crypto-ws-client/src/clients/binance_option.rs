@@ -11,7 +11,7 @@ use serde_json::Value;
 
 pub(super) const EXCHANGE_NAME: &str = "binance";
 
-const WEBSOCKET_URL: &str = "wss://stream.opsnest.com/stream";
+pub(super) const WEBSOCKET_URL: &str = "wss://stream.opsnest.com/stream";
 
 /// Binance Option market
 ///
@@ -46,6 +46,10 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
 }
 
 fn on_misc_msg(msg: &str) -> MiscMessage {
+    if msg == r#"{"id":9527}"# || msg == r#"{"event":"pong"}"# {
+        return MiscMessage::Misc;
+    }
+
     let resp = serde_json::from_str::<HashMap<String, Value>>(&msg);
     if resp.is_err() {
         error!("{} is not a JSON string, {}", msg, EXCHANGE_NAME);
