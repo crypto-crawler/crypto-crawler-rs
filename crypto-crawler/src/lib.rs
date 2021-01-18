@@ -1,7 +1,7 @@
 mod crawlers;
 mod msg;
 
-use crypto_markets::MarketType;
+pub use crypto_markets::MarketType;
 use std::sync::{Arc, Mutex};
 
 pub use msg::*;

@@ -4,7 +4,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use strum_macros::{Display, EnumString};
 
 /// The type of a message
-#[derive(PartialEq, Serialize, Deserialize, Display, Debug, EnumString)]
+#[derive(Copy, Clone, PartialEq, Serialize, Deserialize, Display, Debug, EnumString)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
 pub enum MessageType {
@@ -26,10 +26,10 @@ pub struct Message {
     pub exchange: String,
     /// Market type
     pub market_type: MarketType,
+    /// Message type
+    pub msg_type: MessageType,
     /// Exchange specific symbol, used by RESTful APIs and websocket
     pub symbol: String,
-    /// Data type
-    pub msg_type: MessageType,
     /// Unix timestamp in milliseconds
     pub received_at: u128,
     /// the original message
