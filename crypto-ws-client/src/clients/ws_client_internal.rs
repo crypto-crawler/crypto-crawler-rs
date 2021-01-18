@@ -197,6 +197,7 @@ impl<'a> WSClientInternal<'a> {
                     Message::Ping(resp) => {
                         let tmp = std::str::from_utf8(&resp);
                         warn!("Received a ping frame: {}", tmp.unwrap());
+                        self.ws_stream.lock().unwrap().write_message(Message::Pong(resp));
                         false
                     }
                     Message::Pong(resp) => {
