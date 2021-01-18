@@ -1,12 +1,12 @@
 [package]
 name = "crypto-ws-client"
-version = "1.7.1"
+version = "1.7.2"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "A versatile websocket client that supports many cryptocurrency exchanges."
 license = "Apache-2.0"
 repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-ws-client"
-homepage = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-ws-client"
+keywords = ["cryptocurrency", "blockchain", "trading", "websocket"]
 
 [dependencies]
 flate2 = "1"
