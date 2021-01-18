@@ -15,8 +15,7 @@ const SPOT_WEBSOCKET_URL: &str = "wss://stream.binance.com:9443/stream";
 const FUTURES_WEBSOCKET_URL: &str = "wss://fstream.binance.com/stream";
 const DELIVERY_WEBSOCKET_URL: &str = "wss://dstream.binance.com/stream";
 
-// TODO: A single connection can listen to a maximum of 200 streams
-#[allow(dead_code)]
+// A single connection can listen to a maximum of 200 streams
 const MAX_NUM_CHANNELS: usize = 200;
 
 // Internal unified client
@@ -70,25 +69,41 @@ impl<'a> BinanceWSClient<'a> {
     }
 
     fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-        let channels_to_parse: Vec<&String> =
-            channels.iter().filter(|ch| !ch.starts_with('{')).collect();
         let mut all_commands: Vec<String> = channels
             .iter()
             .filter(|ch| ch.starts_with('{'))
             .map(|s| s.to_string())
             .collect();
 
-        if !channels_to_parse.is_empty() {
-            all_commands.append(&mut vec![format!(
+        let mut chunk: Vec<String> = Vec::new();
+        for channel in channels.iter().filter(|ch| !ch.starts_with('{')) {
+            chunk.push(channel.clone());
+            if chunk.len() >= MAX_NUM_CHANNELS {
+                let command = format!(
+                    r#"{{"id":9527,"method":"{}","params":{}}}"#,
+                    if subscribe {
+                        "SUBSCRIBE"
+                    } else {
+                        "UNSUBSCRIBE"
+                    },
+                    serde_json::to_string(&chunk).unwrap()
+                );
+                all_commands.push(command);
+                chunk.clear();
+            }
+        }
+        if !chunk.is_empty() {
+            let command = format!(
                 r#"{{"id":9527,"method":"{}","params":{}}}"#,
                 if subscribe {
                     "SUBSCRIBE"
                 } else {
                     "UNSUBSCRIBE"
                 },
-                serde_json::to_string(&channels_to_parse).unwrap()
-            )])
-        };
+                serde_json::to_string(&chunk).unwrap()
+            );
+            all_commands.push(command);
+        }
 
         all_commands
     }
