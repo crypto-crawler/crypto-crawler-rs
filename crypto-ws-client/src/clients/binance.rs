@@ -16,6 +16,7 @@ const FUTURES_WEBSOCKET_URL: &str = "wss://fstream.binance.com/stream";
 const DELIVERY_WEBSOCKET_URL: &str = "wss://dstream.binance.com/stream";
 
 // TODO: A single connection can listen to a maximum of 200 streams
+#[allow(dead_code)]
 const MAX_NUM_CHANNELS: usize = 200;
 
 // Internal unified client
