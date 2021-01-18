@@ -9,13 +9,12 @@ use std::{
 
 use super::{
     utils::{connect_with_retry, CHANNEL_PAIR_DELIMITER},
-    ws_stream::WebSocketStream,
     Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
 };
 
 use log::*;
 use serde_json::Value;
-use tungstenite::{Error, Message};
+use tungstenite::{client::AutoStream, Error, Message, WebSocket};
 
 pub(super) const EXCHANGE_NAME: &str = "bitfinex";
 
@@ -28,7 +27,7 @@ const WEBSOCKET_URL: &str = "wss://api-pub.bitfinex.com/ws/2";
 /// * Swap: <https://trading.bitfinex.com/t/BTCF0:USTF0>
 /// * Funding: <https://trading.bitfinex.com/funding>
 pub struct BitfinexWSClient<'a> {
-    ws_stream: Mutex<WebSocketStream>,
+    ws_stream: Arc<Mutex<WebSocket<AutoStream>>>,
     channels: Mutex<HashSet<String>>, // subscribed channels
     on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, // user defined message callback
     channel_id_meta: Mutex<HashMap<i64, String>>, // CHANNEL_ID information
@@ -197,7 +196,7 @@ impl<'a> BitfinexWSClient<'a> {
         {
             warn!("Reconnecting to {}", WEBSOCKET_URL);
             let mut guard = self.ws_stream.lock().unwrap();
-            *guard = WebSocketStream::new(connect_with_retry(WEBSOCKET_URL));
+            *guard = connect_with_retry(WEBSOCKET_URL);
         }
 
         let channels = self
@@ -210,10 +209,14 @@ impl<'a> BitfinexWSClient<'a> {
         if !channels.is_empty() {
             let commands = channels_to_commands(&channels, true);
             commands.into_iter().for_each(|command| {
-                self.ws_stream
+                let ret = self
+                    .ws_stream
                     .lock()
                     .unwrap()
                     .write_message(Message::Text(command));
+                if let Err(err) = ret {
+                    error!("{}", err);
+                }
             });
         }
         // avoid too frequent reconnect
@@ -287,10 +290,14 @@ impl<'a> BitfinexWSClient<'a> {
                                     .collect::<Vec<String>>();
                                 let commands = channels_to_commands(&channels, true);
                                 commands.into_iter().for_each(|command| {
-                                    self.ws_stream
+                                    let ret = self
+                                        .ws_stream
                                         .lock()
                                         .unwrap()
                                         .write_message(Message::Text(command));
+                                    if let Err(err) = ret {
+                                        error!("{}", err);
+                                    }
                                 });
                             }
                             _ => info!("{} from {}", txt, EXCHANGE_NAME),
@@ -335,9 +342,15 @@ impl<'a> BitfinexWSClient<'a> {
     }
 
     // Send ping per 30s
-    fn auto_ping(ws_stream: WebSocketStream) {
+    fn auto_ping(ws_stream: Arc<Mutex<WebSocket<AutoStream>>>) {
         thread::spawn(move || loop {
-            ws_stream.write_message(Message::Text(r#"{"event":"ping"}"#.to_string()));
+            let ret = ws_stream
+                .lock()
+                .unwrap()
+                .write_message(Message::Text(r#"{"event":"ping"}"#.to_string()));
+            if let Err(err) = ret {
+                error!("{}", err);
+            }
             thread::sleep(Duration::from_secs(30));
         });
     }
@@ -347,7 +360,7 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
     fn new(on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, _url: Option<&str>) -> Self {
         let stream = connect_with_retry(WEBSOCKET_URL);
         BitfinexWSClient {
-            ws_stream: Mutex::new(WebSocketStream::new(stream)),
+            ws_stream: Arc::new(Mutex::new(stream)),
             channels: Mutex::new(HashSet::new()),
             on_msg,
             channel_id_meta: Mutex::new(HashMap::new()),
@@ -392,10 +405,14 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
         if !diff.is_empty() {
             let commands = channels_to_commands(&diff, true);
             commands.into_iter().for_each(|command| {
-                self.ws_stream
+                let ret = self
+                    .ws_stream
                     .lock()
                     .unwrap()
                     .write_message(Message::Text(command));
+                if let Err(err) = ret {
+                    error!("{}", err);
+                }
             });
         }
     }
@@ -414,17 +431,21 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
         if !diff.is_empty() {
             let commands = channels_to_commands(&diff, false);
             commands.into_iter().for_each(|command| {
-                self.ws_stream
+                let ret = self
+                    .ws_stream
                     .lock()
                     .unwrap()
                     .write_message(Message::Text(command));
+                if let Err(err) = ret {
+                    error!("{}", err);
+                }
             });
         }
     }
 
     fn run(&self, duration: Option<u64>) {
         // start the ping thread
-        Self::auto_ping(self.ws_stream.lock().unwrap().clone());
+        Self::auto_ping(self.ws_stream.clone());
 
         let now = Instant::now();
         loop {
@@ -469,7 +490,10 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
     }
 
     fn close(&self) {
-        self.ws_stream.lock().unwrap().close();
+        let ret = self.ws_stream.lock().unwrap().close(None);
+        if let Err(err) = ret {
+            error!("{}", err);
+        }
     }
 }
 

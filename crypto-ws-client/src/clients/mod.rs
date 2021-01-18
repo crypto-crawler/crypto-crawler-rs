@@ -1,5 +1,3 @@
-mod ws_stream;
-
 #[macro_use]
 mod common_traits;
 
