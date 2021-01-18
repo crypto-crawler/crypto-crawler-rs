@@ -249,6 +249,9 @@ impl<'a> WSClientInternal<'a> {
                         } else if url.as_str() == super::mxc::SWAP_WEBSOCKET_URL {
                             // ping per 10 seconds
                             Some((10, Message::Text(r#"{"method":"ping"}"#.to_string())))
+                        } else if url.as_str() == super::binance_option::WEBSOCKET_URL {
+                            // ping per 4 minutes
+                            Some((240, Message::Text(r#"{"event":"ping"}"#.to_string())))
                         } else {
                             None
                         }
