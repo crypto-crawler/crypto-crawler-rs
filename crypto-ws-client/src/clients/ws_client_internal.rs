@@ -11,7 +11,7 @@ use std::{
 
 use flate2::read::{DeflateDecoder, GzDecoder};
 use log::*;
-use tungstenite::{Error, Message};
+use tungstenite::Message;
 
 pub(super) enum MiscMessage {
     WebSocket(Message), // WebSocket message that needs to be sent to the server
@@ -99,8 +99,8 @@ impl<'a> WSClientInternal<'a> {
 
     // reconnect and subscribe all channels
     fn reconnect(&self) {
+        warn!("Reconnecting to {}", &self.url);
         {
-            warn!("Reconnecting to {}", &self.url);
             let mut guard = self.ws_stream.lock().unwrap();
             *guard = WebSocketStream::new(connect_with_retry(self.url.as_str()));
         }
@@ -183,7 +183,8 @@ impl<'a> WSClientInternal<'a> {
                             let mut decoder = DeflateDecoder::new(&binary[..]);
                             decoder.read_to_string(&mut txt)
                         } else {
-                            panic!("Unknown binary format from {}", self.url)
+                            error!("Unknown binary format from {}", self.url);
+                            panic!("Unknown binary format from {}", self.url);
                         };
 
                         match resp {
@@ -217,13 +218,8 @@ impl<'a> WSClientInternal<'a> {
                     }
                 },
                 Err(err) => {
-                    match err {
-                        Error::ConnectionClosed => {
-                            warn!("tungstenite::Error::ConnectionClosed");
-                            self.reconnect();
-                        }
-                        _ => error!("{}", err),
-                    };
+                    self.reconnect();
+                    error!("Error thrown from read_message(): {}", err);
                     false
                 }
             };
