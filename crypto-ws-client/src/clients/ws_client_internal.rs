@@ -1,5 +1,4 @@
 use super::utils::connect_with_retry;
-use super::ws_stream::WebSocketStream;
 use std::sync::{Arc, Mutex};
 
 use std::time::{Duration, Instant};
@@ -11,7 +10,7 @@ use std::{
 
 use flate2::read::{DeflateDecoder, GzDecoder};
 use log::*;
-use tungstenite::Message;
+use tungstenite::{client::AutoStream, Message, WebSocket};
 
 pub(super) enum MiscMessage {
     WebSocket(Message), // WebSocket message that needs to be sent to the server
@@ -23,7 +22,7 @@ pub(super) enum MiscMessage {
 pub(super) struct WSClientInternal<'a> {
     exchange: &'static str, // Eexchange name
     pub(super) url: String, // Websocket base url
-    ws_stream: Mutex<WebSocketStream>,
+    ws_stream: Arc<Mutex<WebSocket<AutoStream>>>,
     channels: Mutex<HashSet<String>>, // subscribed channels
     on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, // user defined message callback
     on_misc_msg: fn(&str) -> MiscMessage, // handle misc messages
@@ -44,7 +43,7 @@ impl<'a> WSClientInternal<'a> {
         WSClientInternal {
             exchange,
             url: url.to_string(),
-            ws_stream: Mutex::new(WebSocketStream::new(stream)),
+            ws_stream: Arc::new(Mutex::new(stream)),
             on_msg,
             on_misc_msg,
             channels: Mutex::new(HashSet::new()),
@@ -67,10 +66,14 @@ impl<'a> WSClientInternal<'a> {
         if !diff.is_empty() {
             let commands = (self.channels_to_commands)(&diff, true);
             commands.into_iter().for_each(|command| {
-                self.ws_stream
+                let ret = self
+                    .ws_stream
                     .lock()
                     .unwrap()
                     .write_message(Message::Text(command));
+                if let Err(err) = ret {
+                    error!("{}", err);
+                }
             });
         }
     }
@@ -89,10 +92,14 @@ impl<'a> WSClientInternal<'a> {
         if !diff.is_empty() {
             let commands = (self.channels_to_commands)(&diff, false);
             commands.into_iter().for_each(|command| {
-                self.ws_stream
+                let ret = self
+                    .ws_stream
                     .lock()
                     .unwrap()
                     .write_message(Message::Text(command));
+                if let Err(err) = ret {
+                    error!("{}", err);
+                }
             });
         }
     }
@@ -102,7 +109,7 @@ impl<'a> WSClientInternal<'a> {
         warn!("Reconnecting to {}", &self.url);
         {
             let mut guard = self.ws_stream.lock().unwrap();
-            *guard = WebSocketStream::new(connect_with_retry(self.url.as_str()));
+            *guard = connect_with_retry(self.url.as_str());
         }
 
         let channels = self
@@ -115,10 +122,14 @@ impl<'a> WSClientInternal<'a> {
         if !channels.is_empty() {
             let commands = (self.channels_to_commands)(&channels, true);
             commands.into_iter().for_each(|command| {
-                self.ws_stream
+                let ret = self
+                    .ws_stream
                     .lock()
                     .unwrap()
                     .write_message(Message::Text(command));
+                if let Err(err) = ret {
+                    error!("{}", err);
+                }
             });
         }
         // avoid too frequent reconnect
@@ -135,7 +146,10 @@ impl<'a> WSClientInternal<'a> {
                 false
             }
             MiscMessage::WebSocket(ws_msg) => {
-                self.ws_stream.lock().unwrap().write_message(ws_msg);
+                let ret = self.ws_stream.lock().unwrap().write_message(ws_msg);
+                if let Err(err) = ret {
+                    error!("{}", err);
+                }
                 false
             }
             MiscMessage::Normal => {
@@ -160,11 +174,7 @@ impl<'a> WSClientInternal<'a> {
 
     pub fn run(&self, duration: Option<u64>) {
         // start the ping thread
-        WSClientInternal::auto_ping(
-            self.exchange,
-            self.url.to_string(),
-            self.ws_stream.lock().unwrap().clone(),
-        );
+        WSClientInternal::auto_ping(self.exchange, self.url.to_string(), self.ws_stream.clone());
 
         let now = Instant::now();
         while !self.should_stop.load(Ordering::Acquire) {
@@ -198,10 +208,14 @@ impl<'a> WSClientInternal<'a> {
                     Message::Ping(resp) => {
                         let tmp = std::str::from_utf8(&resp);
                         warn!("Received a ping frame: {}", tmp.unwrap());
-                        self.ws_stream
+                        let ret = self
+                            .ws_stream
                             .lock()
                             .unwrap()
                             .write_message(Message::Pong(resp));
+                        if let Err(err) = ret {
+                            error!("{}", err);
+                        }
                         false
                     }
                     Message::Pong(resp) => {
@@ -234,11 +248,18 @@ impl<'a> WSClientInternal<'a> {
 
     pub fn close(&self) {
         self.should_stop.store(true, Ordering::Release);
-        self.ws_stream.lock().unwrap().close();
+        let ret = self.ws_stream.lock().unwrap().close(None);
+        if let Err(err) = ret {
+            error!("{}", err);
+        }
     }
 
     // Send ping per interval
-    fn auto_ping(exchange: &'static str, url: String, ws_stream: WebSocketStream) {
+    fn auto_ping(
+        exchange: &'static str,
+        url: String,
+        ws_stream: Arc<Mutex<WebSocket<AutoStream>>>,
+    ) {
         thread::spawn(move || {
             loop {
                 let ping_msg = match exchange {
@@ -263,7 +284,10 @@ impl<'a> WSClientInternal<'a> {
 
                 match ping_msg {
                     Some(msg) => {
-                        ws_stream.write_message(msg.1);
+                        let ret = ws_stream.lock().unwrap().write_message(msg.1);
+                        if let Err(err) = ret {
+                            error!("{}", err);
+                        }
                         thread::sleep(Duration::from_secs(msg.0));
                     }
                     None => return,
