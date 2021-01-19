@@ -25,7 +25,30 @@ macro_rules! gen_crawl_snapshot {
                 };
 
                 let real_symbols = if is_empty {
-                    fetch_symbols(EXCHANGE_NAME, market_type).unwrap()
+                    if std::env::var("https_proxy").is_ok() {
+                        // retry 5 times if there is a https_proxy
+                        let mut symbols = Vec::<String>::new();
+                        for i in 0..5 {
+                            match fetch_symbols(EXCHANGE_NAME, market_type) {
+                                Ok(list) => {
+                                    symbols = list;
+                                    break;
+                                }
+                                Err(err) => {
+                                    error!("The {}th time, {}", i, err);
+                                }
+                            }
+                        }
+                        symbols
+                    } else {
+                        match fetch_symbols(EXCHANGE_NAME, market_type) {
+                            Ok(symbols) => symbols,
+                            Err(err) => {
+                                error!("{}", err);
+                                Vec::<String>::new()
+                            }
+                        }
+                    }
                 } else {
                     symbols.unwrap().iter().cloned().collect::<Vec<String>>()
                 };
@@ -84,7 +107,30 @@ macro_rules! gen_crawl_event {
             };
 
             let real_symbols = if is_empty {
-                fetch_symbols(EXCHANGE_NAME, market_type).unwrap()
+                if std::env::var("https_proxy").is_ok() {
+                    // retry 5 times if there is a https_proxy
+                    let mut symbols = Vec::<String>::new();
+                    for i in 0..5 {
+                        match fetch_symbols(EXCHANGE_NAME, market_type) {
+                            Ok(list) => {
+                                symbols = list;
+                                break;
+                            }
+                            Err(err) => {
+                                error!("The {}th time, {}", i, err);
+                            }
+                        }
+                    }
+                    symbols
+                } else {
+                    match fetch_symbols(EXCHANGE_NAME, market_type) {
+                        Ok(symbols) => symbols,
+                        Err(err) => {
+                            error!("{}", err);
+                            Vec::<String>::new()
+                        }
+                    }
+                }
             } else {
                 symbols.unwrap().iter().cloned().collect::<Vec<String>>()
             };
