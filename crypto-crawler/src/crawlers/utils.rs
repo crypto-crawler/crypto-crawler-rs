@@ -7,8 +7,11 @@ macro_rules! gen_crawl_snapshot {
             interval: Option<u64>,
             duration: Option<u64>,
         ) {
+            let interval = Duration::from_secs(interval.unwrap_or(60));
             let now = Instant::now();
             loop {
+                let loop_start = Instant::now();
+
                 let real_symbols = match symbols {
                     Some(list) => {
                         if list.is_empty() {
@@ -46,7 +49,9 @@ macro_rules! gen_crawl_snapshot {
                         break;
                     }
                 }
-                std::thread::sleep(Duration::from_secs(interval.unwrap_or(60)));
+                if loop_start.elapsed() < interval {
+                    std::thread::sleep(interval - loop_start.elapsed());
+                }
             }
         }
     };
