@@ -29,7 +29,7 @@ struct SwapMarket {
 // see <https://www.okex.com/docs/en/#swap-swap---contract_information>
 fn fetch_swap_markets_raw() -> Result<Vec<SwapMarket>> {
     let txt = http_get("https://www.okex.com/api/swap/v3/instruments", None)?;
-    let markets = serde_json::from_str::<Vec<SwapMarket>>(&txt).unwrap();
+    let markets = serde_json::from_str::<Vec<SwapMarket>>(&txt)?;
     Ok(markets)
 }
 

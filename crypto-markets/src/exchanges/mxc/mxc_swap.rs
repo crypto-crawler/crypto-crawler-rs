@@ -49,7 +49,7 @@ struct Response {
 // see <https://github.com/mxcdevelop/APIDoc/blob/master/contract/contract-api.md#contract-interface-public>
 fn fetch_swap_markets_raw() -> Result<Vec<SwapMarket>> {
     let txt = mxc_http_get("https://contract.mxc.com/api/v1/contract/detail")?;
-    let resp = serde_json::from_str::<Response>(&txt).unwrap();
+    let resp = serde_json::from_str::<Response>(&txt)?;
     Ok(resp.data)
 }
 

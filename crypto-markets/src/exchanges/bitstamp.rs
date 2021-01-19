@@ -32,7 +32,7 @@ struct SpotMarket {
 // see <https://www.bitstamp.net/api/>
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
     let txt = http_get("https://www.bitstamp.net/api/v2/trading-pairs-info/", None)?;
-    let markets = serde_json::from_str::<Vec<SpotMarket>>(&txt).unwrap();
+    let markets = serde_json::from_str::<Vec<SpotMarket>>(&txt)?;
     Ok(markets)
 }
 

@@ -29,7 +29,7 @@ struct Response {
 // see <https://huobiapi.github.io/docs/usdt_swap/v1/en/#general-query-swap-info>
 fn fetch_linear_swap_markets_raw() -> Result<Vec<LinearSwapMarket>> {
     let txt = huobi_http_get("https://api.hbdm.com/linear-swap-api/v1/swap_contract_info")?;
-    let resp = serde_json::from_str::<Response>(&txt).unwrap();
+    let resp = serde_json::from_str::<Response>(&txt)?;
     Ok(resp.data)
 }
 

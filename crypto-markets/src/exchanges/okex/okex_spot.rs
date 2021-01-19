@@ -23,7 +23,7 @@ struct SpotMarket {
 // see <https://www.okex.com/docs/en/#spot-currency>
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
     let txt = http_get("https://www.okex.com/api/spot/v3/instruments", None)?;
-    let markets = serde_json::from_str::<Vec<SpotMarket>>(&txt).unwrap();
+    let markets = serde_json::from_str::<Vec<SpotMarket>>(&txt)?;
     Ok(markets)
 }
 

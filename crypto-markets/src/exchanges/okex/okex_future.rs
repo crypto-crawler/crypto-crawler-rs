@@ -31,7 +31,7 @@ struct FutureMarket {
 // see <https://www.okex.com/docs/en/#futures-contract_information>
 fn fetch_future_markets_raw() -> Result<Vec<FutureMarket>> {
     let txt = http_get("https://www.okex.com/api/futures/v3/instruments", None)?;
-    let markets = serde_json::from_str::<Vec<FutureMarket>>(&txt).unwrap();
+    let markets = serde_json::from_str::<Vec<FutureMarket>>(&txt)?;
     Ok(markets)
 }
 

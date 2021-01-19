@@ -75,7 +75,7 @@ pub(super) fn kraken_http_get(url: &str) -> Result<String> {
 // see <https://www.kraken.com/features/api#get-tradable-pairs>
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
     let txt = kraken_http_get("https://api.kraken.com/0/public/AssetPairs")?;
-    let obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();
+    let obj = serde_json::from_str::<HashMap<String, Value>>(&txt)?;
     let markets = obj
         .get("result")
         .unwrap()

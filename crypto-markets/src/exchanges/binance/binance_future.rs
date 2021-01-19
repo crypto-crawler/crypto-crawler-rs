@@ -42,7 +42,7 @@ struct FutureMarket {
 // see <https://binance-docs.github.io/apidocs/delivery/en/#exchange-information>
 fn fetch_future_markets_raw() -> Result<Vec<FutureMarket>> {
     let txt = binance_http_get("https://dapi.binance.com/dapi/v1/exchangeInfo")?;
-    let resp = serde_json::from_str::<BinanceResponse<FutureMarket>>(&txt).unwrap();
+    let resp = serde_json::from_str::<BinanceResponse<FutureMarket>>(&txt)?;
     Ok(resp.symbols)
 }
 

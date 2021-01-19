@@ -30,7 +30,7 @@ struct SpotMarket {
 // see <https://binance-docs.github.io/apidocs/spot/en/#exchange-information>
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
     let txt = binance_http_get("https://api.binance.com/api/v3/exchangeInfo")?;
-    let resp = serde_json::from_str::<BinanceResponse<SpotMarket>>(&txt).unwrap();
+    let resp = serde_json::from_str::<BinanceResponse<SpotMarket>>(&txt)?;
     Ok(resp.symbols)
 }
 

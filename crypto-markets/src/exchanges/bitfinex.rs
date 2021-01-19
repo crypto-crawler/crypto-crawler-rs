@@ -19,7 +19,7 @@ fn fetch_spot_symbols() -> Result<Vec<String>> {
         "https://api-pub.bitfinex.com/v2/conf/pub:list:pair:exchange",
         None,
     )?;
-    let pairs = serde_json::from_str::<Vec<Vec<String>>>(&text).unwrap();
+    let pairs = serde_json::from_str::<Vec<Vec<String>>>(&text)?;
     let symbols = pairs[0]
         .iter()
         .filter(|x| !x.starts_with("TEST"))
@@ -34,7 +34,7 @@ fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
         "https://api-pub.bitfinex.com/v2/conf/pub:list:pair:futures",
         None,
     )?;
-    let pairs = serde_json::from_str::<Vec<Vec<String>>>(&text).unwrap();
+    let pairs = serde_json::from_str::<Vec<Vec<String>>>(&text)?;
     let symbols = pairs[0]
         .iter()
         .filter(|x| !x.starts_with("TEST"))

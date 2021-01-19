@@ -29,7 +29,7 @@ struct Response {
 // see <https://huobiapi.github.io/docs/coin_margined_swap/v1/en/#query-swap-info>
 fn fetch_inverse_swap_markets_raw() -> Result<Vec<InverseSwapMarket>> {
     let txt = huobi_http_get("https://api.hbdm.com/swap-api/v1/swap_contract_info")?;
-    let resp = serde_json::from_str::<Response>(&txt).unwrap();
+    let resp = serde_json::from_str::<Response>(&txt)?;
     Ok(resp.data)
 }
 

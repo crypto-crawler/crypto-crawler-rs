@@ -40,7 +40,7 @@ struct LinearSwapMarket {
 // see <https://binance-docs.github.io/apidocs/futures/en/#exchange-information>
 fn fetch_linear_swap_markets_raw() -> Result<Vec<LinearSwapMarket>> {
     let txt = binance_http_get("https://fapi.binance.com/fapi/v1/exchangeInfo")?;
-    let resp = serde_json::from_str::<BinanceResponse<LinearSwapMarket>>(&txt).unwrap();
+    let resp = serde_json::from_str::<BinanceResponse<LinearSwapMarket>>(&txt)?;
     Ok(resp.symbols)
 }
 

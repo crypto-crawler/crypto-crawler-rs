@@ -34,7 +34,7 @@ struct Response {
 // see <https://huobiapi.github.io/docs/option/v1/en/#query-option-info>
 fn fetch_option_markets_raw() -> Result<Vec<OptionMarket>> {
     let txt = huobi_http_get("https://api.hbdm.com/option-api/v1/option_contract_info")?;
-    let resp = serde_json::from_str::<Response>(&txt).unwrap();
+    let resp = serde_json::from_str::<Response>(&txt)?;
     Ok(resp.data)
 }
 
