@@ -27,7 +27,10 @@ macro_rules! gen_crawl_snapshot {
                 let real_symbols = if is_empty {
                     if std::env::var("https_proxy").is_ok() {
                         // retry retry_count times if there is a https_proxy
-                        let retry_count = std::env::var("REST_RETRY_COUNT").unwrap_or("5".to_string()).parse::<i64>().unwrap();
+                        let retry_count = std::env::var("REST_RETRY_COUNT")
+                            .unwrap_or("5".to_string())
+                            .parse::<i64>()
+                            .unwrap();
                         let mut symbols = Vec::<String>::new();
                         for i in 0..retry_count {
                             match fetch_symbols(EXCHANGE_NAME, market_type) {
@@ -36,7 +39,7 @@ macro_rules! gen_crawl_snapshot {
                                     break;
                                 }
                                 Err(err) => {
-                                    if i == retry_count-1 {
+                                    if i == retry_count - 1 {
                                         error!("The {}th time, {}", i, err);
                                     } else {
                                         info!("The {}th time, {}", i, err);
@@ -114,7 +117,10 @@ macro_rules! gen_crawl_event {
             let real_symbols = if is_empty {
                 if std::env::var("https_proxy").is_ok() {
                     // retry retry_count times if there is a https_proxy
-                    let retry_count = std::env::var("REST_RETRY_COUNT").unwrap_or("5".to_string()).parse::<i64>().unwrap();
+                    let retry_count = std::env::var("REST_RETRY_COUNT")
+                        .unwrap_or("5".to_string())
+                        .parse::<i64>()
+                        .unwrap();
                     let mut symbols = Vec::<String>::new();
                     for i in 0..retry_count {
                         match fetch_symbols(EXCHANGE_NAME, market_type) {
@@ -123,7 +129,7 @@ macro_rules! gen_crawl_event {
                                 break;
                             }
                             Err(err) => {
-                                if i == retry_count-1 {
+                                if i == retry_count - 1 {
                                     error!("The {}th time, {}", i, err);
                                 } else {
                                     info!("The {}th time, {}", i, err);
