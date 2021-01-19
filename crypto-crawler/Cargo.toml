@@ -1,6 +1,6 @@
 [package]
 name = "crypto-crawler"
-version = "0.9.9"
+version = "1.0.0"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "Crawl websocket messages from crypto exchanges."
@@ -9,9 +9,9 @@ repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-
 keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
-crypto-markets = "0.3.8"
-crypto-rest-client = "0.3.3"
-crypto-ws-client = "1.7.3"
+crypto-markets = "0.3.9"
+crypto-rest-client = "0.3.5"
+crypto-ws-client = "1.7.5"
 log = "0.4"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

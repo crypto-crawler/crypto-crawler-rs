@@ -4,37 +4,49 @@ macro_rules! gen_crawl_snapshot {
             market_type: MarketType,
             symbols: Option<&[String]>,
             on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+            interval: Option<u64>,
+            duration: Option<u64>,
         ) {
-            let real_symbols = match symbols {
-                Some(list) => {
-                    if list.is_empty() {
-                        fetch_symbols(EXCHANGE_NAME, market_type).unwrap()
-                    } else {
-                        check_args(market_type, &list);
-                        symbols.unwrap().iter().cloned().collect::<Vec<String>>()
+            let now = Instant::now();
+            loop {
+                let real_symbols = match symbols {
+                    Some(list) => {
+                        if list.is_empty() {
+                            fetch_symbols(EXCHANGE_NAME, market_type).unwrap()
+                        } else {
+                            check_args(market_type, &list);
+                            symbols.unwrap().iter().cloned().collect::<Vec<String>>()
+                        }
                     }
-                }
-                None => fetch_symbols(EXCHANGE_NAME, market_type).unwrap(),
-            };
+                    None => fetch_symbols(EXCHANGE_NAME, market_type).unwrap(),
+                };
 
-            for symbol in real_symbols.iter() {
-                let resp = ($fetch_snapshot)(symbol);
-                match resp {
-                    Ok(msg) => {
-                        let message = Message::new(
-                            EXCHANGE_NAME.to_string(),
-                            market_type,
-                            symbol.to_string(),
-                            $msg_type,
-                            msg,
-                        );
-                        (on_msg.lock().unwrap())(message);
+                for symbol in real_symbols.iter() {
+                    let resp = ($fetch_snapshot)(symbol);
+                    match resp {
+                        Ok(msg) => {
+                            let message = Message::new(
+                                EXCHANGE_NAME.to_string(),
+                                market_type,
+                                symbol.to_string(),
+                                $msg_type,
+                                msg,
+                            );
+                            (on_msg.lock().unwrap())(message);
+                        }
+                        Err(err) => error!(
+                            "{} {} {}, error: {}",
+                            EXCHANGE_NAME, market_type, symbol, err
+                        ),
                     }
-                    Err(err) => error!(
-                        "{} {} {}, error: {}",
-                        EXCHANGE_NAME, market_type, symbol, err
-                    ),
                 }
+
+                if let Some(seconds) = duration {
+                    if now.elapsed() > Duration::from_secs(seconds) {
+                        break;
+                    }
+                }
+                std::thread::sleep(Duration::from_secs(interval.unwrap_or(60)));
             }
         }
     };

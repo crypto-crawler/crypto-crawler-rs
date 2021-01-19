@@ -3,7 +3,10 @@ use std::sync::{
     Arc, Mutex,
 };
 
-use std::{collections::HashMap, time::Duration};
+use std::{
+    collections::HashMap,
+    time::{Duration, Instant},
+};
 
 use crate::{msg::Message, MessageType};
 use crypto_markets::{fetch_symbols, MarketType};
@@ -118,13 +121,16 @@ pub(crate) fn crawl_l2_snapshot(
     market_type: MarketType,
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    interval: Option<u64>,
+    duration: Option<u64>,
 ) {
-    match market_type {
-        MarketType::Spot => crawl_l2_snapshot_spot(market_type, symbols, on_msg),
-        MarketType::InverseFuture => crawl_l2_snapshot_inverse_future(market_type, symbols, on_msg),
-        MarketType::LinearSwap => crawl_l2_snapshot_linear_swap(market_type, symbols, on_msg),
-        MarketType::InverseSwap => crawl_l2_snapshot_inverse_swap(market_type, symbols, on_msg),
-        MarketType::Option => crawl_l2_snapshot_option(market_type, symbols, on_msg),
+    let func = match market_type {
+        MarketType::Spot => crawl_l2_snapshot_spot,
+        MarketType::InverseFuture => crawl_l2_snapshot_inverse_future,
+        MarketType::LinearSwap => crawl_l2_snapshot_linear_swap,
+        MarketType::InverseSwap => crawl_l2_snapshot_inverse_swap,
+        MarketType::Option => crawl_l2_snapshot_option,
         _ => panic!("Huobi does NOT have the {} market type", market_type),
-    }
+    };
+    func(market_type, symbols, on_msg, interval, duration);
 }
