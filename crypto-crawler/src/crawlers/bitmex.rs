@@ -2,7 +2,10 @@ use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc, Mutex,
 };
-use std::{collections::HashMap, time::Duration};
+use std::{
+    collections::HashMap,
+    time::{Duration, Instant},
+};
 
 use crate::{msg::Message, MessageType};
 use crypto_markets::{fetch_symbols, MarketType};

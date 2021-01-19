@@ -5,7 +5,7 @@ use std::{
         atomic::{AtomicBool, Ordering},
         Arc, Mutex,
     },
-    time::Duration,
+    time::{Duration, Instant},
 };
 
 use crate::{msg::Message, MessageType};
@@ -138,13 +138,16 @@ pub(crate) fn crawl_l2_snapshot(
     market_type: MarketType,
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    interval: Option<u64>,
+    duration: Option<u64>,
 ) {
-    match market_type {
-        MarketType::Spot => crawl_l2_snapshot_spot(market_type, symbols, on_msg),
-        MarketType::InverseFuture => crawl_l2_snapshot_inverse_future(market_type, symbols, on_msg),
-        MarketType::LinearSwap => crawl_l2_snapshot_linear_swap(market_type, symbols, on_msg),
-        MarketType::InverseSwap => crawl_l2_snapshot_inverse_swap(market_type, symbols, on_msg),
-        MarketType::Option => crawl_l2_snapshot_linear_option(market_type, symbols, on_msg),
+    let func = match market_type {
+        MarketType::Spot => crawl_l2_snapshot_spot,
+        MarketType::InverseFuture => crawl_l2_snapshot_inverse_future,
+        MarketType::LinearSwap => crawl_l2_snapshot_linear_swap,
+        MarketType::InverseSwap => crawl_l2_snapshot_inverse_swap,
+        MarketType::Option => crawl_l2_snapshot_linear_option,
         _ => panic!("Binance does NOT have the {} market type", market_type),
-    }
+    };
+    func(market_type, symbols, on_msg, interval, duration);
 }

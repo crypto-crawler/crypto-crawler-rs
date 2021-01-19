@@ -67,6 +67,8 @@ pub fn crawl_l2_snapshot(
     market_type: MarketType,
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    interval: Option<u64>,
+    duration: Option<u64>,
 ) {
     let func = match exchange {
         "binance" => crawlers::binance::crawl_l2_snapshot,
@@ -80,7 +82,7 @@ pub fn crawl_l2_snapshot(
         "okex" => crawlers::okex::crawl_l2_snapshot,
         _ => panic!("Unknown exchange {}", exchange),
     };
-    func(market_type, symbols, on_msg);
+    func(market_type, symbols, on_msg, interval, duration);
 }
 
 /// Crawl level3 orderbook update events.
@@ -110,6 +112,8 @@ pub fn crawl_l3_snapshot(
     market_type: MarketType,
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    interval: Option<u64>,
+    duration: Option<u64>,
 ) {
     let func = match exchange {
         "binance" => panic!("Binance does NOT provide level3 orderbook data"),
@@ -118,5 +122,5 @@ pub fn crawl_l3_snapshot(
         "coinbase_pro" => crawlers::coinbase_pro::crawl_l3_snapshot,
         _ => panic!("Unknown exchange {}", exchange),
     };
-    func(market_type, symbols, on_msg);
+    func(market_type, symbols, on_msg, interval, duration);
 }

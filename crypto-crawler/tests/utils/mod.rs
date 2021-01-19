@@ -37,7 +37,14 @@ macro_rules! gen_test_snapshot_code {
             MESSAGES.with(|messages| messages.borrow_mut().push(msg))
         }));
         let symbols = vec![$symbol.to_string()];
-        $crawl_func($exchange, $market_type, Some(&symbols), on_msg);
+        $crawl_func(
+            $exchange,
+            $market_type,
+            Some(&symbols),
+            on_msg,
+            None,
+            Some(0),
+        );
 
         MESSAGES.with(|slf| {
             let messages = slf.borrow();

@@ -2,7 +2,7 @@ use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc, Mutex,
 };
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use crate::{msg::Message, MessageType};
 use crypto_markets::{fetch_symbols, MarketType};
