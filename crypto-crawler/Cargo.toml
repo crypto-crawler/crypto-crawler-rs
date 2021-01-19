@@ -1,6 +1,6 @@
 [package]
 name = "crypto-crawler"
-version = "1.0.1"
+version = "1.0.2"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "Crawl websocket messages from crypto exchanges."
@@ -10,7 +10,7 @@ keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
 crypto-markets = "0.4.0"
-crypto-rest-client = "0.3.6"
+crypto-rest-client = "0.3.7"
 crypto-ws-client = "1.7.5"
 log = "0.4"
 serde = { version = "1", features = ["derive"] }
