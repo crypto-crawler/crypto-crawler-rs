@@ -44,12 +44,18 @@ impl OkexRestClient {
     ///
     /// Top 200 bids and asks are returned.
     ///
-    /// For example: <https://www.okex.com/api/spot/v3/instruments/BTC-USDT/book>
+    /// For example: <https://www.okex.com/api/spot/v3/instruments/BTC-USDT/book?size=200>,
+    // <https://www.okex.com/api/swap/v3/instruments/BTC-USDT-SWAP/depth?size=200>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         gen_api!(format!(
-            "/{}/v3/instruments/{}/book",
+            "/{}/v3/instruments/{}/{}?size=200",
             pair_to_market_type(symbol),
-            symbol
+            symbol,
+            if symbol.ends_with("-SWAP") {
+                "depth"
+            } else {
+                "book"
+            }
         ))
     }
 }
