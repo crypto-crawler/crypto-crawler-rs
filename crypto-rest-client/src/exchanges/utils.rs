@@ -46,6 +46,7 @@ mod tests {
 
     // System proxies are enabled by default, see <https://docs.rs/reqwest/latest/reqwest/#proxies>
     #[test]
+    #[ignore]
     fn use_system_socks_proxy() {
         std::env::set_var("https_proxy", "socks5://127.0.0.1:9050");
         let text = super::http_get("https://check.torproject.org/api/ip", &HashMap::new()).unwrap();
@@ -54,6 +55,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn use_system_https_proxy() {
         std::env::set_var("https_proxy", "http://127.0.0.1:8118");
         let text = super::http_get("https://check.torproject.org/api/ip", &HashMap::new()).unwrap();
