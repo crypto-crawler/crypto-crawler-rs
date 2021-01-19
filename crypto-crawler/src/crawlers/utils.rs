@@ -12,16 +12,22 @@ macro_rules! gen_crawl_snapshot {
             loop {
                 let loop_start = Instant::now();
 
-                let real_symbols = match symbols {
+                let is_empty = match symbols {
                     Some(list) => {
                         if list.is_empty() {
-                            fetch_symbols(EXCHANGE_NAME, market_type).unwrap()
+                            true
                         } else {
                             check_args(market_type, &list);
-                            symbols.unwrap().iter().cloned().collect::<Vec<String>>()
+                            false
                         }
                     }
-                    None => fetch_symbols(EXCHANGE_NAME, market_type).unwrap(),
+                    None => true,
+                };
+
+                let real_symbols = if is_empty {
+                    fetch_symbols(EXCHANGE_NAME, market_type).unwrap()
+                } else {
+                    symbols.unwrap().iter().cloned().collect::<Vec<String>>()
                 };
 
                 for symbol in real_symbols.iter() {
@@ -65,16 +71,22 @@ macro_rules! gen_crawl_event {
             on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
             duration: Option<u64>,
         ) -> Option<std::thread::JoinHandle<()>> {
-            let real_symbols = match symbols {
+            let is_empty = match symbols {
                 Some(list) => {
                     if list.is_empty() {
-                        fetch_symbols(EXCHANGE_NAME, market_type).unwrap()
+                        true
                     } else {
                         check_args(market_type, &list);
-                        list.iter().cloned().collect::<Vec<String>>()
+                        false
                     }
                 }
-                None => fetch_symbols(EXCHANGE_NAME, market_type).unwrap(),
+                None => true,
+            };
+
+            let real_symbols = if is_empty {
+                fetch_symbols(EXCHANGE_NAME, market_type).unwrap()
+            } else {
+                symbols.unwrap().iter().cloned().collect::<Vec<String>>()
             };
 
             let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
