@@ -21,8 +21,8 @@ fn extract_symbol(json: &str) -> String {
 gen_check_args!(EXCHANGE_NAME);
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade, market_type, symbols, on_msg, duration, KrakenWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade, KrakenWSClient, MessageType::Trade, subscribe_trade, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event, market_type, symbols, on_msg, duration, KrakenWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event, KrakenWSClient, MessageType::L2Event, subscribe_orderbook, true);
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot, market_type, symbols, on_msg, MessageType::L2Snapshot, KrakenRestClient::fetch_l2_snapshot);
+gen_crawl_snapshot!(crawl_l2_snapshot, MessageType::L2Snapshot, KrakenRestClient::fetch_l2_snapshot);

@@ -24,35 +24,35 @@ fn extract_symbol(json: &str) -> String {
 }
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_spot, market_type, symbols, on_msg, duration, HuobiSpotWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_spot, HuobiSpotWSClient, MessageType::Trade, subscribe_trade, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_inverse_future, market_type, symbols, on_msg, duration, HuobiFutureWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_inverse_future, HuobiFutureWSClient, MessageType::Trade, subscribe_trade, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_linear_swap, market_type, symbols, on_msg, duration, HuobiLinearSwapWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_linear_swap, HuobiLinearSwapWSClient, MessageType::Trade, subscribe_trade, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_inverse_swap, market_type, symbols, on_msg, duration, HuobiInverseSwapWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_inverse_swap, HuobiInverseSwapWSClient, MessageType::Trade, subscribe_trade, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_option, market_type, symbols, on_msg, duration, HuobiOptionWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_option, HuobiOptionWSClient, MessageType::Trade, subscribe_trade, true);
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_inverse_future, market_type, symbols, on_msg, duration, HuobiFutureWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_inverse_future, HuobiFutureWSClient, MessageType::L2Event, subscribe_orderbook, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_linear_swap, market_type, symbols, on_msg, duration, HuobiLinearSwapWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_linear_swap, HuobiLinearSwapWSClient, MessageType::L2Event, subscribe_orderbook, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_inverse_swap, market_type, symbols, on_msg, duration, HuobiInverseSwapWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_inverse_swap, HuobiInverseSwapWSClient, MessageType::L2Event, subscribe_orderbook, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_option, market_type, symbols, on_msg, duration, HuobiOptionWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_option, HuobiOptionWSClient, MessageType::L2Event, subscribe_orderbook, true);
 
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot_spot, market_type, symbols, on_msg, MessageType::L2Snapshot, HuobiSpotRestClient::fetch_l2_snapshot);
+gen_crawl_snapshot!(crawl_l2_snapshot_spot, MessageType::L2Snapshot, HuobiSpotRestClient::fetch_l2_snapshot);
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot_inverse_future, market_type, symbols, on_msg, MessageType::L2Snapshot, HuobiFutureRestClient::fetch_l2_snapshot);
+gen_crawl_snapshot!(crawl_l2_snapshot_inverse_future, MessageType::L2Snapshot, HuobiFutureRestClient::fetch_l2_snapshot);
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot_linear_swap, market_type, symbols, on_msg, MessageType::L2Snapshot, HuobiLinearSwapRestClient::fetch_l2_snapshot);
+gen_crawl_snapshot!(crawl_l2_snapshot_linear_swap, MessageType::L2Snapshot, HuobiLinearSwapRestClient::fetch_l2_snapshot);
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot_inverse_swap, market_type, symbols, on_msg, MessageType::L2Snapshot, HuobiInverseSwapRestClient::fetch_l2_snapshot);
+gen_crawl_snapshot!(crawl_l2_snapshot_inverse_swap, MessageType::L2Snapshot, HuobiInverseSwapRestClient::fetch_l2_snapshot);
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot_option, market_type, symbols, on_msg, MessageType::L2Snapshot, HuobiOptionRestClient::fetch_l2_snapshot);
+gen_crawl_snapshot!(crawl_l2_snapshot_option, MessageType::L2Snapshot, HuobiOptionRestClient::fetch_l2_snapshot);
 
 pub(crate) fn crawl_trade(
     market_type: MarketType,
