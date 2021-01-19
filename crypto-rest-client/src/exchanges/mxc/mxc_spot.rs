@@ -9,14 +9,14 @@ const BASE_URL: &str = "https://www.mxc.co";
 /// * REST API doc: <https://mxcdevelop.github.io/APIDoc/>
 /// * Trading at: <https://www.mxc.com/trade/pro>
 pub struct MxcSpotRestClient {
-    access_key: String,
+    _access_key: String,
     _secret_key: Option<String>,
 }
 
 impl MxcSpotRestClient {
     pub fn new(access_key: String, secret_key: Option<String>) -> Self {
         MxcSpotRestClient {
-            access_key,
+            _access_key: access_key,
             _secret_key: secret_key,
         }
     }
@@ -27,10 +27,15 @@ impl MxcSpotRestClient {
     ///
     /// For example: <https://www.mxc.co/open/api/v2/market/deals?symbol=BTC_USDT&limit=1000&api_key=your-access-key>
     #[allow(non_snake_case)]
-    pub fn fetch_trades(&self, symbol: &str) -> Result<String> {
+    pub fn fetch_trades(symbol: &str) -> Result<String> {
+        if std::env::var("MXC_ACCESS_KEY").is_err() {
+            panic!("MXC Spot REST APIs require access key, please set it to the MXC_ACCESS_KEY environment variable");
+        }
+        let access_key = std::env::var("MXC_ACCESS_KEY").unwrap();
+
         gen_api!(format!(
             "/open/api/v2/market/deals?symbol={}&limit=1000&api_key={}",
-            symbol, self.access_key
+            symbol, access_key
         ))
     }
 
@@ -39,10 +44,15 @@ impl MxcSpotRestClient {
     /// Top 2000 bids and asks will be returned.
     ///
     /// For example: <https://www.mxc.co/open/api/v2/market/depth?symbol=BTC_USDT&depth=2000&api_key=your-access-key>
-    pub fn fetch_l2_snapshot(&self, symbol: &str) -> Result<String> {
+    pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
+        if std::env::var("MXC_ACCESS_KEY").is_err() {
+            panic!("MXC Spot REST APIs require access key, please set it to the MXC_ACCESS_KEY environment variable");
+        }
+        let access_key = std::env::var("MXC_ACCESS_KEY").unwrap();
+
         gen_api!(format!(
             "/open/api/v2/market/depth?symbol={}&depth=2000&api_key={}",
-            symbol, self.access_key
+            symbol, access_key
         ))
     }
 }

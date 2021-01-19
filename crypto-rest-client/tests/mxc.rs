@@ -4,15 +4,13 @@ mod mxc_spot {
 
     #[test]
     fn test_trades() {
-        let client = MxcSpotRestClient::new("your_access_key".to_string(), None);
-        let text = client.fetch_trades("BTC_USDT").unwrap();
+        let text = MxcSpotRestClient::fetch_trades("BTC_USDT").unwrap();
         assert!(text.starts_with("{"));
     }
 
     #[test]
     fn test_l2_snapshot() {
-        let client = MxcSpotRestClient::new("your_access_key".to_string(), None);
-        let text = client.fetch_l2_snapshot("BTC_USDT").unwrap();
+        let text = MxcSpotRestClient::fetch_l2_snapshot("BTC_USDT").unwrap();
         assert!(text.starts_with("{"));
     }
 }
