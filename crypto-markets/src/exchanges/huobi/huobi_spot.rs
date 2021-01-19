@@ -38,7 +38,7 @@ struct Response {
 // see <https://huobiapi.github.io/docs/spot/v1/en/#get-all-supported-trading-symbol>
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
     let txt = huobi_http_get("https://api.huobi.pro/v1/common/symbols")?;
-    let resp = serde_json::from_str::<Response>(&txt).unwrap();
+    let resp = serde_json::from_str::<Response>(&txt)?;
     Ok(resp.data)
 }
 

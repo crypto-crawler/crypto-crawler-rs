@@ -18,3 +18,9 @@ impl From<reqwest::Error> for Error {
         Error(err.to_string())
     }
 }
+
+impl From<serde_json::Error> for Error {
+    fn from(err: serde_json::Error) -> Self {
+        Error(err.to_string())
+    }
+}

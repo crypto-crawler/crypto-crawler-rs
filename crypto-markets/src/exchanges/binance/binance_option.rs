@@ -50,7 +50,7 @@ fn fetch_option_markets_raw() -> Result<Vec<OptionMarket>> {
 
     let txt =
         binance_http_get("https://voptions.binance.com/options-api/v1/public/exchange/symbols")?;
-    let resp = serde_json::from_str::<BinanceOptionResponse>(&txt).unwrap();
+    let resp = serde_json::from_str::<BinanceOptionResponse>(&txt)?;
     Ok(resp.data.optionSymbols)
 }
 

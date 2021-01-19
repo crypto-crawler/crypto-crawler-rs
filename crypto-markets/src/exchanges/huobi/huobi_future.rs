@@ -31,7 +31,7 @@ struct Response {
 // see <https://huobiapi.github.io/docs/dm/v1/en/#get-contract-info>
 fn fetch_future_markets_raw() -> Result<Vec<FutureMarket>> {
     let txt = huobi_http_get("https://api.hbdm.com/api/v1/contract_contract_info")?;
-    let resp = serde_json::from_str::<Response>(&txt).unwrap();
+    let resp = serde_json::from_str::<Response>(&txt)?;
     Ok(resp.data)
 }
 

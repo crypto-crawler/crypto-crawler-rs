@@ -30,13 +30,13 @@ struct OptionMarket {
 // see <https://www.okex.com/docs/en/#option-option---instrument>
 fn fetch_option_markets_raw() -> Result<Vec<OptionMarket>> {
     let txt = http_get("https://www.okex.com/api/option/v3/underlying", None)?;
-    let underlying_indexes = serde_json::from_str::<Vec<String>>(&txt).unwrap();
+    let underlying_indexes = serde_json::from_str::<Vec<String>>(&txt)?;
 
     let mut markets = Vec::<OptionMarket>::new();
     for index in underlying_indexes.iter() {
         let url = format!("https://www.okex.com/api/option/v3/instruments/{}", index);
         let txt = http_get(url.as_str(), None)?;
-        let mut arr = serde_json::from_str::<Vec<OptionMarket>>(&txt).unwrap();
+        let mut arr = serde_json::from_str::<Vec<OptionMarket>>(&txt)?;
         markets.append(&mut arr);
     }
 

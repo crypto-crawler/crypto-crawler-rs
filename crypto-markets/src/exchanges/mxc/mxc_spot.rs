@@ -40,7 +40,7 @@ fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
         )
         .as_str(),
     )?;
-    let resp = serde_json::from_str::<Response>(&txt).unwrap();
+    let resp = serde_json::from_str::<Response>(&txt)?;
     Ok(resp.data)
 }
 
