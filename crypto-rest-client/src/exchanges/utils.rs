@@ -1,4 +1,4 @@
-use crate::error::Result;
+use crate::error::{Error, Result};
 use std::collections::HashMap;
 
 pub(super) fn http_get(url: &str, params: &HashMap<String, String>) -> Result<String> {
@@ -17,9 +17,17 @@ pub(super) fn http_get(url: &str, params: &HashMap<String, String>) -> Result<St
     let client = reqwest::blocking::Client::builder()
          .user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
          .build()?;
-    let response = client.get(full_url.as_str()).send()?.text()?;
+    let response = client.get(full_url.as_str()).send()?;
 
-    Ok(response)
+    if response.status().is_success() {
+        Ok(response.text()?)
+    } else {
+        let ret = response.error_for_status();
+        match ret {
+            Ok(resp) => Err(Error(resp.text()?)),
+            Err(e) => Err(Error::from(e)),
+        }
+    }
 }
 
 macro_rules! gen_api {
