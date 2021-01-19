@@ -30,8 +30,8 @@ fn extract_symbol(json: &str) -> String {
 gen_check_args!(EXCHANGE_NAME);
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade, market_type, symbols, on_msg, duration, OkexWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade, OkexWSClient, MessageType::Trade, subscribe_trade, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event, market_type, symbols, on_msg, duration, OkexWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event, OkexWSClient, MessageType::L2Event, subscribe_orderbook, true);
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot, market_type, symbols, on_msg, MessageType::L2Snapshot, OkexRestClient::fetch_l2_snapshot);
+gen_crawl_snapshot!(crawl_l2_snapshot, MessageType::L2Snapshot, OkexRestClient::fetch_l2_snapshot);

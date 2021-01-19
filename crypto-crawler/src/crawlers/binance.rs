@@ -62,37 +62,37 @@ fn check_args(market_type: MarketType, symbols: &[String]) {
 }
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_spot, market_type, symbols, on_msg, duration, BinanceSpotWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_spot, BinanceSpotWSClient, MessageType::Trade, subscribe_trade, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_inverse_future, market_type, symbols, on_msg, duration, BinanceFutureWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_inverse_future, BinanceFutureWSClient, MessageType::Trade, subscribe_trade, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_linear_swap, market_type, symbols, on_msg, duration, BinanceLinearSwapWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_linear_swap, BinanceLinearSwapWSClient, MessageType::Trade, subscribe_trade, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_inverse_swap, market_type, symbols, on_msg, duration, BinanceInverseSwapWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_inverse_swap, BinanceInverseSwapWSClient, MessageType::Trade, subscribe_trade, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_linear_option, market_type, symbols, on_msg, duration, BinanceOptionWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_linear_option, BinanceOptionWSClient, MessageType::Trade, subscribe_trade, true);
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_spot, market_type, symbols, on_msg, duration, BinanceSpotWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_spot, BinanceSpotWSClient, MessageType::L2Event, subscribe_orderbook, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_inverse_future, market_type, symbols, on_msg, duration, BinanceFutureWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_inverse_future, BinanceFutureWSClient, MessageType::L2Event, subscribe_orderbook, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_linear_swap, market_type, symbols, on_msg, duration, BinanceLinearSwapWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_linear_swap, BinanceLinearSwapWSClient, MessageType::L2Event, subscribe_orderbook, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_inverse_swap, market_type, symbols, on_msg, duration, BinanceInverseSwapWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_inverse_swap, BinanceInverseSwapWSClient, MessageType::L2Event, subscribe_orderbook, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_linear_option, market_type, symbols, on_msg, duration, BinanceOptionWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_linear_option, BinanceOptionWSClient, MessageType::L2Event, subscribe_orderbook, true);
 
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot_spot, market_type, symbols, on_msg, MessageType::L2Snapshot, BinanceSpotRestClient::fetch_l2_snapshot);
+gen_crawl_snapshot!(crawl_l2_snapshot_spot, MessageType::L2Snapshot, BinanceSpotRestClient::fetch_l2_snapshot);
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot_inverse_future, market_type, symbols, on_msg, MessageType::L2Snapshot, BinanceFutureRestClient::fetch_l2_snapshot);
+gen_crawl_snapshot!(crawl_l2_snapshot_inverse_future, MessageType::L2Snapshot, BinanceFutureRestClient::fetch_l2_snapshot);
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot_linear_swap, market_type, symbols, on_msg, MessageType::L2Snapshot, BinanceLinearSwapRestClient::fetch_l2_snapshot);
+gen_crawl_snapshot!(crawl_l2_snapshot_linear_swap, MessageType::L2Snapshot, BinanceLinearSwapRestClient::fetch_l2_snapshot);
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot_inverse_swap, market_type, symbols, on_msg, MessageType::L2Snapshot, BinanceInverseSwapRestClient::fetch_l2_snapshot);
+gen_crawl_snapshot!(crawl_l2_snapshot_inverse_swap, MessageType::L2Snapshot, BinanceInverseSwapRestClient::fetch_l2_snapshot);
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot_linear_option, market_type, symbols, on_msg, MessageType::L2Snapshot, BinanceOptionRestClient::fetch_l2_snapshot);
+gen_crawl_snapshot!(crawl_l2_snapshot_linear_option, MessageType::L2Snapshot, BinanceOptionRestClient::fetch_l2_snapshot);
 
 pub(crate) fn crawl_trade(
     market_type: MarketType,

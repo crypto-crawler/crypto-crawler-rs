@@ -54,12 +54,12 @@ fn check_args(market_type: MarketType, symbols: &[String]) {
 }
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade, market_type, symbols, on_msg, duration, BitfinexWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade, BitfinexWSClient, MessageType::Trade, subscribe_trade, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event, market_type, symbols, on_msg, duration, BitfinexWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event, BitfinexWSClient, MessageType::L2Event, subscribe_orderbook, true);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l3_event, market_type, symbols, on_msg, duration, BitfinexWSClient, MessageType::L3Event, subscribe_l3_orderbook, true);
+gen_crawl_event!(crawl_l3_event, BitfinexWSClient, MessageType::L3Event, subscribe_l3_orderbook, true);
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot, market_type, symbols, on_msg, MessageType::L2Snapshot, BitfinexRestClient::fetch_l2_snapshot);
+gen_crawl_snapshot!(crawl_l2_snapshot, MessageType::L2Snapshot, BitfinexRestClient::fetch_l2_snapshot);
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l3_snapshot, market_type, symbols, on_msg, MessageType::L3Snapshot, BitfinexRestClient::fetch_l3_snapshot);
+gen_crawl_snapshot!(crawl_l3_snapshot, MessageType::L3Snapshot, BitfinexRestClient::fetch_l3_snapshot);
