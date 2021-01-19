@@ -2,7 +2,7 @@ use super::utils::http_get;
 use crate::error::Result;
 use std::collections::HashMap;
 
-const BASE_URL: &'static str = "https://api.pro.coinbase.com";
+const BASE_URL: &str = "https://api.pro.coinbase.com";
 
 /// The REST client for CoinbasePro.
 ///

@@ -2,7 +2,7 @@ use super::utils::http_get;
 use crate::error::Result;
 use std::collections::HashMap;
 
-const BASE_URL: &'static str = "https://www.bitmex.com/api/v1";
+const BASE_URL: &str = "https://www.bitmex.com/api/v1";
 
 /// The REST client for BitMEX.
 ///
