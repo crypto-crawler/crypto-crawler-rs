@@ -2,7 +2,7 @@ use super::utils::http_get;
 use crate::error::Result;
 use std::collections::HashMap;
 
-const BASE_URL: &'static str = "https://api.kraken.com";
+const BASE_URL: &str = "https://api.kraken.com";
 
 /// The WebSocket client for Kraken.
 ///

@@ -3,7 +3,7 @@ use super::utils::*;
 use crate::error::Result;
 use std::collections::HashMap;
 
-const BASE_URL: &'static str = "https://fapi.binance.com";
+const BASE_URL: &str = "https://fapi.binance.com";
 
 /// Binance USDT-margined Perpetual Swap market.
 ///

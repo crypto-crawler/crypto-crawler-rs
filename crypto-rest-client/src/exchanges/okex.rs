@@ -2,7 +2,7 @@ use super::utils::http_get;
 use crate::error::Result;
 use std::collections::HashMap;
 
-const BASE_URL: &'static str = "https://www.okex.com/api";
+const BASE_URL: &str = "https://www.okex.com/api";
 
 /// The REST client for OKEx.
 ///
