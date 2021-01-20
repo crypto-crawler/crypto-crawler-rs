@@ -59,18 +59,19 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     let obj = resp.unwrap();
 
     if let Some(event) = obj.get("event") {
-        if event.as_str().unwrap() == "error" {
-            error!("Received {} from {}", msg, EXCHANGE_NAME);
-            return MiscMessage::Misc;
+        match event.as_str().unwrap() {
+            "error" => error!("Received {} from {}", msg, EXCHANGE_NAME),
+            "subscribe" => info!("Received {} from {}", msg, EXCHANGE_NAME),
+            "unsubscribe" => info!("Received {} from {}", msg, EXCHANGE_NAME),
+            _ => warn!("Received {} from {}", msg, EXCHANGE_NAME),
         }
+        MiscMessage::Misc
+    } else if !obj.contains_key("table") || !obj.contains_key("data") {
+        error!("Received {} from {}", msg, EXCHANGE_NAME);
+        MiscMessage::Misc
+    } else {
+        MiscMessage::Normal
     }
-
-    if !obj.contains_key("table") || !obj.contains_key("data") {
-        warn!("Received {} from {}", msg, EXCHANGE_NAME);
-        return MiscMessage::Misc;
-    }
-
-    MiscMessage::Normal
 }
 
 fn pair_to_market_type(pair: &str) -> &'static str {

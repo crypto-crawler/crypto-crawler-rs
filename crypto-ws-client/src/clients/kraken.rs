@@ -94,6 +94,10 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
                 debug!("Received {} from {}", msg, EXCHANGE_NAME);
                 MiscMessage::Misc
             }
+            "subscriptionStatus" => {
+                info!("Received {} from {}", msg, EXCHANGE_NAME);
+                MiscMessage::Misc
+            }
             _ => {
                 warn!("Received {} from {}", msg, EXCHANGE_NAME);
                 MiscMessage::Misc
