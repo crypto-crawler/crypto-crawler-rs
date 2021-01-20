@@ -8,7 +8,8 @@ use std::{
 };
 
 use crate::{msg::Message, MessageType};
-use crypto_markets::{fetch_symbols, MarketType};
+use super::utils::fetch_symbols_retry;
+use crypto_markets::MarketType;
 use crypto_rest_client::*;
 use crypto_ws_client::*;
 use log::*;

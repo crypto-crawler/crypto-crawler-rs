@@ -1,3 +1,41 @@
+use crypto_markets::{fetch_symbols, MarketType};
+use log::*;
+
+pub(super) fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<String> {
+    if std::env::var("https_proxy").is_ok() {
+        // retry retry_count times if there is a https_proxy
+        let retry_count = std::env::var("REST_RETRY_COUNT")
+            .unwrap_or("5".to_string())
+            .parse::<i64>()
+            .unwrap();
+        let mut symbols = Vec::<String>::new();
+        for i in 0..retry_count {
+            match fetch_symbols(exchange, market_type) {
+                Ok(list) => {
+                    symbols = list;
+                    break;
+                }
+                Err(err) => {
+                    if i == retry_count - 1 {
+                        error!("The {}th time, {}", i, err);
+                    } else {
+                        info!("The {}th time, {}", i, err);
+                    }
+                }
+            }
+        }
+        symbols
+    } else {
+        match fetch_symbols(exchange, market_type) {
+            Ok(symbols) => symbols,
+            Err(err) => {
+                error!("{}", err);
+                Vec::<String>::new()
+            }
+        }
+    }
+}
+
 macro_rules! gen_crawl_snapshot {
     ($func_name:ident, $msg_type:expr, $fetch_snapshot:expr) => {
         pub(crate) fn $func_name(
@@ -25,38 +63,7 @@ macro_rules! gen_crawl_snapshot {
                 };
 
                 let real_symbols = if is_empty {
-                    if std::env::var("https_proxy").is_ok() {
-                        // retry retry_count times if there is a https_proxy
-                        let retry_count = std::env::var("REST_RETRY_COUNT")
-                            .unwrap_or("5".to_string())
-                            .parse::<i64>()
-                            .unwrap();
-                        let mut symbols = Vec::<String>::new();
-                        for i in 0..retry_count {
-                            match fetch_symbols(EXCHANGE_NAME, market_type) {
-                                Ok(list) => {
-                                    symbols = list;
-                                    break;
-                                }
-                                Err(err) => {
-                                    if i == retry_count - 1 {
-                                        error!("The {}th time, {}", i, err);
-                                    } else {
-                                        info!("The {}th time, {}", i, err);
-                                    }
-                                }
-                            }
-                        }
-                        symbols
-                    } else {
-                        match fetch_symbols(EXCHANGE_NAME, market_type) {
-                            Ok(symbols) => symbols,
-                            Err(err) => {
-                                error!("{}", err);
-                                Vec::<String>::new()
-                            }
-                        }
-                    }
+                    fetch_symbols_retry(EXCHANGE_NAME, market_type)
                 } else {
                     symbols.unwrap().iter().cloned().collect::<Vec<String>>()
                 };
@@ -115,38 +122,7 @@ macro_rules! gen_crawl_event {
             };
 
             let real_symbols = if is_empty {
-                if std::env::var("https_proxy").is_ok() {
-                    // retry retry_count times if there is a https_proxy
-                    let retry_count = std::env::var("REST_RETRY_COUNT")
-                        .unwrap_or("5".to_string())
-                        .parse::<i64>()
-                        .unwrap();
-                    let mut symbols = Vec::<String>::new();
-                    for i in 0..retry_count {
-                        match fetch_symbols(EXCHANGE_NAME, market_type) {
-                            Ok(list) => {
-                                symbols = list;
-                                break;
-                            }
-                            Err(err) => {
-                                if i == retry_count - 1 {
-                                    error!("The {}th time, {}", i, err);
-                                } else {
-                                    info!("The {}th time, {}", i, err);
-                                }
-                            }
-                        }
-                    }
-                    symbols
-                } else {
-                    match fetch_symbols(EXCHANGE_NAME, market_type) {
-                        Ok(symbols) => symbols,
-                        Err(err) => {
-                            error!("{}", err);
-                            Vec::<String>::new()
-                        }
-                    }
-                }
+                fetch_symbols_retry(EXCHANGE_NAME, market_type)
             } else {
                 symbols.unwrap().iter().cloned().collect::<Vec<String>>()
             };
@@ -171,7 +147,7 @@ macro_rules! gen_crawl_event {
 
                 std::thread::spawn(move || {
                     while !should_stop2.load(Ordering::Acquire) {
-                        let symbols = fetch_symbols(EXCHANGE_NAME, market_type).unwrap();
+                        let symbols = fetch_symbols_retry(EXCHANGE_NAME, market_type);
                         ws_client2.$crawl_func(&symbols);
                         std::thread::sleep(Duration::from_secs(3600));
                     }
@@ -208,7 +184,7 @@ macro_rules! gen_check_args {
                 );
             }
 
-            let valid_symbols = fetch_symbols($exchange, market_type).unwrap();
+            let valid_symbols = fetch_symbols_retry($exchange, market_type);
             let invalid_symbols: Vec<String> = symbols
                 .iter()
                 .filter(|symbol| !valid_symbols.contains(symbol))

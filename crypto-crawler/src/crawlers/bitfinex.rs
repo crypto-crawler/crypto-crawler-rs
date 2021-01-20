@@ -5,7 +5,8 @@ use std::sync::{
 use std::time::{Duration, Instant};
 
 use crate::{msg::Message, MessageType};
-use crypto_markets::{fetch_symbols, get_market_types, MarketType};
+use super::utils::fetch_symbols_retry;
+use crypto_markets::{get_market_types, MarketType};
 use crypto_rest_client::*;
 use crypto_ws_client::*;
 use log::*;
@@ -36,7 +37,7 @@ fn check_args(market_type: MarketType, symbols: &[String]) {
         panic!("Each websocket connection has a limit of 30 subscriptions");
     }
 
-    let valid_symbols = fetch_symbols(EXCHANGE_NAME, market_type).unwrap();
+    let valid_symbols = fetch_symbols_retry(EXCHANGE_NAME, market_type);
     let invalid_symbols: Vec<String> = symbols
         .iter()
         .filter(|symbol| !valid_symbols.contains(symbol))
