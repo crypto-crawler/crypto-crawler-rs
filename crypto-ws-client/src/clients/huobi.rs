@@ -114,6 +114,8 @@ impl<'a> HuobiWSClient<'a> {
         let obj = resp.unwrap();
 
         if obj.contains_key("ping") {
+            // the server will send a heartbeat every 5 seconds,
+            // see <https://huobiapi.github.io/docs/coin_margined_swap/v1/en/#market-heartbeat>
             let value = obj.get("ping").unwrap();
             let mut pong_msg = HashMap::<String, &Value>::new();
             pong_msg.insert("pong".to_string(), value);
@@ -124,8 +126,10 @@ impl<'a> HuobiWSClient<'a> {
         if let Some(status) = obj.get("status") {
             if status.as_str().unwrap() != "ok" {
                 error!("Received {} from {}", msg, EXCHANGE_NAME);
-                return MiscMessage::Misc;
+            } else {
+                info!("Received {} from {}", msg, EXCHANGE_NAME);
             }
+            return MiscMessage::Misc;
         }
 
         if !obj.contains_key("ch") || !obj.contains_key("ts") {
