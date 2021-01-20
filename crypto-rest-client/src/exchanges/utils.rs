@@ -1,3 +1,5 @@
+use reqwest::header;
+
 use crate::error::{Error, Result};
 use std::collections::HashMap;
 
@@ -14,8 +16,16 @@ pub(super) fn http_get(url: &str, params: &HashMap<String, String>) -> Result<St
     }
     // println!("{}", full_url);
 
+    let mut headers = header::HeaderMap::new();
+    headers.insert(
+        header::CONTENT_TYPE,
+        header::HeaderValue::from_static("application/json"),
+    );
+
     let client = reqwest::blocking::Client::builder()
+         .default_headers(headers)
          .user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
+         .gzip(true)
          .build()?;
     let response = client.get(full_url.as_str()).send()?;
 
