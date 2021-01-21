@@ -8,7 +8,7 @@ pub use msg::*;
 
 /// Crawl trades.
 ///
-/// If `symbols` is None, this function will crawl all trading symbols of in the `market_type`,
+/// If `symbols` is None, this function will crawl all trading symbols in the `market_type`,
 /// and fetch the latest symbols every hour.
 pub fn crawl_trade(
     exchange: &str,

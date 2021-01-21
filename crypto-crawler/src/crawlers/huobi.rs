@@ -1,5 +1,5 @@
 use std::sync::{
-    atomic::{AtomicBool, Ordering},
+    atomic::{AtomicBool, AtomicUsize, Ordering},
     Arc, Mutex,
 };
 
@@ -17,6 +17,8 @@ use log::*;
 use serde_json::Value;
 
 const EXCHANGE_NAME: &str = "huobi";
+// usize::MAX means unlimited
+const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = usize::MAX;
 
 gen_check_args!(EXCHANGE_NAME);
 
@@ -28,24 +30,24 @@ fn extract_symbol(json: &str) -> String {
 }
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_spot, HuobiSpotWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_spot, HuobiSpotWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_inverse_future, HuobiFutureWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_inverse_future, HuobiFutureWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_linear_swap, HuobiLinearSwapWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_linear_swap, HuobiLinearSwapWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_inverse_swap, HuobiInverseSwapWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_inverse_swap, HuobiInverseSwapWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_option, HuobiOptionWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_option, HuobiOptionWSClient, MessageType::Trade, subscribe_trade);
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_inverse_future, HuobiFutureWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_inverse_future, HuobiFutureWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_linear_swap, HuobiLinearSwapWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_linear_swap, HuobiLinearSwapWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_inverse_swap, HuobiInverseSwapWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_inverse_swap, HuobiInverseSwapWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_option, HuobiOptionWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_option, HuobiOptionWSClient, MessageType::L2Event, subscribe_orderbook);
 
 #[rustfmt::skip]
 gen_crawl_snapshot!(crawl_l2_snapshot_spot, MessageType::L2Snapshot, HuobiSpotRestClient::fetch_l2_snapshot);
