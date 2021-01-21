@@ -123,20 +123,23 @@ impl<'a> HuobiWSClient<'a> {
             return MiscMessage::WebSocket(ws_msg);
         }
 
-        if let Some(status) = obj.get("status") {
-            if status.as_str().unwrap() != "ok" {
-                error!("Received {} from {}", msg, EXCHANGE_NAME);
+        if obj.contains_key("ch")
+            && obj.contains_key("ts")
+            && (obj.contains_key("tick") || obj.contains_key("data"))
+        {
+            MiscMessage::Normal
+        } else {
+            if let Some(status) = obj.get("status") {
+                if status.as_str().unwrap() != "ok" {
+                    error!("Received {} from {}", msg, EXCHANGE_NAME);
+                } else {
+                    info!("Received {} from {}", msg, EXCHANGE_NAME);
+                }
             } else {
-                info!("Received {} from {}", msg, EXCHANGE_NAME);
+                warn!("Received {} from {}", msg, EXCHANGE_NAME);
             }
-            return MiscMessage::Misc;
+            MiscMessage::Misc
         }
-
-        if !obj.contains_key("ch") || !obj.contains_key("ts") {
-            warn!("Received {} from {}", msg, EXCHANGE_NAME);
-            return MiscMessage::Misc;
-        }
-        MiscMessage::Normal
     }
 }
 
