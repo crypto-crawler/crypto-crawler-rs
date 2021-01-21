@@ -325,7 +325,7 @@ impl<'a> BitfinexWSClient<'a> {
         } else {
             debug_assert!(txt.starts_with('['));
             // replace CHANNEL_ID with meta info
-            let i = txt.find(",[").unwrap();
+            let i = txt.find(",").unwrap(); // first comma, for example, te, tu, see https://blog.bitfinex.com/api/websocket-api-update/
             let channel_id = (&txt[1..i]).parse::<i64>().unwrap();
             let channel_info = self
                 .channel_id_meta
