@@ -102,7 +102,7 @@ macro_rules! gen_crawl_snapshot {
 }
 
 macro_rules! gen_crawl_event {
-    ($func_name:ident, $struct_name:ident, $msg_type:expr, $crawl_func:ident, $run:expr) => {
+    ($func_name:ident, $struct_name:ident, $msg_type:expr, $crawl_func:ident) => {
         pub(crate) fn $func_name(
             market_type: MarketType,
             symbols: Option<&[String]>,
@@ -126,6 +126,10 @@ macro_rules! gen_crawl_event {
             } else {
                 symbols.unwrap().iter().cloned().collect::<Vec<String>>()
             };
+            if real_symbols.is_empty() {
+                error!("real_symbols is empty");
+                panic!("real_symbols is empty");
+            }
 
             let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
                 let message = Message::new(
@@ -138,35 +142,96 @@ macro_rules! gen_crawl_event {
                 (on_msg.lock().unwrap())(message);
             }));
 
-            let should_stop = Arc::new(AtomicBool::new(false));
-            let ws_client = Arc::new($struct_name::new(on_msg_ext, None));
+            if real_symbols.len() <= MAX_SUBSCRIPTIONS_PER_CONNECTION {
+                let should_stop = Arc::new(AtomicBool::new(false));
+                let ws_client = Arc::new($struct_name::new(on_msg_ext, None));
 
-            if symbols.is_none() {
-                let should_stop2 = should_stop.clone();
-                let ws_client2 = ws_client.clone();
+                if symbols.is_none() {
+                    let should_stop2 = should_stop.clone();
+                    let ws_client2 = ws_client.clone();
 
-                std::thread::spawn(move || {
-                    while !should_stop2.load(Ordering::Acquire) {
-                        let symbols = fetch_symbols_retry(EXCHANGE_NAME, market_type);
-                        ws_client2.$crawl_func(&symbols);
-                        std::thread::sleep(Duration::from_secs(3600));
-                    }
-                });
-            }
+                    std::thread::spawn(move || {
+                        while !should_stop2.load(Ordering::Acquire) {
+                            let symbols = fetch_symbols_retry(EXCHANGE_NAME, market_type);
+                            ws_client2.$crawl_func(&symbols);
+                            // update symbols every hour
+                            std::thread::sleep(Duration::from_secs(3600));
+                        }
+                    });
+                }
 
-            if $run {
                 ws_client.$crawl_func(&real_symbols);
                 ws_client.run(duration);
                 should_stop.store(true, Ordering::Release);
-                None
             } else {
-                let handle = std::thread::spawn(move || {
-                    ws_client.$crawl_func(&real_symbols);
-                    ws_client.run(duration);
-                    should_stop.store(true, Ordering::Release);
-                });
-                Some(handle)
+                // split to chunks
+                let mut chunks: Vec<Vec<String>> = Vec::new();
+                for i in (0..real_symbols.len()).step_by(MAX_SUBSCRIPTIONS_PER_CONNECTION) {
+                    let chunk = (&real_symbols[i..(std::cmp::min(
+                        i + MAX_SUBSCRIPTIONS_PER_CONNECTION,
+                        real_symbols.len(),
+                    ))])
+                        .iter()
+                        .cloned()
+                        .collect();
+                    chunks.push(chunk);
+                }
+                assert!(chunks.len() > 1);
+                assert!(real_symbols.len() % MAX_SUBSCRIPTIONS_PER_CONNECTION != 0);
+
+                if symbols.is_none() {
+                    let num_threads = Arc::new(AtomicUsize::new(chunks.len()));
+                    let last_client = Arc::new($struct_name::new(on_msg_ext.clone(), None));
+
+                    for chunk in chunks.into_iter() {
+                        let on_msg_ext_clone = on_msg_ext.clone();
+                        let num_threads_clone = num_threads.clone();
+                        let last_client_clone = last_client.clone();
+                        std::thread::spawn(move || {
+                            if chunk.len() < MAX_SUBSCRIPTIONS_PER_CONNECTION {
+                                last_client_clone.$crawl_func(&chunk);
+                                last_client_clone.run(duration);
+                            } else {
+                                let ws_client = $struct_name::new(on_msg_ext_clone, None);
+                                ws_client.$crawl_func(&chunk);
+                                ws_client.run(duration);
+                            }
+
+                            num_threads_clone.fetch_sub(1, Ordering::SeqCst);
+                        });
+                    }
+
+                    let mut subscribed_symbols = real_symbols.clone();
+                    while num_threads.load(Ordering::Acquire) > 0 {
+                        let latest_symbols = fetch_symbols_retry(EXCHANGE_NAME, market_type);
+                        let mut new_symbols: Vec<String> = latest_symbols
+                            .iter()
+                            .filter(|s| !subscribed_symbols.contains(s))
+                            .cloned()
+                            .collect();
+                        last_client.$crawl_func(&new_symbols);
+                        subscribed_symbols.append(&mut new_symbols);
+                        // update symbols every hour
+                        std::thread::sleep(Duration::from_secs(duration.unwrap_or(3600)));
+                    }
+                } else {
+                    let mut join_handles: Vec<std::thread::JoinHandle<()>> = Vec::new();
+
+                    for chunk in chunks.into_iter() {
+                        let on_msg_ext_clone = on_msg_ext.clone();
+                        let handle = std::thread::spawn(move || {
+                            let ws_client = $struct_name::new(on_msg_ext_clone, None);
+                            ws_client.$crawl_func(&chunk);
+                            ws_client.run(duration);
+                        });
+                        join_handles.push(handle);
+                    }
+                    for handle in join_handles {
+                        handle.join().unwrap();
+                    }
+                }
             }
+            None
         }
     };
 }
@@ -181,6 +246,17 @@ macro_rules! gen_check_args {
                 panic!(
                     "{} does NOT have the {} market type",
                     $exchange, market_type
+                );
+            }
+
+            if symbols.len() > MAX_SUBSCRIPTIONS_PER_CONNECTION {
+                error!(
+                    "Each websocket connection has a limit of {} subscriptions",
+                    MAX_SUBSCRIPTIONS_PER_CONNECTION
+                );
+                panic!(
+                    "Each websocket connection has a limit of {} subscriptions",
+                    MAX_SUBSCRIPTIONS_PER_CONNECTION
                 );
             }
 

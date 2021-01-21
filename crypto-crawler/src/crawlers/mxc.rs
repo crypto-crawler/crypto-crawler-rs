@@ -1,5 +1,5 @@
 use std::sync::{
-    atomic::{AtomicBool, Ordering},
+    atomic::{AtomicBool, AtomicUsize, Ordering},
     Arc, Mutex,
 };
 
@@ -17,6 +17,8 @@ use log::*;
 use serde_json::Value;
 
 const EXCHANGE_NAME: &str = "mxc";
+// usize::MAX means unlimited
+const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = usize::MAX;
 
 fn extract_symbol(json: &str) -> String {
     if json.starts_with('[') {
@@ -31,14 +33,14 @@ fn extract_symbol(json: &str) -> String {
 gen_check_args!(EXCHANGE_NAME);
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_spot, MxcSpotWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_spot, MxcSpotWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_swap, MxcSwapWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_swap, MxcSwapWSClient, MessageType::Trade, subscribe_trade);
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_spot, MxcSpotWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_spot, MxcSpotWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_swap, MxcSwapWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_swap, MxcSwapWSClient, MessageType::L2Event, subscribe_orderbook);
 
 #[rustfmt::skip]
 gen_crawl_snapshot!(crawl_l2_snapshot_spot, MessageType::L2Snapshot, MxcSpotRestClient::fetch_l2_snapshot);

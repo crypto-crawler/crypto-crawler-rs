@@ -2,7 +2,7 @@ use core::panic;
 use std::{
     collections::HashMap,
     sync::{
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicUsize, Ordering},
         Arc, Mutex,
     },
     time::{Duration, Instant},
@@ -17,6 +17,10 @@ use log::*;
 use serde_json::Value;
 
 const EXCHANGE_NAME: &str = "binance";
+
+// A single connection can listen to a maximum of 200 streams.
+// see <https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams>
+const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = 200;
 
 fn extract_symbol(json: &str) -> String {
     let obj = serde_json::from_str::<HashMap<String, Value>>(&json).unwrap();
@@ -38,6 +42,11 @@ fn check_args(market_type: MarketType, symbols: &[String]) {
             "{} does NOT have the {} market type",
             EXCHANGE_NAME, market_type
         );
+    }
+
+    if symbols.len() > MAX_SUBSCRIPTIONS_PER_CONNECTION {
+        error!("Each websocket connection has a limit of 30 subscriptions");
+        panic!("Each websocket connection has a limit of 30 subscriptions");
     }
 
     let symbols = symbols
@@ -63,26 +72,26 @@ fn check_args(market_type: MarketType, symbols: &[String]) {
 }
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_spot, BinanceSpotWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_spot, BinanceSpotWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_inverse_future, BinanceFutureWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_inverse_future, BinanceFutureWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_linear_swap, BinanceLinearSwapWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_linear_swap, BinanceLinearSwapWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_inverse_swap, BinanceInverseSwapWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_inverse_swap, BinanceInverseSwapWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_linear_option, BinanceOptionWSClient, MessageType::Trade, subscribe_trade, true);
+gen_crawl_event!(crawl_trade_linear_option, BinanceOptionWSClient, MessageType::Trade, subscribe_trade);
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_spot, BinanceSpotWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_spot, BinanceSpotWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_inverse_future, BinanceFutureWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_inverse_future, BinanceFutureWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_linear_swap, BinanceLinearSwapWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_linear_swap, BinanceLinearSwapWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_inverse_swap, BinanceInverseSwapWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_inverse_swap, BinanceInverseSwapWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_linear_option, BinanceOptionWSClient, MessageType::L2Event, subscribe_orderbook, true);
+gen_crawl_event!(crawl_l2_event_linear_option, BinanceOptionWSClient, MessageType::L2Event, subscribe_orderbook);
 
 #[rustfmt::skip]
 gen_crawl_snapshot!(crawl_l2_snapshot_spot, MessageType::L2Snapshot, BinanceSpotRestClient::fetch_l2_snapshot);
