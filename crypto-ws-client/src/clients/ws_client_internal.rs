@@ -1,4 +1,4 @@
-use super::utils::{connect_with_retry, WEBSOCKET_READ_TIMEOUT};
+use super::utils::connect_with_retry;
 use std::sync::{Arc, Mutex};
 
 use std::time::{Duration, Instant};
@@ -261,6 +261,7 @@ impl<'a> WSClientInternal<'a> {
         ws_stream: Arc<Mutex<WebSocket<AutoStream>>>,
     ) {
         thread::spawn(move || {
+            let mut prev_ping_timestamp = Instant::now();
             loop {
                 let ping_msg = match exchange {
                     super::mxc::EXCHANGE_NAME => {
@@ -296,9 +297,15 @@ impl<'a> WSClientInternal<'a> {
                         if guard.can_write() {
                             if let Err(err) = guard.write_message(msg.1) {
                                 error!("{}", err);
-                            }
-                            if msg.0 > WEBSOCKET_READ_TIMEOUT {
-                                thread::sleep(Duration::from_secs(msg.0 - WEBSOCKET_READ_TIMEOUT));
+                                std::thread::sleep(Duration::from_millis(1));
+                            } else {
+                                let interval = Duration::from_secs(msg.0);
+                                let elapsed = prev_ping_timestamp.elapsed();
+                                prev_ping_timestamp = Instant::now();
+
+                                if interval > elapsed {
+                                    thread::sleep(interval - elapsed);
+                                }
                             }
                         } else {
                             std::thread::sleep(Duration::from_millis(1));

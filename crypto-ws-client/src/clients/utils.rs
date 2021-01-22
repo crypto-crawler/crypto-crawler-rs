@@ -31,6 +31,8 @@ fn wrap_stream(stream: TcpStream, domain: &str, mode: Mode) -> Result<AutoStream
     }
 }
 
+const WEBSOCKET_READ_TIMEOUT: u64 = 3;
+
 // copied from https://github.com/snapview/tungstenite-rs/blob/master/src/client.rs#L167
 fn connect_to_some(addrs: &[SocketAddr], uri: &Uri, mode: Mode) -> Result<AutoStream> {
     let domain = uri
@@ -99,4 +101,3 @@ pub(super) fn connect_with_retry(url: &str) -> WebSocket<AutoStream> {
 }
 
 pub(super) const CHANNEL_PAIR_DELIMITER: char = ':';
-pub(super) const WEBSOCKET_READ_TIMEOUT: u64 = 3;

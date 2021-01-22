@@ -11,8 +11,9 @@ fn subscribe() {
         BinanceOptionWSClient,
         subscribe,
         &vec![
-            "BTC-210122-48000-C@trade".to_string(),
-            "BTC-210129-40000-C@trade".to_string()
+            "BTCUSDT@TICKER_ALL".to_string(),
+            "BTCUSDT_C@TRADE_ALL".to_string(),
+            "BTCUSDT_P@TRADE_ALL".to_string()
         ]
     );
 }
@@ -31,6 +32,7 @@ fn subscribe_trade() {
 }
 
 #[test]
+#[ignore]
 fn subscribe_ticker() {
     gen_test_code!(
         BinanceOptionWSClient,
@@ -69,6 +71,7 @@ fn subscribe_orderbook() {
 }
 
 #[test]
+#[ignore]
 fn subscribe_orderbook_snapshot() {
     gen_test_code!(
         BinanceOptionWSClient,
