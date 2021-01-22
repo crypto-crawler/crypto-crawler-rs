@@ -3,7 +3,6 @@ use crate::{Level3OrderBook, WSClient};
 use std::sync::{Arc, Mutex};
 use std::{
     collections::{HashMap, HashSet},
-    thread,
     time::{Duration, Instant},
 };
 
@@ -27,7 +26,7 @@ const WEBSOCKET_URL: &str = "wss://api-pub.bitfinex.com/ws/2";
 /// * Swap: <https://trading.bitfinex.com/t/BTCF0:USTF0>
 /// * Funding: <https://trading.bitfinex.com/funding>
 pub struct BitfinexWSClient<'a> {
-    ws_stream: Arc<Mutex<WebSocket<AutoStream>>>,
+    ws_stream: Mutex<WebSocket<AutoStream>>,
     channels: Mutex<HashSet<String>>, // subscribed channels
     on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, // user defined message callback
     channel_id_meta: Mutex<HashMap<i64, String>>, // CHANNEL_ID information
@@ -341,35 +340,38 @@ impl<'a> BitfinexWSClient<'a> {
             false
         } else {
             debug_assert!(txt.starts_with('['));
-            // replace CHANNEL_ID with meta info
-            let i = txt.find(",").unwrap(); // first comma, for example, te, tu, see https://blog.bitfinex.com/api/websocket-api-update/
-            let channel_id = (&txt[1..i]).parse::<i64>().unwrap();
-            let channel_info = self
-                .channel_id_meta
-                .lock()
-                .unwrap()
-                .get(&channel_id)
-                .unwrap()
-                .clone();
-            let new_txt = format!("[{}{}", channel_info, &txt[i..]);
+            let arr = serde_json::from_str::<Vec<Value>>(&txt).unwrap();
+            if arr.len() == 2 && arr[1].as_str().unwrap_or("null") == "hb" {
+                // If there is no activity in the channel for 15 seconds, the Websocket server
+                // will send you a heartbeat message in this format.
+                // see <https://docs.bitfinex.com/docs/ws-general#heartbeating>
+                if let Err(err) = self
+                    .ws_stream
+                    .lock()
+                    .unwrap()
+                    .write_message(Message::Text(r#"{"event":"ping"}"#.to_string()))
+                {
+                    error!("{}", err);
+                }
+                false
+            } else {
+                // replace CHANNEL_ID with meta info
+                let i = txt.find(",").unwrap(); // first comma, for example, te, tu, see https://blog.bitfinex.com/api/websocket-api-update/
+                let channel_id = (&txt[1..i]).parse::<i64>().unwrap();
+                let channel_info = self
+                    .channel_id_meta
+                    .lock()
+                    .unwrap()
+                    .get(&channel_id)
+                    .unwrap()
+                    .clone();
+                let new_txt = format!("[{}{}", channel_info, &txt[i..]);
 
-            (self.on_msg.lock().unwrap())(new_txt);
-            true
-        }
-    }
+                (self.on_msg.lock().unwrap())(new_txt);
 
-    // Send ping per 30s
-    fn auto_ping(ws_stream: Arc<Mutex<WebSocket<AutoStream>>>) {
-        thread::spawn(move || loop {
-            let ret = ws_stream
-                .lock()
-                .unwrap()
-                .write_message(Message::Text(r#"{"event":"ping"}"#.to_string()));
-            if let Err(err) = ret {
-                error!("{}", err);
+                true
             }
-            thread::sleep(Duration::from_secs(30));
-        });
+        }
     }
 }
 
@@ -377,7 +379,7 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
     fn new(on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, _url: Option<&str>) -> Self {
         let stream = connect_with_retry(WEBSOCKET_URL);
         BitfinexWSClient {
-            ws_stream: Arc::new(Mutex::new(stream)),
+            ws_stream: Mutex::new(stream),
             channels: Mutex::new(HashSet::new()),
             on_msg,
             channel_id_meta: Mutex::new(HashMap::new()),
@@ -417,9 +419,6 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
     }
 
     fn run(&self, duration: Option<u64>) {
-        // start the ping thread
-        Self::auto_ping(self.ws_stream.clone());
-
         let now = Instant::now();
         loop {
             let resp = self.ws_stream.lock().unwrap().read_message();
