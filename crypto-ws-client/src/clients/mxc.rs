@@ -123,7 +123,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
             } else if obj.contains_key("symbol") {
                 MiscMessage::Normal
             } else {
-                warn!("{} from {}", msg, EXCHANGE_NAME);
+                info!("{} from {}", msg, EXCHANGE_NAME);
                 MiscMessage::Misc
             }
         } else {
