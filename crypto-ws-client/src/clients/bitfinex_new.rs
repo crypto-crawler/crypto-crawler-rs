@@ -456,8 +456,18 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
                     Message::Text(txt) => succeeded = self.handle_msg(&txt),
                     Message::Binary(_) => panic!("Unknown binary format from Bitfinex"),
                     Message::Ping(resp) => {
-                        let tmp = std::str::from_utf8(&resp);
-                        warn!("Received a ping frame: {}", tmp.unwrap());
+                        info!(
+                            "Received a ping frame: {}",
+                            std::str::from_utf8(&resp).unwrap()
+                        );
+                        let ret = self
+                            .ws_stream
+                            .lock()
+                            .unwrap()
+                            .write_message(Message::Pong(resp));
+                        if let Err(err) = ret {
+                            error!("{}", err);
+                        }
                     }
                     Message::Pong(resp) => {
                         let tmp = std::str::from_utf8(&resp);
@@ -473,11 +483,27 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
                 Err(err) => {
                     match err {
                         Error::ConnectionClosed => {
-                            warn!("tungstenite::Error::ConnectionClosed");
                             self.reconnect();
                         }
-                        _ => error!("{}", err),
-                    };
+                        Error::AlreadyClosed => {
+                            error!("Impossible to happen, fix the bug in the code");
+                            panic!("Impossible to happen, fix the bug in the code");
+                        }
+                        Error::Io(io_err) => {
+                            if io_err.kind() != std::io::ErrorKind::WouldBlock {
+                                error!("I/O error thrown from read_message(): {}", io_err);
+                                panic!("I/O error thrown from read_message(): {}", io_err);
+                            } else {
+                                debug!("read_message() timeout");
+                                // give auto_ping() a chance to acquire the lock
+                                std::thread::sleep(Duration::from_micros(1));
+                            }
+                        }
+                        _ => {
+                            error!("Error thrown from read_message(): {}", err);
+                            panic!("Error thrown from read_message(): {}", err);
+                        }
+                    }
                 }
             };
 
