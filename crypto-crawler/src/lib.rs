@@ -1,3 +1,74 @@
+//! A rock-solid cryprocurrency crawler.
+//!
+//! ## Crawl realtime trades
+//!
+//! ```rust
+//! use std::sync::{Arc, Mutex};
+//! use crypto_crawler::{crawl_trade, MarketType, Message};
+//!
+//! let on_msg = Arc::new(Mutex::new(|msg: Message| {
+//!     println!("{}", msg);
+//! }));
+//!
+//! // Crawl BitMEX inverse_swap market, for all symbols, only run for 5 seconds
+//! crawl_trade("bitmex", MarketType::InverseSwap, None, on_msg, Some(5));
+//! ```
+//!
+//! ## Crawl level2 orderbook update events
+//!
+//! ```rust
+//! use std::sync::{Arc, Mutex};
+//! use crypto_crawler::{crawl_l2_event, MarketType, Message};
+//!
+//! let on_msg = Arc::new(Mutex::new(|msg: Message| {
+//!     println!("{}", msg);
+//! }));
+//!
+//! // Crawl BitMEX inverse_swap market, for all symbols, only run for 5 seconds
+//! crawl_l2_event("bitmex", MarketType::InverseSwap, None, on_msg, Some(5));
+//! ```
+//!
+//! ## Crawl level2 orderbook snapshots
+//!
+//! ```rust
+//! use std::sync::{Arc, Mutex};
+//! use crypto_crawler::{crawl_l2_snapshot, MarketType, Message};
+//!
+//! let on_msg = Arc::new(Mutex::new(|msg: Message| {
+//!     println!("{}", msg);
+//! }));
+//!
+//! // Crawl BitMEX inverse_swap market level2 orderbook snapshots every 60 seconds, for all symbols, only run for 5 seconds
+//! crawl_l2_snapshot("bitmex", MarketType::InverseSwap, None, on_msg, Some(60), Some(5));
+//! ```
+//!
+//! ## Crawl level3 orderbook update events
+//!
+//! ```rust
+//! use std::sync::{Arc, Mutex};
+//! use crypto_crawler::{crawl_l3_event, MarketType, Message};
+//!
+//! let on_msg = Arc::new(Mutex::new(|msg: Message| {
+//!     println!("{}", msg);
+//! }));
+//!
+//! // Crawl CoinbasePro spot market, for all symbols, only run for 5 seconds
+//! crawl_l3_event("coinbase_pro", MarketType::Spot, None, on_msg, Some(5));
+//! ```
+//!
+//! ## Crawl level3 orderbook snapshots
+//!
+//! ```rust
+//! use std::sync::{Arc, Mutex};
+//! use crypto_crawler::{crawl_l3_snapshot, MarketType, Message};
+//!
+//! let on_msg = Arc::new(Mutex::new(|msg: Message| {
+//!     println!("{}", msg);
+//! }));
+//!
+//! // Crawl CoinbasePro spot market level2 orderbook snapshots every 60 seconds, for all symbols, only run for 5 seconds
+//! crawl_l3_snapshot("coinbase_pro", MarketType::Spot, None, on_msg, Some(60), Some(5));
+//! ```
 mod crawlers;
 mod msg;
 
@@ -6,7 +77,7 @@ use std::sync::{Arc, Mutex};
 
 pub use msg::*;
 
-/// Crawl trades.
+/// Crawl realtime trades.
 ///
 /// If `symbols` is None, this function will crawl all trading symbols in the `market_type`,
 /// and fetch the latest symbols every hour.
@@ -61,7 +132,7 @@ pub fn crawl_l2_event(
     }
 }
 
-/// Crawl level2 orderbook snapshot through REST API.
+/// Crawl level2 orderbook snapshots through RESTful APIs.
 pub fn crawl_l2_snapshot(
     exchange: &str,
     market_type: MarketType,
@@ -106,7 +177,7 @@ pub fn crawl_l3_event(
     }
 }
 
-/// Crawl level3 orderbook snapshot through REST API.
+/// Crawl level3 orderbook snapshots through RESTful APIs.
 pub fn crawl_l3_snapshot(
     exchange: &str,
     market_type: MarketType,
