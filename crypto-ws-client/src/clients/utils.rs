@@ -39,7 +39,7 @@ fn connect_to_some(addrs: &[SocketAddr], uri: &Uri, mode: Mode) -> Result<AutoSt
     for addr in addrs {
         debug!("Trying to contact {} at {}...", uri, addr);
         if let Ok(raw_stream) = TcpStream::connect(addr) {
-            let _ = raw_stream.set_read_timeout(Some(Duration::from_secs(5)));
+            let _ = raw_stream.set_read_timeout(Some(Duration::from_secs(WEBSOCKET_READ_TIMEOUT)));
             if let Ok(stream) = wrap_stream(raw_stream, domain, mode) {
                 return Ok(stream);
             }
@@ -99,3 +99,4 @@ pub(super) fn connect_with_retry(url: &str) -> WebSocket<AutoStream> {
 }
 
 pub(super) const CHANNEL_PAIR_DELIMITER: char = ':';
+pub(super) const WEBSOCKET_READ_TIMEOUT: u64 = 3;
