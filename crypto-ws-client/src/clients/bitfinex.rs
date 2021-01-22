@@ -191,10 +191,33 @@ impl<'a> Candlestick for BitfinexWSClient<'a> {
 }
 
 impl<'a> BitfinexWSClient<'a> {
+    fn subscribe_or_unsubscribe(&self, channels: &[String], subscribe: bool) {
+        let mut diff = Vec::<String>::new();
+        {
+            let mut guard = self.channels.lock().unwrap();
+            for ch in channels.iter() {
+                if guard.insert(ch.clone()) {
+                    diff.push(ch.clone());
+                }
+            }
+        }
+
+        if !diff.is_empty() {
+            let commands = channels_to_commands(&diff, subscribe);
+            let mut ws_stream = self.ws_stream.lock().unwrap();
+            commands.into_iter().for_each(|command| {
+                let ret = ws_stream.write_message(Message::Text(command));
+                if let Err(err) = ret {
+                    error!("{}", err);
+                }
+            });
+        }
+    }
+
     // reconnect and subscribe all channels
     fn reconnect(&self) {
+        warn!("Reconnecting to {}", WEBSOCKET_URL);
         {
-            warn!("Reconnecting to {}", WEBSOCKET_URL);
             let mut guard = self.ws_stream.lock().unwrap();
             *guard = connect_with_retry(WEBSOCKET_URL);
         }
@@ -208,12 +231,9 @@ impl<'a> BitfinexWSClient<'a> {
             .collect::<Vec<String>>();
         if !channels.is_empty() {
             let commands = channels_to_commands(&channels, true);
+            let mut ws_stream = self.ws_stream.lock().unwrap();
             commands.into_iter().for_each(|command| {
-                let ret = self
-                    .ws_stream
-                    .lock()
-                    .unwrap()
-                    .write_message(Message::Text(command));
+                let ret = ws_stream.write_message(Message::Text(command));
                 if let Err(err) = ret {
                     error!("{}", err);
                 }
@@ -392,55 +412,11 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
     }
 
     fn subscribe(&self, channels: &[String]) {
-        let mut diff = Vec::<String>::new();
-        {
-            let mut guard = self.channels.lock().unwrap();
-            for ch in channels.iter() {
-                if guard.insert(ch.clone()) {
-                    diff.push(ch.clone());
-                }
-            }
-        }
-
-        if !diff.is_empty() {
-            let commands = channels_to_commands(&diff, true);
-            commands.into_iter().for_each(|command| {
-                let ret = self
-                    .ws_stream
-                    .lock()
-                    .unwrap()
-                    .write_message(Message::Text(command));
-                if let Err(err) = ret {
-                    error!("{}", err);
-                }
-            });
-        }
+        self.subscribe_or_unsubscribe(channels, true);
     }
 
     fn unsubscribe(&self, channels: &[String]) {
-        let mut diff = Vec::<String>::new();
-        {
-            let mut guard = self.channels.lock().unwrap();
-            for ch in channels.iter() {
-                if guard.remove(ch) {
-                    diff.push(ch.clone());
-                }
-            }
-        }
-
-        if !diff.is_empty() {
-            let commands = channels_to_commands(&diff, false);
-            commands.into_iter().for_each(|command| {
-                let ret = self
-                    .ws_stream
-                    .lock()
-                    .unwrap()
-                    .write_message(Message::Text(command));
-                if let Err(err) = ret {
-                    error!("{}", err);
-                }
-            });
-        }
+        self.subscribe_or_unsubscribe(channels, false);
     }
 
     fn run(&self, duration: Option<u64>) {
