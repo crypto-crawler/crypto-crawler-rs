@@ -116,14 +116,18 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
         }
     } else {
         let obj = serde_json::from_str::<HashMap<String, Value>>(&msg).unwrap();
-        if obj.contains_key("channel")
-            && obj.contains_key("data")
-            && obj.contains_key("symbol")
-            && obj.contains_key("ts")
-        {
-            MiscMessage::Normal
+        if obj.contains_key("channel") && obj.contains_key("data") && obj.contains_key("ts") {
+            if obj.get("channel").unwrap().as_str().unwrap() == "pong" {
+                debug!("Received pong {} from {}", msg, EXCHANGE_NAME);
+                MiscMessage::Misc
+            } else if obj.contains_key("symbol") {
+                MiscMessage::Normal
+            } else {
+                warn!("{} from {}", msg, EXCHANGE_NAME);
+                MiscMessage::Misc
+            }
         } else {
-            error!("{} is not a JSON string, {}", msg, EXCHANGE_NAME);
+            error!("Received {} from {}", msg, SWAP_WEBSOCKET_URL);
             MiscMessage::Misc
         }
     }
