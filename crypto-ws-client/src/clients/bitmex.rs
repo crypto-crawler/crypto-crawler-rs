@@ -73,8 +73,8 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
             400 => MiscMessage::Misc,
             _ => MiscMessage::Misc,
         }
-    } else if obj.contains_key("success") {
-        info!("{} is not a JSON string, {}", msg, EXCHANGE_NAME);
+    } else if obj.contains_key("success") || obj.contains_key("info") {
+        info!("Received {} from {}", msg, EXCHANGE_NAME);
         MiscMessage::Misc
     } else if obj.contains_key("table") {
         debug_assert!(obj.contains_key("action"));
