@@ -309,12 +309,9 @@ impl<'a> BitfinexWSClient<'a> {
                                     .map(|s| s.to_string())
                                     .collect::<Vec<String>>();
                                 let commands = channels_to_commands(&channels, true);
+                                let mut ws_stream = self.ws_stream.lock().unwrap();
                                 commands.into_iter().for_each(|command| {
-                                    let ret = self
-                                        .ws_stream
-                                        .lock()
-                                        .unwrap()
-                                        .write_message(Message::Text(command));
+                                    let ret = ws_stream.write_message(Message::Text(command));
                                     if let Err(err) = ret {
                                         error!("{}", err);
                                     }
