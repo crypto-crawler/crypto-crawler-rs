@@ -293,11 +293,15 @@ impl<'a> WSClientInternal<'a> {
 
                 match ping_msg {
                     Some(msg) => {
-                        let ret = ws_stream.lock().unwrap().write_message(msg.1);
-                        if let Err(err) = ret {
-                            error!("{}", err);
+                        let mut guard = ws_stream.lock().unwrap();
+                        if guard.can_write() {
+                            if let Err(err) = guard.write_message(msg.1) {
+                                error!("{}", err);
+                            }
+                            thread::sleep(Duration::from_secs(msg.0));
+                        } else {
+                            std::thread::sleep(Duration::from_millis(1));
                         }
-                        thread::sleep(Duration::from_secs(msg.0));
                     }
                     None => return,
                 }
