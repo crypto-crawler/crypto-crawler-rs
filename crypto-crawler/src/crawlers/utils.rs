@@ -19,7 +19,7 @@ pub(super) fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Ve
                     if i == retry_count - 1 {
                         error!("The {}th time, {}", i, err);
                     } else {
-                        info!("The {}th time, {}", i, err);
+                        warn!("The {}th time, {}", i, err);
                     }
                 }
             }
