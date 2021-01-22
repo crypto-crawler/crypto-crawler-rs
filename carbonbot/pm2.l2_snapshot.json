@@ -1,38 +1,6 @@
 {
     "apps": [
         {
-            "name": "crawler-trade-binance-spot",
-            "script": "carbonbot",
-            "args": "binance spot trade",
-            "exec_interpreter": "none",
-            "exec_mode": "fork_mode",
-            "instances": 1
-        },
-        {
-            "name": "crawler-trade-binance-inverse_swap",
-            "script": "carbonbot",
-            "args": "binance inverse_swap trade",
-            "exec_interpreter": "none",
-            "exec_mode": "fork_mode",
-            "instances": 1
-        },
-        {
-            "name": "crawler-trade-binance-linear_swap",
-            "script": "carbonbot",
-            "args": "binance linear_swap trade",
-            "exec_interpreter": "none",
-            "exec_mode": "fork_mode",
-            "instances": 1
-        },
-        {
-            "name": "crawler-trade-binance-inverse_future",
-            "script": "carbonbot",
-            "args": "binance inverse_future trade",
-            "exec_interpreter": "none",
-            "exec_mode": "fork_mode",
-            "instances": 1
-        },
-        {
             "name": "crawler-l2_snapshot-binance-spot",
             "script": "carbonbot",
             "args": "binance spot l2_snapshot",
