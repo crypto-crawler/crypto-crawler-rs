@@ -10,7 +10,7 @@ use std::{
 
 use flate2::read::{DeflateDecoder, GzDecoder};
 use log::*;
-use tungstenite::{client::AutoStream, Message, WebSocket};
+use tungstenite::{client::AutoStream, Error, Message, WebSocket};
 
 pub(super) enum MiscMessage {
     WebSocket(Message), // WebSocket message that needs to be sent to the server
@@ -206,8 +206,10 @@ impl<'a> WSClientInternal<'a> {
                         }
                     }
                     Message::Ping(resp) => {
-                        let tmp = std::str::from_utf8(&resp);
-                        warn!("Received a ping frame: {}", tmp.unwrap());
+                        info!(
+                            "Received a ping frame: {}",
+                            std::str::from_utf8(&resp).unwrap()
+                        );
                         let ret = self
                             .ws_stream
                             .lock()
@@ -232,8 +234,30 @@ impl<'a> WSClientInternal<'a> {
                     }
                 },
                 Err(err) => {
-                    self.reconnect();
-                    error!("Error thrown from read_message(): {}", err);
+                    match err {
+                        Error::ConnectionClosed => {
+                            self.reconnect();
+                        }
+                        Error::AlreadyClosed => {
+                            error!("Impossible to happen, fix the bug in the code");
+                            panic!("Impossible to happen, fix the bug in the code");
+                        }
+                        Error::Io(io_err) => {
+                            if io_err.kind() != std::io::ErrorKind::WouldBlock {
+                                error!("I/O error thrown from read_message(): {}", io_err);
+                                panic!("I/O error thrown from read_message(): {}", io_err);
+                            } else {
+                                debug!("read_message() timeout");
+                                // give auto_ping() a chance to acquire the lock
+                                std::thread::sleep(Duration::from_micros(1));
+                            }
+                        }
+                        _ => {
+                            error!("Error thrown from read_message(): {}", err);
+                            panic!("Error thrown from read_message(): {}", err);
+                        }
+                    }
+
                     false
                 }
             };
