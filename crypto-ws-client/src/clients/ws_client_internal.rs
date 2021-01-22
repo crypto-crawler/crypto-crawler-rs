@@ -308,8 +308,10 @@ impl<'a> WSClientInternal<'a> {
                     }
                     // https://www.bitmex.com/app/wsAPI#Heartbeats
                     super::bitmex::EXCHANGE_NAME => Some((5, Message::Text("ping".to_string()))),
-                    // https://www.okex.com/docs/en/#futures_ws-limit
-                    super::okex::EXCHANGE_NAME => Some((30, Message::Text("ping".to_string()))),
+                    // If there is no data return after connecting to ws, the connection will
+                    // break in 30s. See https://www.okex.com/docs/en/#futures_ws-limit
+                    // So we send ping every 15 seconds
+                    super::okex::EXCHANGE_NAME => Some((15, Message::Text("ping".to_string()))),
                     _ => None,
                 };
 
