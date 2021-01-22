@@ -1,4 +1,4 @@
-use super::utils::connect_with_retry;
+use super::utils::{connect_with_retry, WEBSOCKET_READ_TIMEOUT};
 use std::sync::{Arc, Mutex};
 
 use std::time::{Duration, Instant};
@@ -286,8 +286,7 @@ impl<'a> WSClientInternal<'a> {
                     super::bitmex::EXCHANGE_NAME => Some((5, Message::Text("ping".to_string()))),
                     // If there is no data return after connecting to ws, the connection will
                     // break in 30s. See https://www.okex.com/docs/en/#futures_ws-limit
-                    // So we send ping every 15 seconds
-                    super::okex::EXCHANGE_NAME => Some((15, Message::Text("ping".to_string()))),
+                    super::okex::EXCHANGE_NAME => Some((30, Message::Text("ping".to_string()))),
                     _ => None,
                 };
 
@@ -298,7 +297,9 @@ impl<'a> WSClientInternal<'a> {
                             if let Err(err) = guard.write_message(msg.1) {
                                 error!("{}", err);
                             }
-                            thread::sleep(Duration::from_secs(msg.0));
+                            if msg.0 > WEBSOCKET_READ_TIMEOUT {
+                                thread::sleep(Duration::from_secs(msg.0 - WEBSOCKET_READ_TIMEOUT));
+                            }
                         } else {
                             std::thread::sleep(Duration::from_millis(1));
                         }
