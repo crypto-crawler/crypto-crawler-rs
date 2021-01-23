@@ -14,6 +14,8 @@ pub(super) const EXCHANGE_NAME: &str = "bitmex";
 
 const WEBSOCKET_URL: &str = "wss://www.bitmex.com/realtime";
 
+const PING_INTERVAL_AND_MSG: (u64, &str) = (5, "ping");
+
 /// The WebSocket client for BitMEX.
 ///
 /// BitMEX has Swap and Future markets.
@@ -123,7 +125,8 @@ define_client!(
     EXCHANGE_NAME,
     WEBSOCKET_URL,
     channels_to_commands,
-    on_misc_msg
+    on_misc_msg,
+    Some(PING_INTERVAL_AND_MSG)
 );
 
 #[cfg(test)]

@@ -19,6 +19,9 @@ pub(super) const SPOT_WEBSOCKET_URL: &str =
     "wss://wbs.mxc.com/socket.io/?EIO=3&transport=websocket";
 pub(super) const SWAP_WEBSOCKET_URL: &str = "wss://contract.mxc.com/ws";
 
+const SPOT_PING_INTERVAL_AND_MSG: (u64, &str) = (5, "2");
+const SWAP_PING_INTERVAL_AND_MSG: (u64, &str) = (10, r#"{"method":"ping"}"#);
+
 /// MXC Spot market.
 ///
 ///   * WebSocket API doc: <https://github.com/mxcdevelop/APIDoc/blob/master/websocket/websocket-api.md>
@@ -228,14 +231,16 @@ define_client!(
     EXCHANGE_NAME,
     SPOT_WEBSOCKET_URL,
     spot_channels_to_commands,
-    on_misc_msg
+    on_misc_msg,
+    Some(SPOT_PING_INTERVAL_AND_MSG)
 );
 define_client!(
     MxcSwapWSClient,
     EXCHANGE_NAME,
     SWAP_WEBSOCKET_URL,
     swap_channels_to_commands,
-    on_misc_msg
+    on_misc_msg,
+    Some(SWAP_PING_INTERVAL_AND_MSG)
 );
 
 #[cfg(test)]

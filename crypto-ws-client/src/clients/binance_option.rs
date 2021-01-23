@@ -13,6 +13,8 @@ pub(super) const EXCHANGE_NAME: &str = "binance";
 
 pub(super) const WEBSOCKET_URL: &str = "wss://stream.opsnest.com/stream";
 
+const PING_INTERVAL_AND_MSG: (u64, &str) = (240, r#"{"event":"ping"}"#);
+
 /// Binance Option market
 ///
 ///   * WebSocket API doc: None
@@ -81,7 +83,8 @@ define_client!(
     EXCHANGE_NAME,
     WEBSOCKET_URL,
     channels_to_commands,
-    on_misc_msg
+    on_misc_msg,
+    Some(PING_INTERVAL_AND_MSG)
 );
 
 fn to_raw_channel(channel: &str, pair: &str) -> String {

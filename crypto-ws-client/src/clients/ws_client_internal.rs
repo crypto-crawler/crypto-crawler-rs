@@ -1,11 +1,12 @@
 use super::utils::connect_with_retry;
-use std::sync::{Arc, Mutex};
-
-use std::time::{Duration, Instant};
-use std::{collections::HashSet, thread};
 use std::{
+    collections::HashSet,
     io::prelude::*,
-    sync::atomic::{AtomicBool, Ordering},
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc, Mutex,
+    },
+    time::{Duration, Instant},
 };
 
 use flate2::read::{DeflateDecoder, GzDecoder};
@@ -22,13 +23,16 @@ pub(super) enum MiscMessage {
 pub(super) struct WSClientInternal<'a> {
     exchange: &'static str, // Eexchange name
     pub(super) url: String, // Websocket base url
-    ws_stream: Arc<Mutex<WebSocket<AutoStream>>>,
+    ws_stream: Mutex<WebSocket<AutoStream>>,
     channels: Mutex<HashSet<String>>, // subscribed channels
     on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, // user defined message callback
     on_misc_msg: fn(&str) -> MiscMessage, // handle misc messages
     // converts raw channels to subscribe/unsubscribe commands
     channels_to_commands: fn(&[String], bool) -> Vec<String>,
-    should_stop: Arc<AtomicBool>, // used by close() and run()
+    should_stop: AtomicBool, // used by close() and run()
+    // how often the client should send a ping, None means the client doesn't need to send
+    // ping, instead the server will send ping and the client just needs to reply a pong
+    ping_interval_and_msg: Option<(u64, &'static str)>,
 }
 
 impl<'a> WSClientInternal<'a> {
@@ -38,17 +42,26 @@ impl<'a> WSClientInternal<'a> {
         on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>,
         on_misc_msg: fn(&str) -> MiscMessage,
         channels_to_commands: fn(&[String], bool) -> Vec<String>,
+        ping_interval_and_msg: Option<(u64, &'static str)>,
     ) -> Self {
-        let stream = connect_with_retry(url);
+        let stream = connect_with_retry(
+            url,
+            if let Some(interval_and_msg) = ping_interval_and_msg {
+                Some(interval_and_msg.0 - 1)
+            } else {
+                None
+            },
+        );
         WSClientInternal {
             exchange,
             url: url.to_string(),
-            ws_stream: Arc::new(Mutex::new(stream)),
+            ws_stream: Mutex::new(stream),
             on_msg,
             on_misc_msg,
             channels: Mutex::new(HashSet::new()),
             channels_to_commands,
-            should_stop: Arc::new(AtomicBool::new(false)),
+            should_stop: AtomicBool::new(false),
+            ping_interval_and_msg,
         }
     }
 
@@ -88,9 +101,15 @@ impl<'a> WSClientInternal<'a> {
         warn!("Reconnecting to {}", &self.url);
         {
             let mut guard = self.ws_stream.lock().unwrap();
-            *guard = connect_with_retry(self.url.as_str());
+            *guard = connect_with_retry(
+                self.url.as_str(),
+                if let Some(interval_and_msg) = self.ping_interval_and_msg {
+                    Some(interval_and_msg.0 - 1)
+                } else {
+                    None
+                },
+            );
         }
-
         let channels = self
             .channels
             .lock()
@@ -108,8 +127,6 @@ impl<'a> WSClientInternal<'a> {
                 }
             });
         }
-        // avoid too frequent reconnect
-        std::thread::sleep(Duration::from_secs(5));
     }
 
     // Handle a text msg from Message::Text or Message::Binary
@@ -149,9 +166,6 @@ impl<'a> WSClientInternal<'a> {
     }
 
     pub fn run(&self, duration: Option<u64>) {
-        // start the ping thread
-        WSClientInternal::auto_ping(self.exchange, self.url.to_string(), self.ws_stream.clone());
-
         let now = Instant::now();
         while !self.should_stop.load(Ordering::Acquire) {
             let resp = self.ws_stream.lock().unwrap().read_message();
@@ -212,6 +226,7 @@ impl<'a> WSClientInternal<'a> {
                 Err(err) => {
                     match err {
                         Error::ConnectionClosed => {
+                            error!("ConnectionClosed");
                             self.reconnect();
                         }
                         Error::AlreadyClosed => {
@@ -219,13 +234,43 @@ impl<'a> WSClientInternal<'a> {
                             panic!("Impossible to happen, fix the bug in the code");
                         }
                         Error::Io(io_err) => {
-                            if io_err.kind() != std::io::ErrorKind::WouldBlock {
-                                error!("I/O error thrown from read_message(): {}", io_err);
-                                panic!("I/O error thrown from read_message(): {}", io_err);
+                            if io_err.kind() == std::io::ErrorKind::WouldBlock {
+                                // send ping
+                                let ping_msg = Message::Text(
+                                    self.ping_interval_and_msg.unwrap().1.to_string(),
+                                );
+                                if let Err(err) =
+                                    self.ws_stream.lock().unwrap().write_message(ping_msg)
+                                {
+                                    error!("{}", err);
+                                }
                             } else {
-                                debug!("read_message() timeout");
-                                // give auto_ping() a chance to acquire the lock
-                                std::thread::sleep(Duration::from_micros(1));
+                                let err_msg = io_err.to_string();
+                                if err_msg.contains("connection closed via error") {
+                                    warn!(
+                                        "I/O error thrown from read_message(): {}, {:?}",
+                                        io_err,
+                                        io_err.kind()
+                                    );
+                                    self.reconnect();
+                                } else {
+                                    error!(
+                                        "I/O error thrown from read_message(): {}, {:?}",
+                                        io_err,
+                                        io_err.kind()
+                                    );
+                                }
+                            }
+                        }
+                        Error::Protocol(protocol_err) => {
+                            if protocol_err.contains("Connection reset without closing handshake") {
+                                error!("ResetWithoutClosingHandshake");
+                                self.reconnect();
+                            } else {
+                                error!(
+                                    "Protocol error thrown from read_message(): {}",
+                                    protocol_err
+                                );
                             }
                         }
                         _ => {
@@ -253,74 +298,11 @@ impl<'a> WSClientInternal<'a> {
             error!("{}", err);
         }
     }
-
-    // Send ping per interval
-    fn auto_ping(
-        exchange: &'static str,
-        url: String,
-        ws_stream: Arc<Mutex<WebSocket<AutoStream>>>,
-    ) {
-        thread::spawn(move || {
-            let mut prev_ping_timestamp = Instant::now();
-            loop {
-                let ping_msg = match exchange {
-                    super::mxc::EXCHANGE_NAME => {
-                        if url.as_str() == super::mxc::SPOT_WEBSOCKET_URL {
-                            // ping per 5 seconds
-                            Some((5, Message::Text("2".to_string()))) // socket.io ping
-                        } else if url.as_str() == super::mxc::SWAP_WEBSOCKET_URL {
-                            // ping per 10 seconds
-                            Some((10, Message::Text(r#"{"method":"ping"}"#.to_string())))
-                        } else {
-                            None
-                        }
-                    }
-                    super::binance_option::EXCHANGE_NAME => {
-                        if url.as_str() == super::binance_option::WEBSOCKET_URL {
-                            // ping per 4 minutes
-                            Some((240, Message::Text(r#"{"event":"ping"}"#.to_string())))
-                        } else {
-                            None
-                        }
-                    }
-                    // https://www.bitmex.com/app/wsAPI#Heartbeats
-                    super::bitmex::EXCHANGE_NAME => Some((5, Message::Text("ping".to_string()))),
-                    // If there is no data return after connecting to ws, the connection will
-                    // break in 30s. See https://www.okex.com/docs/en/#futures_ws-limit
-                    super::okex::EXCHANGE_NAME => Some((30, Message::Text("ping".to_string()))),
-                    _ => None,
-                };
-
-                match ping_msg {
-                    Some(msg) => {
-                        let mut guard = ws_stream.lock().unwrap();
-                        if guard.can_write() {
-                            if let Err(err) = guard.write_message(msg.1) {
-                                error!("{}", err);
-                                std::thread::sleep(Duration::from_millis(1));
-                            } else {
-                                let interval = Duration::from_secs(msg.0);
-                                let elapsed = prev_ping_timestamp.elapsed();
-                                prev_ping_timestamp = Instant::now();
-
-                                if interval > elapsed {
-                                    thread::sleep(interval - elapsed);
-                                }
-                            }
-                        } else {
-                            std::thread::sleep(Duration::from_millis(1));
-                        }
-                    }
-                    None => return,
-                }
-            }
-        });
-    }
 }
 
 /// Define exchange specific client.
 macro_rules! define_client {
-    ($struct_name:ident, $exchange:ident, $default_url:ident, $channels_to_commands:ident, $on_misc_msg:ident) => {
+    ($struct_name:ident, $exchange:ident, $default_url:ident, $channels_to_commands:ident, $on_misc_msg:ident, $ping_interval:expr) => {
         impl<'a> WSClient<'a> for $struct_name<'a> {
             fn new(
                 on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>,
@@ -337,6 +319,7 @@ macro_rules! define_client {
                         on_msg,
                         $on_misc_msg,
                         $channels_to_commands,
+                        $ping_interval,
                     ),
                 }
             }
