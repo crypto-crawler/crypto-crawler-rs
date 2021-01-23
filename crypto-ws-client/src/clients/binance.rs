@@ -64,6 +64,7 @@ impl<'a> BinanceWSClient<'a> {
                 on_msg,
                 Self::on_misc_msg,
                 Self::channels_to_commands,
+                None,
             ),
         }
     }

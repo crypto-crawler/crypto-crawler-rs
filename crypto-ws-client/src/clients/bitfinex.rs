@@ -1,6 +1,9 @@
 use crate::{Level3OrderBook, WSClient};
 
-use std::sync::{Arc, Mutex};
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc, Mutex,
+};
 use std::{
     collections::{HashMap, HashSet},
     time::{Duration, Instant},
@@ -30,6 +33,7 @@ pub struct BitfinexWSClient<'a> {
     channels: Mutex<HashSet<String>>, // subscribed channels
     on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, // user defined message callback
     channel_id_meta: Mutex<HashMap<i64, String>>, // CHANNEL_ID information
+    should_stop: AtomicBool,          // used by close() and run()
 }
 
 fn channel_to_command(channel: &str, subscribe: bool) -> String {
@@ -218,7 +222,7 @@ impl<'a> BitfinexWSClient<'a> {
         warn!("Reconnecting to {}", WEBSOCKET_URL);
         {
             let mut guard = self.ws_stream.lock().unwrap();
-            *guard = connect_with_retry(WEBSOCKET_URL);
+            *guard = connect_with_retry(WEBSOCKET_URL, None);
         }
 
         let channels = self
@@ -238,8 +242,6 @@ impl<'a> BitfinexWSClient<'a> {
                 }
             });
         }
-        // avoid too frequent reconnect
-        std::thread::sleep(Duration::from_secs(5));
     }
 
     // Handle a text msg from Message::Text or Message::Binary
@@ -356,7 +358,7 @@ impl<'a> BitfinexWSClient<'a> {
                 false
             } else {
                 // replace CHANNEL_ID with meta info
-                let i = txt.find(",").unwrap(); // first comma, for example, te, tu, see https://blog.bitfinex.com/api/websocket-api-update/
+                let i = txt.find(',').unwrap(); // first comma, for example, te, tu, see https://blog.bitfinex.com/api/websocket-api-update/
                 let channel_id = (&txt[1..i]).parse::<i64>().unwrap();
                 let channel_info = self
                     .channel_id_meta
@@ -377,12 +379,13 @@ impl<'a> BitfinexWSClient<'a> {
 
 impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
     fn new(on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, _url: Option<&str>) -> Self {
-        let stream = connect_with_retry(WEBSOCKET_URL);
+        let stream = connect_with_retry(WEBSOCKET_URL, None);
         BitfinexWSClient {
             ws_stream: Mutex::new(stream),
             channels: Mutex::new(HashSet::new()),
             on_msg,
             channel_id_meta: Mutex::new(HashMap::new()),
+            should_stop: AtomicBool::new(false),
         }
     }
 
@@ -420,7 +423,7 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
 
     fn run(&self, duration: Option<u64>) {
         let now = Instant::now();
-        loop {
+        while !self.should_stop.load(Ordering::Acquire) {
             let resp = self.ws_stream.lock().unwrap().read_message();
             let mut succeeded = false;
             match resp {
@@ -432,12 +435,7 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
                             "Received a ping frame: {}",
                             std::str::from_utf8(&resp).unwrap()
                         );
-                        let ret = self
-                            .ws_stream
-                            .lock()
-                            .unwrap()
-                            .write_message(Message::Pong(resp));
-                        if let Err(err) = ret {
+                        if let Err(err) = self.ws_stream.lock().unwrap().write_message(Message::Pong(resp)) {
                             error!("{}", err);
                         }
                     }
@@ -465,10 +463,6 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
                             if io_err.kind() != std::io::ErrorKind::WouldBlock {
                                 error!("I/O error thrown from read_message(): {}", io_err);
                                 panic!("I/O error thrown from read_message(): {}", io_err);
-                            } else {
-                                debug!("read_message() timeout");
-                                // give auto_ping() a chance to acquire the lock
-                                std::thread::sleep(Duration::from_micros(1));
                             }
                         }
                         _ => {
@@ -488,6 +482,7 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
     }
 
     fn close(&self) {
+        self.should_stop.store(true, Ordering::Release);
         let ret = self.ws_stream.lock().unwrap().close(None);
         if let Err(err) = ret {
             error!("{}", err);

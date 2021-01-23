@@ -148,7 +148,8 @@ define_client!(
     EXCHANGE_NAME,
     WEBSOCKET_URL,
     channels_to_commands,
-    on_misc_msg
+    on_misc_msg,
+    None
 );
 
 #[cfg(test)]

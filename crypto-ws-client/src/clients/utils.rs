@@ -31,17 +31,22 @@ fn wrap_stream(stream: TcpStream, domain: &str, mode: Mode) -> Result<AutoStream
     }
 }
 
-const WEBSOCKET_READ_TIMEOUT: u64 = 3;
-
 // copied from https://github.com/snapview/tungstenite-rs/blob/master/src/client.rs#L167
-fn connect_to_some(addrs: &[SocketAddr], uri: &Uri, mode: Mode) -> Result<AutoStream> {
+fn connect_to_some(
+    addrs: &[SocketAddr],
+    uri: &Uri,
+    mode: Mode,
+    timeout: Option<u64>,
+) -> Result<AutoStream> {
     let domain = uri
         .host()
         .ok_or_else(|| Error::Url("No host name in the URL".into()))?;
     for addr in addrs {
         debug!("Trying to contact {} at {}...", uri, addr);
         if let Ok(raw_stream) = TcpStream::connect(addr) {
-            let _ = raw_stream.set_read_timeout(Some(Duration::from_secs(WEBSOCKET_READ_TIMEOUT)));
+            if let Some(seconds) = timeout {
+                let _ = raw_stream.set_read_timeout(Some(Duration::from_secs(seconds)));
+            }
             if let Ok(stream) = wrap_stream(raw_stream, domain, mode) {
                 return Ok(stream);
             }
@@ -52,7 +57,10 @@ fn connect_to_some(addrs: &[SocketAddr], uri: &Uri, mode: Mode) -> Result<AutoSt
 
 // Usually ws_stream.read_message() blocks forever,
 // with this function, it returns after 5 seconds if no data comming in
-fn connect_with_timeout(url: &str) -> Result<(WebSocket<AutoStream>, Response)> {
+fn connect_with_timeout(
+    url: &str,
+    timeout: Option<u64>,
+) -> Result<(WebSocket<AutoStream>, Response)> {
     let request = url.into_client_request()?;
 
     let uri = request.uri();
@@ -66,7 +74,7 @@ fn connect_with_timeout(url: &str) -> Result<(WebSocket<AutoStream>, Response)> 
         Mode::Tls => 443,
     });
     let addrs = (host, port).to_socket_addrs()?;
-    let mut stream = connect_to_some(addrs.as_slice(), &request.uri(), mode)?;
+    let mut stream = connect_to_some(addrs.as_slice(), &request.uri(), mode, timeout)?;
     NoDelay::set_nodelay(&mut stream, true)?;
 
     client::client(request, stream).map_err(|e| match e {
@@ -77,8 +85,8 @@ fn connect_with_timeout(url: &str) -> Result<(WebSocket<AutoStream>, Response)> 
 
 // This function is equivalent to tungstenite::connect(), with an additional benefit that
 // it can make read_message() timeout after 5 seconds
-pub(super) fn connect_with_retry(url: &str) -> WebSocket<AutoStream> {
-    let mut res = connect_with_timeout(url);
+pub(super) fn connect_with_retry(url: &str, timeout: Option<u64>) -> WebSocket<AutoStream> {
+    let mut res = connect_with_timeout(url, timeout);
     let mut count: i8 = 1;
     while res.is_err() && count < 3 {
         warn!(

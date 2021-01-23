@@ -12,6 +12,8 @@ pub(super) const EXCHANGE_NAME: &str = "okex";
 
 const WEBSOCKET_URL: &str = "wss://real.okex.com:8443/ws/v3";
 
+const PING_INTERVAL_AND_MSG: (u64, &str) = (30, "ping");
+
 /// The WebSocket client for OKEx.
 ///
 /// OKEx has Spot, Future, Swap and Option markets.
@@ -143,7 +145,8 @@ define_client!(
     EXCHANGE_NAME,
     WEBSOCKET_URL,
     channels_to_commands,
-    on_misc_msg
+    on_misc_msg,
+    Some(PING_INTERVAL_AND_MSG)
 );
 
 #[cfg(test)]
