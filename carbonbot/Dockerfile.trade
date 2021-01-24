@@ -1,0 +1,34 @@
+FROM rust:latest AS builder
+
+RUN mkdir /project
+WORKDIR /project
+
+COPY ./Cargo.toml ./Cargo.toml
+COPY ./pm2.trade.json ./pm2.trade.json
+COPY ./src/ ./src/
+
+RUN cargo build --release
+
+
+FROM node:buster-slim
+
+RUN mkdir /data
+WORKDIR /data
+
+COPY --from=builder /project/target/release/carbonbot /usr/local/bin/
+COPY --from=builder /project/pm2.trade.json /root/pm2.trade.json
+
+RUN apt-get -qy update && apt-get -qy --no-install-recommends install \
+    pkg-config libssl-dev ca-certificates \
+ && npm install pm2 -g \
+ && apt-get -qy autoremove && apt-get clean && rm -rf /var/lib/apt/lists/* && rm -rf /tmp/*
+
+ENV RUST_LOG "warn"
+ENV DATA_DIR "/data"
+ENV RUST_BACKTRACE 1
+
+VOLUME [ "/data" ]
+EXPOSE 9615
+
+# CMD ["carbonbot"]
+CMD [ "pm2-runtime", "start", "/root/pm2.trade.json" ]

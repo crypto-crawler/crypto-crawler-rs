@@ -100,7 +100,7 @@ fn main() {
 
     let _ = std::fs::create_dir_all(Path::new(data_dir).join("logs"));
     let _ = WriteLogger::init(
-        LevelFilter::Info,
+        LevelFilter::Warn,
         Config::default(),
         File::create(
             Path::new(data_dir)
