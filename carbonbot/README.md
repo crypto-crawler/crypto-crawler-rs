@@ -12,13 +12,13 @@
 ## Run
 
 ```bash
-docker run -it --rm -v $(pwd):/data -p 9615:9615 soulmachine/carbonbot
+docker run -it --rm -v $(pwd):/data soulmachine/carbonbot
 ```
 
 To enable crawling mxc spot markets, we need to define a `MXC_ACCESS_KEY` environment variable(because this cryprocurrency exchange requires it even for public APIs, while other exchanges don't):
 
 ```bash
-docker run -it --rm -v $(pwd):/data -p 9615:9615 -e MXC_ACCESS_KEY=your_mxc_access_key soulmachine/carbonbot:trade
+docker run -it --rm -v $(pwd):/data -e MXC_ACCESS_KEY=your_mxc_access_key soulmachine/carbonbot:trade
 ```
 
 ## Build
