@@ -78,9 +78,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     } else if obj.contains_key("success") || obj.contains_key("info") {
         info!("Received {} from {}", msg, EXCHANGE_NAME);
         MiscMessage::Misc
-    } else if obj.contains_key("table") {
-        debug_assert!(obj.contains_key("action"));
-        debug_assert!(obj.contains_key("data"));
+    } else if obj.contains_key("table") && obj.contains_key("action") && obj.contains_key("data") {
         MiscMessage::Normal
     } else {
         warn!("Received {} from {}", msg, EXCHANGE_NAME);
