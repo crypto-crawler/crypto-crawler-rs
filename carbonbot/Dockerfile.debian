@@ -36,13 +36,10 @@ ENV RUST_BACKTRACE 1
 USER node
 ENV HOME /home/node
 ENV USER node
+WORKDIR /home/node
 
 VOLUME [ "/data" ]
-WORKDIR /data
 ENV DATA_DIR "/data"
 
 # Switch back to dialog for any ad-hoc use of apt-get
 ENV DEBIAN_FRONTEND=dialog
-
-# CMD ["carbonbot"]
-CMD [ "pm2-runtime", "start", "/home/node/pm2.trade.json" ]
