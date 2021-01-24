@@ -12,8 +12,15 @@ RUN cargo build --release
 
 FROM node:buster-slim
 
-RUN mkdir /data
-WORKDIR /data
+# Avoid warnings by switching to noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
+
+# The node image comes with a base non-root 'node' user which this Dockerfile
+# gives sudo access. However, for Linux, this user's GID/UID must match your local
+# user UID/GID to avoid permission issues with bind mounts. Update USER_UID / USER_GID
+# if yours is not 1000. See https://aka.ms/vscode-remote/containers/non-root-user.
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
 
 COPY --from=builder /project/target/release/carbonbot /usr/local/bin/
 COPY --from=builder /project/pm2.trade.json /root/pm2.trade.json
@@ -27,8 +34,15 @@ ENV RUST_LOG "warn"
 ENV DATA_DIR "/data"
 ENV RUST_BACKTRACE 1
 
+USER node
+ENV HOME /home/node
+ENV USER node
+
 VOLUME [ "/data" ]
-EXPOSE 9615
+WORKDIR /data
+
+# Switch back to dialog for any ad-hoc use of apt-get
+ENV DEBIAN_FRONTEND=dialog
 
 # CMD ["carbonbot"]
 CMD [ "pm2-runtime", "start", "/root/pm2.trade.json" ]
