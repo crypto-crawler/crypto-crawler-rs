@@ -150,10 +150,21 @@ macro_rules! gen_crawl_event {
                     let should_stop2 = should_stop.clone();
                     let ws_client2 = ws_client.clone();
 
+                    let mut subscribed_symbols = real_symbols.clone();
                     std::thread::spawn(move || {
                         while !should_stop2.load(Ordering::Acquire) {
-                            let symbols = fetch_symbols_retry(EXCHANGE_NAME, market_type);
-                            ws_client2.$crawl_func(&symbols);
+                            let latest_symbols = fetch_symbols_retry(EXCHANGE_NAME, market_type);
+                            let mut new_symbols: Vec<String> = latest_symbols
+                                .iter()
+                                .filter(|s| !subscribed_symbols.contains(s))
+                                .cloned()
+                                .collect();
+
+                            if !new_symbols.is_empty() {
+                                warn!("Found new symbols: {}", new_symbols.join(", "));
+                                ws_client2.$crawl_func(&new_symbols);
+                                subscribed_symbols.append(&mut new_symbols);
+                            }
                             // update symbols every hour
                             std::thread::sleep(Duration::from_secs(3600));
                         }
@@ -209,8 +220,11 @@ macro_rules! gen_crawl_event {
                             .filter(|s| !subscribed_symbols.contains(s))
                             .cloned()
                             .collect();
-                        last_client.$crawl_func(&new_symbols);
-                        subscribed_symbols.append(&mut new_symbols);
+                        if !new_symbols.is_empty() {
+                            warn!("Found new symbols: {}", new_symbols.join(", "));
+                            last_client.$crawl_func(&new_symbols);
+                            subscribed_symbols.append(&mut new_symbols);
+                        }
                         // update symbols every hour
                         std::thread::sleep(Duration::from_secs(duration.unwrap_or(3600)));
                     }
