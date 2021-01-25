@@ -9,10 +9,7 @@ use std::{
 };
 use writers::{RotatedFileWriter, Writer};
 
-use simplelog::*;
-
 use dashmap::{DashMap, DashSet};
-use std::fs::File;
 
 pub fn crawl(
     exchange: &'static str,
@@ -71,6 +68,8 @@ pub fn crawl(
 }
 
 fn main() {
+    env_logger::init();
+
     let args: Vec<String> = env::args().collect();
     if args.len() != 4 {
         println!("Usage: carbonbot <exchange> <market_type> <msg_type>");
@@ -97,18 +96,6 @@ fn main() {
         panic!("Please set the DATA_DIR environment variable");
     }
     let data_dir: &'static str = Box::leak(std::env::var("DATA_DIR").unwrap().into_boxed_str());
-
-    let _ = std::fs::create_dir_all(Path::new(data_dir).join("logs"));
-    let _ = WriteLogger::init(
-        LevelFilter::Warn,
-        Config::default(),
-        File::create(
-            Path::new(data_dir)
-                .join("logs")
-                .join(format!("{}-{}-{}.log", exchange, market_type, msg_type)),
-        )
-        .unwrap(),
-    );
 
     crawl(exchange, market_type, msg_type, data_dir);
 }
