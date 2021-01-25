@@ -26,4 +26,7 @@ docker run -it --rm -v $(pwd):/data -e MXC_ACCESS_KEY=your_mxc_access_key soulma
 ```bash
 docker build -t soulmachine/carbonbot:debian -f Dockerfile.debian .
 docker push soulmachine/carbonbot:debian
+
+docker build -t soulmachine/carbonbot:amazonlinux -f Dockerfile.amazonlinux .
+docker push soulmachine/carbonbot:amazonlinux
 ```
