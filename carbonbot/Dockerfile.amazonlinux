@@ -14,14 +14,20 @@ RUN yum update -y && yum install -y pkgconfig openssl-devel \
 FROM amazonlinux:latest
 
 COPY --from=builder /project/target/release/carbonbot /usr/local/bin/
-COPY --from=builder /project/pm2.trade.json /pm2.trade.json
+COPY --from=builder /project/pm2.trade.json /root/pm2.trade.json
 
 RUN curl -sL https://rpm.nodesource.com/setup_lts.x | bash - && yum install -y nodejs \
  && npm install pm2 -g \
+ && yum install -y gzip unzip && curl https://rclone.org/install.sh | bash \
  && yum clean all && rm -rf /var/cache/yum
+
+COPY ./rclone/rclone.conf /root/.config/rclone/rclone.conf
+COPY ./rclone/rclone.sh /usr/local/bin/rclone.sh
 
 ENV RUST_LOG "warn"
 ENV RUST_BACKTRACE 1
 
 VOLUME [ "/data" ]
 ENV DATA_DIR "/data"
+
+WORKDIR /root
