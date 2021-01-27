@@ -235,6 +235,7 @@ impl<'a> WSClientInternal<'a> {
                         }
                         Error::Io(io_err) => {
                             if io_err.kind() == std::io::ErrorKind::WouldBlock {
+                                info!("Sending ping");
                                 // send ping
                                 let ping_msg = Message::Text(
                                     self.ping_interval_and_msg.unwrap().1.to_string(),
