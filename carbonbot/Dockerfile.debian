@@ -28,7 +28,7 @@ RUN curl -SsL https://github.com/boxboat/fixuid/releases/download/v0.5/fixuid-0.
     mkdir -p /etc/fixuid && \
     printf "user: node\ngroup: node\n" > /etc/fixuid/config.yml
 
-COPY ./rclone/rclone.conf /home/node/.config/rclone/rclone.conf
+COPY --chown=node:node ./rclone/rclone.conf /home/node/.config/rclone/rclone.conf
 COPY ./rclone/rclone.sh /usr/local/bin/rclone.sh
 
 ENV RUST_LOG "warn"
