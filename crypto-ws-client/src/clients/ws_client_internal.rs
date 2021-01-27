@@ -13,6 +13,9 @@ use flate2::read::{DeflateDecoder, GzDecoder};
 use log::*;
 use tungstenite::{client::AutoStream, Error, Message, WebSocket};
 
+// ping_interval - ping_latency = websocket_read_timeout
+const PING_LATENCY: u64 = 2;
+
 pub(super) enum MiscMessage {
     WebSocket(Message), // WebSocket message that needs to be sent to the server
     Reconnect,          // Needs to reconnect
@@ -47,7 +50,7 @@ impl<'a> WSClientInternal<'a> {
         let stream = connect_with_retry(
             url,
             if let Some(interval_and_msg) = ping_interval_and_msg {
-                Some(interval_and_msg.0 - 1)
+                Some(interval_and_msg.0 - PING_LATENCY)
             } else {
                 None
             },
@@ -104,7 +107,7 @@ impl<'a> WSClientInternal<'a> {
             *guard = connect_with_retry(
                 self.url.as_str(),
                 if let Some(interval_and_msg) = self.ping_interval_and_msg {
-                    Some(interval_and_msg.0 - 1)
+                    Some(interval_and_msg.0 - PING_LATENCY)
                 } else {
                     None
                 },
