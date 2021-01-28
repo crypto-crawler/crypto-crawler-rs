@@ -95,7 +95,21 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
                 MiscMessage::Misc
             }
             "subscriptionStatus" | "systemStatus" => {
-                info!("Received {} from {}", msg, EXCHANGE_NAME);
+                let status = obj.get("status").unwrap().as_str().unwrap();
+                match status {
+                    "subscribed" | "unsubscribed" => {
+                        info!("Received {} from {}", msg, EXCHANGE_NAME)
+                    }
+                    "error" => {
+                        error!("Received {} from {}", msg, EXCHANGE_NAME);
+                        let error_msg = obj.get("errorMessage").unwrap().as_str().unwrap();
+                        if error_msg.starts_with("Currency pair not supported") {
+                            panic!("Received {} from {}", msg, EXCHANGE_NAME)
+                        }
+                    }
+                    _ => warn!("Received {} from {}", msg, EXCHANGE_NAME),
+                }
+
                 MiscMessage::Misc
             }
             _ => {
