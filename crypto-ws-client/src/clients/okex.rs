@@ -66,7 +66,18 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
 
     if let Some(event) = obj.get("event") {
         match event.as_str().unwrap() {
-            "error" => error!("Received {} from {}", msg, EXCHANGE_NAME),
+            "error" => {
+                error!("Received {} from {}", msg, EXCHANGE_NAME);
+                if let Some(error_code) = obj.get("errorCode") {
+                    match error_code.as_i64().unwrap() {
+                        30040 => {
+                            // channel doesn't exist
+                            panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                        }
+                        _ => (),
+                    }
+                }
+            }
             "subscribe" => info!("Received {} from {}", msg, EXCHANGE_NAME),
             "unsubscribe" => info!("Received {} from {}", msg, EXCHANGE_NAME),
             _ => warn!("Received {} from {}", msg, EXCHANGE_NAME),

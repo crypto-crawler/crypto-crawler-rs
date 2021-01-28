@@ -199,11 +199,19 @@ mod okex_option {
         gen_test_code!(
             OkexWSClient,
             subscribe,
-            &vec!["option/trade:BTC-USD-210625-72000-C".to_string()]
+            &vec![
+                "option/delivery:BTC-USD".to_string(),
+                "option/instruments:BTC-USD".to_string(),
+                "index/ticker:BTC-USD".to_string(),
+                "option/trades:BTC-USD".to_string(),
+                "option/volume24h:BTC-USD".to_string(),
+                "option/fitter:BTC-USD".to_string()
+            ]
         );
     }
 
     #[test]
+    #[ignore]
     fn subscribe_trade() {
         gen_test_code!(
             OkexWSClient,

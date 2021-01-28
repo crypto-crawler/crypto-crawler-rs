@@ -131,10 +131,16 @@ impl<'a> HuobiWSClient<'a> {
             MiscMessage::Normal
         } else {
             if let Some(status) = obj.get("status") {
-                if status.as_str().unwrap() != "ok" {
-                    error!("Received {} from {}", msg, EXCHANGE_NAME);
-                } else {
-                    info!("Received {} from {}", msg, EXCHANGE_NAME);
+                match status.as_str().unwrap() {
+                    "ok" => info!("Received {} from {}", msg, EXCHANGE_NAME),
+                    "error" => {
+                        error!("Received {} from {}", msg, EXCHANGE_NAME);
+                        let err_msg = obj.get("err-msg").unwrap().as_str().unwrap();
+                        if err_msg.starts_with("invalid topic") {
+                            panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                        }
+                    }
+                    _ => warn!("Received {} from {}", msg, EXCHANGE_NAME),
                 }
             } else {
                 warn!("Received {} from {}", msg, EXCHANGE_NAME);
