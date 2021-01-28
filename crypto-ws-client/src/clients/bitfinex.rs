@@ -218,7 +218,7 @@ impl<'a> BitfinexWSClient<'a> {
     }
 
     // reconnect and subscribe all channels
-    fn reconnect(&self) {
+    fn _reconnect(&self) {
         warn!("Reconnecting to {}", WEBSOCKET_URL);
         {
             let mut guard = self.ws_stream.lock().unwrap();
@@ -291,7 +291,9 @@ impl<'a> BitfinexWSClient<'a> {
                         match code {
                             20051 => {
                                 // Stop/Restart Websocket Server (please reconnect)
-                                self.reconnect();
+                                // self.reconnect();
+                                error!("Stop/Restart Websocket Server, exiting now...");
+                                std::process::exit(0); // fail fast, pm2 will restart
                             }
                             20060 => {
                                 // Entering in Maintenance mode. Please pause any activity and resume
@@ -453,7 +455,9 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
                 Err(err) => {
                     match err {
                         Error::ConnectionClosed => {
-                            self.reconnect();
+                            // self.reconnect();
+                            error!("Server closed connection, exiting now...");
+                            std::process::exit(0); // fail fast, pm2 will restart
                         }
                         Error::AlreadyClosed => {
                             error!("Impossible to happen, fix the bug in the code");
