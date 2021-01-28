@@ -65,23 +65,24 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     if obj.contains_key("error") {
         let error_msg = obj.get("error").unwrap().as_str().unwrap();
         let code = obj.get("status").unwrap().as_i64().unwrap();
-        error!("Received {} from {}", msg, EXCHANGE_NAME);
 
         match code {
             // Rate limit exceeded
             429 => {
+                error!("Received {} from {}", msg, EXCHANGE_NAME);
                 std::thread::sleep(Duration::from_secs(3));
             }
             400 => {
                 if error_msg.starts_with("Unknown or expired symbol") {
+                    error!("Received {} from {}", msg, EXCHANGE_NAME);
                     panic!("Received {} from {}", msg, EXCHANGE_NAME);
                 } else if error_msg.starts_with("You are already subscribed to this topic") {
-                    // do nothing
+                    info!("Received {} from {}", msg, EXCHANGE_NAME)
                 } else {
-                    // do nothing
+                    warn!("Received {} from {}", msg, EXCHANGE_NAME);
                 }
             }
-            _ => (),
+            _ => error!("Received {} from {}", msg, EXCHANGE_NAME),
         }
         MiscMessage::Misc
     } else if obj.contains_key("success") || obj.contains_key("info") {
