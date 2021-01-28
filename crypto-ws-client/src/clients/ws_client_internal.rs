@@ -100,7 +100,7 @@ impl<'a> WSClientInternal<'a> {
     }
 
     // reconnect and subscribe all channels
-    fn reconnect(&self) {
+    fn _reconnect(&self) {
         warn!("Reconnecting to {}", &self.url);
         {
             let mut guard = self.ws_stream.lock().unwrap();
@@ -138,8 +138,9 @@ impl<'a> WSClientInternal<'a> {
         match (self.on_misc_msg)(txt) {
             MiscMessage::Misc => false,
             MiscMessage::Reconnect => {
-                self.reconnect();
-                false
+                // self.reconnect();
+                error!("Server asked client to reconnect, exiting now...");
+                std::process::exit(0); // fail fast, pm2 will restart
             }
             MiscMessage::WebSocket(ws_msg) => {
                 let ret = self.ws_stream.lock().unwrap().write_message(ws_msg);
@@ -229,8 +230,9 @@ impl<'a> WSClientInternal<'a> {
                 Err(err) => {
                     match err {
                         Error::ConnectionClosed => {
-                            error!("ConnectionClosed");
-                            self.reconnect();
+                            error!("Server closed connection, exiting now...");
+                            // self.reconnect();
+                            std::process::exit(0); // fail fast, pm2 will restart
                         }
                         Error::AlreadyClosed => {
                             error!("Impossible to happen, fix the bug in the code");
@@ -251,12 +253,13 @@ impl<'a> WSClientInternal<'a> {
                             } else {
                                 let err_msg = io_err.to_string();
                                 if err_msg.contains("connection closed via error") {
-                                    warn!(
+                                    error!(
                                         "I/O error thrown from read_message(): {}, {:?}",
                                         io_err,
                                         io_err.kind()
                                     );
-                                    self.reconnect();
+                                    // self.reconnect();
+                                    std::process::exit(0); // fail fast, pm2 will restart
                                 } else {
                                     error!(
                                         "I/O error thrown from read_message(): {}, {:?}",
@@ -269,7 +272,8 @@ impl<'a> WSClientInternal<'a> {
                         Error::Protocol(protocol_err) => {
                             if protocol_err.contains("Connection reset without closing handshake") {
                                 error!("ResetWithoutClosingHandshake");
-                                self.reconnect();
+                                // self.reconnect();
+                                std::process::exit(0); // fail fast, pm2 will restart
                             } else {
                                 error!(
                                     "Protocol error thrown from read_message(): {}",
