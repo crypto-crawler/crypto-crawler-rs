@@ -24,7 +24,7 @@ then
 fi
 
 # Delete .gz files older than 3 minutes and smaller than 32 bytes
-find $DATA_DIR -type f -name '*.json.gz' -mmin +3 -size -32c | xargs rm
+find $DATA_DIR -type f -name '*.json.gz' -mmin +3 -size -32c | xargs -r rm
 
 # compress json files older than 61 minutes and larger than 64 bytes
 find $DATA_DIR -type f -name '*.json' -mmin +61 -size +64c | xargs -r gzip
