@@ -225,14 +225,6 @@
             "instances": 1
         },
         {
-            "name": "crawler-trade-okex-spot",
-            "script": "carbonbot",
-            "args": "okex spot trade",
-            "exec_interpreter": "none",
-            "exec_mode": "fork_mode",
-            "instances": 1
-        },
-        {
             "name": "rclone",
             "script": "/usr/local/bin/rclone.sh",
             "interpreter": "bash",
