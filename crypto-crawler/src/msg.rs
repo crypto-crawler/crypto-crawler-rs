@@ -1,5 +1,6 @@
 use super::MarketType;
 use serde::{Deserialize, Serialize};
+use std::convert::TryInto;
 use std::time::{SystemTime, UNIX_EPOCH};
 use strum_macros::{Display, EnumString};
 
@@ -31,7 +32,7 @@ pub struct Message {
     /// Exchange specific symbol, used by RESTful APIs and websocket
     pub symbol: String,
     /// Unix timestamp in milliseconds
-    pub received_at: u128,
+    pub received_at: u64,
     /// the original message
     pub json: String,
 }
@@ -52,7 +53,9 @@ impl Message {
             received_at: SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
-                .as_millis(),
+                .as_millis()
+                .try_into()
+                .unwrap(),
             json,
         }
     }
