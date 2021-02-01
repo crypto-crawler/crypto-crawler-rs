@@ -1,0 +1,19 @@
+[package]
+name = "crypto-crawler-ffi"
+version = "0.1.0"
+authors = ["soulmachine <soulmachine@gmail.com>"]
+edition = "2018"
+description   = "FFI bindings for the crypto-crawler crate."
+license = "Apache-2.0"
+repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-crawler-ffi"
+keywords = ["cryptocurrency", "blockchain", "trading"]
+
+[lib]
+name = "crypto_crawler_ffi"
+crate-type = ["cdylib"]
+
+[dependencies]
+crypto-crawler = { path = "../crypto-crawler" }
+
+[build-dependencies]
+cbindgen = "0.16.0"
