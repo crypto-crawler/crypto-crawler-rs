@@ -18,6 +18,7 @@ COPY --from=builder /project/pm2.trade.json /root/pm2.trade.json
 
 RUN curl -sL https://rpm.nodesource.com/setup_lts.x | bash - && yum install -y nodejs \
  && npm install pm2 -g \
+ && pm2 install pm2-logrotate && pm2 set pm2-logrotate:compress true && pm2 set pm2-logrotate:retain 7 \
  && yum install -y gzip unzip && curl https://rclone.org/install.sh | bash \
  && yum clean all && rm -rf /var/cache/yum
 
