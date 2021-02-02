@@ -1,3 +1,4 @@
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 use std::{
     ffi::{CStr, CString},
     os::raw::c_char,
