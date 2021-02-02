@@ -9,5 +9,5 @@ fn main() {
 
     cbindgen::generate_with_config(&crate_dir, config)
         .unwrap()
-        .write_to_file("include/crypto_crawler_ffi.h");
+        .write_to_file("include/crypto_crawler.h");
 }
