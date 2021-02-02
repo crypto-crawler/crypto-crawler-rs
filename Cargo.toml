@@ -9,3 +9,6 @@ members = [
   "crypto-crawler-ffi",
   "carbonbot",
 ]
+
+[profile.release]
+lto = true
