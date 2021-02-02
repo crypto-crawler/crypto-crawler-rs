@@ -96,24 +96,6 @@ pub struct Message {
     pub json: *const c_char,
 }
 
-impl Message {
-    // Converts a Rust Message to a C Message struct.
-    pub fn from_rust(msg: crypto_crawler::Message) -> Self {
-        let exchange_cstring = CString::new(msg.exchange).unwrap();
-        let symbol_cstring = CString::new(msg.symbol).unwrap();
-        let json_cstring = CString::new(msg.json).unwrap();
-
-        Message {
-            exchange: exchange_cstring.as_ptr(),
-            market_type: MarketType::from_rust(msg.market_type),
-            msg_type: MessageType::from_rust(msg.msg_type),
-            symbol: symbol_cstring.as_ptr(),
-            received_at: msg.received_at,
-            json: json_cstring.as_ptr(),
-        }
-    }
-}
-
 // Converts an array of symbols from C to rust
 fn convert_symbols(symbols: *const *const c_char, num_symbols: usize) -> Vec<String> {
     let mut arr = Vec::<String>::new();
@@ -129,6 +111,22 @@ fn convert_symbols(symbols: *const *const c_char, num_symbols: usize) -> Vec<Str
     }
     assert_eq!(arr.len(), num_symbols);
     arr
+}
+
+fn process_msg(on_msg: extern "C" fn(*const Message), msg: crypto_crawler::Message) {
+    let exchange_cstring = CString::new(msg.exchange).unwrap();
+    let symbol_cstring = CString::new(msg.symbol).unwrap();
+    let json_cstring = CString::new(msg.json).unwrap();
+
+    let msg_ffi = Message {
+        exchange: exchange_cstring.as_ptr(),
+        market_type: MarketType::from_rust(msg.market_type),
+        msg_type: MessageType::from_rust(msg.msg_type),
+        symbol: symbol_cstring.as_ptr(),
+        received_at: msg.received_at,
+        json: json_cstring.as_ptr(),
+    };
+    on_msg(&msg_ffi);
 }
 
 /// Crawl realtime trades.
@@ -159,8 +157,7 @@ pub extern "C" fn crawl_trade(
     let symbols_rust = convert_symbols(symbols, num_symbols);
 
     let on_msg_ext = Arc::new(Mutex::new(move |msg: crypto_crawler::Message| {
-        let msg_ffi = Message::from_rust(msg);
-        on_msg(&msg_ffi);
+        process_msg(on_msg, msg);
     }));
 
     crypto_crawler::crawl_trade(
@@ -195,8 +192,7 @@ pub extern "C" fn crawl_l2_event(
     let symbols_rust = convert_symbols(symbols, num_symbols);
 
     let on_msg_ext = Arc::new(Mutex::new(move |msg: crypto_crawler::Message| {
-        let msg_ffi = Message::from_rust(msg);
-        on_msg(&msg_ffi);
+        process_msg(on_msg, msg);
     }));
 
     crypto_crawler::crawl_l2_event(
@@ -232,8 +228,7 @@ pub extern "C" fn crawl_l2_snapshot(
     let symbols_rust = convert_symbols(symbols, num_symbols);
 
     let on_msg_ext = Arc::new(Mutex::new(move |msg: crypto_crawler::Message| {
-        let msg_ffi = Message::from_rust(msg);
-        on_msg(&msg_ffi);
+        process_msg(on_msg, msg);
     }));
 
     crypto_crawler::crawl_l2_snapshot(
@@ -269,8 +264,7 @@ pub extern "C" fn crawl_l3_event(
     let symbols_rust = convert_symbols(symbols, num_symbols);
 
     let on_msg_ext = Arc::new(Mutex::new(move |msg: crypto_crawler::Message| {
-        let msg_ffi = Message::from_rust(msg);
-        on_msg(&msg_ffi);
+        process_msg(on_msg, msg);
     }));
 
     crypto_crawler::crawl_l3_event(
@@ -306,8 +300,7 @@ pub extern "C" fn crawl_l3_snapshot(
     let symbols_rust = convert_symbols(symbols, num_symbols);
 
     let on_msg_ext = Arc::new(Mutex::new(move |msg: crypto_crawler::Message| {
-        let msg_ffi = Message::from_rust(msg);
-        on_msg(&msg_ffi);
+        process_msg(on_msg, msg);
     }));
 
     crypto_crawler::crawl_l3_snapshot(
