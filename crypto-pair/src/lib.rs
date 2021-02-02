@@ -361,8 +361,8 @@ pub fn normalize_pair(raw_pair: &str, exchange: &str) -> Option<String> {
 
             let tmp: &str = &quote_symbol;
             if !KRAKEN_QUOTE_SYMBOLS.contains(tmp) {
-                ("".to_string(), "".to_string())
                 // throw new Error(`Failed to parse Kraken raw pair ${raw_pair}`);
+                ("".to_string(), "".to_string())
             } else {
                 (base_symbol, quote_symbol)
             }
@@ -375,8 +375,8 @@ pub fn normalize_pair(raw_pair: &str, exchange: &str) -> Option<String> {
                 let v: Vec<&str> = raw_pair.split('_').collect();
                 (v[0].to_string(), v[1].to_string())
             } else {
-                ("".to_string(), "".to_string())
                 // throw new Error(`Failed to parse ${raw_pair} for Newdex`);
+                ("".to_string(), "".to_string())
             }
         }
         "OKEx" => {
@@ -398,8 +398,8 @@ pub fn normalize_pair(raw_pair: &str, exchange: &str) -> Option<String> {
     if base_symbol.is_empty() || quote_symbol.is_empty() {
         let normalized_pair = default_normalize_pair(raw_pair);
         if normalized_pair == None {
-            None
             // throw new Error(`Failed to parse ${raw_pair} of exchange ${exchange}`);
+            None
         } else {
             let tmp = normalized_pair.unwrap();
             let v: Vec<&str> = tmp.split('_').collect();
