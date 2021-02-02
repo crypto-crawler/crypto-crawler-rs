@@ -11,7 +11,7 @@ crate-type = ["cdylib"]
 lto = true
 
 [dependencies]
-crypto-crawler = "1.1.2"
+crypto-crawler = { path = "../crypto-crawler" }
 
 [build-dependencies]
 cbindgen = "0.16.0"
