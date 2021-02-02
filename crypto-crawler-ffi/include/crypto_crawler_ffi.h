@@ -83,3 +83,45 @@ void crawl_trade(const char *exchange,
                  uintptr_t num_symbols,
                  void (*on_msg)(const struct Message*),
                  uint64_t duration);
+
+/**
+ * Crawl level2 orderbook update events.
+ */
+void crawl_l2_event(const char *exchange,
+                    enum MarketType market_type,
+                    const char *const *symbols,
+                    uintptr_t num_symbols,
+                    void (*on_msg)(const struct Message*),
+                    uint64_t duration);
+
+/**
+ * Crawl level2 orderbook snapshots through RESTful APIs.
+ */
+void crawl_l2_snapshot(const char *exchange,
+                       enum MarketType market_type,
+                       const char *const *symbols,
+                       uintptr_t num_symbols,
+                       void (*on_msg)(const struct Message*),
+                       uint64_t interval,
+                       uint64_t duration);
+
+/**
+ * Crawl level3 orderbook update events.
+ */
+void crawl_l3_event(const char *exchange,
+                    enum MarketType market_type,
+                    const char *const *symbols,
+                    uintptr_t num_symbols,
+                    void (*on_msg)(const struct Message*),
+                    uint64_t duration);
+
+/**
+ * Crawl level3 orderbook snapshots through RESTful APIs.
+ */
+void crawl_l3_snapshot(const char *exchange,
+                       enum MarketType market_type,
+                       const char *const *symbols,
+                       uintptr_t num_symbols,
+                       void (*on_msg)(const struct Message*),
+                       uint64_t interval,
+                       uint64_t duration);
