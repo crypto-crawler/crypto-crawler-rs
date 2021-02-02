@@ -5,7 +5,7 @@ pub(super) fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Ve
     if std::env::var("https_proxy").is_ok() {
         // retry retry_count times if there is a https_proxy
         let retry_count = std::env::var("REST_RETRY_COUNT")
-            .unwrap_or("5".to_string())
+            .unwrap_or_else(|_| "5".to_string())
             .parse::<i64>()
             .unwrap();
         let mut symbols = Vec::<String>::new();
