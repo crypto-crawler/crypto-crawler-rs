@@ -6,7 +6,6 @@ members = [
   "crypto-rest-client",
   "crypto-ws-client",
   "crypto-crawler",
-  "crypto-crawler-ffi",
   "carbonbot",
 ]
 
