@@ -7,6 +7,7 @@ COPY ./Cargo.toml ./Cargo.toml
 COPY ./pm2.trade.json ./pm2.trade.json
 COPY ./src/ ./src/
 
+# the openssl crate needs pkg-config and openssl
 RUN yum update -y && yum install -y pkgconfig openssl-devel \
  && amazon-linux-extras install -y rust1 && cargo build --release
 
