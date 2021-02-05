@@ -4,7 +4,6 @@ RUN mkdir /project
 WORKDIR /project
 
 COPY ./Cargo.toml ./Cargo.toml
-COPY ./pm2.trade.json ./pm2.trade.json
 COPY ./src/ ./src/
 
 # the openssl crate needs pkg-config and openssl
@@ -15,16 +14,16 @@ RUN yum update -y && yum install -y pkgconfig openssl-devel \
 FROM amazonlinux:latest
 
 COPY --from=builder /project/target/release/carbonbot /usr/local/bin/
-COPY --from=builder /project/pm2.trade.json /root/pm2.trade.json
 
 RUN curl -sL https://rpm.nodesource.com/setup_lts.x | bash - && yum install -y nodejs \
  && npm install pm2 -g \
  && pm2 install pm2-logrotate && pm2 set pm2-logrotate:compress true && pm2 set pm2-logrotate:retain 7 \
- && yum install -y gzip unzip && curl https://rclone.org/install.sh | bash \
+ && yum install -y gzip unzip logrotate && curl https://rclone.org/install.sh | bash \
  && yum clean all && rm -rf /var/cache/yum
 
-COPY ./rclone/rclone.conf /root/.config/rclone/rclone.conf
-COPY ./rclone/rclone.sh /usr/local/bin/rclone.sh
+COPY ./pm2.trade.config.js /root/pm2.trade.config.js
+COPY ./conf/rclone.conf /root/.config/rclone/rclone.conf
+COPY ./conf/logrotate.conf /usr/local/etc/logrotate.conf
 
 ENV RUST_LOG "warn"
 ENV RUST_BACKTRACE 1

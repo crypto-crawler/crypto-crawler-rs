@@ -4,7 +4,6 @@ RUN mkdir /project
 WORKDIR /project
 
 COPY ./Cargo.toml ./Cargo.toml
-COPY ./pm2.trade.json ./pm2.trade.json
 COPY ./src/ ./src/
 
 RUN cargo build --release
@@ -13,10 +12,10 @@ RUN cargo build --release
 FROM node:buster-slim
 
 COPY --from=builder /project/target/release/carbonbot /usr/local/bin/
-COPY --from=builder --chown=node:node /project/pm2.trade.json /home/node/pm2.trade.json
 
 RUN apt-get -qy update && apt-get -qy --no-install-recommends install \
-    pkg-config libssl-dev ca-certificates curl \
+    pkg-config libssl-dev ca-certificates curl logrotate \
+ && chown -R node:node /var/lib/logrotate/ \
  && npm install pm2 -g \
  && apt-get -qy install gzip unzip && curl https://rclone.org/install.sh | bash \
  && apt-get -qy autoremove && apt-get clean && rm -rf /var/lib/apt/lists/* && rm -rf /tmp/*
@@ -28,8 +27,9 @@ RUN curl -SsL https://github.com/boxboat/fixuid/releases/download/v0.5/fixuid-0.
     mkdir -p /etc/fixuid && \
     printf "user: node\ngroup: node\n" > /etc/fixuid/config.yml
 
-COPY --chown=node:node ./rclone/rclone.conf /home/node/.config/rclone/rclone.conf
-COPY ./rclone/rclone.sh /usr/local/bin/rclone.sh
+COPY --chown=node:node ./pm2.trade.config.js /home/node/pm2.trade.config.js
+COPY --chown=node:node ./conf/rclone.conf /home/node/.config/rclone/rclone.conf
+COPY ./conf/logrotate.conf /usr/local/etc/logrotate.conf
 
 ENV RUST_LOG "warn"
 ENV RUST_BACKTRACE 1

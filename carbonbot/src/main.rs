@@ -7,7 +7,7 @@ use std::{
     str::FromStr,
     sync::{Arc, Mutex},
 };
-use writers::{RotatedFileWriter, Writer};
+use writers::{FileWriter, Writer};
 
 use dashmap::{DashMap, DashSet};
 
@@ -17,7 +17,7 @@ pub fn crawl(
     msg_type: MessageType,
     data_dir: &'static str,
 ) {
-    let writers_map: Arc<DashMap<String, RotatedFileWriter>> = Arc::new(DashMap::new());
+    let writers_map: Arc<DashMap<String, FileWriter>> = Arc::new(DashMap::new());
     let symbols: Arc<DashSet<String>> = Arc::new(DashSet::new());
 
     let writers_map_clone = writers_map.clone();
@@ -32,10 +32,15 @@ pub fn crawl(
                 .join(exchange)
                 .join(market_type.to_string())
                 .into_os_string();
-            let prefix = format!("{}.{}.{}.", exchange, market_type, msg_type);
+            std::fs::create_dir_all(data_dir.as_os_str()).unwrap();
+
+            let file_name = format!("{}.{}.{}", exchange, market_type, msg_type);
+            let file_path = Path::new(data_dir.as_os_str())
+                .join(file_name)
+                .into_os_string();
             writers_map_clone.insert(
                 key.clone(),
-                RotatedFileWriter::new(data_dir.as_os_str().to_str().unwrap(), prefix.as_str()),
+                FileWriter::new(file_path.as_os_str().to_str().unwrap()),
             );
         }
 

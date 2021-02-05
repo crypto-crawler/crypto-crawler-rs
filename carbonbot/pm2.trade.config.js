@@ -42,9 +42,11 @@ Object.keys(market_types).forEach((exchange) => {
 });
 
 apps.push({
-    name: "rclone",
-    script: "/usr/local/bin/rclone.sh",
-    interpreter: "bash",
+    name: "logrotate",
+    script: "logrotate",
+    args: "/usr/local/etc/logrotate.conf",
+    exec_interpreter: "none",
+    exec_mode: "fork_mode",
     cron_restart: "*/15 * * * *",
     autorestart: false,
 });

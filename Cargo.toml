@@ -8,6 +8,3 @@ members = [
   "crypto-crawler",
   "carbonbot",
 ]
-
-[profile.release]
-lto = true
