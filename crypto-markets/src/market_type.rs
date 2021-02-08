@@ -49,6 +49,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::Option,
         ],
         "bitfinex" => vec![MarketType::Spot, MarketType::LinearSwap],
+        // BitMEX only handles Bitcoin. All profit and loss is in Bitcoin
         "bitmex" => vec![
             MarketType::InverseSwap,
             MarketType::QuantoSwap,
@@ -58,6 +59,12 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
         ],
         "bitstamp" => vec![MarketType::Spot],
         "coinbase_pro" => vec![MarketType::Spot],
+        // Deribit only accepts Bitcoin as funds to deposit.
+        "deribit" => vec![
+            MarketType::InverseFuture,
+            MarketType::InverseSwap,
+            MarketType::Option,
+        ],
         "huobi" => vec![
             MarketType::Spot,
             MarketType::InverseFuture,
