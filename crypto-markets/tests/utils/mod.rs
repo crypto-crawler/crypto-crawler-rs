@@ -1,3 +1,4 @@
+#[allow(unused_macros)]
 macro_rules! gen_all_symbols {
     () => {
         let market_types = get_market_types(EXCHANGE_NAME);
