@@ -23,6 +23,7 @@ const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = usize::MAX;
 fn extract_symbol(json: &str) -> String {
     let obj = serde_json::from_str::<HashMap<String, Value>>(&json).unwrap();
     let arr = obj.get("data").unwrap().as_array().unwrap();
+    debug_assert_eq!(1, arr.len());
     let symbol = arr[0]
         .as_object()
         .unwrap()
