@@ -1,15 +1,11 @@
 use super::Writer;
 
-use std::{
-    fs,
-    io::{BufWriter, Write},
-    sync::Mutex,
-};
+use std::{fs, io::Write, sync::Mutex};
 
 use log::*;
 
 pub(crate) struct FileWriter {
-    file: Mutex<BufWriter<fs::File>>,
+    file: Mutex<fs::File>,
     path: String,
 }
 
@@ -22,7 +18,7 @@ impl FileWriter {
             .expect(format!("Failed to open {}", path).as_str());
 
         FileWriter {
-            file: Mutex::new(BufWriter::new(file)),
+            file: Mutex::new(file),
             path: path.to_string(),
         }
     }
@@ -41,7 +37,7 @@ impl Writer for FileWriter {
             error!("{}, {}", self.path, e);
         }
 
-        if let Err(e) = file.get_ref().sync_all() {
+        if let Err(e) = file.sync_all() {
             error!("{}, {}", self.path, e);
         }
     }
