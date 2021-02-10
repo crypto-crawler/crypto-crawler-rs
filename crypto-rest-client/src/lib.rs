@@ -11,6 +11,7 @@ pub use exchanges::bitfinex::BitfinexRestClient;
 pub use exchanges::bitmex::BitmexRestClient;
 pub use exchanges::bitstamp::BitstampRestClient;
 pub use exchanges::coinbase_pro::CoinbaseProRestClient;
+pub use exchanges::deribit::DeribitRestClient;
 pub use exchanges::huobi::huobi_future::HuobiFutureRestClient;
 pub use exchanges::huobi::huobi_inverse_swap::HuobiInverseSwapRestClient;
 pub use exchanges::huobi::huobi_linear_swap::HuobiLinearSwapRestClient;
