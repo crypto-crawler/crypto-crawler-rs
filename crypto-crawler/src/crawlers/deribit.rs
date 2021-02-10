@@ -38,11 +38,7 @@ fn extract_symbol(json: &str) -> String {
 gen_check_args!(EXCHANGE_NAME);
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_inverse_future, DeribitWSClient, MessageType::Trade, subscribe_trade);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_trade_inverse_swap, DeribitWSClient, MessageType::Trade, subscribe_trade);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_trade_option, DeribitWSClient, MessageType::Trade, subscribe_trade);
+gen_crawl_event!(crawl_trade_internal, DeribitWSClient, MessageType::Trade, subscribe_trade);
 
 pub(crate) fn crawl_trade(
     market_type: MarketType,
@@ -77,16 +73,7 @@ pub(crate) fn crawl_trade(
         ws_client.run(duration);
         None
     } else {
-        match market_type {
-            MarketType::InverseFuture => {
-                crawl_trade_inverse_future(market_type, symbols, on_msg, duration)
-            }
-            MarketType::InverseSwap => {
-                crawl_trade_inverse_swap(market_type, symbols, on_msg, duration)
-            }
-            MarketType::Option => crawl_trade_option(market_type, symbols, on_msg, duration),
-            _ => panic!("Binance does NOT have the {} market type", market_type),
-        }
+        crawl_trade_internal(market_type, symbols, on_msg, duration)
     }
 }
 
