@@ -13,6 +13,32 @@ use std::{
 
 const EXCHANGE_NAME: &str = "okex";
 
+#[test_case(MarketType::Spot)]
+#[test_case(MarketType::InverseFuture)]
+#[test_case(MarketType::LinearFuture)]
+#[test_case(MarketType::InverseSwap)]
+#[test_case(MarketType::LinearSwap)]
+#[test_case(MarketType::Option)]
+fn test_crawl_trade_all(market_type: MarketType) {
+    thread_local! {
+        static MESSAGES: RefCell<Vec<Message>> = RefCell::new(Vec::new());
+    }
+
+    let on_msg = Arc::new(Mutex::new(|msg: Message| {
+        MESSAGES.with(|messages| messages.borrow_mut().push(msg))
+    }));
+    crawl_trade(EXCHANGE_NAME, market_type, None, on_msg, Some(0));
+
+    MESSAGES.with(|slf| {
+        let messages = slf.borrow();
+
+        assert!(!messages.is_empty());
+        assert_eq!(messages[0].exchange, EXCHANGE_NAME.to_string());
+        assert_eq!(messages[0].market_type, market_type);
+        assert_eq!(messages[0].msg_type, MessageType::Trade);
+    });
+}
+
 #[test_case(MarketType::Spot, "BTC-USDT")]
 #[test_case(MarketType::InverseFuture, "BTC-USD-210625")]
 #[test_case(MarketType::LinearFuture, "BTC-USDT-210625")]
