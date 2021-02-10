@@ -14,4 +14,10 @@ mod okex_swap {
         let text = OkexRestClient::fetch_l2_snapshot("BTC-USDT-SWAP").unwrap();
         assert!(text.starts_with("{"));
     }
+
+    #[test]
+    fn test_option_underlying() {
+        let arr = OkexRestClient::fetch_option_underlying().unwrap();
+        assert!(!arr.is_empty());
+    }
 }

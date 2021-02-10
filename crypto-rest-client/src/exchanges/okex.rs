@@ -58,6 +58,16 @@ impl OkexRestClient {
             }
         ))
     }
+
+    /// Get option underlying.
+    pub fn fetch_option_underlying() -> Result<Vec<String>> {
+        let txt = http_get(
+            "https://www.okex.com/api/option/v3/underlying",
+            &HashMap::new(),
+        )?;
+        let underlying_indexes = serde_json::from_str::<Vec<String>>(&txt)?;
+        Ok(underlying_indexes)
+    }
 }
 
 fn pair_to_market_type(pair: &str) -> &'static str {
