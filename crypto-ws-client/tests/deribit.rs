@@ -5,13 +5,15 @@ use std::sync::{Arc, Mutex};
 mod utils;
 
 #[test]
-fn deribit_platform_state() {
+fn deribit_all_trades() {
     gen_test_code!(
         DeribitWSClient,
         subscribe,
         &vec![
             "trades.future.BTC.raw".to_string(),
-            "trades.future.ETH.raw".to_string()
+            "trades.future.ETH.raw".to_string(),
+            "trades.option.BTC.raw".to_string(),
+            "trades.option.ETH.raw".to_string()
         ]
     );
 }
