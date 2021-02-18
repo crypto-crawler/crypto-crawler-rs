@@ -13,9 +13,6 @@ use flate2::read::{DeflateDecoder, GzDecoder};
 use log::*;
 use tungstenite::{client::AutoStream, error::ProtocolError, Error, Message, WebSocket};
 
-// ping_interval - ping_latency = websocket_read_timeout
-const PING_LATENCY: u64 = 2;
-
 pub(super) enum MiscMessage {
     WebSocket(Message), // WebSocket message that needs to be sent to the server
     Reconnect,          // Needs to reconnect
@@ -50,7 +47,7 @@ impl<'a> WSClientInternal<'a> {
         let stream = connect_with_retry(
             url,
             if let Some(interval_and_msg) = ping_interval_and_msg {
-                Some(interval_and_msg.0 - PING_LATENCY)
+                Some(interval_and_msg.0 / 2)
             } else {
                 None
             },
@@ -107,7 +104,7 @@ impl<'a> WSClientInternal<'a> {
             *guard = connect_with_retry(
                 self.url.as_str(),
                 if let Some(interval_and_msg) = self.ping_interval_and_msg {
-                    Some(interval_and_msg.0 - PING_LATENCY)
+                    Some(interval_and_msg.0 / 2)
                 } else {
                     None
                 },
@@ -170,7 +167,8 @@ impl<'a> WSClientInternal<'a> {
     }
 
     pub fn run(&self, duration: Option<u64>) {
-        let now = Instant::now();
+        let start_timstamp = Instant::now();
+        let mut last_ping_timestamp = Instant::now();
         while !self.should_stop.load(Ordering::Acquire) {
             let resp = self.ws_stream.lock().unwrap().read_message();
             let normal = match resp {
@@ -240,33 +238,15 @@ impl<'a> WSClientInternal<'a> {
                         }
                         Error::Io(io_err) => {
                             if io_err.kind() == std::io::ErrorKind::WouldBlock {
-                                info!("Sending ping");
-                                // send ping
-                                let ping_msg = Message::Text(
-                                    self.ping_interval_and_msg.unwrap().1.to_string(),
-                                );
-                                if let Err(err) =
-                                    self.ws_stream.lock().unwrap().write_message(ping_msg)
-                                {
-                                    error!("{}", err);
-                                }
+                                info!("read_message() timeout");
                             } else {
-                                let err_msg = io_err.to_string();
-                                if err_msg.contains("connection closed via error") {
-                                    error!(
-                                        "I/O error thrown from read_message(): {}, {:?}",
-                                        io_err,
-                                        io_err.kind()
-                                    );
-                                    // self.reconnect();
-                                    std::process::exit(0); // fail fast, pm2 will restart
-                                } else {
-                                    error!(
-                                        "I/O error thrown from read_message(): {}, {:?}",
-                                        io_err,
-                                        io_err.kind()
-                                    );
-                                }
+                                error!(
+                                    "I/O error thrown from read_message(): {}, {:?}",
+                                    io_err,
+                                    io_err.kind()
+                                );
+                                // self.reconnect();
+                                std::process::exit(0); // fail fast, pm2 will restart
                             }
                         }
                         Error::Protocol(protocol_err) => {
@@ -291,8 +271,20 @@ impl<'a> WSClientInternal<'a> {
                 }
             };
 
+            if let Some(interval_and_msg) = self.ping_interval_and_msg {
+                if last_ping_timestamp.elapsed() >= Duration::from_secs(interval_and_msg.0 - 1) {
+                    info!("Sending ping: {}", interval_and_msg.1);
+                    // send ping
+                    let ping_msg = Message::Text(interval_and_msg.1.to_string());
+                    last_ping_timestamp = Instant::now();
+                    if let Err(err) = self.ws_stream.lock().unwrap().write_message(ping_msg) {
+                        error!("{}", err);
+                    }
+                }
+            }
+
             if let Some(seconds) = duration {
-                if now.elapsed() > Duration::from_secs(seconds) && normal {
+                if start_timstamp.elapsed() > Duration::from_secs(seconds) && normal {
                     break;
                 }
             }
