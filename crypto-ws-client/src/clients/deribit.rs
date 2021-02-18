@@ -69,7 +69,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
             MiscMessage::Misc
         } else if result.is_array() {
             let arr = result.as_array().unwrap();
-            if arr.len() > 0 {
+            if !arr.is_empty() {
                 if arr[0].is_object() {
                     MiscMessage::Normal
                 } else {

@@ -69,6 +69,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
             "error" => {
                 error!("Received {} from {}", msg, EXCHANGE_NAME);
                 if let Some(error_code) = obj.get("errorCode") {
+                    #[allow(clippy::single_match)]
                     match error_code.as_i64().unwrap() {
                         30040 => {
                             // channel doesn't exist
