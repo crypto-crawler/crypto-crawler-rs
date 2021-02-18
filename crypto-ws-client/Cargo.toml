@@ -1,6 +1,6 @@
 [package]
 name = "crypto-ws-client"
-version = "2.1.8"
+version = "2.1.9"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "A versatile websocket client that supports many cryptocurrency exchanges."
@@ -12,6 +12,8 @@ keywords = ["cryptocurrency", "blockchain", "trading", "websocket"]
 flate2 = "1"
 log = "0.4"
 serde_json = "1"
-tungstenite = "0.13"
+tungstenite = { version = "0.13", default-features = false, features = ["rustls-tls"] }
 http = "0.2"
-native-tls = "0.2"
+rustls = "0.19.0"
+webpki = "0.21.4"
+webpki-roots = "0.21.0"
