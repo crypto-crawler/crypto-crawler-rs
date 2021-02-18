@@ -11,7 +11,7 @@ use std::{
 
 use flate2::read::{DeflateDecoder, GzDecoder};
 use log::*;
-use tungstenite::{client::AutoStream, Error, Message, WebSocket};
+use tungstenite::{client::AutoStream, error::ProtocolError, Error, Message, WebSocket};
 
 // ping_interval - ping_latency = websocket_read_timeout
 const PING_LATENCY: u64 = 2;
@@ -270,7 +270,7 @@ impl<'a> WSClientInternal<'a> {
                             }
                         }
                         Error::Protocol(protocol_err) => {
-                            if protocol_err.contains("Connection reset without closing handshake") {
+                            if protocol_err == ProtocolError::ResetWithoutClosingHandshake {
                                 error!("ResetWithoutClosingHandshake");
                                 // self.reconnect();
                                 std::process::exit(0); // fail fast, pm2 will restart
