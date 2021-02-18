@@ -20,7 +20,8 @@ pub(super) const SPOT_WEBSOCKET_URL: &str =
 pub(super) const SWAP_WEBSOCKET_URL: &str = "wss://contract.mxc.com/ws";
 
 const SPOT_PING_INTERVAL_AND_MSG: (u64, &str) = (5, "2");
-const SWAP_PING_INTERVAL_AND_MSG: (u64, &str) = (10, r#"{"method":"ping"}"#);
+// more than 60 seconds no response, close the channel
+const SWAP_PING_INTERVAL_AND_MSG: (u64, &str) = (60, r#"{"method":"ping"}"#);
 
 /// MXC Spot market.
 ///
