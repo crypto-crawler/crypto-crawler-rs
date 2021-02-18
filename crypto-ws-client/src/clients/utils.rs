@@ -12,7 +12,7 @@ use tungstenite::{
     error::{TlsError, UrlError},
     handshake::{client::Response, HandshakeError},
     stream::{Mode, NoDelay, Stream as StreamSwitcher},
-    ClientHandshake, Error, Result, WebSocket,
+    Error, Result, WebSocket,
 };
 use webpki::DNSNameRef;
 
@@ -81,29 +81,32 @@ fn connect_with_timeout(
     let addrs = (host, port).to_socket_addrs()?;
     let mut stream = connect_to_some(addrs.as_slice(), &request.uri(), mode, timeout)?;
     NoDelay::set_nodelay(&mut stream, true)?;
-    ClientHandshake::start(stream, request.into_client_request()?, None)?
-        .handshake()
-        .map_err(|e| match e {
-            HandshakeError::Failure(f) => f,
-            HandshakeError::Interrupted(_) => panic!("Bug: blocking handshake not blocked"),
-        })
+    tungstenite::client(request, stream).map_err(|e| match e {
+        HandshakeError::Failure(f) => f,
+        HandshakeError::Interrupted(_) => panic!("Bug: blocking handshake not blocked"),
+    })
 }
 
 // This function is equivalent to tungstenite::connect(), with an additional benefit that
 // it can make read_message() timeout after 5 seconds
 pub(super) fn connect_with_retry(url: &str, timeout: Option<u64>) -> WebSocket<AutoStream> {
-    for _ in 0..3 {
+    let count = 3;
+    let mut error_msg: String = String::new();
+    for i in 0..count {
         let res = connect_with_timeout(url, timeout);
         match res {
             Ok((ws_stream, _)) => return ws_stream,
             Err(err) => {
                 warn!("Error connecting to {}, {}, aborted", url, err);
                 thread::sleep(time::Duration::from_secs(3));
+                if i == count - 1 {
+                    error_msg = err.to_string();
+                }
             }
         }
     }
 
-    panic!("Error connecting to {}, aborted", url);
+    panic!("Error connecting to {}, {}, aborted", url, error_msg);
 }
 
 pub(super) const CHANNEL_PAIR_DELIMITER: char = ':';
