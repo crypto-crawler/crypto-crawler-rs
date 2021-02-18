@@ -1,8 +1,9 @@
 use http::Uri;
 use log::*;
-use native_tls::{HandshakeError as TlsHandshakeError, TlsConnector};
+use rustls::{ClientConfig, ClientSession, StreamOwned};
 use std::{
     net::{SocketAddr, TcpStream, ToSocketAddrs},
+    sync::Arc,
     thread,
     time::{self, Duration},
 };
@@ -11,28 +12,33 @@ use tungstenite::{
     error::{TlsError, UrlError},
     handshake::{client::Response, HandshakeError},
     stream::{Mode, NoDelay, Stream as StreamSwitcher},
-    Error, Result, WebSocket,
+    ClientHandshake, Error, Result, WebSocket,
 };
+use webpki::DNSNameRef;
 
+// copied from https://github.com/snapview/tungstenite-rs/blob/master/src/client.rs#L69
 fn wrap_stream(stream: TcpStream, domain: &str, mode: Mode) -> Result<AutoStream> {
     match mode {
         Mode::Plain => Ok(StreamSwitcher::Plain(stream)),
         Mode::Tls => {
-            let connector = TlsConnector::builder().build().map_err(TlsError::Native)?;
-            connector
-                .connect(domain, stream)
-                .map_err(|e| match e {
-                    TlsHandshakeError::Failure(f) => TlsError::Native(f).into(),
-                    TlsHandshakeError::WouldBlock(_) => {
-                        panic!("Bug: TLS handshake not blocked")
-                    }
-                })
-                .map(StreamSwitcher::Tls)
+            let config = {
+                let mut config = ClientConfig::new();
+                config
+                    .root_store
+                    .add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
+
+                Arc::new(config)
+            };
+            let domain = DNSNameRef::try_from_ascii_str(domain).map_err(TlsError::Dns)?;
+            let client = ClientSession::new(&config, domain);
+            let stream = StreamOwned::new(client, stream);
+
+            Ok(StreamSwitcher::Tls(stream))
         }
     }
 }
 
-// copied from https://github.com/snapview/tungstenite-rs/blob/master/src/client.rs#L167
+// copied from https://github.com/snapview/tungstenite-rs/blob/master/src/client.rs#L206
 fn connect_to_some(
     addrs: &[SocketAddr],
     uri: &Uri,
@@ -75,36 +81,29 @@ fn connect_with_timeout(
     let addrs = (host, port).to_socket_addrs()?;
     let mut stream = connect_to_some(addrs.as_slice(), &request.uri(), mode, timeout)?;
     NoDelay::set_nodelay(&mut stream, true)?;
-
-    client::client(request, stream).map_err(|e| match e {
-        HandshakeError::Failure(f) => f,
-        HandshakeError::Interrupted(_) => panic!("Bug: blocking handshake not blocked"),
-    })
+    ClientHandshake::start(stream, request.into_client_request()?, None)?
+        .handshake()
+        .map_err(|e| match e {
+            HandshakeError::Failure(f) => f,
+            HandshakeError::Interrupted(_) => panic!("Bug: blocking handshake not blocked"),
+        })
 }
 
 // This function is equivalent to tungstenite::connect(), with an additional benefit that
 // it can make read_message() timeout after 5 seconds
 pub(super) fn connect_with_retry(url: &str, timeout: Option<u64>) -> WebSocket<AutoStream> {
-    let mut res = connect_with_timeout(url, timeout);
-    let mut count: i8 = 1;
-    while res.is_err() && count < 3 {
-        warn!(
-            "Error connecting to {}, {}, re-connecting now...",
-            url,
-            res.unwrap_err()
-        );
-        thread::sleep(time::Duration::from_secs(3));
-        res = tungstenite::connect(url);
-        count += 1;
-    }
-
-    match res {
-        Ok((ws_stream, _)) => ws_stream,
-        Err(err) => {
-            error!("Error connecting to {}, {}, aborted", url, err);
-            panic!("Error connecting to {}, {}, aborted", url, err);
+    for _ in 0..3 {
+        let res = connect_with_timeout(url, timeout);
+        match res {
+            Ok((ws_stream, _)) => return ws_stream,
+            Err(err) => {
+                warn!("Error connecting to {}, {}, aborted", url, err);
+                thread::sleep(time::Duration::from_secs(3));
+            }
         }
     }
+
+    panic!("Error connecting to {}, aborted", url);
 }
 
 pub(super) const CHANNEL_PAIR_DELIMITER: char = ':';
