@@ -8,6 +8,7 @@ use std::{
 };
 use tungstenite::{
     client::{self, AutoStream, IntoClientRequest},
+    error::{TlsError, UrlError},
     handshake::{client::Response, HandshakeError},
     stream::{Mode, NoDelay, Stream as StreamSwitcher},
     Error, Result, WebSocket,
@@ -17,11 +18,11 @@ fn wrap_stream(stream: TcpStream, domain: &str, mode: Mode) -> Result<AutoStream
     match mode {
         Mode::Plain => Ok(StreamSwitcher::Plain(stream)),
         Mode::Tls => {
-            let connector = TlsConnector::builder().build()?;
+            let connector = TlsConnector::builder().build().map_err(TlsError::Native)?;
             connector
                 .connect(domain, stream)
                 .map_err(|e| match e {
-                    TlsHandshakeError::Failure(f) => f.into(),
+                    TlsHandshakeError::Failure(f) => TlsError::Native(f).into(),
                     TlsHandshakeError::WouldBlock(_) => {
                         panic!("Bug: TLS handshake not blocked")
                     }
@@ -38,9 +39,7 @@ fn connect_to_some(
     mode: Mode,
     timeout: Option<u64>,
 ) -> Result<AutoStream> {
-    let domain = uri
-        .host()
-        .ok_or_else(|| Error::Url("No host name in the URL".into()))?;
+    let domain = uri.host().ok_or(Error::Url(UrlError::NoHostName))?;
     for addr in addrs {
         debug!("Trying to contact {} at {}...", uri, addr);
         if let Ok(raw_stream) = TcpStream::connect(addr) {
@@ -52,7 +51,7 @@ fn connect_to_some(
             }
         }
     }
-    Err(Error::Url(format!("Unable to connect to {}", uri).into()))
+    Err(Error::Url(UrlError::UnableToConnect(uri.to_string())))
 }
 
 // Usually ws_stream.read_message() blocks forever,
@@ -68,7 +67,7 @@ fn connect_with_timeout(
     let host = request
         .uri()
         .host()
-        .ok_or_else(|| Error::Url("No host name in the URL".into()))?;
+        .ok_or(Error::Url(UrlError::NoHostName))?;
     let port = uri.port_u16().unwrap_or(match mode {
         Mode::Plain => 80,
         Mode::Tls => 443,
