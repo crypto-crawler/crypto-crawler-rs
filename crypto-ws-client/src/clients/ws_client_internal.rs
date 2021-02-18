@@ -272,7 +272,7 @@ impl<'a> WSClientInternal<'a> {
             };
 
             if let Some(interval_and_msg) = self.ping_interval_and_msg {
-                if last_ping_timestamp.elapsed() >= Duration::from_secs(interval_and_msg.0 - 1) {
+                if last_ping_timestamp.elapsed() >= Duration::from_secs(interval_and_msg.0 / 2) {
                     info!("Sending ping: {}", interval_and_msg.1);
                     // send ping
                     let ping_msg = Message::Text(interval_and_msg.1.to_string());
