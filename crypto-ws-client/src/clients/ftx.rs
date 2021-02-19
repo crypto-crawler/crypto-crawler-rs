@@ -58,11 +58,12 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     let msg_type = obj.get("type").unwrap().as_str().unwrap();
 
     match msg_type {
-        "pong" | "subscribed" | "unsubscribed" => {
+        // see https://docs.ftx.com/#response-format
+        "pong" | "subscribed" | "unsubscribed" | "info" => {
             info!("Received {} from {}", msg, EXCHANGE_NAME);
             MiscMessage::Misc
         }
-        "update" => MiscMessage::Normal,
+        "partial" | "update" => MiscMessage::Normal,
         "error" => {
             error!("Received {} from {}", msg, EXCHANGE_NAME);
             panic!("Received {} from {}", msg, EXCHANGE_NAME);
