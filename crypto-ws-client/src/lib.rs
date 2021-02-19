@@ -71,6 +71,7 @@ pub use clients::bitmex::*;
 pub use clients::bitstamp::*;
 pub use clients::coinbase_pro::*;
 pub use clients::deribit::*;
+pub use clients::ftx::*;
 pub use clients::huobi::*;
 pub use clients::kraken::*;
 pub use clients::mxc::*;

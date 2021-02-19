@@ -36,6 +36,10 @@ pub enum MarketType {
 
     QuantoFuture,
     QuantoSwap,
+
+    Move,
+    #[serde(rename = "bvol")]
+    BVOL,
 }
 
 /// Get market types of a cryptocurrency exchange.
@@ -64,6 +68,13 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::InverseFuture,
             MarketType::InverseSwap,
             MarketType::Option,
+        ],
+        "ftx" => vec![
+            MarketType::Spot,
+            MarketType::LinearFuture,
+            MarketType::LinearSwap,
+            MarketType::Move,
+            MarketType::BVOL,
         ],
         "huobi" => vec![
             MarketType::Spot,
