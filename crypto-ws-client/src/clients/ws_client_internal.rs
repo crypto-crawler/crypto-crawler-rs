@@ -137,6 +137,7 @@ impl<'a> WSClientInternal<'a> {
             MiscMessage::Reconnect => {
                 // self.reconnect();
                 error!("Server asked client to reconnect, exiting now...");
+                std::thread::sleep(Duration::from_secs(5));
                 std::process::exit(0); // fail fast, pm2 will restart
             }
             MiscMessage::WebSocket(ws_msg) => {
@@ -230,6 +231,7 @@ impl<'a> WSClientInternal<'a> {
                         Error::ConnectionClosed => {
                             error!("Server closed connection, exiting now...");
                             // self.reconnect();
+                            std::thread::sleep(Duration::from_secs(5));
                             std::process::exit(0); // fail fast, pm2 will restart
                         }
                         Error::AlreadyClosed => {
@@ -246,6 +248,7 @@ impl<'a> WSClientInternal<'a> {
                                     io_err.kind()
                                 );
                                 // self.reconnect();
+                                std::thread::sleep(Duration::from_secs(5));
                                 std::process::exit(0); // fail fast, pm2 will restart
                             }
                         }
@@ -253,6 +256,7 @@ impl<'a> WSClientInternal<'a> {
                             if protocol_err == ProtocolError::ResetWithoutClosingHandshake {
                                 error!("ResetWithoutClosingHandshake");
                                 // self.reconnect();
+                                std::thread::sleep(Duration::from_secs(5));
                                 std::process::exit(0); // fail fast, pm2 will restart
                             } else {
                                 error!(
