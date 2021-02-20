@@ -69,6 +69,7 @@ pub use clients::binance_option::*;
 pub use clients::bitfinex::*;
 pub use clients::bitmex::*;
 pub use clients::bitstamp::*;
+pub use clients::bybit::*;
 pub use clients::coinbase_pro::*;
 pub use clients::deribit::*;
 pub use clients::ftx::*;

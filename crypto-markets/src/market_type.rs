@@ -62,6 +62,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::QuantoFuture,
         ],
         "bitstamp" => vec![MarketType::Spot],
+        "bybit" => vec![MarketType::InverseSwap, MarketType::LinearSwap],
         "coinbase_pro" => vec![MarketType::Spot],
         // Deribit only accepts Bitcoin as funds to deposit.
         "deribit" => vec![
