@@ -62,7 +62,10 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
             panic!("Received {} from {}", msg, EXCHANGE_NAME);
         }
         "bts:request_reconnect" => {
-            warn!("Received {} from {}", msg, EXCHANGE_NAME);
+            warn!(
+                "Received {}, which means Bitstamp is under maintenance",
+                msg
+            );
             MiscMessage::Reconnect
         }
         _ => MiscMessage::Normal,

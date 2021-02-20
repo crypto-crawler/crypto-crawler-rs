@@ -94,10 +94,10 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
                 debug!("Received {} from {}", msg, EXCHANGE_NAME);
                 MiscMessage::Misc
             }
-            "subscriptionStatus" | "systemStatus" => {
+            "subscriptionStatus" => {
                 let status = obj.get("status").unwrap().as_str().unwrap();
                 match status {
-                    "subscribed" | "unsubscribed" | "online" => {
+                    "subscribed" | "unsubscribed" => {
                         info!("Received {} from {}", msg, EXCHANGE_NAME)
                     }
                     "error" => {
@@ -111,6 +111,22 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
                 }
 
                 MiscMessage::Misc
+            }
+            "systemStatus" => {
+                let status = obj.get("status").unwrap().as_str().unwrap();
+                match status {
+                    "maintenance" | "cancel_only" => {
+                        warn!(
+                            "Received {}, which means Kraken is in maintenance mode",
+                            msg
+                        );
+                        MiscMessage::Reconnect
+                    }
+                    _ => {
+                        info!("Received {} from {}", msg, EXCHANGE_NAME);
+                        MiscMessage::Misc
+                    }
+                }
             }
             _ => {
                 warn!("Received {} from {}", msg, EXCHANGE_NAME);
