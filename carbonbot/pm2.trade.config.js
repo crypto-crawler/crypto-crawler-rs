@@ -37,6 +37,7 @@ Object.keys(market_types).forEach((exchange) => {
             exec_interpreter: "none",
             exec_mode: "fork_mode",
             instances: 1,
+            restart_delay: 15000, // 15 seconds
         };
 
         apps.push(app);
