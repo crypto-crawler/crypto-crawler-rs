@@ -117,9 +117,9 @@ impl<'a> HuobiWSClient<'a> {
         if obj.contains_key("ping") {
             // the server will send a heartbeat every 5 seconds,
             // see <https://huobiapi.github.io/docs/coin_margined_swap/v1/en/#market-heartbeat>
-            let value = obj.get("ping").unwrap();
+            let timestamp = obj.get("ping").unwrap();
             let mut pong_msg = HashMap::<String, &Value>::new();
-            pong_msg.insert("pong".to_string(), value);
+            pong_msg.insert("pong".to_string(), timestamp);
             let ws_msg = Message::Text(serde_json::to_string(&pong_msg).unwrap());
             return MiscMessage::WebSocket(ws_msg);
         }
