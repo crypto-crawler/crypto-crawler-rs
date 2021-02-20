@@ -10,6 +10,7 @@ pub use exchanges::binance::binance_spot::BinanceSpotRestClient;
 pub use exchanges::bitfinex::BitfinexRestClient;
 pub use exchanges::bitmex::BitmexRestClient;
 pub use exchanges::bitstamp::BitstampRestClient;
+pub use exchanges::bybit::BybitRestClient;
 pub use exchanges::coinbase_pro::CoinbaseProRestClient;
 pub use exchanges::deribit::DeribitRestClient;
 pub use exchanges::ftx::FtxRestClient;

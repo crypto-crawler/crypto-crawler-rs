@@ -29,14 +29,14 @@ pub struct OkexWSClient<'a> {
 }
 
 fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-    let channels_to_parse: Vec<&String> =
-        channels.iter().filter(|ch| !ch.starts_with('{')).collect();
     let mut all_commands: Vec<String> = channels
         .iter()
         .filter(|ch| ch.starts_with('{'))
         .map(|s| s.to_string())
         .collect();
 
+    let channels_to_parse: Vec<&String> =
+        channels.iter().filter(|ch| !ch.starts_with('{')).collect();
     if !channels_to_parse.is_empty() {
         all_commands.append(&mut vec![format!(
             r#"{{"op":"{}","args":{}}}"#,
@@ -45,7 +45,7 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
             } else {
                 "unsubscribe"
             },
-            serde_json::to_string(channels).unwrap()
+            serde_json::to_string(&channels_to_parse).unwrap()
         )])
     };
 
