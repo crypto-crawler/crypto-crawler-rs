@@ -97,7 +97,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
             "subscriptionStatus" | "systemStatus" => {
                 let status = obj.get("status").unwrap().as_str().unwrap();
                 match status {
-                    "subscribed" | "unsubscribed" => {
+                    "subscribed" | "unsubscribed" | "online" => {
                         info!("Received {} from {}", msg, EXCHANGE_NAME)
                     }
                     "error" => {
