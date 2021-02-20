@@ -100,6 +100,7 @@ fn swap_channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String
 
 fn on_misc_msg(msg: &str) -> MiscMessage {
     if msg == "1" {
+        warn!("Server closed the connection");
         return MiscMessage::Reconnect;
     }
 

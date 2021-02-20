@@ -136,7 +136,6 @@ impl<'a> WSClientInternal<'a> {
             MiscMessage::Misc => false,
             MiscMessage::Reconnect => {
                 // self.reconnect();
-                error!("Server asked client to reconnect, exiting now...");
                 std::thread::sleep(Duration::from_secs(5));
                 std::process::exit(0); // fail fast, pm2 will restart
             }
