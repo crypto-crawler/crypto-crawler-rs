@@ -120,6 +120,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
                             "Received {}, which means Kraken is in maintenance mode",
                             msg
                         );
+                        std::thread::sleep(std::time::Duration::from_secs(20));
                         MiscMessage::Reconnect
                     }
                     _ => {

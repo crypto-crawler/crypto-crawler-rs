@@ -66,6 +66,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
                 "Received {}, which means Bitstamp is under maintenance",
                 msg
             );
+            std::thread::sleep(std::time::Duration::from_secs(20));
             MiscMessage::Reconnect
         }
         _ => MiscMessage::Normal,
