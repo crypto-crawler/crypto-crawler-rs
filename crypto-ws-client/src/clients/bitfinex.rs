@@ -16,7 +16,7 @@ use super::{
 
 use log::*;
 use serde_json::Value;
-use tungstenite::{client::AutoStream, Error, Message, WebSocket};
+use tungstenite::{Error, Message, WebSocket, client::AutoStream, error::ProtocolError};
 
 pub(super) const EXCHANGE_NAME: &str = "bitfinex";
 
@@ -455,8 +455,9 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
                 Err(err) => {
                     match err {
                         Error::ConnectionClosed => {
-                            // self.reconnect();
                             error!("Server closed connection, exiting now...");
+                            // self.reconnect();
+                            std::thread::sleep(Duration::from_secs(5));
                             std::process::exit(0); // fail fast, pm2 will restart
                         }
                         Error::AlreadyClosed => {
@@ -464,9 +465,30 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
                             panic!("Impossible to happen, fix the bug in the code");
                         }
                         Error::Io(io_err) => {
-                            if io_err.kind() != std::io::ErrorKind::WouldBlock {
-                                error!("I/O error thrown from read_message(): {}", io_err);
-                                panic!("I/O error thrown from read_message(): {}", io_err);
+                            if io_err.kind() == std::io::ErrorKind::WouldBlock {
+                                info!("read_message() timeout");
+                            } else {
+                                error!(
+                                    "I/O error thrown from read_message(): {}, {:?}",
+                                    io_err,
+                                    io_err.kind()
+                                );
+                                // self.reconnect();
+                                std::thread::sleep(Duration::from_secs(5));
+                                std::process::exit(0); // fail fast, pm2 will restart
+                            }
+                        }
+                        Error::Protocol(protocol_err) => {
+                            if protocol_err == ProtocolError::ResetWithoutClosingHandshake {
+                                error!("ResetWithoutClosingHandshake");
+                                // self.reconnect();
+                                std::thread::sleep(Duration::from_secs(5));
+                                std::process::exit(0); // fail fast, pm2 will restart
+                            } else {
+                                error!(
+                                    "Protocol error thrown from read_message(): {}",
+                                    protocol_err
+                                );
                             }
                         }
                         _ => {
