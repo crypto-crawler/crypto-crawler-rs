@@ -179,7 +179,8 @@ impl<'a> WSClientInternal<'a> {
                         let resp = match self.exchange {
                             super::huobi::EXCHANGE_NAME
                             | super::binance::EXCHANGE_NAME
-                            | super::bitget::EXCHANGE_NAME => {
+                            | super::bitget::EXCHANGE_NAME
+                            | super::bitz::EXCHANGE_NAME => {
                                 let mut decoder = GzDecoder::new(&binary[..]);
                                 decoder.read_to_string(&mut txt)
                             }

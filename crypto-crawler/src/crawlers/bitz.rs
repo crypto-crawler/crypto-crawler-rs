@@ -16,17 +16,17 @@ use crypto_ws_client::*;
 use log::*;
 use serde_json::Value;
 
-const EXCHANGE_NAME: &str = "bitget";
+const EXCHANGE_NAME: &str = "bitz";
 // usize::MAX means unlimited
 const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = usize::MAX;
 
 fn extract_symbol(json: &str) -> String {
     let obj = serde_json::from_str::<HashMap<String, Value>>(&json).unwrap();
-    let data = obj.get("data").unwrap().as_array().unwrap();
-    data[0]
+    obj.get("params")
+        .unwrap()
         .as_object()
         .unwrap()
-        .get("instrument_id")
+        .get("symbol")
         .unwrap()
         .as_str()
         .unwrap()
@@ -36,14 +36,14 @@ fn extract_symbol(json: &str) -> String {
 gen_check_args!(EXCHANGE_NAME);
 
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_swap, BitgetSwapWSClient, MessageType::Trade, subscribe_trade);
+gen_crawl_event!(crawl_trade_spot, BitzSpotWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_swap, BitgetSwapWSClient, MessageType::L2Event, subscribe_orderbook);
+gen_crawl_event!(crawl_l2_event_spot, BitzSpotWSClient, MessageType::L2Event, subscribe_orderbook);
 
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot_spot, MessageType::L2Snapshot, BitgetSpotRestClient::fetch_l2_snapshot);
+gen_crawl_snapshot!(crawl_l2_snapshot_spot, MessageType::L2Snapshot, BitzSpotRestClient::fetch_l2_snapshot);
 #[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot_swap, MessageType::L2Snapshot, BitgetSwapRestClient::fetch_l2_snapshot);
+gen_crawl_snapshot!(crawl_l2_snapshot_swap, MessageType::L2Snapshot, BitzSwapRestClient::fetch_l2_snapshot);
 
 pub(crate) fn crawl_trade(
     market_type: MarketType,
@@ -52,10 +52,8 @@ pub(crate) fn crawl_trade(
     duration: Option<u64>,
 ) -> Option<std::thread::JoinHandle<()>> {
     match market_type {
-        MarketType::InverseSwap | MarketType::LinearSwap => {
-            crawl_trade_swap(market_type, symbols, on_msg, duration)
-        }
-        _ => panic!("Bitget does NOT have the {} market type", market_type),
+        MarketType::Spot => crawl_trade_spot(market_type, symbols, on_msg, duration),
+        _ => panic!("Bitz does NOT have the {} market type", market_type),
     }
 }
 
@@ -66,10 +64,8 @@ pub(crate) fn crawl_l2_event(
     duration: Option<u64>,
 ) -> Option<std::thread::JoinHandle<()>> {
     match market_type {
-        MarketType::InverseSwap | MarketType::LinearSwap => {
-            crawl_l2_event_swap(market_type, symbols, on_msg, duration)
-        }
-        _ => panic!("Bitget does NOT have the {} market type", market_type),
+        MarketType::Spot => crawl_l2_event_spot(market_type, symbols, on_msg, duration),
+        _ => panic!("Bitz does NOT have the {} market type", market_type),
     }
 }
 
@@ -83,7 +79,7 @@ pub(crate) fn crawl_l2_snapshot(
     let func = match market_type {
         MarketType::Spot => crawl_l2_snapshot_spot,
         MarketType::InverseSwap | MarketType::LinearSwap => crawl_l2_snapshot_swap,
-        _ => panic!("Bitget does NOT have the {} market type", market_type),
+        _ => panic!("Bitz does NOT have the {} market type", market_type),
     };
     func(market_type, symbols, on_msg, interval, duration);
 }

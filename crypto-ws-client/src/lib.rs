@@ -70,6 +70,7 @@ pub use clients::bitfinex::*;
 pub use clients::bitget::*;
 pub use clients::bitmex::*;
 pub use clients::bitstamp::*;
+pub use clients::bitz::*;
 pub use clients::bybit::*;
 pub use clients::coinbase_pro::*;
 pub use clients::deribit::*;
