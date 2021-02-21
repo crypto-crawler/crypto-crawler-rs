@@ -29,17 +29,7 @@ struct Response {
 
 // see <https://mxcdevelop.github.io/APIDoc/open.api.v2.en.html#all-symbols>
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
-    if std::env::var("MXC_ACCESS_KEY").is_err() {
-        panic!("MXC Spot REST APIs require access key, please set it to the MXC_ACCESS_KEY environment variable");
-    }
-    let access_key = std::env::var("MXC_ACCESS_KEY").unwrap();
-    let txt = mxc_http_get(
-        format!(
-            "https://www.mxc.co/open/api/v2/market/symbols?api_key={}",
-            access_key
-        )
-        .as_str(),
-    )?;
+    let txt = mxc_http_get("https://www.mxc.co/open/api/v2/market/symbols")?;
     let resp = serde_json::from_str::<Response>(&txt)?;
     Ok(resp.data)
 }
