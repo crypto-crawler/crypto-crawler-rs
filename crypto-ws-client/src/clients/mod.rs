@@ -14,6 +14,7 @@ pub(super) mod bitfinex;
 pub(super) mod bitget;
 pub(super) mod bitmex;
 pub(super) mod bitstamp;
+pub(super) mod bitz;
 pub(super) mod bybit;
 pub(super) mod coinbase_pro;
 pub(super) mod deribit;

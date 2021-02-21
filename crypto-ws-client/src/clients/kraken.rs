@@ -60,13 +60,10 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
         }
     }
 
-    let mut commands = Vec::<String>::new();
-
     for (name, pairs) in name_pairs.iter() {
-        commands.push(name_pairs_to_command(name, pairs, subscribe));
+        all_commands.push(name_pairs_to_command(name, pairs, subscribe));
     }
 
-    all_commands.append(&mut commands);
     all_commands
 }
 

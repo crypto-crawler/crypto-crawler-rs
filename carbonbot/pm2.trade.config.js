@@ -11,6 +11,7 @@ const market_types = {
         "quanto_future",
     ],
     bitstamp: ["spot"],
+    bitz: ["spot"],
     bybit: ["inverse_swap", "linear_swap"],
     coinbase_pro: ["spot"],
     deribit: ["inverse_future", "inverse_swap", "option"],

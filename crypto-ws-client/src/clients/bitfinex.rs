@@ -16,7 +16,7 @@ use super::{
 
 use log::*;
 use serde_json::Value;
-use tungstenite::{Error, Message, WebSocket, client::AutoStream, error::ProtocolError};
+use tungstenite::{client::AutoStream, error::ProtocolError, Error, Message, WebSocket};
 
 pub(super) const EXCHANGE_NAME: &str = "bitfinex";
 

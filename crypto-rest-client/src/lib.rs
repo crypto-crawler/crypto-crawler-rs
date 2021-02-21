@@ -11,6 +11,7 @@ pub use exchanges::bitfinex::BitfinexRestClient;
 pub use exchanges::bitget::*;
 pub use exchanges::bitmex::BitmexRestClient;
 pub use exchanges::bitstamp::BitstampRestClient;
+pub use exchanges::bitz::*;
 pub use exchanges::bybit::BybitRestClient;
 pub use exchanges::coinbase_pro::CoinbaseProRestClient;
 pub use exchanges::deribit::DeribitRestClient;
