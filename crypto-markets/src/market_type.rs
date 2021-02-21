@@ -53,6 +53,11 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::Option,
         ],
         "bitfinex" => vec![MarketType::Spot, MarketType::LinearSwap],
+        "bitget" => vec![
+            MarketType::Spot,
+            MarketType::InverseSwap,
+            MarketType::LinearSwap,
+        ],
         // BitMEX only handles Bitcoin. All profit and loss is in Bitcoin
         "bitmex" => vec![
             MarketType::InverseSwap,

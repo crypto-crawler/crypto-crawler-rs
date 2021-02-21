@@ -26,6 +26,7 @@ pub fn fetch_symbols(exchange: &str, market_type: MarketType) -> Result<Vec<Stri
     match exchange {
         "binance" => exchanges::binance::fetch_symbols(market_type),
         "bitfinex" => exchanges::bitfinex::fetch_symbols(market_type),
+        "bitget" => exchanges::bitget::fetch_symbols(market_type),
         "bitmex" => exchanges::bitmex::fetch_symbols(market_type),
         "bitstamp" => exchanges::bitstamp::fetch_symbols(market_type),
         "bybit" => exchanges::bybit::fetch_symbols(market_type),
@@ -59,6 +60,7 @@ pub fn fetch_markets(exchange: &str, market_type: MarketType) -> Result<Vec<Mark
     match exchange {
         "binance" => exchanges::binance::fetch_markets(market_type),
         "bitfinex" => exchanges::bitfinex::fetch_markets(market_type),
+        "bitget" => exchanges::bitget::fetch_markets(market_type),
         "bitmex" => exchanges::bitmex::fetch_markets(market_type),
         "bitstamp" => exchanges::bitstamp::fetch_markets(market_type),
         "bybit" => exchanges::bybit::fetch_markets(market_type),
