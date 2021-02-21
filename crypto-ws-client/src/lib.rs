@@ -67,6 +67,7 @@ pub use clients::binance::*;
 pub use clients::binance_option::*;
 // pub use clients::bitfinex::*;
 pub use clients::bitfinex::*;
+pub use clients::bitget::*;
 pub use clients::bitmex::*;
 pub use clients::bitstamp::*;
 pub use clients::bybit::*;

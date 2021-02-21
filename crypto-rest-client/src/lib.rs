@@ -8,6 +8,7 @@ pub use exchanges::binance::binance_linear_swap::BinanceLinearSwapRestClient;
 pub use exchanges::binance::binance_option::BinanceOptionRestClient;
 pub use exchanges::binance::binance_spot::BinanceSpotRestClient;
 pub use exchanges::bitfinex::BitfinexRestClient;
+pub use exchanges::bitget::*;
 pub use exchanges::bitmex::BitmexRestClient;
 pub use exchanges::bitstamp::BitstampRestClient;
 pub use exchanges::bybit::BybitRestClient;

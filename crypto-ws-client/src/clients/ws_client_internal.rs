@@ -176,17 +176,21 @@ impl<'a> WSClientInternal<'a> {
                     Message::Text(txt) => self.handle_msg(&txt),
                     Message::Binary(binary) => {
                         let mut txt = String::new();
-                        let resp = if self.exchange == super::huobi::EXCHANGE_NAME
-                            || self.exchange == super::binance::EXCHANGE_NAME
-                        {
-                            let mut decoder = GzDecoder::new(&binary[..]);
-                            decoder.read_to_string(&mut txt)
-                        } else if self.exchange == super::okex::EXCHANGE_NAME {
-                            let mut decoder = DeflateDecoder::new(&binary[..]);
-                            decoder.read_to_string(&mut txt)
-                        } else {
-                            error!("Unknown binary format from {}", self.url);
-                            panic!("Unknown binary format from {}", self.url);
+                        let resp = match self.exchange {
+                            super::huobi::EXCHANGE_NAME
+                            | super::binance::EXCHANGE_NAME
+                            | super::bitget::EXCHANGE_NAME => {
+                                let mut decoder = GzDecoder::new(&binary[..]);
+                                decoder.read_to_string(&mut txt)
+                            }
+                            super::okex::EXCHANGE_NAME => {
+                                let mut decoder = DeflateDecoder::new(&binary[..]);
+                                decoder.read_to_string(&mut txt)
+                            }
+                            _ => {
+                                error!("Unknown binary format from {}", self.url);
+                                panic!("Unknown binary format from {}", self.url);
+                            }
                         };
 
                         match resp {

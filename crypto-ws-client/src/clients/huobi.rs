@@ -90,13 +90,14 @@ impl<'a> HuobiWSClient<'a> {
 
     fn channel_to_command(channel: &str, subscribe: bool) -> String {
         if channel.starts_with('{') {
-            return channel.to_string();
+            channel.to_string()
+        } else {
+            format!(
+                r#"{{"{}":"{}","id":"crypto-ws-client"}}"#,
+                if subscribe { "sub" } else { "unsub" },
+                channel
+            )
         }
-        format!(
-            r#"{{"{}":"{}","id":"crypto-ws-client"}}"#,
-            if subscribe { "sub" } else { "unsub" },
-            channel
-        )
     }
 
     fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {

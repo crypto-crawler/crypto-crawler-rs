@@ -91,6 +91,7 @@ pub fn crawl_trade(
     let func = match exchange {
         "binance" => crawlers::binance::crawl_trade,
         "bitfinex" => crawlers::bitfinex::crawl_trade,
+        "bitget" => crawlers::bitget::crawl_trade,
         "bitmex" => crawlers::bitmex::crawl_trade,
         "bitstamp" => crawlers::bitstamp::crawl_trade,
         "bybit" => crawlers::bybit::crawl_trade,
@@ -120,6 +121,7 @@ pub fn crawl_l2_event(
     let func = match exchange {
         "binance" => crawlers::binance::crawl_l2_event,
         "bitfinex" => crawlers::bitfinex::crawl_l2_event,
+        "bitget" => crawlers::bitget::crawl_l2_event,
         "bitmex" => crawlers::bitmex::crawl_l2_event,
         "bitstamp" => crawlers::bitstamp::crawl_l2_event,
         "bybit" => crawlers::bybit::crawl_l2_event,
@@ -150,6 +152,7 @@ pub fn crawl_l2_snapshot(
     let func = match exchange {
         "binance" => crawlers::binance::crawl_l2_snapshot,
         "bitfinex" => crawlers::bitfinex::crawl_l2_snapshot,
+        "bitget" => crawlers::bitget::crawl_l2_snapshot,
         "bitmex" => crawlers::bitmex::crawl_l2_snapshot,
         "bitstamp" => crawlers::bitstamp::crawl_l2_snapshot,
         "bybit" => crawlers::bybit::crawl_l2_snapshot,
