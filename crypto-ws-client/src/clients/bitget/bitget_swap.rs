@@ -61,13 +61,19 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
             info!("Received {} from {}", msg, EXCHANGE_NAME);
             MiscMessage::Misc
         }
-    } else {
-        if obj.contains_key("table") && obj.contains_key("data") {
-            MiscMessage::Normal
+    } else if obj.contains_key("table") && obj.contains_key("data") {
+        MiscMessage::Normal
+    } else if obj.contains_key("action") {
+        let action = obj.get("action").unwrap().as_str().unwrap();
+        if action == "ping" {
+            info!("Received {} from {}", msg, EXCHANGE_NAME);
         } else {
             warn!("Received {} from {}", msg, EXCHANGE_NAME);
-            MiscMessage::Misc
         }
+        MiscMessage::Misc
+    } else {
+        warn!("Received {} from {}", msg, EXCHANGE_NAME);
+        MiscMessage::Misc
     }
 }
 
