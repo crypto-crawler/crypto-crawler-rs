@@ -12,13 +12,8 @@
 ## Run
 
 ```bash
-docker run -it --rm -v $(pwd):/data soulmachine/carbonbot:debian pm2-runtime start pm2.trade.json
-```
+docker run -it --rm -v $(pwd):/data -e AWS_ACCESS_KEY_ID=AKIAJDDG3LQ4XSBLKFJQ -e AWS_SECRET_ACCESS_KEY="29W4ruPHL+PtFtjNaDmClP8s4mBqzbmkbtKSr7Bx" -e AWS_S3_DIR="s3://your_path" soulmachine/carbonbot:debian pm2-runtime start pm2.trade.config.js
 
-To enable crawling mxc spot markets, we need to define a `MXC_ACCESS_KEY` environment variable(because this cryprocurrency exchange requires it even for public APIs, while other exchanges don't):
-
-```bash
-docker run -it --rm -v $(pwd):/data -e MXC_ACCESS_KEY=your_mxc_access_key soulmachine/carbonbot:debian pm2-runtime start pm2.trade.json
 ```
 
 ## Build

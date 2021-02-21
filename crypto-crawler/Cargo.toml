@@ -1,6 +1,6 @@
 [package]
 name = "crypto-crawler"
-version = "1.2.2"
+version = "1.2.3"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "A rock-solid cryprocurrency crawler."
@@ -9,8 +9,8 @@ repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-
 keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
-crypto-markets = "0.4.6"
-crypto-rest-client = "0.4.3"
+crypto-markets = "0.4.7"
+crypto-rest-client = "0.4.4"
 crypto-ws-client = "2.2.5"
 log = "0.4"
 serde = { version = "1", features = ["derive"] }

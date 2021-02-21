@@ -25,17 +25,12 @@ impl MxcSpotRestClient {
     ///
     /// 1000 trades are returned.
     ///
-    /// For example: <https://www.mxc.co/open/api/v2/market/deals?symbol=BTC_USDT&limit=1000&api_key=your-access-key>
+    /// For example: <https://www.mxc.co/open/api/v2/market/deals?symbol=BTC_USDT&limit=1000>
     #[allow(non_snake_case)]
     pub fn fetch_trades(symbol: &str) -> Result<String> {
-        if std::env::var("MXC_ACCESS_KEY").is_err() {
-            panic!("MXC Spot REST APIs require access key, please set it to the MXC_ACCESS_KEY environment variable");
-        }
-        let access_key = std::env::var("MXC_ACCESS_KEY").unwrap();
-
         gen_api!(format!(
-            "/open/api/v2/market/deals?symbol={}&limit=1000&api_key={}",
-            symbol, access_key
+            "/open/api/v2/market/deals?symbol={}&limit=1000",
+            symbol
         ))
     }
 
@@ -43,16 +38,11 @@ impl MxcSpotRestClient {
     ///
     /// Top 2000 bids and asks will be returned.
     ///
-    /// For example: <https://www.mxc.co/open/api/v2/market/depth?symbol=BTC_USDT&depth=2000&api_key=your-access-key>
+    /// For example: <https://www.mxc.co/open/api/v2/market/depth?symbol=BTC_USDT&depth=2000>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        if std::env::var("MXC_ACCESS_KEY").is_err() {
-            panic!("MXC Spot REST APIs require access key, please set it to the MXC_ACCESS_KEY environment variable");
-        }
-        let access_key = std::env::var("MXC_ACCESS_KEY").unwrap();
-
         gen_api!(format!(
-            "/open/api/v2/market/depth?symbol={}&depth=2000&api_key={}",
-            symbol, access_key
+            "/open/api/v2/market/depth?symbol={}&depth=2000",
+            symbol
         ))
     }
 }
