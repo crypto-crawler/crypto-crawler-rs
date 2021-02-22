@@ -1,6 +1,6 @@
 [package]
 name = "crypto-crawler"
-version = "1.2.6"
+version = "1.2.7"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "A rock-solid cryprocurrency crawler."
@@ -9,9 +9,9 @@ repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-
 keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
-crypto-markets = "0.5.1"
-crypto-rest-client = "0.4.8"
-crypto-ws-client = "2.2.8"
+crypto-markets = "0.5.2"
+crypto-rest-client = "0.4.9"
+crypto-ws-client = "2.3.0"
 lazy_static = "1"
 log = "0.4"
 reqwest = { version = "0.10", features = ["blocking", "gzip"] }
