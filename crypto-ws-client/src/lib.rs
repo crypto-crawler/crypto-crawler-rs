@@ -79,6 +79,7 @@ pub use clients::huobi::*;
 pub use clients::kraken::*;
 pub use clients::mxc::*;
 pub use clients::okex::*;
+pub use clients::zbg::*;
 
 /// The public interface of every WebSocket client.
 pub trait WSClient<'a> {
@@ -176,7 +177,7 @@ pub trait WSClient<'a> {
     ///
     /// A `raw_channel` can be:
     ///
-    /// * A plain string, supported by Binance, BitMEX, Bitstamp, Huobi, OKEx.
+    /// * A plain string, supported by Binance, BitMEX, Bitstamp, Bybit, Deribit, Huobi, OKEx, ZBG.
     /// For example, Binance `btcusdt@aggTrade`, BitMEX `trade:XBTUSD,
     /// `instrument`, Bitstamp `live_trades_btcusd`,
     /// Huobi `market.btcusdt.trade.detail`, `market.overview`,

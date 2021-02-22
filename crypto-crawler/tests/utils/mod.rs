@@ -19,6 +19,9 @@ macro_rules! gen_test_code {
             if $exchange == "binance" {
                 // Binance REST APIs use uppercase while websocket uses lowercase
                 assert_eq!(messages[0].symbol, $symbol.to_string().to_uppercase());
+            } else if $exchange == "zbg" && $market_type == MarketType::Spot {
+                // ZBG spot REST APIs use lowercase while websocket uses uppercase
+                assert_eq!(messages[0].symbol.to_lowercase(), $symbol.to_string());
             } else {
                 assert_eq!(messages[0].symbol, $symbol.to_string());
             }

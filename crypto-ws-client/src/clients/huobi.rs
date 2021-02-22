@@ -116,8 +116,13 @@ impl<'a> HuobiWSClient<'a> {
         let obj = resp.unwrap();
 
         if obj.contains_key("ping") {
-            // the server will send a heartbeat every 5 seconds,
-            // see <https://huobiapi.github.io/docs/coin_margined_swap/v1/en/#market-heartbeat>
+            // The server will send a heartbeat every 5 seconds,
+            // - Spot <https://huobiapi.github.io/docs/spot/v1/en/#introduction-11>
+            // - Future <https://huobiapi.github.io/docs/dm/v1/en/#websocket-heartbeat-and-authentication-interface>
+            // - InverseSwap <https://huobiapi.github.io/docs/coin_margined_swap/v1/en/#market-heartbeat>
+            // - LinearSwap <https://huobiapi.github.io/docs/usdt_swap/v1/en/#websocket-heartbeat-and-authentication-interface>
+            // - Option <https://huobiapi.github.io/docs/option/v1/en/#websocket-heartbeat-and-authentication-interface>
+            debug!("Received {} from {}", msg, EXCHANGE_NAME);
             let timestamp = obj.get("ping").unwrap();
             let mut pong_msg = HashMap::<String, &Value>::new();
             pong_msg.insert("pong".to_string(), timestamp);

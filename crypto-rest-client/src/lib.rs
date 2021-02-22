@@ -25,3 +25,4 @@ pub use exchanges::kraken::KrakenRestClient;
 pub use exchanges::mxc::mxc_spot::MxcSpotRestClient;
 pub use exchanges::mxc::mxc_swap::MxcSwapRestClient;
 pub use exchanges::okex::OkexRestClient;
+pub use exchanges::zbg::*;
