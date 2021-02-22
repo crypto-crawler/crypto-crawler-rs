@@ -27,6 +27,7 @@ const market_types = {
         "inverse_swap",
         "option",
     ],
+    zbg: ["spot", "inverse_swap", "linear_swap"],
 };
 
 const apps = [];

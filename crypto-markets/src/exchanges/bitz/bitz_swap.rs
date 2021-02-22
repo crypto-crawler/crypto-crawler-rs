@@ -70,7 +70,7 @@ pub(super) fn fetch_inverse_swap_symbols() -> Result<Vec<String>> {
 pub(super) fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
     let symbols = fetch_swap_markets_raw()?
         .into_iter()
-        .filter(|m| m.isreverse == "-1")
+        .filter(|m| m.isreverse == "-1" && m.settleAnchor == "USDT")
         .map(|m| m.pair)
         .collect::<Vec<String>>();
     Ok(symbols)

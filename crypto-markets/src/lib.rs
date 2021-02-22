@@ -38,6 +38,7 @@ pub fn fetch_symbols(exchange: &str, market_type: MarketType) -> Result<Vec<Stri
         "kraken" => exchanges::kraken::fetch_symbols(market_type),
         "mxc" => exchanges::mxc::fetch_symbols(market_type),
         "okex" => exchanges::okex::fetch_symbols(market_type),
+        "zbg" => exchanges::zbg::fetch_symbols(market_type),
         _ => panic!("Unsupported exchange {}", exchange),
     }
 }
@@ -73,6 +74,7 @@ pub fn fetch_markets(exchange: &str, market_type: MarketType) -> Result<Vec<Mark
         "kraken" => exchanges::kraken::fetch_markets(market_type),
         "mxc" => exchanges::mxc::fetch_markets(market_type),
         "okex" => exchanges::okex::fetch_markets(market_type),
+        "zbg" => exchanges::zbg::fetch_markets(market_type),
         _ => panic!("Unsupported exchange {}", exchange),
     }
 }

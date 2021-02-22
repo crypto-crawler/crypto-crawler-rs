@@ -31,14 +31,9 @@ pub(super) fn http_get(url: &str, params: Option<&HashMap<String, String>>) -> R
          .build()?;
     let response = client.get(full_url.as_str()).send()?;
 
-    if response.status().is_success() {
-        Ok(response.text()?)
-    } else {
-        let ret = response.error_for_status();
-        match ret {
-            Ok(resp) => Err(Error(resp.text()?)),
-            Err(e) => Err(Error::from(e)),
-        }
+    match response.error_for_status() {
+        Ok(resp) => Ok(resp.text()?),
+        Err(error) => Err(Error::from(error)),
     }
 }
 

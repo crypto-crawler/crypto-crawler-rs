@@ -103,6 +103,7 @@ pub fn crawl_trade(
         "kraken" => crawlers::kraken::crawl_trade,
         "mxc" => crawlers::mxc::crawl_trade,
         "okex" => crawlers::okex::crawl_trade,
+        "zbg" => crawlers::zbg::crawl_trade,
         _ => panic!("Unknown exchange {}", exchange),
     };
     let handle = func(market_type, symbols, on_msg, duration);
@@ -134,6 +135,7 @@ pub fn crawl_l2_event(
         "kraken" => crawlers::kraken::crawl_l2_event,
         "mxc" => crawlers::mxc::crawl_l2_event,
         "okex" => crawlers::okex::crawl_l2_event,
+        "zbg" => crawlers::zbg::crawl_l2_event,
         _ => panic!("Unknown exchange {}", exchange),
     };
     let handle = func(market_type, symbols, on_msg, duration);
@@ -166,6 +168,7 @@ pub fn crawl_l2_snapshot(
         "kraken" => crawlers::kraken::crawl_l2_snapshot,
         "mxc" => crawlers::mxc::crawl_l2_snapshot,
         "okex" => crawlers::okex::crawl_l2_snapshot,
+        "zbg" => crawlers::zbg::crawl_l2_snapshot,
         _ => panic!("Unknown exchange {}", exchange),
     };
     func(market_type, symbols, on_msg, interval, duration);

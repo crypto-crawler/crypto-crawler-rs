@@ -3,7 +3,7 @@ use crypto_markets::{fetch_symbols, get_market_types, MarketType};
 #[macro_use]
 mod utils;
 
-const EXCHANGE_NAME: &str = "bitz";
+const EXCHANGE_NAME: &str = "zbg";
 
 #[test]
 fn fetch_all_symbols() {
@@ -16,6 +16,7 @@ fn fetch_spot_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.contains('_'));
+        assert_eq!(symbol.to_string(), symbol.to_lowercase());
     }
 }
 
@@ -24,7 +25,7 @@ fn fetch_inverse_swap_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
-        assert!(symbol.ends_with("_USD"));
+        assert!(symbol.ends_with("_USD-R"));
     }
 }
 
@@ -33,6 +34,6 @@ fn fetch_linear_swap_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
-        assert!(symbol.ends_with("_USDT") || symbol.ends_with("_USD"));
+        assert!(symbol.ends_with("_USDT"));
     }
 }

@@ -44,7 +44,7 @@ fn test_crawl_trade_all(market_type: MarketType) {
 #[test_case(MarketType::LinearFuture, "BTC-USDT-210625")]
 #[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
 #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
-#[test_case(MarketType::Option, "BTC-USD-210625-72000-C")]
+#[test_case(MarketType::Option, "BTC-USD-210625-72000-C"; "inconclusive")]
 fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_trade,
