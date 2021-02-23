@@ -1,4 +1,5 @@
-use crypto_rest_client::BinanceInverseSwapRestClient;
+use crypto_markets::MarketType;
+use crypto_rest_client::{fetch_l2_snapshot, BinanceInverseSwapRestClient};
 
 #[test]
 fn test_agg_trades() {
@@ -9,6 +10,6 @@ fn test_agg_trades() {
 
 #[test]
 fn test_l2_snapshot() {
-    let text = BinanceInverseSwapRestClient::fetch_l2_snapshot("BTCUSD_PERP").unwrap();
+    let text = fetch_l2_snapshot("binance", MarketType::InverseSwap, "BTCUSD_PERP").unwrap();
     assert!(text.starts_with("{"));
 }

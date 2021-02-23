@@ -1,4 +1,5 @@
-use crypto_rest_client::BitfinexRestClient;
+use crypto_markets::MarketType;
+use crypto_rest_client::{fetch_l2_snapshot, fetch_l3_snapshot, BitfinexRestClient};
 
 #[test]
 fn test_trades() {
@@ -8,12 +9,12 @@ fn test_trades() {
 
 #[test]
 fn test_l2_snapshot() {
-    let text = BitfinexRestClient::fetch_l2_snapshot("tBTCUSD").unwrap();
+    let text = fetch_l2_snapshot("bitfinex", MarketType::Spot, "tBTCUSD").unwrap();
     assert!(text.starts_with("[["));
 }
 
 #[test]
 fn test_l3_snapshot() {
-    let text = BitfinexRestClient::fetch_l3_snapshot("tBTCUSD").unwrap();
+    let text = fetch_l3_snapshot("bitfinex", MarketType::Spot, "tBTCUSD").unwrap();
     assert!(text.starts_with("[["));
 }

@@ -1,11 +1,11 @@
-use std::collections::HashMap;
-
-use crypto_rest_client::BitgetSpotRestClient;
+use crypto_markets::MarketType;
+use crypto_rest_client::fetch_l2_snapshot;
 use serde_json::Value;
+use std::collections::HashMap;
 
 #[test]
 fn test_l2_snapshot() {
-    let text = BitgetSpotRestClient::fetch_l2_snapshot("btc_usdt").unwrap();
+    let text = fetch_l2_snapshot("bitget", MarketType::Spot, "btc_usdt").unwrap();
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
 
     assert_eq!(obj.get("status").unwrap().as_str().unwrap(), "ok");

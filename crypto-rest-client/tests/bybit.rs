@@ -1,13 +1,14 @@
 use std::collections::HashMap;
 
-use crypto_rest_client::BybitRestClient;
+use crypto_markets::MarketType;
+use crypto_rest_client::fetch_l2_snapshot;
 use serde_json::Value;
 use test_case::test_case;
 
-#[test_case("BTCUSD")]
-#[test_case("BTCUSDT")]
-fn test_l2_snapshot(symbol: &str) {
-    let text = BybitRestClient::fetch_l2_snapshot(symbol).unwrap();
+#[test_case(MarketType::InverseSwap, "BTCUSD")]
+#[test_case(MarketType::LinearSwap, "BTCUSDT")]
+fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
+    let text = fetch_l2_snapshot("bybit", market_type, symbol).unwrap();
 
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
     let result = obj.get("result").unwrap();

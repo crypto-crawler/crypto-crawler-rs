@@ -1,4 +1,5 @@
-use crypto_rest_client::BinanceOptionRestClient;
+use crypto_markets::MarketType;
+use crypto_rest_client::{fetch_l2_snapshot, BinanceOptionRestClient};
 
 #[test]
 fn test_agg_trades() {
@@ -8,6 +9,6 @@ fn test_agg_trades() {
 
 #[test]
 fn test_l2_snapshot() {
-    let text = BinanceOptionRestClient::fetch_l2_snapshot("BTC-210129-40000-C").unwrap();
+    let text = fetch_l2_snapshot("binance", MarketType::Option, "BTC-210129-40000-C").unwrap();
     assert!(text.starts_with("{"));
 }

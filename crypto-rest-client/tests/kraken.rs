@@ -1,4 +1,5 @@
-use crypto_rest_client::KrakenRestClient;
+use crypto_markets::MarketType;
+use crypto_rest_client::{fetch_l2_snapshot, KrakenRestClient};
 
 #[test]
 fn test_trades() {
@@ -8,6 +9,6 @@ fn test_trades() {
 
 #[test]
 fn test_l2_snapshot() {
-    let text = KrakenRestClient::fetch_l2_snapshot("XXBTZUSD").unwrap();
+    let text = fetch_l2_snapshot("kraken", MarketType::Spot, "XXBTZUSD").unwrap();
     assert!(text.starts_with("{"));
 }

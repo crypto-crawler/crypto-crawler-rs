@@ -1,4 +1,5 @@
-use crypto_rest_client::BitstampRestClient;
+use crypto_markets::MarketType;
+use crypto_rest_client::{fetch_l2_snapshot, fetch_l3_snapshot, BitstampRestClient};
 
 #[test]
 fn test_trades() {
@@ -8,12 +9,12 @@ fn test_trades() {
 
 #[test]
 fn test_l2_snapshot() {
-    let text = BitstampRestClient::fetch_l2_snapshot("btcusd").unwrap();
+    let text = fetch_l2_snapshot("bitstamp", MarketType::Spot, "btcusd").unwrap();
     assert!(text.starts_with("{"));
 }
 
 #[test]
 fn test_l3_snapshot() {
-    let text = BitstampRestClient::fetch_l3_snapshot("btcusd").unwrap();
+    let text = fetch_l3_snapshot("bitstamp", MarketType::Spot, "btcusd").unwrap();
     assert!(text.starts_with("{"));
 }
