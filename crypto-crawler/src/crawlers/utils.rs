@@ -1,5 +1,13 @@
-use crypto_markets::{fetch_symbols, MarketType};
+use std::{
+    sync::{Arc, Mutex},
+    time::{Duration, Instant},
+};
+
+use crypto_markets::{fetch_symbols, get_market_types, MarketType};
+use crypto_rest_client::{fetch_l2_snapshot, fetch_l3_snapshot};
 use log::*;
+
+use crate::{Message, MessageType};
 
 pub(super) fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<String> {
     if std::env::var("https_proxy").is_ok() {
@@ -36,69 +44,92 @@ pub(super) fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Ve
     }
 }
 
-macro_rules! gen_crawl_snapshot {
-    ($func_name:ident, $msg_type:expr, $fetch_snapshot:expr) => {
-        pub(crate) fn $func_name(
-            market_type: MarketType,
-            symbols: Option<&[String]>,
-            on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
-            interval: Option<u64>,
-            duration: Option<u64>,
-        ) {
-            let interval = Duration::from_secs(interval.unwrap_or(60));
-            let now = Instant::now();
-            loop {
-                let loop_start = Instant::now();
+pub(super) fn check_args(exchange: &str, market_type: MarketType, symbols: &[String]) {
+    let market_types = get_market_types(exchange);
+    if !market_types.contains(&market_type) {
+        panic!("{} does NOT have the {} market type", exchange, market_type);
+    }
 
-                let is_empty = match symbols {
-                    Some(list) => {
-                        if list.is_empty() {
-                            true
-                        } else {
-                            check_args(market_type, &list);
-                            false
-                        }
-                    }
-                    None => true,
-                };
+    let valid_symbols = fetch_symbols_retry(exchange, market_type);
+    let invalid_symbols: Vec<String> = symbols
+        .iter()
+        .filter(|symbol| !valid_symbols.contains(symbol))
+        .cloned()
+        .collect();
+    if !invalid_symbols.is_empty() {
+        panic!(
+            "Invalid symbols: {}, {} {} available trading symbols are {}",
+            invalid_symbols.join(","),
+            exchange,
+            market_type,
+            valid_symbols.join(",")
+        );
+    }
+}
 
-                let real_symbols = if is_empty {
-                    fetch_symbols_retry(EXCHANGE_NAME, market_type)
+/// Crawl leve2 or level3 orderbook snapshots through RESTful APIs.
+pub(crate) fn crawl_snapshot(
+    exchange: &str,
+    market_type: MarketType,
+    msg_type: MessageType, // L2Snapshot or L3Snapshot
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    interval: Option<u64>,
+    duration: Option<u64>,
+) {
+    let interval = Duration::from_secs(interval.unwrap_or(60));
+    let now = Instant::now();
+    loop {
+        let loop_start = Instant::now();
+
+        let is_empty = match symbols {
+            Some(list) => {
+                if list.is_empty() {
+                    true
                 } else {
-                    symbols.unwrap().iter().cloned().collect::<Vec<String>>()
-                };
-
-                for symbol in real_symbols.iter() {
-                    let resp = ($fetch_snapshot)(symbol);
-                    match resp {
-                        Ok(msg) => {
-                            let message = Message::new(
-                                EXCHANGE_NAME.to_string(),
-                                market_type,
-                                symbol.to_string(),
-                                $msg_type,
-                                msg,
-                            );
-                            (on_msg.lock().unwrap())(message);
-                        }
-                        Err(err) => error!(
-                            "{} {} {}, error: {}",
-                            EXCHANGE_NAME, market_type, symbol, err
-                        ),
-                    }
-                }
-
-                if let Some(seconds) = duration {
-                    if now.elapsed() > Duration::from_secs(seconds) {
-                        break;
-                    }
-                }
-                if loop_start.elapsed() < interval {
-                    std::thread::sleep(interval - loop_start.elapsed());
+                    check_args(exchange, market_type, &list);
+                    false
                 }
             }
+            None => true,
+        };
+
+        let real_symbols = if is_empty {
+            fetch_symbols_retry(exchange, market_type)
+        } else {
+            symbols.unwrap().iter().cloned().collect::<Vec<String>>()
+        };
+
+        for symbol in real_symbols.iter() {
+            let resp = match msg_type {
+                MessageType::L2Snapshot => fetch_l2_snapshot(exchange, market_type, symbol),
+                MessageType::L3Snapshot => fetch_l3_snapshot(exchange, market_type, symbol),
+                _ => panic!("msg_type must be L2Snapshot or L3Snapshot"),
+            };
+            match resp {
+                Ok(msg) => {
+                    let message = Message::new(
+                        exchange.to_string(),
+                        market_type,
+                        symbol.to_string(),
+                        msg_type,
+                        msg,
+                    );
+                    (on_msg.lock().unwrap())(message);
+                }
+                Err(err) => error!("{} {} {}, error: {}", exchange, market_type, symbol, err),
+            }
         }
-    };
+
+        if let Some(seconds) = duration {
+            if now.elapsed() > Duration::from_secs(seconds) {
+                break;
+            }
+        }
+        if loop_start.elapsed() < interval {
+            std::thread::sleep(interval - loop_start.elapsed());
+        }
+    }
 }
 
 macro_rules! gen_crawl_event {
@@ -114,7 +145,7 @@ macro_rules! gen_crawl_event {
                     if list.is_empty() {
                         true
                     } else {
-                        check_args(market_type, &list);
+                        check_args(EXCHANGE_NAME, market_type, &list);
                         false
                     }
                 }
@@ -246,49 +277,6 @@ macro_rules! gen_crawl_event {
                 }
             }
             None
-        }
-    };
-}
-
-macro_rules! gen_check_args {
-    ($exchange: expr) => {
-        use crypto_markets::get_market_types;
-
-        fn check_args(market_type: MarketType, symbols: &[String]) {
-            let market_types = get_market_types($exchange);
-            if !market_types.contains(&market_type) {
-                panic!(
-                    "{} does NOT have the {} market type",
-                    $exchange, market_type
-                );
-            }
-
-            if symbols.len() > MAX_SUBSCRIPTIONS_PER_CONNECTION {
-                error!(
-                    "Each websocket connection has a limit of {} subscriptions",
-                    MAX_SUBSCRIPTIONS_PER_CONNECTION
-                );
-                panic!(
-                    "Each websocket connection has a limit of {} subscriptions",
-                    MAX_SUBSCRIPTIONS_PER_CONNECTION
-                );
-            }
-
-            let valid_symbols = fetch_symbols_retry($exchange, market_type);
-            let invalid_symbols: Vec<String> = symbols
-                .iter()
-                .filter(|symbol| !valid_symbols.contains(symbol))
-                .cloned()
-                .collect();
-            if !invalid_symbols.is_empty() {
-                panic!(
-                    "Invalid symbols for {} {} market: {}, available trading symbols are {}",
-                    $exchange,
-                    market_type,
-                    invalid_symbols.join(","),
-                    valid_symbols.join(",")
-                );
-            }
         }
     };
 }

@@ -2,15 +2,11 @@ use std::sync::{
     atomic::{AtomicBool, AtomicUsize, Ordering},
     Arc, Mutex,
 };
-use std::{
-    collections::HashMap,
-    time::{Duration, Instant},
-};
+use std::{collections::HashMap, time::Duration};
 
-use super::utils::fetch_symbols_retry;
+use super::utils::{check_args, fetch_symbols_retry};
 use crate::{msg::Message, MessageType};
 use crypto_markets::MarketType;
-use crypto_rest_client::*;
 use crypto_ws_client::*;
 use log::*;
 use serde_json::Value;
@@ -41,11 +37,7 @@ fn extract_symbol(json: &str) -> String {
         .to_string()
 }
 
-gen_check_args!(EXCHANGE_NAME);
-
 #[rustfmt::skip]
 gen_crawl_event!(crawl_trade, BitmexWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event, BitmexWSClient, MessageType::L2Event, subscribe_orderbook);
-#[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot, MessageType::L2Snapshot, BitmexRestClient::fetch_l2_snapshot);
