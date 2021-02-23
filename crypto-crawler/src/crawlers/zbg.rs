@@ -3,15 +3,11 @@ use std::sync::{
     Arc, Mutex,
 };
 
-use std::{
-    collections::HashMap,
-    time::{Duration, Instant},
-};
+use std::{collections::HashMap, time::Duration};
 
-use super::utils::fetch_symbols_retry;
+use super::utils::{check_args, fetch_symbols_retry};
 use crate::{msg::Message, MessageType};
 use crypto_markets::MarketType;
-use crypto_rest_client::*;
 use crypto_ws_client::*;
 
 use lazy_static::lazy_static;
@@ -118,8 +114,6 @@ fn extract_symbol(json: &str) -> String {
     }
 }
 
-gen_check_args!(EXCHANGE_NAME);
-
 #[rustfmt::skip]
 gen_crawl_event!(crawl_trade_spot, ZbgSpotWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
@@ -128,11 +122,6 @@ gen_crawl_event!(crawl_trade_swap, ZbgSwapWSClient, MessageType::Trade, subscrib
 gen_crawl_event!(crawl_l2_event_spot, ZbgSpotWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event_swap, ZbgSwapWSClient, MessageType::L2Event, subscribe_orderbook);
-
-#[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot_spot, MessageType::L2Snapshot, ZbgSpotRestClient::fetch_l2_snapshot);
-#[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot_swap, MessageType::L2Snapshot, ZbgSwapRestClient::fetch_l2_snapshot);
 
 pub(crate) fn crawl_trade(
     market_type: MarketType,
@@ -162,19 +151,4 @@ pub(crate) fn crawl_l2_event(
         }
         _ => panic!("ZBG does NOT have the {} market type", market_type),
     }
-}
-
-pub(crate) fn crawl_l2_snapshot(
-    market_type: MarketType,
-    symbols: Option<&[String]>,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
-    interval: Option<u64>,
-    duration: Option<u64>,
-) {
-    let func = match market_type {
-        MarketType::Spot => crawl_l2_snapshot_spot,
-        MarketType::InverseSwap | MarketType::LinearSwap => crawl_l2_snapshot_swap,
-        _ => panic!("ZBG does NOT have the {} market type", market_type),
-    };
-    func(market_type, symbols, on_msg, interval, duration);
 }

@@ -146,37 +146,6 @@ pub fn crawl_l2_event(
     }
 }
 
-/// Crawl level2 orderbook snapshots through RESTful APIs.
-pub fn crawl_l2_snapshot(
-    exchange: &str,
-    market_type: MarketType,
-    symbols: Option<&[String]>,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
-    interval: Option<u64>,
-    duration: Option<u64>,
-) {
-    let func = match exchange {
-        "binance" => crawlers::binance::crawl_l2_snapshot,
-        "bitfinex" => crawlers::bitfinex::crawl_l2_snapshot,
-        "bitget" => crawlers::bitget::crawl_l2_snapshot,
-        "bithumb" => crawlers::bithumb::crawl_l2_snapshot,
-        "bitmex" => crawlers::bitmex::crawl_l2_snapshot,
-        "bitstamp" => crawlers::bitstamp::crawl_l2_snapshot,
-        "bitz" => crawlers::bitz::crawl_l2_snapshot,
-        "bybit" => crawlers::bybit::crawl_l2_snapshot,
-        "coinbase_pro" => crawlers::coinbase_pro::crawl_l2_snapshot,
-        "deribit" => crawlers::deribit::crawl_l2_snapshot,
-        "ftx" => crawlers::ftx::crawl_l2_snapshot,
-        "huobi" => crawlers::huobi::crawl_l2_snapshot,
-        "kraken" => crawlers::kraken::crawl_l2_snapshot,
-        "mxc" => crawlers::mxc::crawl_l2_snapshot,
-        "okex" => crawlers::okex::crawl_l2_snapshot,
-        "zbg" => crawlers::zbg::crawl_l2_snapshot,
-        _ => panic!("Unknown exchange {}", exchange),
-    };
-    func(market_type, symbols, on_msg, interval, duration);
-}
-
 /// Crawl level3 orderbook update events.
 pub fn crawl_l3_event(
     exchange: &str,
@@ -198,6 +167,26 @@ pub fn crawl_l3_event(
     }
 }
 
+/// Crawl level2 orderbook snapshots through RESTful APIs.
+pub fn crawl_l2_snapshot(
+    exchange: &str,
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    interval: Option<u64>,
+    duration: Option<u64>,
+) {
+    crawlers::crawl_snapshot(
+        exchange,
+        market_type,
+        MessageType::L2Snapshot,
+        symbols,
+        on_msg,
+        interval,
+        duration,
+    )
+}
+
 /// Crawl level3 orderbook snapshots through RESTful APIs.
 pub fn crawl_l3_snapshot(
     exchange: &str,
@@ -207,12 +196,13 @@ pub fn crawl_l3_snapshot(
     interval: Option<u64>,
     duration: Option<u64>,
 ) {
-    let func = match exchange {
-        "binance" => panic!("Binance does NOT provide level3 orderbook data"),
-        "bitfinex" => crawlers::bitfinex::crawl_l3_snapshot,
-        "bitstamp" => crawlers::bitstamp::crawl_l3_snapshot,
-        "coinbase_pro" => crawlers::coinbase_pro::crawl_l3_snapshot,
-        _ => panic!("Unknown exchange {}", exchange),
-    };
-    func(market_type, symbols, on_msg, interval, duration);
+    crawlers::crawl_snapshot(
+        exchange,
+        market_type,
+        MessageType::L3Snapshot,
+        symbols,
+        on_msg,
+        interval,
+        duration,
+    )
 }

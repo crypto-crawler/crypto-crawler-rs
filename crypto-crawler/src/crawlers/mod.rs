@@ -17,3 +17,5 @@ pub(super) mod kraken;
 pub(super) mod mxc;
 pub(super) mod okex;
 pub(super) mod zbg;
+
+pub(super) use utils::crawl_snapshot;

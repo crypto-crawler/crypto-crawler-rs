@@ -3,12 +3,9 @@ use std::sync::{
     Arc, Mutex,
 };
 
-use std::{
-    collections::HashMap,
-    time::{Duration, Instant},
-};
+use std::{collections::HashMap, time::Duration};
 
-use super::utils::fetch_symbols_retry;
+use super::utils::{check_args, fetch_symbols_retry};
 use crate::{msg::Message, MessageType};
 use crypto_markets::MarketType;
 use crypto_rest_client::*;
@@ -33,8 +30,6 @@ fn extract_symbol(json: &str) -> String {
         .unwrap();
     symbol.to_string()
 }
-
-gen_check_args!(EXCHANGE_NAME);
 
 #[rustfmt::skip]
 gen_crawl_event!(crawl_trade_internal, OkexWSClient, MessageType::Trade, subscribe_trade);
@@ -75,5 +70,3 @@ pub(crate) fn crawl_trade(
 
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event, OkexWSClient, MessageType::L2Event, subscribe_orderbook);
-#[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot, MessageType::L2Snapshot, OkexRestClient::fetch_l2_snapshot);

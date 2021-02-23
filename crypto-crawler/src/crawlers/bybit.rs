@@ -3,15 +3,11 @@ use std::sync::{
     Arc, Mutex,
 };
 
-use std::{
-    collections::HashMap,
-    time::{Duration, Instant},
-};
+use std::{collections::HashMap, time::Duration};
 
-use super::utils::fetch_symbols_retry;
+use super::utils::{check_args, fetch_symbols_retry};
 use crate::{msg::Message, MessageType};
 use crypto_markets::MarketType;
-use crypto_rest_client::*;
 use crypto_ws_client::*;
 use log::*;
 use serde_json::Value;
@@ -26,8 +22,6 @@ fn extract_symbol(json: &str) -> String {
     let last_dot = topic.rfind('.').unwrap();
     (&topic[(last_dot + 1)..]).to_string()
 }
-
-gen_check_args!(EXCHANGE_NAME);
 
 #[rustfmt::skip]
 gen_crawl_event!(crawl_trade_inverse_swap, BybitInverseSwapWSClient, MessageType::Trade, subscribe_trade);
@@ -67,6 +61,3 @@ pub(crate) fn crawl_l2_event(
         _ => panic!("Bybit does NOT have the {} market type", market_type),
     }
 }
-
-#[rustfmt::skip]
-gen_crawl_snapshot!(crawl_l2_snapshot, MessageType::L2Snapshot, BybitRestClient::fetch_l2_snapshot);
