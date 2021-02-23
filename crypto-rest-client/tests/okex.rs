@@ -1,3 +1,18 @@
+use crypto_markets::MarketType;
+use crypto_rest_client::fetch_l2_snapshot;
+use test_case::test_case;
+
+#[test_case(MarketType::Spot, "BTC-USDT")]
+#[test_case(MarketType::InverseFuture, "BTC-USD-210625")]
+#[test_case(MarketType::LinearFuture, "BTC-USDT-210625")]
+#[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
+#[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
+#[test_case(MarketType::Option, "BTC-USD-210625-72000-C")]
+fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
+    let text = fetch_l2_snapshot("okex", market_type, symbol).unwrap();
+    assert!(text.starts_with("{"));
+}
+
 #[cfg(test)]
 mod okex_swap {
     use crypto_rest_client::OkexRestClient;
@@ -7,12 +22,6 @@ mod okex_swap {
         let text = OkexRestClient::fetch_trades("BTC-USDT-SWAP").unwrap();
 
         assert!(text.starts_with("[{"));
-    }
-
-    #[test]
-    fn test_l2_snapshot() {
-        let text = OkexRestClient::fetch_l2_snapshot("BTC-USDT-SWAP").unwrap();
-        assert!(text.starts_with("{"));
     }
 
     #[test]

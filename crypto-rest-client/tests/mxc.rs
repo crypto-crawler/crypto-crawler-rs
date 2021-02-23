@@ -17,7 +17,8 @@ mod mxc_spot {
 
 #[cfg(test)]
 mod mxc_swap {
-    use crypto_rest_client::MxcSwapRestClient;
+    use crypto_markets::MarketType;
+    use crypto_rest_client::{fetch_l2_snapshot, MxcSwapRestClient};
 
     #[test]
     fn test_trades() {
@@ -27,7 +28,7 @@ mod mxc_swap {
 
     #[test]
     fn test_l2_snapshot() {
-        let text = MxcSwapRestClient::fetch_l2_snapshot("BTC_USDT").unwrap();
+        let text = fetch_l2_snapshot("mxc", MarketType::LinearSwap, "BTC_USDT").unwrap();
         assert!(text.starts_with("{"));
     }
 }
