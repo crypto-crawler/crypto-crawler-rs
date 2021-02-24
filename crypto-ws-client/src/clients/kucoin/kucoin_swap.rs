@@ -5,14 +5,10 @@ use super::super::ws_client_internal::WSClientInternal;
 use super::super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
 use super::utils::{
     channels_to_commands, fetch_ws_token, on_misc_msg, to_raw_channel, WebsocketToken,
+    EXCHANGE_NAME, PING_INTERVAL_AND_MSG,
 };
 
 use lazy_static::lazy_static;
-
-const EXCHANGE_NAME: &str = "kucoin";
-
-// See https://docs.kucoin.cc/futures/#ping
-const PING_INTERVAL_AND_MSG: (u64, &str) = (18, r#"{"type":"ping", "id": "crypto-ws-client"}"#);
 
 lazy_static! {
     static ref WS_TOKEN: WebsocketToken = fetch_ws_token();

@@ -1,3 +1,4 @@
+mod utils;
 mod bybit_inverse_swap;
 mod bybit_linear_swap;
 
