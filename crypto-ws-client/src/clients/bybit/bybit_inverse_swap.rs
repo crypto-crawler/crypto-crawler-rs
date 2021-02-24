@@ -12,7 +12,8 @@ pub(super) const EXCHANGE_NAME: &str = "bybit";
 
 const WEBSOCKET_URL: &str = "wss://stream.bybit.com/realtime";
 
-const PING_INTERVAL_AND_MSG: (u64, &str) = (60, r#"{"op":"ping"}"#);
+// See https://bybit-exchange.github.io/docs/inverse/#t-heartbeat
+const PING_INTERVAL_AND_MSG: (u64, &str) = (30, r#"{"op":"ping"}"#);
 
 /// Bybit InverseSwap market.
 ///
