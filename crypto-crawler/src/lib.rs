@@ -102,6 +102,7 @@ pub fn crawl_trade(
         "ftx" => crawlers::ftx::crawl_trade,
         "huobi" => crawlers::huobi::crawl_trade,
         "kraken" => crawlers::kraken::crawl_trade,
+        "kucoin" => crawlers::kucoin::crawl_trade,
         "mxc" => crawlers::mxc::crawl_trade,
         "okex" => crawlers::okex::crawl_trade,
         "zbg" => crawlers::zbg::crawl_trade,
@@ -135,6 +136,7 @@ pub fn crawl_l2_event(
         "ftx" => crawlers::ftx::crawl_l2_event,
         "huobi" => crawlers::huobi::crawl_l2_event,
         "kraken" => crawlers::kraken::crawl_l2_event,
+        "kucoin" => crawlers::kucoin::crawl_l2_event,
         "mxc" => crawlers::mxc::crawl_l2_event,
         "okex" => crawlers::okex::crawl_l2_event,
         "zbg" => crawlers::zbg::crawl_l2_event,
@@ -159,6 +161,7 @@ pub fn crawl_l3_event(
         "bitfinex" => crawlers::bitfinex::crawl_l3_event,
         "bitstamp" => crawlers::bitstamp::crawl_l3_event,
         "coinbase_pro" => crawlers::coinbase_pro::crawl_l3_event,
+        "kucoin" => crawlers::kucoin::crawl_l3_event,
         _ => panic!("Unknown exchange {}", exchange),
     };
     let handle = func(market_type, symbols, on_msg, duration);

@@ -78,6 +78,7 @@ pub use clients::deribit::*;
 pub use clients::ftx::*;
 pub use clients::huobi::*;
 pub use clients::kraken::*;
+pub use clients::kucoin::*;
 pub use clients::mxc::*;
 pub use clients::okex::*;
 pub use clients::zbg::*;

@@ -23,6 +23,7 @@ pub use exchanges::huobi::huobi_linear_swap::HuobiLinearSwapRestClient;
 pub use exchanges::huobi::huobi_option::HuobiOptionRestClient;
 pub use exchanges::huobi::huobi_spot::HuobiSpotRestClient;
 pub use exchanges::kraken::KrakenRestClient;
+pub use exchanges::kucoin::*;
 pub use exchanges::mxc::mxc_spot::MxcSpotRestClient;
 pub use exchanges::mxc::mxc_swap::MxcSwapRestClient;
 pub use exchanges::okex::OkexRestClient;
@@ -47,6 +48,7 @@ pub fn fetch_l2_snapshot(exchange: &str, market_type: MarketType, symbol: &str) 
         "ftx" => exchanges::ftx::FtxRestClient::fetch_l2_snapshot(symbol),
         "huobi" => exchanges::huobi::fetch_l2_snapshot(market_type, symbol),
         "kraken" => exchanges::kraken::KrakenRestClient::fetch_l2_snapshot(symbol),
+        "kucoin" => exchanges::kucoin::fetch_l2_snapshot(market_type, symbol),
         "mxc" => exchanges::mxc::fetch_l2_snapshot(market_type, symbol),
         "okex" => exchanges::okex::OkexRestClient::fetch_l2_snapshot(symbol),
         "zbg" => exchanges::zbg::fetch_l2_snapshot(market_type, symbol),
@@ -60,6 +62,7 @@ pub fn fetch_l3_snapshot(exchange: &str, market_type: MarketType, symbol: &str) 
         "bitfinex" => exchanges::bitfinex::BitfinexRestClient::fetch_l3_snapshot(symbol),
         "bitstamp" => exchanges::bitstamp::BitstampRestClient::fetch_l3_snapshot(symbol),
         "coinbase_pro" => exchanges::coinbase_pro::CoinbaseProRestClient::fetch_l3_snapshot(symbol),
+        "kucoin" => exchanges::kucoin::fetch_l3_snapshot(market_type, symbol),
         _ => panic!(
             "{} {} does NOT provide level3 orderbook data",
             exchange, market_type

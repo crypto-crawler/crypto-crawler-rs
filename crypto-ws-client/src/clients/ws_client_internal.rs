@@ -310,7 +310,7 @@ impl<'a> WSClientInternal<'a> {
 
 /// Define exchange specific client.
 macro_rules! define_client {
-    ($struct_name:ident, $exchange:ident, $default_url:ident, $channels_to_commands:ident, $on_misc_msg:ident, $ping_interval:expr) => {
+    ($struct_name:ident, $exchange:ident, $default_url:expr, $channels_to_commands:ident, $on_misc_msg:ident, $ping_interval:expr) => {
         impl<'a> WSClient<'a> for $struct_name<'a> {
             fn new(
                 on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>,
