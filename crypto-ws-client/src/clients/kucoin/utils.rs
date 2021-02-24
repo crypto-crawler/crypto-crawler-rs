@@ -6,6 +6,14 @@ use serde_json::Value;
 
 use crate::clients::{utils::CHANNEL_PAIR_DELIMITER, ws_client_internal::MiscMessage};
 
+pub(super) const EXCHANGE_NAME: &str = "kucoin";
+
+/// See:
+/// - https://docs.kucoin.com/#ping
+/// - https://docs.kucoin.cc/futures/#ping
+pub(super) const PING_INTERVAL_AND_MSG: (u64, &str) =
+    (60, r#"{"type":"ping", "id": "crypto-ws-client"}"#);
+
 // Maximum number of batch subscriptions at a time: 100 topics
 // See https://docs.kucoin.cc/#request-rate-limit
 const MAX_SUBSCRIPTIONS_PER_TIME: usize = 100;
@@ -60,8 +68,6 @@ pub(super) fn fetch_ws_token() -> WebsocketToken {
         ping_interval: server.get("pingInterval").unwrap().as_i64().unwrap(),
     }
 }
-
-const EXCHANGE_NAME: &str = "kucoin";
 
 pub(super) fn on_misc_msg(msg: &str) -> MiscMessage {
     let obj = serde_json::from_str::<HashMap<String, Value>>(&msg).unwrap();
