@@ -19,6 +19,7 @@ const market_types = {
     ftx: ["spot", "linear_swap", "linear_future", "move", "bvol"],
     huobi: ["spot", "inverse_future", "linear_swap", "inverse_swap", "option"],
     kraken: ["spot"],
+    kucoin: ["spot", "inverse_future", "linear_swap", "inverse_swap"],
     mxc: ["spot", "linear_swap", "inverse_swap"],
     okex: [
         "spot",
