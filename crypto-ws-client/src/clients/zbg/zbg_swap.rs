@@ -1,6 +1,8 @@
 use crate::WSClient;
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex, RwLock},
+};
 
 use super::super::ws_client_internal::{MiscMessage, WSClientInternal};
 use super::super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
@@ -16,7 +18,8 @@ const WEBSOCKET_URL: &str = "wss://kline.zbg.com/exchange/v1/futurews";
 const PING_INTERVAL_AND_MSG: (u64, &str) = (25, "PING");
 
 lazy_static! {
-    static ref SYMBOL_CONTRACT_ID_MAP: HashMap<String, i64> = fetch_symbol_contract_id_map_swap();
+    static ref SYMBOL_CONTRACT_ID_MAP: RwLock<HashMap<String, i64>> =
+        RwLock::new(fetch_symbol_contract_id_map_swap());
 }
 
 /// The WebSocket client for ZBG spot market.
@@ -25,6 +28,15 @@ lazy_static! {
 /// * Trading at: <https://futures.zbg.com/>
 pub struct ZbgSwapWSClient<'a> {
     client: WSClientInternal<'a>,
+}
+
+fn reload_contract_ids() {
+    let mut write_guard = SYMBOL_CONTRACT_ID_MAP.write().unwrap();
+    let symbol_id_map = fetch_symbol_contract_id_map_swap();
+
+    for (symbol, id) in symbol_id_map.iter() {
+        write_guard.insert(symbol.clone(), id.clone());
+    }
 }
 
 fn channel_to_command(channel: &str, subscribe: bool) -> String {
@@ -60,9 +72,16 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
 }
 
 fn to_raw_channel(channel: &str, pair: &str) -> String {
+    if !SYMBOL_CONTRACT_ID_MAP.read().unwrap().contains_key(pair) {
+        // found new symbols
+        reload_contract_ids();
+    }
     let contract_id = SYMBOL_CONTRACT_ID_MAP
+        .read()
+        .unwrap()
         .get(pair)
-        .unwrap_or_else(|| panic!("Failed to find contract_id for {}", pair));
+        .unwrap_or_else(|| panic!("Failed to find contract_id for {}", pair))
+        .clone();
     format!("{}-{}", channel, contract_id)
 }
 
@@ -99,8 +118,11 @@ fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
     }
 
     let contract_id = SYMBOL_CONTRACT_ID_MAP
+        .read()
+        .unwrap()
         .get(pair)
-        .unwrap_or_else(|| panic!("Failed to find contract_id for {}", pair));
+        .unwrap_or_else(|| panic!("Failed to find contract_id for {}", pair))
+        .clone();
 
     format!("future_kline-{}-{}", contract_id, interval * 1000)
 }

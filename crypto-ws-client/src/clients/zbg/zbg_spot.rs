@@ -1,6 +1,8 @@
 use crate::WSClient;
-use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex, RwLock},
+};
 
 use super::super::ws_client_internal::{MiscMessage, WSClientInternal};
 use super::super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
@@ -16,7 +18,17 @@ const WEBSOCKET_URL: &str = "wss://kline.zbg.com/websocket";
 const PING_INTERVAL_AND_MSG: (u64, &str) = (10, r#"{"action":"PING"}"#);
 
 lazy_static! {
-    static ref SYMBOL_ID_MAP: HashMap<String, String> = fetch_symbol_id_map_spot();
+    static ref SYMBOL_ID_MAP: RwLock<HashMap<String, String>> =
+        RwLock::new(fetch_symbol_id_map_spot());
+}
+
+fn reload_symbol_ids() {
+    let mut write_guard = SYMBOL_ID_MAP.write().unwrap();
+    let symbol_id_map = fetch_symbol_id_map_spot();
+
+    for (symbol, id) in symbol_id_map.iter() {
+        write_guard.insert(symbol.clone(), id.clone());
+    }
 }
 
 /// The WebSocket client for ZBG spot market.
@@ -56,9 +68,16 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
 }
 
 fn to_raw_channel(channel: &str, pair: &str) -> String {
+    if !SYMBOL_ID_MAP.read().unwrap().contains_key(pair) {
+        // found new symbols
+        reload_symbol_ids();
+    }
     let symbol_id = SYMBOL_ID_MAP
+        .read()
+        .unwrap()
         .get(pair)
-        .unwrap_or_else(|| panic!("Failed to find symbol_id for {}", pair));
+        .unwrap_or_else(|| panic!("Failed to find symbol_id for {}", pair))
+        .clone();
     if channel == "TRADE_STATISTIC_24H" {
         format!("{}_{}", symbol_id, channel)
     } else {
@@ -98,9 +117,16 @@ fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
         _ => panic!("ZBG spot available intervals 1M,5M,15M,30M,1H,4H,1D,1W"),
     };
 
+    if !SYMBOL_ID_MAP.read().unwrap().contains_key(pair) {
+        // found new symbols
+        reload_symbol_ids();
+    }
     let symbol_id = SYMBOL_ID_MAP
+        .read()
+        .unwrap()
         .get(pair)
-        .unwrap_or_else(|| panic!("Failed to find symbol_id for {}", pair));
+        .unwrap_or_else(|| panic!("Failed to find symbol_id for {}", pair))
+        .clone();
 
     format!(
         "{}_KLINE_{}_{}",
