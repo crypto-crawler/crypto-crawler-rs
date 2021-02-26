@@ -32,7 +32,7 @@ COPY --chown=node:node ./conf/rclone.conf /home/node/.config/rclone/rclone.conf
 COPY ./conf/logrotate.conf /usr/local/etc/logrotate.conf
 
 ENV RUST_LOG "warn"
-ENV RUST_BACKTRACE "full"
+ENV RUST_BACKTRACE 1
 
 VOLUME [ "/data" ]
 ENV DATA_DIR "/data"
