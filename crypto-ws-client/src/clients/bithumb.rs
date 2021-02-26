@@ -57,7 +57,15 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     let code = code.parse::<i64>().unwrap();
     if code < 10000 {
         match code {
-            6 | 7 => MiscMessage::Normal,
+            6 => {
+                if obj.get("data").unwrap().as_array().unwrap().is_empty() {
+                    // ignore empty data
+                    MiscMessage::Misc
+                } else {
+                    MiscMessage::Normal
+                }
+            }
+            7 => MiscMessage::Normal,
             _ => {
                 debug!("Received {} from {}", msg, EXCHANGE_NAME);
                 MiscMessage::Misc
