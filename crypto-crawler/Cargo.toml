@@ -1,6 +1,6 @@
 [package]
 name = "crypto-crawler"
-version = "1.3.3"
+version = "1.3.4"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "A rock-solid cryprocurrency crawler."
@@ -11,7 +11,7 @@ keywords = ["cryptocurrency", "blockchain", "trading"]
 [dependencies]
 crypto-markets = "0.5.3"
 crypto-rest-client = "0.5.2"
-crypto-ws-client = "2.3.4"
+crypto-ws-client = "2.3.5"
 lazy_static = "1"
 log = "0.4"
 reqwest = { version = "0.10", features = ["blocking", "gzip"] }
