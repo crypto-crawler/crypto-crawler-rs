@@ -41,6 +41,4 @@ USER node:node
 ENV USER node
 WORKDIR /home/node
 
-RUN pm2 install pm2-logrotate --docker && pm2 set pm2-logrotate:compress true && pm2 set pm2-logrotate:retain 7
-
 ENTRYPOINT ["fixuid"]
