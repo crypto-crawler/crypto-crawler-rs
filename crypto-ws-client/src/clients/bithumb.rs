@@ -58,7 +58,8 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     if code < 10000 {
         match code {
             6 => {
-                if obj.get("data").unwrap().as_array().unwrap().is_empty() {
+                let arr = obj.get("data").unwrap().as_array();
+                if arr != None && arr.unwrap().is_empty() {
                     // ignore empty data
                     MiscMessage::Misc
                 } else {
