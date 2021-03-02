@@ -1,6 +1,6 @@
 [package]
 name = "crypto-rest-client"
-version = "0.5.4"
+version = "0.5.5"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "An restful client for all cryptocurrency exchanges."
@@ -9,7 +9,7 @@ repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-
 keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
-crypto-markets = "0.5.4"
+crypto-markets = "0.5.5"
 lazy_static = "1"
 regex = "1"
 reqwest = { version = "0.10", features = ["blocking", "gzip", "socks"] }
