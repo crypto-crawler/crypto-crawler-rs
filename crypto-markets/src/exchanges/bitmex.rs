@@ -1,7 +1,10 @@
+use std::collections::HashMap;
+
 use super::utils::http_get;
 use crate::{error::Result, Market, MarketType};
 
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
     let instruments = fetch_instruments(market_type)?;
@@ -79,11 +82,6 @@ struct Instrument {
     openingTimestamp: String,
     closingTimestamp: String,
     sessionInterval: String,
-    prevClosePrice: f64,
-    limitDownPrice: Option<f64>,
-    limitUpPrice: Option<f64>,
-    bankruptLimitDownPrice: Option<f64>,
-    bankruptLimitUpPrice: Option<f64>,
     prevTotalVolume: i64,
     totalVolume: i64,
     volume: i64,
@@ -94,39 +92,20 @@ struct Instrument {
     turnover24h: i64,
     homeNotional24h: f64,
     foreignNotional24h: f64,
-    prevPrice24h: f64,
-    vwap: f64,
-    highPrice: f64,
-    lowPrice: f64,
-    lastPrice: f64,
-    lastPriceProtected: f64,
     lastTickDirection: String,
-    lastChangePcnt: f64,
-    bidPrice: f64,
-    midPrice: f64,
-    askPrice: f64,
-    impactBidPrice: f64,
-    impactMidPrice: f64,
-    impactAskPrice: f64,
     hasLiquidity: bool,
     openInterest: i64,
     openValue: i64,
     fairMethod: String,
-    fairBasisRate: f64,
-    fairBasis: f64,
-    fairPrice: f64,
     markMethod: String,
-    markPrice: f64,
-    indicativeTaxRate: Option<f64>,
-    indicativeSettlePrice: f64,
-    optionUnderlyingPrice: Option<f64>,
-    settledPriceAdjustmentRate: Option<f64>,
-    settledPrice: Option<f64>,
     timestamp: String,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
 }
 
 fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
     let text = http_get("https://www.bitmex.com/api/v1/instrument/active", None)?;
+    println!("{}", text);
     let instruments: Vec<Instrument> = serde_json::from_str::<Vec<Instrument>>(&text)?
         .into_iter()
         .filter(|x| x.state == "Open")
