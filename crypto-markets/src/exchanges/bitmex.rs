@@ -105,7 +105,6 @@ struct Instrument {
 
 fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
     let text = http_get("https://www.bitmex.com/api/v1/instrument/active", None)?;
-    println!("{}", text);
     let instruments: Vec<Instrument> = serde_json::from_str::<Vec<Instrument>>(&text)?
         .into_iter()
         .filter(|x| x.state == "Open")
