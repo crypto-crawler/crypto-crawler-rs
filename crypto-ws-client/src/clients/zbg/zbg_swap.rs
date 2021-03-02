@@ -35,7 +35,7 @@ fn reload_contract_ids() {
     let symbol_id_map = fetch_symbol_contract_id_map_swap();
 
     for (symbol, id) in symbol_id_map.iter() {
-        write_guard.insert(symbol.clone(), id.clone());
+        write_guard.insert(symbol.clone(), *id);
     }
 }
 
@@ -76,12 +76,11 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
         // found new symbols
         reload_contract_ids();
     }
-    let contract_id = SYMBOL_CONTRACT_ID_MAP
+    let contract_id = *SYMBOL_CONTRACT_ID_MAP
         .read()
         .unwrap()
         .get(pair)
-        .unwrap_or_else(|| panic!("Failed to find contract_id for {}", pair))
-        .clone();
+        .unwrap_or_else(|| panic!("Failed to find contract_id for {}", pair));
     format!("{}-{}", channel, contract_id)
 }
 
@@ -117,12 +116,11 @@ fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
         panic!("ZBG Swap available intervals {}", joined);
     }
 
-    let contract_id = SYMBOL_CONTRACT_ID_MAP
+    let contract_id = *SYMBOL_CONTRACT_ID_MAP
         .read()
         .unwrap()
         .get(pair)
-        .unwrap_or_else(|| panic!("Failed to find contract_id for {}", pair))
-        .clone();
+        .unwrap_or_else(|| panic!("Failed to find contract_id for {}", pair));
 
     format!("future_kline-{}-{}", contract_id, interval * 1000)
 }

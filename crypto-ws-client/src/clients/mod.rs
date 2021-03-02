@@ -20,6 +20,7 @@ pub(super) mod bybit;
 pub(super) mod coinbase_pro;
 pub(super) mod deribit;
 pub(super) mod ftx;
+pub(super) mod gate;
 pub(super) mod huobi;
 pub(super) mod kraken;
 pub(super) mod kucoin;

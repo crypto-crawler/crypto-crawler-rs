@@ -17,6 +17,7 @@ pub use exchanges::bybit::BybitRestClient;
 pub use exchanges::coinbase_pro::CoinbaseProRestClient;
 pub use exchanges::deribit::DeribitRestClient;
 pub use exchanges::ftx::FtxRestClient;
+pub use exchanges::gate::*;
 pub use exchanges::huobi::huobi_future::HuobiFutureRestClient;
 pub use exchanges::huobi::huobi_inverse_swap::HuobiInverseSwapRestClient;
 pub use exchanges::huobi::huobi_linear_swap::HuobiLinearSwapRestClient;
@@ -46,6 +47,7 @@ pub fn fetch_l2_snapshot(exchange: &str, market_type: MarketType, symbol: &str) 
         "coinbase_pro" => exchanges::coinbase_pro::CoinbaseProRestClient::fetch_l2_snapshot(symbol),
         "deribit" => exchanges::deribit::DeribitRestClient::fetch_l2_snapshot(symbol),
         "ftx" => exchanges::ftx::FtxRestClient::fetch_l2_snapshot(symbol),
+        "gate" => exchanges::gate::fetch_l2_snapshot(market_type, symbol),
         "huobi" => exchanges::huobi::fetch_l2_snapshot(market_type, symbol),
         "kraken" => exchanges::kraken::KrakenRestClient::fetch_l2_snapshot(symbol),
         "kucoin" => exchanges::kucoin::fetch_l2_snapshot(market_type, symbol),

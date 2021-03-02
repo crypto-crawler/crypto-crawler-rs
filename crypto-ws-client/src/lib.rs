@@ -76,6 +76,7 @@ pub use clients::bybit::*;
 pub use clients::coinbase_pro::*;
 pub use clients::deribit::*;
 pub use clients::ftx::*;
+pub use clients::gate::*;
 pub use clients::huobi::*;
 pub use clients::kraken::*;
 pub use clients::kucoin::*;
