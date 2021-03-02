@@ -17,6 +17,7 @@ const market_types = {
     coinbase_pro: ["spot"],
     deribit: ["inverse_future", "inverse_swap", "option"],
     ftx: ["spot", "linear_swap", "linear_future", "move", "bvol"],
+    gate: ["spot", "linear_future", "linear_swap", "inverse_swap"],
     huobi: ["spot", "inverse_future", "linear_swap", "inverse_swap", "option"],
     kraken: ["spot"],
     kucoin: ["spot", "inverse_future", "linear_swap", "inverse_swap"],

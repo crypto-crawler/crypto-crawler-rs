@@ -88,6 +88,12 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::Move,
             MarketType::BVOL,
         ],
+        "gate" => vec![
+            MarketType::Spot,
+            MarketType::LinearFuture,
+            MarketType::InverseSwap,
+            MarketType::LinearSwap,
+        ],
         "huobi" => vec![
             MarketType::Spot,
             MarketType::InverseFuture,
