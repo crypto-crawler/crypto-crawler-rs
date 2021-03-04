@@ -15,8 +15,7 @@ struct SpotMarket {
     max_amount: String,
     maker_fee_rate: String,
     taker_fee_rate: String,
-    limit: Option<bool>,
-    etf_mark: i64,
+    limited: bool,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }

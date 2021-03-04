@@ -1,4 +1,4 @@
-use crypto_markets::MarketType;
+use crypto_market_type::MarketType;
 use crypto_rest_client::{fetch_l2_snapshot, BinanceSpotRestClient};
 
 #[test]

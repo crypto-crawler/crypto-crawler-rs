@@ -5,7 +5,7 @@ pub use kucoin_spot::KuCoinSpotRestClient;
 pub use kucoin_swap::KuCoinSwapRestClient;
 
 use crate::error::Result;
-use crypto_markets::MarketType;
+use crypto_market_type::MarketType;
 
 pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result<String> {
     let func = match market_type {

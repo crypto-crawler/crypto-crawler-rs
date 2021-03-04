@@ -16,7 +16,7 @@ const EXCHANGE_NAME: &str = "gate";
 #[test_case(MarketType::Spot)]
 #[test_case(MarketType::InverseSwap)]
 #[test_case(MarketType::LinearSwap)]
-#[test_case(MarketType::LinearFuture)]
+#[test_case(MarketType::LinearFuture; "inconclusive")]
 fn test_crawl_trade_all(market_type: MarketType) {
     thread_local! {
         static MESSAGES: RefCell<Vec<Message>> = RefCell::new(Vec::new());
@@ -40,7 +40,7 @@ fn test_crawl_trade_all(market_type: MarketType) {
 #[test_case(MarketType::Spot, "BTC_USDT")]
 #[test_case(MarketType::InverseSwap, "BTC_USD")]
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
-#[test_case(MarketType::LinearFuture, "BTC_USDT_20210326")]
+#[test_case(MarketType::LinearFuture, "BTC_USDT_20210326"; "inconclusive")]
 fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_trade,

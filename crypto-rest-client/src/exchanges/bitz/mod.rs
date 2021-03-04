@@ -5,7 +5,7 @@ pub use bitz_spot::BitzSpotRestClient;
 pub use bitz_swap::BitzSwapRestClient;
 
 use crate::error::Result;
-use crypto_markets::MarketType;
+use crypto_market_type::MarketType;
 
 pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result<String> {
     let func = match market_type {
