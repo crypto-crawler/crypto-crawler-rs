@@ -30,7 +30,7 @@ pub use exchanges::mxc::mxc_swap::MxcSwapRestClient;
 pub use exchanges::okex::OkexRestClient;
 pub use exchanges::zbg::*;
 
-use crypto_markets::MarketType;
+use crypto_market_type::MarketType;
 use error::Result;
 
 /// Fetch level2 orderbook snapshot.

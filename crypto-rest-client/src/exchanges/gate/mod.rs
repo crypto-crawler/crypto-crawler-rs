@@ -7,7 +7,7 @@ pub use gate_spot::GateSpotRestClient;
 pub use gate_swap::GateSwapRestClient;
 
 use crate::error::Result;
-use crypto_markets::MarketType;
+use crypto_market_type::MarketType;
 
 pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result<String> {
     let func = match market_type {

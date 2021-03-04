@@ -12,12 +12,11 @@
 mod error;
 mod exchanges;
 mod market;
-mod market_type;
 mod utils;
 
+pub use crypto_market_type::{get_market_types, MarketType};
 pub use error::Error;
 pub use market::Market;
-pub use market_type::{get_market_types, MarketType};
 
 use error::Result;
 
