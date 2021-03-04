@@ -3,6 +3,7 @@ members = [
   "crypto-client",
   "crypto-pair",
   "crypto-markets",
+  "crypto-market-type",
   "crypto-rest-client",
   "crypto-ws-client",
   "crypto-crawler",
