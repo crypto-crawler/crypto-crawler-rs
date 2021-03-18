@@ -19,22 +19,10 @@ const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = 40;
 fn extract_symbol(json: &str) -> String {
     let obj = serde_json::from_str::<HashMap<String, Value>>(&json).unwrap();
 
-    let symbol_obj = if obj.contains_key("filter") {
-        obj.get("filter").unwrap().as_object().unwrap()
-    } else {
-        let arr = obj.get("data").unwrap().as_array().unwrap();
-        if arr.is_empty() {
-            println!("{}", json);
-        }
-        arr[0].as_object().unwrap()
-    };
+    let arr = obj.get("data").unwrap().as_array().unwrap();
+    let first = arr[0].as_object().unwrap();
 
-    symbol_obj
-        .get("symbol")
-        .unwrap()
-        .as_str()
-        .unwrap()
-        .to_string()
+    first.get("symbol").unwrap().as_str().unwrap().to_string()
 }
 
 #[rustfmt::skip]
