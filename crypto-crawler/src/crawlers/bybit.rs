@@ -24,6 +24,10 @@ fn extract_symbol(json: &str) -> String {
 }
 
 #[rustfmt::skip]
+gen_crawl_event!(crawl_trade_inverse_future, BybitInverseFutureWSClient, MessageType::Trade, subscribe_trade);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_event_inverse_future, BybitInverseFutureWSClient, MessageType::L2Event, subscribe_orderbook);
+#[rustfmt::skip]
 gen_crawl_event!(crawl_trade_inverse_swap, BybitInverseSwapWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event_inverse_swap, BybitInverseSwapWSClient, MessageType::L2Event, subscribe_orderbook);
@@ -39,6 +43,9 @@ pub(crate) fn crawl_trade(
     duration: Option<u64>,
 ) -> Option<std::thread::JoinHandle<()>> {
     match market_type {
+        MarketType::InverseFuture => {
+            crawl_trade_inverse_future(market_type, symbols, on_msg, duration)
+        }
         MarketType::InverseSwap => crawl_trade_inverse_swap(market_type, symbols, on_msg, duration),
         MarketType::LinearSwap => crawl_trade_linear_swap(market_type, symbols, on_msg, duration),
         _ => panic!("Bybit does NOT have the {} market type", market_type),
@@ -52,6 +59,9 @@ pub(crate) fn crawl_l2_event(
     duration: Option<u64>,
 ) -> Option<std::thread::JoinHandle<()>> {
     match market_type {
+        MarketType::InverseFuture => {
+            crawl_l2_event_inverse_future(market_type, symbols, on_msg, duration)
+        }
         MarketType::InverseSwap => {
             crawl_l2_event_inverse_swap(market_type, symbols, on_msg, duration)
         }

@@ -37,22 +37,18 @@ fn extract_symbol(json: &str) -> String {
 #[rustfmt::skip]
 gen_crawl_event!(crawl_trade_spot, BinanceSpotWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_inverse_future, BinanceFutureWSClient, MessageType::Trade, subscribe_trade);
+gen_crawl_event!(crawl_trade_inverse, BinanceInverseWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_trade_linear_swap, BinanceLinearSwapWSClient, MessageType::Trade, subscribe_trade);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_trade_inverse_swap, BinanceInverseSwapWSClient, MessageType::Trade, subscribe_trade);
+gen_crawl_event!(crawl_trade_linear, BinanceLinearWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_trade_linear_option, BinanceOptionWSClient, MessageType::Trade, subscribe_trade);
 
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event_spot, BinanceSpotWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_inverse_future, BinanceFutureWSClient, MessageType::L2Event, subscribe_orderbook);
+gen_crawl_event!(crawl_l2_event_inverse, BinanceInverseWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_linear_swap, BinanceLinearSwapWSClient, MessageType::L2Event, subscribe_orderbook);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_inverse_swap, BinanceInverseSwapWSClient, MessageType::L2Event, subscribe_orderbook);
+gen_crawl_event!(crawl_l2_event_linear, BinanceLinearWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event_linear_option, BinanceOptionWSClient, MessageType::L2Event, subscribe_orderbook);
 
@@ -64,11 +60,12 @@ pub(crate) fn crawl_trade(
 ) -> Option<std::thread::JoinHandle<()>> {
     match market_type {
         MarketType::Spot => crawl_trade_spot(market_type, symbols, on_msg, duration),
-        MarketType::InverseFuture => {
-            crawl_trade_inverse_future(market_type, symbols, on_msg, duration)
+        MarketType::InverseFuture | MarketType::InverseSwap => {
+            crawl_trade_inverse(market_type, symbols, on_msg, duration)
         }
-        MarketType::LinearSwap => crawl_trade_linear_swap(market_type, symbols, on_msg, duration),
-        MarketType::InverseSwap => crawl_trade_inverse_swap(market_type, symbols, on_msg, duration),
+        MarketType::LinearFuture | MarketType::LinearSwap => {
+            crawl_trade_linear(market_type, symbols, on_msg, duration)
+        }
         MarketType::Option => crawl_trade_linear_option(market_type, symbols, on_msg, duration),
         _ => panic!("Binance does NOT have the {} market type", market_type),
     }
@@ -82,14 +79,11 @@ pub(crate) fn crawl_l2_event(
 ) -> Option<std::thread::JoinHandle<()>> {
     match market_type {
         MarketType::Spot => crawl_l2_event_spot(market_type, symbols, on_msg, duration),
-        MarketType::InverseFuture => {
-            crawl_l2_event_inverse_future(market_type, symbols, on_msg, duration)
+        MarketType::InverseFuture | MarketType::InverseSwap => {
+            crawl_l2_event_inverse(market_type, symbols, on_msg, duration)
         }
-        MarketType::LinearSwap => {
-            crawl_l2_event_linear_swap(market_type, symbols, on_msg, duration)
-        }
-        MarketType::InverseSwap => {
-            crawl_l2_event_inverse_swap(market_type, symbols, on_msg, duration)
+        MarketType::LinearFuture | MarketType::LinearSwap => {
+            crawl_l2_event_linear(market_type, symbols, on_msg, duration)
         }
         MarketType::Option => crawl_l2_event_linear_option(market_type, symbols, on_msg, duration),
         _ => panic!("Binance does NOT have the {} market type", market_type),

@@ -12,8 +12,8 @@ use serde_json::Value;
 pub(super) const EXCHANGE_NAME: &str = "binance";
 
 const SPOT_WEBSOCKET_URL: &str = "wss://stream.binance.com:9443/stream";
-const FUTURES_WEBSOCKET_URL: &str = "wss://fstream.binance.com/stream";
-const DELIVERY_WEBSOCKET_URL: &str = "wss://dstream.binance.com/stream";
+const LINEAR_WEBSOCKET_URL: &str = "wss://fstream.binance.com/stream";
+const INVERSE_WEBSOCKET_URL: &str = "wss://dstream.binance.com/stream";
 
 // A single connection can listen to a maximum of 200 streams
 const MAX_NUM_CHANNELS: usize = 200;
@@ -31,27 +31,19 @@ pub struct BinanceSpotWSClient<'a> {
     client: BinanceWSClient<'a>,
 }
 
-/// Binance Coin-margined Future market.
+/// Binance Coin-margined Future and Swap markets.
 ///
 ///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/delivery/en/>
 ///   * Trading at: <https://www.binance.com/en/delivery/btcusd_quarter>
-pub struct BinanceFutureWSClient<'a> {
+pub struct BinanceInverseWSClient<'a> {
     client: BinanceWSClient<'a>,
 }
 
-/// Binance USDT-margined Perpetual Swap market.
+/// Binance USDT-margined Future and Swap markets.
 ///
 ///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/futures/en/>
 ///   * Trading at: <https://www.binance.com/en/futures/BTC_USDT>
-pub struct BinanceLinearSwapWSClient<'a> {
-    client: BinanceWSClient<'a>,
-}
-
-/// Binance Coin-margined Perpetual Swap market
-///
-///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/delivery/en/>
-///   * Trading at: <https://www.binance.com/en/delivery/btcusd_perpetual>
-pub struct BinanceInverseSwapWSClient<'a> {
+pub struct BinanceLinearWSClient<'a> {
     client: BinanceWSClient<'a>,
 }
 
@@ -234,9 +226,8 @@ macro_rules! define_market_client {
 }
 
 define_market_client!(BinanceSpotWSClient, SPOT_WEBSOCKET_URL);
-define_market_client!(BinanceFutureWSClient, DELIVERY_WEBSOCKET_URL);
-define_market_client!(BinanceLinearSwapWSClient, FUTURES_WEBSOCKET_URL);
-define_market_client!(BinanceInverseSwapWSClient, DELIVERY_WEBSOCKET_URL);
+define_market_client!(BinanceInverseWSClient, INVERSE_WEBSOCKET_URL);
+define_market_client!(BinanceLinearWSClient, LINEAR_WEBSOCKET_URL);
 
 macro_rules! impl_trade {
     ($struct_name:ident) => {
@@ -249,9 +240,8 @@ macro_rules! impl_trade {
 }
 
 impl_trade!(BinanceSpotWSClient);
-impl_trade!(BinanceFutureWSClient);
-impl_trade!(BinanceLinearSwapWSClient);
-impl_trade!(BinanceInverseSwapWSClient);
+impl_trade!(BinanceInverseWSClient);
+impl_trade!(BinanceLinearWSClient);
 
 macro_rules! impl_ticker {
     ($struct_name:ident) => {
@@ -264,9 +254,8 @@ macro_rules! impl_ticker {
 }
 
 impl_ticker!(BinanceSpotWSClient);
-impl_ticker!(BinanceFutureWSClient);
-impl_ticker!(BinanceLinearSwapWSClient);
-impl_ticker!(BinanceInverseSwapWSClient);
+impl_ticker!(BinanceInverseWSClient);
+impl_ticker!(BinanceLinearWSClient);
 
 macro_rules! impl_bbo {
     ($struct_name:ident) => {
@@ -279,9 +268,8 @@ macro_rules! impl_bbo {
 }
 
 impl_bbo!(BinanceSpotWSClient);
-impl_bbo!(BinanceFutureWSClient);
-impl_bbo!(BinanceLinearSwapWSClient);
-impl_bbo!(BinanceInverseSwapWSClient);
+impl_bbo!(BinanceInverseWSClient);
+impl_bbo!(BinanceLinearWSClient);
 
 macro_rules! impl_orderbook {
     ($struct_name:ident) => {
@@ -294,9 +282,8 @@ macro_rules! impl_orderbook {
 }
 
 impl_orderbook!(BinanceSpotWSClient);
-impl_orderbook!(BinanceFutureWSClient);
-impl_orderbook!(BinanceLinearSwapWSClient);
-impl_orderbook!(BinanceInverseSwapWSClient);
+impl_orderbook!(BinanceInverseWSClient);
+impl_orderbook!(BinanceLinearWSClient);
 
 macro_rules! impl_orderbook_snapshot {
     ($struct_name:ident) => {
@@ -309,9 +296,8 @@ macro_rules! impl_orderbook_snapshot {
 }
 
 impl_orderbook_snapshot!(BinanceSpotWSClient);
-impl_orderbook_snapshot!(BinanceFutureWSClient);
-impl_orderbook_snapshot!(BinanceLinearSwapWSClient);
-impl_orderbook_snapshot!(BinanceInverseSwapWSClient);
+impl_orderbook_snapshot!(BinanceInverseWSClient);
+impl_orderbook_snapshot!(BinanceLinearWSClient);
 
 macro_rules! impl_candlestick {
     ($struct_name:ident) => {
@@ -324,9 +310,8 @@ macro_rules! impl_candlestick {
 }
 
 impl_candlestick!(BinanceSpotWSClient);
-impl_candlestick!(BinanceFutureWSClient);
-impl_candlestick!(BinanceLinearSwapWSClient);
-impl_candlestick!(BinanceInverseSwapWSClient);
+impl_candlestick!(BinanceInverseWSClient);
+impl_candlestick!(BinanceLinearWSClient);
 
 #[cfg(test)]
 mod tests {

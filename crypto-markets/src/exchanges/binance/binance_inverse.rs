@@ -40,7 +40,7 @@ struct FutureMarket {
 }
 
 // see <https://binance-docs.github.io/apidocs/delivery/en/#exchange-information>
-fn fetch_future_markets_raw() -> Result<Vec<FutureMarket>> {
+fn fetch_inverse_markets_raw() -> Result<Vec<FutureMarket>> {
     let txt = binance_http_get("https://dapi.binance.com/dapi/v1/exchangeInfo")?;
     let resp = serde_json::from_str::<BinanceResponse<FutureMarket>>(&txt)?;
     let symbols: Vec<FutureMarket> = resp
@@ -52,7 +52,7 @@ fn fetch_future_markets_raw() -> Result<Vec<FutureMarket>> {
 }
 
 pub(super) fn fetch_inverse_future_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_future_markets_raw()?
+    let symbols = fetch_inverse_markets_raw()?
         .into_iter()
         .filter(|m| m.contractType != "PERPETUAL")
         .map(|m| m.symbol)
@@ -61,7 +61,7 @@ pub(super) fn fetch_inverse_future_symbols() -> Result<Vec<String>> {
 }
 
 pub(super) fn fetch_inverse_swap_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_future_markets_raw()?
+    let symbols = fetch_inverse_markets_raw()?
         .into_iter()
         .filter(|m| m.contractType == "PERPETUAL")
         .map(|m| m.symbol)
@@ -70,7 +70,7 @@ pub(super) fn fetch_inverse_swap_symbols() -> Result<Vec<String>> {
 }
 
 fn fetch_future_markets_internal() -> Result<Vec<Market>> {
-    let raw_markets = fetch_future_markets_raw()?;
+    let raw_markets = fetch_inverse_markets_raw()?;
     let markets = raw_markets
         .into_iter()
         .map(|m| {

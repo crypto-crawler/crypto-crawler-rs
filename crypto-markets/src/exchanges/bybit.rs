@@ -10,6 +10,7 @@ pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
     match market_type {
         MarketType::InverseSwap => fetch_inverse_swap_symbols(),
         MarketType::LinearSwap => fetch_linear_swap_symbols(),
+        MarketType::InverseFuture => fetch_inverse_future_symbols(),
         _ => panic!("Unsupported market_type: {}", market_type),
     }
 }
@@ -42,6 +43,7 @@ struct LotSizeFilter {
 #[derive(Serialize, Deserialize)]
 struct BybitMarket {
     name: String,
+    alias: String,
     base_currency: String,
     quote_currency: String,
     price_scale: i64,
@@ -74,7 +76,7 @@ fn fetch_markets_raw() -> Result<Vec<BybitMarket>> {
 fn fetch_inverse_swap_symbols() -> Result<Vec<String>> {
     let symbols = fetch_markets_raw()?
         .into_iter()
-        .filter(|m| m.quote_currency == "USD")
+        .filter(|m| m.name == m.alias && m.quote_currency == "USD")
         .map(|m| m.name)
         .collect::<Vec<String>>();
     Ok(symbols)
@@ -83,7 +85,18 @@ fn fetch_inverse_swap_symbols() -> Result<Vec<String>> {
 fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
     let symbols = fetch_markets_raw()?
         .into_iter()
-        .filter(|m| m.quote_currency == "USDT")
+        .filter(|m| m.name == m.alias && m.quote_currency == "USDT")
+        .map(|m| m.name)
+        .collect::<Vec<String>>();
+    Ok(symbols)
+}
+
+fn fetch_inverse_future_symbols() -> Result<Vec<String>> {
+    let symbols = fetch_markets_raw()?
+        .into_iter()
+        .filter(|m| {
+            m.quote_currency == "USD" && (&m.name[(m.name.len() - 2)..]).parse::<i64>().is_ok()
+        })
         .map(|m| m.name)
         .collect::<Vec<String>>();
     Ok(symbols)

@@ -85,14 +85,14 @@ mod binance_spot {
 }
 
 #[cfg(test)]
-mod binance_future {
-    use crypto_ws_client::{BinanceFutureWSClient, WSClient};
+mod binance_inverse_future {
+    use crypto_ws_client::{BinanceInverseWSClient, WSClient};
     use std::sync::{Arc, Mutex};
 
     #[test]
     fn subscribe() {
         gen_test_code!(
-            BinanceFutureWSClient,
+            BinanceInverseWSClient,
             subscribe,
             &vec!["btcusd_210625@aggTrade".to_string()]
         );
@@ -101,7 +101,7 @@ mod binance_future {
     #[test]
     fn subscribe_trade() {
         gen_test_code!(
-            BinanceFutureWSClient,
+            BinanceInverseWSClient,
             subscribe_trade,
             &vec!["btcusd_210625".to_string(), "ethusd_210625".to_string()]
         );
@@ -110,7 +110,7 @@ mod binance_future {
     #[test]
     fn subscribe_ticker() {
         gen_test_code!(
-            BinanceFutureWSClient,
+            BinanceInverseWSClient,
             subscribe_ticker,
             &vec!["btcusd_210625".to_string(), "ethusd_210625".to_string()]
         );
@@ -119,7 +119,7 @@ mod binance_future {
     #[test]
     fn subscribe_bbo() {
         gen_test_code!(
-            BinanceFutureWSClient,
+            BinanceInverseWSClient,
             subscribe_bbo,
             &vec!["btcusd_210625".to_string(), "ethusd_210625".to_string()]
         );
@@ -128,7 +128,7 @@ mod binance_future {
     #[test]
     fn subscribe_orderbook() {
         gen_test_code!(
-            BinanceFutureWSClient,
+            BinanceInverseWSClient,
             subscribe_orderbook,
             &vec!["btcusd_210625".to_string(), "ethusd_210625".to_string()]
         );
@@ -137,7 +137,7 @@ mod binance_future {
     #[test]
     fn subscribe_orderbook_snapshot() {
         gen_test_code!(
-            BinanceFutureWSClient,
+            BinanceInverseWSClient,
             subscribe_orderbook_snapshot,
             &vec!["btcusd_210625".to_string(), "ethusd_210625".to_string()]
         );
@@ -146,12 +146,12 @@ mod binance_future {
     #[test]
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
-            BinanceFutureWSClient,
+            BinanceInverseWSClient,
             &vec!["btcusd_210625".to_string(), "ethusd_210625".to_string()],
             60
         );
         gen_test_subscribe_candlestick!(
-            BinanceFutureWSClient,
+            BinanceInverseWSClient,
             &vec!["btcusd_210625".to_string(), "ethusd_210625".to_string()],
             2592000
         );
@@ -159,14 +159,88 @@ mod binance_future {
 }
 
 #[cfg(test)]
-mod binance_inverse_swap {
-    use crypto_ws_client::{BinanceInverseSwapWSClient, WSClient};
+mod binance_linear_future {
+    use crypto_ws_client::{BinanceLinearWSClient, WSClient};
     use std::sync::{Arc, Mutex};
 
     #[test]
     fn subscribe() {
         gen_test_code!(
-            BinanceInverseSwapWSClient,
+            BinanceLinearWSClient,
+            subscribe,
+            &vec!["btcusdt_210625@aggTrade".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_trade() {
+        gen_test_code!(
+            BinanceLinearWSClient,
+            subscribe_trade,
+            &vec!["btcusdt_210625".to_string(), "ethusdt_210625".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_ticker() {
+        gen_test_code!(
+            BinanceLinearWSClient,
+            subscribe_ticker,
+            &vec!["btcusdt_210625".to_string(), "ethusdt_210625".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_bbo() {
+        gen_test_code!(
+            BinanceLinearWSClient,
+            subscribe_bbo,
+            &vec!["btcusdt_210625".to_string(), "ethusdt_210625".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_orderbook() {
+        gen_test_code!(
+            BinanceLinearWSClient,
+            subscribe_orderbook,
+            &vec!["btcusdt_210625".to_string(), "ethusdt_210625".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_orderbook_snapshot() {
+        gen_test_code!(
+            BinanceLinearWSClient,
+            subscribe_orderbook_snapshot,
+            &vec!["btcusdt_210625".to_string(), "ethusdt_210625".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_candlestick() {
+        gen_test_subscribe_candlestick!(
+            BinanceLinearWSClient,
+            &vec!["btcusdt_210625".to_string(), "ethusdt_210625".to_string()],
+            60
+        );
+        gen_test_subscribe_candlestick!(
+            BinanceLinearWSClient,
+            &vec!["btcusdt_210625".to_string(), "ethusdt_210625".to_string()],
+            2592000
+        );
+    }
+}
+
+#[cfg(test)]
+mod binance_inverse_swap {
+    use crypto_ws_client::{BinanceInverseWSClient, WSClient};
+    use std::sync::{Arc, Mutex};
+
+    #[test]
+    fn subscribe() {
+        gen_test_code!(
+            BinanceInverseWSClient,
             subscribe,
             &vec!["btcusd_perp@aggTrade".to_string()]
         );
@@ -175,7 +249,7 @@ mod binance_inverse_swap {
     #[test]
     fn subscribe_trade() {
         gen_test_code!(
-            BinanceInverseSwapWSClient,
+            BinanceInverseWSClient,
             subscribe_trade,
             &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
         );
@@ -184,7 +258,7 @@ mod binance_inverse_swap {
     #[test]
     fn subscribe_ticker() {
         gen_test_code!(
-            BinanceInverseSwapWSClient,
+            BinanceInverseWSClient,
             subscribe_ticker,
             &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
         );
@@ -193,7 +267,7 @@ mod binance_inverse_swap {
     #[test]
     fn subscribe_bbo() {
         gen_test_code!(
-            BinanceInverseSwapWSClient,
+            BinanceInverseWSClient,
             subscribe_bbo,
             &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
         );
@@ -202,7 +276,7 @@ mod binance_inverse_swap {
     #[test]
     fn subscribe_orderbook() {
         gen_test_code!(
-            BinanceInverseSwapWSClient,
+            BinanceInverseWSClient,
             subscribe_orderbook,
             &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
         );
@@ -211,7 +285,7 @@ mod binance_inverse_swap {
     #[test]
     fn subscribe_orderbook_snapshot() {
         gen_test_code!(
-            BinanceInverseSwapWSClient,
+            BinanceInverseWSClient,
             subscribe_orderbook_snapshot,
             &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
         );
@@ -220,12 +294,12 @@ mod binance_inverse_swap {
     #[test]
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
-            BinanceInverseSwapWSClient,
+            BinanceInverseWSClient,
             &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()],
             60
         );
         gen_test_subscribe_candlestick!(
-            BinanceInverseSwapWSClient,
+            BinanceInverseWSClient,
             &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()],
             2592000
         );
@@ -234,13 +308,13 @@ mod binance_inverse_swap {
 
 #[cfg(test)]
 mod binance_linear_swap {
-    use crypto_ws_client::{BinanceLinearSwapWSClient, WSClient};
+    use crypto_ws_client::{BinanceLinearWSClient, WSClient};
     use std::sync::{Arc, Mutex};
 
     #[test]
     fn subscribe() {
         gen_test_code!(
-            BinanceLinearSwapWSClient,
+            BinanceLinearWSClient,
             subscribe,
             &vec!["btcusdt@aggTrade".to_string()]
         );
@@ -249,7 +323,7 @@ mod binance_linear_swap {
     #[test]
     fn subscribe_trade() {
         gen_test_code!(
-            BinanceLinearSwapWSClient,
+            BinanceLinearWSClient,
             subscribe_trade,
             &vec!["btcusdt".to_string(), "ethusdt".to_string()]
         );
@@ -258,7 +332,7 @@ mod binance_linear_swap {
     #[test]
     fn subscribe_ticker() {
         gen_test_code!(
-            BinanceLinearSwapWSClient,
+            BinanceLinearWSClient,
             subscribe_ticker,
             &vec!["btcusdt".to_string(), "ethusdt".to_string()]
         );
@@ -267,7 +341,7 @@ mod binance_linear_swap {
     #[test]
     fn subscribe_bbo() {
         gen_test_code!(
-            BinanceLinearSwapWSClient,
+            BinanceLinearWSClient,
             subscribe_bbo,
             &vec!["btcusdt".to_string(), "ethusdt".to_string()]
         );
@@ -276,7 +350,7 @@ mod binance_linear_swap {
     #[test]
     fn subscribe_orderbook() {
         gen_test_code!(
-            BinanceLinearSwapWSClient,
+            BinanceLinearWSClient,
             subscribe_orderbook,
             &vec!["btcusdt".to_string(), "ethusdt".to_string()]
         );
@@ -285,7 +359,7 @@ mod binance_linear_swap {
     #[test]
     fn subscribe_orderbook_snapshot() {
         gen_test_code!(
-            BinanceLinearSwapWSClient,
+            BinanceLinearWSClient,
             subscribe_orderbook_snapshot,
             &vec!["btcusdt".to_string(), "ethusdt".to_string()]
         );
@@ -294,12 +368,12 @@ mod binance_linear_swap {
     #[test]
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
-            BinanceLinearSwapWSClient,
+            BinanceLinearWSClient,
             &vec!["btcusdt".to_string(), "ethusdt".to_string()],
             60
         );
         gen_test_subscribe_candlestick!(
-            BinanceLinearSwapWSClient,
+            BinanceLinearWSClient,
             &vec!["btcusdt".to_string(), "ethusdt".to_string()],
             2592000
         );

@@ -14,6 +14,9 @@ fn fetch_all_symbols() {
 fn fetch_spot_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::Spot).unwrap();
     assert!(!symbols.is_empty());
+    for symbol in symbols.iter() {
+        assert_eq!(symbol.to_lowercase(), symbol.to_string());
+    }
 }
 
 #[test]

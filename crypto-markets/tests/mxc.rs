@@ -6,6 +6,11 @@ const EXCHANGE_NAME: &str = "mxc";
 fn fetch_spot_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::Spot).unwrap();
     assert!(!symbols.is_empty());
+
+    for symbol in symbols.iter() {
+        assert!(symbol.contains("_"));
+        assert_eq!(symbol.to_uppercase(), symbol.to_string());
+    }
 }
 
 #[test]
