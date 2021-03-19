@@ -5,18 +5,18 @@ use std::collections::HashMap;
 
 const BASE_URL: &str = "https://fapi.binance.com";
 
-/// Binance USDT-margined Perpetual Swap market.
+/// Binance USDT-margined Future and Swap market.
 ///
 ///   * REST API doc: <https://binance-docs.github.io/apidocs/futures/en/>
 ///   * Trading at: <https://www.binance.com/en/futures/BTC_USDT>
-pub struct BinanceLinearSwapRestClient {
+pub struct BinanceLinearRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
 }
 
-impl BinanceLinearSwapRestClient {
+impl BinanceLinearRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        BinanceLinearSwapRestClient {
+        BinanceLinearRestClient {
             _api_key: api_key,
             _api_secret: api_secret,
         }
@@ -26,7 +26,10 @@ impl BinanceLinearSwapRestClient {
     ///
     /// Equivalent to `/fapi/v1/aggTrades` with `limit=1000`
     ///
-    /// For example: <https://fapi.binance.com/fapi/v1/aggTrades?symbol=BTCUSDT&limit=1000>
+    /// For example:
+    ///
+    /// - <https://fapi.binance.com/fapi/v1/aggTrades?symbol=BTCUSDT&limit=1000>
+    /// - <https://fapi.binance.com/fapi/v1/aggTrades?symbol=BTCUSDT_210625&limit=1000>
     pub fn fetch_agg_trades(
         symbol: &str,
         from_id: Option<u64>,
@@ -50,7 +53,10 @@ impl BinanceLinearSwapRestClient {
     ///
     /// Equivalent to `/fapi/v1/depth` with `limit=1000`
     ///
-    /// For example: <https://fapi.binance.com/fapi/v1/depth?symbol=BTCUSDT&limit=1000>
+    /// For example:
+    ///
+    /// - <https://fapi.binance.com/fapi/v1/depth?symbol=BTCUSDT&limit=1000>
+    /// - <https://fapi.binance.com/fapi/v1/depth?symbol=BTCUSDT_210625&limit=1000>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         check_symbol(symbol);
         let symbol = Some(symbol);

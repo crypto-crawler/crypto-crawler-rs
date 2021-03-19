@@ -12,24 +12,26 @@ struct BinanceResponse<T: Sized> {
 
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
-struct LinearSwapMarket {
+struct FutureMarket {
     symbol: String,
     pair: String,
     contractType: String,
     deliveryDate: i64,
     onboardDate: i64,
-    status: String,
+    contractStatus: String,
+    contractSize: i64,
+    marginAsset: String,
     maintMarginPercent: String,
     requiredMarginPercent: String,
     baseAsset: String,
     quoteAsset: String,
-    marginAsset: String,
     pricePrecision: i64,
     quantityPrecision: i64,
     baseAssetPrecision: i64,
     quotePrecision: i64,
-    underlyingType: String,
+    equalQtyPrecision: i64,
     triggerProtect: String,
+    underlyingType: String,
     filters: Vec<HashMap<String, Value>>,
     orderTypes: Vec<String>,
     timeInForce: Vec<String>,
@@ -37,42 +39,59 @@ struct LinearSwapMarket {
     extra: HashMap<String, Value>,
 }
 
-// see <https://binance-docs.github.io/apidocs/futures/en/#exchange-information>
-fn fetch_linear_swap_markets_raw() -> Result<Vec<LinearSwapMarket>> {
-    let txt = binance_http_get("https://fapi.binance.com/fapi/v1/exchangeInfo")?;
-    let resp = serde_json::from_str::<BinanceResponse<LinearSwapMarket>>(&txt)?;
-    Ok(resp.symbols)
+// see <https://binance-docs.github.io/apidocs/delivery/en/#exchange-information>
+fn fetch_future_markets_raw() -> Result<Vec<FutureMarket>> {
+    let txt = binance_http_get("https://dapi.binance.com/dapi/v1/exchangeInfo")?;
+    let resp = serde_json::from_str::<BinanceResponse<FutureMarket>>(&txt)?;
+    let symbols: Vec<FutureMarket> = resp
+        .symbols
+        .into_iter()
+        .filter(|m| m.contractStatus == "TRADING")
+        .collect();
+    Ok(symbols)
 }
 
-pub(super) fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_linear_swap_markets_raw()?
+pub(super) fn fetch_inverse_future_symbols() -> Result<Vec<String>> {
+    let symbols = fetch_future_markets_raw()?
         .into_iter()
-        .filter(|m| m.status == "TRADING" && m.contractType == "PERPETUAL")
+        .filter(|m| m.contractType != "PERPETUAL")
         .map(|m| m.symbol)
-        .filter(|symbol| symbol.ends_with("USDT"))
         .collect::<Vec<String>>();
     Ok(symbols)
 }
 
-pub(super) fn fetch_linear_swap_markets() -> Result<Vec<Market>> {
-    let raw_markets = fetch_linear_swap_markets_raw()?;
+pub(super) fn fetch_inverse_swap_symbols() -> Result<Vec<String>> {
+    let symbols = fetch_future_markets_raw()?
+        .into_iter()
+        .filter(|m| m.contractType == "PERPETUAL")
+        .map(|m| m.symbol)
+        .collect::<Vec<String>>();
+    Ok(symbols)
+}
+
+fn fetch_future_markets_internal() -> Result<Vec<Market>> {
+    let raw_markets = fetch_future_markets_raw()?;
     let markets = raw_markets
         .into_iter()
         .map(|m| {
             Market {
                 exchange: "binance".to_string(),
-                market_type: MarketType::LinearSwap,
+                market_type: if m.contractType == "PERPETUAL" {
+                    MarketType::InverseSwap
+                } else {
+                    MarketType::InverseFuture
+                },
                 symbol: m.symbol.clone(),
                 pair: format!("{}/{}", m.baseAsset, m.quoteAsset),
                 base: m.baseAsset.clone(),
                 quote: m.quoteAsset.clone(),
                 base_id: m.baseAsset.clone(),
                 quote_id: m.quoteAsset.clone(),
-                active: m.status == "TRADING",
+                active: m.contractStatus == "TRADING",
                 margin: true,
                 // see https://www.binance.com/en/fee/futureFee
                 fees: Fees {
-                    maker: 0.0002,
+                    maker: 0.00015,
                     taker: 0.0004,
                 },
                 precision: Precision {
@@ -92,5 +111,21 @@ pub(super) fn fetch_linear_swap_markets() -> Result<Vec<Market>> {
             }
         })
         .collect::<Vec<Market>>();
+    Ok(markets)
+}
+
+pub(super) fn fetch_inverse_future_markets() -> Result<Vec<Market>> {
+    let markets = fetch_future_markets_internal()?
+        .into_iter()
+        .filter(|m| m.market_type == MarketType::InverseFuture)
+        .collect();
+    Ok(markets)
+}
+
+pub(super) fn fetch_inverse_swap_markets() -> Result<Vec<Market>> {
+    let markets = fetch_future_markets_internal()?
+        .into_iter()
+        .filter(|m| m.market_type == MarketType::InverseSwap)
+        .collect();
     Ok(markets)
 }

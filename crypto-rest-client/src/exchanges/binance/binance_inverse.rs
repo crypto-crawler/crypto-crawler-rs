@@ -5,18 +5,18 @@ use std::collections::HashMap;
 
 const BASE_URL: &str = "https://dapi.binance.com";
 
-/// Binance Coin-margined Perpetual Swap market
+/// Binance Coin-margined Future and Swap market
 ///
 ///   * REST API doc: <https://binance-docs.github.io/apidocs/delivery/en/>
 ///   * Trading at: <https://www.binance.com/en/delivery/btcusd_perpetual>
-pub struct BinanceInverseSwapRestClient {
+pub struct BinanceInverseRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
 }
 
-impl BinanceInverseSwapRestClient {
+impl BinanceInverseRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        BinanceInverseSwapRestClient {
+        BinanceInverseRestClient {
             _api_key: api_key,
             _api_secret: api_secret,
         }
@@ -26,7 +26,10 @@ impl BinanceInverseSwapRestClient {
     ///
     /// Equivalent to `/dapi/v1/aggTrades` with `limit=1000`
     ///
-    /// For example: <https://dapi.binance.com/dapi/v1/aggTrades?symbol=BTCUSD_PERP&limit=1000>
+    /// For example:
+    ///
+    /// - <https://dapi.binance.com/dapi/v1/aggTrades?symbol=BTCUSD_PERP&limit=1000>
+    /// - <https://dapi.binance.com/dapi/v1/aggTrades?symbol=BTCUSD_210625&limit=1000>
     pub fn fetch_agg_trades(
         symbol: &str,
         from_id: Option<u64>,
@@ -50,7 +53,10 @@ impl BinanceInverseSwapRestClient {
     ///
     /// Equivalent to `/dapi/v1/depth` with `limit=1000`
     ///
-    /// For example: <https://dapi.binance.com/dapi/v1/depth?symbol=BTCUSD_PERP&limit=1000>
+    /// For example:
+    ///
+    /// - <https://dapi.binance.com/dapi/v1/depth?symbol=BTCUSD_PERP&limit=1000>
+    /// - <https://dapi.binance.com/dapi/v1/depth?symbol=BTCUSD_210625&limit=1000>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         check_symbol(symbol);
         let symbol = Some(symbol);
