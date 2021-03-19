@@ -2,9 +2,8 @@ mod error;
 mod exchanges;
 
 pub use error::Error;
-pub use exchanges::binance::binance_future::BinanceFutureRestClient;
-pub use exchanges::binance::binance_inverse_swap::BinanceInverseSwapRestClient;
-pub use exchanges::binance::binance_linear_swap::BinanceLinearSwapRestClient;
+pub use exchanges::binance::binance_inverse::BinanceInverseRestClient;
+pub use exchanges::binance::binance_linear::BinanceLinearRestClient;
 pub use exchanges::binance::binance_option::BinanceOptionRestClient;
 pub use exchanges::binance::binance_spot::BinanceSpotRestClient;
 pub use exchanges::bitfinex::BitfinexRestClient;

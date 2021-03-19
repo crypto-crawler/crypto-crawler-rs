@@ -14,6 +14,9 @@ fn fetch_all_symbols() {
 fn fetch_spot_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::Spot).unwrap();
     assert!(!symbols.is_empty());
+    for symbol in symbols.iter() {
+        assert_eq!(symbol.to_uppercase(), symbol.to_string());
+    }
 }
 
 #[test]
@@ -27,6 +30,20 @@ fn fetch_inverse_future_symbols() {
 
         let quote = &symbol[(symbol.len() - 10)..(symbol.len() - 7)];
         assert_eq!(quote, "USD");
+    }
+}
+
+#[test]
+fn fetch_linear_future_symbols() {
+    let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::LinearFuture).unwrap();
+    assert!(!symbols.is_empty());
+
+    for symbol in symbols.iter() {
+        let date = &symbol[(symbol.len() - 6)..];
+        assert!(date.parse::<i64>().is_ok());
+
+        let quote = &symbol[(symbol.len() - 11)..(symbol.len() - 7)];
+        assert_eq!(quote, "USDT");
     }
 }
 
@@ -46,7 +63,7 @@ fn fetch_linear_swap_symbols() {
     assert!(!symbols.is_empty());
 
     for symbol in symbols.iter() {
-        assert!(symbol.ends_with("USDT"));
+        assert!(symbol.ends_with("USDT") || symbol.ends_with("BUSD"));
     }
 }
 

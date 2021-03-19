@@ -47,6 +47,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
     match exchange {
         "binance" => vec![
             MarketType::Spot,
+            MarketType::LinearFuture,
             MarketType::InverseFuture,
             MarketType::LinearSwap,
             MarketType::InverseSwap,
