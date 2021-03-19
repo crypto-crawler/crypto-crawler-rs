@@ -5,7 +5,7 @@
 [![](https://docs.rs/crypto-pair/badge.svg)](https://docs.rs/crypto-pair)
 ==========
 
-Get all trading pairs of a cryptocurrency exchange.
+Normalize cryptocurrency trading pairs.
 
 ## Usage
 
@@ -13,6 +13,6 @@ Get all trading pairs of a cryptocurrency exchange.
 use crypto_pair::fetch_markets;
 
 fn main() {
-    assert_eq!(Some("BTC_USD".to_string()), normalize_pair("XBTH21", "BitMEX"));
+    assert_eq!(Some("BTC/USD".to_string()), normalize_pair("XBTH21", "BitMEX"));
 }
 ```

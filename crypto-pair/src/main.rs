@@ -5,7 +5,7 @@ use crypto_pair::normalize_pair;
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
-        println!("Usage: crypto-pair <raw_pair> [exchange]");
+        println!("Usage: crypto-pair <symbol> [exchange]");
         return;
     }
 
@@ -29,7 +29,7 @@ fn main() {
         "ZB",
         "bitFlyer",
     ];
-    let raw_pair: &str = &args[1];
+    let symbol: &str = &args[1];
 
     if args.len() == 3 {
         let exchange: &str = &args[2];
@@ -37,9 +37,9 @@ fn main() {
         if !exchanges.contains(&tmp) {
             println!("{} is not in [{}]", exchange, exchanges.join(","));
         } else {
-            println!("{}", normalize_pair(raw_pair, exchange).unwrap());
+            println!("{}", normalize_pair(symbol, exchange).unwrap());
         }
     } else {
-        println!("{}", normalize_pair(raw_pair, "").unwrap());
+        println!("{}", normalize_pair(symbol, "").unwrap());
     }
 }
