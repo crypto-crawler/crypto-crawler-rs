@@ -27,3 +27,13 @@ fn fetch_linear_swap_symbols() {
         assert!(symbol.ends_with("USDT"));
     }
 }
+
+#[test]
+fn fetch_inverse_future_symbols() {
+    let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
+    assert!(!symbols.is_empty());
+    for symbol in symbols.iter() {
+        let date = &symbol[(symbol.len() - 2)..];
+        assert!(date.parse::<i64>().is_ok());
+    }
+}

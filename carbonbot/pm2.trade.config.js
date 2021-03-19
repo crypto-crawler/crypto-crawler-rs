@@ -1,6 +1,12 @@
 // see src/market_type.rs in crypto-markets
 const market_types = {
-    binance: ["spot", "inverse_future", "linear_swap", "inverse_swap"],
+    binance: [
+        "spot",
+        "linear_future",
+        "inverse_future",
+        "linear_swap",
+        "inverse_swap",
+    ],
     bitfinex: ["spot", "linear_swap"],
     bitget: ["inverse_swap", "linear_swap"],
     bithumb: ["spot"],
@@ -13,7 +19,7 @@ const market_types = {
     ],
     bitstamp: ["spot"],
     bitz: ["spot"],
-    bybit: ["inverse_swap", "linear_swap"],
+    bybit: ["inverse_future", "inverse_swap", "linear_swap"],
     coinbase_pro: ["spot"],
     deribit: ["inverse_future", "inverse_swap", "option"],
     ftx: ["spot", "linear_swap", "linear_future", "move", "bvol"],
