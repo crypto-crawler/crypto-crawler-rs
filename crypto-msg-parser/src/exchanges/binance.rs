@@ -73,6 +73,19 @@ struct WebsocketMsg<T> {
     data: T,
 }
 
+fn calc_quantity(market_type: MarketType, pair: &str, price: f64, quantity: f64) -> f64 {
+    if market_type == MarketType::InverseSwap || market_type == MarketType::InverseFuture {
+        let contract_value = if pair.starts_with("BTC/") {
+            100.0
+        } else {
+            10.0
+        };
+        quantity * contract_value / price
+    } else {
+        quantity
+    }
+}
+
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let obj = serde_json::from_str::<HashMap<String, Value>>(&msg)?;
     let data = obj.get("data").unwrap();
@@ -81,7 +94,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     match event_type {
         "aggTrade" => {
             let agg_trade: AggTradeMsg = serde_json::from_value(data.clone()).unwrap();
-            let trade = TradeMsg {
+            let mut trade = TradeMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type,
                 symbol: agg_trade.s.clone(),
@@ -94,11 +107,12 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 trade_id: agg_trade.a.to_string(),
                 raw: serde_json::from_str(msg)?,
             };
+            trade.quantity = calc_quantity(market_type, &trade.pair, trade.price, trade.quantity);
             Ok(vec![trade])
         }
         "trade" => {
             let raw_trade: RawTradeMsg = serde_json::from_value(data.clone()).unwrap();
-            let trade = TradeMsg {
+            let mut trade = TradeMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type,
                 symbol: raw_trade.s.clone(),
@@ -111,6 +125,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 trade_id: raw_trade.t.to_string(),
                 raw: serde_json::from_str(msg)?,
             };
+            trade.quantity = calc_quantity(market_type, &trade.pair, trade.price, trade.quantity);
             Ok(vec![trade])
         }
         "trade_all" => {
