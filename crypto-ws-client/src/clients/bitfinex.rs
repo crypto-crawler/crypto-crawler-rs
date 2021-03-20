@@ -330,6 +330,7 @@ impl<'a> BitfinexWSClient<'a> {
                     let chan_id = obj.get("chanId").unwrap().as_i64().unwrap();
                     obj.remove("event");
                     obj.remove("chanId");
+                    obj.remove("pair");
                     self.channel_id_meta
                         .lock()
                         .unwrap()
