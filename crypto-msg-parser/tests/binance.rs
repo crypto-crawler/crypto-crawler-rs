@@ -2,7 +2,7 @@ mod utils;
 
 #[cfg(test)]
 mod trade {
-    use crypto_msg_parser::{parse_trade, MarketType};
+    use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
 
     #[test]
     fn spot() {
@@ -16,7 +16,7 @@ mod trade {
             trade,
         );
 
-        assert!(!trade.side); // buyer is the taker
+        assert_eq!(trade.side, TradeSide::Buy);
     }
 
     #[test]
@@ -31,7 +31,7 @@ mod trade {
             trade,
         );
 
-        assert!(trade.side); // seller is the taker
+        assert_eq!(trade.side, TradeSide::Sell);
     }
 
     #[test]
@@ -46,7 +46,7 @@ mod trade {
             trade,
         );
 
-        assert!(!trade.side); // buyer is the taker
+        assert_eq!(trade.side, TradeSide::Buy);
     }
 
     #[test]
@@ -61,7 +61,7 @@ mod trade {
             trade,
         );
 
-        assert!(trade.side); // seller is the taker
+        assert_eq!(trade.side, TradeSide::Sell);
     }
 
     #[test]
@@ -76,7 +76,7 @@ mod trade {
             trade,
         );
 
-        assert!(!trade.side); // buyer is the taker
+        assert_eq!(trade.side, TradeSide::Buy);
     }
 
     #[test]

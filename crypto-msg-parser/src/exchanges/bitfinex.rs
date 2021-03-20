@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use crate::{msg::TradeMsg, MessageType};
+use crate::{MessageType, TradeMsg, TradeSide};
 
 use serde_json::{Result, Value};
 
@@ -22,7 +22,11 @@ fn parse_one_trade(market_type: MarketType, symbol: &str, nums: &[f64]) -> Trade
         timestamp,
         price,
         quantity: f64::abs(quantity),
-        side: quantity < 0.0,
+        side: if quantity < 0.0 {
+            TradeSide::Sell
+        } else {
+            TradeSide::Buy
+        },
         trade_id: trade_id.to_string(),
         raw: serde_json::to_value(nums).unwrap(),
     }

@@ -62,6 +62,15 @@ add_common_fields!(
     struct Msg {}
 );
 
+/// Which side is taker
+#[derive(Copy, Clone, PartialEq, Serialize, Deserialize, Display, Debug, EnumString)]
+pub enum TradeSide {
+    /// Buyer is taker
+    Buy,
+    /// Seller is taker
+    Sell,
+}
+
 /// Realtime trade message.
 #[derive(Serialize, Deserialize)]
 pub struct TradeMsg {
@@ -79,8 +88,8 @@ pub struct TradeMsg {
     pub price: f64,
     // quantity
     pub quantity: f64,
-    /// true, seller is taker; false, buyer is taker
-    pub side: bool,
+    /// Which side is taker
+    pub side: TradeSide,
     // Trade ID
     pub trade_id: String,
     /// Unix timestamp, in milliseconds

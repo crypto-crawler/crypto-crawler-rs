@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use crate::{msg::TradeMsg, MessageType};
+use crate::{MessageType, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
@@ -103,7 +103,11 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 timestamp: agg_trade.T,
                 price: agg_trade.p.parse::<f64>().unwrap(),
                 quantity: agg_trade.q.parse::<f64>().unwrap(),
-                side: agg_trade.m,
+                side: if agg_trade.m {
+                    TradeSide::Sell
+                } else {
+                    TradeSide::Buy
+                },
                 trade_id: agg_trade.a.to_string(),
                 raw: serde_json::from_str(msg)?,
             };
@@ -121,7 +125,11 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 timestamp: raw_trade.T,
                 price: raw_trade.p.parse::<f64>().unwrap(),
                 quantity: raw_trade.q.parse::<f64>().unwrap(),
-                side: raw_trade.m,
+                side: if raw_trade.m {
+                    TradeSide::Sell
+                } else {
+                    TradeSide::Buy
+                },
                 trade_id: raw_trade.t.to_string(),
                 raw: serde_json::from_str(msg)?,
             };
@@ -142,7 +150,12 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                     timestamp: trade.T,
                     price: trade.p.parse::<f64>().unwrap(),
                     quantity: trade.q.parse::<f64>().unwrap(),
-                    side: trade.s == "1", // TODO: find the meaning after option doc is released
+                    side: if trade.s == "1" {
+                        // TODO: find out the meaning of the field s
+                        TradeSide::Sell
+                    } else {
+                        TradeSide::Buy
+                    },
                     trade_id: trade.a.to_string(),
                     raw: serde_json::to_value(trade).unwrap(),
                 })
