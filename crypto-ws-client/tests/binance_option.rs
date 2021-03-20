@@ -5,7 +5,6 @@ use std::sync::{Arc, Mutex};
 mod utils;
 
 #[test]
-#[ignore]
 fn subscribe() {
     gen_test_code!(
         BinanceOptionWSClient,
@@ -25,8 +24,8 @@ fn subscribe_trade() {
         BinanceOptionWSClient,
         subscribe_trade,
         &vec![
-            "BTC-210122-48000-C".to_string(),
-            "BTC-210129-40000-C".to_string()
+            "BTC-210430-64000-C".to_string(),
+            "BTC-210430-68000-C".to_string()
         ]
     );
 }
@@ -38,8 +37,8 @@ fn subscribe_ticker() {
         BinanceOptionWSClient,
         subscribe_ticker,
         &vec![
-            "BTC-210122-48000-C".to_string(),
-            "BTC-210129-40000-C".to_string()
+            "BTC-210430-64000-C".to_string(),
+            "BTC-210430-68000-C".to_string()
         ]
     );
 }
@@ -51,8 +50,8 @@ fn subscribe_bbo() {
         BinanceOptionWSClient,
         subscribe_bbo,
         &vec![
-            "BTC-210122-48000-C".to_string(),
-            "BTC-210129-40000-C".to_string()
+            "BTC-210430-64000-C".to_string(),
+            "BTC-210430-68000-C".to_string()
         ]
     );
 }
@@ -64,8 +63,8 @@ fn subscribe_orderbook() {
         BinanceOptionWSClient,
         subscribe_orderbook,
         &vec![
-            "BTC-210122-48000-C".to_string(),
-            "BTC-210129-40000-C".to_string()
+            "BTC-210430-64000-C".to_string(),
+            "BTC-210430-68000-C".to_string()
         ]
     );
 }
@@ -77,8 +76,8 @@ fn subscribe_orderbook_snapshot() {
         BinanceOptionWSClient,
         subscribe_orderbook_snapshot,
         &vec![
-            "BTC-210122-48000-C".to_string(),
-            "BTC-210129-40000-C".to_string()
+            "BTC-210430-64000-C".to_string(),
+            "BTC-210430-68000-C".to_string()
         ]
     );
 }
@@ -89,16 +88,16 @@ fn subscribe_candlestick() {
     gen_test_subscribe_candlestick!(
         BinanceOptionWSClient,
         &vec![
-            "BTC-210122-48000-C".to_string(),
-            "BTC-210129-40000-C".to_string()
+            "BTC-210430-64000-C".to_string(),
+            "BTC-210430-68000-C".to_string()
         ],
         60
     );
     gen_test_subscribe_candlestick!(
         BinanceOptionWSClient,
         &vec![
-            "BTC-210122-48000-C".to_string(),
-            "BTC-210129-40000-C".to_string()
+            "BTC-210430-64000-C".to_string(),
+            "BTC-210430-68000-C".to_string()
         ],
         2592000
     );
