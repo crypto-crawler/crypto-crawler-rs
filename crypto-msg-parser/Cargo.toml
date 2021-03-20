@@ -1,0 +1,17 @@
+[package]
+name = "crypto-msg-parser"
+version = "0.1.0"
+authors = ["soulmachine <soulmachine@gmail.com>"]
+edition = "2018"
+description   = "Parse websocket messages"
+license = "Apache-2.0"
+repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-msg-parser"
+keywords = ["cryptocurrency", "blockchain", "trading"]
+
+[dependencies]
+crypto-market-type = "0.1.2"
+crypto-pair = "2.0.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+strum = "0.20"
+strum_macros = "0.20"

@@ -36,7 +36,11 @@ pub(crate) fn normalize_currency(mut currency: &str) -> String {
     currency.to_uppercase()
 }
 
-pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
+pub(crate) fn normalize_pair(mut symbol: &str) -> Option<String> {
+    if symbol.chars().next().unwrap() == 't' {
+        symbol = &symbol[1..]; // e.g., tBTCUSD, remove t
+    };
+
     let (base, quote) = if symbol.contains(':') {
         let v: Vec<&str> = symbol.split(':').collect();
         (v[0].to_string(), v[1].to_string())
