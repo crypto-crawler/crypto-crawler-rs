@@ -64,6 +64,8 @@ add_common_fields!(
 
 /// Which side is taker
 #[derive(Copy, Clone, PartialEq, Serialize, Deserialize, Display, Debug, EnumString)]
+#[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
 pub enum TradeSide {
     /// Buyer is taker
     Buy,

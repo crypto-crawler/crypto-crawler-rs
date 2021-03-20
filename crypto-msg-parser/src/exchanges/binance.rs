@@ -67,8 +67,7 @@ struct OptionTradeAllMsg {
 }
 
 #[derive(Serialize, Deserialize)]
-#[allow(non_snake_case)]
-struct WebsocketMsg<T> {
+struct WebsocketMsg<T: Sized> {
     stream: String,
     data: T,
 }
@@ -105,7 +104,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type,
                 symbol: agg_trade.s.clone(),
-                pair: crypto_pair::normalize_pair(&agg_trade.s, "binance").unwrap(),
+                pair: crypto_pair::normalize_pair(&agg_trade.s, EXCHANGE_NAME).unwrap(),
                 msg_type: MessageType::Trade,
                 timestamp: agg_trade.T,
                 price: agg_trade.p.parse::<f64>().unwrap(),
@@ -131,7 +130,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type,
                 symbol: raw_trade.s.clone(),
-                pair: crypto_pair::normalize_pair(&raw_trade.s, "binance").unwrap(),
+                pair: crypto_pair::normalize_pair(&raw_trade.s, EXCHANGE_NAME).unwrap(),
                 msg_type: MessageType::Trade,
                 timestamp: raw_trade.T,
                 price: raw_trade.p.parse::<f64>().unwrap(),
@@ -163,7 +162,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                         exchange: EXCHANGE_NAME.to_string(),
                         market_type,
                         symbol: trade.S.clone(),
-                        pair: crypto_pair::normalize_pair(&trade.S, "binance").unwrap(),
+                        pair: crypto_pair::normalize_pair(&trade.S, EXCHANGE_NAME).unwrap(),
                         msg_type: MessageType::Trade,
                         timestamp: trade.T,
                         price,
