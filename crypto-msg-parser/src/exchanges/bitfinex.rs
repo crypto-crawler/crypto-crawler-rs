@@ -21,10 +21,10 @@ fn parse_one_trade(market_type: MarketType, symbol: &str, nums: &[f64]) -> Trade
         msg_type: MessageType::Trade,
         timestamp,
         price,
-        quantity,
+        quantity: f64::abs(quantity),
         side: quantity < 0.0,
         trade_id: trade_id.to_string(),
-        raw: serde_json::Value::Null,
+        raw: serde_json::to_value(nums).unwrap(),
     }
 }
 
@@ -43,7 +43,8 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         Some(_) => {
             // te, tu
             let nums: Vec<f64> = serde_json::from_value(arr[2].clone()).unwrap();
-            let trade = parse_one_trade(market_type, symbol, &nums);
+            let mut trade = parse_one_trade(market_type, symbol, &nums);
+            trade.raw = serde_json::from_str(msg).unwrap();
             Ok(vec![trade])
         }
         None => {

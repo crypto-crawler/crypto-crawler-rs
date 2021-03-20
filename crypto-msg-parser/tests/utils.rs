@@ -7,8 +7,6 @@ pub fn check_trade_fields(exchange: &str, market_type: MarketType, pair: String,
     assert_eq!(trade.pair, pair);
     assert_eq!(trade.msg_type, MessageType::Trade);
     assert!(trade.price > 0.0);
-    if exchange != "bitfinex" {
-        assert!(trade.quantity > 0.0);
-    }
+    assert!(trade.quantity > 0.0);
     assert!(!trade.trade_id.is_empty());
 }
