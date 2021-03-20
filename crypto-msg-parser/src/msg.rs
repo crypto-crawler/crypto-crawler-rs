@@ -86,8 +86,10 @@ pub struct TradeMsg {
     pub msg_type: MessageType,
     /// price
     pub price: f64,
-    // quantity
+    /// quantity
     pub quantity: f64,
+    /// total traded value in USD(T)
+    pub volume: f64,
     /// Which side is taker
     pub side: TradeSide,
     // Trade ID

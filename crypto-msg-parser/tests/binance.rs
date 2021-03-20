@@ -16,6 +16,7 @@ mod trade {
             trade,
         );
 
+        assert_eq!(trade.volume, trade.price * trade.quantity);
         assert_eq!(trade.side, TradeSide::Buy);
     }
 
@@ -31,6 +32,7 @@ mod trade {
             trade,
         );
 
+        assert_eq!(trade.volume, 500.0);
         assert_eq!(trade.side, TradeSide::Sell);
     }
 
@@ -46,6 +48,7 @@ mod trade {
             trade,
         );
 
+        assert_eq!(trade.volume, trade.price * trade.quantity);
         assert_eq!(trade.side, TradeSide::Buy);
     }
 
@@ -61,6 +64,7 @@ mod trade {
             trade,
         );
 
+        assert_eq!(trade.volume, 5800.0);
         assert_eq!(trade.side, TradeSide::Sell);
     }
 
@@ -76,6 +80,7 @@ mod trade {
             trade,
         );
 
+        assert_eq!(trade.volume, trade.price * trade.quantity);
         assert_eq!(trade.side, TradeSide::Buy);
     }
 
@@ -93,6 +98,7 @@ mod trade {
                 "BTC/USDT".to_string(),
                 trade,
             );
+            assert_eq!(trade.volume, trade.price * trade.quantity);
         }
     }
 }

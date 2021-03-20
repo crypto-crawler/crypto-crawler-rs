@@ -22,6 +22,7 @@ fn parse_one_trade(market_type: MarketType, symbol: &str, nums: &[f64]) -> Trade
         timestamp,
         price,
         quantity: f64::abs(quantity),
+        volume: price * f64::abs(quantity),
         side: if quantity < 0.0 {
             TradeSide::Sell
         } else {

@@ -73,16 +73,23 @@ struct WebsocketMsg<T> {
     data: T,
 }
 
-fn calc_quantity(market_type: MarketType, pair: &str, price: f64, quantity: f64) -> f64 {
+fn calc_quantity_and_volume(
+    market_type: MarketType,
+    pair: &str,
+    price: f64,
+    quantity: f64,
+) -> (f64, f64) {
     if market_type == MarketType::InverseSwap || market_type == MarketType::InverseFuture {
         let contract_value = if pair.starts_with("BTC/") {
             100.0
         } else {
             10.0
         };
-        quantity * contract_value / price
+        let volume = quantity * contract_value;
+        let quantity = volume / price;
+        (quantity, volume)
     } else {
-        quantity
+        (quantity, quantity * price)
     }
 }
 
@@ -103,6 +110,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 timestamp: agg_trade.T,
                 price: agg_trade.p.parse::<f64>().unwrap(),
                 quantity: agg_trade.q.parse::<f64>().unwrap(),
+                volume: 0.0,
                 side: if agg_trade.m {
                     TradeSide::Sell
                 } else {
@@ -111,7 +119,10 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 trade_id: agg_trade.a.to_string(),
                 raw: serde_json::from_str(msg)?,
             };
-            trade.quantity = calc_quantity(market_type, &trade.pair, trade.price, trade.quantity);
+            let (quantity, volume) =
+                calc_quantity_and_volume(market_type, &trade.pair, trade.price, trade.quantity);
+            trade.quantity = quantity;
+            trade.volume = volume;
             Ok(vec![trade])
         }
         "trade" => {
@@ -125,6 +136,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 timestamp: raw_trade.T,
                 price: raw_trade.p.parse::<f64>().unwrap(),
                 quantity: raw_trade.q.parse::<f64>().unwrap(),
+                volume: 0.0,
                 side: if raw_trade.m {
                     TradeSide::Sell
                 } else {
@@ -133,7 +145,10 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 trade_id: raw_trade.t.to_string(),
                 raw: serde_json::from_str(msg)?,
             };
-            trade.quantity = calc_quantity(market_type, &trade.pair, trade.price, trade.quantity);
+            let (quantity, volume) =
+                calc_quantity_and_volume(market_type, &trade.pair, trade.price, trade.quantity);
+            trade.quantity = quantity;
+            trade.volume = volume;
             Ok(vec![trade])
         }
         "trade_all" => {
@@ -141,23 +156,28 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             let trades: Vec<TradeMsg> = all_trades
                 .t
                 .into_iter()
-                .map(|trade| TradeMsg {
-                    exchange: EXCHANGE_NAME.to_string(),
-                    market_type,
-                    symbol: trade.S.clone(),
-                    pair: crypto_pair::normalize_pair(&trade.S, "binance").unwrap(),
-                    msg_type: MessageType::Trade,
-                    timestamp: trade.T,
-                    price: trade.p.parse::<f64>().unwrap(),
-                    quantity: trade.q.parse::<f64>().unwrap(),
-                    side: if trade.s == "1" {
-                        // TODO: find out the meaning of the field s
-                        TradeSide::Sell
-                    } else {
-                        TradeSide::Buy
-                    },
-                    trade_id: trade.a.to_string(),
-                    raw: serde_json::to_value(trade).unwrap(),
+                .map(|trade| {
+                    let price = trade.p.parse::<f64>().unwrap();
+                    let quantity = trade.q.parse::<f64>().unwrap();
+                    TradeMsg {
+                        exchange: EXCHANGE_NAME.to_string(),
+                        market_type,
+                        symbol: trade.S.clone(),
+                        pair: crypto_pair::normalize_pair(&trade.S, "binance").unwrap(),
+                        msg_type: MessageType::Trade,
+                        timestamp: trade.T,
+                        price,
+                        quantity,
+                        volume: price * quantity,
+                        side: if trade.s == "1" {
+                            // TODO: find out the meaning of the field s
+                            TradeSide::Sell
+                        } else {
+                            TradeSide::Buy
+                        },
+                        trade_id: trade.a.to_string(),
+                        raw: serde_json::to_value(trade).unwrap(),
+                    }
                 })
                 .collect();
 
