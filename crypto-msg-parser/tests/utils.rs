@@ -10,4 +10,5 @@ pub fn check_trade_fields(exchange: &str, market_type: MarketType, pair: String,
     assert!(trade.quantity > 0.0);
     assert!(trade.volume > 0.0);
     assert!(!trade.trade_id.is_empty());
+    assert_eq!(trade.timestamp.to_string().len(), 13);
 }
