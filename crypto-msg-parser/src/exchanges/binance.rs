@@ -8,6 +8,7 @@ use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "binance";
 
+// see https://binance-docs.github.io/apidocs/spot/en/#aggregate-trade-streams
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct AggTradeMsg {
@@ -25,6 +26,7 @@ struct AggTradeMsg {
     extra: HashMap<String, Value>,
 }
 
+// see https://binance-docs.github.io/apidocs/spot/en/#trade-streams
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct RawTradeMsg {
@@ -34,8 +36,8 @@ struct RawTradeMsg {
     t: i64,    // Trade ID
     p: String, // Price
     q: String, // Quantity
-    b: i64,    // Bid order ID
-    a: i64,    // Ask order ID
+    b: i64,    // Buyer order ID
+    a: i64,    // Seller order ID
     T: i64,    // Trade time
     m: bool,   // Is the buyer the market maker?
     #[serde(flatten)]

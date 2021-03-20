@@ -44,6 +44,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         .as_str()
         .unwrap();
 
+    // see https://docs.bitfinex.com/reference#ws-public-trades
     match arr[1].as_str() {
         Some(_) => {
             // te, tu
