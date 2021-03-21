@@ -16,5 +16,4 @@ fn trade() {
 
     assert_eq!(trade.volume, trade.price * trade.quantity);
     assert_eq!(trade.side, TradeSide::Sell);
-    println!("{}", serde_json::to_string_pretty(&trade).unwrap());
 }

@@ -13,3 +13,4 @@ pub(super) mod deribit;
 pub(super) mod ftx;
 pub(super) mod gate;
 pub(super) mod huobi;
+pub(super) mod kraken;
