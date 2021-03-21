@@ -141,9 +141,7 @@ mod deribit_option {
         gen_test_code!(
             DeribitWSClient,
             subscribe,
-            &vec![
-                "trades.option.any.raw".to_string()
-            ]
+            &vec!["trades.option.any.raw".to_string()]
         );
     }
 
