@@ -4,5 +4,6 @@ pub(super) mod bitget;
 pub(super) mod bithumb;
 pub(super) mod bitmex;
 pub(super) mod bitstamp;
+pub(super) mod bitz;
 pub(super) mod coinbase_pro;
 pub(super) mod huobi;
