@@ -47,7 +47,7 @@ struct SwapTradeMsg {
 }
 
 #[derive(Serialize, Deserialize)]
-struct WebsocketMsg<T: Sized> {
+struct ResponseMsg<T: Sized> {
     table: String,
     data: Vec<T>,
 }
@@ -76,7 +76,7 @@ fn calc_quantity_and_volume(
 }
 
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<SwapTradeMsg>>(&msg)?;
+    let ws_msg = serde_json::from_str::<ResponseMsg<SwapTradeMsg>>(&msg)?;
     let trades: Vec<TradeMsg> = ws_msg
         .data
         .into_iter()

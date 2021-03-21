@@ -85,7 +85,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 .into_iter()
                 .map(|raw_trade| {
                     let price = raw_trade.price.parse::<f64>().unwrap();
-                    let trade = TradeMsg {
+                    TradeMsg {
                         exchange: EXCHANGE_NAME.to_string(),
                         market_type,
                         symbol: raw_trade.symbol.clone(),
@@ -103,8 +103,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                         },
                         trade_id: raw_trade.trade_id.clone(),
                         raw: serde_json::to_value(&raw_trade).unwrap(),
-                    };
-                    trade
+                    }
                 })
                 .collect();
 
