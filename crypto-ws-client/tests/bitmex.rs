@@ -10,7 +10,7 @@ fn bitmex_instrument() {
 }
 
 #[cfg(test)]
-mod bitmex_swap {
+mod bitmex_inverse_swap {
     use crypto_ws_client::{BitmexWSClient, WSClient};
     use std::sync::{Arc, Mutex};
 
@@ -37,7 +37,7 @@ mod bitmex_swap {
         gen_test_code!(
             BitmexWSClient,
             subscribe_trade,
-            &vec!["XBTUSD".to_string(), "ETHUSD".to_string()]
+            &vec!["XBTUSD".to_string()]
         );
     }
 
@@ -46,7 +46,7 @@ mod bitmex_swap {
         gen_test_code!(
             BitmexWSClient,
             subscribe_bbo,
-            &vec!["XBTUSD".to_string(), "ETHUSD".to_string()]
+            &vec!["XBTUSD".to_string()]
         );
     }
 
@@ -55,7 +55,7 @@ mod bitmex_swap {
         gen_test_code!(
             BitmexWSClient,
             subscribe_orderbook,
-            &vec!["XBTUSD".to_string(), "ETHUSD".to_string()]
+            &vec!["XBTUSD".to_string()]
         );
     }
 
@@ -64,7 +64,7 @@ mod bitmex_swap {
         gen_test_code!(
             BitmexWSClient,
             subscribe_orderbook_snapshot,
-            &vec!["XBTUSD".to_string(), "ETHUSD".to_string()]
+            &vec!["XBTUSD".to_string()]
         );
     }
 
@@ -72,19 +72,19 @@ mod bitmex_swap {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BitmexWSClient,
-            &vec!["XBTUSD".to_string(), "ETHUSD".to_string()],
+            &vec!["XBTUSD".to_string()],
             60
         );
         gen_test_subscribe_candlestick!(
             BitmexWSClient,
-            &vec!["XBTUSD".to_string(), "ETHUSD".to_string()],
+            &vec!["XBTUSD".to_string()],
             86400
         );
     }
 }
 
 #[cfg(test)]
-mod bitmex_future {
+mod bitmex_inverse_future {
     use crypto_ws_client::{BitmexWSClient, WSClient};
     use std::sync::{Arc, Mutex};
 
@@ -143,6 +143,62 @@ mod bitmex_future {
         gen_test_subscribe_candlestick!(
             BitmexWSClient,
             &vec!["XBTM21".to_string(), "ETHH21".to_string()],
+            86400
+        );
+    }
+}
+
+#[cfg(test)]
+mod bitmex_quanto_swap {
+    use crypto_ws_client::{BitmexWSClient, WSClient};
+    use std::sync::{Arc, Mutex};
+
+    #[test]
+    fn subscribe_trade() {
+        gen_test_code!(
+            BitmexWSClient,
+            subscribe_trade,
+            &vec!["ETHUSD".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_bbo() {
+        gen_test_code!(
+            BitmexWSClient,
+            subscribe_bbo,
+            &vec!["ETHUSD".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_orderbook() {
+        gen_test_code!(
+            BitmexWSClient,
+            subscribe_orderbook,
+            &vec!["ETHUSD".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_orderbook_snapshot() {
+        gen_test_code!(
+            BitmexWSClient,
+            subscribe_orderbook_snapshot,
+            &vec!["ETHUSD".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_candlestick() {
+        gen_test_subscribe_candlestick!(
+            BitmexWSClient,
+            &vec!["ETHUSD".to_string()],
+            60
+        );
+        gen_test_subscribe_candlestick!(
+            BitmexWSClient,
+            &vec!["ETHUSD".to_string()],
             86400
         );
     }
