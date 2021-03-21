@@ -29,7 +29,7 @@ fn parse_one_trade(market_type: MarketType, symbol: &str, nums: &[f64]) -> Trade
             TradeSide::Buy
         },
         trade_id: trade_id.to_string(),
-        raw: serde_json::to_value(nums).unwrap(),
+        raw: serde_json::to_value(&nums).unwrap(),
     }
 }
 

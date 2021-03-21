@@ -98,7 +98,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 },
                 // Use timestamp as ID because bitget doesn't provide trade_id
                 trade_id: raw_trade.timestamp.to_string(),
-                raw: serde_json::to_value(raw_trade).unwrap(),
+                raw: serde_json::to_value(&raw_trade).unwrap(),
             };
             let (quantity, volume) =
                 calc_quantity_and_volume(market_type, &trade.pair, trade.price, trade.quantity);

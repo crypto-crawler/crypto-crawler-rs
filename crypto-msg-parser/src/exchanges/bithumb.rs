@@ -51,7 +51,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                     TradeSide::Buy
                 },
                 trade_id: timestamp.to_string(),
-                raw: serde_json::to_value(raw_trade).unwrap(),
+                raw: serde_json::to_value(&raw_trade).unwrap(),
             }
         })
         .collect();
