@@ -8,4 +8,5 @@ pub(super) mod bitz;
 pub(super) mod bybit;
 pub(super) mod coinbase_pro;
 pub(super) mod deribit;
+pub(super) mod ftx;
 pub(super) mod huobi;

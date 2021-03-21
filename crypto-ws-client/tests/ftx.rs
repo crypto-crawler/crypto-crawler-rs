@@ -101,7 +101,7 @@ mod ftx_move {
         gen_test_code!(
             FtxWSClient,
             subscribe_trade,
-            &vec!["BTC-MOVE-2021Q1".to_string()]
+            &vec!["BTC-MOVE-2021Q1".to_string(), "BTC-MOVE-2021Q3".to_string()]
         );
     }
 
@@ -110,7 +110,7 @@ mod ftx_move {
         gen_test_code!(
             FtxWSClient,
             subscribe_bbo,
-            &vec!["BTC-MOVE-2021Q1".to_string()]
+            &vec!["BTC-MOVE-2021Q3".to_string()]
         );
     }
 
@@ -119,7 +119,7 @@ mod ftx_move {
         gen_test_code!(
             FtxWSClient,
             subscribe_orderbook,
-            &vec!["BTC-MOVE-2021Q1".to_string()]
+            &vec!["BTC-MOVE-2021Q3".to_string()]
         );
     }
 }
