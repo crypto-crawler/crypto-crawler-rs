@@ -20,6 +20,7 @@ pub fn parse_trade(exchange: &str, market_type: MarketType, msg: &str) -> Result
         "coinbase_pro" => exchanges::coinbase_pro::parse_trade(market_type, msg),
         "deribit" => exchanges::deribit::parse_trade(market_type, msg),
         "ftx" => exchanges::ftx::parse_trade(market_type, msg),
+        "gate" => exchanges::gate::parse_trade(market_type, msg),
         "huobi" => exchanges::huobi::parse_trade(market_type, msg),
         _ => panic!("Unknown exchange {}", exchange),
     }
