@@ -14,6 +14,7 @@ pub fn parse_trade(exchange: &str, market_type: MarketType, msg: &str) -> Result
         "bitget" => exchanges::bitget::parse_trade(market_type, msg),
         "bithumb" => exchanges::bithumb::parse_trade(market_type, msg),
         "bitmex" => exchanges::bitmex::parse_trade(market_type, msg),
+        "bitstamp" => exchanges::bitstamp::parse_trade(market_type, msg),
         "huobi" => exchanges::huobi::parse_trade(market_type, msg),
         _ => panic!("Unknown exchange {}", exchange),
     }
