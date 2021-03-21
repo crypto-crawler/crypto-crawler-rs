@@ -9,11 +9,10 @@ fn deribit_all_trades() {
     gen_test_code!(
         DeribitWSClient,
         subscribe,
+        // https://docs.deribit.com/?javascript#trades-kind-currency-interval
         &vec![
-            "trades.future.BTC.raw".to_string(),
-            "trades.future.ETH.raw".to_string(),
-            "trades.option.BTC.raw".to_string(),
-            "trades.option.ETH.raw".to_string()
+            "trades.future.any.raw".to_string(),
+            "trades.option.any.raw".to_string(),
         ]
     );
 }
@@ -143,8 +142,7 @@ mod deribit_option {
             DeribitWSClient,
             subscribe,
             &vec![
-                "trades.option.BTC.raw".to_string(),
-                "trades.option.ETH.raw".to_string()
+                "trades.option.any.raw".to_string()
             ]
         );
     }
