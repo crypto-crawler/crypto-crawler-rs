@@ -14,16 +14,16 @@ lazy_static! {
     static ref QUANTO_MULTIPLIERS: HashMap<String, f64> = fetch_quanto_multipliers();
 }
 
-#[derive(Serialize, Deserialize)]
-struct RawMarket {
-    name: String,
-    quanto_multiplier: String,
-}
-
 // get the quanto_multiplier field from:
 // https://api.gateio.ws/api/v4/futures/usdt/contracts
 // https://api.gateio.ws/api/v4/delivery/usdt/contracts
 fn fetch_quanto_multipliers() -> HashMap<String, f64> {
+    #[derive(Serialize, Deserialize)]
+    struct RawMarket {
+        name: String,
+        quanto_multiplier: String,
+    }
+
     let mut mapping: HashMap<String, f64> = HashMap::new();
 
     let txt = http_get("https://api.gateio.ws/api/v4/futures/usdt/contracts").unwrap();
