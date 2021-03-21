@@ -34,20 +34,12 @@ mod bitmex_inverse_swap {
 
     #[test]
     fn subscribe_trade() {
-        gen_test_code!(
-            BitmexWSClient,
-            subscribe_trade,
-            &vec!["XBTUSD".to_string()]
-        );
+        gen_test_code!(BitmexWSClient, subscribe_trade, &vec!["XBTUSD".to_string()]);
     }
 
     #[test]
     fn subscribe_bbo() {
-        gen_test_code!(
-            BitmexWSClient,
-            subscribe_bbo,
-            &vec!["XBTUSD".to_string()]
-        );
+        gen_test_code!(BitmexWSClient, subscribe_bbo, &vec!["XBTUSD".to_string()]);
     }
 
     #[test]
@@ -70,16 +62,8 @@ mod bitmex_inverse_swap {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(
-            BitmexWSClient,
-            &vec!["XBTUSD".to_string()],
-            60
-        );
-        gen_test_subscribe_candlestick!(
-            BitmexWSClient,
-            &vec!["XBTUSD".to_string()],
-            86400
-        );
+        gen_test_subscribe_candlestick!(BitmexWSClient, &vec!["XBTUSD".to_string()], 60);
+        gen_test_subscribe_candlestick!(BitmexWSClient, &vec!["XBTUSD".to_string()], 86400);
     }
 }
 
@@ -155,20 +139,12 @@ mod bitmex_quanto_swap {
 
     #[test]
     fn subscribe_trade() {
-        gen_test_code!(
-            BitmexWSClient,
-            subscribe_trade,
-            &vec!["ETHUSD".to_string()]
-        );
+        gen_test_code!(BitmexWSClient, subscribe_trade, &vec!["ETHUSD".to_string()]);
     }
 
     #[test]
     fn subscribe_bbo() {
-        gen_test_code!(
-            BitmexWSClient,
-            subscribe_bbo,
-            &vec!["ETHUSD".to_string()]
-        );
+        gen_test_code!(BitmexWSClient, subscribe_bbo, &vec!["ETHUSD".to_string()]);
     }
 
     #[test]
@@ -191,15 +167,7 @@ mod bitmex_quanto_swap {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(
-            BitmexWSClient,
-            &vec!["ETHUSD".to_string()],
-            60
-        );
-        gen_test_subscribe_candlestick!(
-            BitmexWSClient,
-            &vec!["ETHUSD".to_string()],
-            86400
-        );
+        gen_test_subscribe_candlestick!(BitmexWSClient, &vec!["ETHUSD".to_string()], 60);
+        gen_test_subscribe_candlestick!(BitmexWSClient, &vec!["ETHUSD".to_string()], 86400);
     }
 }
