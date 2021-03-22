@@ -97,7 +97,7 @@ pub(crate) fn crawl_snapshot(
         let real_symbols = if is_empty {
             fetch_symbols_retry(exchange, market_type)
         } else {
-            symbols.unwrap().iter().cloned().collect::<Vec<String>>()
+            symbols.unwrap().to_vec()
         };
 
         for symbol in real_symbols.iter() {

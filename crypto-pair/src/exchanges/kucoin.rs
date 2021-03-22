@@ -32,7 +32,7 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
         // inverse future
         let base = &symbol[..symbol.len() - 4];
         (base.to_string(), "USD".to_string())
-    } else if symbol.contains("-") {
+    } else if symbol.contains('-') {
         // spot
         let v: Vec<&str> = symbol.split('-').collect();
         (v[0].to_string(), v[1].to_string())

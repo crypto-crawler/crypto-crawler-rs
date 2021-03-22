@@ -35,9 +35,8 @@ fn fetch_spot_quotes() -> HashSet<String> {
 }
 
 pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
-    if symbol.ends_with("USD_PERP") {
+    if let Some(base) = symbol.strip_suffix("USD_PERP") {
         // inverse swap
-        let base = &symbol[..symbol.len() - 8];
         Some(format!("{}/USD", base))
     } else if symbol.ends_with("-P") || symbol.ends_with("-C") {
         // option

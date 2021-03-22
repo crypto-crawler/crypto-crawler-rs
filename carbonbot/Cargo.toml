@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-crypto-crawler = "1.4.3"
+crypto-crawler = "1.4.4"
 dashmap = "4"
 serde_json = "1.0"
 log = "0.4"

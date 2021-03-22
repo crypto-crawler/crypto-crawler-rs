@@ -153,7 +153,7 @@ pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
         symbol: symbol.to_string(),
-        pair: pair.clone(),
+        pair,
         msg_type: MessageType::Trade,
         timestamp: timestamp / 1000,
         price,

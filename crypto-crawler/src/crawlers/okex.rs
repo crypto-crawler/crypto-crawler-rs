@@ -31,13 +31,13 @@ pub(crate) fn crawl_trade(
                 EXCHANGE_NAME.to_string(),
                 market_type,
                 MessageType::Trade,
-                msg.to_string(),
+                msg,
             );
             (on_msg.lock().unwrap())(message);
         }));
 
         let underlying = OkexRestClient::fetch_option_underlying()
-            .unwrap_or(vec!["BTC-USD".to_string(), "ETH-USD".to_string()]);
+            .unwrap_or_else(|_| vec!["BTC-USD".to_string(), "ETH-USD".to_string()]);
         let channels: Vec<String> = underlying
             .into_iter()
             .map(|x| format!("option/trades:{}", x))

@@ -15,7 +15,7 @@ impl FileWriter {
             .append(true)
             .create(true)
             .open(path)
-            .expect(format!("Failed to open {}", path).as_str());
+            .unwrap_or_else(|_| panic!("Failed to open {}", path));
 
         FileWriter {
             file: Mutex::new(file),

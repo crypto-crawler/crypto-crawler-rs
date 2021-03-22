@@ -1,3 +1,4 @@
+#![allow(clippy::unnecessary_wraps)]
 //! Get all trading pairs of a cryptocurrency exchange.
 //!
 //! ## Example

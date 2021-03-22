@@ -37,7 +37,7 @@ pub(crate) fn normalize_currency(mut currency: &str) -> String {
 }
 
 pub(crate) fn normalize_pair(mut symbol: &str) -> Option<String> {
-    if symbol.chars().next().unwrap() == 't' {
+    if symbol.starts_with('t') {
         symbol = &symbol[1..]; // e.g., tBTCUSD, remove t
     };
 

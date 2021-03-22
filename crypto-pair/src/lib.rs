@@ -1,3 +1,4 @@
+#![allow(clippy::unnecessary_wraps)]
 mod exchanges;
 
 /// Normalize a trading currency.
@@ -47,11 +48,18 @@ pub fn normalize_pair(symbol: &str, exchange: &str) -> Option<String> {
         "coinbase_pro" => Some(symbol.replace("-", "/")),
         "deribit" => exchanges::deribit::normalize_pair(symbol),
         "ftx" => exchanges::ftx::normalize_pair(symbol),
-        "gate" => exchanges::gate::normalize_pair(symbol),
+        "gate" => {
+            let (base, quote) = {
+                let v: Vec<&str> = symbol.split('_').collect();
+                (v[0].to_string(), v[1].to_string())
+            };
+
+            Some(format!("{}/{}", base, quote))
+        }
         "huobi" => exchanges::huobi::normalize_pair(symbol),
         "kraken" => exchanges::kraken::normalize_pair(symbol),
         "kucoin" => exchanges::kucoin::normalize_pair(symbol),
-        "mxc" => exchanges::mxc::normalize_pair(symbol),
+        "mxc" => Some(symbol.replace("_", "/")),
         "okex" => {
             let v: Vec<&str> = symbol.split('-').collect();
             Some(format!("{}/{}", v[0], v[1]))

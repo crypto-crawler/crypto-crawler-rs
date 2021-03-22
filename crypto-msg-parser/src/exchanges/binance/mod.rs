@@ -1,4 +1,4 @@
-mod binance;
+mod binance_all;
 mod binance_option;
 
 use crypto_market_type::MarketType;
@@ -11,6 +11,6 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     if market_type == MarketType::Option {
         binance_option::parse_trade(msg)
     } else {
-        binance::parse_trade(market_type, msg)
+        binance_all::parse_trade(market_type, msg)
     }
 }

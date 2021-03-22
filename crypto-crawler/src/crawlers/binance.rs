@@ -58,7 +58,7 @@ pub(crate) fn crawl_trade(
                         EXCHANGE_NAME.to_string(),
                         market_type,
                         MessageType::Trade,
-                        msg.to_string(),
+                        msg,
                     );
                     (on_msg.lock().unwrap())(message);
                 }));
