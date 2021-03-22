@@ -74,6 +74,7 @@ mod mxc_spot {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             MxcSpotWSClient,
