@@ -26,6 +26,7 @@ pub fn parse_trade(exchange: &str, market_type: MarketType, msg: &str) -> Result
         "kucoin" => exchanges::kucoin::parse_trade(market_type, msg),
         "mxc" => exchanges::mxc::parse_trade(market_type, msg),
         "okex" => exchanges::okex::parse_trade(market_type, msg),
+        "zbg" => exchanges::zbg::parse_trade(market_type, msg),
         _ => panic!("Unknown exchange {}", exchange),
     }
 }
