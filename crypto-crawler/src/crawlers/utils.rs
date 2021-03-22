@@ -108,13 +108,7 @@ pub(crate) fn crawl_snapshot(
             };
             match resp {
                 Ok(msg) => {
-                    let message = Message::new(
-                        exchange.to_string(),
-                        market_type,
-                        symbol.to_string(),
-                        msg_type,
-                        msg,
-                    );
+                    let message = Message::new(exchange.to_string(), market_type, msg_type, msg);
                     (on_msg.lock().unwrap())(message);
                 }
                 Err(err) => error!("{} {} {}, error: {}", exchange, market_type, symbol, err),
@@ -166,7 +160,6 @@ macro_rules! gen_crawl_event {
                 let message = Message::new(
                     EXCHANGE_NAME.to_string(),
                     market_type,
-                    extract_symbol(&msg),
                     $msg_type,
                     msg.to_string(),
                 );

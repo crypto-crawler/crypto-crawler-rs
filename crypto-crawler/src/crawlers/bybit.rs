@@ -3,25 +3,17 @@ use std::sync::{
     Arc, Mutex,
 };
 
-use std::{collections::HashMap, time::Duration};
+use std::time::Duration;
 
 use super::utils::{check_args, fetch_symbols_retry};
 use crate::{msg::Message, MessageType};
 use crypto_markets::MarketType;
 use crypto_ws_client::*;
 use log::*;
-use serde_json::Value;
 
 const EXCHANGE_NAME: &str = "bybit";
 // usize::MAX means unlimited
 const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = usize::MAX;
-
-fn extract_symbol(json: &str) -> String {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(&json).unwrap();
-    let topic = obj.get("topic").unwrap().as_str().unwrap();
-    let last_dot = topic.rfind('.').unwrap();
-    (&topic[(last_dot + 1)..]).to_string()
-}
 
 #[rustfmt::skip]
 gen_crawl_event!(crawl_trade_inverse_future, BybitInverseFutureWSClient, MessageType::Trade, subscribe_trade);
