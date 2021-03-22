@@ -92,7 +92,7 @@ mod gate_inverse_swap {
         gen_test_code!(
             GateInverseSwapWSClient,
             subscribe_trade,
-            &vec!["BTC_USD".to_string()]
+            &vec!["BTC_USD".to_string(), "ETH_USD".to_string()]
         );
     }
 
@@ -179,7 +179,10 @@ mod gate_linear_future {
         gen_test_code!(
             GateLinearFutureWSClient,
             subscribe_trade,
-            &vec!["BTC_USDT_20210326".to_string()]
+            &vec![
+                "BTC_USDT_20210326".to_string(),
+                "ETH_USDT_20210326".to_string()
+            ]
         );
     }
 
