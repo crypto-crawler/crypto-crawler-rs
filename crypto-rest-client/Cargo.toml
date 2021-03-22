@@ -1,6 +1,6 @@
 [package]
 name = "crypto-rest-client"
-version = "0.5.8"
+version = "0.5.9"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "An restful client for all cryptocurrency exchanges."
@@ -12,7 +12,7 @@ keywords = ["cryptocurrency", "blockchain", "trading"]
 crypto-market-type = "0.1.2"
 lazy_static = "1"
 regex = "1"
-reqwest = { version = "0.10", features = ["blocking", "gzip", "socks"] }
+reqwest = { version = "0.11", features = ["blocking", "gzip", "socks"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
 strum = "0.20"
