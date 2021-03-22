@@ -3,26 +3,17 @@ use std::sync::{
     Arc, Mutex,
 };
 
-use std::{collections::HashMap, time::Duration};
+use std::time::Duration;
 
 use super::utils::{check_args, fetch_symbols_retry};
 use crate::{msg::Message, MessageType};
 use crypto_markets::MarketType;
 use crypto_ws_client::*;
 use log::*;
-use serde_json::Value;
 
 const EXCHANGE_NAME: &str = "kucoin";
 // See https://docs.kucoin.cc/#request-rate-limit
 const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = 300;
-
-fn extract_symbol(json: &str) -> String {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(&json).unwrap();
-    let topic = obj.get("topic").unwrap().as_str().unwrap();
-
-    let colon_pos = topic.rfind(':').unwrap();
-    (&topic[(colon_pos + 1)..]).to_string()
-}
 
 #[rustfmt::skip]
 gen_crawl_event!(crawl_trade_spot, KuCoinSpotWSClient, MessageType::Trade, subscribe_trade);

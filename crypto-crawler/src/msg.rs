@@ -29,8 +29,6 @@ pub struct Message {
     pub market_type: MarketType,
     /// Message type
     pub msg_type: MessageType,
-    /// Exchange specific symbol, used by RESTful APIs and websocket
-    pub symbol: String,
     /// Unix timestamp in milliseconds
     pub received_at: u64,
     /// the original message
@@ -41,14 +39,12 @@ impl Message {
     pub fn new(
         exchange: String,
         market_type: MarketType,
-        symbol: String,
         msg_type: MessageType,
         json: String,
     ) -> Self {
         Message {
             exchange,
             market_type,
-            symbol,
             msg_type,
             received_at: SystemTime::now()
                 .duration_since(UNIX_EPOCH)

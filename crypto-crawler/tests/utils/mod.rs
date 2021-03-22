@@ -16,15 +16,6 @@ macro_rules! gen_test_code {
             assert!(!messages.is_empty());
             assert_eq!(messages[0].exchange, $exchange.to_string());
             assert_eq!(messages[0].market_type, $market_type);
-            if $exchange == "binance" {
-                // Binance REST APIs use uppercase while websocket uses lowercase
-                assert_eq!(messages[0].symbol, $symbol.to_string().to_uppercase());
-            } else if $exchange == "zbg" && $market_type == MarketType::Spot {
-                // ZBG spot REST APIs use lowercase while websocket uses uppercase
-                assert_eq!(messages[0].symbol.to_lowercase(), $symbol.to_string());
-            } else {
-                assert_eq!(messages[0].symbol, $symbol.to_string());
-            }
             assert_eq!(messages[0].msg_type, $msg_type);
         });
     }};
@@ -55,12 +46,6 @@ macro_rules! gen_test_snapshot_code {
             assert!(!messages.is_empty());
             assert_eq!(messages[0].exchange, $exchange.to_string());
             assert_eq!(messages[0].market_type, $market_type);
-            if $exchange == "binance" {
-                // Binance REST APIs use uppercase while websocket uses lowercase
-                assert_eq!(messages[0].symbol, $symbol.to_string().to_uppercase());
-            } else {
-                assert_eq!(messages[0].symbol, $symbol.to_string());
-            }
             assert_eq!(messages[0].msg_type, $msg_type);
         });
     }};
