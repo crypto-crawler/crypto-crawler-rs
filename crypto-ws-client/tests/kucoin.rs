@@ -163,9 +163,18 @@ mod kucoin_inverse_swap {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(KuCoinSwapWSClient, &vec!["XBTUSDM".to_string()], 60);
-        gen_test_subscribe_candlestick!(KuCoinSwapWSClient, &vec!["XBTUSDM".to_string()], 604800);
+        gen_test_subscribe_candlestick!(
+            KuCoinSwapWSClient,
+            &vec!["XBTUSDM".to_string(), "ETHUSDM".to_string()],
+            60
+        );
+        gen_test_subscribe_candlestick!(
+            KuCoinSwapWSClient,
+            &vec!["XBTUSDM".to_string(), "ETHUSDM".to_string()],
+            604800
+        );
     }
 }
 
@@ -247,9 +256,18 @@ mod kucoin_linear_swap {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(KuCoinSwapWSClient, &vec!["XBTUSDTM".to_string()], 60);
-        gen_test_subscribe_candlestick!(KuCoinSwapWSClient, &vec!["XBTUSDTM".to_string()], 604800);
+        gen_test_subscribe_candlestick!(
+            KuCoinSwapWSClient,
+            &vec!["XBTUSDTM".to_string(), "ETHUSDTM".to_string()],
+            60
+        );
+        gen_test_subscribe_candlestick!(
+            KuCoinSwapWSClient,
+            &vec!["XBTUSDTM".to_string(), "ETHUSDTM".to_string()],
+            604800
+        );
     }
 }
 
@@ -259,6 +277,7 @@ mod kucoin_inverse_future {
     use std::sync::{Arc, Mutex};
 
     #[test]
+    #[ignore]
     fn subscribe() {
         gen_test_code!(
             KuCoinSwapWSClient,
@@ -268,6 +287,7 @@ mod kucoin_inverse_future {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_raw_json() {
         gen_test_code!(
             KuCoinSwapWSClient,
@@ -277,6 +297,7 @@ mod kucoin_inverse_future {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_trade() {
         gen_test_code!(
             KuCoinSwapWSClient,
@@ -286,6 +307,7 @@ mod kucoin_inverse_future {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_bbo() {
         gen_test_code!(
             KuCoinSwapWSClient,
@@ -331,6 +353,7 @@ mod kucoin_inverse_future {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(KuCoinSwapWSClient, &vec!["XBTMH21".to_string()], 60);
         gen_test_subscribe_candlestick!(KuCoinSwapWSClient, &vec!["XBTMH21".to_string()], 604800);

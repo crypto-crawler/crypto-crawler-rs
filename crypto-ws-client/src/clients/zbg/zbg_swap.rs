@@ -22,7 +22,7 @@ lazy_static! {
         RwLock::new(fetch_symbol_contract_id_map_swap());
 }
 
-/// The WebSocket client for ZBG spot market.
+/// The WebSocket client for ZBG swap market.
 ///
 /// * WebSocket API doc: <https://www.zbgpro.com/docs/future/v1/cn/#300f34d976>, there is English doc
 /// * Trading at: <https://futures.zbg.com/>

@@ -11,7 +11,7 @@ mod bitfinex_spot {
         gen_test_code!(
             BitfinexWSClient,
             subscribe,
-            &vec!["trades:tBTCUST".to_string()]
+            &vec!["trades:tBTCUST".to_string(), "trades:tETHUST".to_string()]
         );
     }
 
@@ -30,7 +30,7 @@ mod bitfinex_spot {
         gen_test_code!(
             BitfinexWSClient,
             subscribe_trade,
-            &vec!["tBTCUST".to_string()]
+            &vec!["tBTCUST".to_string(), "tETHUST".to_string()]
         );
     }
 
@@ -96,7 +96,7 @@ mod bitfinex_swap {
         gen_test_code!(
             BitfinexWSClient,
             subscribe_trade,
-            &vec!["tBTCF0:USTF0".to_string()]
+            &vec!["tBTCF0:USTF0".to_string(), "tETHF0:USTF0".to_string()]
         );
     }
 

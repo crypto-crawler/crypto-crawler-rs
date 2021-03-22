@@ -9,7 +9,7 @@ fn subscribe() {
     gen_test_code!(
         BithumbWSClient,
         subscribe,
-        &vec!["TRADE:BTC-USDT".to_string(),]
+        &vec!["TRADE:BTC-USDT".to_string(), "TRADE:ETH-USDT".to_string()]
     );
 }
 
@@ -28,7 +28,7 @@ fn subscribe_raw_json() {
     gen_test_code!(
         BithumbWSClient,
         subscribe,
-        &vec![r#"{"cmd":"subscribe","args":["TRADE:BTC-USDT"]}"#.to_string()]
+        &vec![r#"{"cmd":"subscribe","args":["TRADE:BTC-USDT","TRADE:ETH-USDT"]}"#.to_string()]
     );
 }
 

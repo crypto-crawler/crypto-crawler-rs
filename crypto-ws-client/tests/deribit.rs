@@ -152,10 +152,10 @@ mod deribit_option {
             DeribitWSClient,
             subscribe_trade,
             &vec![
-                "BTC-26FEB21-44000-C".to_string(),
-                "BTC-26FEB21-44000-P".to_string(),
-                "BTC-26FEB21-48000-C".to_string(),
-                "BTC-26FEB21-48000-P".to_string(),
+                "BTC-2APR21-58000-C	".to_string(),
+                "BTC-9APR21-60000-C".to_string(),
+                "BTC-2APR21-50000-P".to_string(),
+                "BTC-26MAR21-60000-P".to_string(),
             ]
         );
     }
@@ -165,7 +165,7 @@ mod deribit_option {
         gen_test_code!(
             DeribitWSClient,
             subscribe_ticker,
-            &vec!["BTC-26FEB21-44000-C".to_string()]
+            &vec!["BTC-26MAR21-60000-P".to_string()]
         );
     }
 
@@ -174,7 +174,7 @@ mod deribit_option {
         gen_test_code!(
             DeribitWSClient,
             subscribe_orderbook,
-            &vec!["BTC-26FEB21-44000-C".to_string()]
+            &vec!["BTC-26MAR21-60000-P".to_string()]
         );
     }
 
@@ -183,7 +183,7 @@ mod deribit_option {
         gen_test_code!(
             DeribitWSClient,
             subscribe_orderbook_snapshot,
-            &vec!["BTC-26FEB21-44000-C".to_string()]
+            &vec!["BTC-26MAR21-60000-P".to_string()]
         );
     }
 
@@ -191,12 +191,12 @@ mod deribit_option {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             DeribitWSClient,
-            &vec!["BTC-26FEB21-44000-C".to_string()],
+            &vec!["BTC-26MAR21-60000-P".to_string()],
             60
         );
         gen_test_subscribe_candlestick!(
             DeribitWSClient,
-            &vec!["BTC-26FEB21-44000-C".to_string()],
+            &vec!["BTC-26MAR21-60000-P".to_string()],
             86400
         );
     }
