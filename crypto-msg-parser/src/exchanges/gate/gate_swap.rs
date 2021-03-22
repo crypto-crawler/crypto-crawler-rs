@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use super::utils::http_get;
+use super::super::utils::http_get;
 use crate::{MessageType, TradeMsg, TradeSide};
 
 use lazy_static::lazy_static;
@@ -55,27 +55,6 @@ fn fetch_quanto_multipliers() -> HashMap<String, f64> {
     mapping
 }
 
-// https://www.gate.io/docs/websocket/index.html#trades-subscription
-#[derive(Serialize, Deserialize)]
-struct SpotTradeMsg {
-    id: i64,
-    time: f64,
-    price: String,
-    amount: String,
-    #[serde(rename = "type")]
-    type_: String, // buy, sell
-    #[serde(flatten)]
-    extra: HashMap<String, Value>,
-}
-
-#[derive(Serialize, Deserialize)]
-struct SpotWebsocketMsg {
-    method: String,
-    params: Vec<Value>,
-    #[serde(flatten)]
-    extra: HashMap<String, Value>,
-}
-
 // https://www.gate.io/docs/delivery/ws/index.html#trades-subscription
 #[derive(Serialize, Deserialize)]
 struct FutureTradeMsg {
@@ -102,7 +81,7 @@ struct SwapTradeMsg {
 }
 
 #[derive(Serialize, Deserialize)]
-struct ContractWebsocketMsg<T: Sized> {
+struct WebsocketMsg<T: Sized> {
     time: i64,
     channel: String,
     event: String,
@@ -137,46 +116,10 @@ fn calc_quantity_and_volume(
     }
 }
 
-pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
+pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     match market_type {
-        MarketType::Spot => {
-            let ws_msg = serde_json::from_str::<SpotWebsocketMsg>(msg)?;
-            let symbol = ws_msg.params[0].as_str().unwrap();
-            let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
-            let raw_trades: Vec<SpotTradeMsg> =
-                serde_json::from_value(ws_msg.params[1].clone()).unwrap();
-
-            let trades: Vec<TradeMsg> = raw_trades
-                .into_iter()
-                .map(|raw_trade| {
-                    let price = raw_trade.price.parse::<f64>().unwrap();
-                    let quantity = raw_trade.amount.parse::<f64>().unwrap();
-
-                    TradeMsg {
-                        exchange: EXCHANGE_NAME.to_string(),
-                        market_type,
-                        symbol: symbol.to_string(),
-                        pair: pair.clone(),
-                        msg_type: MessageType::Trade,
-                        timestamp: (raw_trade.time * 1000.0) as i64,
-                        price,
-                        quantity,
-                        volume: price * quantity,
-                        side: if raw_trade.type_ == "sell" {
-                            TradeSide::Sell
-                        } else {
-                            TradeSide::Buy
-                        },
-                        trade_id: raw_trade.id.to_string(),
-                        raw: serde_json::to_value(&raw_trade).unwrap(),
-                    }
-                })
-                .collect();
-
-            Ok(trades)
-        }
         MarketType::LinearFuture => {
-            let ws_msg = serde_json::from_str::<ContractWebsocketMsg<FutureTradeMsg>>(msg)?;
+            let ws_msg = serde_json::from_str::<WebsocketMsg<FutureTradeMsg>>(msg)?;
 
             let trades: Vec<TradeMsg> = ws_msg
                 .result
@@ -212,7 +155,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             Ok(trades)
         }
         MarketType::InverseSwap | MarketType::LinearSwap => {
-            let ws_msg = serde_json::from_str::<ContractWebsocketMsg<SwapTradeMsg>>(msg)?;
+            let ws_msg = serde_json::from_str::<WebsocketMsg<SwapTradeMsg>>(msg)?;
 
             let trades: Vec<TradeMsg> = ws_msg
                 .result
