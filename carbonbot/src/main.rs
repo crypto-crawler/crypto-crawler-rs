@@ -21,11 +21,9 @@ pub fn crawl(
     let symbols: Arc<DashSet<String>> = Arc::new(DashSet::new());
 
     let writers_map_clone = writers_map.clone();
-    let symbols_clone = symbols.clone();
 
     let on_msg_ext = Arc::new(Mutex::new(move |msg: Message| {
         let key = format!("{}-{}-{}", msg_type, exchange, market_type);
-        symbols_clone.insert(msg.symbol.clone());
         if !writers_map_clone.contains_key(&key) {
             let data_dir = Path::new(data_dir)
                 .join(msg_type.to_string())
