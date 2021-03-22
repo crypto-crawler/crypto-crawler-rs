@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use super::utils::http_get;
+use super::super::utils::http_get;
 use crate::{MessageType, TradeMsg, TradeSide};
 
 use lazy_static::lazy_static;
@@ -44,19 +44,6 @@ fn fetch_linear_multipliers() -> HashMap<String, f64> {
     mapping
 }
 
-// https://docs.kucoin.com/#match-execution-data
-#[derive(Serialize, Deserialize)]
-struct SpotTradeMsg {
-    symbol: String,
-    sequence: String,
-    side: String, // buy, sell
-    size: String,
-    price: String,
-    time: String,
-    #[serde(flatten)]
-    extra: HashMap<String, Value>,
-}
-
 // https://docs.kucoin.cc/futures/#execution-data
 #[derive(Serialize, Deserialize)]
 struct ContractTradeMsg {
@@ -97,56 +84,28 @@ fn calc_quantity_and_volume(market_type: MarketType, raw_trade: &ContractTradeMs
 }
 
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    if market_type == MarketType::Spot {
-        let ws_msg = serde_json::from_str::<WebsocketMsg<SpotTradeMsg>>(msg)?;
-        let raw_trade = ws_msg.data;
-        let price = raw_trade.price.parse::<f64>().unwrap();
-        let quantity = raw_trade.size.parse::<f64>().unwrap();
+    let ws_msg = serde_json::from_str::<WebsocketMsg<ContractTradeMsg>>(msg)?;
+    let raw_trade = ws_msg.data;
+    let (quantity, volume) = calc_quantity_and_volume(market_type, &raw_trade);
 
-        let trade = TradeMsg {
-            exchange: EXCHANGE_NAME.to_string(),
-            market_type,
-            symbol: raw_trade.symbol.clone(),
-            pair: crypto_pair::normalize_pair(&raw_trade.symbol, EXCHANGE_NAME).unwrap(),
-            msg_type: MessageType::Trade,
-            timestamp: raw_trade.time.parse::<i64>().unwrap() / 1000000,
-            price,
-            quantity,
-            volume: price * quantity,
-            side: if raw_trade.side == "sell" {
-                TradeSide::Sell
-            } else {
-                TradeSide::Buy
-            },
-            trade_id: raw_trade.sequence.to_string(),
-            raw: serde_json::to_value(&raw_trade).unwrap(),
-        };
+    let trade = TradeMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: raw_trade.symbol.clone(),
+        pair: crypto_pair::normalize_pair(&raw_trade.symbol, EXCHANGE_NAME).unwrap(),
+        msg_type: MessageType::Trade,
+        timestamp: raw_trade.ts / 1000000,
+        price: raw_trade.price,
+        quantity,
+        volume,
+        side: if raw_trade.side == "sell" {
+            TradeSide::Sell
+        } else {
+            TradeSide::Buy
+        },
+        trade_id: raw_trade.sequence.to_string(),
+        raw: serde_json::to_value(&raw_trade).unwrap(),
+    };
 
-        Ok(vec![trade])
-    } else {
-        let ws_msg = serde_json::from_str::<WebsocketMsg<ContractTradeMsg>>(msg)?;
-        let raw_trade = ws_msg.data;
-        let (quantity, volume) = calc_quantity_and_volume(market_type, &raw_trade);
-
-        let trade = TradeMsg {
-            exchange: EXCHANGE_NAME.to_string(),
-            market_type,
-            symbol: raw_trade.symbol.clone(),
-            pair: crypto_pair::normalize_pair(&raw_trade.symbol, EXCHANGE_NAME).unwrap(),
-            msg_type: MessageType::Trade,
-            timestamp: raw_trade.ts / 1000000,
-            price: raw_trade.price,
-            quantity,
-            volume,
-            side: if raw_trade.side == "sell" {
-                TradeSide::Sell
-            } else {
-                TradeSide::Buy
-            },
-            trade_id: raw_trade.sequence.to_string(),
-            raw: serde_json::to_value(&raw_trade).unwrap(),
-        };
-
-        Ok(vec![trade])
-    }
+    Ok(vec![trade])
 }
