@@ -33,8 +33,10 @@ fn fetch_linear_future_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::LinearFuture).unwrap();
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
-        let date = &symbol[(symbol.len() - 4)..];
-        assert!(date.parse::<i64>().is_ok());
+        if !symbol.starts_with("BTC-HASH") {
+            let date = &symbol[(symbol.len() - 4)..];
+            assert!(date.parse::<i64>().is_ok());
+        }
     }
 }
 

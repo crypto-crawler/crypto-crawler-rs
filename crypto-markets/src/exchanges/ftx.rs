@@ -77,7 +77,12 @@ fn fetch_linear_future_symbols() -> Result<Vec<String>> {
     let markets = fetch_markets_raw()?;
     let symbols: Vec<String> = markets
         .into_iter()
-        .filter(|x| x.type_ == "future" && (&x.name[(x.name.len() - 4)..]).parse::<i64>().is_ok())
+        .filter(|x| {
+            x.type_ == "future"
+                && !x.name.ends_with("-PERP")
+                && !x.name.contains("BVOL")
+                && !x.name.contains("-MOVE-")
+        })
         .map(|x| x.name)
         .collect();
     Ok(symbols)
