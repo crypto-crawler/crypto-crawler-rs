@@ -66,7 +66,7 @@ pub(crate) fn crawl_l2_event(
                     EXCHANGE_NAME.to_string(),
                     market_type,
                     MessageType::L2Event,
-                    msg.to_string(),
+                    msg,
                 );
                 (on_msg.lock().unwrap())(message);
             };
