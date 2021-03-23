@@ -26,8 +26,6 @@ struct SpotTradeMsg {
 #[allow(non_snake_case)]
 struct Params {
     symbol: String,
-    #[serde(rename = "type")]
-    type_: String,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }

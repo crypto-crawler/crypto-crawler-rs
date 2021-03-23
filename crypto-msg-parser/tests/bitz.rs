@@ -4,7 +4,7 @@ use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
 
 #[test]
 fn trade() {
-    let raw_msg = r#"{"params":{"symbol":"btc_usdt","type":"order","_CDID":"100002","dataType":"1"},"action":"Pushdata.order","data":[{"id":"1616299593889","t":"12:06:33","T":1616299593,"p":"57625.22","n":"0.0890","s":"sell"},{"id":"1616299593297","t":"12:06:33","T":1616299593,"p":"57625.23","n":"0.0049","s":"buy"}],"time":1616299594334}"#;
+    let raw_msg = r#"{"msgId":0,"params":{"symbol":"btc_usdt"},"action":"Pushdata.order","data":[{"id":"1616486110508","t":"15:55:10","T":1616486110,"p":"53874.97","n":"0.1310","s":"sell"},{"id":"1616486110006","t":"15:55:10","T":1616486110,"p":"53875.82","n":"0.1144","s":"buy"}],"time":1616486110921,"source":"sub-api"}"#;
     let trades = &parse_trade("bitz", MarketType::Spot, raw_msg).unwrap();
 
     assert_eq!(trades.len(), 2);
