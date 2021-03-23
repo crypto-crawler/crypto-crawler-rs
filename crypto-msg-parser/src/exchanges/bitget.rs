@@ -1,5 +1,6 @@
 use crypto_market_type::MarketType;
 
+use super::utils::http_get;
 use crate::{MessageType, TradeMsg, TradeSide};
 
 use lazy_static::lazy_static;
@@ -11,27 +12,30 @@ const EXCHANGE_NAME: &str = "bitget";
 
 lazy_static! {
     // See https://bitgetlimited.github.io/apidoc/en/swap/#contract-information
-    static ref LINEAR_SWAP_MAPPING: HashMap<&'static str, f64> = vec![
-        ("BTC", 0.001),
-        ("EOS", 1.0),
-        ("ETH", 0.1),
-        ("LTC", 0.1),
-        ("XRP", 10.0),
-        ("BCH", 0.01),
-        ("ETC", 1.0),
-        ("ADA", 100.0),
-        ("LINK", 1.0),
-        ("TRX", 100.0),
-        ("DOT", 1.0),
-        ("XTZ", 1.0),
-        ("UNI", 1.0),
-        ("SUSHI", 1.0),
-        ("YFI", 0.0001),
-        ("ATOM", 1.0),
-        ("FIL", 0.1),
-        ("ALGO", 10.0),
-        ("COMP", 0.01),
-    ].into_iter().collect();
+    static ref CONTRACT_VAL_MAPPING: HashMap<String, f64> = fetch_contract_val();
+}
+
+fn fetch_contract_val() -> HashMap<String, f64> {
+    // See https://bitgetlimited.github.io/apidoc/en/swap/#contract-information
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct SwapMarket {
+        symbol: String,
+        contract_val: String,
+    }
+
+    let txt = http_get("https://capi.bitget.com/api/swap/v3/market/contracts").unwrap();
+    let swap_markets = serde_json::from_str::<Vec<SwapMarket>>(&txt).unwrap();
+
+    let mut mapping: HashMap<String, f64> = HashMap::new();
+    for swap_market in swap_markets.iter() {
+        mapping.insert(
+            swap_market.symbol.clone(),
+            swap_market.contract_val.parse::<f64>().unwrap(),
+        );
+    }
+
+    mapping
 }
 
 // see https://bitgetlimited.github.io/apidoc/en/swap/#public-trading-channel
@@ -54,21 +58,16 @@ struct ResponseMsg<T: Sized> {
 
 fn calc_quantity_and_volume(
     market_type: MarketType,
-    pair: &str,
+    symbol: &str,
     price: f64,
-    quantity: f64,
+    size: f64,
 ) -> (f64, f64) {
+    let contract_value = CONTRACT_VAL_MAPPING.get(symbol).unwrap();
     if market_type == MarketType::LinearSwap {
-        let base = {
-            let slash_pos = pair.find('/').unwrap();
-            &pair[..slash_pos]
-        };
-        let contract_value = LINEAR_SWAP_MAPPING.get(base).unwrap();
-
-        let real_quantity = contract_value * quantity;
+        let real_quantity = contract_value * size;
         (real_quantity, real_quantity * price)
     } else if market_type == MarketType::InverseSwap {
-        let volume = quantity;
+        let volume = contract_value * size;
         (volume / price, volume)
     } else {
         panic!("Unknown market_type {}", market_type);
@@ -81,16 +80,21 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         .data
         .into_iter()
         .map(|raw_trade| {
-            let mut trade = TradeMsg {
+            let price = raw_trade.price.parse::<f64>().unwrap();
+            let size = raw_trade.size.parse::<f64>().unwrap();
+            let (quantity, volume) =
+                calc_quantity_and_volume(market_type, &raw_trade.instrument_id, price, size);
+
+            TradeMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type,
                 symbol: raw_trade.instrument_id.clone(),
                 pair: crypto_pair::normalize_pair(&raw_trade.instrument_id, EXCHANGE_NAME).unwrap(),
                 msg_type: MessageType::Trade,
                 timestamp: raw_trade.timestamp.parse::<i64>().unwrap(),
-                price: raw_trade.price.parse::<f64>().unwrap(),
-                quantity: raw_trade.size.parse::<f64>().unwrap(),
-                volume: 0.0,
+                price,
+                quantity,
+                volume,
                 side: if raw_trade.side == "sell" {
                     TradeSide::Sell
                 } else {
@@ -99,12 +103,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 // Use timestamp as ID because bitget doesn't provide trade_id
                 trade_id: raw_trade.timestamp.to_string(),
                 raw: serde_json::to_value(&raw_trade).unwrap(),
-            };
-            let (quantity, volume) =
-                calc_quantity_and_volume(market_type, &trade.pair, trade.price, trade.quantity);
-            trade.quantity = quantity;
-            trade.volume = volume;
-            trade
+            }
         })
         .collect();
 
