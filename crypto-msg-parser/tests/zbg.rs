@@ -16,6 +16,17 @@ mod trade {
 
         assert_eq!(trade.volume, trade.price * trade.quantity);
         assert_eq!(trade.side, TradeSide::Buy);
+
+        let raw_msg = r#"["T","329","1616486457","BTC_USDT","ask","54139.4","0.654172"]"#;
+        let trades = &parse_trade("zbg", MarketType::Spot, raw_msg).unwrap();
+
+        assert_eq!(trades.len(), 1);
+        let trade = &trades[0];
+
+        crate::utils::check_trade_fields("zbg", MarketType::Spot, "BTC/USDT".to_string(), trade);
+
+        assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.side, TradeSide::Sell);
     }
 
     #[test]

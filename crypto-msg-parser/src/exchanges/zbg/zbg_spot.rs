@@ -9,7 +9,14 @@ const EXCHANGE_NAME: &str = "zbg";
 // https://zbgapi.github.io/docs/spot/v1/en/#market-trade
 // [T, symbol-id, symbol, timestamp, ask/bid, price, quantity]
 pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
-    let arr = serde_json::from_str::<Vec<Vec<String>>>(msg)?;
+    let arr = if msg.starts_with(r#"[["T","#) {
+        serde_json::from_str::<Vec<Vec<String>>>(msg)?
+    } else if msg.starts_with(r#"["T","#) {
+        let tmp = serde_json::from_str::<Vec<String>>(msg)?;
+        vec![tmp]
+    } else {
+        panic!("Invalid trade msg {}", msg);
+    };
 
     let trades: Vec<TradeMsg> = arr
         .into_iter()
