@@ -18,8 +18,6 @@ pub fn crawl(
     data_dir: &'static str,
 ) {
     let writers_map: Arc<DashMap<String, FileWriter>> = Arc::new(DashMap::new());
-    let symbols: Arc<DashSet<String>> = Arc::new(DashSet::new());
-
     let writers_map_clone = writers_map.clone();
 
     let on_msg_ext = Arc::new(Mutex::new(move |msg: Message| {
@@ -58,10 +56,6 @@ pub fn crawl(
             crawl_l3_snapshot(exchange, market_type, None, on_msg_ext, None, None)
         }
         _ => panic!("Not implemented"),
-    }
-
-    for symbol in symbols.iter() {
-        println!("{}", *symbol);
     }
 
     for kv in writers_map.iter() {
