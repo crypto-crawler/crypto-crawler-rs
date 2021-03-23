@@ -8,7 +8,8 @@ use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "huobi";
 
-// see https://huobiapi.github.io/docs/usdt_swap/v1/en/#general-subscribe-trade-detail-data
+// https://huobiapi.github.io/docs/usdt_swap/v1/en/#general-subscribe-trade-detail-data
+// https://huobiapi.github.io/docs/option/v1/en/#subscribe-trade-detail-data
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct LinearTradeMsg {

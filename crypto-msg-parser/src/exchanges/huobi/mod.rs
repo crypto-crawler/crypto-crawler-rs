@@ -14,7 +14,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         MarketType::InverseFuture | MarketType::InverseSwap => {
             huobi_inverse::parse_trade(market_type, msg)
         }
-        MarketType::LinearFuture | MarketType::LinearSwap => {
+        MarketType::LinearFuture | MarketType::LinearSwap | MarketType::Option => {
             huobi_linear::parse_trade(market_type, msg)
         }
         _ => panic!("Unknown market type {}", market_type),

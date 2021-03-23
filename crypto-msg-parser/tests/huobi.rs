@@ -65,7 +65,7 @@ mod trade {
             "ETH/USD".to_string(),
             trade,
         );
-        assert_eq!(trade.volume, 3460.0);
+        assert_eq!(trade.volume, 3460.0); // volume == trade_turnover
         assert_eq!(trade.volume, trade.price * trade.quantity);
         assert_eq!(trade.side, TradeSide::Sell);
     }
@@ -80,7 +80,7 @@ mod trade {
             "BTC/USDT".to_string(),
             trade,
         );
-        assert_eq!(trade.volume, 2350.796);
+        assert_eq!(trade.volume, 2350.796); // volume == trade_turnover
         assert!(approx_eq!(
             f64,
             trade.volume,
@@ -105,5 +105,26 @@ mod trade {
             ulps = 9
         ));
         assert_eq!(trade.side, TradeSide::Sell);
+    }
+
+    #[test]
+    fn linear_option() {
+        let raw_msg = r#"{"ch":"market.BTC-USDT-210326-C-32000.trade.detail","ts":1616246303142,"tick":{"id":674495368,"ts":1616246303133,"data":[{"amount":36,"quantity":0.036,"trade_turnover":971.69976,"ts":1616246303133,"id":6744953680000,"price":26991.66,"direction":"buy"},{"amount":42,"quantity":0.042,"trade_turnover":1134,"ts":1616246303133,"id":6744953680001,"price":27000,"direction":"buy"}]}}"#;
+        let trades = &parse_trade("huobi", MarketType::Option, raw_msg).unwrap();
+        assert_eq!(trades.len(), 2);
+
+        for trade in trades.iter() {
+            crate::utils::check_trade_fields(
+                "huobi",
+                MarketType::Option,
+                "BTC/USDT".to_string(),
+                trade,
+            );
+            assert_eq!(trade.volume, trade.price * trade.quantity);
+            assert_eq!(trade.side, TradeSide::Buy);
+        }
+
+        assert_eq!(trades[0].volume, 971.69976); // volume == trade_turnover
+        assert_eq!(trades[1].volume, 1134.0); // volume == trade_turnover
     }
 }
