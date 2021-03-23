@@ -111,5 +111,17 @@ mod trade {
         assert_eq!(trade.volume, trade.price * trade.quantity);
         assert_eq!(trade.quantity, 0.1 * 4.0);
         assert_eq!(trade.side, TradeSide::Buy);
+
+        let raw_msg = r#"{"table":"option/trades","data":[{"instrument_id":"BTC-USD-210924-120000-C","trade_id":"22","price":"0.079","qty":"1","trade_side":"sell","timestamp":"2021-03-23T08:12:28.348Z"}]}"#;
+        let trades = &parse_trade("okex", MarketType::Option, raw_msg).unwrap();
+
+        assert_eq!(trades.len(), 1);
+        let trade = &trades[0];
+
+        crate::utils::check_trade_fields("okex", MarketType::Option, "BTC/USD".to_string(), trade);
+
+        assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.quantity, 0.1 * 1.0);
+        assert_eq!(trade.side, TradeSide::Sell);
     }
 }

@@ -54,7 +54,8 @@ struct RawTradeMsg {
     price: String,
     size: Option<String>,
     qty: Option<String>,
-    side: String, // buy, sell
+    trade_side: Option<String>, // buy, sell, for option/trades only
+    side: Option<String>,       // buy, sell, for other
     timestamp: String,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
@@ -111,7 +112,7 @@ fn calc_quantity_and_volume(
 
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradeMsg>>(msg)?;
-
+    let option_trades = ws_msg.table.as_str() == "option/trades";
     let trades: Vec<TradeMsg> = ws_msg
         .data
         .into_iter()
@@ -124,6 +125,11 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 raw_trade.size.clone().unwrap().parse::<f64>().unwrap()
             } else {
                 panic!("qty and size are both missing");
+            };
+            let side = if option_trades {
+                raw_trade.trade_side.clone().unwrap()
+            } else {
+                raw_trade.side.clone().unwrap()
             };
             let pair =
                 crypto_pair::normalize_pair(&raw_trade.instrument_id, EXCHANGE_NAME).unwrap();
@@ -139,7 +145,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 price,
                 quantity,
                 volume,
-                side: if raw_trade.side == "sell" {
+                side: if side.as_str() == "sell" {
                     TradeSide::Sell
                 } else {
                     TradeSide::Buy
