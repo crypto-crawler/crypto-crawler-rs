@@ -20,4 +20,15 @@ fn spot() {
         assert_eq!(trade.volume, trade.price * trade.quantity);
         assert_eq!(trade.side, TradeSide::Sell);
     }
+
+    let raw_msg = r#"{"code":"00007","data":{"p":"1674.7700000000","symbol":"ETH-USDT","ver":"15186035","s":"buy","t":"1616487024","v":"0.065614"},"topic":"TRADE","timestamp":1616487024837}"#;
+    let trades = &parse_trade("bithumb", MarketType::Spot, raw_msg).unwrap();
+
+    assert_eq!(trades.len(), 1);
+    let trade = &trades[0];
+
+    crate::utils::check_trade_fields("bithumb", MarketType::Spot, "ETH/USDT".to_string(), trade);
+
+    assert_eq!(trade.volume, trade.price * trade.quantity);
+    assert_eq!(trade.side, TradeSide::Buy);
 }

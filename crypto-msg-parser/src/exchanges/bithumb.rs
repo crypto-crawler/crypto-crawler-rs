@@ -24,11 +24,23 @@ struct SpotTradeMsg {
 struct WebsocketMsg<T: Sized> {
     code: String,
     data: T,
+    timestamp: i64,
+    topic: String,
 }
 
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Vec<SpotTradeMsg>>>(msg)?;
-    let raw_trades = ws_msg.data;
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg)?;
+    let raw_trades = if ws_msg.code == "00006" {
+        // snapshot
+        let ws_msg = serde_json::from_str::<WebsocketMsg<Vec<SpotTradeMsg>>>(msg)?;
+        ws_msg.data
+    } else if ws_msg.code == "00007" {
+        // updates
+        let ws_msg = serde_json::from_str::<WebsocketMsg<SpotTradeMsg>>(msg)?;
+        vec![ws_msg.data]
+    } else {
+        panic!("Invalid trade msg {}", msg);
+    };
     let trades: Vec<TradeMsg> = raw_trades
         .into_iter()
         .map(|raw_trade| {
