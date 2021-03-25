@@ -19,9 +19,9 @@ docker run -it --rm -v $(pwd):/data -e AWS_ACCESS_KEY_ID=AKIAJDDG3LQ4XSBLKFJQ -e
 ## Build
 
 ```bash
-docker build -t --squash soulmachine/carbonbot:debian -f Dockerfile.debian .
+docker build --squash -t soulmachine/carbonbot:debian -f Dockerfile.debian .
 docker push soulmachine/carbonbot:debian
 
-docker build -t --squash soulmachine/carbonbot:amazonlinux -f Dockerfile.amazonlinux .
+docker build --squash -t soulmachine/carbonbot:amazonlinux -f Dockerfile.amazonlinux .
 docker push soulmachine/carbonbot:amazonlinux
 ```
