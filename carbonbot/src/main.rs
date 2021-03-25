@@ -1,6 +1,7 @@
 mod writers;
 
 use crypto_crawler::*;
+use dashmap::DashMap;
 use std::{
     env,
     path::Path,
@@ -8,8 +9,6 @@ use std::{
     sync::{Arc, Mutex},
 };
 use writers::{FileWriter, Writer};
-
-use dashmap::{DashMap, DashSet};
 
 pub fn crawl(
     exchange: &'static str,

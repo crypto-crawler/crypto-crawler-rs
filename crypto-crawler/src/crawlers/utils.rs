@@ -212,7 +212,6 @@ macro_rules! gen_crawl_event {
                     chunks.push(chunk);
                 }
                 assert!(chunks.len() > 1);
-                assert!(real_symbols.len() % MAX_SUBSCRIPTIONS_PER_CONNECTION != 0);
 
                 if symbols.is_none() {
                     let num_threads = Arc::new(AtomicUsize::new(chunks.len()));

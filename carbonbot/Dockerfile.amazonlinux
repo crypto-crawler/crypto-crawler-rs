@@ -16,7 +16,7 @@ FROM amazonlinux:latest
 COPY --from=builder /project/target/release/carbonbot /usr/local/bin/
 
 RUN curl -sL https://rpm.nodesource.com/setup_lts.x | bash - && yum install -y nodejs \
- && npm install pm2 -g \
+ && npm install pm2 -g --production \
  && yum install -y gzip unzip logrotate && curl https://rclone.org/install.sh | bash \
  && yum clean all && rm -rf /var/cache/yum
 
