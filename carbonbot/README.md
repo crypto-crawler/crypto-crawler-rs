@@ -12,8 +12,7 @@
 ## Run
 
 ```bash
-docker run -it --rm -v $(pwd):/data -e AWS_ACCESS_KEY_ID=AKIAJDDG3LQ4XSBLKFJQ -e AWS_SECRET_ACCESS_KEY="29W4ruPHL+PtFtjNaDmClP8s4mBqzbmkbtKSr7Bx" -e AWS_S3_DIR="s3://your_path" soulmachine/carbonbot:debian pm2-runtime start pm2.trade.config.js
-
+docker run -it --rm -v $(pwd):/data -e AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY" -e AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY" -e AWS_S3_DIR="s3://YOUR_BUCKET" -e PARSER=true -u "$(id -u):$(id -g)" soulmachine/carbonbot:debian pm2-runtime start pm2.trade.config.js
 ```
 
 ## Build
