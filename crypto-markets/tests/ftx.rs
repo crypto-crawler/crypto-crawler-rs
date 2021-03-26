@@ -16,6 +16,7 @@ fn fetch_spot_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.contains("/"));
+        assert_eq!(*symbol, symbol.to_uppercase());
     }
 }
 
@@ -33,10 +34,8 @@ fn fetch_linear_future_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::LinearFuture).unwrap();
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
-        if !symbol.starts_with("BTC-HASH") {
-            let date = &symbol[(symbol.len() - 4)..];
-            assert!(date.parse::<i64>().is_ok());
-        }
+        let date = &symbol[(symbol.len() - 4)..];
+        assert!(date.parse::<i64>().is_ok());
     }
 }
 
