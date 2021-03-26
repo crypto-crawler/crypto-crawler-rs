@@ -1,6 +1,6 @@
 [package]
 name = "carbonbot"
-version = "1.1.6"
+version = "1.1.7"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 
@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 crypto-crawler = "1.4.6"
+crypto-msg-parser = "1.0.4"
 dashmap = "4"
 serde_json = "1.0"
 log = "0.4"

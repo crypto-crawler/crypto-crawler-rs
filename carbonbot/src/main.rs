@@ -40,8 +40,18 @@ pub fn crawl(
         }
 
         let writer = writers_map_clone.get(&key).unwrap();
-        let json = serde_json::to_string(&msg).unwrap();
-        writer.write(&json);
+
+        if let Ok(_) = std::env::var("PARSER") {
+            let trades =
+                crypto_msg_parser::parse_trade(&msg.exchange, msg.market_type, &msg.json).unwrap();
+            for trade in trades.iter() {
+                let json = serde_json::to_string(trade).unwrap();
+                writer.write(&json);
+            }
+        } else {
+            let json = serde_json::to_string(&msg).unwrap();
+            writer.write(&json);
+        }
     }));
 
     match msg_type {
