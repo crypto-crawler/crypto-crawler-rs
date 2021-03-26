@@ -33,7 +33,15 @@ fn fetch_markets_raw() -> Vec<FtxMarket> {
     assert!(resp.success);
     resp.result
         .into_iter()
-        .filter(|market| market.name.contains('-') || market.name.contains('/'))
+        .filter(|x| {
+            if let Some(underlying) = x.underlying.clone() {
+                underlying != "BTC-HASH".to_string()
+                    && !underlying.contains("PRESIDENT")
+                    && underlying != "OLYMPICS".to_string()
+            } else {
+                true
+            }
+        })
         .collect()
 }
 
