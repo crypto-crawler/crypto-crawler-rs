@@ -41,9 +41,13 @@ pub fn crawl(
     exchange: &'static str,
     market_type: MarketType,
     msg_type: MessageType,
-    data_dir: &'static str,
+    data_dir: Option<String>,
     redis_url: Option<String>,
 ) {
+    if data_dir.is_none() && redis_url.is_none() {
+        panic!("The environment variable DATA_DIR and REDIS_URL are not set, at least one of them should be set");
+    }
+    let data_dir_clone = Arc::new(data_dir);
     let writers_map: Arc<DashMap<String, FileWriter>> = Arc::new(DashMap::new());
     let writers_map_clone = writers_map.clone();
 
@@ -60,25 +64,25 @@ pub fn crawl(
 
     let on_msg_ext = Arc::new(Mutex::new(move |msg: Message| {
         let key = format!("{}-{}-{}", msg_type, exchange, market_type);
-        if !writers_map_clone.contains_key(&key) {
-            let data_dir = Path::new(data_dir)
-                .join(msg_type.to_string())
-                .join(exchange)
-                .join(market_type.to_string())
-                .into_os_string();
-            std::fs::create_dir_all(data_dir.as_os_str()).unwrap();
+        if let Some(ref data_dir) = *data_dir_clone {
+            if !writers_map_clone.contains_key(&key) {
+                let data_dir = Path::new(data_dir)
+                    .join(msg_type.to_string())
+                    .join(exchange)
+                    .join(market_type.to_string())
+                    .into_os_string();
+                std::fs::create_dir_all(data_dir.as_os_str()).unwrap();
 
-            let file_name = format!("{}.{}.{}", exchange, market_type, msg_type);
-            let file_path = Path::new(data_dir.as_os_str())
-                .join(file_name)
-                .into_os_string();
-            writers_map_clone.insert(
-                key.clone(),
-                FileWriter::new(file_path.as_os_str().to_str().unwrap()),
-            );
+                let file_name = format!("{}.{}.{}", exchange, market_type, msg_type);
+                let file_path = Path::new(data_dir.as_os_str())
+                    .join(file_name)
+                    .into_os_string();
+                writers_map_clone.insert(
+                    key.clone(),
+                    FileWriter::new(file_path.as_os_str().to_str().unwrap()),
+                );
+            }
         }
-
-        let writer = writers_map_clone.get(&key).unwrap();
 
         if let Ok(_) = std::env::var("PARSER") {
             let trades =
@@ -86,7 +90,9 @@ pub fn crawl(
             for trade in trades.iter() {
                 let json = serde_json::to_string(trade).unwrap();
 
-                writer.write(&json);
+                if let Some(writer) = writers_map_clone.get(&key) {
+                    writer.write(&json);
+                }
 
                 let mut guard = redis_conn_clone.lock().unwrap();
                 if let Some(ref mut conn) = *guard {
@@ -98,7 +104,9 @@ pub fn crawl(
         } else {
             let json = serde_json::to_string(&msg).unwrap();
 
-            writer.write(&json);
+            if let Some(writer) = writers_map_clone.get(&key) {
+                writer.write(&json);
+            }
 
             let mut guard = redis_conn_clone.lock().unwrap();
             if let Some(ref mut conn) = *guard {
@@ -153,10 +161,13 @@ fn main() {
     }
     let msg_type = msg_type.unwrap();
 
-    if std::env::var("DATA_DIR").is_err() {
-        panic!("Please set the DATA_DIR environment variable");
-    }
-    let data_dir: &'static str = Box::leak(std::env::var("DATA_DIR").unwrap().into_boxed_str());
+    let data_dir = if std::env::var("DATA_DIR").is_err() {
+        info!("The DATA_DIR environment variable does not exist");
+        None
+    } else {
+        let url = std::env::var("DATA_DIR").unwrap();
+        Some(url)
+    };
 
     let redis_url = if std::env::var("REDIS_URL").is_err() {
         info!("The REDIS_URL environment variable does not exist");
