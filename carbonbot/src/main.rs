@@ -2,6 +2,8 @@ mod writers;
 
 use crypto_crawler::*;
 use dashmap::DashMap;
+use log::*;
+use redis::{self, Commands};
 use std::{
     env,
     path::Path,
@@ -10,14 +12,51 @@ use std::{
 };
 use writers::{FileWriter, Writer};
 
+fn connect_redis(redis_url: &str) -> Result<redis::Connection, redis::RedisError> {
+    assert!(!redis_url.is_empty(), "redis_url is empty");
+
+    let mut redis_error: Option<redis::RedisError> = None;
+    let mut conn: Option<redis::Connection> = None;
+    for _ in 0..3 {
+        match redis::Client::open(redis_url) {
+            Ok(client) => match client.get_connection() {
+                Ok(connection) => {
+                    conn = Some(connection);
+                    break;
+                }
+                Err(err) => redis_error = Some(err),
+            },
+            Err(err) => redis_error = Some(err),
+        }
+    }
+
+    if conn.is_some() {
+        Ok(conn.unwrap())
+    } else {
+        Err(redis_error.unwrap())
+    }
+}
+
 pub fn crawl(
     exchange: &'static str,
     market_type: MarketType,
     msg_type: MessageType,
     data_dir: &'static str,
+    redis_url: Option<String>,
 ) {
     let writers_map: Arc<DashMap<String, FileWriter>> = Arc::new(DashMap::new());
     let writers_map_clone = writers_map.clone();
+
+    let redis_conn = if let Some(url) = redis_url {
+        let conn = match connect_redis(&url) {
+            Ok(conn) => Some(conn),
+            Err(_) => None,
+        };
+        Arc::new(Mutex::new(conn))
+    } else {
+        Arc::new(Mutex::new(None))
+    };
+    let redis_conn_clone = redis_conn.clone();
 
     let on_msg_ext = Arc::new(Mutex::new(move |msg: Message| {
         let key = format!("{}-{}-{}", msg_type, exchange, market_type);
@@ -46,11 +85,27 @@ pub fn crawl(
                 crypto_msg_parser::parse_trade(&msg.exchange, msg.market_type, &msg.json).unwrap();
             for trade in trades.iter() {
                 let json = serde_json::to_string(trade).unwrap();
+
                 writer.write(&json);
+
+                let mut guard = redis_conn_clone.lock().unwrap();
+                if let Some(ref mut conn) = *guard {
+                    if let Err(err) = conn.publish::<&str, String, i64>("carbonbot:trade", json) {
+                        error!("{}", err);
+                    }
+                }
             }
         } else {
             let json = serde_json::to_string(&msg).unwrap();
+
             writer.write(&json);
+
+            let mut guard = redis_conn_clone.lock().unwrap();
+            if let Some(ref mut conn) = *guard {
+                if let Err(err) = conn.publish::<&str, String, i64>("carbonbot:trade", json) {
+                    error!("{}", err);
+                }
+            }
         }
     }));
 
@@ -103,5 +158,13 @@ fn main() {
     }
     let data_dir: &'static str = Box::leak(std::env::var("DATA_DIR").unwrap().into_boxed_str());
 
-    crawl(exchange, market_type, msg_type, data_dir);
+    let redis_url = if std::env::var("REDIS_URL").is_err() {
+        info!("The REDIS_URL environment variable does not exist");
+        None
+    } else {
+        let url = std::env::var("REDIS_URL").unwrap();
+        Some(url)
+    };
+
+    crawl(exchange, market_type, msg_type, data_dir, redis_url);
 }
