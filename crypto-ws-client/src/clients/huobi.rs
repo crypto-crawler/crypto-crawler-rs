@@ -46,7 +46,7 @@ pub struct HuobiFutureWSClient<'a> {
 ///
 /// Inverse Swap market uses coins like BTC as collateral.
 ///
-/// * WebSocket API doc: <<https://huobiapi.github.io/docs/coin_margined_swap/v1/en/>>
+/// * WebSocket API doc: <https://huobiapi.github.io/docs/coin_margined_swap/v1/en/>
 /// * Trading at: <https://futures.huobi.com/en-us/swap/exchange/>
 pub struct HuobiInverseSwapWSClient<'a> {
     client: HuobiWSClient<'a>,
@@ -130,7 +130,7 @@ impl<'a> HuobiWSClient<'a> {
             return MiscMessage::WebSocket(ws_msg);
         }
 
-        if obj.contains_key("ch")
+        if (obj.contains_key("ch") || obj.contains_key("topic"))
             && obj.contains_key("ts")
             && (obj.contains_key("tick") || obj.contains_key("data"))
         {

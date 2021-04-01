@@ -187,6 +187,15 @@ mod okex_swap {
         gen_test_subscribe_candlestick!(OkexWSClient, &vec!["BTC-USDT-SWAP".to_string()], 60);
         gen_test_subscribe_candlestick!(OkexWSClient, &vec!["BTC-USDT-SWAP".to_string()], 604800);
     }
+
+    #[test]
+    fn subscribe_funding_rate() {
+        gen_test_code!(
+            OkexWSClient,
+            subscribe,
+            &vec!["swap/funding_rate:BTC-USDT-SWAP".to_string()]
+        );
+    }
 }
 
 #[cfg(test)]
