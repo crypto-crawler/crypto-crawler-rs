@@ -8,7 +8,7 @@ use test_case::test_case;
 #[test_case(MarketType::InverseFuture, "BTC_CQ")]
 #[test_case(MarketType::InverseSwap, "BTC-USD")]
 #[test_case(MarketType::LinearSwap, "BTC-USDT")]
-#[test_case(MarketType::Option, "BTC-USDT-210326-C-32000")]
+#[test_case(MarketType::Option, "BTC-USDT-210409-C-66000")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     let text = fetch_l2_snapshot("huobi", market_type, symbol).unwrap();
     assert!(text.starts_with("{"));
@@ -97,7 +97,7 @@ mod huobi_option {
 
     #[test]
     fn test_trades() {
-        let text = HuobiOptionRestClient::fetch_trades("BTC-USDT-210326-C-32000").unwrap();
+        let text = HuobiOptionRestClient::fetch_trades("BTC-USDT-210409-C-66000").unwrap();
         assert!(text.starts_with("{"));
     }
 }

@@ -7,7 +7,7 @@ use test_case::test_case;
 
 #[test_case(MarketType::Spot, "BTC/USD")]
 #[test_case(MarketType::LinearSwap, "BTC-PERP")]
-#[test_case(MarketType::LinearFuture, "BTC-0326")]
+#[test_case(MarketType::LinearFuture, "BTC-0625")]
 #[test_case(MarketType::Move, "BTC-MOVE-2021Q1")]
 #[test_case(MarketType::BVOL, "BVOL/USD")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
