@@ -180,27 +180,29 @@ mod gate_linear_future {
             GateLinearFutureWSClient,
             subscribe_trade,
             &vec![
-                "BTC_USDT_20210326".to_string(),
-                "ETH_USDT_20210326".to_string()
+                "BTC_USDT_20210625".to_string(),
+                "ETH_USDT_20210625".to_string()
             ]
         );
     }
 
     #[test]
+    #[ignore]
     fn subscribe_orderbook() {
         gen_test_code!(
             GateLinearFutureWSClient,
             subscribe_orderbook,
-            &vec!["BTC_USDT_20210326".to_string()]
+            &vec!["BTC_USDT_20210625".to_string()]
         );
     }
 
     #[test]
+    #[ignore]
     fn subscribe_ticker() {
         gen_test_code!(
             GateLinearFutureWSClient,
             subscribe_ticker,
-            &vec!["BTC_USDT_20210326".to_string()]
+            &vec!["BTC_USDT_20210625".to_string()]
         );
     }
 
@@ -209,12 +211,12 @@ mod gate_linear_future {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             GateLinearFutureWSClient,
-            &vec!["BTC_USDT_20210326".to_string()],
+            &vec!["BTC_USDT_20210625".to_string()],
             10
         );
         gen_test_subscribe_candlestick!(
             GateLinearFutureWSClient,
-            &vec!["BTC_USDT_20210326".to_string()],
+            &vec!["BTC_USDT_20210625".to_string()],
             604800
         );
     }
