@@ -65,6 +65,15 @@ mod bitmex_inverse_swap {
         gen_test_subscribe_candlestick!(BitmexWSClient, &vec!["XBTUSD".to_string()], 60);
         gen_test_subscribe_candlestick!(BitmexWSClient, &vec!["XBTUSD".to_string()], 86400);
     }
+
+    #[test]
+    fn subscribe_funding_rate() {
+        gen_test_code!(
+            BitmexWSClient,
+            subscribe,
+            &vec!["funding:XBTUSD".to_string()]
+        );
+    }
 }
 
 #[cfg(test)]
@@ -86,7 +95,7 @@ mod bitmex_inverse_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe_trade,
-            &vec!["XBTM21".to_string(), "ETHH21".to_string()]
+            &vec!["XBTM21".to_string(), "XBTU21".to_string()]
         );
     }
 
@@ -95,7 +104,7 @@ mod bitmex_inverse_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe_bbo,
-            &vec!["XBTM21".to_string(), "ETHH21".to_string()]
+            &vec!["XBTM21".to_string(), "XBTU21".to_string()]
         );
     }
 
@@ -104,7 +113,7 @@ mod bitmex_inverse_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe_orderbook,
-            &vec!["XBTM21".to_string(), "ETHH21".to_string()]
+            &vec!["XBTM21".to_string(), "XBTU21".to_string()]
         );
     }
 
@@ -113,7 +122,7 @@ mod bitmex_inverse_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe_orderbook_snapshot,
-            &vec!["XBTM21".to_string(), "ETHH21".to_string()]
+            &vec!["XBTM21".to_string(), "XBTU21".to_string()]
         );
     }
 
@@ -121,12 +130,12 @@ mod bitmex_inverse_future {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BitmexWSClient,
-            &vec!["XBTM21".to_string(), "ETHH21".to_string()],
+            &vec!["XBTM21".to_string(), "XBTU21".to_string()],
             60
         );
         gen_test_subscribe_candlestick!(
             BitmexWSClient,
-            &vec!["XBTM21".to_string(), "ETHH21".to_string()],
+            &vec!["XBTM21".to_string(), "XBTU21".to_string()],
             86400
         );
     }
@@ -169,5 +178,14 @@ mod bitmex_quanto_swap {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(BitmexWSClient, &vec!["ETHUSD".to_string()], 60);
         gen_test_subscribe_candlestick!(BitmexWSClient, &vec!["ETHUSD".to_string()], 86400);
+    }
+
+    #[test]
+    fn subscribe_funding_rate() {
+        gen_test_code!(
+            BitmexWSClient,
+            subscribe,
+            &vec!["funding:ETHUSD".to_string()]
+        );
     }
 }

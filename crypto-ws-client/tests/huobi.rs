@@ -228,6 +228,25 @@ mod huobi_linear_swap {
             2592000
         );
     }
+
+    #[test]
+    #[ignore]
+    fn subscribe_funding_rate() {
+        let mut messages = Vec::<String>::new();
+        {
+            let on_msg = Arc::new(Mutex::new(|msg: String| messages.push(msg)));
+            let ws_client = HuobiLinearSwapWSClient::new(
+                on_msg.clone(),
+                Some("wss://api.hbdm.com/linear-swap-notification"),
+            );
+            ws_client.subscribe(&vec![
+                r#"{"topic":"public.BTC-USDT.funding_rate","op":"sub"}"#.to_string(),
+            ]);
+            ws_client.run(Some(0)); // return immediately once after a normal message
+            ws_client.close();
+        }
+        assert!(!messages.is_empty());
+    }
 }
 
 #[cfg(test)]
@@ -298,6 +317,34 @@ mod huobi_inverse_swap {
             2592000
         );
     }
+
+    #[test]
+    #[ignore]
+    fn subscribe_funding_rate() {
+        let mut messages = Vec::<String>::new();
+        {
+            let on_msg = Arc::new(Mutex::new(|msg: String| messages.push(msg)));
+            let ws_client = HuobiInverseSwapWSClient::new(
+                on_msg.clone(),
+                Some("wss://api.hbdm.com/swap-notification"),
+            );
+            ws_client.subscribe(&vec![
+                r#"{"topic":"public.BTC-USD.funding_rate","op":"sub"}"#.to_string(),
+            ]);
+            ws_client.run(Some(0)); // return immediately once after a normal message
+            ws_client.close();
+        }
+        assert!(!messages.is_empty());
+    }
+
+    #[test]
+    fn subscribe_overview() {
+        gen_test_code!(
+            HuobiInverseSwapWSClient,
+            subscribe,
+            &vec!["market.overview".to_string()]
+        );
+    }
 }
 
 #[cfg(test)]
@@ -310,7 +357,7 @@ mod huobi_option {
         gen_test_code!(
             HuobiOptionWSClient,
             subscribe,
-            &vec!["market.BTC-USDT-210326-C-32000.trade.detail".to_string()]
+            &vec!["market.BTC-USDT-210409-C-66000.trade.detail".to_string()]
         );
     }
 
@@ -319,7 +366,7 @@ mod huobi_option {
         gen_test_code!(
             HuobiOptionWSClient,
             subscribe_trade,
-            &vec!["BTC-USDT-210326-C-32000".to_string()]
+            &vec!["BTC-USDT-210409-C-66000".to_string()]
         );
     }
 
@@ -328,7 +375,7 @@ mod huobi_option {
         gen_test_code!(
             HuobiOptionWSClient,
             subscribe_ticker,
-            &vec!["BTC-USDT-210326-C-32000".to_string()]
+            &vec!["BTC-USDT-210409-C-66000".to_string()]
         );
     }
 
@@ -337,7 +384,7 @@ mod huobi_option {
         gen_test_code!(
             HuobiOptionWSClient,
             subscribe_bbo,
-            &vec!["BTC-USDT-210326-C-32000".to_string()]
+            &vec!["BTC-USDT-210409-C-66000".to_string()]
         );
     }
 
@@ -346,7 +393,7 @@ mod huobi_option {
         gen_test_code!(
             HuobiOptionWSClient,
             subscribe_orderbook,
-            &vec!["BTC-USDT-210326-C-32000".to_string()]
+            &vec!["BTC-USDT-210409-C-66000".to_string()]
         );
     }
 
@@ -355,7 +402,7 @@ mod huobi_option {
         gen_test_code!(
             HuobiOptionWSClient,
             subscribe_orderbook_snapshot,
-            &vec!["BTC-USDT-210326-C-32000".to_string()]
+            &vec!["BTC-USDT-210409-C-66000".to_string()]
         );
     }
 
@@ -363,12 +410,12 @@ mod huobi_option {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             HuobiOptionWSClient,
-            &vec!["BTC-USDT-210326-C-32000".to_string()],
+            &vec!["BTC-USDT-210409-C-66000".to_string()],
             60
         );
         gen_test_subscribe_candlestick!(
             HuobiOptionWSClient,
-            &vec!["BTC-USDT-210326-C-32000".to_string()],
+            &vec!["BTC-USDT-210409-C-66000".to_string()],
             2592000
         );
     }
