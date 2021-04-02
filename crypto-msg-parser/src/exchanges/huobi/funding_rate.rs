@@ -46,7 +46,7 @@ pub(crate) fn parse_funding_rate(
             funding_rate: raw_msg.funding_rate.parse::<f64>().unwrap(),
             funding_time: raw_msg.settlement_time.parse::<i64>().unwrap(),
             estimated_rate: Some(raw_msg.estimated_rate.parse::<f64>().unwrap()),
-            raw: serde_json::from_str(msg).unwrap(),
+            raw: serde_json::to_value(&raw_msg).unwrap(),
         })
         .collect();
     Ok(funding_rates)

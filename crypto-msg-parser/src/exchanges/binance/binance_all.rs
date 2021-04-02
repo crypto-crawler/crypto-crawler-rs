@@ -168,6 +168,7 @@ pub(crate) fn parse_funding_rate(
     };
     let funding_rates: Vec<FundingRateMsg> = data
         .into_iter()
+        .filter(|x| !x.r.is_empty())
         .map(|raw_msg| FundingRateMsg {
             exchange: EXCHANGE_NAME.to_string(),
             market_type,
@@ -178,7 +179,11 @@ pub(crate) fn parse_funding_rate(
             funding_rate: raw_msg.r.parse::<f64>().unwrap(),
             funding_time: raw_msg.T,
             estimated_rate: None,
-            raw: serde_json::to_value(&raw_msg).unwrap(),
+            raw: if stream == "!markPrice@arr" {
+                serde_json::to_value(&raw_msg).unwrap()
+            } else {
+                serde_json::from_str(msg).unwrap()
+            },
         })
         .collect();
     Ok(funding_rates)
