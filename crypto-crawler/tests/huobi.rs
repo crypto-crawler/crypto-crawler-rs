@@ -59,7 +59,7 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::InverseSwap, "BTC-USD")]
-#[test_case(MarketType::LinearSwap, "BTC-USD")]
+#[test_case(MarketType::LinearSwap, "BTC-USDT")]
 fn test_crawl_funding_rate(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_funding_rate,

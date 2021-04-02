@@ -110,15 +110,15 @@ pub(crate) fn crawl_funding_rate(
         (on_msg.lock().unwrap())(message);
     }));
 
-    let channels: Vec<String> = if symbols.is_none() || symbols.unwrap().is_empty() {
-        fetch_symbols_retry(EXCHANGE_NAME, market_type)
+    let symbols: Vec<String> = if symbols.is_none() || symbols.unwrap().is_empty() {
+        vec!["*".to_string()]
     } else {
-        symbols
-            .unwrap()
-            .into_iter()
-            .map(|symbol| format!(r#"{{"topic":"public.{}.funding_rate","op":"sub"}}"#, symbol))
-            .collect()
+        symbols.unwrap().into_iter().map(|x| x.clone()).collect()
     };
+    let channels: Vec<String> = symbols
+        .into_iter()
+        .map(|symbol| format!(r#"{{"topic":"public.{}.funding_rate","op":"sub"}}"#, symbol))
+        .collect();
 
     match market_type {
         MarketType::InverseSwap => {
