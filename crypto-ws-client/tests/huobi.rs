@@ -246,6 +246,24 @@ mod huobi_linear_swap {
         }
         assert!(!messages.is_empty());
     }
+
+    #[test]
+    fn subscribe_funding_rate_all() {
+        let mut messages = Vec::<String>::new();
+        {
+            let on_msg = Arc::new(Mutex::new(|msg: String| messages.push(msg)));
+            let ws_client = HuobiLinearSwapWSClient::new(
+                on_msg.clone(),
+                Some("wss://api.hbdm.com/linear-swap-notification"),
+            );
+            ws_client.subscribe(&vec![
+                r#"{"topic":"public.*.funding_rate","op":"sub"}"#.to_string()
+            ]);
+            ws_client.run(Some(0)); // return immediately once after a normal message
+            ws_client.close();
+        }
+        assert!(!messages.is_empty());
+    }
 }
 
 #[cfg(test)]
@@ -328,6 +346,24 @@ mod huobi_inverse_swap {
             );
             ws_client.subscribe(&vec![
                 r#"{"topic":"public.BTC-USD.funding_rate","op":"sub"}"#.to_string(),
+            ]);
+            ws_client.run(Some(0)); // return immediately once after a normal message
+            ws_client.close();
+        }
+        assert!(!messages.is_empty());
+    }
+
+    #[test]
+    fn subscribe_funding_rate_all() {
+        let mut messages = Vec::<String>::new();
+        {
+            let on_msg = Arc::new(Mutex::new(|msg: String| messages.push(msg)));
+            let ws_client = HuobiInverseSwapWSClient::new(
+                on_msg.clone(),
+                Some("wss://api.hbdm.com/swap-notification"),
+            );
+            ws_client.subscribe(&vec![
+                r#"{"topic":"public.*.funding_rate","op":"sub"}"#.to_string()
             ]);
             ws_client.run(Some(0)); // return immediately once after a normal message
             ws_client.close();
