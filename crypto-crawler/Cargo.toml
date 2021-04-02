@@ -1,6 +1,6 @@
 [package]
 name = "crypto-crawler"
-version = "1.5.2"
+version = "1.5.3"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "A rock-solid cryprocurrency crawler."
