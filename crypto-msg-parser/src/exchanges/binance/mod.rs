@@ -3,7 +3,7 @@ mod binance_option;
 
 use crypto_market_type::MarketType;
 
-use crate::TradeMsg;
+use crate::{FundingRateMsg, TradeMsg};
 
 use serde_json::Result;
 
@@ -12,5 +12,16 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         binance_option::parse_trade(msg)
     } else {
         binance_all::parse_trade(market_type, msg)
+    }
+}
+
+pub(crate) fn parse_funding_rate(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<FundingRateMsg>> {
+    if market_type == MarketType::InverseSwap || market_type == MarketType::LinearSwap {
+        binance_all::parse_funding_rate(market_type, msg)
+    } else {
+        panic!("Binance {} does NOT have funding rates", market_type);
     }
 }

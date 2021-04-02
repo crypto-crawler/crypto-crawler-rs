@@ -7,6 +7,7 @@ pub use crypto_market_type::MarketType;
 
 use serde_json::Result;
 
+/// Parse trade messages.
 pub fn parse_trade(exchange: &str, market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     match exchange {
         "binance" => exchanges::binance::parse_trade(market_type, msg),
@@ -29,4 +30,21 @@ pub fn parse_trade(exchange: &str, market_type: MarketType, msg: &str) -> Result
         "zbg" => exchanges::zbg::parse_trade(market_type, msg),
         _ => panic!("Unknown exchange {}", exchange),
     }
+}
+
+/// Parse funding rate messages.
+pub fn parse_funding_rate(
+    exchange: &str,
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<FundingRateMsg>> {
+    let func = match exchange {
+        "binance" => exchanges::binance::parse_funding_rate,
+        "bitget" => exchanges::bitget::parse_funding_rate,
+        "bitmex" => exchanges::bitmex::parse_funding_rate,
+        "huobi" => exchanges::huobi::parse_funding_rate,
+        "okex" => exchanges::okex::parse_funding_rate,
+        _ => panic!("{} does NOT have perpetual swap market", exchange),
+    };
+    func(market_type, msg)
 }

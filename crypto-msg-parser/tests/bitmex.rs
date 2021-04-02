@@ -90,3 +90,41 @@ mod trade {
         assert_eq!(trade.side, TradeSide::Sell);
     }
 }
+
+#[cfg(test)]
+mod funding_rate {
+    use crypto_msg_parser::{parse_funding_rate, MarketType};
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"table":"funding","action":"partial","data":[{"timestamp":"2021-04-01T20:00:00.000Z","symbol":"XBTUSD","fundingInterval":"2000-01-01T08:00:00.000Z","fundingRate":0.000817,"fundingRateDaily":0.002451}]}"#;
+        let funding_rates =
+            &parse_funding_rate("bitmex", MarketType::InverseSwap, raw_msg).unwrap();
+
+        assert_eq!(funding_rates.len(), 1);
+
+        for rate in funding_rates.iter() {
+            crate::utils::check_funding_rate_fields("bitmex", MarketType::InverseSwap, rate);
+        }
+
+        assert_eq!(funding_rates[0].pair, "BTC/USD".to_string());
+        assert_eq!(funding_rates[0].funding_rate, 0.000817);
+        assert_eq!(funding_rates[0].funding_time, 1617307200000);
+    }
+
+    #[test]
+    fn quanto_swap() {
+        let raw_msg = r#"{"table":"funding","action":"partial","data":[{"timestamp":"2021-04-01T20:00:00.000Z","symbol":"ETHUSD","fundingInterval":"2000-01-01T08:00:00.000Z","fundingRate":0.002142,"fundingRateDaily":0.006425999999999999}]}"#;
+        let funding_rates = &parse_funding_rate("bitmex", MarketType::QuantoSwap, raw_msg).unwrap();
+
+        assert_eq!(funding_rates.len(), 1);
+
+        for rate in funding_rates.iter() {
+            crate::utils::check_funding_rate_fields("bitmex", MarketType::QuantoSwap, rate);
+        }
+
+        assert_eq!(funding_rates[0].pair, "ETH/USD".to_string());
+        assert_eq!(funding_rates[0].funding_rate, 0.002142);
+        assert_eq!(funding_rates[0].funding_time, 1617307200000);
+    }
+}

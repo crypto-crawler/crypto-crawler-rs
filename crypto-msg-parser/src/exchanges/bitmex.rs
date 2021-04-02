@@ -1,7 +1,8 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, TradeMsg, TradeSide};
+use crate::{FundingRateMsg, MessageType, TradeMsg, TradeSide};
 
+use chrono::prelude::*;
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
@@ -23,6 +24,18 @@ struct RawTradeMsg {
     grossValue: f64,
     homeNotional: f64,
     foreignNotional: f64,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawFundingRateMsg {
+    timestamp: String,
+    symbol: String,
+    fundingInterval: String,
+    fundingRate: f64,
+    fundingRateDaily: f64,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -65,4 +78,33 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         .collect();
 
     Ok(trades)
+}
+
+pub(crate) fn parse_funding_rate(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<FundingRateMsg>> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawFundingRateMsg>>(msg)?;
+    let rates: Vec<FundingRateMsg> = ws_msg
+        .data
+        .into_iter()
+        .map(|raw_msg| {
+            let settlement_time = DateTime::parse_from_rfc3339(&raw_msg.timestamp).unwrap();
+
+            FundingRateMsg {
+                exchange: EXCHANGE_NAME.to_string(),
+                market_type,
+                symbol: raw_msg.symbol.clone(),
+                pair: crypto_pair::normalize_pair(&raw_msg.symbol, EXCHANGE_NAME).unwrap(),
+                msg_type: MessageType::FundingRate,
+                timestamp: Utc::now().timestamp_millis(),
+                funding_rate: raw_msg.fundingRate,
+                funding_time: settlement_time.timestamp_millis(),
+                estimated_rate: None,
+                raw: serde_json::to_value(&raw_msg).unwrap(),
+            }
+        })
+        .collect();
+
+    Ok(rates)
 }

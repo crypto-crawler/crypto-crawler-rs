@@ -50,3 +50,41 @@ mod trade {
         assert!(approx_eq!(f64, trades[2].quantity, 0.181, ulps = 9));
     }
 }
+
+#[cfg(test)]
+mod funding_rate {
+    use crypto_msg_parser::{parse_funding_rate, MarketType};
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"data":[{"funding_rate":"0.000258514264","funding_time":"1617346800000","instrument_id":"btcusd"}],"table":"swap/funding_rate"}"#;
+        let funding_rates =
+            &parse_funding_rate("bitget", MarketType::InverseSwap, raw_msg).unwrap();
+
+        assert_eq!(funding_rates.len(), 1);
+
+        for rate in funding_rates.iter() {
+            crate::utils::check_funding_rate_fields("bitget", MarketType::InverseSwap, rate);
+        }
+
+        assert_eq!(funding_rates[0].pair, "BTC/USD".to_string());
+        assert_eq!(funding_rates[0].funding_rate, 0.000258514264);
+        assert_eq!(funding_rates[0].funding_time, 1617346800000);
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"data":[{"funding_rate":"0.000106539854","funding_time":"1617346800000","instrument_id":"cmt_btcusdt"}],"table":"swap/funding_rate"}"#;
+        let funding_rates = &parse_funding_rate("bitget", MarketType::LinearSwap, raw_msg).unwrap();
+
+        assert_eq!(funding_rates.len(), 1);
+
+        for rate in funding_rates.iter() {
+            crate::utils::check_funding_rate_fields("bitget", MarketType::LinearSwap, rate);
+        }
+
+        assert_eq!(funding_rates[0].pair, "BTC/USDT".to_string());
+        assert_eq!(funding_rates[0].funding_rate, 0.000106539854);
+        assert_eq!(funding_rates[0].funding_time, 1617346800000);
+    }
+}

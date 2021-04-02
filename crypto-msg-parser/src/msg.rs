@@ -16,9 +16,11 @@ pub enum MessageType {
     L3Event,
     L3Snapshot,
     #[serde(rename = "bbo")]
+    #[allow(clippy::upper_case_acronyms)]
     BBO,
     Ticker,
     Candlestick,
+    FundingRate,
 }
 
 macro_rules! add_common_fields {
@@ -102,6 +104,31 @@ pub struct TradeMsg {
     pub raw: Value,
 }
 
+/// Funding rate message.
+#[derive(Serialize, Deserialize)]
+pub struct FundingRateMsg {
+    /// The exchange name, unique for each exchage
+    pub exchange: String,
+    /// Market type
+    pub market_type: MarketType,
+    /// Exchange-specific trading symbol or id, recognized by RESTful API
+    pub symbol: String,
+    /// Unified pair, base/quote, e.g., BTC/USDT
+    pub pair: String,
+    /// Message type
+    pub msg_type: MessageType,
+    // Funding rate, which is calculated on data between [funding_time-16h, funding_time-8h]
+    pub funding_rate: f64,
+    // Funding time, the moment when funding rate is used
+    pub funding_time: i64,
+    // Estimated funding rate between [funding_time-h, funding_time], it will be static after funding_time
+    pub estimated_rate: Option<f64>,
+    /// Unix timestamp, in milliseconds
+    pub timestamp: i64,
+    /// the original message
+    pub raw: Value,
+}
+
 add_common_fields!(
     /// 24hr rolling window ticker
     #[derive(Serialize, Deserialize)]
@@ -170,13 +197,5 @@ add_common_fields!(
         period: String,
         /// quote volume
         quote_volume: Option<f64>,
-    }
-);
-
-add_common_fields!(
-    #[derive(Serialize, Deserialize)]
-    struct FundingRateMsg {
-        funding_rate: f64,
-        funding_time: i64,
     }
 );

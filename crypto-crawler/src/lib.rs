@@ -211,3 +211,22 @@ pub fn crawl_l3_snapshot(
         duration,
     )
 }
+
+/// Crawl perpetual swap funding rates.
+pub fn crawl_funding_rate(
+    exchange: &str,
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) {
+    let func = match exchange {
+        "binance" => crawlers::binance::crawl_funding_rate,
+        "bitget" => crawlers::bitget::crawl_funding_rate,
+        "bitmex" => crawlers::bitmex::crawl_funding_rate,
+        "huobi" => crawlers::huobi::crawl_funding_rate,
+        "okex" => crawlers::okex::crawl_funding_rate,
+        _ => panic!("{} does NOT have perpetual swap market", exchange),
+    };
+    func(market_type, symbols, on_msg, duration);
+}

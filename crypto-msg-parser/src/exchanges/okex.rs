@@ -1,8 +1,9 @@
 use crypto_market_type::MarketType;
 
 use super::utils::http_get;
-use crate::{MessageType, TradeMsg, TradeSide};
+use crate::{FundingRateMsg, MessageType, TradeMsg, TradeSide};
 
+use chrono::prelude::*;
 use chrono::DateTime;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
@@ -57,6 +58,17 @@ struct RawTradeMsg {
     trade_side: Option<String>, // buy, sell, for option/trades only
     side: Option<String>,       // buy, sell, for other
     timestamp: String,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct RawFundingRateMsg {
+    estimated_rate: String,
+    funding_rate: String,
+    funding_time: String,
+    instrument_id: String,
+    settlement_time: String,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -157,4 +169,33 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         .collect();
 
     Ok(trades)
+}
+
+pub(crate) fn parse_funding_rate(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<FundingRateMsg>> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawFundingRateMsg>>(msg)?;
+
+    let rates: Vec<FundingRateMsg> = ws_msg
+        .data
+        .into_iter()
+        .map(|raw_msg| {
+            let funding_time = DateTime::parse_from_rfc3339(&raw_msg.funding_time).unwrap();
+            FundingRateMsg {
+                exchange: EXCHANGE_NAME.to_string(),
+                market_type,
+                symbol: raw_msg.instrument_id.clone(),
+                pair: crypto_pair::normalize_pair(&raw_msg.instrument_id, EXCHANGE_NAME).unwrap(),
+                msg_type: MessageType::FundingRate,
+                timestamp: Utc::now().timestamp_millis(),
+                funding_rate: raw_msg.funding_rate.parse::<f64>().unwrap(),
+                funding_time: funding_time.timestamp_millis(),
+                estimated_rate: Some(raw_msg.estimated_rate.parse::<f64>().unwrap()),
+                raw: serde_json::to_value(&raw_msg).unwrap(),
+            }
+        })
+        .collect();
+
+    Ok(rates)
 }

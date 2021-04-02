@@ -310,6 +310,15 @@ mod binance_inverse_swap {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe,
+            &vec!["btcusd_perp@markPrice".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_funding_rate_all() {
+        gen_test_code!(
+            BinanceInverseWSClient,
+            subscribe,
             &vec!["!markPrice@arr".to_string()]
         );
     }
@@ -390,6 +399,15 @@ mod binance_linear_swap {
 
     #[test]
     fn subscribe_funding_rate() {
+        gen_test_code!(
+            BinanceLinearWSClient,
+            subscribe,
+            &vec!["btcusdt@markPrice".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_funding_rate_all() {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe,

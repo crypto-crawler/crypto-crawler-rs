@@ -93,3 +93,50 @@ pub(crate) fn crawl_l2_event(
         _ => panic!("Huobi does NOT have the {} market type", market_type),
     }
 }
+
+pub(crate) fn crawl_funding_rate(
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) {
+    let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
+        let message = Message::new(
+            EXCHANGE_NAME.to_string(),
+            market_type,
+            MessageType::FundingRate,
+            msg,
+        );
+        (on_msg.lock().unwrap())(message);
+    }));
+
+    let channels: Vec<String> = if symbols.is_none() || symbols.unwrap().is_empty() {
+        fetch_symbols_retry(EXCHANGE_NAME, market_type)
+    } else {
+        symbols
+            .unwrap()
+            .into_iter()
+            .map(|symbol| format!(r#"{{"topic":"public.{}.funding_rate","op":"sub"}}"#, symbol))
+            .collect()
+    };
+
+    match market_type {
+        MarketType::InverseSwap => {
+            let ws_client = HuobiInverseSwapWSClient::new(
+                on_msg_ext,
+                Some("wss://api.hbdm.com/swap-notification"),
+            );
+            ws_client.subscribe(&channels);
+            ws_client.run(duration);
+        }
+        MarketType::LinearSwap => {
+            let ws_client = HuobiLinearSwapWSClient::new(
+                on_msg_ext,
+                Some("wss://api.hbdm.com/linear-swap-notification"),
+            );
+            ws_client.subscribe(&channels);
+            ws_client.run(duration);
+        }
+        _ => panic!("Huobi {} does NOT have funding rates", market_type),
+    }
+}

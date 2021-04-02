@@ -28,8 +28,10 @@ RUN curl -SsL https://github.com/boxboat/fixuid/releases/download/v0.5/fixuid-0.
     printf "user: node\ngroup: node\n" > /etc/fixuid/config.yml
 
 COPY --chown=node:node ./pm2.trade.config.js /home/node/pm2.trade.config.js
+COPY --chown=node:node ./pm2.funding_rate.config.js /home/node/pm2.funding_rate.config.js
 COPY --chown=node:node ./conf/rclone.conf /home/node/.config/rclone/rclone.conf
-COPY ./conf/logrotate.conf /usr/local/etc/logrotate.conf
+COPY ./conf/logrotate.trade.conf /usr/local/etc/logrotate.trade.conf
+COPY ./conf/logrotate.funding_rate.conf /usr/local/etc/logrotate.funding_rate.conf
 
 ENV RUST_LOG "warn"
 ENV RUST_BACKTRACE 1

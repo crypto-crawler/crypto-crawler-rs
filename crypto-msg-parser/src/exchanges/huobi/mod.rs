@@ -1,10 +1,11 @@
+mod funding_rate;
 mod huobi_inverse;
 mod huobi_linear;
 mod huobi_spot;
 
 use crypto_market_type::MarketType;
 
-use crate::TradeMsg;
+use crate::{FundingRateMsg, TradeMsg};
 
 use serde_json::Result;
 
@@ -18,5 +19,16 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             huobi_linear::parse_trade(market_type, msg)
         }
         _ => panic!("Unknown market type {}", market_type),
+    }
+}
+
+pub(crate) fn parse_funding_rate(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<FundingRateMsg>> {
+    if market_type == MarketType::InverseSwap || market_type == MarketType::LinearSwap {
+        funding_rate::parse_funding_rate(market_type, msg)
+    } else {
+        panic!("Huobi {} does NOT have funding rates", market_type);
     }
 }

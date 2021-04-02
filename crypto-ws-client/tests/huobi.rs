@@ -230,7 +230,6 @@ mod huobi_linear_swap {
     }
 
     #[test]
-    #[ignore]
     fn subscribe_funding_rate() {
         let mut messages = Vec::<String>::new();
         {
@@ -319,7 +318,6 @@ mod huobi_inverse_swap {
     }
 
     #[test]
-    #[ignore]
     fn subscribe_funding_rate() {
         let mut messages = Vec::<String>::new();
         {
@@ -353,6 +351,7 @@ mod huobi_option {
     use std::sync::{Arc, Mutex};
 
     #[test]
+    #[ignore]
     fn subscribe() {
         gen_test_code!(
             HuobiOptionWSClient,
@@ -362,6 +361,7 @@ mod huobi_option {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_trade() {
         gen_test_code!(
             HuobiOptionWSClient,
@@ -380,6 +380,7 @@ mod huobi_option {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_bbo() {
         gen_test_code!(
             HuobiOptionWSClient,

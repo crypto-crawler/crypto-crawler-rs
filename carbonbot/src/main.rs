@@ -85,21 +85,53 @@ pub fn crawl(
         }
 
         if let Ok(_) = std::env::var("PARSER") {
-            let trades =
-                crypto_msg_parser::parse_trade(&msg.exchange, msg.market_type, &msg.json).unwrap();
-            for trade in trades.iter() {
-                let json = serde_json::to_string(trade).unwrap();
+            match msg_type {
+                MessageType::Trade => {
+                    let trades =
+                        crypto_msg_parser::parse_trade(&msg.exchange, msg.market_type, &msg.json)
+                            .unwrap();
+                    for trade in trades.iter() {
+                        let json = serde_json::to_string(trade).unwrap();
 
-                if let Some(writer) = writers_map_clone.get(&key) {
-                    writer.write(&json);
-                }
+                        if let Some(writer) = writers_map_clone.get(&key) {
+                            writer.write(&json);
+                        }
 
-                let mut guard = redis_conn_clone.lock().unwrap();
-                if let Some(ref mut conn) = *guard {
-                    if let Err(err) = conn.publish::<&str, String, i64>("carbonbot:trade", json) {
-                        error!("{}", err);
+                        let mut guard = redis_conn_clone.lock().unwrap();
+                        if let Some(ref mut conn) = *guard {
+                            if let Err(err) =
+                                conn.publish::<&str, String, i64>("carbonbot:trade", json)
+                            {
+                                error!("{}", err);
+                            }
+                        }
                     }
                 }
+                MessageType::FundingRate => {
+                    let rates = crypto_msg_parser::parse_funding_rate(
+                        &msg.exchange,
+                        msg.market_type,
+                        &msg.json,
+                    )
+                    .unwrap();
+                    for rate in rates.iter() {
+                        let json = serde_json::to_string(rate).unwrap();
+
+                        if let Some(writer) = writers_map_clone.get(&key) {
+                            writer.write(&json);
+                        }
+
+                        let mut guard = redis_conn_clone.lock().unwrap();
+                        if let Some(ref mut conn) = *guard {
+                            if let Err(err) =
+                                conn.publish::<&str, String, i64>("carbonbot:funding_rate", json)
+                            {
+                                error!("{}", err);
+                            }
+                        }
+                    }
+                }
+                _ => panic!("Parse does NOT support {} yet", msg_type),
             }
         } else {
             let json = serde_json::to_string(&msg).unwrap();
@@ -126,6 +158,9 @@ pub fn crawl(
         }
         MessageType::L3Snapshot => {
             crawl_l3_snapshot(exchange, market_type, None, on_msg_ext, None, None)
+        }
+        MessageType::FundingRate => {
+            crawl_funding_rate(exchange, market_type, None, on_msg_ext, None)
         }
         _ => panic!("Not implemented"),
     }

@@ -24,7 +24,7 @@ lazy_static! {
 
 /// The WebSocket client for ZBG swap market.
 ///
-/// * WebSocket API doc: <https://www.zbgpro.com/docs/future/v1/cn/#300f34d976>, there is English doc
+/// * WebSocket API doc: <https://www.zbgpro.com/docs/future/v1/cn/#300f34d976>, there is no English doc
 /// * Trading at: <https://futures.zbg.com/>
 pub struct ZbgSwapWSClient<'a> {
     client: WSClientInternal<'a>,

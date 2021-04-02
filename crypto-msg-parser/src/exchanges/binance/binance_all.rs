@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, TradeMsg, TradeSide};
+use crate::{FundingRateMsg, MessageType, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
@@ -130,4 +130,56 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         }
         _ => panic!("Unsupported event type {}", event_type),
     }
+}
+
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawFundingRateMsg {
+    e: String,         // Event type
+    E: i64,            // Event time
+    s: String,         // Symbol
+    p: String,         // Mark price
+    i: Option<String>, // Index price
+    P: String, // Estimated Settle Price, only useful in the last hour before the settlement starts
+    r: String, // Funding rate
+    T: i64,    // Next funding time
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+pub(crate) fn parse_funding_rate(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<FundingRateMsg>> {
+    let obj = serde_json::from_str::<HashMap<String, Value>>(&msg)?;
+    let stream = obj.get("stream").unwrap().as_str().unwrap();
+    let data = if stream == "!markPrice@arr" {
+        obj.get("data")
+            .unwrap()
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|x| serde_json::from_value::<RawFundingRateMsg>(x.clone()).unwrap())
+            .collect()
+    } else if stream.ends_with("@markPrice") {
+        vec![serde_json::from_value::<RawFundingRateMsg>(obj.get("data").unwrap().clone()).unwrap()]
+    } else {
+        panic!("Unknown funding rate messaeg {}", msg);
+    };
+    let funding_rates: Vec<FundingRateMsg> = data
+        .into_iter()
+        .map(|raw_msg| FundingRateMsg {
+            exchange: EXCHANGE_NAME.to_string(),
+            market_type,
+            symbol: raw_msg.s.clone(),
+            pair: crypto_pair::normalize_pair(&raw_msg.s, EXCHANGE_NAME).unwrap(),
+            msg_type: MessageType::FundingRate,
+            timestamp: raw_msg.E,
+            funding_rate: raw_msg.r.parse::<f64>().unwrap(),
+            funding_time: raw_msg.T,
+            estimated_rate: None,
+            raw: serde_json::to_value(&raw_msg).unwrap(),
+        })
+        .collect();
+    Ok(funding_rates)
 }

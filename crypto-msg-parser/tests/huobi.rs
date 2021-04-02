@@ -128,3 +128,42 @@ mod trade {
         assert_eq!(trades[1].volume, 1134.0); // volume == trade_turnover
     }
 }
+
+#[cfg(test)]
+mod funding_rate {
+    use crypto_msg_parser::{parse_funding_rate, MarketType};
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"op":"notify","topic":"public.BTC-USD.funding_rate","ts":1617309842839,"data":[{"symbol":"BTC","contract_code":"BTC-USD","fee_asset":"BTC","funding_time":"1617309840000","funding_rate":"0.000624180443735412","estimated_rate":"0.000807076648698898","settlement_time":"1617321600000"}]}"#;
+        let funding_rates = &parse_funding_rate("huobi", MarketType::InverseSwap, raw_msg).unwrap();
+
+        assert_eq!(funding_rates.len(), 1);
+
+        for rate in funding_rates.iter() {
+            crate::utils::check_funding_rate_fields("huobi", MarketType::InverseSwap, rate);
+        }
+
+        assert_eq!(funding_rates[0].pair, "BTC/USD".to_string());
+        assert_eq!(funding_rates[0].funding_rate, 0.000624180443735412);
+        assert_eq!(funding_rates[0].estimated_rate, Some(0.000807076648698898));
+        assert_eq!(funding_rates[0].funding_time, 1617321600000);
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"op":"notify","topic":"public.BTC-USDT.funding_rate","ts":1617309787271,"data":[{"symbol":"BTC","contract_code":"BTC-USDT","fee_asset":"USDT","funding_time":"1617309780000","funding_rate":"0.000754108135233895","estimated_rate":"0.000429934303518805","settlement_time":"1617321600000"}]}"#;
+        let funding_rates = &parse_funding_rate("huobi", MarketType::LinearSwap, raw_msg).unwrap();
+
+        assert_eq!(funding_rates.len(), 1);
+
+        for rate in funding_rates.iter() {
+            crate::utils::check_funding_rate_fields("huobi", MarketType::LinearSwap, rate);
+        }
+
+        assert_eq!(funding_rates[0].pair, "BTC/USDT".to_string());
+        assert_eq!(funding_rates[0].funding_rate, 0.000754108135233895);
+        assert_eq!(funding_rates[0].estimated_rate, Some(0.000429934303518805));
+        assert_eq!(funding_rates[0].funding_time, 1617321600000);
+    }
+}

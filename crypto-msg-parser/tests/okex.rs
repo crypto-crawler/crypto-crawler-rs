@@ -125,3 +125,42 @@ mod trade {
         assert_eq!(trade.side, TradeSide::Sell);
     }
 }
+
+#[cfg(test)]
+mod funding_rate {
+    use crypto_msg_parser::{parse_funding_rate, MarketType};
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"table":"swap/funding_rate","data":[{"estimated_rate":"0.00065","funding_rate":"0.00072933","funding_time":"2021-04-02T00:00:00.000Z","instrument_id":"BTC-USD-SWAP","interest_rate":"0","settlement_time":"2021-04-02T08:00:00.000Z"}]}"#;
+        let funding_rates = &parse_funding_rate("okex", MarketType::InverseSwap, raw_msg).unwrap();
+
+        assert_eq!(funding_rates.len(), 1);
+
+        for rate in funding_rates.iter() {
+            crate::utils::check_funding_rate_fields("okex", MarketType::InverseSwap, rate);
+        }
+
+        assert_eq!(funding_rates[0].pair, "BTC/USD".to_string());
+        assert_eq!(funding_rates[0].funding_rate, 0.00072933);
+        assert_eq!(funding_rates[0].estimated_rate, Some(0.00065));
+        assert_eq!(funding_rates[0].funding_time, 1617321600000);
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"table":"swap/funding_rate","data":[{"estimated_rate":"0.00031","funding_rate":"0.00081859","funding_time":"2021-04-02T00:00:00.000Z","instrument_id":"BTC-USDT-SWAP","interest_rate":"0","settlement_time":"2021-04-02T08:00:00.000Z"}]}"#;
+        let funding_rates = &parse_funding_rate("okex", MarketType::LinearSwap, raw_msg).unwrap();
+
+        assert_eq!(funding_rates.len(), 1);
+
+        for rate in funding_rates.iter() {
+            crate::utils::check_funding_rate_fields("okex", MarketType::LinearSwap, rate);
+        }
+
+        assert_eq!(funding_rates[0].pair, "BTC/USDT".to_string());
+        assert_eq!(funding_rates[0].funding_rate, 0.00081859);
+        assert_eq!(funding_rates[0].estimated_rate, Some(0.00031));
+        assert_eq!(funding_rates[0].funding_time, 1617321600000);
+    }
+}
