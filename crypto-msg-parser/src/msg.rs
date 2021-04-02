@@ -122,6 +122,7 @@ pub struct FundingRateMsg {
     // Funding time, the moment when funding rate is used
     pub funding_time: i64,
     // Estimated funding rate between [funding_time-h, funding_time], it will be static after funding_time
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub estimated_rate: Option<f64>,
     /// Unix timestamp, in milliseconds
     pub timestamp: i64,
