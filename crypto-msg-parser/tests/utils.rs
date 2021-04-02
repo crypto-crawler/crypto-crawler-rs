@@ -13,6 +13,8 @@ pub fn check_trade_fields(exchange: &str, market_type: MarketType, pair: String,
     assert_eq!(trade.timestamp.to_string().len(), 13);
 }
 
+// TODO: fake warning
+#[allow(dead_code)]
 pub fn check_funding_rate_fields(
     exchange: &str,
     market_type: MarketType,

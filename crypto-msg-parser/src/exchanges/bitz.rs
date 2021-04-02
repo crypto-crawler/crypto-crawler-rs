@@ -49,13 +49,18 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         .map(|raw_trade| {
             let price = raw_trade.p.parse::<f64>().unwrap();
             let quantity = raw_trade.n.parse::<f64>().unwrap();
+            let timestamp = if raw_trade.id.is_empty() {
+                raw_trade.T * 1000
+            } else {
+                raw_trade.id.parse::<i64>().unwrap()
+            };
             TradeMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type,
                 symbol: symbol.to_string(),
                 pair: pair.clone(),
                 msg_type: MessageType::Trade,
-                timestamp: raw_trade.id.parse::<i64>().unwrap(),
+                timestamp,
                 price,
                 quantity,
                 volume: price * quantity,
@@ -64,7 +69,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 } else {
                     TradeSide::Buy
                 },
-                trade_id: raw_trade.id.clone(),
+                trade_id: timestamp.to_string(),
                 raw: serde_json::to_value(&raw_trade).unwrap(),
             }
         })
