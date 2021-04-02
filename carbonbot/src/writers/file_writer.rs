@@ -4,7 +4,7 @@ use std::{fs, io::Write, sync::Mutex};
 
 use log::*;
 
-pub(crate) struct FileWriter {
+pub struct FileWriter {
     file: Mutex<fs::File>,
     path: String,
 }

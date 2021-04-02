@@ -1,5 +1,4 @@
-mod writers;
-
+use carbonbot::writers::{FileWriter, Writer};
 use crypto_crawler::*;
 use dashmap::DashMap;
 use log::*;
@@ -10,7 +9,6 @@ use std::{
     str::FromStr,
     sync::{Arc, Mutex},
 };
-use writers::{FileWriter, Writer};
 
 fn connect_redis(redis_url: &str) -> Result<redis::Connection, redis::RedisError> {
     assert!(!redis_url.is_empty(), "redis_url is empty");

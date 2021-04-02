@@ -5,4 +5,4 @@ pub trait Writer {
     fn close(&self);
 }
 
-pub(super) use file_writer::FileWriter;
+pub use file_writer::FileWriter;
