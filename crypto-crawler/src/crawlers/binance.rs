@@ -98,3 +98,47 @@ pub(crate) fn crawl_l2_event(
         _ => panic!("Binance does NOT have the {} market type", market_type),
     }
 }
+
+pub(crate) fn crawl_funding_rate(
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) {
+    let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
+        let message = Message::new(
+            EXCHANGE_NAME.to_string(),
+            market_type,
+            MessageType::FundingRate,
+            msg,
+        );
+        (on_msg.lock().unwrap())(message);
+    }));
+
+    let channels: Vec<String> = if symbols.is_none() || symbols.unwrap().is_empty() {
+        vec!["!markPrice@arr".to_string()]
+    } else {
+        symbols
+            .unwrap()
+            .into_iter()
+            .map(|symbol| format!("{}@markPrice", symbol.to_lowercase()))
+            .collect()
+    };
+    for ch in channels.iter() {
+        println!("{}", ch);
+    }
+
+    match market_type {
+        MarketType::InverseSwap => {
+            let ws_client = BinanceInverseWSClient::new(on_msg_ext, None);
+            ws_client.subscribe(&channels);
+            ws_client.run(duration);
+        }
+        MarketType::LinearSwap => {
+            let ws_client = BinanceLinearWSClient::new(on_msg_ext, None);
+            ws_client.subscribe(&channels);
+            ws_client.run(duration);
+        }
+        _ => panic!("Binance {} does NOT have funding rates", market_type),
+    }
+}

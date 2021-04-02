@@ -74,6 +74,15 @@ mod bitmex_inverse_swap {
             &vec!["funding:XBTUSD".to_string()]
         );
     }
+
+    #[test]
+    fn subscribe_instrument() {
+        gen_test_code!(
+            BitmexWSClient,
+            subscribe,
+            &vec!["instrument:XBTUSD".to_string()]
+        );
+    }
 }
 
 #[cfg(test)]

@@ -65,6 +65,15 @@ mod bitget_inverse_swap {
         gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec!["btcusd".to_string()], 60);
         gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec!["btcusd".to_string()], 604800);
     }
+
+    #[test]
+    fn subscribe_funding_rate() {
+        gen_test_code!(
+            BitgetSwapWSClient,
+            subscribe,
+            &vec!["swap/funding_rate:btcusd".to_string()]
+        );
+    }
 }
 
 #[cfg(test)]
@@ -115,6 +124,15 @@ mod bitget_linear_swap {
             BitgetSwapWSClient,
             &vec!["cmt_btcusdt".to_string()],
             604800
+        );
+    }
+
+    #[test]
+    fn subscribe_funding_rate() {
+        gen_test_code!(
+            BitgetSwapWSClient,
+            subscribe,
+            &vec!["swap/funding_rate:cmt_btcusdt".to_string()]
         );
     }
 }

@@ -115,6 +115,7 @@ impl<'a> HuobiWSClient<'a> {
         }
         let obj = resp.unwrap();
 
+        // Market Heartbeat
         if obj.contains_key("ping") {
             // The server will send a heartbeat every 5 seconds,
             // - Spot <https://huobiapi.github.io/docs/spot/v1/en/#introduction-11>
@@ -126,6 +127,16 @@ impl<'a> HuobiWSClient<'a> {
             let timestamp = obj.get("ping").unwrap();
             let mut pong_msg = HashMap::<String, &Value>::new();
             pong_msg.insert("pong".to_string(), timestamp);
+            let ws_msg = Message::Text(serde_json::to_string(&pong_msg).unwrap());
+            return MiscMessage::WebSocket(ws_msg);
+        }
+        // Order Push Heartbeat
+        // https://huobiapi.github.io/docs/usdt_swap/v1/en/#market-heartbeat
+        if obj.contains_key("op") && obj.get("op").unwrap().as_str().unwrap() == "ping" {
+            debug!("Received {} from {}", msg, EXCHANGE_NAME);
+            let mut pong_msg = obj.clone();
+            pong_msg.insert("op".to_string(), serde_json::from_str("\"pong\"").unwrap()); // change ping to pong
+            println!("{}", serde_json::to_string(&pong_msg).unwrap());
             let ws_msg = Message::Text(serde_json::to_string(&pong_msg).unwrap());
             return MiscMessage::WebSocket(ws_msg);
         }

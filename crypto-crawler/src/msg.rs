@@ -18,6 +18,7 @@ pub enum MessageType {
     BBO,
     Ticker,
     Candlestick,
+    FundingRate,
 }
 
 /// Message represents messages received by crawlers.
