@@ -124,9 +124,6 @@ pub(crate) fn crawl_funding_rate(
             .map(|symbol| format!("{}@markPrice", symbol.to_lowercase()))
             .collect()
     };
-    for ch in channels.iter() {
-        println!("{}", ch);
-    }
 
     match market_type {
         MarketType::InverseSwap => {
