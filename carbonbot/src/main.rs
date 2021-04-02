@@ -1,3 +1,4 @@
+use carbonbot::utils::connect_redis;
 use carbonbot::writers::{FileWriter, Writer};
 use crypto_crawler::*;
 use dashmap::DashMap;
@@ -10,31 +11,6 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-fn connect_redis(redis_url: &str) -> Result<redis::Connection, redis::RedisError> {
-    assert!(!redis_url.is_empty(), "redis_url is empty");
-
-    let mut redis_error: Option<redis::RedisError> = None;
-    let mut conn: Option<redis::Connection> = None;
-    for _ in 0..3 {
-        match redis::Client::open(redis_url) {
-            Ok(client) => match client.get_connection() {
-                Ok(connection) => {
-                    conn = Some(connection);
-                    break;
-                }
-                Err(err) => redis_error = Some(err),
-            },
-            Err(err) => redis_error = Some(err),
-        }
-    }
-
-    if conn.is_some() {
-        Ok(conn.unwrap())
-    } else {
-        Err(redis_error.unwrap())
-    }
-}
-
 pub fn crawl(
     exchange: &'static str,
     market_type: MarketType,
@@ -42,9 +18,6 @@ pub fn crawl(
     data_dir: Option<String>,
     redis_url: Option<String>,
 ) {
-    if data_dir.is_none() && redis_url.is_none() {
-        panic!("The environment variable DATA_DIR and REDIS_URL are not set, at least one of them should be set");
-    }
     let data_dir_clone = Arc::new(data_dir);
     let writers_map: Arc<DashMap<String, FileWriter>> = Arc::new(DashMap::new());
     let writers_map_clone = writers_map.clone();
@@ -209,6 +182,10 @@ fn main() {
         let url = std::env::var("REDIS_URL").unwrap();
         Some(url)
     };
+
+    if data_dir.is_none() && redis_url.is_none() {
+        panic!("The environment variable DATA_DIR and REDIS_URL are not set, at least one of them should be set");
+    }
 
     crawl(exchange, market_type, msg_type, data_dir, redis_url);
 }

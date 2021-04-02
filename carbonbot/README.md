@@ -38,9 +38,9 @@ The container above will deliver data to the following locations:
 ## Build
 
 ```bash
-docker build --squash -t soulmachine/carbonbot:debian -f Dockerfile.debian .
+docker build -t soulmachine/carbonbot:debian -f Dockerfile.debian .
 docker push soulmachine/carbonbot:debian
 
-docker build --squash -t soulmachine/carbonbot:amazonlinux -f Dockerfile.amazonlinux .
+docker build -t soulmachine/carbonbot:amazonlinux -f Dockerfile.amazonlinux .
 docker push soulmachine/carbonbot:amazonlinux
 ```

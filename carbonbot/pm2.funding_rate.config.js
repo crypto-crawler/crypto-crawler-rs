@@ -2,7 +2,7 @@
 const market_types = {
     binance: ["linear_swap", "inverse_swap"],
     bitget: ["inverse_swap", "linear_swap"],
-    bitmex: ["inverse_swap", "quanto_swap"],
+    bitmex: ["inverse_swap" /*, "quanto_swap"*/], // the funding channel includes all pairs
     huobi: ["linear_swap", "inverse_swap"],
     okex: ["linear_swap", "inverse_swap"],
 };

@@ -12,6 +12,8 @@ RUN cargo build --release
 FROM node:buster-slim
 
 COPY --from=builder /project/target/release/carbonbot /usr/local/bin/
+COPY --from=builder /project/target/release/bitmex_misc /usr/local/bin/
+COPY --from=builder /project/target/release/huobi_misc /usr/local/bin/
 
 RUN apt-get -qy update && apt-get -qy --no-install-recommends install \
     pkg-config libssl-dev ca-certificates curl logrotate \
@@ -29,9 +31,13 @@ RUN curl -SsL https://github.com/boxboat/fixuid/releases/download/v0.5/fixuid-0.
 
 COPY --chown=node:node ./pm2.trade.config.js /home/node/pm2.trade.config.js
 COPY --chown=node:node ./pm2.funding_rate.config.js /home/node/pm2.funding_rate.config.js
+COPY --chown=node:node ./pm2.misc.config.js /home/node/pm2.misc.config.js
+
 COPY --chown=node:node ./conf/rclone.conf /home/node/.config/rclone/rclone.conf
+
 COPY ./conf/logrotate.trade.conf /usr/local/etc/logrotate.trade.conf
 COPY ./conf/logrotate.funding_rate.conf /usr/local/etc/logrotate.funding_rate.conf
+COPY ./conf/logrotate.misc.conf /usr/local/etc/logrotate.misc.conf
 
 ENV RUST_LOG "warn"
 ENV RUST_BACKTRACE 1
