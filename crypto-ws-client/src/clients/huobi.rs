@@ -136,7 +136,6 @@ impl<'a> HuobiWSClient<'a> {
             debug!("Received {} from {}", msg, EXCHANGE_NAME);
             let mut pong_msg = obj.clone();
             pong_msg.insert("op".to_string(), serde_json::from_str("\"pong\"").unwrap()); // change ping to pong
-            println!("{}", serde_json::to_string(&pong_msg).unwrap());
             let ws_msg = Message::Text(serde_json::to_string(&pong_msg).unwrap());
             return MiscMessage::WebSocket(ws_msg);
         }
@@ -159,6 +158,15 @@ impl<'a> HuobiWSClient<'a> {
                     }
                     _ => warn!("Received {} from {}", msg, EXCHANGE_NAME),
                 }
+            } else if let Some(op) = obj.get("op") {
+                match op.as_str().unwrap() {
+                    "sub" | "unsub" => MiscMessage::Misc,
+                    "notify" => MiscMessage::Normal,
+                    _ => {
+                        warn!("Received {} from {}", msg, EXCHANGE_NAME);
+                        MiscMessage::Misc
+                    }
+                };
             } else {
                 warn!("Received {} from {}", msg, EXCHANGE_NAME);
             }
