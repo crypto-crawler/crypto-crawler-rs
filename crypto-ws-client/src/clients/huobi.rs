@@ -192,11 +192,7 @@ impl<'a> OrderBook for HuobiWSClient<'a> {
     fn subscribe_orderbook(&self, pairs: &[String]) {
         let pair_to_raw_channel = |pair: &String| {
             format!(
-                r#"{{
-            "sub": "market.{}.depth.size_150.high_freq",
-            "data_type":"incremental",
-            "id": "crypto-ws-client"
-        }}"#,
+                r#"{{"sub": "market.{}.depth.size_150.high_freq","data_type":"incremental","id": "crypto-ws-client"}}"#,
                 pair
             )
         };
@@ -367,7 +363,6 @@ impl<'a> OrderBook for HuobiSpotWSClient<'a> {
         } else {
             panic!("Huobi Spot market.$symbol.mbp.$levels must use wss://api.huobi.pro/feed or wss://api-aws.huobi.pro/feed");
         }
-        self.client.subscribe_orderbook(pairs);
     }
 }
 
