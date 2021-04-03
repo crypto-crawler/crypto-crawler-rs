@@ -70,13 +70,18 @@ pub(crate) fn crawl_l2_event(
                 );
                 (on_msg.lock().unwrap())(message);
             };
+            let symbols: Vec<String> = if symbols.is_none() || symbols.unwrap().is_empty() {
+                fetch_symbols_retry(EXCHANGE_NAME, market_type)
+            } else {
+                symbols.unwrap().into_iter().map(|x| x.clone()).collect()
+            };
             // Huobi Spot market.$symbol.mbp.$levels must use wss://api.huobi.pro/feed
             // or wss://api-aws.huobi.pro/feed
             let ws_client = HuobiSpotWSClient::new(
                 Arc::new(Mutex::new(on_msg_ext)),
                 Some("wss://api.huobi.pro/feed"),
             );
-            ws_client.subscribe_orderbook(symbols.unwrap());
+            ws_client.subscribe_orderbook(&symbols);
             ws_client.run(duration);
             None
         }
