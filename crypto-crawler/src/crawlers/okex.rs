@@ -13,8 +13,10 @@ use crypto_ws_client::*;
 use log::*;
 
 const EXCHANGE_NAME: &str = "okex";
-// usize::MAX means unlimited
-const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = usize::MAX;
+// https://www.okex.com/docs/zh/#question-public
+// How many subscriptions per websocket connection?
+// The total size of subscription command should not exceed 4096 bytes.
+const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = 256;
 
 #[rustfmt::skip]
 gen_crawl_event!(crawl_trade_internal, OkexWSClient, MessageType::Trade, subscribe_trade);
