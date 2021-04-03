@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     path::Path,
     sync::{Arc, Mutex},
 };
@@ -8,8 +9,10 @@ use carbonbot::{
     writers::{FileWriter, Writer},
 };
 use crypto_ws_client::{BitmexWSClient, WSClient};
+use dashmap::DashMap;
 use log::*;
 use redis::{self, Commands};
+use serde_json::Value;
 
 fn main() {
     let data_dir = if std::env::var("DATA_DIR").is_err() {
@@ -32,22 +35,9 @@ fn main() {
         panic!("The environment variable DATA_DIR and REDIS_URL are not set, at least one of them should be set");
     }
 
-    let file_writer = if let Some(data_dir) = data_dir {
-        let root_dir = Path::new(data_dir.as_str())
-            .join("misc")
-            .join("bitmex")
-            .into_os_string();
-        std::fs::create_dir_all(root_dir.as_os_str()).unwrap();
+    let data_dir_clone = Arc::new(data_dir);
 
-        let file_path = Path::new(root_dir.as_os_str())
-            .join("bitmex")
-            .into_os_string();
-
-        let file_writer = FileWriter::new(file_path.as_os_str().to_str().unwrap());
-        Arc::new(Mutex::new(Some(file_writer)))
-    } else {
-        Arc::new(Mutex::new(None))
-    };
+    let writers_map: Arc<DashMap<String, FileWriter>> = Arc::new(DashMap::new());
 
     let redis_conn = if let Some(url) = redis_url {
         let conn = match connect_redis(&url) {
@@ -60,8 +50,30 @@ fn main() {
     };
 
     let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
-        let mut guard = file_writer.lock().unwrap();
-        if let Some(ref mut writer) = *guard {
+        let obj = serde_json::from_str::<HashMap<String, Value>>(&msg).unwrap();
+        let table = obj.get("table").unwrap().as_str().unwrap();
+        let key = format!("bitmex-{}", table);
+        if let Some(ref data_dir) = *data_dir_clone {
+            if !writers_map.contains_key(&key) {
+                let data_dir = Path::new(data_dir)
+                    .join("misc")
+                    .join("bitmex")
+                    .join(table)
+                    .into_os_string();
+                std::fs::create_dir_all(data_dir.as_os_str()).unwrap();
+
+                let file_name = format!("bitmex.misc.{}", table);
+                let file_path = Path::new(data_dir.as_os_str())
+                    .join(file_name)
+                    .into_os_string();
+                writers_map.insert(
+                    key.clone(),
+                    FileWriter::new(file_path.as_os_str().to_str().unwrap()),
+                );
+            }
+        }
+
+        if let Some(writer) = writers_map.get(&key) {
             writer.write(&msg);
         }
 
