@@ -36,19 +36,15 @@ pub(crate) fn crawl_funding_rate(
         (on_msg.lock().unwrap())(message);
     }));
 
-    let symbols: Vec<String> = if symbols.is_none() || symbols.unwrap().is_empty() {
+    let channels: Vec<String> = if symbols.is_none() || symbols.unwrap().is_empty() {
         vec!["funding".to_string()]
     } else {
         symbols
             .unwrap()
             .into_iter()
-            .map(|symbol| symbol.to_string())
+            .map(|symbol| format!("funding:{}", symbol))
             .collect()
     };
-    let channels: Vec<String> = symbols
-        .into_iter()
-        .map(|symbol| format!("funding:{}", symbol))
-        .collect();
 
     match market_type {
         MarketType::InverseSwap | MarketType::QuantoSwap => {
