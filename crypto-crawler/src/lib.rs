@@ -212,6 +212,41 @@ pub fn crawl_l3_snapshot(
     )
 }
 
+/// Crawl 24hr rolling window ticker.
+///
+/// If `symbols` is None, it means all trading symbols in the `market_type`,
+/// and updates the latest symbols every hour.
+pub fn crawl_ticker(
+    exchange: &str,
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) {
+    let func = match exchange {
+        "binance" => crawlers::binance::crawl_ticker,
+        "bitfinex" => crawlers::bitfinex::crawl_ticker,
+        "bitget" => crawlers::bitget::crawl_ticker,
+        "bithumb" => crawlers::bithumb::crawl_ticker,
+        "bitz" => crawlers::bitz::crawl_ticker,
+        "bybit" => crawlers::bybit::crawl_ticker,
+        "coinbase_pro" => crawlers::coinbase_pro::crawl_ticker,
+        "deribit" => crawlers::deribit::crawl_ticker,
+        "gate" => crawlers::gate::crawl_ticker,
+        "huobi" => crawlers::huobi::crawl_ticker,
+        "kraken" => crawlers::kraken::crawl_ticker,
+        "kucoin" => crawlers::kucoin::crawl_ticker,
+        "mxc" => crawlers::mxc::crawl_ticker,
+        "okex" => crawlers::okex::crawl_ticker,
+        "zbg" => crawlers::zbg::crawl_ticker,
+        _ => panic!("Unknown exchange {}", exchange),
+    };
+    let handle = func(market_type, symbols, on_msg, duration);
+    if let Some(h) = handle {
+        h.join().expect("The thread panicked");
+    }
+}
+
 /// Crawl perpetual swap funding rates.
 pub fn crawl_funding_rate(
     exchange: &str,

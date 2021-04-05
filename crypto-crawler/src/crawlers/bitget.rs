@@ -19,6 +19,8 @@ const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = usize::MAX;
 gen_crawl_event!(crawl_trade_swap, BitgetSwapWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event_swap, BitgetSwapWSClient, MessageType::L2Event, subscribe_orderbook);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_ticker_swap, BitgetSwapWSClient, MessageType::Ticker, subscribe_ticker);
 
 pub(crate) fn crawl_trade(
     market_type: MarketType,
@@ -43,6 +45,20 @@ pub(crate) fn crawl_l2_event(
     match market_type {
         MarketType::InverseSwap | MarketType::LinearSwap => {
             crawl_l2_event_swap(market_type, symbols, on_msg, duration)
+        }
+        _ => panic!("Bitget does NOT have the {} market type", market_type),
+    }
+}
+
+pub(crate) fn crawl_ticker(
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) -> Option<std::thread::JoinHandle<()>> {
+    match market_type {
+        MarketType::InverseSwap | MarketType::LinearSwap => {
+            crawl_ticker_swap(market_type, symbols, on_msg, duration)
         }
         _ => panic!("Bitget does NOT have the {} market type", market_type),
     }

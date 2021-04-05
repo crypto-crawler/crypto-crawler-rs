@@ -82,3 +82,17 @@ fn test_crawl_l3_snapshot(market_type: MarketType, symbol: &str) {
         MessageType::L3Snapshot
     )
 }
+
+#[test_case(MarketType::Spot, "BTC-USDT")]
+#[test_case(MarketType::InverseSwap, "XBTUSDM")]
+#[test_case(MarketType::LinearSwap, "XBTUSDTM")]
+#[test_case(MarketType::InverseFuture, "XBTMM21")]
+fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_ticker,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::Ticker
+    )
+}

@@ -35,6 +35,17 @@ gen_crawl_event!(crawl_l2_event_inverse_swap, HuobiInverseSwapWSClient, MessageT
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event_option, HuobiOptionWSClient, MessageType::L2Event, subscribe_orderbook);
 
+#[rustfmt::skip]
+gen_crawl_event!(crawl_ticker_spot, HuobiSpotWSClient, MessageType::Ticker, subscribe_ticker);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_ticker_inverse_future, HuobiFutureWSClient, MessageType::Ticker, subscribe_ticker);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_ticker_linear_swap, HuobiLinearSwapWSClient, MessageType::Ticker, subscribe_ticker);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_ticker_inverse_swap, HuobiInverseSwapWSClient, MessageType::Ticker, subscribe_ticker);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_ticker_option, HuobiOptionWSClient, MessageType::Ticker, subscribe_ticker);
+
 pub(crate) fn crawl_trade(
     market_type: MarketType,
     symbols: Option<&[String]>,
@@ -95,6 +106,26 @@ pub(crate) fn crawl_l2_event(
             crawl_l2_event_inverse_swap(market_type, symbols, on_msg, duration)
         }
         MarketType::Option => crawl_l2_event_option(market_type, symbols, on_msg, duration),
+        _ => panic!("Huobi does NOT have the {} market type", market_type),
+    }
+}
+
+pub(crate) fn crawl_ticker(
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) -> Option<std::thread::JoinHandle<()>> {
+    match market_type {
+        MarketType::Spot => crawl_ticker_spot(market_type, symbols, on_msg, duration),
+        MarketType::InverseFuture => {
+            crawl_ticker_inverse_future(market_type, symbols, on_msg, duration)
+        }
+        MarketType::LinearSwap => crawl_ticker_linear_swap(market_type, symbols, on_msg, duration),
+        MarketType::InverseSwap => {
+            crawl_ticker_inverse_swap(market_type, symbols, on_msg, duration)
+        }
+        MarketType::Option => crawl_ticker_option(market_type, symbols, on_msg, duration),
         _ => panic!("Huobi does NOT have the {} market type", market_type),
     }
 }

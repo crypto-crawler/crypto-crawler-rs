@@ -48,3 +48,15 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
         MessageType::L2Snapshot
     )
 }
+
+#[test_case(MarketType::Spot, "BTC-USDT")]
+#[test_case(MarketType::Spot, "ETH-USDT")]
+fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_ticker,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::Ticker
+    )
+}

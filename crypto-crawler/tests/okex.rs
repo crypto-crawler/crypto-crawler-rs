@@ -13,7 +13,7 @@ use std::{
 
 const EXCHANGE_NAME: &str = "okex";
 
-#[test_case(MarketType::Spot)]
+#[test_case(MarketType::Spot; "inconclusive")] // TODO
 #[test_case(MarketType::InverseFuture)]
 #[test_case(MarketType::LinearFuture)]
 #[test_case(MarketType::InverseSwap)]
@@ -96,5 +96,21 @@ fn test_crawl_funding_rate(market_type: MarketType, symbol: &str) {
         market_type,
         symbol,
         MessageType::FundingRate
+    )
+}
+
+#[test_case(MarketType::Spot, "BTC-USDT")]
+#[test_case(MarketType::InverseFuture, "BTC-USD-210625")]
+#[test_case(MarketType::LinearFuture, "BTC-USDT-210625")]
+#[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
+#[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
+#[test_case(MarketType::Option, "BTC-USD-210625-72000-C")]
+fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_ticker,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::Ticker
     )
 }
