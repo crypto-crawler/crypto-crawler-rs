@@ -43,6 +43,15 @@ mod binance_spot {
     }
 
     #[test]
+    fn subscribe_tickers_all() {
+        gen_test_code!(
+            BinanceSpotWSClient,
+            subscribe,
+            &vec!["!ticker@arr".to_string()]
+        );
+    }
+
+    #[test]
     fn subscribe_bbo() {
         gen_test_code!(
             BinanceSpotWSClient,
@@ -113,6 +122,15 @@ mod binance_inverse_future {
             BinanceInverseWSClient,
             subscribe_ticker,
             &vec!["btcusd_210625".to_string(), "ethusd_210625".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_tickers_all() {
+        gen_test_code!(
+            BinanceInverseWSClient,
+            subscribe,
+            &vec!["!ticker@arr".to_string()]
         );
     }
 
@@ -191,6 +209,15 @@ mod binance_linear_future {
     }
 
     #[test]
+    fn subscribe_tickers_all() {
+        gen_test_code!(
+            BinanceLinearWSClient,
+            subscribe,
+            &vec!["!ticker@arr".to_string()]
+        );
+    }
+
+    #[test]
     fn subscribe_bbo() {
         gen_test_code!(
             BinanceLinearWSClient,
@@ -261,6 +288,15 @@ mod binance_inverse_swap {
             BinanceInverseWSClient,
             subscribe_ticker,
             &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_tickers_all() {
+        gen_test_code!(
+            BinanceInverseWSClient,
+            subscribe,
+            &vec!["!ticker@arr".to_string()]
         );
     }
 
@@ -353,6 +389,15 @@ mod binance_linear_swap {
             BinanceLinearWSClient,
             subscribe_ticker,
             &vec!["btcusdt".to_string(), "ethusdt".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_tickers_all() {
+        gen_test_code!(
+            BinanceLinearWSClient,
+            subscribe,
+            &vec!["!ticker@arr".to_string()]
         );
     }
 

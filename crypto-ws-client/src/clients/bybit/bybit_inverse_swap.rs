@@ -23,16 +23,12 @@ impl_trait!(Trade, BybitInverseSwapWSClient, subscribe_trade, "trade", to_raw_ch
 impl_trait!(BBO, BybitInverseSwapWSClient, subscribe_bbo, "orderBookL2_25", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, BybitInverseSwapWSClient, subscribe_orderbook, "orderBook_200.100ms", to_raw_channel);
+#[rustfmt::skip]
+impl_trait!(Ticker, BybitInverseSwapWSClient, subscribe_ticker, "instrument_info.100ms", to_raw_channel);
 
 impl<'a> OrderBookSnapshot for BybitInverseSwapWSClient<'a> {
     fn subscribe_orderbook_snapshot(&self, _pairs: &[String]) {
         panic!("FTX does NOT have orderbook snapshot channel");
-    }
-}
-
-impl<'a> Ticker for BybitInverseSwapWSClient<'a> {
-    fn subscribe_ticker(&self, _pairs: &[String]) {
-        panic!("FTX does NOT have ticker channel");
     }
 }
 
