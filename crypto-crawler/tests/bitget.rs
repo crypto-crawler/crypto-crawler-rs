@@ -52,6 +52,18 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
 
 #[test_case(MarketType::InverseSwap, "btcusd")]
 #[test_case(MarketType::LinearSwap, "cmt_btcusdt")]
+fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_ticker,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::Ticker
+    )
+}
+
+#[test_case(MarketType::InverseSwap, "btcusd")]
+#[test_case(MarketType::LinearSwap, "cmt_btcusdt")]
 fn test_crawl_funding_rate(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_funding_rate,

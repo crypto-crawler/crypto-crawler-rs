@@ -72,3 +72,15 @@ fn test_crawl_l3_snapshot(market_type: MarketType, symbol: &str) {
         MessageType::L3Snapshot
     )
 }
+
+#[test_case(MarketType::Spot, "tBTCUSD")]
+#[test_case(MarketType::LinearSwap, "tBTCF0:USTF0")]
+fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_ticker,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::Ticker
+    )
+}

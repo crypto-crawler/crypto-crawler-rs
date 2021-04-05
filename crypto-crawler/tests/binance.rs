@@ -61,6 +61,22 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     )
 }
 
+#[test_case(MarketType::Spot, "BTCUSDT")]
+#[test_case(MarketType::InverseFuture, "BTCUSD_210625")]
+#[test_case(MarketType::LinearFuture, "BTCUSDT_210625")]
+#[test_case(MarketType::InverseSwap, "BTCUSD_PERP")]
+#[test_case(MarketType::LinearSwap, "BTCUSDT")]
+#[test_case(MarketType::Option, "BTC-210129-40000-C"; "inconclusive")]
+fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_ticker,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::Ticker
+    )
+}
+
 #[test_case(MarketType::InverseSwap, "BTCUSD_PERP")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 fn test_crawl_funding_rate(market_type: MarketType, symbol: &str) {

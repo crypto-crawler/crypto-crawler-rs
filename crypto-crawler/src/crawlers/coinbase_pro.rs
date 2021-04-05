@@ -21,3 +21,5 @@ gen_crawl_event!(crawl_trade, CoinbaseProWSClient, MessageType::Trade, subscribe
 gen_crawl_event!(crawl_l2_event, CoinbaseProWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l3_event, CoinbaseProWSClient, MessageType::L3Event, subscribe_l3_orderbook);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_ticker, CoinbaseProWSClient, MessageType::Ticker, subscribe_ticker);

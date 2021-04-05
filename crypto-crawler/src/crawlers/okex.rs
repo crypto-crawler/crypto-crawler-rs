@@ -57,6 +57,9 @@ pub(crate) fn crawl_trade(
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event, OkexWSClient, MessageType::L2Event, subscribe_orderbook);
 
+#[rustfmt::skip]
+gen_crawl_event!(crawl_ticker, OkexWSClient, MessageType::Ticker, subscribe_ticker);
+
 pub(crate) fn crawl_funding_rate(
     market_type: MarketType,
     symbols: Option<&[String]>,

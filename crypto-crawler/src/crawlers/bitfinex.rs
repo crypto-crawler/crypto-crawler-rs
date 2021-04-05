@@ -23,3 +23,5 @@ gen_crawl_event!(crawl_trade, BitfinexWSClient, MessageType::Trade, subscribe_tr
 gen_crawl_event!(crawl_l2_event, BitfinexWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l3_event, BitfinexWSClient, MessageType::L3Event, subscribe_l3_orderbook);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_ticker, BitfinexWSClient, MessageType::Ticker, subscribe_ticker);

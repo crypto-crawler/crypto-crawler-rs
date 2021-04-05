@@ -69,3 +69,18 @@ fn test_crawl_funding_rate(market_type: MarketType, symbol: &str) {
         MessageType::FundingRate
     )
 }
+
+#[test_case(MarketType::Spot, "btcusdt")]
+#[test_case(MarketType::InverseFuture, "BTC_CQ")]
+#[test_case(MarketType::InverseSwap, "BTC-USD")]
+#[test_case(MarketType::LinearSwap, "BTC-USDT")]
+#[test_case(MarketType::Option, "BTC-USDT-210409-C-66000")]
+fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_ticker,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::Ticker
+    )
+}

@@ -19,3 +19,5 @@ const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = usize::MAX;
 gen_crawl_event!(crawl_trade, BithumbWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event, BithumbWSClient, MessageType::L2Event, subscribe_orderbook);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_ticker, BithumbWSClient, MessageType::Ticker, subscribe_ticker);
