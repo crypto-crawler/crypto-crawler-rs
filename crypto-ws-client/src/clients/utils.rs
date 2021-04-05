@@ -61,7 +61,7 @@ fn connect_to_some(
 }
 
 // Usually ws_stream.read_message() blocks forever,
-// with this function, it returns after 5 seconds if no data comming in
+// with this function, it returns after `timeout` seconds if no data comming in
 fn connect_with_timeout(
     url: &str,
     timeout: Option<u64>,

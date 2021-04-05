@@ -52,6 +52,15 @@ mod bybit_inverse_future {
     }
 
     #[test]
+    fn subscribe_ticker() {
+        gen_test_code!(
+            BybitInverseFutureWSClient,
+            subscribe_ticker,
+            &vec!["BTCUSDM21".to_string()]
+        );
+    }
+
+    #[test]
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BybitInverseFutureWSClient,
@@ -117,6 +126,15 @@ mod bybit_inverse_swap {
     }
 
     #[test]
+    fn subscribe_ticker() {
+        gen_test_code!(
+            BybitInverseSwapWSClient,
+            subscribe_ticker,
+            &vec!["BTCUSD".to_string()]
+        );
+    }
+
+    #[test]
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(BybitInverseSwapWSClient, &vec!["BTCUSD".to_string()], 60);
         gen_test_subscribe_candlestick!(
@@ -155,6 +173,15 @@ mod bybit_linear_swap {
         gen_test_code!(
             BybitLinearSwapWSClient,
             subscribe_orderbook,
+            &vec!["BTCUSDT".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_ticker() {
+        gen_test_code!(
+            BybitLinearSwapWSClient,
+            subscribe_ticker,
             &vec!["BTCUSDT".to_string()]
         );
     }
