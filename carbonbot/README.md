@@ -35,6 +35,18 @@ The container above will deliver data to the following locations:
 | ------------------ | -------------------- | ------------------ |
 | $DATA_DIR/l2_event | $AWS_S3_DIR/l2_event | carbonbot:l2_event |
 
+Crawl 24hr rolling window tickers:
+
+```bash
+docker run -it --rm -v $(pwd):/data -e AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY" -e AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY" -e AWS_S3_DIR="s3://YOUR_BUCKET/path" -e REDIS_URL="redis://host-ip:6379" -e PARSER=true -u "$(id -u):$(id -g)" soulmachine/carbonbot:debian pm2-runtime start pm2.ticker.config.js
+```
+
+The container above will deliver data to the following locations:
+
+| Local           | AWS S3            | Redis Channel   |
+| --------------- | ----------------- | --------------- |
+| $DATA_DIR/ticker | $AWS_S3_DIR/ticker | carbonbot:ticker |
+
 Crawl funding rates:
 
 ```bash
