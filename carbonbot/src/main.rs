@@ -130,6 +130,9 @@ pub fn crawl(
         MessageType::L3Snapshot => {
             crawl_l3_snapshot(exchange, market_type, None, on_msg_ext, None, None)
         }
+        MessageType::Ticker => {
+            crawl_ticker(exchange, market_type, None, on_msg_ext, None)
+        }
         MessageType::FundingRate => {
             crawl_funding_rate(exchange, market_type, None, on_msg_ext, None)
         }

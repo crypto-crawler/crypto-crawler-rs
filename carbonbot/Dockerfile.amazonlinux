@@ -23,6 +23,7 @@ RUN curl -sL https://rpm.nodesource.com/setup_lts.x | bash - && yum install -y n
  && yum clean all && rm -rf /var/cache/yum
 
 COPY ./pm2.trade.config.js /root/pm2.trade.config.js
+COPY ./pm2.ticker.config.js /root/pm2.ticker.config.js
 COPY ./pm2.l2_event.config.js /root/pm2.l2_event.config.js
 COPY ./pm2.funding_rate.config.js /root/pm2.funding_rate.config.js
 COPY ./pm2.misc.config.js /root/pm2.misc.config.js
@@ -30,6 +31,7 @@ COPY ./pm2.misc.config.js /root/pm2.misc.config.js
 COPY ./conf/rclone.conf /root/.config/rclone/rclone.conf
 
 COPY ./conf/logrotate.trade.conf /usr/local/etc/logrotate.trade.conf
+COPY ./conf/logrotate.ticker.conf /usr/local/etc/logrotate.ticker.conf
 COPY ./conf/logrotate.l2_event.conf /usr/local/etc/logrotate.l2_event.conf
 COPY ./conf/logrotate.funding_rate.conf /usr/local/etc/logrotate.funding_rate.conf
 COPY ./conf/logrotate.misc.conf /usr/local/etc/logrotate.misc.conf
