@@ -1,48 +1,15 @@
 use crypto_market_type::MarketType;
 
-use super::utils::http_get;
-use crate::{FundingRateMsg, MessageType, TradeMsg, TradeSide};
+use super::utils::calc_quantity_and_volume;
+use crate::{FundingRateMsg, MessageType, OrderBookMsg, TradeMsg, TradeSide};
 
 use chrono::prelude::*;
 use chrono::DateTime;
-use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
 use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "okex";
-
-lazy_static! {
-    static ref LINEAR_FUTURE_CONTRACT_VALUE_MAP: HashMap<String, f64> =
-        fetch_contract_val("futures");
-    static ref LINEAR_SWAP_CONTRACT_VALUE_MAP: HashMap<String, f64> = fetch_contract_val("swap");
-}
-
-// get the contract_val field
-// market_type, futures, swap, option
-fn fetch_contract_val(market_type: &str) -> HashMap<String, f64> {
-    #[derive(Serialize, Deserialize)]
-    struct Instrument {
-        underlying: String,
-        contract_val: String,
-        is_inverse: String,
-    }
-    let mut mapping: HashMap<String, f64> = HashMap::new();
-
-    let txt = http_get(&format!(
-        "https://www.okex.com/api/{}/v3/instruments",
-        market_type
-    ))
-    .unwrap();
-    let instruments = serde_json::from_str::<Vec<Instrument>>(&txt).unwrap();
-
-    for instrument in instruments.iter().filter(|x| x.is_inverse == "false") {
-        let pair = instrument.underlying.replace('-', "/");
-        mapping.insert(pair, instrument.contract_val.parse::<f64>().unwrap());
-    }
-
-    mapping
-}
 
 // https://www.okex.com/docs/en/#spot_ws-trade
 // https://www.okex.com/docs/en/#futures_ws-trade
@@ -81,47 +48,6 @@ struct WebsocketMsg<T: Sized> {
     extra: HashMap<String, Value>,
 }
 
-fn calc_quantity_and_volume(
-    market_type: MarketType,
-    pair: &str,
-    price: f64,
-    size: f64,
-) -> (f64, f64) {
-    match market_type {
-        MarketType::Spot => (size, size * price),
-        MarketType::LinearFuture => {
-            let contract_val = LINEAR_FUTURE_CONTRACT_VALUE_MAP.get(pair).unwrap();
-            let quantity = contract_val * size;
-            (quantity, quantity * price)
-        }
-        MarketType::LinearSwap => {
-            let contract_val = LINEAR_SWAP_CONTRACT_VALUE_MAP.get(pair).unwrap();
-            let quantity = contract_val * size;
-            (quantity, quantity * price)
-        }
-        MarketType::InverseFuture | MarketType::InverseSwap => {
-            let contract_value = if pair.starts_with("BTC/") {
-                100.0
-            } else {
-                10.0
-            };
-            let volume = contract_value * size;
-            (volume / price, volume)
-        }
-        MarketType::Option => {
-            let multiplier = match pair {
-                "BTC/USD" => 0.1,
-                "ETH/USD" => 1.0,
-                "EOS/USD" => 100.0,
-                _ => panic!("Unknown OKEx option pair {}", pair),
-            };
-            let quantity = size * multiplier;
-            (quantity, quantity * price)
-        }
-        _ => panic!("Unknown market_type {}", market_type),
-    }
-}
-
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradeMsg>>(msg)?;
     let option_trades = ws_msg.table.as_str() == "option/trades";
@@ -145,7 +71,8 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             };
             let pair =
                 crypto_pair::normalize_pair(&raw_trade.instrument_id, EXCHANGE_NAME).unwrap();
-            let (quantity, volume) = calc_quantity_and_volume(market_type, &pair, price, size);
+            let (quantity, volume) =
+                calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, size);
 
             TradeMsg {
                 exchange: EXCHANGE_NAME.to_string(),
@@ -198,4 +125,8 @@ pub(crate) fn parse_funding_rate(
         .collect();
 
     Ok(rates)
+}
+
+pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+    Ok(Vec::new())
 }

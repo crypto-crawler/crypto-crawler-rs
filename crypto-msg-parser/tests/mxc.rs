@@ -3,6 +3,7 @@ mod utils;
 #[cfg(test)]
 mod trade {
     use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
+    use float_cmp::approx_eq;
 
     #[test]
     fn spot() {
@@ -34,7 +35,12 @@ mod trade {
         );
 
         assert_eq!(trade.volume, trade.price * trade.quantity);
-        assert_eq!(trade.quantity, 0.0001 * 14.0);
+        assert!(approx_eq!(
+            f64,
+            trade.quantity,
+            0.0001 * 14.0,
+            epsilon = 0.0000000001
+        ));
         assert_eq!(trade.side, TradeSide::Sell);
     }
 

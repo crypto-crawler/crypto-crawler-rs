@@ -1,49 +1,13 @@
 use crypto_market_type::MarketType;
 
-use super::super::utils::http_get;
+use super::super::utils::calc_quantity_and_volume;
 use crate::{MessageType, TradeMsg, TradeSide};
 
-use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
 use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "mxc";
-
-lazy_static! {
-    // symbol -> contractSize
-    static ref LINEAR_CONTRACT_VALUE_MAP: HashMap<String, f64> = fetch_linear_contract_sizes();
-}
-
-// get the contractSize field from linear markets
-fn fetch_linear_contract_sizes() -> HashMap<String, f64> {
-    #[derive(Serialize, Deserialize)]
-    #[allow(non_snake_case)]
-    struct SwapMarket {
-        symbol: String,
-        baseCoin: String,
-        quoteCoin: String,
-        settleCoin: String,
-        contractSize: f64,
-    }
-
-    #[derive(Serialize, Deserialize)]
-    struct ResponseMsg {
-        success: bool,
-        code: i64,
-        data: Vec<SwapMarket>,
-    }
-
-    let mut mapping: HashMap<String, f64> = HashMap::new();
-
-    let txt = http_get("https://contract.mxc.com/api/v1/contract/detail").unwrap();
-    let resp = serde_json::from_str::<ResponseMsg>(&txt).unwrap();
-    for linear_market in resp.data.iter().filter(|x| x.settleCoin == x.quoteCoin) {
-        mapping.insert(linear_market.symbol.clone(), linear_market.contractSize);
-    }
-
-    mapping
-}
 
 // https://mxcdevelop.github.io/APIDoc/contract.api.cn.html#4483df6e28
 #[derive(Serialize, Deserialize)]
@@ -65,37 +29,14 @@ struct WebsocketMsg<T: Sized> {
     data: T,
 }
 
-fn calc_quantity_and_volume(
-    market_type: MarketType,
-    symbol: &str,
-    raw_trade: &RawTradeMsg,
-) -> (f64, f64) {
-    match market_type {
-        MarketType::InverseSwap => {
-            let contract_value = if symbol.starts_with("BTC_") {
-                100.0
-            } else {
-                10.0
-            };
-            let volume = raw_trade.v * contract_value;
-            (volume / raw_trade.p, volume)
-        }
-        MarketType::LinearSwap => {
-            let contract_value = LINEAR_CONTRACT_VALUE_MAP.get(symbol).unwrap();
-            let quantity = raw_trade.v * contract_value;
-            (quantity, raw_trade.p * quantity)
-        }
-        _ => panic!("Unknown market_type {}", market_type),
-    }
-}
-
 pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradeMsg>>(msg)?;
     let symbol = ws_msg.symbol.as_str();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
     let raw_trade = ws_msg.data;
 
-    let (quantity, volume) = calc_quantity_and_volume(market_type, symbol, &raw_trade);
+    let (quantity, volume) =
+        calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, raw_trade.p, raw_trade.v);
 
     let trade = TradeMsg {
         exchange: EXCHANGE_NAME.to_string(),

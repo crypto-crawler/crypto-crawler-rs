@@ -45,9 +45,24 @@ mod trade {
 
             assert_eq!(trade.side, TradeSide::Sell);
         }
-        assert!(approx_eq!(f64, trades[0].quantity, 1.265, ulps = 9));
-        assert!(approx_eq!(f64, trades[1].quantity, 0.025, ulps = 9));
-        assert!(approx_eq!(f64, trades[2].quantity, 0.181, ulps = 9));
+        assert!(approx_eq!(
+            f64,
+            trades[0].quantity,
+            1.265,
+            epsilon = 0.0000001
+        ));
+        assert!(approx_eq!(
+            f64,
+            trades[1].quantity,
+            0.025,
+            epsilon = 0.0000001
+        ));
+        assert!(approx_eq!(
+            f64,
+            trades[2].quantity,
+            0.181,
+            epsilon = 0.0000001
+        ));
     }
 }
 

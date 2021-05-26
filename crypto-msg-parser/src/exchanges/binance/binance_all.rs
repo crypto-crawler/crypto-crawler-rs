@@ -2,6 +2,7 @@ use crypto_market_type::MarketType;
 
 use crate::{FundingRateMsg, MessageType, TradeMsg, TradeSide};
 
+use super::super::utils::calc_quantity_and_volume;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
 use std::collections::HashMap;
@@ -50,26 +51,6 @@ struct WebsocketMsg<T: Sized> {
     data: T,
 }
 
-fn calc_quantity_and_volume(
-    market_type: MarketType,
-    pair: &str,
-    price: f64,
-    quantity: f64,
-) -> (f64, f64) {
-    if market_type == MarketType::InverseSwap || market_type == MarketType::InverseFuture {
-        let contract_value = if pair.starts_with("BTC/") {
-            100.0
-        } else {
-            10.0
-        };
-        let volume = quantity * contract_value;
-        let quantity = volume / price;
-        (quantity, volume)
-    } else {
-        (quantity, quantity * price)
-    }
-}
-
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let obj = serde_json::from_str::<HashMap<String, Value>>(&msg)?;
     let data = obj.get("data").unwrap();
@@ -96,8 +77,13 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 trade_id: agg_trade.a.to_string(),
                 raw: serde_json::from_str(msg)?,
             };
-            let (quantity, volume) =
-                calc_quantity_and_volume(market_type, &trade.pair, trade.price, trade.quantity);
+            let (quantity, volume) = calc_quantity_and_volume(
+                EXCHANGE_NAME,
+                market_type,
+                &trade.pair,
+                trade.price,
+                trade.quantity,
+            );
             trade.quantity = quantity;
             trade.volume = volume;
             Ok(vec![trade])
@@ -122,8 +108,13 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 trade_id: raw_trade.t.to_string(),
                 raw: serde_json::from_str(msg)?,
             };
-            let (quantity, volume) =
-                calc_quantity_and_volume(market_type, &trade.pair, trade.price, trade.quantity);
+            let (quantity, volume) = calc_quantity_and_volume(
+                EXCHANGE_NAME,
+                market_type,
+                &trade.pair,
+                trade.price,
+                trade.quantity,
+            );
             trade.quantity = quantity;
             trade.volume = volume;
             Ok(vec![trade])

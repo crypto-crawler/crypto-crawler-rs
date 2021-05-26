@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, TradeMsg, TradeSide};
+use crate::{exchanges::utils::calc_quantity_and_volume, MessageType, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
@@ -50,11 +50,13 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         .data
         .into_iter()
         .map(|raw_trade| {
-            let volume = if pair.starts_with("BTC/") {
-                raw_trade.amount * 100.0
-            } else {
-                raw_trade.amount * 10.0
-            };
+            let (quantity, volume) = calc_quantity_and_volume(
+                EXCHANGE_NAME,
+                market_type,
+                &pair,
+                raw_trade.price,
+                raw_trade.amount,
+            );
             TradeMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type,
@@ -63,7 +65,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 msg_type: MessageType::Trade,
                 timestamp: raw_trade.ts,
                 price: raw_trade.price,
-                quantity: raw_trade.quantity,
+                quantity,
                 volume,
                 side: if raw_trade.direction == "sell" {
                     TradeSide::Sell

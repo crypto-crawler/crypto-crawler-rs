@@ -3,6 +3,7 @@ mod utils;
 #[cfg(test)]
 mod trade {
     use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
+    use float_cmp::approx_eq;
 
     #[test]
     fn spot() {
@@ -34,7 +35,12 @@ mod trade {
         );
 
         assert_eq!(trade.volume, trade.price * trade.quantity);
-        assert_eq!(trade.quantity, 0.01 * 20.0);
+        assert!(approx_eq!(
+            f64,
+            trade.quantity,
+            0.01 * 20.0,
+            epsilon = 0.00000001
+        ));
         assert_eq!(trade.side, TradeSide::Buy);
     }
 
@@ -54,7 +60,12 @@ mod trade {
         );
 
         assert_eq!(trade.volume, trade.price * trade.quantity);
-        assert_eq!(trade.quantity, 0.01 * 3.0);
+        assert!(approx_eq!(
+            f64,
+            trade.quantity,
+            0.01 * 3.0,
+            epsilon = 0.000000001
+        ));
         assert_eq!(trade.side, TradeSide::Buy);
     }
 
@@ -109,7 +120,12 @@ mod trade {
         crate::utils::check_trade_fields("okex", MarketType::Option, "BTC/USD".to_string(), trade);
 
         assert_eq!(trade.volume, trade.price * trade.quantity);
-        assert_eq!(trade.quantity, 0.1 * 4.0);
+        assert!(approx_eq!(
+            f64,
+            trade.quantity,
+            0.1 * 4.0,
+            epsilon = 0.00000001
+        ));
         assert_eq!(trade.side, TradeSide::Buy);
 
         let raw_msg = r#"{"table":"option/trades","data":[{"instrument_id":"BTC-USD-210924-120000-C","trade_id":"22","price":"0.079","qty":"1","trade_side":"sell","timestamp":"2021-03-23T08:12:28.348Z"}]}"#;
@@ -121,7 +137,12 @@ mod trade {
         crate::utils::check_trade_fields("okex", MarketType::Option, "BTC/USD".to_string(), trade);
 
         assert_eq!(trade.volume, trade.price * trade.quantity);
-        assert_eq!(trade.quantity, 0.1 * 1.0);
+        assert!(approx_eq!(
+            f64,
+            trade.quantity,
+            0.1 * 1.0,
+            epsilon = 0.00000001
+        ));
         assert_eq!(trade.side, TradeSide::Sell);
     }
 }
