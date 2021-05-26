@@ -1,6 +1,7 @@
 [workspace]
 members = [
   "crypto-client",
+  "crypto-contract-value",
   "crypto-pair",
   "crypto-markets",
   "crypto-market-type",
