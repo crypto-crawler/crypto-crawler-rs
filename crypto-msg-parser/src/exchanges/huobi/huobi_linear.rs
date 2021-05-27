@@ -59,8 +59,9 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             msg_type: MessageType::Trade,
             timestamp: raw_trade.ts,
             price: raw_trade.price,
-            quantity: raw_trade.quantity,
-            volume: raw_trade.trade_turnover,
+            quantity_base: raw_trade.quantity,
+            quantity_quote: raw_trade.trade_turnover,
+            quantity_contract: Some(raw_trade.amount),
             side: if raw_trade.direction == "sell" {
                 TradeSide::Sell
             } else {

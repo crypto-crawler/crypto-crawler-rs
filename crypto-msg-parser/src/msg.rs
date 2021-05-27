@@ -90,16 +90,49 @@ pub struct TradeMsg {
     pub msg_type: MessageType,
     /// price
     pub price: f64,
-    /// quantity
-    pub quantity: f64,
-    /// total traded value in USD(T)
-    pub volume: f64,
+    // Number of base coins
+    pub quantity_base: f64,
+    // Number of quote coins(mostly USDT)
+    pub quantity_quote: f64,
+    /// Number of contracts, always None for Spot
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quantity_contract: Option<f64>,
     /// Which side is taker
     pub side: TradeSide,
     // Trade ID
     pub trade_id: String,
     /// Unix timestamp, in milliseconds
     pub timestamp: i64,
+    /// the original message
+    pub raw: Value,
+}
+
+/// price, quantity, volume
+pub type Order = [f64; 3];
+
+/// Level2 orderbook message.
+#[derive(Serialize, Deserialize)]
+pub struct OrderBookMsg {
+    /// The exchange name, unique for each exchage
+    pub exchange: String,
+    /// Market type
+    pub market_type: MarketType,
+    /// Exchange-specific trading symbol or id, recognized by RESTful API
+    pub symbol: String,
+    /// Unified pair, base/quote, e.g., BTC/USDT
+    pub pair: String,
+    /// Message type
+    pub msg_type: MessageType,
+    /// Unix timestamp, in milliseconds
+    pub timestamp: i64,
+
+    /// sorted from smallest to largest
+    pub asks: Vec<Order>,
+    /// sorted from largest to smallest
+    pub bids: Vec<Order>,
+    // true means snapshot, false means updates
+    pub snapshot: bool,
+
     /// the original message
     pub raw: Value,
 }
@@ -153,25 +186,6 @@ add_common_fields!(
         open_interest: Option<f64>,
         /// availale in Futures and Swap markets
         open_interest_quote: Option<f64>,
-    }
-);
-
-#[derive(Serialize, Deserialize)]
-pub struct OrderItem {
-    price: f64,
-    quantity: f64,
-    cost: f64,
-    timestamp: Option<i64>,
-}
-
-add_common_fields!(
-    #[derive(Serialize, Deserialize)]
-    struct OrderBookMsg {
-        /// sorted from smallest to largest
-        asks: Vec<OrderItem>,
-        /// sorted from largest to smallest
-        bids: Vec<OrderItem>,
-        full: bool,
     }
 );
 

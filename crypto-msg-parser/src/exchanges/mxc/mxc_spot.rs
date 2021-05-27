@@ -65,8 +65,9 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
                 msg_type: MessageType::Trade,
                 timestamp: raw_trade.t,
                 price,
-                quantity,
-                volume: price * quantity,
+                quantity_base: quantity,
+                quantity_quote: price * quantity,
+                quantity_contract: None,
                 side: if raw_trade.T == 2 {
                     TradeSide::Sell
                 } else {

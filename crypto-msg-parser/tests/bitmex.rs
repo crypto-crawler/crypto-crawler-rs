@@ -17,7 +17,9 @@ mod trade {
             trade,
         );
 
-        // assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.quantity_base, 0.015813);
+        assert_eq!(trade.quantity_quote, 900.0);
+        assert_eq!(trade.quantity_contract, Some(900.0));
         assert_eq!(trade.side, TradeSide::Sell);
     }
 
@@ -33,7 +35,14 @@ mod trade {
             trade,
         );
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.quantity_base, 0.058513750731421885);
+        assert!(approx_eq!(
+            f64,
+            trade.quantity_quote,
+            106.00351082504389,
+            ulps = 12
+        ));
+        assert_eq!(trade.quantity_contract, Some(1.0));
         assert_eq!(trade.side, TradeSide::Buy);
     }
 
@@ -49,7 +58,9 @@ mod trade {
             trade,
         );
 
-        // assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.quantity_base, 0.1276);
+        assert_eq!(trade.quantity_quote, 8000.0);
+        assert_eq!(trade.quantity_contract, Some(8000.0));
         assert_eq!(trade.side, TradeSide::Sell);
     }
 
@@ -65,7 +76,9 @@ mod trade {
             trade,
         );
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.quantity_base, 1.0);
+        assert_eq!(trade.quantity_quote, 0.03191);
+        assert_eq!(trade.quantity_contract, Some(1.0));
         assert_eq!(trade.side, TradeSide::Buy);
     }
 
@@ -81,11 +94,19 @@ mod trade {
             trade,
         );
 
+        assert_eq!(trade.quantity_base, 0.6814310051107325);
         assert!(approx_eq!(
             f64,
-            trade.volume,
-            trade.price * trade.quantity,
-            ulps = 9
+            trade.quantity_quote,
+            1289.8126064735945,
+            ulps = 12
+        ));
+        assert_eq!(trade.quantity_contract, Some(12.0));
+        assert!(approx_eq!(
+            f64,
+            trade.quantity_quote,
+            trade.price * trade.quantity_base,
+            ulps = 12
         ));
         assert_eq!(trade.side, TradeSide::Sell);
     }

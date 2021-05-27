@@ -59,16 +59,22 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     match event_type {
         "aggTrade" => {
             let agg_trade: AggTradeMsg = serde_json::from_value(data.clone()).unwrap();
-            let mut trade = TradeMsg {
+            let pair = crypto_pair::normalize_pair(&agg_trade.s, EXCHANGE_NAME).unwrap();
+            let price = agg_trade.p.parse::<f64>().unwrap();
+            let quantity = agg_trade.q.parse::<f64>().unwrap();
+            let (quantity_base, quantity_quote, quantity_contract) =
+                calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
+            let trade = TradeMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type,
                 symbol: agg_trade.s.clone(),
-                pair: crypto_pair::normalize_pair(&agg_trade.s, EXCHANGE_NAME).unwrap(),
+                pair,
                 msg_type: MessageType::Trade,
                 timestamp: agg_trade.T,
-                price: agg_trade.p.parse::<f64>().unwrap(),
-                quantity: agg_trade.q.parse::<f64>().unwrap(),
-                volume: 0.0,
+                price,
+                quantity_base,
+                quantity_quote,
+                quantity_contract,
                 side: if agg_trade.m {
                     TradeSide::Sell
                 } else {
@@ -77,29 +83,27 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 trade_id: agg_trade.a.to_string(),
                 raw: serde_json::from_str(msg)?,
             };
-            let (quantity, volume) = calc_quantity_and_volume(
-                EXCHANGE_NAME,
-                market_type,
-                &trade.pair,
-                trade.price,
-                trade.quantity,
-            );
-            trade.quantity = quantity;
-            trade.volume = volume;
+
             Ok(vec![trade])
         }
         "trade" => {
             let raw_trade: RawTradeMsg = serde_json::from_value(data.clone()).unwrap();
-            let mut trade = TradeMsg {
+            let pair = crypto_pair::normalize_pair(&raw_trade.s, EXCHANGE_NAME).unwrap();
+            let price = raw_trade.p.parse::<f64>().unwrap();
+            let quantity = raw_trade.q.parse::<f64>().unwrap();
+            let (quantity_base, quantity_quote, quantity_contract) =
+                calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
+            let trade = TradeMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type,
                 symbol: raw_trade.s.clone(),
-                pair: crypto_pair::normalize_pair(&raw_trade.s, EXCHANGE_NAME).unwrap(),
+                pair,
                 msg_type: MessageType::Trade,
                 timestamp: raw_trade.T,
-                price: raw_trade.p.parse::<f64>().unwrap(),
-                quantity: raw_trade.q.parse::<f64>().unwrap(),
-                volume: 0.0,
+                price,
+                quantity_base,
+                quantity_quote,
+                quantity_contract,
                 side: if raw_trade.m {
                     TradeSide::Sell
                 } else {
@@ -108,15 +112,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 trade_id: raw_trade.t.to_string(),
                 raw: serde_json::from_str(msg)?,
             };
-            let (quantity, volume) = calc_quantity_and_volume(
-                EXCHANGE_NAME,
-                market_type,
-                &trade.pair,
-                trade.price,
-                trade.quantity,
-            );
-            trade.quantity = quantity;
-            trade.volume = volume;
+
             Ok(vec![trade])
         }
         _ => panic!("Unsupported event type {}", event_type),

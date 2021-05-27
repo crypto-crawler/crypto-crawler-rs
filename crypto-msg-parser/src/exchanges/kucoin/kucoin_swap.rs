@@ -51,7 +51,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     let ws_msg = serde_json::from_str::<WebsocketMsg<ContractTradeMsg>>(msg)?;
     let raw_trade = ws_msg.data;
     let pair = crypto_pair::normalize_pair(&raw_trade.symbol, EXCHANGE_NAME).unwrap();
-    let (quantity, volume) = calc_quantity_and_volume(
+    let (quantity_base, quantity_quote, quantity_contract) = calc_quantity_and_volume(
         EXCHANGE_NAME,
         market_type,
         &pair,
@@ -67,8 +67,9 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         msg_type: MessageType::Trade,
         timestamp: raw_trade.ts / 1000000,
         price: raw_trade.price,
-        quantity,
-        volume,
+        quantity_base,
+        quantity_quote,
+        quantity_contract,
         side: if raw_trade.side == "sell" {
             TradeSide::Sell
         } else {

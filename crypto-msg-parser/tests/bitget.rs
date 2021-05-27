@@ -19,12 +19,20 @@ mod trade {
                 "BTC/USD".to_string(),
                 trade,
             );
-            assert_eq!(trade.volume, trade.price * trade.quantity);
             assert_eq!(trade.side, TradeSide::Sell);
         }
-        assert_eq!(trades[0].volume, 158.0);
-        assert_eq!(trades[1].volume, 450.0);
-        assert_eq!(trades[2].volume, 762.0);
+
+        assert_eq!(trades[0].quantity_base, 158.0 / 58722.0);
+        assert_eq!(trades[0].quantity_quote, 158.0);
+        assert_eq!(trades[0].quantity_contract, Some(158.0));
+
+        assert_eq!(trades[1].quantity_base, 450.0 / 58722.0);
+        assert_eq!(trades[1].quantity_quote, 450.0);
+        assert_eq!(trades[1].quantity_contract, Some(450.0));
+
+        assert_eq!(trades[2].quantity_base, 762.0 / 58722.0);
+        assert_eq!(trades[2].quantity_quote, 762.0);
+        assert_eq!(trades[2].quantity_contract, Some(762.0));
     }
 
     #[test]
@@ -41,26 +49,25 @@ mod trade {
                 "BTC/USDT".to_string(),
                 trade,
             );
-            assert_eq!(trade.volume, trade.price * trade.quantity);
 
             assert_eq!(trade.side, TradeSide::Sell);
         }
         assert!(approx_eq!(
             f64,
-            trades[0].quantity,
-            1.265,
+            trades[0].quantity_base,
+            1265.0 * 0.001,
             epsilon = 0.0000001
         ));
         assert!(approx_eq!(
             f64,
-            trades[1].quantity,
-            0.025,
+            trades[1].quantity_base,
+            25.0 * 0.001,
             epsilon = 0.0000001
         ));
         assert!(approx_eq!(
             f64,
-            trades[2].quantity,
-            0.181,
+            trades[2].quantity_base,
+            181.0 * 0.001,
             epsilon = 0.0000001
         ));
     }

@@ -35,7 +35,7 @@ pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
     let raw_trade = ws_msg.data;
 
-    let (quantity, volume) =
+    let (quantity_base, quantity_quote, _) =
         calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, raw_trade.p, raw_trade.v);
 
     let trade = TradeMsg {
@@ -46,8 +46,9 @@ pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         msg_type: MessageType::Trade,
         timestamp: raw_trade.t,
         price: raw_trade.p,
-        quantity,
-        volume,
+        quantity_base,
+        quantity_quote,
+        quantity_contract: Some(raw_trade.v),
         side: if raw_trade.T == 2 {
             TradeSide::Sell
         } else {

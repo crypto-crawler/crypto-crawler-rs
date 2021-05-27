@@ -14,7 +14,7 @@ mod trade {
 
         crate::utils::check_trade_fields("zbg", MarketType::Spot, "BTC/USDT".to_string(), trade);
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.quantity_base, 0.048800);
         assert_eq!(trade.side, TradeSide::Buy);
 
         let raw_msg = r#"["T","329","1616486457","BTC_USDT","ask","54139.4","0.654172"]"#;
@@ -25,7 +25,7 @@ mod trade {
 
         crate::utils::check_trade_fields("zbg", MarketType::Spot, "BTC/USDT".to_string(), trade);
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.quantity_base, 0.654172);
         assert_eq!(trade.side, TradeSide::Sell);
     }
 
@@ -45,8 +45,9 @@ mod trade {
             trade,
         );
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
-        assert_eq!(trade.quantity, 0.01 * 31.0);
+        assert_eq!(trade.quantity_base, 0.01 * 31.0);
+        assert_eq!(trade.quantity_quote, 0.01 * 31.0 * 57326.0);
+        assert_eq!(trade.quantity_contract, Some(31.0));
         assert_eq!(trade.side, TradeSide::Sell);
     }
 
@@ -65,8 +66,9 @@ mod trade {
             trade,
         );
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
-        assert_eq!(trade.volume, 188.0);
+        assert_eq!(trade.quantity_base, 188.0 / 57370.0);
+        assert_eq!(trade.quantity_quote, 188.0);
+        assert_eq!(trade.quantity_contract, Some(188.0));
         assert_eq!(trade.side, TradeSide::Sell);
     }
 }

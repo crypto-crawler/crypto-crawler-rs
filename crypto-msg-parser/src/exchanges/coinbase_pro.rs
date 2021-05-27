@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, TradeMsg, TradeSide};
+use crate::{MessageType, OrderBookMsg, TradeMsg, TradeSide};
 
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
@@ -41,8 +41,9 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         msg_type: MessageType::Trade,
         timestamp: timestamp.timestamp_millis(),
         price,
-        quantity,
-        volume: price * quantity,
+        quantity_base: quantity,
+        quantity_quote: price * quantity,
+        quantity_contract: None,
         side: if raw_trade.side == "sell" {
             TradeSide::Sell
         } else {
@@ -53,4 +54,8 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     };
 
     Ok(vec![trade])
+}
+
+pub(crate) fn parse_l2(_market_type: MarketType, _msg: &str) -> Result<Vec<OrderBookMsg>> {
+    Ok(Vec::new())
 }

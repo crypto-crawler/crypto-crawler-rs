@@ -17,7 +17,6 @@ fn spot() {
             trade,
         );
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
         assert_eq!(trade.side, TradeSide::Sell);
     }
 
@@ -29,6 +28,6 @@ fn spot() {
 
     crate::utils::check_trade_fields("bithumb", MarketType::Spot, "ETH/USDT".to_string(), trade);
 
-    assert_eq!(trade.volume, trade.price * trade.quantity);
+    assert_eq!(trade.quantity_base, 0.065614);
     assert_eq!(trade.side, TradeSide::Buy);
 }

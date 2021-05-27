@@ -15,8 +15,10 @@ mod trade {
 
         crate::utils::check_trade_fields("gate", MarketType::Spot, "BTC/USDT".to_string(), trade);
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
-        assert_eq!(trade.side, TradeSide::Sell);
+        assert_eq!(trades[0].quantity_base, 0.0037);
+        assert_eq!(trades[0].quantity_quote, 0.0037 * 56173.28);
+        assert_eq!(trades[0].quantity_contract, None);
+        assert_eq!(trades[0].side, TradeSide::Sell);
     }
 
     #[test]
@@ -34,13 +36,19 @@ mod trade {
             trade,
         );
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
         assert!(approx_eq!(
             f64,
-            trade.quantity,
-            0.0019,
+            trade.quantity_base,
+            19.0 * 0.0001,
             epsilon = 0.0000000001
         ));
+        assert!(approx_eq!(
+            f64,
+            trade.quantity_quote,
+            0.0019 * 53560.5,
+            epsilon = 0.0001
+        ));
+        assert_eq!(trade.quantity_contract, Some(19.0));
         assert_eq!(trade.side, TradeSide::Sell);
     }
 
@@ -59,8 +67,9 @@ mod trade {
             trade,
         );
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
-        assert_eq!(trade.volume, 7.0);
+        assert_eq!(trade.quantity_base, 7.0 / 56155.2);
+        assert_eq!(trade.quantity_quote, 7.0);
+        assert_eq!(trade.quantity_contract, Some(7.0));
         assert_eq!(trade.side, TradeSide::Buy);
     }
 
@@ -79,13 +88,19 @@ mod trade {
             trade,
         );
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
         assert!(approx_eq!(
             f64,
-            trade.quantity,
-            0.005,
-            epsilon = 0.000000001
+            trade.quantity_base,
+            0.0001 * 50.0,
+            epsilon = 0.00000001
         ));
+        assert!(approx_eq!(
+            f64,
+            trade.quantity_quote,
+            0.005 * 56233.3,
+            epsilon = 0.00001
+        ));
+        assert_eq!(trade.quantity_contract, Some(50.0));
         assert_eq!(trade.side, TradeSide::Buy);
     }
 }

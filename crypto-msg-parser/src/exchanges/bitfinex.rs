@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, TradeMsg, TradeSide};
+use crate::{MessageType, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde_json::{Result, Value};
 
@@ -21,8 +21,13 @@ fn parse_one_trade(market_type: MarketType, symbol: &str, nums: &[f64]) -> Trade
         msg_type: MessageType::Trade,
         timestamp,
         price,
-        quantity: f64::abs(quantity),
-        volume: price * f64::abs(quantity),
+        quantity_base: f64::abs(quantity),
+        quantity_quote: price * f64::abs(quantity),
+        quantity_contract: if market_type == MarketType::Spot {
+            None
+        } else {
+            Some(f64::abs(quantity))
+        },
         side: if quantity < 0.0 {
             TradeSide::Sell
         } else {
@@ -64,4 +69,8 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             Ok(trades)
         }
     }
+}
+
+pub(crate) fn parse_l2(_market_type: MarketType, _msg: &str) -> Result<Vec<OrderBookMsg>> {
+    Ok(Vec::new())
 }

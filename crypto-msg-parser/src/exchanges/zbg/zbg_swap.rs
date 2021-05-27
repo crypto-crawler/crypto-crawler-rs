@@ -146,7 +146,7 @@ pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         TradeSide::Buy
     };
 
-    let (quantity, volume) =
+    let (quantity_base, quantity_quote) =
         calc_quantity_and_volume(market_type, contract_info.contract_id, price, size);
 
     let trade = TradeMsg {
@@ -157,8 +157,9 @@ pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         msg_type: MessageType::Trade,
         timestamp: timestamp / 1000,
         price,
-        quantity,
-        volume,
+        quantity_base,
+        quantity_quote,
+        quantity_contract: Some(size),
         side,
         trade_id: timestamp.to_string(),
         raw: serde_json::to_value(&raw_trade).unwrap(),

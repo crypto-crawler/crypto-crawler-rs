@@ -5,7 +5,7 @@ mod huobi_spot;
 
 use crypto_market_type::MarketType;
 
-use crate::{FundingRateMsg, TradeMsg};
+use crate::{FundingRateMsg, OrderBookMsg, TradeMsg};
 
 use serde_json::Result;
 
@@ -31,4 +31,8 @@ pub(crate) fn parse_funding_rate(
     } else {
         panic!("Huobi {} does NOT have funding rates", market_type);
     }
+}
+
+pub(crate) fn parse_l2(_market_type: MarketType, _msg: &str) -> Result<Vec<OrderBookMsg>> {
+    Ok(Vec::new())
 }

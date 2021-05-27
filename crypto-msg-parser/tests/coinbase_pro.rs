@@ -14,6 +14,6 @@ fn trade() {
         trade,
     );
 
-    assert_eq!(trade.volume, trade.price * trade.quantity);
+    assert_eq!(trade.quantity_base, 0.00031874);
     assert_eq!(trade.side, TradeSide::Sell);
 }

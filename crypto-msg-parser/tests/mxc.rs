@@ -15,7 +15,7 @@ mod trade {
 
         crate::utils::check_trade_fields("mxc", MarketType::Spot, "BTC/USDT".to_string(), trade);
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.quantity_base, 0.007811);
         assert_eq!(trade.side, TradeSide::Buy);
     }
 
@@ -34,13 +34,19 @@ mod trade {
             trade,
         );
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
         assert!(approx_eq!(
             f64,
-            trade.quantity,
+            trade.quantity_base,
             0.0001 * 14.0,
             epsilon = 0.0000000001
         ));
+        assert!(approx_eq!(
+            f64,
+            trade.quantity_quote,
+            0.0001 * 14.0 * 57602.0,
+            epsilon = 0.001
+        ));
+        assert_eq!(trade.quantity_contract, Some(14.0));
         assert_eq!(trade.side, TradeSide::Sell);
     }
 
@@ -59,8 +65,14 @@ mod trade {
             trade,
         );
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
-        assert_eq!(trade.volume, 79.0 * 100.0);
+        assert!(approx_eq!(
+            f64,
+            trade.quantity_base,
+            79.0 * 100.0 / 57476.5,
+            epsilon = 0.0000000001
+        ));
+        assert_eq!(trade.quantity_quote, 79.0 * 100.0);
+        assert_eq!(trade.quantity_contract, Some(79.0));
         assert_eq!(trade.side, TradeSide::Buy);
     }
 }

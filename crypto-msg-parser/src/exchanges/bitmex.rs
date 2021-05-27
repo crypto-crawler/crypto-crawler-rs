@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use crate::{FundingRateMsg, MessageType, TradeMsg, TradeSide};
+use crate::{FundingRateMsg, MessageType, OrderBookMsg, TradeMsg, TradeSide};
 
 use chrono::prelude::*;
 use chrono::DateTime;
@@ -64,8 +64,9 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 msg_type: MessageType::Trade,
                 timestamp: timestamp.timestamp_millis(),
                 price: raw_trade.price,
-                quantity: raw_trade.homeNotional,
-                volume: raw_trade.foreignNotional,
+                quantity_base: raw_trade.homeNotional,
+                quantity_quote: raw_trade.foreignNotional,
+                quantity_contract: Some(raw_trade.size),
                 side: if raw_trade.side == "Sell" {
                     TradeSide::Sell
                 } else {
@@ -107,4 +108,8 @@ pub(crate) fn parse_funding_rate(
         .collect();
 
     Ok(rates)
+}
+
+pub(crate) fn parse_l2(_market_type: MarketType, _msg: &str) -> Result<Vec<OrderBookMsg>> {
+    Ok(Vec::new())
 }

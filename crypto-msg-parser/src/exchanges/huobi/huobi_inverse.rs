@@ -50,7 +50,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         .data
         .into_iter()
         .map(|raw_trade| {
-            let (quantity, volume) = calc_quantity_and_volume(
+            let (_, quantity_quote, _) = calc_quantity_and_volume(
                 EXCHANGE_NAME,
                 market_type,
                 &pair,
@@ -65,8 +65,9 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 msg_type: MessageType::Trade,
                 timestamp: raw_trade.ts,
                 price: raw_trade.price,
-                quantity,
-                volume,
+                quantity_base: raw_trade.quantity,
+                quantity_quote,
+                quantity_contract: Some(raw_trade.amount),
                 side: if raw_trade.direction == "sell" {
                     TradeSide::Sell
                 } else {

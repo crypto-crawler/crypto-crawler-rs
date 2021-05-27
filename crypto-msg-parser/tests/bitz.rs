@@ -11,10 +11,11 @@ fn trade() {
 
     for trade in trades.iter() {
         crate::utils::check_trade_fields("bitz", MarketType::Spot, "BTC/USDT".to_string(), trade);
-
-        assert_eq!(trade.volume, trade.price * trade.quantity);
     }
 
     assert_eq!(trades[0].side, TradeSide::Sell);
+    assert_eq!(trades[0].quantity_base, 0.1310);
+
     assert_eq!(trades[1].side, TradeSide::Buy);
+    assert_eq!(trades[1].quantity_base, 0.1144);
 }

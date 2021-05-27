@@ -9,6 +9,6 @@ fn trade() {
 
     crate::utils::check_trade_fields("bitstamp", MarketType::Spot, "BTC/USD".to_string(), trade);
 
-    assert_eq!(trade.volume, trade.price * trade.quantity);
+    assert_eq!(trade.quantity_base, 1e-08);
     assert_eq!(trade.side, TradeSide::Buy);
 }

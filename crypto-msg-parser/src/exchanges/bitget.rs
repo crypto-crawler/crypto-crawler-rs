@@ -10,7 +10,6 @@ use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "bitget";
 
-
 // see https://bitgetlimited.github.io/apidoc/en/swap/#public-trading-channel
 #[derive(Serialize, Deserialize)]
 struct SwapTradeMsg {
@@ -35,10 +34,11 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         .data
         .into_iter()
         .map(|raw_trade| {
-            let pair = crypto_pair::normalize_pair(&raw_trade.instrument_id, EXCHANGE_NAME).unwrap();
+            let pair =
+                crypto_pair::normalize_pair(&raw_trade.instrument_id, EXCHANGE_NAME).unwrap();
             let price = raw_trade.price.parse::<f64>().unwrap();
             let size = raw_trade.size.parse::<f64>().unwrap();
-            let (quantity, volume) =
+            let (quantity_base, quantity_quote, quantity_contract) =
                 calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, size);
 
             TradeMsg {
@@ -49,8 +49,9 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 msg_type: MessageType::Trade,
                 timestamp: raw_trade.timestamp.parse::<i64>().unwrap(),
                 price,
-                quantity,
-                volume,
+                quantity_base,
+                quantity_quote,
+                quantity_contract,
                 side: if raw_trade.side == "sell" {
                     TradeSide::Sell
                 } else {
@@ -102,6 +103,6 @@ pub(crate) fn parse_funding_rate(
     Ok(rates)
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+pub(crate) fn parse_l2(_market_type: MarketType, _msg: &str) -> Result<Vec<OrderBookMsg>> {
     Ok(Vec::new())
 }

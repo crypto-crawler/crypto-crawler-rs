@@ -15,7 +15,8 @@ mod trade {
 
         crate::utils::check_trade_fields("okex", MarketType::Spot, "BTC/USDT".to_string(), trade);
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.quantity_base, 0.00020621);
+        assert_eq!(trade.quantity_contract, None);
         assert_eq!(trade.side, TradeSide::Sell);
     }
 
@@ -34,13 +35,19 @@ mod trade {
             trade,
         );
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
         assert!(approx_eq!(
             f64,
-            trade.quantity,
-            0.01 * 20.0,
+            trade.quantity_base,
+            20.0 * 0.01,
             epsilon = 0.00000001
         ));
+        assert!(approx_eq!(
+            f64,
+            trade.quantity_quote,
+            20.0 * 0.01 * 60059.7,
+            epsilon = 0.001
+        ));
+        assert_eq!(trade.quantity_contract, Some(20.0));
         assert_eq!(trade.side, TradeSide::Buy);
     }
 
@@ -59,13 +66,19 @@ mod trade {
             trade,
         );
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
         assert!(approx_eq!(
             f64,
-            trade.quantity,
+            trade.quantity_base,
             0.01 * 3.0,
             epsilon = 0.000000001
         ));
+        assert!(approx_eq!(
+            f64,
+            trade.quantity_quote,
+            0.01 * 3.0 * 56480.1,
+            epsilon = 0.0001
+        ));
+        assert_eq!(trade.quantity_contract, Some(3.0));
         assert_eq!(trade.side, TradeSide::Buy);
     }
 
@@ -84,8 +97,9 @@ mod trade {
             trade,
         );
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
-        assert_eq!(trade.volume, 100.0 * 7.0);
+        assert_eq!(trade.quantity_base, 100.0 * 7.0 / 59999.7);
+        assert_eq!(trade.quantity_quote, 100.0 * 7.0);
+        assert_eq!(trade.quantity_contract, Some(7.0));
         assert_eq!(trade.side, TradeSide::Sell);
     }
 
@@ -104,8 +118,9 @@ mod trade {
             trade,
         );
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
-        assert_eq!(trade.volume, 100.0 * 1.0);
+        assert_eq!(trade.quantity_base, 100.0 * 1.0 / 56535.9);
+        assert_eq!(trade.quantity_quote, 100.0 * 1.0);
+        assert_eq!(trade.quantity_contract, Some(1.0));
         assert_eq!(trade.side, TradeSide::Sell);
     }
 
@@ -119,13 +134,19 @@ mod trade {
 
         crate::utils::check_trade_fields("okex", MarketType::Option, "BTC/USD".to_string(), trade);
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
         assert!(approx_eq!(
             f64,
-            trade.quantity,
+            trade.quantity_base,
+            0.1 * 4.0 / 0.1545,
+            epsilon = 0.0000001
+        ));
+        assert!(approx_eq!(
+            f64,
+            trade.quantity_quote,
             0.1 * 4.0,
             epsilon = 0.00000001
         ));
+        assert_eq!(trade.quantity_contract, Some(4.0));
         assert_eq!(trade.side, TradeSide::Buy);
 
         let raw_msg = r#"{"table":"option/trades","data":[{"instrument_id":"BTC-USD-210924-120000-C","trade_id":"22","price":"0.079","qty":"1","trade_side":"sell","timestamp":"2021-03-23T08:12:28.348Z"}]}"#;
@@ -136,13 +157,19 @@ mod trade {
 
         crate::utils::check_trade_fields("okex", MarketType::Option, "BTC/USD".to_string(), trade);
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
         assert!(approx_eq!(
             f64,
-            trade.quantity,
+            trade.quantity_base,
+            0.1 * 1.0 / 0.079,
+            epsilon = 0.0000001
+        ));
+        assert!(approx_eq!(
+            f64,
+            trade.quantity_quote,
             0.1 * 1.0,
             epsilon = 0.00000001
         ));
+        assert_eq!(trade.quantity_contract, Some(1.0));
         assert_eq!(trade.side, TradeSide::Sell);
     }
 }

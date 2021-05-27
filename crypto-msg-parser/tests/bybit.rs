@@ -6,7 +6,7 @@ mod trade {
 
     #[test]
     fn inverse_future() {
-        let raw_msg = r#"{"topic":"trade.BTCUSDM21","data":[{"trade_time_ms":1616304614117,"timestamp":"2021-03-21T05:30:14.000Z","symbol":"BTCUSDM21","side":"Buy","size":100,"price":61094.5,"tick_direction":"ZeroPlusTick","trade_id":"e61fb2dc-a658-5a7d-88fb-d166a4bd29b8","cross_seq":233452601},{"trade_time_ms":1616304614117,"timestamp":"2021-03-21T05:30:14.000Z","symbol":"BTCUSDM21","side":"Buy","size":100,"price":61094.5,"tick_direction":"ZeroPlusTick","trade_id":"2cbeff0d-16da-5946-a7b0-0ccfb78d3ab5","cross_seq":233452601}]}"#;
+        let raw_msg = r#"{"topic":"trade.BTCUSDM21","data":[{"trade_time_ms":1616304614117,"timestamp":"2021-03-21T05:30:14.000Z","symbol":"BTCUSDM21","side":"Buy","size":100,"price":61094.5,"tick_direction":"ZeroPlusTick","trade_id":"e61fb2dc-a658-5a7d-88fb-d166a4bd29b8","cross_seq":233452601},{"trade_time_ms":1616304614117,"timestamp":"2021-03-21T05:30:14.000Z","symbol":"BTCUSDM21","side":"Sell","size":300,"price":61097.5,"tick_direction":"ZeroPlusTick","trade_id":"2cbeff0d-16da-5946-a7b0-0ccfb78d3ab5","cross_seq":233452601}]}"#;
         let trades = &parse_trade("bybit", MarketType::InverseFuture, raw_msg).unwrap();
 
         assert_eq!(trades.len(), 2);
@@ -18,11 +18,17 @@ mod trade {
                 "BTC/USD".to_string(),
                 trade,
             );
-
-            assert_eq!(trade.volume, 100.0); // volume == size
-            assert_eq!(trade.volume, trade.price * trade.quantity);
-            assert_eq!(trade.side, TradeSide::Buy);
         }
+
+        assert_eq!(trades[0].quantity_base, 100.0 / 61094.5);
+        assert_eq!(trades[0].quantity_quote, 100.0);
+        assert_eq!(trades[0].quantity_contract, Some(100.0));
+        assert_eq!(trades[0].side, TradeSide::Buy);
+
+        assert_eq!(trades[1].quantity_base, 300.0 / 61097.5);
+        assert_eq!(trades[1].quantity_quote, 300.0);
+        assert_eq!(trades[1].quantity_contract, Some(300.0));
+        assert_eq!(trades[1].side, TradeSide::Sell);
     }
 
     #[test]
@@ -41,8 +47,9 @@ mod trade {
             trade,
         );
 
-        assert_eq!(trade.volume, 237.0); // volume == size
-        assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.quantity_base, 237.0 / 57073.5);
+        assert_eq!(trade.quantity_quote, 237.0);
+        assert_eq!(trade.quantity_contract, Some(237.0));
         assert_eq!(trade.side, TradeSide::Buy);
     }
 
@@ -62,7 +69,9 @@ mod trade {
             trade,
         );
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.quantity_base, 0.04);
+        assert_eq!(trade.quantity_quote, 0.04 * 57170.0);
+        assert_eq!(trade.quantity_contract, Some(0.04));
         assert_eq!(trade.side, TradeSide::Buy);
     }
 }

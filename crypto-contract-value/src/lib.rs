@@ -9,6 +9,7 @@ pub fn get_contract_value(exchange: &str, market_type: MarketType, pair: &str) -
 
     match exchange {
         "binance" => exchanges::binance::get_contract_value(market_type, pair),
+        "bitfinex" => exchanges::bitfinex::get_contract_value(market_type, pair),
         "bitget" => exchanges::bitget::get_contract_value(market_type, pair),
         "bitmex" => exchanges::bitmex::get_contract_value(market_type, pair),
         "bybit" => exchanges::bybit::get_contract_value(market_type, pair),

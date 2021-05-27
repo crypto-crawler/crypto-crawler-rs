@@ -10,6 +10,6 @@ fn trade() {
 
     crate::utils::check_trade_fields("kraken", MarketType::Spot, "BTC/USD".to_string(), trade);
 
-    assert_eq!(trade.volume, trade.price * trade.quantity);
+    assert_eq!(trade.quantity_base, 0.02063928);
     assert_eq!(trade.side, TradeSide::Buy);
 }

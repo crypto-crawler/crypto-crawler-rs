@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, TradeMsg, TradeSide};
+use crate::{MessageType, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
@@ -60,11 +60,12 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                     msg_type: MessageType::Trade,
                     timestamp: raw_trade.trade_time_ms,
                     price: raw_trade.price,
-                    quantity: raw_trade.size / raw_trade.price,
+                    quantity_base: raw_trade.size / raw_trade.price,
                     // Each inverse contract value is 1 USD, see:
                     // https://www.bybit.com/data/basic/inverse/contract-detail?symbol=BTCUSD
                     // https://www.bybit.com/data/basic/future-inverse/contract-detail?symbol=BTCUSD0625
-                    volume: raw_trade.size,
+                    quantity_quote: raw_trade.size,
+                    quantity_contract: Some(raw_trade.size),
                     side: if raw_trade.side == "Sell" {
                         TradeSide::Sell
                     } else {
@@ -94,8 +95,11 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                         msg_type: MessageType::Trade,
                         timestamp: raw_trade.trade_time_ms.parse::<i64>().unwrap(),
                         price,
-                        quantity: raw_trade.size,
-                        volume: price * raw_trade.size,
+                        // Each linear contract value is 1 coin, see:
+                        // https://www.bybit.com/data/basic/linear/contract-detail?symbol=BTCUSDT
+                        quantity_base: raw_trade.size,
+                        quantity_quote: price * raw_trade.size,
+                        quantity_contract: Some(raw_trade.size),
                         side: if raw_trade.side == "Sell" {
                             TradeSide::Sell
                         } else {
@@ -111,4 +115,8 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         }
         _ => panic!("Unknown market_type {}", market_type),
     }
+}
+
+pub(crate) fn parse_l2(_market_type: MarketType, _msg: &str) -> Result<Vec<OrderBookMsg>> {
+    Ok(Vec::new())
 }

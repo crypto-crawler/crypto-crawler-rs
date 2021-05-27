@@ -71,7 +71,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             };
             let pair =
                 crypto_pair::normalize_pair(&raw_trade.instrument_id, EXCHANGE_NAME).unwrap();
-            let (quantity, volume) =
+            let (quantity_base, quantity_quote, _) =
                 calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, size);
 
             TradeMsg {
@@ -82,8 +82,13 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 msg_type: MessageType::Trade,
                 timestamp: timestamp.timestamp_millis(),
                 price,
-                quantity,
-                volume,
+                quantity_base,
+                quantity_quote,
+                quantity_contract: if market_type == MarketType::Spot {
+                    None
+                } else {
+                    Some(size)
+                },
                 side: if side.as_str() == "sell" {
                     TradeSide::Sell
                 } else {
@@ -127,6 +132,6 @@ pub(crate) fn parse_funding_rate(
     Ok(rates)
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+pub(crate) fn parse_l2(_market_type: MarketType, _msg: &str) -> Result<Vec<OrderBookMsg>> {
     Ok(Vec::new())
 }

@@ -12,7 +12,7 @@ mod trade {
 
         crate::utils::check_trade_fields("huobi", MarketType::Spot, "BTC/USDT".to_string(), trade);
 
-        assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.quantity_base, 1.98E-4);
         assert_eq!(trade.side, TradeSide::Sell);
     }
 
@@ -26,8 +26,9 @@ mod trade {
             "BTC/USD".to_string(),
             trade,
         );
-        assert_eq!(trade.volume, 200.0);
-        assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.quantity_base, 200.0 / 62774.97);
+        assert_eq!(trade.quantity_quote, 200.0);
+        assert_eq!(trade.quantity_contract, Some(2.0));
         assert_eq!(trade.side, TradeSide::Buy);
 
         let raw_msg = r#"{"ch":"market.ETH_CQ.trade.detail","ts":1616269629976,"tick":{"id":128632765054,"ts":1616269629958,"data":[{"amount":2,"quantity":0.0100143605930904917651912843016886215,"ts":1616269629958,"id":1286327650540000,"price":1997.132,"direction":"sell"}]}}"#;
@@ -38,8 +39,9 @@ mod trade {
             "ETH/USD".to_string(),
             trade,
         );
-        assert_eq!(trade.volume, 20.0);
-        assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.quantity_base, 20.0 / 1997.132);
+        assert_eq!(trade.quantity_quote, 20.0);
+        assert_eq!(trade.quantity_contract, Some(2.0));
         assert_eq!(trade.side, TradeSide::Sell);
     }
 
@@ -53,8 +55,9 @@ mod trade {
             "BTC/USD".to_string(),
             trade,
         );
-        assert_eq!(trade.volume, 600.0);
-        assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.quantity_base, 600.0 / 58666.3);
+        assert_eq!(trade.quantity_quote, 600.0);
+        assert_eq!(trade.quantity_contract, Some(6.0));
         assert_eq!(trade.side, TradeSide::Buy);
 
         let raw_msg = r#"{"ch":"market.ETH-USD.trade.detail","ts":1616269812566,"tick":{"id":79855942906,"ts":1616269812548,"data":[{"amount":346,"quantity":1.871099622535394066559231659438237489,"ts":1616269812548,"id":798559429060000,"price":1849.18,"direction":"sell"}]}}"#;
@@ -65,8 +68,9 @@ mod trade {
             "ETH/USD".to_string(),
             trade,
         );
-        assert_eq!(trade.volume, 3460.0); // volume == trade_turnover
-        assert_eq!(trade.volume, trade.price * trade.quantity);
+        assert_eq!(trade.quantity_base, 3460.0 / 1849.18);
+        assert_eq!(trade.quantity_quote, 3460.0);
+        assert_eq!(trade.quantity_contract, Some(346.0));
         assert_eq!(trade.side, TradeSide::Sell);
     }
 
@@ -80,13 +84,9 @@ mod trade {
             "BTC/USDT".to_string(),
             trade,
         );
-        assert_eq!(trade.volume, 2350.796); // volume == trade_turnover
-        assert!(approx_eq!(
-            f64,
-            trade.volume,
-            trade.price * trade.quantity,
-            ulps = 9
-        ));
+        assert_eq!(trade.quantity_base, 0.04);
+        assert_eq!(trade.quantity_quote, 2350.796);
+        assert_eq!(trade.quantity_contract, Some(40.0));
         assert_eq!(trade.side, TradeSide::Sell);
 
         let raw_msg = r#"{"ch":"market.ETH-USDT.trade.detail","ts":1616270565862,"tick":{"id":19056652696,"ts":1616270565838,"data":[{"amount":18,"quantity":0.18,"trade_turnover":332.487,"ts":1616270565838,"id":190566526960000,"price":1847.15,"direction":"sell"}]}}"#;
@@ -97,13 +97,9 @@ mod trade {
             "ETH/USDT".to_string(),
             trade,
         );
-        assert_eq!(trade.volume, 332.487);
-        assert!(approx_eq!(
-            f64,
-            trade.volume,
-            trade.price * trade.quantity,
-            ulps = 9
-        ));
+        assert_eq!(trade.quantity_base, 0.18);
+        assert_eq!(trade.quantity_quote, 332.487);
+        assert_eq!(trade.quantity_contract, Some(18.0));
         assert_eq!(trade.side, TradeSide::Sell);
     }
 
@@ -120,12 +116,17 @@ mod trade {
                 "BTC/USDT".to_string(),
                 trade,
             );
-            assert_eq!(trade.volume, trade.price * trade.quantity);
-            assert_eq!(trade.side, TradeSide::Buy);
         }
 
-        assert_eq!(trades[0].volume, 971.69976); // volume == trade_turnover
-        assert_eq!(trades[1].volume, 1134.0); // volume == trade_turnover
+        assert_eq!(trades[0].quantity_base, 0.036);
+        assert_eq!(trades[0].quantity_quote, 971.69976);
+        assert_eq!(trades[0].quantity_contract, Some(36.0));
+        assert_eq!(trades[0].side, TradeSide::Buy);
+
+        assert_eq!(trades[1].quantity_base, 0.042);
+        assert_eq!(trades[1].quantity_quote, 1134.0);
+        assert_eq!(trades[1].quantity_contract, Some(42.0));
+        assert_eq!(trades[1].side, TradeSide::Buy);
     }
 }
 

@@ -50,18 +50,20 @@ pub(crate) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
         .t
         .into_iter()
         .map(|trade| {
+            let pair = crypto_pair::normalize_pair(&trade.S, EXCHANGE_NAME).unwrap();
             let price = trade.p.parse::<f64>().unwrap();
             let quantity = trade.q.parse::<f64>().unwrap();
             TradeMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type: MarketType::Option,
                 symbol: trade.S.clone(),
-                pair: crypto_pair::normalize_pair(&trade.S, EXCHANGE_NAME).unwrap(),
+                pair,
                 msg_type: MessageType::Trade,
                 timestamp: trade.T,
                 price,
-                quantity,
-                volume: price * quantity,
+                quantity_base: quantity,
+                quantity_quote: price * quantity,
+                quantity_contract: Some(quantity),
                 side: if trade.s == "1" {
                     // TODO: find out the meaning of the field s
                     TradeSide::Sell

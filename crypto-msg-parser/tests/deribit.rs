@@ -18,12 +18,12 @@ mod trade {
                 "BTC/USD".to_string(),
                 trade,
             );
-
-            assert_eq!(trade.volume, trade.price * trade.quantity);
-            assert_eq!(trade.side, TradeSide::Buy);
         }
 
-        assert_eq!(trades[0].volume, 6000.0); // volume == amount
+        assert_eq!(trades[0].quantity_base, 6000.0 / 56273.5);
+        assert_eq!(trades[0].quantity_quote, 6000.0);
+        assert_eq!(trades[0].quantity_contract, Some(6000.0));
+        assert_eq!(trades[0].side, TradeSide::Buy);
     }
 
     #[test]
@@ -41,12 +41,11 @@ mod trade {
                 trade,
             );
 
-            assert_eq!(trade.volume, trade.price * trade.quantity);
             assert_eq!(trade.side, TradeSide::Buy);
         }
         // volume == amount
-        assert_eq!(trades[0].volume, 5580.0);
-        assert_eq!(trades[1].volume, 60.0);
+        assert_eq!(trades[0].quantity_quote, 5580.0);
+        assert_eq!(trades[1].quantity_quote, 60.0);
     }
 
     #[test]
@@ -64,8 +63,11 @@ mod trade {
                 trade,
             );
 
-            assert_eq!(trade.volume, trade.price * trade.quantity);
             assert_eq!(trade.side, TradeSide::Buy);
         }
+
+        assert_eq!(trades[0].quantity_base, 0.1);
+        assert_eq!(trades[0].quantity_quote, 0.007 * 0.1);
+        assert_eq!(trades[0].quantity_contract, Some(0.1));
     }
 }

@@ -32,6 +32,31 @@ pub fn parse_trade(exchange: &str, market_type: MarketType, msg: &str) -> Result
     }
 }
 
+/// Parse level2 orderbook messages.
+pub fn parse_l2(exchange: &str, market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+    match exchange {
+        "binance" => exchanges::binance::parse_l2(market_type, msg),
+        "bitfinex" => exchanges::bitfinex::parse_l2(market_type, msg),
+        "bitget" => exchanges::bitget::parse_l2(market_type, msg),
+        "bithumb" => exchanges::bithumb::parse_l2(market_type, msg),
+        "bitmex" => exchanges::bitmex::parse_l2(market_type, msg),
+        "bitstamp" => exchanges::bitstamp::parse_l2(market_type, msg),
+        "bitz" => exchanges::bitz::parse_l2(market_type, msg),
+        "bybit" => exchanges::bybit::parse_l2(market_type, msg),
+        "coinbase_pro" => exchanges::coinbase_pro::parse_l2(market_type, msg),
+        "deribit" => exchanges::deribit::parse_l2(market_type, msg),
+        "ftx" => exchanges::ftx::parse_l2(market_type, msg),
+        "gate" => exchanges::gate::parse_l2(market_type, msg),
+        "huobi" => exchanges::huobi::parse_l2(market_type, msg),
+        "kraken" => exchanges::kraken::parse_l2(market_type, msg),
+        "kucoin" => exchanges::kucoin::parse_l2(market_type, msg),
+        "mxc" => exchanges::mxc::parse_l2(market_type, msg),
+        "okex" => exchanges::okex::parse_l2(market_type, msg),
+        "zbg" => exchanges::zbg::parse_l2(market_type, msg),
+        _ => panic!("Unknown exchange {}", exchange),
+    }
+}
+
 /// Parse funding rate messages.
 pub fn parse_funding_rate(
     exchange: &str,

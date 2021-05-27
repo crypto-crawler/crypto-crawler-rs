@@ -14,9 +14,9 @@ mod trade {
         for trade in trades.iter() {
             crate::utils::check_trade_fields("ftx", MarketType::Spot, "BTC/USD".to_string(), trade);
 
-            assert_eq!(trade.volume, trade.price * trade.quantity);
             assert_eq!(trade.side, TradeSide::Buy);
         }
+        assert_eq!(trades[0].quantity_base, 0.0444);
     }
 
     #[test]
@@ -33,11 +33,12 @@ mod trade {
                 "BTC/USD".to_string(),
                 trade,
             );
-
-            assert_eq!(trade.volume, trade.price * trade.quantity);
-            assert_eq!(trade.side, TradeSide::Sell);
-            println!("{}", serde_json::to_string_pretty(&trade).unwrap());
         }
+
+        assert_eq!(trades[0].quantity_base, 0.0043);
+        assert_eq!(trades[0].quantity_quote, 0.0043 * 56244.0);
+        assert_eq!(trades[0].quantity_contract, Some(0.0043));
+        assert_eq!(trades[0].side, TradeSide::Sell);
     }
 
     #[test]
@@ -54,10 +55,12 @@ mod trade {
                 "BTC/USD".to_string(),
                 trade,
             );
-
-            assert_eq!(trade.volume, trade.price * trade.quantity);
-            assert_eq!(trade.side, TradeSide::Buy);
         }
+
+        assert_eq!(trades[0].quantity_base, 0.005);
+        assert_eq!(trades[0].quantity_quote, 0.005 * 56115.0);
+        assert_eq!(trades[0].quantity_contract, Some(0.005));
+        assert_eq!(trades[0].side, TradeSide::Buy);
     }
 
     #[test]
@@ -74,9 +77,11 @@ mod trade {
                 "BTC-MOVE/USD".to_string(),
                 trade,
             );
-
-            assert_eq!(trade.volume, trade.price * trade.quantity);
-            assert_eq!(trade.side, TradeSide::Buy);
         }
+
+        assert_eq!(trades[0].quantity_base, 0.1136);
+        assert_eq!(trades[0].quantity_quote, 0.1136 * 5862.0);
+        assert_eq!(trades[0].quantity_contract, Some(0.1136));
+        assert_eq!(trades[0].side, TradeSide::Buy);
     }
 }
