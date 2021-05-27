@@ -186,7 +186,7 @@ pub(crate) fn crawl_funding_rate(
     } else {
         symbols
             .unwrap()
-            .into_iter()
+            .iter()
             .map(|symbol| format!("{}@markPrice", symbol.to_lowercase()))
             .collect()
     };

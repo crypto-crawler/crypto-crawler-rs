@@ -9,6 +9,7 @@ pub(super) trait Ticker {
 }
 
 // Best Bid & Offer
+#[allow(clippy::upper_case_acronyms)]
 pub(super) trait BBO {
     fn subscribe_bbo(&self, pairs: &[String]);
 }

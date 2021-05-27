@@ -39,6 +39,7 @@ pub enum MarketType {
 
     Move,
     #[serde(rename = "bvol")]
+    #[allow(clippy::upper_case_acronyms)]
     BVOL,
 }
 

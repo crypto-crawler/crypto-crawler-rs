@@ -15,6 +15,7 @@ pub enum MessageType {
     L3Event,
     L3Snapshot,
     #[serde(rename = "bbo")]
+    #[allow(clippy::upper_case_acronyms)]
     BBO,
     Ticker,
     Candlestick,

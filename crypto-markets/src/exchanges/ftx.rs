@@ -55,9 +55,9 @@ fn fetch_markets_raw() -> Result<Vec<FtxMarket>> {
         .filter(|x| {
             x.enabled
                 && if let Some(underlying) = x.underlying.clone() {
-                    underlying != "BTC-HASH".to_string()
+                    underlying != *"BTC-HASH"
                         && !underlying.contains("PRESIDENT")
-                        && underlying != "OLYMPICS".to_string()
+                        && underlying != *"OLYMPICS"
                 } else {
                     true
                 }

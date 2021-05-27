@@ -134,7 +134,7 @@ impl<'a> HuobiWSClient<'a> {
         // https://huobiapi.github.io/docs/usdt_swap/v1/en/#market-heartbeat
         if obj.contains_key("op") && obj.get("op").unwrap().as_str().unwrap() == "ping" {
             debug!("Received {} from {}", msg, EXCHANGE_NAME);
-            let mut pong_msg = obj.clone();
+            let mut pong_msg = obj;
             pong_msg.insert("op".to_string(), serde_json::from_str("\"pong\"").unwrap()); // change ping to pong
             let ws_msg = Message::Text(serde_json::to_string(&pong_msg).unwrap());
             return MiscMessage::WebSocket(ws_msg);

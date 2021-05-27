@@ -79,11 +79,7 @@ pub(crate) fn crawl_funding_rate(
     let symbols: Vec<String> = if symbols.is_none() || symbols.unwrap().is_empty() {
         fetch_symbols_retry(EXCHANGE_NAME, market_type)
     } else {
-        symbols
-            .unwrap()
-            .into_iter()
-            .map(|symbol| symbol.to_string())
-            .collect()
+        symbols.unwrap().to_vec()
     };
     let channels: Vec<String> = symbols
         .into_iter()
