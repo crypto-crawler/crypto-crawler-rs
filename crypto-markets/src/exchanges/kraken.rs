@@ -91,8 +91,7 @@ fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
 fn fetch_spot_symbols() -> Result<Vec<String>> {
     let symbols = fetch_spot_markets_raw()?
         .into_iter()
-        .filter(|m| m.wsname.is_some())
-        .map(|m| m.wsname.unwrap())
+        .filter_map(|m| m.wsname)
         .collect::<Vec<String>>();
     Ok(symbols)
 }

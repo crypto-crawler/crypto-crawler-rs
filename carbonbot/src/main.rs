@@ -31,7 +31,7 @@ pub fn crawl(
     } else {
         Arc::new(Mutex::new(None))
     };
-    let redis_conn_clone = redis_conn.clone();
+    let redis_conn_clone = redis_conn;
 
     let on_msg_ext = Arc::new(Mutex::new(move |msg: Message| {
         let key = format!("{}-{}-{}", msg_type, exchange, market_type);
@@ -55,7 +55,7 @@ pub fn crawl(
             }
         }
 
-        if let Ok(_) = std::env::var("PARSER") {
+        if std::env::var("PARSER").is_ok() {
             match msg_type {
                 MessageType::Trade => {
                     let trades =
@@ -130,9 +130,7 @@ pub fn crawl(
         MessageType::L3Snapshot => {
             crawl_l3_snapshot(exchange, market_type, None, on_msg_ext, None, None)
         }
-        MessageType::Ticker => {
-            crawl_ticker(exchange, market_type, None, on_msg_ext, None)
-        }
+        MessageType::Ticker => crawl_ticker(exchange, market_type, None, on_msg_ext, None),
         MessageType::FundingRate => {
             crawl_funding_rate(exchange, market_type, None, on_msg_ext, None)
         }

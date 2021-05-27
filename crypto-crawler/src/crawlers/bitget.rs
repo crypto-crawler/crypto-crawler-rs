@@ -85,7 +85,7 @@ pub(crate) fn crawl_funding_rate(
     } else {
         symbols
             .unwrap()
-            .into_iter()
+            .iter()
             .map(|symbol| symbol.to_string())
             .collect()
     };

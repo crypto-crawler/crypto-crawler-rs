@@ -3,7 +3,6 @@ mod utils;
 #[cfg(test)]
 mod trade {
     use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
-    use float_cmp::approx_eq;
 
     #[test]
     fn spot() {

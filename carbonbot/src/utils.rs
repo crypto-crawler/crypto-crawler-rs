@@ -16,8 +16,8 @@ pub fn connect_redis(redis_url: &str) -> Result<redis::Connection, redis::RedisE
         }
     }
 
-    if conn.is_some() {
-        Ok(conn.unwrap())
+    if let Some(connection) = conn {
+        Ok(connection)
     } else {
         Err(redis_error.unwrap())
     }

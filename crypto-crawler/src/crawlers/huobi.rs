@@ -84,7 +84,7 @@ pub(crate) fn crawl_l2_event(
             let symbols: Vec<String> = if symbols.is_none() || symbols.unwrap().is_empty() {
                 fetch_symbols_retry(EXCHANGE_NAME, market_type)
             } else {
-                symbols.unwrap().into_iter().map(|x| x.clone()).collect()
+                symbols.unwrap().to_vec()
             };
             // Huobi Spot market.$symbol.mbp.$levels must use wss://api.huobi.pro/feed
             // or wss://api-aws.huobi.pro/feed
@@ -149,7 +149,7 @@ pub(crate) fn crawl_funding_rate(
     let symbols: Vec<String> = if symbols.is_none() || symbols.unwrap().is_empty() {
         vec!["*".to_string()]
     } else {
-        symbols.unwrap().into_iter().map(|x| x.clone()).collect()
+        symbols.unwrap().to_vec()
     };
     let channels: Vec<String> = symbols
         .into_iter()
