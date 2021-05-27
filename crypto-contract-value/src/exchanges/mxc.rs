@@ -117,7 +117,7 @@ lazy_static! {
 
         let from_online = fetch_linear_contract_sizes();
         for (pair, contract_value) in &from_online {
-            m.insert(pair.clone(), contract_value.clone());
+            m.insert(pair.clone(), *contract_value);
         }
 
         m

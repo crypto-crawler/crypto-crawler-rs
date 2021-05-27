@@ -114,7 +114,7 @@ lazy_static! {
 
             let from_online = fetch_contract_size(LINEAR_SWAP_URL);
             for (pair, contract_value) in &from_online {
-                m.insert(pair.clone(), contract_value.clone());
+                m.insert(pair.clone(), *contract_value);
             }
 
             m
@@ -129,7 +129,7 @@ lazy_static! {
 
             let from_online = fetch_contract_size(LINEAR_OPTION_URL);
             for (pair, contract_value) in &from_online {
-                m.insert(pair.clone(), contract_value.clone());
+                m.insert(pair.clone(), *contract_value);
             }
 
             m
@@ -163,7 +163,7 @@ fn fetch_contract_size(url: &str) -> BTreeMap<String, f32> {
 
     let mut mapping: BTreeMap<String, f32> = BTreeMap::new();
 
-    let txt = http_get(url).unwrap_or("[]".to_string());
+    let txt = http_get(url).unwrap_or_else(|_| "[]".to_string());
     let response = serde_json::from_str::<Response>(&txt).unwrap();
     for market in response.data.iter() {
         mapping.insert(

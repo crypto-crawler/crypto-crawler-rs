@@ -138,7 +138,7 @@ lazy_static! {
 
             let from_online = fetch_quanto_multipliers(LINEAR_SWAP_URL);
             for (pair, contract_value) in &from_online {
-                m.insert(pair.clone(), contract_value.clone());
+                m.insert(pair.clone(), *contract_value);
             }
 
             m
@@ -152,7 +152,7 @@ lazy_static! {
 
             let from_online = fetch_quanto_multipliers(LINEAR_FUTURE_URL);
             for (pair, contract_value) in &from_online {
-                m.insert(pair.clone(), contract_value.clone());
+                m.insert(pair.clone(), *contract_value);
             }
 
             m
@@ -180,7 +180,7 @@ fn fetch_quanto_multipliers(url: &str) -> BTreeMap<String, f32> {
 
     let mut mapping: BTreeMap<String, f32> = BTreeMap::new();
 
-    let txt = http_get(url).unwrap_or("[]".to_string());
+    let txt = http_get(url).unwrap_or_else(|_| "[]".to_string());
     let markets = serde_json::from_str::<Vec<RawMarket>>(&txt).unwrap();
     for market in markets.iter() {
         mapping.insert(

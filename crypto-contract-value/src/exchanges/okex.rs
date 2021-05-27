@@ -114,7 +114,7 @@ lazy_static! {
 
             let from_online = fetch_contract_val("swap");
             for (pair, contract_value) in &from_online {
-                m.insert(pair.clone(), contract_value.clone());
+                m.insert(pair.clone(), *contract_value);
             }
 
             m
@@ -142,7 +142,7 @@ lazy_static! {
 
             let from_online = fetch_contract_val("futures");
             for (pair, contract_value) in &from_online {
-                m.insert(pair.clone(), contract_value.clone());
+                m.insert(pair.clone(), *contract_value);
             }
 
             m
