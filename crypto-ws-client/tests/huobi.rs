@@ -392,7 +392,7 @@ mod huobi_option {
         gen_test_code!(
             HuobiOptionWSClient,
             subscribe,
-            &vec!["market.BTC-USDT-210409-C-66000.trade.detail".to_string()]
+            &vec!["market.BTC-USDT-210625-P-27000.trade.detail".to_string()]
         );
     }
 
@@ -402,7 +402,7 @@ mod huobi_option {
         gen_test_code!(
             HuobiOptionWSClient,
             subscribe_trade,
-            &vec!["BTC-USDT-210409-C-66000".to_string()]
+            &vec!["BTC-USDT-210625-P-27000".to_string()]
         );
     }
 
@@ -411,7 +411,7 @@ mod huobi_option {
         gen_test_code!(
             HuobiOptionWSClient,
             subscribe_ticker,
-            &vec!["BTC-USDT-210409-C-66000".to_string()]
+            &vec!["BTC-USDT-210625-P-27000".to_string()]
         );
     }
 
@@ -421,7 +421,7 @@ mod huobi_option {
         gen_test_code!(
             HuobiOptionWSClient,
             subscribe_bbo,
-            &vec!["BTC-USDT-210409-C-66000".to_string()]
+            &vec!["BTC-USDT-210625-P-27000".to_string()]
         );
     }
 
@@ -430,7 +430,7 @@ mod huobi_option {
         gen_test_code!(
             HuobiOptionWSClient,
             subscribe_orderbook,
-            &vec!["BTC-USDT-210409-C-66000".to_string()]
+            &vec!["BTC-USDT-210625-P-27000".to_string()]
         );
     }
 
@@ -439,7 +439,7 @@ mod huobi_option {
         gen_test_code!(
             HuobiOptionWSClient,
             subscribe_orderbook_snapshot,
-            &vec!["BTC-USDT-210409-C-66000".to_string()]
+            &vec!["BTC-USDT-210625-P-27000".to_string()]
         );
     }
 
@@ -447,12 +447,12 @@ mod huobi_option {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             HuobiOptionWSClient,
-            &vec!["BTC-USDT-210409-C-66000".to_string()],
+            &vec!["BTC-USDT-210625-P-27000".to_string()],
             60
         );
         gen_test_subscribe_candlestick!(
             HuobiOptionWSClient,
-            &vec!["BTC-USDT-210409-C-66000".to_string()],
+            &vec!["BTC-USDT-210625-P-27000".to_string()],
             2592000
         );
     }
