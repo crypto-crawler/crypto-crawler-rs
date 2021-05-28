@@ -14,8 +14,8 @@ use std::{
 const EXCHANGE_NAME: &str = "deribit";
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
-#[test_case(MarketType::InverseFuture, "BTC-9APR21")]
-#[test_case(MarketType::Option, "BTC-30APR21-76000-C"; "inconclusive")]
+#[test_case(MarketType::InverseFuture, "BTC-25JUN21")]
+#[test_case(MarketType::Option, "BTC-4JUN21-26000-P"; "inconclusive")]
 fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_trade,
@@ -50,8 +50,8 @@ fn test_crawl_trade_all(market_type: MarketType) {
 }
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
-#[test_case(MarketType::InverseFuture, "BTC-9APR21")]
-#[test_case(MarketType::Option, "BTC-30APR21-76000-C")]
+#[test_case(MarketType::InverseFuture, "BTC-25JUN21")]
+#[test_case(MarketType::Option, "BTC-4JUN21-26000-P")]
 fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_l2_event,
@@ -63,8 +63,8 @@ fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
-#[test_case(MarketType::InverseFuture, "BTC-9APR21")]
-#[test_case(MarketType::Option, "BTC-30APR21-76000-C")]
+#[test_case(MarketType::InverseFuture, "BTC-25JUN21")]
+#[test_case(MarketType::Option, "BTC-4JUN21-26000-P")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     gen_test_snapshot_code!(
         crawl_l2_snapshot,
@@ -76,8 +76,8 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
-#[test_case(MarketType::InverseFuture, "BTC-9APR21")]
-#[test_case(MarketType::Option, "BTC-30APR21-76000-C")]
+#[test_case(MarketType::InverseFuture, "BTC-25JUN21")]
+#[test_case(MarketType::Option, "BTC-4JUN21-26000-P")]
 fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_ticker,
