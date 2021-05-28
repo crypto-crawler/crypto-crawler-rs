@@ -64,29 +64,38 @@ mod zbg_inverse_swap {
     use std::sync::{Arc, Mutex};
 
     #[test]
+    #[ignore]
     fn subscribe() {
         gen_test_code!(
             ZbgSwapWSClient,
             subscribe,
-            &vec!["future_tick-1000001".to_string()]
+            &vec![
+                "future_tick-1000001".to_string(),
+                "future_tick-1000003".to_string()
+            ]
         );
     }
 
     #[test]
+    #[ignore]
     fn subscribe_raw_json() {
         gen_test_code!(
             ZbgSwapWSClient,
             subscribe,
-            &vec![r#"{"action":"sub", "topic":"future_tick-1000001"}"#.to_string()]
+            &vec![
+                r#"{"action":"sub", "topic":"future_tick-1000001"}"#.to_string(),
+                r#"{"action":"sub", "topic":"future_tick-1000003"}"#.to_string()
+            ]
         );
     }
 
     #[test]
+    #[ignore]
     fn subscribe_trade() {
         gen_test_code!(
             ZbgSwapWSClient,
             subscribe_trade,
-            &vec!["BTC_USD-R".to_string()]
+            &vec!["BTC_USD-R".to_string(), "ETH_USD-R".to_string()]
         );
     }
 
@@ -95,23 +104,33 @@ mod zbg_inverse_swap {
         gen_test_code!(
             ZbgSwapWSClient,
             subscribe_orderbook,
-            &vec!["BTC_USD-R".to_string()]
+            &vec!["BTC_USD-R".to_string(), "ETH_USD-R".to_string()]
         );
     }
 
     #[test]
+    #[ignore]
     fn subscribe_ticker() {
         gen_test_code!(
             ZbgSwapWSClient,
             subscribe_ticker,
-            &vec!["BTC_USD-R".to_string()]
+            &vec!["BTC_USD-R".to_string(), "ETH_USD-R".to_string()]
         );
     }
 
     #[test]
+    #[ignore]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(ZbgSwapWSClient, &vec!["BTC_USD-R".to_string()], 60);
-        gen_test_subscribe_candlestick!(ZbgSwapWSClient, &vec!["BTC_USD-R".to_string()], 604800);
+        gen_test_subscribe_candlestick!(
+            ZbgSwapWSClient,
+            &vec!["BTC_USD-R".to_string(), "ETH_USD-R".to_string()],
+            60
+        );
+        gen_test_subscribe_candlestick!(
+            ZbgSwapWSClient,
+            &vec!["BTC_USD-R".to_string(), "ETH_USD-R".to_string()],
+            604800
+        );
     }
 }
 
@@ -125,7 +144,7 @@ mod zbg_linear_swap {
         gen_test_code!(
             ZbgSwapWSClient,
             subscribe,
-            &vec!["future_tick-1000000".to_string()]
+            &vec!["future_tick-1000000".to_string(), "future_tick-1000002".to_string()]
         );
     }
 
@@ -134,7 +153,10 @@ mod zbg_linear_swap {
         gen_test_code!(
             ZbgSwapWSClient,
             subscribe,
-            &vec![r#"{"action":"sub", "topic":"future_tick-1000000"}"#.to_string()]
+            &vec![
+                r#"{"action":"sub", "topic":"future_tick-1000000"}"#.to_string(),
+                r#"{"action":"sub", "topic":"future_tick-1000002"}"#.to_string()
+            ]
         );
     }
 
@@ -143,16 +165,17 @@ mod zbg_linear_swap {
         gen_test_code!(
             ZbgSwapWSClient,
             subscribe_trade,
-            &vec!["BTC_USDT".to_string()]
+            &vec!["BTC_USDT".to_string(), "ETH_USDT".to_string()]
         );
     }
 
     #[test]
+    #[ignore]
     fn subscribe_orderbook() {
         gen_test_code!(
             ZbgSwapWSClient,
             subscribe_orderbook,
-            &vec!["BTC_USDT".to_string()]
+            &vec!["BTC_USDT".to_string(), "ETH_USDT".to_string()]
         );
     }
 
@@ -161,13 +184,22 @@ mod zbg_linear_swap {
         gen_test_code!(
             ZbgSwapWSClient,
             subscribe_ticker,
-            &vec!["BTC_USDT".to_string()]
+            &vec!["BTC_USDT".to_string(), "ETH_USDT".to_string()]
         );
     }
 
     #[test]
+    #[ignore]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(ZbgSwapWSClient, &vec!["BTC_USDT".to_string()], 60);
-        gen_test_subscribe_candlestick!(ZbgSwapWSClient, &vec!["BTC_USDT".to_string()], 604800);
+        gen_test_subscribe_candlestick!(
+            ZbgSwapWSClient,
+            &vec!["BTC_USDT".to_string(), "ETH_USDT".to_string()],
+            60
+        );
+        gen_test_subscribe_candlestick!(
+            ZbgSwapWSClient,
+            &vec!["BTC_USDT".to_string(), "ETH_USDT".to_string()],
+            604800
+        );
     }
 }
