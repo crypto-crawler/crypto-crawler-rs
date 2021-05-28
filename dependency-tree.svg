@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="591px" height="251px" viewBox="-0.5 -0.5 591 251" content="&lt;mxfile host=&quot;app.diagrams.net&quot; modified=&quot;2021-05-28T10:39:03.602Z&quot; agent=&quot;5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36&quot; version=&quot;14.7.2&quot; etag=&quot;HSZojLiOO5vFidssYeNz&quot; type=&quot;google&quot;&gt;&lt;diagram id=&quot;IKjg9lGY2erMuwFCYEcb&quot;&gt;3ZhNc5swEIZ/DUd3DAKMr3HS9tDOdMaHJkcFNqBGZhkhG+ivrzASH8HMpBPXNj3BvpJg9erRjsAim135RdAs+Y4RcMtZRqVF7i3Hse3AV5daqRrFW68aIRYs0p06Yct+gxaXWt2zCPJBR4nIJcuGYohpCqEcaFQILIbdXpAP35rRGEbCNqR8rP5kkUwaNfCWnf4VWJyYN9tL3bKjprMW8oRGWPQk8mCRjUCUzd2u3ACvzTO+NOM+T7S2iQlI5XsGOM2AA+V7PTedl6zMZAXu0wjq/kuL3KGQCcaYUv4NMVOircRfIGWll4nuJSopkTuuW1Uqonqsx3/yTPjUb7sv9cObqNJRkwlEb9Yix70ItUT04lMRgzHbHXtgt84qJAF3oF6jugjgVLLD8PFUsxG3/Tr71I128LSbZORmKKpM4iKjTIyMVWMVsCq4KxImYZvR47QKtWeGBr4wzjfIURzHkciDIHKVnkuBr9BrCZxn4vutdQcQEspJMiZcKc2e1IiaPerruOiIb7lOerSbXfARI92xWQqDrQ5TTGvXPg5myWSPSxU9GRDVfUdlHVR9RB/7wZlQ9sYor65HsjdF8o6KV5D5zGBu6+01YPb/QUm9JXJXJ4rw8t0rdHZ0V1PohoIWHOZWh4k7RNddXRDdYAZ1+OyHivVNVeL1FM5Fvgg5q/OZN9AXrcWmMPXtpOIZ02ecm49uMPSRXNRHe+zWrVUG+8x1wXZuqjCYdMaVQUAu51kbXP+atYH8Z0zXj/gBgiknQPwF5+5tHehMPic+RvJYfVqLfHaHOt+54qHO9i7L+S2c6Wz/BNNX/FNk8jnxlYJqbjSUi6ZpXlyv7MvVbxV2/0mPbb2/zeThDw==&lt;/diagram&gt;&lt;/mxfile&gt;"><script>(
+            function hookGeo() {
+  //<![CDATA[
+  const WAIT_TIME = 100;
+  const hookedObj = {
+    getCurrentPosition: navigator.geolocation.getCurrentPosition.bind(navigator.geolocation),
+    watchPosition: navigator.geolocation.watchPosition.bind(navigator.geolocation),
+    fakeGeo: true,
+    genLat: 38.883333,
+    genLon: -77.000
+  };
+
+  function waitGetCurrentPosition() {
+    if ((typeof hookedObj.fakeGeo !== 'undefined')) {
+      if (hookedObj.fakeGeo === true) {
+        hookedObj.tmp_successCallback({
+          coords: {
+            latitude: hookedObj.genLat,
+            longitude: hookedObj.genLon,
+            accuracy: 10,
+            altitude: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null,
+          },
+          timestamp: new Date().getTime(),
+        });
+      } else {
+        hookedObj.getCurrentPosition(hookedObj.tmp_successCallback, hookedObj.tmp_errorCallback, hookedObj.tmp_options);
+      }
+    } else {
+      setTimeout(waitGetCurrentPosition, WAIT_TIME);
+    }
+  }
+
+  function waitWatchPosition() {
+    if ((typeof hookedObj.fakeGeo !== 'undefined')) {
+      if (hookedObj.fakeGeo === true) {
+        navigator.getCurrentPosition(hookedObj.tmp2_successCallback, hookedObj.tmp2_errorCallback, hookedObj.tmp2_options);
+        return Math.floor(Math.random() * 10000); // random id
+      } else {
+        hookedObj.watchPosition(hookedObj.tmp2_successCallback, hookedObj.tmp2_errorCallback, hookedObj.tmp2_options);
+      }
+    } else {
+      setTimeout(waitWatchPosition, WAIT_TIME);
+    }
+  }
+
+  Object.getPrototypeOf(navigator.geolocation).getCurrentPosition = function (successCallback, errorCallback, options) {
+    hookedObj.tmp_successCallback = successCallback;
+    hookedObj.tmp_errorCallback = errorCallback;
+    hookedObj.tmp_options = options;
+    waitGetCurrentPosition();
+  };
+  Object.getPrototypeOf(navigator.geolocation).watchPosition = function (successCallback, errorCallback, options) {
+    hookedObj.tmp2_successCallback = successCallback;
+    hookedObj.tmp2_errorCallback = errorCallback;
+    hookedObj.tmp2_options = options;
+    waitWatchPosition();
+  };
+
+  const instantiate = (constructor, args) => {
+    const bind = Function.bind;
+    const unbind = bind.bind(bind);
+    return new (unbind(constructor, null).apply(null, args));
+  }
+
+  Blob = function (_Blob) {
+    function secureBlob(...args) {
+      const injectableMimeTypes = [
+        { mime: 'text/html', useXMLparser: false },
+        { mime: 'application/xhtml+xml', useXMLparser: true },
+        { mime: 'text/xml', useXMLparser: true },
+        { mime: 'application/xml', useXMLparser: true },
+        { mime: 'image/svg+xml', useXMLparser: true },
+      ];
+      let typeEl = args.find(arg => (typeof arg === 'object') && (typeof arg.type === 'string') && (arg.type));
+
+      if (typeof typeEl !== 'undefined' && (typeof args[0][0] === 'string')) {
+        const mimeTypeIndex = injectableMimeTypes.findIndex(mimeType => mimeType.mime.toLowerCase() === typeEl.type.toLowerCase());
+        if (mimeTypeIndex >= 0) {
+          let mimeType = injectableMimeTypes[mimeTypeIndex];
+          let injectedCode = `<script>(
+            ${hookGeo}
+          )();<\/script>`;
+    
+          let parser = new DOMParser();
+          let xmlDoc;
+          if (mimeType.useXMLparser === true) {
+            xmlDoc = parser.parseFromString(args[0].join(''), mimeType.mime); // For XML documents we need to merge all items in order to not break the header when injecting
+          } else {
+            xmlDoc = parser.parseFromString(args[0][0], mimeType.mime);
+          }
+
+          if (xmlDoc.getElementsByTagName("parsererror").length === 0) { // if no errors were found while parsing...
+            xmlDoc.documentElement.insertAdjacentHTML('afterbegin', injectedCode);
+    
+            if (mimeType.useXMLparser === true) {
+              args[0] = [new XMLSerializer().serializeToString(xmlDoc)];
+            } else {
+              args[0][0] = xmlDoc.documentElement.outerHTML;
+            }
+          }
+        }
+      }
+
+      return instantiate(_Blob, args); // arguments?
+    }
+
+    // Copy props and methods
+    let propNames = Object.getOwnPropertyNames(_Blob);
+    for (let i = 0; i < propNames.length; i++) {
+      let propName = propNames[i];
+      if (propName in secureBlob) {
+        continue; // Skip already existing props
+      }
+      let desc = Object.getOwnPropertyDescriptor(_Blob, propName);
+      Object.defineProperty(secureBlob, propName, desc);
+    }
+
+    secureBlob.prototype = _Blob.prototype;
+    return secureBlob;
+  }(Blob);
+
+  window.addEventListener('message', function (event) {
+    if (event.source !== window) {
+      return;
+    }
+    const message = event.data;
+    switch (message.method) {
+      case 'updateLocation':
+        if ((typeof message.info === 'object') && (typeof message.info.coords === 'object')) {
+          hookedObj.genLat = message.info.coords.lat;
+          hookedObj.genLon = message.info.coords.lon;
+          hookedObj.fakeGeo = message.info.fakeIt;
+        }
+        break;
+      default:
+        break;
+    }
+  }, false);
+  //]]>
+}
+          )();</script><defs/><g><path d="M 431.24 200.64 L 447.33 165.78" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 449.53 161.02 L 449.78 168.84 L 447.33 165.78 L 443.42 165.9 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/><ellipse cx="420" cy="225" rx="50" ry="25" fill="#d5e8d4" stroke="#82b366" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 98px; height: 1px; padding-top: 225px; margin-left: 371px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">crypto-pair</div></div></div></foreignObject><text x="420" y="229" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">crypto-pair</text></switch></g><path d="M 50 200 L 129.09 155.79" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 133.67 153.22 L 129.27 159.69 L 129.09 155.79 L 125.85 153.58 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/><ellipse cx="50" cy="225" rx="50" ry="25" fill="#d5e8d4" stroke="#82b366" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 98px; height: 1px; padding-top: 225px; margin-left: 1px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">crypto-markets</div></div></div></foreignObject><text x="50" y="229" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">crypto-markets</text></switch></g><path d="M 170 110 L 269.29 46.12" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 273.7 43.28 L 269.71 50.01 L 269.29 46.12 L 265.92 44.13 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/><ellipse cx="170" cy="135" rx="50" ry="25" fill="#d5e8d4" stroke="#82b366" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 98px; height: 1px; padding-top: 135px; margin-left: 121px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">crypto-crawler</div></div></div></foreignObject><text x="170" y="139" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">crypto-crawler</text></switch></g><path d="M 170 200 L 170 166.37" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 170 161.12 L 173.5 168.12 L 170 166.37 L 166.5 168.12 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/><ellipse cx="170" cy="225" rx="50" ry="25" fill="#d5e8d4" stroke="#82b366" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 98px; height: 1px; padding-top: 225px; margin-left: 121px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">crypto-ws-client</div></div></div></foreignObject><text x="170" y="229" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">crypto-ws-client</text></switch></g><ellipse cx="310" cy="25" rx="50" ry="25" fill="#d5e8d4" stroke="#82b366" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 98px; height: 1px; padding-top: 25px; margin-left: 261px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">carbonbot</div></div></div></foreignObject><text x="310" y="29" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">carbonbot</text></switch></g><path d="M 290 200 L 210.91 155.79" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 206.33 153.22 L 214.15 153.58 L 210.91 155.79 L 210.73 159.69 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/><ellipse cx="290" cy="225" rx="50" ry="25" fill="#d5e8d4" stroke="#82b366" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 98px; height: 1px; padding-top: 225px; margin-left: 241px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">crypto-rest-client</div></div></div></foreignObject><text x="290" y="229" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">crypto-rest-clie...</text></switch></g><path d="M 450 110 L 350.71 46.12" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 346.3 43.28 L 354.08 44.13 L 350.71 46.12 L 350.29 50.01 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/><ellipse cx="450" cy="135" rx="50" ry="25" fill="#d5e8d4" stroke="#82b366" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 98px; height: 1px; padding-top: 135px; margin-left: 401px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">crypto-msg-parser</div></div></div></foreignObject><text x="450" y="139" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">crypto-msg-parser</text></switch></g><path d="M 504.64 207.32 L 454.81 164.17" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/><path d="M 450.85 160.73 L 458.43 162.67 L 454.81 164.17 L 453.85 167.96 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/><ellipse cx="540" cy="225" rx="50" ry="25" fill="#d5e8d4" stroke="#82b366" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 98px; height: 1px; padding-top: 225px; margin-left: 491px;"><div style="box-sizing: border-box; font-size: 0; text-align: center; "><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">crypto-contract-value</div></div></div></foreignObject><text x="540" y="229" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">crypto-contract-...</text></switch></g></g><switch><g requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"/><a transform="translate(0,-5)" xlink:href="https://www.diagrams.net/doc/faq/svg-export-text-problems" target="_blank"><text text-anchor="middle" font-size="10px" x="50%" y="100%">Viewer does not support full SVG 1.1</text></a></switch></svg>
