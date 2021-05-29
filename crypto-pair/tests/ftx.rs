@@ -32,17 +32,6 @@ fn fetch_markets_raw() -> Vec<FtxMarket> {
     let resp = serde_json::from_str::<Response>(&txt).unwrap();
     assert!(resp.success);
     resp.result
-        .into_iter()
-        .filter(|x| {
-            if let Some(underlying) = x.underlying.clone() {
-                underlying != "BTC-HASH".to_string()
-                    && !underlying.contains("PRESIDENT")
-                    && underlying != "OLYMPICS".to_string()
-            } else {
-                true
-            }
-        })
-        .collect()
 }
 
 #[test]
@@ -66,7 +55,12 @@ fn verify_all_symbols() {
                 )
             } else {
                 // linear future
-                format!("{}/USD", market.underlying.clone().unwrap())
+                if market.name.contains('-') {
+                    format!("{}/USD", market.underlying.clone().unwrap())
+                } else {
+                    // prediction
+                    format!("{}/USD", market.name)
+                }
             }
         } else {
             panic!("Unknown symbol {}", market.name);

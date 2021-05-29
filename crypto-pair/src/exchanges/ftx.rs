@@ -9,10 +9,12 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
     } else if symbol.contains("BVOL/") || symbol.contains('/') {
         // BVOL and Spot
         Some(symbol.to_string())
-    } else {
+    } else if let Some(pos) = symbol.rfind('-') {
         // linear future
-        let pos = symbol.rfind('-').unwrap();
         let base = &symbol[..pos];
         Some(format!("{}/USD", base))
+    } else {
+        // prediction
+        Some(format!("{}/USD", symbol))
     }
 }
