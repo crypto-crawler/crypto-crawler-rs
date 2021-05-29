@@ -100,6 +100,7 @@ mod zbg_inverse_swap {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_orderbook() {
         gen_test_code!(
             ZbgSwapWSClient,
@@ -140,6 +141,7 @@ mod zbg_linear_swap {
     use std::sync::{Arc, Mutex};
 
     #[test]
+    #[ignore]
     fn subscribe() {
         gen_test_code!(
             ZbgSwapWSClient,
@@ -152,6 +154,7 @@ mod zbg_linear_swap {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_raw_json() {
         gen_test_code!(
             ZbgSwapWSClient,
@@ -164,6 +167,7 @@ mod zbg_linear_swap {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_trade() {
         gen_test_code!(
             ZbgSwapWSClient,
@@ -183,6 +187,7 @@ mod zbg_linear_swap {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_ticker() {
         gen_test_code!(
             ZbgSwapWSClient,
