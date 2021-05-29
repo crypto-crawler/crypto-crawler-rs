@@ -144,7 +144,10 @@ mod zbg_linear_swap {
         gen_test_code!(
             ZbgSwapWSClient,
             subscribe,
-            &vec!["future_tick-1000000".to_string(), "future_tick-1000002".to_string()]
+            &vec![
+                "future_tick-1000000".to_string(),
+                "future_tick-1000002".to_string()
+            ]
         );
     }
 

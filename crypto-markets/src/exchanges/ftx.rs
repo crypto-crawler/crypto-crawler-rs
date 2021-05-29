@@ -49,20 +49,7 @@ fn fetch_markets_raw() -> Result<Vec<FtxMarket>> {
     let txt = http_get("https://ftx.com/api/markets", None)?;
     let resp = serde_json::from_str::<Response>(&txt)?;
     assert!(resp.success);
-    let valid: Vec<FtxMarket> = resp
-        .result
-        .into_iter()
-        .filter(|x| {
-            x.enabled
-                && if let Some(underlying) = x.underlying.clone() {
-                    underlying != *"BTC-HASH"
-                        && !underlying.contains("PRESIDENT")
-                        && underlying != *"OLYMPICS"
-                } else {
-                    true
-                }
-        })
-        .collect();
+    let valid: Vec<FtxMarket> = resp.result.into_iter().filter(|x| x.enabled).collect();
     Ok(valid)
 }
 
