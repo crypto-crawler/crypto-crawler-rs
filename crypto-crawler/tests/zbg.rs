@@ -27,8 +27,8 @@ fn test_crawl_trade(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::Spot, "btc_usdt")]
-#[test_case(MarketType::InverseSwap, "BTC_USD-R")]
-#[test_case(MarketType::LinearSwap, "BTC_USDT"; "inconclusive")]
+// #[test_case(MarketType::InverseSwap, "BTC_USD-R")]
+// #[test_case(MarketType::LinearSwap, "BTC_USDT")]
 fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_l2_event,
