@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use crate::{FundingRateMsg, MessageType, TradeMsg, TradeSide};
+use crate::{FundingRateMsg, MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use super::super::utils::calc_quantity_and_volume;
 use serde::{Deserialize, Serialize};
@@ -41,6 +41,26 @@ struct RawTradeMsg {
     a: i64,    // Seller order ID
     T: i64,    // Trade time
     m: bool,   // Is the buyer the market maker?
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+/// price, quantity
+pub type RawOrder = [String; 2];
+
+// see https://binance-docs.github.io/apidocs/spot/en/#diff-depth-stream
+// https://binance-docs.github.io/apidocs/delivery/en/#diff-book-depth-streams
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawOrderbookMsg {
+    e: String,      // Event type
+    E: i64,         // Event time
+    T: Option<i64>, // Transction time
+    s: String,      // Symbol
+    U: i64,         // First update ID in event
+    u: i64,         // // Final update ID in event
+    b: Vec<RawOrder>,
+    a: Vec<RawOrder>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -117,6 +137,55 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         }
         _ => panic!("Unsupported event type {}", event_type),
     }
+}
+
+pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(&msg)?;
+    let pair = crypto_pair::normalize_pair(&ws_msg.data.s, EXCHANGE_NAME).unwrap();
+
+    let parse_order = |raw_order: &RawOrder| -> Order {
+        let price = raw_order[0].parse::<f64>().unwrap();
+        let (quantity_base, quantity_quote, quantity_contract) = calc_quantity_and_volume(
+            EXCHANGE_NAME,
+            market_type,
+            &pair,
+            price,
+            raw_order[1].parse::<f64>().unwrap(),
+        );
+        if let Some(qc) = quantity_contract {
+            vec![price, quantity_base, quantity_quote, qc]
+        } else {
+            vec![price, quantity_base, quantity_quote]
+        }
+    };
+
+    let orderbook = OrderBookMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: ws_msg.data.s.clone(),
+        pair: pair.clone(),
+        msg_type: MessageType::L2Event,
+        timestamp: if market_type == MarketType::Spot {
+            ws_msg.data.E
+        } else {
+            ws_msg.data.T.unwrap()
+        },
+        asks: ws_msg
+            .data
+            .a
+            .iter()
+            .map(|raw_order| parse_order(raw_order))
+            .collect::<Vec<Order>>(),
+        bids: ws_msg
+            .data
+            .b
+            .iter()
+            .map(|raw_order| parse_order(raw_order))
+            .collect::<Vec<Order>>(),
+        snapshot: false,
+        raw: serde_json::from_str(msg)?,
+    };
+    Ok(vec![orderbook])
 }
 
 #[derive(Serialize, Deserialize)]

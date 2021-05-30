@@ -193,3 +193,190 @@ mod funding_rate {
         assert_eq!(funding_rates[1].funding_time, 1617321600000);
     }
 }
+
+#[cfg(test)]
+mod l2_orderbook {
+    use crypto_msg_parser::{parse_l2, MarketType};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"stream":"btcusdt@depth@100ms","data":{"e":"depthUpdate","E":1622363903670,"s":"BTCUSDT","U":11294093710,"u":11294093726,"b":[["35743.98000000","0.00000000"],["35743.87000000","0.00001500"]],"a":[["35743.88000000","0.24000000"],["35743.97000000","0.00000000"]]}}"#;
+        let orderbook = &parse_l2("binance", MarketType::Spot, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 2);
+        assert_eq!(orderbook.bids.len(), 2);
+
+        crate::utils::check_orderbook_fields(
+            "binance",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.bids[0][0], 35743.98);
+        assert_eq!(orderbook.bids[0][1], 0.0);
+        assert_eq!(orderbook.bids[0][2], 0.0);
+
+        assert_eq!(orderbook.bids[1][0], 35743.87);
+        assert_eq!(orderbook.bids[1][1], 0.000015);
+        assert_eq!(orderbook.bids[1][2], 35743.87 * 0.000015);
+
+        assert_eq!(orderbook.asks[0][0], 35743.88);
+        assert_eq!(orderbook.asks[0][1], 0.24);
+        assert_eq!(orderbook.asks[0][2], 35743.88 * 0.24);
+
+        assert_eq!(orderbook.asks[1][0], 35743.97);
+        assert_eq!(orderbook.asks[1][1], 0.0);
+        assert_eq!(orderbook.asks[1][2], 0.0);
+    }
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"stream":"btcusd_210625@depth@100ms","data":{"e":"depthUpdate","E":1622368000245,"T":1622368000234,"s":"BTCUSD_210625","ps":"BTCUSD","U":127531213607,"u":127531214406,"pu":127531213513,"b":[["35943.8","60"],["35965.2","896"]],"a":[["36038.3","9"],["36038.4","21"]]}}"#;
+        let orderbook = &parse_l2("binance", MarketType::InverseFuture, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 2);
+        assert_eq!(orderbook.bids.len(), 2);
+
+        crate::utils::check_orderbook_fields(
+            "binance",
+            MarketType::InverseFuture,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622368000234);
+
+        assert_eq!(orderbook.bids[0][0], 35943.8);
+        assert_eq!(orderbook.bids[0][1], 6000.0 / 35943.8);
+        assert_eq!(orderbook.bids[0][2], 6000.0);
+        assert_eq!(orderbook.bids[0][3], 60.0);
+
+        assert_eq!(orderbook.bids[1][0], 35965.2);
+        assert_eq!(orderbook.bids[1][1], 89600.0 / 35965.2);
+        assert_eq!(orderbook.bids[1][2], 89600.0);
+        assert_eq!(orderbook.bids[1][3], 896.0);
+
+        assert_eq!(orderbook.asks[0][0], 36038.3);
+        assert_eq!(orderbook.asks[0][1], 900.0 / 36038.3);
+        assert_eq!(orderbook.asks[0][2], 900.0);
+        assert_eq!(orderbook.asks[0][3], 9.0);
+
+        assert_eq!(orderbook.asks[1][0], 36038.4);
+        assert_eq!(orderbook.asks[1][1], 2100.0 / 36038.4);
+        assert_eq!(orderbook.asks[1][2], 2100.0);
+        assert_eq!(orderbook.asks[1][3], 21.0);
+    }
+
+    #[test]
+    fn linear_future() {
+        let raw_msg = r#"{"stream":"ethusdt_210625@depth@100ms","data":{"e":"depthUpdate","E":1622368962075,"T":1622368962065,"s":"ETHUSDT_210625","U":475700780918,"u":475700783070,"pu":475700774972,"b":[["2437.04","82.320"],["2437.07","0.000"]],"a":[["2441.23","1.500"],["2441.24","0.220"]]}}"#;
+        let orderbook = &parse_l2("binance", MarketType::LinearFuture, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 2);
+        assert_eq!(orderbook.bids.len(), 2);
+
+        crate::utils::check_orderbook_fields(
+            "binance",
+            MarketType::LinearFuture,
+            "ETH/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622368962065);
+
+        assert_eq!(orderbook.bids[0][0], 2437.04);
+        assert_eq!(orderbook.bids[0][1], 82.32);
+        assert_eq!(orderbook.bids[0][2], 2437.04 * 82.32);
+        assert_eq!(orderbook.bids[0][3], 82.32);
+
+        assert_eq!(orderbook.bids[1][0], 2437.07);
+        assert_eq!(orderbook.bids[1][1], 0.0);
+        assert_eq!(orderbook.bids[1][2], 0.0);
+        assert_eq!(orderbook.bids[1][3], 0.0);
+
+        assert_eq!(orderbook.asks[0][0], 2441.23);
+        assert_eq!(orderbook.asks[0][1], 1.5);
+        assert_eq!(orderbook.asks[0][2], 2441.23 * 1.5);
+        assert_eq!(orderbook.asks[0][3], 1.5);
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"stream":"btcusdt@depth@100ms","data":{"e":"depthUpdate","E":1622371244693,"T":1622371244687,"s":"BTCUSDT","U":475776377463,"u":475776380184,"pu":475776377452,"b":[["35729.77","1.600"],["35750.00","5.106"]],"a":[["35819.20","0.211"],["35820.31","0.001"]]}}"#;
+        let orderbook = &parse_l2("binance", MarketType::LinearSwap, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 2);
+        assert_eq!(orderbook.bids.len(), 2);
+
+        crate::utils::check_orderbook_fields(
+            "binance",
+            MarketType::LinearSwap,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622371244687);
+
+        assert_eq!(orderbook.bids[0][0], 35729.77);
+        assert_eq!(orderbook.bids[0][1], 1.6);
+        assert_eq!(orderbook.bids[0][2], 35729.77 * 1.6);
+        assert_eq!(orderbook.bids[0][3], 1.6);
+
+        assert_eq!(orderbook.bids[1][0], 35750.0);
+        assert_eq!(orderbook.bids[1][1], 5.106);
+        assert_eq!(orderbook.bids[1][2], 35750.0 * 5.106);
+        assert_eq!(orderbook.bids[1][3], 5.106);
+
+        assert_eq!(orderbook.asks[0][0], 35819.2);
+        assert_eq!(orderbook.asks[0][1], 0.211);
+        assert_eq!(orderbook.asks[0][2], 35819.2 * 0.211);
+        assert_eq!(orderbook.asks[0][3], 0.211);
+
+        assert_eq!(orderbook.asks[1][0], 35820.31);
+        assert_eq!(orderbook.asks[1][1], 0.001);
+        assert_eq!(orderbook.asks[1][2], 35820.31 * 0.001);
+        assert_eq!(orderbook.asks[1][3], 0.001);
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"stream":"btcusd_perp@depth@100ms","data":{"e":"depthUpdate","E":1622370862564,"T":1622370862553,"s":"BTCUSD_PERP","ps":"BTCUSD","U":127559587191,"u":127559588177,"pu":127559587113,"b":[["35365.9","1400"],["35425.8","561"]],"a":[["35817.8","7885"],["35818.7","307"]]}}"#;
+        let orderbook = &parse_l2("binance", MarketType::InverseSwap, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 2);
+        assert_eq!(orderbook.bids.len(), 2);
+
+        crate::utils::check_orderbook_fields(
+            "binance",
+            MarketType::InverseSwap,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622370862553);
+
+        assert_eq!(orderbook.bids[0][0], 35365.9);
+        assert_eq!(orderbook.bids[0][1], 140000.0 / 35365.9);
+        assert_eq!(orderbook.bids[0][2], 140000.0);
+        assert_eq!(orderbook.bids[0][3], 1400.0);
+
+        assert_eq!(orderbook.bids[1][0], 35425.8);
+        assert_eq!(orderbook.bids[1][1], 56100.0 / 35425.8);
+        assert_eq!(orderbook.bids[1][2], 56100.0);
+        assert_eq!(orderbook.bids[1][3], 561.0);
+
+        assert_eq!(orderbook.asks[0][0], 35817.8);
+        assert_eq!(orderbook.asks[0][1], 788500.0 / 35817.8);
+        assert_eq!(orderbook.asks[0][2], 788500.0);
+        assert_eq!(orderbook.asks[0][3], 7885.0);
+
+        assert_eq!(orderbook.asks[1][0], 35818.7);
+        assert_eq!(orderbook.asks[1][1], 30700.0 / 35818.7);
+        assert_eq!(orderbook.asks[1][2], 30700.0);
+        assert_eq!(orderbook.asks[1][3], 307.0);
+    }
+
+    #[test]
+    fn option() {}
+}

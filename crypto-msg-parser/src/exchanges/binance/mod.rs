@@ -26,6 +26,10 @@ pub(crate) fn parse_funding_rate(
     }
 }
 
-pub(crate) fn parse_l2(_market_type: MarketType, _msg: &str) -> Result<Vec<OrderBookMsg>> {
-    Ok(Vec::new())
+pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+    if market_type == MarketType::EuropeanOption {
+        Ok(Vec::new())
+    } else {
+        binance_all::parse_l2(market_type, msg)
+    }
 }

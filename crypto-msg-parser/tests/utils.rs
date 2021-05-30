@@ -1,5 +1,5 @@
 use crypto_market_type::MarketType;
-use crypto_msg_parser::{FundingRateMsg, MessageType, TradeMsg};
+use crypto_msg_parser::{FundingRateMsg, MessageType, OrderBookMsg, TradeMsg};
 use float_cmp::approx_eq;
 
 pub fn check_trade_fields(exchange: &str, market_type: MarketType, pair: String, trade: &TradeMsg) {
@@ -20,6 +20,35 @@ pub fn check_trade_fields(exchange: &str, market_type: MarketType, pair: String,
     }
     assert!(!trade.trade_id.is_empty());
     assert_eq!(trade.timestamp.to_string().len(), 13);
+}
+
+pub fn check_orderbook_fields(
+    exchange: &str,
+    market_type: MarketType,
+    pair: String,
+    orderbook: &OrderBookMsg,
+) {
+    assert_eq!(orderbook.exchange, exchange);
+    assert_eq!(orderbook.market_type, market_type);
+    assert_eq!(orderbook.pair, pair);
+    assert_eq!(orderbook.msg_type, MessageType::L2Event);
+    assert_eq!(orderbook.timestamp.to_string().len(), 13);
+
+    for order in orderbook.asks.iter() {
+        assert!(order.len() == 3 || order.len() == 4);
+
+        let price = order[0];
+        let quantity_base = order[1];
+        let quantity_quote = order[2];
+
+        assert!(price > 0.0);
+        assert!(quantity_base >= 0.0);
+        assert!(quantity_quote >= 0.0);
+
+        if order.len() == 4 {
+            assert!(order[3] >= 0.0);
+        }
+    }
 }
 
 // TODO: fake warning

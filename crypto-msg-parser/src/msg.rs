@@ -88,6 +88,9 @@ pub struct TradeMsg {
     pub pair: String,
     /// Message type
     pub msg_type: MessageType,
+    /// Unix timestamp, in milliseconds
+    pub timestamp: i64,
+
     /// price
     pub price: f64,
     // Number of base coins
@@ -101,8 +104,6 @@ pub struct TradeMsg {
     pub side: TradeSide,
     // Trade ID
     pub trade_id: String,
-    /// Unix timestamp, in milliseconds
-    pub timestamp: i64,
     /// the original message
     pub raw: Value,
 }
@@ -150,6 +151,9 @@ pub struct FundingRateMsg {
     pub pair: String,
     /// Message type
     pub msg_type: MessageType,
+    /// Unix timestamp, in milliseconds
+    pub timestamp: i64,
+
     // Funding rate, which is calculated on data between [funding_time-16h, funding_time-8h]
     pub funding_rate: f64,
     // Funding time, the moment when funding rate is used
@@ -157,8 +161,6 @@ pub struct FundingRateMsg {
     // Estimated funding rate between [funding_time-h, funding_time], it will be static after funding_time
     #[serde(skip_serializing_if = "Option::is_none")]
     pub estimated_rate: Option<f64>,
-    /// Unix timestamp, in milliseconds
-    pub timestamp: i64,
     /// the original message
     pub raw: Value,
 }
