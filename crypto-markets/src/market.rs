@@ -28,7 +28,6 @@ pub struct Market {
     /// exchange name
     pub exchange: String,
     /// Market type
-    #[serde(rename = "type")]
     pub market_type: MarketType,
     /// exchange-specific trading symbol, used by RESTful API
     pub symbol: String,
@@ -38,6 +37,8 @@ pub struct Market {
     pub base: String,
     /// unified quote currency, e.g., USDT
     pub quote: String,
+    // settled currency
+    pub settle: String,
     /// exchange-specific base currency
     pub base_id: String,
     /// exchange-specific quote currency
@@ -54,6 +55,12 @@ pub struct Market {
     pub precision: Precision,
     /// minimum quantity when placing orders
     pub min_quantity: MinQuantity,
+    // The value of one contract, not applicable to sport markets
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub contract_value: Option<f64>,
+    /// Delivery date, unix timestamp in milliseconds, only applicable for future and option markets.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub delivery_date: Option<u64>,
     /// the original JSON string retrieved from the exchange
     pub info: Map<String, Value>,
 }

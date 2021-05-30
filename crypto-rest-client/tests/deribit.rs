@@ -18,7 +18,7 @@ fn test_trades(symbol: &str) {
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
 #[test_case(MarketType::InverseFuture, "BTC-24SEP21")]
-#[test_case(MarketType::Option, "BTC-31DEC21-400000-C")]
+#[test_case(MarketType::EuropeanOption, "BTC-31DEC21-400000-C")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     let text = fetch_l2_snapshot("deribit", market_type, symbol).unwrap();
 

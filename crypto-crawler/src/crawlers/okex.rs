@@ -27,7 +27,9 @@ pub(crate) fn crawl_trade(
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
 ) -> Option<std::thread::JoinHandle<()>> {
-    if market_type == MarketType::Option && (symbols.is_none() || symbols.unwrap().is_empty()) {
+    if market_type == MarketType::EuropeanOption
+        && (symbols.is_none() || symbols.unwrap().is_empty())
+    {
         let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
             let message = Message::new(
                 EXCHANGE_NAME.to_string(),

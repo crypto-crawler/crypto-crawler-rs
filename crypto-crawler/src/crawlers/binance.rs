@@ -58,7 +58,7 @@ pub(crate) fn crawl_trade(
         MarketType::LinearFuture | MarketType::LinearSwap => {
             crawl_trade_linear(market_type, symbols, on_msg, duration)
         }
-        MarketType::Option => {
+        MarketType::EuropeanOption => {
             if symbols.is_none() || symbols.unwrap().is_empty() {
                 let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
                     let message = Message::new(
@@ -101,7 +101,9 @@ pub(crate) fn crawl_l2_event(
         MarketType::LinearFuture | MarketType::LinearSwap => {
             crawl_l2_event_linear(market_type, symbols, on_msg, duration)
         }
-        MarketType::Option => crawl_l2_event_linear_option(market_type, symbols, on_msg, duration),
+        MarketType::EuropeanOption => {
+            crawl_l2_event_linear_option(market_type, symbols, on_msg, duration)
+        }
         _ => panic!("Binance does NOT have the {} market type", market_type),
     }
 }
