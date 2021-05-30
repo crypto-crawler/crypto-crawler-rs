@@ -25,7 +25,7 @@ struct OptionMarket {
     side: String,
     makerFeeRate: f64,
     takerFeeRate: f64,
-    expiryDate: i64,
+    expiryDate: u64,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -70,11 +70,12 @@ pub(super) fn fetch_option_markets() -> Result<Vec<Market>> {
             let base_currency = m.underlying.strip_suffix(m.quoteAsset.as_str()).unwrap();
             Market {
                 exchange: "binance".to_string(),
-                market_type: MarketType::Option,
+                market_type: MarketType::EuropeanOption,
                 symbol: m.symbol.clone(),
                 pair: format!("{}/{}", base_currency, m.quoteAsset),
                 base: base_currency.to_string(),
                 quote: m.quoteAsset.clone(),
+                settle: m.quoteAsset.clone(),
                 base_id: base_currency.to_string(),
                 quote_id: m.quoteAsset.clone(),
                 active: true,
@@ -93,6 +94,8 @@ pub(super) fn fetch_option_markets() -> Result<Vec<Market>> {
                     base: Some(m.minQty),
                     quote: None,
                 },
+                contract_value: Some(1.0),
+                delivery_date: Some(m.expiryDate),
                 info: serde_json::to_value(&m)
                     .unwrap()
                     .as_object()

@@ -55,6 +55,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 pair: format!("{}/{}", m.baseAsset, m.quoteAsset),
                 base: m.baseAsset.clone(),
                 quote: m.quoteAsset.clone(),
+                settle: m.quoteAsset.clone(),
                 base_id: m.baseAsset.clone(),
                 quote_id: m.quoteAsset.clone(),
                 active: m.status == "TRADING" && m.isSpotTradingAllowed,
@@ -73,6 +74,8 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                     base: Some(parse_filter(&m.filters, "LOT_SIZE", "minQty")),
                     quote: Some(parse_filter(&m.filters, "MIN_NOTIONAL", "minNotional")),
                 },
+                contract_value: None,
+                delivery_date: None,
                 info: serde_json::to_value(&m)
                     .unwrap()
                     .as_object()

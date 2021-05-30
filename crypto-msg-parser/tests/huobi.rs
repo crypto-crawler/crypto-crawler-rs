@@ -105,13 +105,13 @@ mod trade {
     #[test]
     fn linear_option() {
         let raw_msg = r#"{"ch":"market.BTC-USDT-210326-C-32000.trade.detail","ts":1616246303142,"tick":{"id":674495368,"ts":1616246303133,"data":[{"amount":36,"quantity":0.036,"trade_turnover":971.69976,"ts":1616246303133,"id":6744953680000,"price":26991.66,"direction":"buy"},{"amount":42,"quantity":0.042,"trade_turnover":1134,"ts":1616246303133,"id":6744953680001,"price":27000,"direction":"buy"}]}}"#;
-        let trades = &parse_trade("huobi", MarketType::Option, raw_msg).unwrap();
+        let trades = &parse_trade("huobi", MarketType::EuropeanOption, raw_msg).unwrap();
         assert_eq!(trades.len(), 2);
 
         for trade in trades.iter() {
             crate::utils::check_trade_fields(
                 "huobi",
-                MarketType::Option,
+                MarketType::EuropeanOption,
                 "BTC/USDT".to_string(),
                 trade,
             );

@@ -107,8 +107,8 @@ pub struct TradeMsg {
     pub raw: Value,
 }
 
-/// price, quantity, volume
-pub type Order = [f64; 3];
+/// price, quantity_base, quantity_quote, quantity_contract(for spot markets it is empty)
+pub type Order = Vec<f64>;
 
 /// Level2 orderbook message.
 #[derive(Serialize, Deserialize)]

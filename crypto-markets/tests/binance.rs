@@ -69,7 +69,7 @@ fn fetch_linear_swap_symbols() {
 
 #[test]
 fn fetch_option_symbols() {
-    let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::Option).unwrap();
+    let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::EuropeanOption).unwrap();
     assert!(!symbols.is_empty());
 
     for symbol in symbols.iter() {
@@ -103,6 +103,6 @@ fn fetch_linear_swap_markets() {
 
 #[test]
 fn fetch_option_markets() {
-    let markets = fetch_markets(EXCHANGE_NAME, MarketType::Option).unwrap();
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::EuropeanOption).unwrap();
     assert!(!markets.is_empty());
 }

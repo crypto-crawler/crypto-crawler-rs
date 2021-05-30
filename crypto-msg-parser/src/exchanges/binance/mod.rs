@@ -8,7 +8,7 @@ use crate::{FundingRateMsg, OrderBookMsg, TradeMsg};
 use serde_json::Result;
 
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    if market_type == MarketType::Option {
+    if market_type == MarketType::EuropeanOption {
         binance_option::parse_trade(msg)
     } else {
         binance_all::parse_trade(market_type, msg)

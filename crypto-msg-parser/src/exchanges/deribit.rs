@@ -43,7 +43,7 @@ fn calc_quantity_and_volume(market_type: MarketType, price: f64, amount: f64) ->
             let volume = amount;
             (volume / price, volume)
         }
-        MarketType::Option => (amount, amount * price),
+        MarketType::EuropeanOption => (amount, amount * price),
         _ => panic!("Unknown market_type {}", market_type),
     }
 }

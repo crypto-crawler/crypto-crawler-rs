@@ -12,7 +12,7 @@ pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
         MarketType::LinearFuture => okex_future::fetch_linear_future_symbols(),
         MarketType::InverseSwap => okex_swap::fetch_inverse_swap_symbols(),
         MarketType::LinearSwap => okex_swap::fetch_linear_swap_symbols(),
-        MarketType::Option => okex_option::fetch_option_symbols(),
+        MarketType::EuropeanOption => okex_option::fetch_option_symbols(),
         _ => panic!("Unsupported market_type: {}", market_type),
     }
 }

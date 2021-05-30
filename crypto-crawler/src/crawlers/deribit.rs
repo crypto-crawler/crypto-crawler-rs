@@ -39,7 +39,7 @@ pub(crate) fn crawl_trade(
         let channels: Vec<String> = match market_type {
             MarketType::InverseFuture => vec!["trades.future.any.raw"],
             MarketType::InverseSwap => vec!["trades.BTC-PERPETUAL.raw", "trades.ETH-PERPETUAL.raw"],
-            MarketType::Option => vec!["trades.option.any.raw"],
+            MarketType::EuropeanOption => vec!["trades.option.any.raw"],
             _ => panic!("Deribit does NOT have the {} market type", market_type),
         }
         .into_iter()

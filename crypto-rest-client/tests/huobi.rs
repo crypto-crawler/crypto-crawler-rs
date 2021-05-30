@@ -8,7 +8,7 @@ use test_case::test_case;
 #[test_case(MarketType::InverseFuture, "BTC_CQ")]
 #[test_case(MarketType::InverseSwap, "BTC-USD")]
 #[test_case(MarketType::LinearSwap, "BTC-USDT")]
-#[test_case(MarketType::Option, "BTC-USDT-210625-P-27000")]
+#[test_case(MarketType::EuropeanOption, "BTC-USDT-210625-P-27000")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     let text = fetch_l2_snapshot("huobi", market_type, symbol).unwrap();
     assert!(text.starts_with("{"));
@@ -25,7 +25,7 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
         .unwrap()
         .as_array()
         .unwrap();
-    if market_type == MarketType::Option {
+    if market_type == MarketType::EuropeanOption {
         assert!(!bids.is_empty());
     } else {
         assert_eq!(150, bids.len());
@@ -40,7 +40,7 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
         .unwrap()
         .as_array()
         .unwrap();
-    if market_type == MarketType::Option {
+    if market_type == MarketType::EuropeanOption {
         assert!(!asks.is_empty());
     } else {
         assert_eq!(150, asks.len());

@@ -51,14 +51,14 @@ mod trade {
     #[test]
     fn option() {
         let raw_msg = r#"{"jsonrpc":"2.0","method":"subscription","params":{"channel":"trades.option.any.raw","data":[{"trade_seq":1706,"trade_id":"137488100","timestamp":1616321732986,"tick_direction":0,"price":0.007,"mark_price":0.00670817,"iv":78.44,"instrument_name":"BTC-26MAR21-62000-C","index_price":56151.63,"direction":"buy","amount":0.1}]}}"#;
-        let trades = &parse_trade("deribit", MarketType::Option, raw_msg).unwrap();
+        let trades = &parse_trade("deribit", MarketType::EuropeanOption, raw_msg).unwrap();
 
         assert_eq!(trades.len(), 1);
 
         for trade in trades.iter() {
             crate::utils::check_trade_fields(
                 "deribit",
-                MarketType::Option,
+                MarketType::EuropeanOption,
                 "BTC/USD".to_string(),
                 trade,
             );

@@ -7,9 +7,15 @@ const market_types = {
     bitz: ["spot"],
     bybit: ["inverse_future", "inverse_swap", "linear_swap"],
     coinbase_pro: ["spot"],
-    deribit: ["inverse_future", "option"], // inverse_swap is included in inverse_future
+    deribit: ["inverse_future", "european_option"], // inverse_swap is included in inverse_future
     gate: ["spot", "linear_future", "linear_swap", "inverse_swap"],
-    huobi: ["spot", "inverse_future", "linear_swap", "inverse_swap", "option"],
+    huobi: [
+        "spot",
+        "inverse_future",
+        "linear_swap",
+        "inverse_swap",
+        "european_option",
+    ],
     kraken: ["spot"],
     kucoin: ["spot", "inverse_future", "linear_swap", "inverse_swap"],
     mxc: ["linear_swap", "inverse_swap"],
@@ -19,7 +25,7 @@ const market_types = {
         "inverse_future",
         "linear_swap",
         "inverse_swap",
-        "option",
+        "european_option",
     ],
     zbg: ["spot", "inverse_swap", "linear_swap"],
 };

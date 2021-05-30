@@ -124,7 +124,7 @@ fn main() {
             ws_client.subscribe(&channels);
             ws_client.run(None);
         }
-        MarketType::Option => {
+        MarketType::EuropeanOption => {
             let ws_client = HuobiOptionWSClient::new(on_msg_ext, None);
             ws_client.subscribe(&channels);
             ws_client.run(None);

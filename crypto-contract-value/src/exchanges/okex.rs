@@ -161,7 +161,7 @@ lazy_static! {
         let mut result = HashMap::<MarketType, HashMap<String, f32>>::new();
         result.insert(MarketType::LinearSwap, linear_swap);
         result.insert(MarketType::LinearFuture, linear_future);
-        result.insert(MarketType::Option, option);
+        result.insert(MarketType::EuropeanOption, option);
         result
     };
 }
@@ -198,7 +198,7 @@ pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<
         MarketType::InverseSwap | MarketType::InverseFuture => {
             Some(if pair.starts_with("BTC") { 100.0 } else { 10.0 })
         }
-        MarketType::LinearSwap | MarketType::LinearFuture | MarketType::Option => {
+        MarketType::LinearSwap | MarketType::LinearFuture | MarketType::EuropeanOption => {
             Some(CONTRACT_VALUES[&market_type][pair])
         }
         _ => None,

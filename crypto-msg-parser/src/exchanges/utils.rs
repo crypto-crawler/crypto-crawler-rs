@@ -37,7 +37,7 @@ pub(super) fn calc_quantity_and_volume(
 
     match market_type {
         MarketType::Spot => (quantity, quantity * price, None),
-        MarketType::InverseSwap | MarketType::InverseFuture | MarketType::Option => {
+        MarketType::InverseSwap | MarketType::InverseFuture | MarketType::EuropeanOption => {
             let quantity_quote = quantity * contract_value;
             (quantity_quote / price, quantity_quote, Some(quantity))
         }

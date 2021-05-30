@@ -32,7 +32,9 @@ pub enum MarketType {
     InverseFuture,
     LinearSwap,
     InverseSwap,
-    Option,
+
+    AmericanOption,
+    EuropeanOption,
 
     QuantoFuture,
     QuantoSwap,
@@ -52,7 +54,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::InverseFuture,
             MarketType::LinearSwap,
             MarketType::InverseSwap,
-            MarketType::Option,
+            MarketType::EuropeanOption,
         ],
         "bitfinex" => vec![MarketType::Spot, MarketType::LinearSwap],
         "bitget" => vec![
@@ -85,7 +87,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
         "deribit" => vec![
             MarketType::InverseFuture,
             MarketType::InverseSwap,
-            MarketType::Option,
+            MarketType::EuropeanOption,
         ],
         "ftx" => vec![
             MarketType::Spot,
@@ -105,7 +107,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::InverseFuture,
             MarketType::LinearSwap,
             MarketType::InverseSwap,
-            MarketType::Option,
+            MarketType::EuropeanOption,
         ],
         "kraken" => vec![MarketType::Spot],
         "kucoin" => vec![
@@ -125,7 +127,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::InverseFuture,
             MarketType::LinearSwap,
             MarketType::InverseSwap,
-            MarketType::Option,
+            MarketType::EuropeanOption,
         ],
         "zbg" => vec![
             MarketType::Spot,

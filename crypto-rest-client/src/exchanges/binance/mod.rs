@@ -18,7 +18,7 @@ pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result
         MarketType::LinearFuture | MarketType::LinearSwap => {
             binance_linear::BinanceLinearRestClient::fetch_l2_snapshot
         }
-        MarketType::Option => binance_option::BinanceOptionRestClient::fetch_l2_snapshot,
+        MarketType::EuropeanOption => binance_option::BinanceOptionRestClient::fetch_l2_snapshot,
         _ => panic!("Binance unknown market_type: {}", market_type),
     };
 

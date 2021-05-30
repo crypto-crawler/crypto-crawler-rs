@@ -6,7 +6,7 @@ pub(crate) fn get_contract_value(market_type: MarketType, _pair: &str) -> Option
         // https://docs.deribit.com/?javascript#trades-instrument_name-interval
         MarketType::InverseSwap | MarketType::InverseFuture => Some(1.0),
         // Each option contract value is 1 coin
-        MarketType::Option => Some(1.0),
+        MarketType::EuropeanOption => Some(1.0),
         _ => None,
     }
 }

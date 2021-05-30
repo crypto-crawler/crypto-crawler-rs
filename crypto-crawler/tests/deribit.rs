@@ -15,7 +15,7 @@ const EXCHANGE_NAME: &str = "deribit";
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
 #[test_case(MarketType::InverseFuture, "BTC-25JUN21")]
-#[test_case(MarketType::Option, "BTC-11JUN21-25000-P"; "inconclusive")]
+#[test_case(MarketType::EuropeanOption, "BTC-11JUN21-25000-P"; "inconclusive")]
 fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_trade,
@@ -28,7 +28,7 @@ fn test_crawl_trade(market_type: MarketType, symbol: &str) {
 
 #[test_case(MarketType::InverseSwap)]
 #[test_case(MarketType::InverseFuture)]
-#[test_case(MarketType::Option)]
+#[test_case(MarketType::EuropeanOption)]
 fn test_crawl_trade_all(market_type: MarketType) {
     thread_local! {
         static MESSAGES: RefCell<Vec<Message>> = RefCell::new(Vec::new());
@@ -51,7 +51,7 @@ fn test_crawl_trade_all(market_type: MarketType) {
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
 #[test_case(MarketType::InverseFuture, "BTC-25JUN21")]
-#[test_case(MarketType::Option, "BTC-11JUN21-25000-P")]
+#[test_case(MarketType::EuropeanOption, "BTC-11JUN21-25000-P")]
 fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_l2_event,
@@ -64,7 +64,7 @@ fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
 #[test_case(MarketType::InverseFuture, "BTC-25JUN21")]
-#[test_case(MarketType::Option, "BTC-11JUN21-25000-P")]
+#[test_case(MarketType::EuropeanOption, "BTC-11JUN21-25000-P")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     gen_test_snapshot_code!(
         crawl_l2_snapshot,
@@ -77,7 +77,7 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
 #[test_case(MarketType::InverseFuture, "BTC-25JUN21")]
-#[test_case(MarketType::Option, "BTC-11JUN21-25000-P")]
+#[test_case(MarketType::EuropeanOption, "BTC-11JUN21-25000-P")]
 fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_ticker,

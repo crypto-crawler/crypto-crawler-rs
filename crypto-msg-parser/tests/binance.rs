@@ -100,14 +100,14 @@ mod trade {
     #[test]
     fn option() {
         let raw_msg = r#"{"stream":"BTCUSDT_C@TRADE_ALL","data":{"e":"trade_all","E":1616205287778,"s":"BTCUSDT_C","t":[{"t":"315","p":"4842.24","q":"0.0001","b":"4612047757752932782","a":"4612057653433061439","T":1616204382000,"s":"1","S":"BTC-210430-68000-C"},{"t":"805","p":"5616.36","q":"0.0001","b":"4612047757752932781","a":"4612057653433055969","T":1616204357000,"s":"1","S":"BTC-210430-64000-C"},{"t":"313","p":"7028.44","q":"0.0001","b":"4612015871915728334","a":"4612057653433051715","T":1616204344000,"s":"1","S":"BTC-210430-60000-C"}]}}"#;
-        let trades = &parse_trade("binance", MarketType::Option, raw_msg).unwrap();
+        let trades = &parse_trade("binance", MarketType::EuropeanOption, raw_msg).unwrap();
 
         assert_eq!(trades.len(), 3);
 
         for trade in trades.iter() {
             crate::utils::check_trade_fields(
                 "binance",
-                MarketType::Option,
+                MarketType::EuropeanOption,
                 "BTC/USDT".to_string(),
                 trade,
             );

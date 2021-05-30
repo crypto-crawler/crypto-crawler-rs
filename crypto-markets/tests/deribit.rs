@@ -31,7 +31,7 @@ fn fetch_inverse_swap_symbols() {
 
 #[test]
 fn fetch_option_symbols() {
-    let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::Option).unwrap();
+    let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::EuropeanOption).unwrap();
     assert!(!symbols.is_empty());
 
     for symbol in symbols.iter() {

@@ -16,10 +16,10 @@ struct FutureMarket {
     symbol: String,
     pair: String,
     contractType: String,
-    deliveryDate: i64,
-    onboardDate: i64,
+    deliveryDate: u64,
+    onboardDate: u64,
     contractStatus: String,
-    contractSize: i64,
+    contractSize: f64,
     marginAsset: String,
     maintMarginPercent: String,
     requiredMarginPercent: String,
@@ -85,6 +85,7 @@ fn fetch_future_markets_internal() -> Result<Vec<Market>> {
                 pair: format!("{}/{}", m.baseAsset, m.quoteAsset),
                 base: m.baseAsset.clone(),
                 quote: m.quoteAsset.clone(),
+                settle: m.baseAsset.clone(),
                 base_id: m.baseAsset.clone(),
                 quote_id: m.quoteAsset.clone(),
                 active: m.contractStatus == "TRADING",
@@ -102,6 +103,12 @@ fn fetch_future_markets_internal() -> Result<Vec<Market>> {
                 min_quantity: MinQuantity {
                     base: Some(parse_filter(&m.filters, "LOT_SIZE", "minQty")),
                     quote: None,
+                },
+                contract_value: Some(m.contractSize),
+                delivery_date: if m.contractType == "PERPETUAL" {
+                    None
+                } else {
+                    Some(m.deliveryDate)
                 },
                 info: serde_json::to_value(&m)
                     .unwrap()

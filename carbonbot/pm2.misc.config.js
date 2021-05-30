@@ -43,7 +43,7 @@ apps.push({
 });
 apps.push({
     name: "crawler-huobi-misc-option",
-    script: "huobi_misc option",
+    script: "huobi_misc european_option",
     exec_interpreter: "none",
     exec_mode: "fork",
     instances: 1,

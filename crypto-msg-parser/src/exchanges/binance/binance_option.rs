@@ -55,7 +55,7 @@ pub(crate) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
             let quantity = trade.q.parse::<f64>().unwrap();
             TradeMsg {
                 exchange: EXCHANGE_NAME.to_string(),
-                market_type: MarketType::Option,
+                market_type: MarketType::EuropeanOption,
                 symbol: trade.S.clone(),
                 pair,
                 msg_type: MessageType::Trade,

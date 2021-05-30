@@ -59,7 +59,7 @@ pub(crate) fn crawl_trade(
         }
         MarketType::LinearSwap => crawl_trade_linear_swap(market_type, symbols, on_msg, duration),
         MarketType::InverseSwap => crawl_trade_inverse_swap(market_type, symbols, on_msg, duration),
-        MarketType::Option => crawl_trade_option(market_type, symbols, on_msg, duration),
+        MarketType::EuropeanOption => crawl_trade_option(market_type, symbols, on_msg, duration),
         _ => panic!("Huobi does NOT have the {} market type", market_type),
     }
 }
@@ -105,7 +105,7 @@ pub(crate) fn crawl_l2_event(
         MarketType::InverseSwap => {
             crawl_l2_event_inverse_swap(market_type, symbols, on_msg, duration)
         }
-        MarketType::Option => crawl_l2_event_option(market_type, symbols, on_msg, duration),
+        MarketType::EuropeanOption => crawl_l2_event_option(market_type, symbols, on_msg, duration),
         _ => panic!("Huobi does NOT have the {} market type", market_type),
     }
 }
@@ -125,7 +125,7 @@ pub(crate) fn crawl_ticker(
         MarketType::InverseSwap => {
             crawl_ticker_inverse_swap(market_type, symbols, on_msg, duration)
         }
-        MarketType::Option => crawl_ticker_option(market_type, symbols, on_msg, duration),
+        MarketType::EuropeanOption => crawl_ticker_option(market_type, symbols, on_msg, duration),
         _ => panic!("Huobi does NOT have the {} market type", market_type),
     }
 }
