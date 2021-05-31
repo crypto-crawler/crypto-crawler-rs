@@ -214,6 +214,8 @@ mod l2_orderbook {
             orderbook,
         );
 
+        assert_eq!(orderbook.timestamp, 1622363903670);
+
         assert_eq!(orderbook.bids[0][0], 35743.98);
         assert_eq!(orderbook.bids[0][1], 0.0);
         assert_eq!(orderbook.bids[0][2], 0.0);
