@@ -1,6 +1,9 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{
+    exchanges::utils::calc_quantity_and_volume, MessageType, Order, OrderBookMsg, TradeMsg,
+    TradeSide,
+};
 
 use chrono::prelude::*;
 use serde_json::{Result, Value};
@@ -9,26 +12,26 @@ const EXCHANGE_NAME: &str = "bitfinex";
 
 fn parse_one_trade(market_type: MarketType, symbol: &str, nums: &[f64]) -> TradeMsg {
     assert_eq!(4, nums.len());
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
     let trade_id = nums[0] as i64;
     let timestamp = nums[1] as i64;
-    let quantity = nums[2];
+    let quantity = f64::abs(nums[2]);
     let price = nums[3];
+
+    let (quantity_base, quantity_quote, quantity_contract) =
+        calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
 
     TradeMsg {
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
         symbol: symbol.to_string(),
-        pair: crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap(),
+        pair,
         msg_type: MessageType::Trade,
         timestamp,
         price,
-        quantity_base: f64::abs(quantity),
-        quantity_quote: price * f64::abs(quantity),
-        quantity_contract: if market_type == MarketType::Spot {
-            None
-        } else {
-            Some(f64::abs(quantity))
-        },
+        quantity_base,
+        quantity_quote,
+        quantity_contract,
         side: if quantity < 0.0 {
             TradeSide::Sell
         } else {
@@ -95,16 +98,19 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
     let parse_order = |x: &[f64; 3]| -> Order {
         let price = x[0];
         // delete price level if count = 0
-        let quantity_base = if (x[1] as i32) == 0 {
+        let quantity = if (x[1] as i32) == 0 {
             0.0
         } else {
             f64::abs(x[2])
         };
-        let quantity_quote = price * quantity_base;
-        if market_type == MarketType::Spot {
-            vec![price, quantity_base, quantity_quote]
+
+        let (quantity_base, quantity_quote, quantity_contract) =
+            calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
+
+        if let Some(qc) = quantity_contract {
+            vec![price, quantity_base, quantity_quote, qc]
         } else {
-            vec![price, quantity_base, quantity_quote, quantity_base]
+            vec![price, quantity_base, quantity_quote]
         }
     };
 
@@ -112,7 +118,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
         symbol: symbol.to_string(),
-        pair,
+        pair: pair.clone(),
         msg_type: MessageType::L2Event,
         timestamp: now.timestamp_millis(),
         asks: Vec::new(),

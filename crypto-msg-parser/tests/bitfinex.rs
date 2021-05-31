@@ -120,12 +120,13 @@ mod l2_orderbook {
     use crypto_msg_parser::{parse_l2, MarketType};
 
     #[test]
-    fn spot() {
+    fn spot_snapshot() {
         let raw_msg = r#"[{"symbol":"tBTCUST","len":"25","freq":"F0","channel":"book","prec":"P0"},[[36167,1,0.48403686],[36162,2,0.22625024],[36161,1,0.43250047],[36158,1,0.209],[36155,2,0.48229814],[36171,1,-0.000006],[36172,1,-0.0002],[36173,1,-0.0002],[36174,2,-0.0102],[36175,1,-0.0002]]]"#;
         let orderbook = &parse_l2("bitfinex", MarketType::Spot, raw_msg).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 5);
         assert_eq!(orderbook.bids.len(), 5);
+        assert!(orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
             "bitfinex",
@@ -152,12 +153,33 @@ mod l2_orderbook {
     }
 
     #[test]
-    fn linear_swap() {
+    fn spot_update() {
+        let raw_msg = r#"[{"symbol":"tBTCUST","channel":"book","len":"25","freq":"F0","prec":"P0"},[34668,1,-0.00813136]]"#;
+        let orderbook = &parse_l2("bitfinex", MarketType::Spot, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 1);
+        assert_eq!(orderbook.bids.len(), 0);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "bitfinex",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+        assert_eq!(orderbook.asks[0][0], 34668.0);
+        assert_eq!(orderbook.asks[0][1], 0.00813136);
+        assert_eq!(orderbook.asks[0][2], 34668.0 * 0.00813136);
+    }
+
+    #[test]
+    fn linear_swap_snapshot() {
         let raw_msg = r#"[{"freq":"F0","channel":"book","prec":"P0","len":"25","symbol":"tBTCF0:USTF0"},[[34840,2,0.20047952],[34837,1,0.17573],[34829,1,0.0857],[34828,1,0.17155],[34826,2,0.25510833],[34841,1,-0.00034929],[34843,4,-0.70368583],[34844,1,-0.51672161],[34845,2,-0.78960194],[34846,1,-1.0339621]]]"#;
         let orderbook = &parse_l2("bitfinex", MarketType::LinearSwap, raw_msg).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 5);
         assert_eq!(orderbook.bids.len(), 5);
+        assert!(orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
             "bitfinex",
@@ -169,17 +191,43 @@ mod l2_orderbook {
         assert_eq!(orderbook.bids[0][0], 34840.0);
         assert_eq!(orderbook.bids[0][1], 0.20047952);
         assert_eq!(orderbook.bids[0][2], 34840.0 * 0.20047952);
+        assert_eq!(orderbook.bids[0][3], 0.20047952);
 
         assert_eq!(orderbook.bids[4][0], 34826.0);
         assert_eq!(orderbook.bids[4][1], 0.25510833);
         assert_eq!(orderbook.bids[4][2], 34826.0 * 0.25510833);
+        assert_eq!(orderbook.bids[4][3], 0.25510833);
 
         assert_eq!(orderbook.asks[0][0], 34841.0);
         assert_eq!(orderbook.asks[0][1], 0.00034929);
         assert_eq!(orderbook.asks[0][2], 34841.0 * 0.00034929);
+        assert_eq!(orderbook.asks[0][3], 0.00034929);
 
         assert_eq!(orderbook.asks[4][0], 34846.0);
         assert_eq!(orderbook.asks[4][1], 1.0339621);
         assert_eq!(orderbook.asks[4][2], 34846.0 * 1.0339621);
+        assert_eq!(orderbook.asks[4][3], 1.0339621);
+    }
+
+    #[test]
+    fn linear_swap_update() {
+        let raw_msg = r#"[{"freq":"F0","symbol":"tBTCF0:USTF0","channel":"book","len":"25","prec":"P0"},[34442,2,2.27726294]]"#;
+        let orderbook = &parse_l2("bitfinex", MarketType::LinearSwap, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 0);
+        assert_eq!(orderbook.bids.len(), 1);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "bitfinex",
+            MarketType::LinearSwap,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.bids[0][0], 34442.0);
+        assert_eq!(orderbook.bids[0][1], 2.27726294);
+        assert_eq!(orderbook.bids[0][2], 34442.0 * 2.27726294);
+        assert_eq!(orderbook.bids[0][3], 2.27726294);
     }
 }
