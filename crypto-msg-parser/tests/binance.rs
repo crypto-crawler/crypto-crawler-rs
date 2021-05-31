@@ -205,6 +205,7 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
+        assert!(!orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
             "binance",
@@ -237,6 +238,7 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
+        assert!(!orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
             "binance",
@@ -275,6 +277,7 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
+        assert!(!orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
             "binance",
@@ -308,6 +311,7 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
+        assert!(!orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
             "binance",
@@ -346,6 +350,7 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
+        assert!(!orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
             "binance",
