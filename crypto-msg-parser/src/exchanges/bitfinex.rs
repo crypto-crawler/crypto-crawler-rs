@@ -1,7 +1,8 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
 
+use chrono::prelude::*;
 use serde_json::{Result, Value};
 
 const EXCHANGE_NAME: &str = "bitfinex";
@@ -71,6 +72,71 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     }
 }
 
-pub(crate) fn parse_l2(_market_type: MarketType, _msg: &str) -> Result<Vec<OrderBookMsg>> {
-    Ok(Vec::new())
+pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+    let ws_msg = serde_json::from_str::<Vec<Value>>(&msg)?;
+
+    let symbol = ws_msg[0]
+        .as_object()
+        .unwrap()
+        .get("symbol")
+        .unwrap()
+        .as_str()
+        .unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let now = Utc::now();
+
+    let data = ws_msg[1].clone();
+
+    let snapshot = {
+        let arr = data.as_array().unwrap();
+        arr[0].is_array()
+    };
+
+    let parse_order = |x: &[f64; 3]| -> Order {
+        let price = x[0];
+        // delete price level if count = 0
+        let quantity_base = if (x[1] as i32) == 0 {
+            0.0
+        } else {
+            f64::abs(x[2])
+        };
+        let quantity_quote = price * quantity_base;
+        if market_type == MarketType::Spot {
+            vec![price, quantity_base, quantity_quote]
+        } else {
+            vec![price, quantity_base, quantity_quote, quantity_base]
+        }
+    };
+
+    let mut orderbook = OrderBookMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: symbol.to_string(),
+        pair,
+        msg_type: MessageType::L2Event,
+        timestamp: now.timestamp_millis(),
+        asks: Vec::new(),
+        bids: Vec::new(),
+        snapshot,
+        raw: serde_json::from_str(msg)?,
+    };
+
+    let raw_orders = if snapshot {
+        // snapshot
+        serde_json::from_value::<Vec<[f64; 3]>>(data).unwrap()
+    } else {
+        // update
+        let raw_order = serde_json::from_value::<[f64; 3]>(data).unwrap();
+        vec![raw_order]
+    };
+    for raw_order in raw_orders.iter() {
+        let order = parse_order(raw_order);
+        if raw_order[2] > 0.0 {
+            orderbook.bids.push(order);
+        } else {
+            orderbook.asks.push(order);
+        }
+    }
+
+    Ok(vec![orderbook])
 }
