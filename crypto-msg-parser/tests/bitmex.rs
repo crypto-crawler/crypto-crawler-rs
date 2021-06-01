@@ -149,3 +149,88 @@ mod funding_rate {
         assert_eq!(funding_rates[0].funding_time, 1617307200000);
     }
 }
+
+#[cfg(test)]
+mod l2_orderbook {
+    use crypto_msg_parser::{parse_l2, MarketType};
+
+    #[test]
+    fn inverse_swap_snapshot() {
+        let raw_msg = r#"{"table":"orderBookL2_25","action":"partial","data":[{"symbol":"XBTUSD","id":8796381000,"side":"Sell","size":49900,"price":36190},{"symbol":"XBTUSD","id":8796381050,"side":"Sell","size":125714,"price":36189.5},{"symbol":"XBTUSD","id":8796381100,"side":"Sell","size":34600,"price":36189},{"symbol":"XBTUSD","id":8796385500,"side":"Buy","size":136,"price":36145},{"symbol":"XBTUSD","id":8796385600,"side":"Buy","size":26,"price":36144},{"symbol":"XBTUSD","id":8796385800,"side":"Buy","size":18067,"price":36142}]}"#;
+        let orderbook = &parse_l2("bitmex", MarketType::InverseSwap, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 3);
+        assert_eq!(orderbook.bids.len(), 3);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "bitmex",
+            MarketType::InverseSwap,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.bids[0][0], 36145.0);
+        assert_eq!(orderbook.bids[0][1], 136.0 / 36145.0);
+        assert_eq!(orderbook.bids[0][2], 136.0);
+        assert_eq!(orderbook.bids[0][3], 136.0);
+
+        assert_eq!(orderbook.bids[2][0], 36142.0);
+        assert_eq!(orderbook.bids[2][1], 18067.0 / 36142.0);
+        assert_eq!(orderbook.bids[2][2], 18067.0);
+        assert_eq!(orderbook.bids[2][3], 18067.0);
+
+        assert_eq!(orderbook.asks[0][0], 36190.0);
+        assert_eq!(orderbook.asks[0][1], 49900.0 / 36190.0);
+        assert_eq!(orderbook.asks[0][2], 49900.0);
+        assert_eq!(orderbook.asks[0][3], 49900.0);
+
+        assert_eq!(orderbook.asks[2][0], 36189.0);
+        assert_eq!(orderbook.asks[2][1], 34600.0 / 36189.0);
+        assert_eq!(orderbook.asks[2][2], 34600.0);
+        assert_eq!(orderbook.asks[2][3], 34600.0);
+    }
+
+    #[test]
+    fn inverse_swap_update() {
+        let insert_msg = r#"{"table":"orderBookL2_25","action":"insert","data":[{"symbol":"XBTUSD","id":8796323950,"side":"Sell","size":38760,"price":36760.5}]}"#;
+        let _ = parse_l2("bitmex", MarketType::InverseSwap, insert_msg);
+        let update_msg = r#"{"table":"orderBookL2_25","action":"update","data":[{"symbol":"XBTUSD","id":8796323950,"side":"Sell","size":36760}]}"#;
+        let orderbook = &parse_l2("bitmex", MarketType::InverseSwap, update_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 1);
+        assert_eq!(orderbook.bids.len(), 0);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "bitmex",
+            MarketType::InverseSwap,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.asks[0][0], 36760.5);
+        assert_eq!(orderbook.asks[0][1], 36760.0 / 36760.5);
+        assert_eq!(orderbook.asks[0][2], 36760.0);
+        assert_eq!(orderbook.asks[0][3], 36760.0);
+
+        let delete_msg = r#"{"table":"orderBookL2_25","action":"delete","data":[{"symbol":"XBTUSD","id":8796323950,"side":"Sell"}]}"#;
+        let orderbook = &parse_l2("bitmex", MarketType::InverseSwap, delete_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 1);
+        assert_eq!(orderbook.bids.len(), 0);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "bitmex",
+            MarketType::InverseSwap,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.asks[0][0], 36760.5);
+        assert_eq!(orderbook.asks[0][1], 0.0);
+        assert_eq!(orderbook.asks[0][2], 0.0);
+        assert_eq!(orderbook.asks[0][3], 0.0);
+    }
+}
