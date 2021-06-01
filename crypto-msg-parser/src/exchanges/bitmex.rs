@@ -151,11 +151,9 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         for x in ws_msg.data.iter() {
             symbol_price_map.insert(x.id, x.price.unwrap());
         }
-    } else {
-        if !price_map.contains_key(&symbol) {
-            panic!("{}", msg);
-            // return Ok(Vec::new());
-        }
+    } else if !price_map.contains_key(&symbol) {
+        panic!("{}", msg);
+        // return Ok(Vec::new());
     }
 
     let symbol_price_map = price_map.get_mut(&symbol).unwrap();
