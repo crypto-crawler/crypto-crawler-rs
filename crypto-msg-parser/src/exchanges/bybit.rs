@@ -1,6 +1,9 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{
+    exchanges::utils::calc_quantity_and_volume, MessageType, Order, OrderBookMsg, TradeMsg,
+    TradeSide,
+};
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
@@ -42,6 +45,39 @@ struct LinearTradeMsg {
 struct WebsocketMsg<T: Sized> {
     topic: String,
     data: Vec<T>,
+}
+
+// https://bybit-exchange.github.io/docs/inverse/#t-websocketorderbook25
+// https://bybit-exchange.github.io/docs/linear/#t-websocketorderbook25
+#[derive(Serialize, Deserialize)]
+struct RawOrder {
+    price: String,
+    symbol: String,
+    side: String,
+    size: Option<f64>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct LinearOrderbookSnapshot {
+    order_book: Vec<RawOrder>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct OrderbookDelta {
+    delete: Vec<RawOrder>,
+    update: Vec<RawOrder>,
+    insert: Vec<RawOrder>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct RawOrderbookMsg {
+    topic: String,
+    #[serde(rename = "type")]
+    type_: String,
+    data: Value,
+    timestamp_e6: Value, // i64 or String
 }
 
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
@@ -117,6 +153,85 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     }
 }
 
-pub(crate) fn parse_l2(_market_type: MarketType, _msg: &str) -> Result<Vec<OrderBookMsg>> {
-    Ok(Vec::new())
+pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+    let ws_msg = serde_json::from_str::<RawOrderbookMsg>(msg)?;
+    let symbol = ws_msg.topic.strip_prefix("orderBookL2_25.").unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let snapshot = ws_msg.type_ == "snapshot";
+    let timestamp = if ws_msg.timestamp_e6.is_i64() {
+        ws_msg.timestamp_e6.as_i64().unwrap()
+    } else {
+        ws_msg
+            .timestamp_e6
+            .as_str()
+            .unwrap()
+            .parse::<i64>()
+            .unwrap()
+    } / 1000;
+
+    let parse_order = |raw_order: &RawOrder| -> Order {
+        let price = raw_order.price.parse::<f64>().unwrap();
+        let quantity = raw_order.size.unwrap_or(0.0);
+        let (quantity_base, quantity_quote, quantity_contract) =
+            calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
+
+        vec![
+            price,
+            quantity_base,
+            quantity_quote,
+            quantity_contract.unwrap(),
+        ]
+    };
+
+    let mut orderbook = OrderBookMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: symbol.to_string(),
+        pair: pair.to_string(),
+        msg_type: MessageType::L2Event,
+        timestamp,
+        asks: Vec::new(),
+        bids: Vec::new(),
+        snapshot,
+        raw: serde_json::from_str(msg)?,
+    };
+
+    let raw_orders = match market_type {
+        MarketType::InverseSwap | MarketType::InverseFuture => {
+            if snapshot {
+                serde_json::from_value::<Vec<RawOrder>>(ws_msg.data).unwrap()
+            } else {
+                let tmp = serde_json::from_value::<OrderbookDelta>(ws_msg.data).unwrap();
+                let mut v = Vec::<RawOrder>::new();
+                v.extend(tmp.delete);
+                v.extend(tmp.update);
+                v.extend(tmp.insert);
+                v
+            }
+        }
+        MarketType::LinearSwap => {
+            if snapshot {
+                let tmp = serde_json::from_value::<LinearOrderbookSnapshot>(ws_msg.data).unwrap();
+                tmp.order_book
+            } else {
+                let tmp = serde_json::from_value::<OrderbookDelta>(ws_msg.data).unwrap();
+                let mut v = Vec::<RawOrder>::new();
+                v.extend(tmp.delete);
+                v.extend(tmp.update);
+                v.extend(tmp.insert);
+                v
+            }
+        }
+        _ => panic!("Unknown market_type {}", market_type),
+    };
+
+    for raw_order in raw_orders.iter() {
+        let order = parse_order(raw_order);
+        if raw_order.side == "Buy" {
+            orderbook.bids.push(order);
+        } else {
+            orderbook.asks.push(order);
+        }
+    }
+    Ok(vec![orderbook])
 }
