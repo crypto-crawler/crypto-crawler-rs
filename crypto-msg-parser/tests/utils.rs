@@ -22,6 +22,8 @@ pub fn check_trade_fields(exchange: &str, market_type: MarketType, pair: String,
     assert_eq!(trade.timestamp.to_string().len(), 13);
 }
 
+// TODO: weird, it is actually being used
+#[allow(dead_code)]
 pub fn check_orderbook_fields(
     exchange: &str,
     market_type: MarketType,
