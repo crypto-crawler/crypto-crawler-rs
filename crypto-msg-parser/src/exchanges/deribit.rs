@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
@@ -22,10 +22,23 @@ struct RawTradeMsg {
     extra: HashMap<String, Value>,
 }
 
+// https://docs.deribit.com/?javascript#book-instrument_name-interval
+#[derive(Serialize, Deserialize)]
+struct RawOrderbookMsg {
+    #[serde(rename = "type")]
+    type_: String, // snapshot, change
+    timestamp: i64,
+    instrument_name: String,
+    bids: Vec<[Value; 3]>,
+    asks: Vec<[Value; 3]>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
 #[derive(Serialize, Deserialize)]
 struct Params<T: Sized> {
     channel: String,
-    data: Vec<T>,
+    data: T,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -49,7 +62,7 @@ fn calc_quantity_and_volume(market_type: MarketType, price: f64, amount: f64) ->
 }
 
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradeMsg>>(msg)?;
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Vec<RawTradeMsg>>>(msg)?;
     let trades: Vec<TradeMsg> = ws_msg
         .params
         .data
@@ -84,6 +97,36 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     Ok(trades)
 }
 
-pub(crate) fn parse_l2(_market_type: MarketType, _msg: &str) -> Result<Vec<OrderBookMsg>> {
-    Ok(Vec::new())
+pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(msg)?;
+    let raw_orderbook = ws_msg.params.data;
+    let snapshot = raw_orderbook.type_ == "snapshot";
+    let timestamp = raw_orderbook.timestamp;
+    let symbol = raw_orderbook.instrument_name;
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+
+    let parse_order = |raw_order: &[Value; 3]| -> Order {
+        let price = raw_order[1].as_f64().unwrap();
+        let quantity = raw_order[2].as_f64().unwrap();
+
+        let (quantity_base, quantity_quote) =
+            calc_quantity_and_volume(market_type, price, quantity);
+
+        vec![price, quantity_base, quantity_quote, quantity]
+    };
+
+    let orderbook = OrderBookMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol,
+        pair,
+        msg_type: MessageType::L2Event,
+        timestamp,
+        asks: raw_orderbook.asks.iter().map(|x| parse_order(x)).collect(),
+        bids: raw_orderbook.bids.iter().map(|x| parse_order(x)).collect(),
+        snapshot,
+        raw: serde_json::from_str(msg)?,
+    };
+
+    Ok(vec![orderbook])
 }
