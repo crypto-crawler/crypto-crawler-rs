@@ -109,7 +109,7 @@ pub struct TradeMsg {
 }
 
 /// price, quantity_base, quantity_quote, quantity_contract(for spot markets it is empty)
-/// quantity_base == 0.0 means delete
+/// A 0.0 quantity_base indicates the price level can be removed.
 pub type Order = Vec<f64>;
 
 /// Level2 orderbook message.

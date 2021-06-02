@@ -1,6 +1,6 @@
 mod utils;
 
-use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
+use crypto_msg_parser::{parse_l2, parse_trade, MarketType, TradeSide};
 
 #[test]
 fn trade() {
@@ -16,4 +16,60 @@ fn trade() {
 
     assert_eq!(trade.quantity_base, 0.00031874);
     assert_eq!(trade.side, TradeSide::Sell);
+}
+
+#[test]
+fn l2_orderbook_snapshot() {
+    let raw_msg = r#"{"type":"snapshot","product_id":"BTC-USD","asks":[["37212.77","0.05724592"],["37215.39","0.00900000"],["37215.69","0.09654865"]],"bids":[["37209.96","0.04016376"],["37209.32","0.00192256"],["37209.16","0.01130000"]]}"#;
+    let orderbook = &parse_l2("coinbase_pro", MarketType::Spot, raw_msg).unwrap()[0];
+
+    assert_eq!(orderbook.asks.len(), 3);
+    assert_eq!(orderbook.bids.len(), 3);
+    assert!(orderbook.snapshot);
+
+    crate::utils::check_orderbook_fields(
+        "coinbase_pro",
+        MarketType::Spot,
+        "BTC/USD".to_string(),
+        orderbook,
+    );
+
+    assert_eq!(orderbook.bids[0][0], 37209.96);
+    assert_eq!(orderbook.bids[0][1], 0.04016376);
+    assert_eq!(orderbook.bids[0][2], 37209.96 * 0.04016376);
+
+    assert_eq!(orderbook.bids[2][0], 37209.16);
+    assert_eq!(orderbook.bids[2][1], 0.0113);
+    assert_eq!(orderbook.bids[2][2], 37209.16 * 0.0113);
+
+    assert_eq!(orderbook.asks[0][0], 37212.77);
+    assert_eq!(orderbook.asks[0][1], 0.05724592);
+    assert_eq!(orderbook.asks[0][2], 37212.77 * 0.05724592);
+
+    assert_eq!(orderbook.asks[2][0], 37215.69);
+    assert_eq!(orderbook.asks[2][1], 0.09654865);
+    assert_eq!(orderbook.asks[2][2], 37215.69 * 0.09654865);
+}
+
+#[test]
+fn l2_orderbook_update() {
+    let raw_msg = r#"{"type":"l2update","product_id":"BTC-USD","changes":[["buy","37378.26","0.02460000"]],"time":"2021-06-02T09:02:09.048568Z"}"#;
+    let orderbook = &parse_l2("coinbase_pro", MarketType::Spot, raw_msg).unwrap()[0];
+
+    assert_eq!(orderbook.asks.len(), 0);
+    assert_eq!(orderbook.bids.len(), 1);
+    assert!(!orderbook.snapshot);
+
+    crate::utils::check_orderbook_fields(
+        "coinbase_pro",
+        MarketType::Spot,
+        "BTC/USD".to_string(),
+        orderbook,
+    );
+
+    assert_eq!(orderbook.timestamp, 1622624529048);
+
+    assert_eq!(orderbook.bids[0][0], 37378.26);
+    assert_eq!(orderbook.bids[0][1], 0.0246);
+    assert_eq!(orderbook.bids[0][2], 37378.26 * 0.0246);
 }
