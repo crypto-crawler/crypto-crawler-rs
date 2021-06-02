@@ -85,3 +85,205 @@ mod trade {
         assert_eq!(trades[0].side, TradeSide::Buy);
     }
 }
+
+#[cfg(test)]
+mod l2_orderbook {
+    use crypto_msg_parser::{parse_l2, MarketType};
+
+    #[test]
+    fn spot_snapshot() {
+        let raw_msg = r#"{"channel": "orderbook", "market": "BTC/USD", "type": "partial", "data": {"time": 1622668801.966823, "checksum": 4093133381, "bids": [[37875.0, 0.4537], [37874.0, 0.5673], [37872.0, 0.328]], "asks": [[37876.0, 0.1749], [37877.0, 0.0001], [37878.0, 0.5]], "action": "partial"}}"#;
+        let orderbook = &parse_l2("ftx", MarketType::Spot, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 3);
+        assert_eq!(orderbook.bids.len(), 3);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "ftx",
+            MarketType::Spot,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622668801966);
+
+        assert_eq!(orderbook.bids[0][0], 37875.0);
+        assert_eq!(orderbook.bids[0][1], 0.4537);
+        assert_eq!(orderbook.bids[0][2], 37875.0 * 0.4537);
+
+        assert_eq!(orderbook.bids[2][0], 37872.0);
+        assert_eq!(orderbook.bids[2][1], 0.328);
+        assert_eq!(orderbook.bids[2][2], 37872.0 * 0.328);
+
+        assert_eq!(orderbook.asks[0][0], 37876.0);
+        assert_eq!(orderbook.asks[0][1], 0.1749);
+        assert_eq!(orderbook.asks[0][2], 37876.0 * 0.1749);
+
+        assert_eq!(orderbook.asks[2][0], 37878.0);
+        assert_eq!(orderbook.asks[2][1], 0.5);
+        assert_eq!(orderbook.asks[2][2], 37878.0 * 0.5);
+    }
+
+    #[test]
+    fn spot_update() {
+        let raw_msg = r#"{"channel": "orderbook", "market": "BTC/USD", "type": "update", "data": {"time": 1622668802.0262146, "checksum": 2044263315, "bids": [[37875.0, 0.446]], "asks": [[37886.0, 5.2109], [37889.0, 0.8493]], "action": "update"}}"#;
+        let orderbook = &parse_l2("ftx", MarketType::Spot, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 2);
+        assert_eq!(orderbook.bids.len(), 1);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "ftx",
+            MarketType::Spot,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622668802026);
+
+        assert_eq!(orderbook.bids[0][0], 37875.0);
+        assert_eq!(orderbook.bids[0][1], 0.446);
+        assert_eq!(orderbook.bids[0][2], 37875.0 * 0.446);
+
+        assert_eq!(orderbook.asks[0][0], 37886.0);
+        assert_eq!(orderbook.asks[0][1], 5.2109);
+        assert_eq!(orderbook.asks[0][2], 37886.0 * 5.2109);
+
+        assert_eq!(orderbook.asks[1][0], 37889.0);
+        assert_eq!(orderbook.asks[1][1], 0.8493);
+        assert_eq!(orderbook.asks[1][2], 37889.0 * 0.8493);
+    }
+
+    #[test]
+    fn linear_future_snapshot() {
+        let raw_msg = r#"{"channel": "orderbook", "market": "BTC-0625", "type": "partial", "data": {"time": 1622669504.8200636, "checksum": 1739399809, "bids": [[37965.0, 2.7939], [37961.0, 0.005], [37960.0, 11.4351]], "asks": [[37980.0, 0.2474], [37987.0, 0.0957], [37991.0, 0.0005]], "action": "partial"}}"#;
+        let orderbook = &parse_l2("ftx", MarketType::LinearFuture, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 3);
+        assert_eq!(orderbook.bids.len(), 3);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "ftx",
+            MarketType::LinearFuture,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622669504820);
+
+        assert_eq!(orderbook.bids[0][0], 37965.0);
+        assert_eq!(orderbook.bids[0][1], 2.7939);
+        assert_eq!(orderbook.bids[0][2], 37965.0 * 2.7939);
+        assert_eq!(orderbook.bids[0][3], 2.7939);
+
+        assert_eq!(orderbook.bids[2][0], 37960.0);
+        assert_eq!(orderbook.bids[2][1], 11.4351);
+        assert_eq!(orderbook.bids[2][2], 37960.0 * 11.4351);
+        assert_eq!(orderbook.bids[2][3], 11.4351);
+
+        assert_eq!(orderbook.asks[0][0], 37980.0);
+        assert_eq!(orderbook.asks[0][1], 0.2474);
+        assert_eq!(orderbook.asks[0][2], 37980.0 * 0.2474);
+        assert_eq!(orderbook.asks[0][3], 0.2474);
+
+        assert_eq!(orderbook.asks[2][0], 37991.0);
+        assert_eq!(orderbook.asks[2][1], 0.0005);
+        assert_eq!(orderbook.asks[2][2], 37991.0 * 0.0005);
+        assert_eq!(orderbook.asks[2][3], 0.0005);
+    }
+
+    #[test]
+    fn linear_future_update() {
+        let raw_msg = r#"{"channel": "orderbook", "market": "BTC-0625", "type": "update", "data": {"time": 1622669504.8437843, "checksum": 1584262478, "bids": [], "asks": [[37999.0, 0.0], [38440.0, 0.0026]], "action": "update"}}"#;
+        let orderbook = &parse_l2("ftx", MarketType::LinearFuture, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 2);
+        assert_eq!(orderbook.bids.len(), 0);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "ftx",
+            MarketType::LinearFuture,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622669504843);
+
+        assert_eq!(orderbook.asks[0][0], 37999.0);
+        assert_eq!(orderbook.asks[0][1], 0.0);
+        assert_eq!(orderbook.asks[0][2], 0.0);
+        assert_eq!(orderbook.asks[0][3], 0.0);
+
+        assert_eq!(orderbook.asks[1][0], 38440.0);
+        assert_eq!(orderbook.asks[1][1], 0.0026);
+        assert_eq!(orderbook.asks[1][2], 38440.0 * 0.0026);
+        assert_eq!(orderbook.asks[1][3], 0.0026);
+    }
+
+    #[test]
+    fn linear_swap_snapshot() {
+        let raw_msg = r#"{"channel": "orderbook", "market": "BTC-PERP", "type": "partial", "data": {"time": 1622660997.436228, "checksum": 1855139817, "bids": [[37955.0, 0.2212], [37954.0, 0.0025], [37953.0, 0.0025]], "asks": [[37956.0, 4.8852], [37957.0, 0.022], [37958.0, 0.4818]], "action": "partial"}}"#;
+        let orderbook = &parse_l2("ftx", MarketType::LinearSwap, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 3);
+        assert_eq!(orderbook.bids.len(), 3);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "ftx",
+            MarketType::LinearSwap,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622660997436);
+
+        assert_eq!(orderbook.bids[0][0], 37955.0);
+        assert_eq!(orderbook.bids[0][1], 0.2212);
+        assert_eq!(orderbook.bids[0][2], 37955.0 * 0.2212);
+        assert_eq!(orderbook.bids[0][3], 0.2212);
+
+        assert_eq!(orderbook.bids[2][0], 37953.0);
+        assert_eq!(orderbook.bids[2][1], 0.0025);
+        assert_eq!(orderbook.bids[2][2], 37953.0 * 0.0025);
+        assert_eq!(orderbook.bids[2][3], 0.0025);
+
+        assert_eq!(orderbook.asks[0][0], 37956.0);
+        assert_eq!(orderbook.asks[0][1], 4.8852);
+        assert_eq!(orderbook.asks[0][2], 37956.0 * 4.8852);
+        assert_eq!(orderbook.asks[0][3], 4.8852);
+
+        assert_eq!(orderbook.asks[2][0], 37958.0);
+        assert_eq!(orderbook.asks[2][1], 0.4818);
+        assert_eq!(orderbook.asks[2][2], 37958.0 * 0.4818);
+        assert_eq!(orderbook.asks[2][3], 0.4818);
+    }
+
+    #[test]
+    fn linear_swap_update() {
+        let raw_msg = r#"{"channel": "orderbook", "market": "BTC-PERP", "type": "update", "data": {"time": 1622660997.4591022, "checksum": 276300987, "bids": [], "asks": [[37965.0, 19.6097]], "action": "update"}}"#;
+        let orderbook = &parse_l2("ftx", MarketType::LinearSwap, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 1);
+        assert_eq!(orderbook.bids.len(), 0);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "ftx",
+            MarketType::LinearSwap,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622660997459);
+
+        assert_eq!(orderbook.asks[0][0], 37965.0);
+        assert_eq!(orderbook.asks[0][1], 19.6097);
+        assert_eq!(orderbook.asks[0][2], 37965.0 * 19.6097);
+        assert_eq!(orderbook.asks[0][3], 19.6097);
+    }
+}

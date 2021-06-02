@@ -1,6 +1,9 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{
+    exchanges::utils::calc_quantity_and_volume, MessageType, Order, OrderBookMsg, TradeMsg,
+    TradeSide,
+};
 
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
@@ -18,6 +21,17 @@ struct RawTradeMsg {
     side: String, // buy, sell
     liquidation: bool,
     time: String,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+// https://docs.ftx.com/#orderbooks
+#[derive(Serialize, Deserialize)]
+struct RawOrderbookMsg {
+    action: String, // partial, update
+    bids: Vec<[f64; 2]>,
+    asks: Vec<[f64; 2]>,
+    time: f64,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -71,6 +85,39 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     Ok(trades)
 }
 
-pub(crate) fn parse_l2(_market_type: MarketType, _msg: &str) -> Result<Vec<OrderBookMsg>> {
-    Ok(Vec::new())
+pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(msg)?;
+    debug_assert_eq!(ws_msg.channel, "orderbook");
+    let symbol = ws_msg.market.as_str();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let snapshot = ws_msg.data.action == "partial";
+    let timestamp = (ws_msg.data.time * 1000.0) as i64;
+
+    let parse_order = |raw_order: &[f64; 2]| -> Order {
+        let price = raw_order[0];
+        let quantity = raw_order[1];
+        let (quantity_base, quantity_quote, quantity_contract) =
+            calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
+
+        if let Some(qc) = quantity_contract {
+            vec![price, quantity_base, quantity_quote, qc]
+        } else {
+            vec![price, quantity_base, quantity_quote]
+        }
+    };
+
+    let orderbook = OrderBookMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: symbol.to_string(),
+        pair: pair.to_string(),
+        msg_type: MessageType::L2Event,
+        timestamp,
+        asks: ws_msg.data.asks.iter().map(|x| parse_order(x)).collect(),
+        bids: ws_msg.data.bids.iter().map(|x| parse_order(x)).collect(),
+        snapshot,
+        raw: serde_json::from_str(msg)?,
+    };
+
+    Ok(vec![orderbook])
 }
