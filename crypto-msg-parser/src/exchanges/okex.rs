@@ -154,43 +154,49 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
     debug_assert_eq!(ws_msg.data.len(), 1);
     let raw_orderbook = &ws_msg.data[0];
 
-    let symbol = raw_orderbook.instrument_id.clone();
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
-    let timestamp = DateTime::parse_from_rfc3339(&raw_orderbook.timestamp).unwrap();
+    let orderbooks = ws_msg
+        .data
+        .iter()
+        .map(|raw_orderbook| {
+            let symbol = raw_orderbook.instrument_id.clone();
+            let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+            let timestamp = DateTime::parse_from_rfc3339(&raw_orderbook.timestamp).unwrap();
 
-    let parse_order = |raw_order: &[String; 4]| -> Order {
-        let price = raw_order[0].parse::<f64>().unwrap();
-        let quantity = raw_order[1].parse::<f64>().unwrap();
-        let (quantity_base, quantity_quote, quantity_contract) =
-            calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
+            let parse_order = |raw_order: &[String; 4]| -> Order {
+                let price = raw_order[0].parse::<f64>().unwrap();
+                let quantity = raw_order[1].parse::<f64>().unwrap();
+                let (quantity_base, quantity_quote, quantity_contract) =
+                    calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
 
-        if let Some(qc) = quantity_contract {
-            vec![price, quantity_base, quantity_quote, qc]
-        } else {
-            vec![price, quantity_base, quantity_quote]
-        }
-    };
+                if let Some(qc) = quantity_contract {
+                    vec![price, quantity_base, quantity_quote, qc]
+                } else {
+                    vec![price, quantity_base, quantity_quote]
+                }
+            };
 
-    let orderbook = OrderBookMsg {
-        exchange: EXCHANGE_NAME.to_string(),
-        market_type,
-        symbol,
-        pair: pair.clone(),
-        msg_type: MessageType::L2Event,
-        timestamp: timestamp.timestamp_millis(),
-        asks: raw_orderbook
-            .asks
-            .iter()
-            .map(|x| parse_order(x))
-            .collect::<Vec<Order>>(),
-        bids: raw_orderbook
-            .bids
-            .iter()
-            .map(|x| parse_order(x))
-            .collect::<Vec<Order>>(),
-        snapshot,
-        raw: serde_json::from_str(msg)?,
-    };
+            OrderBookMsg {
+                exchange: EXCHANGE_NAME.to_string(),
+                market_type,
+                symbol,
+                pair: pair.clone(),
+                msg_type: MessageType::L2Event,
+                timestamp: timestamp.timestamp_millis(),
+                asks: raw_orderbook
+                    .asks
+                    .iter()
+                    .map(|x| parse_order(x))
+                    .collect::<Vec<Order>>(),
+                bids: raw_orderbook
+                    .bids
+                    .iter()
+                    .map(|x| parse_order(x))
+                    .collect::<Vec<Order>>(),
+                snapshot,
+                raw: serde_json::to_value(raw_orderbook).unwrap(),
+            }
+        })
+        .collect::<Vec<OrderBookMsg>>();
 
-    Ok(vec![orderbook])
+    Ok(orderbooks)
 }
