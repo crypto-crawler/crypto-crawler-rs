@@ -15,6 +15,10 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     }
 }
 
-pub(crate) fn parse_l2(_market_type: MarketType, _msg: &str) -> Result<Vec<OrderBookMsg>> {
-    Ok(Vec::new())
+pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+    if market_type == MarketType::Spot {
+        mxc_spot::parse_l2(msg)
+    } else {
+        mxc_swap::parse_l2(market_type, msg)
+    }
 }

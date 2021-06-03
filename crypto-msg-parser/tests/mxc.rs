@@ -76,3 +76,77 @@ mod trade {
         assert_eq!(trade.side, TradeSide::Buy);
     }
 }
+
+#[cfg(test)]
+mod l2_orderbook {
+    use crypto_msg_parser::{parse_l2, MarketType};
+
+    #[test]
+    fn spot_update() {
+        let raw_msg = r#"["push.symbol",{"symbol":"BTC_USDT","data":{"bids":[{"p":"38932.19","q":"0.049010","a":"1908.06663"},{"p":"38931.18","q":"0.038220","a":"1487.94969"}],"asks":[{"p":"38941.81","q":"0.000000","a":"0.00000000"},{"p":"38940.71","q":"0.000000","a":"0.00000000"}]}}]"#;
+        let orderbook = &parse_l2("mxc", MarketType::Spot, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 2);
+        assert_eq!(orderbook.bids.len(), 2);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "mxc",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.bids[0][0], 38932.19);
+        assert_eq!(orderbook.bids[0][1], 0.04901);
+        assert_eq!(orderbook.bids[0][2], 1908.06663);
+    }
+
+    #[test]
+    fn linear_swap_update() {
+        let raw_msg = r#"{"channel":"push.depth","data":{"asks":[[38704.5,138686,1]],"bids":[],"version":2427341830},"symbol":"BTC_USDT","ts":1622722473816}"#;
+        let orderbook = &parse_l2("mxc", MarketType::LinearSwap, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 1);
+        assert_eq!(orderbook.bids.len(), 0);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "mxc",
+            MarketType::LinearSwap,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622722473816);
+
+        assert_eq!(orderbook.asks[0][0], 38704.5);
+        assert_eq!(orderbook.asks[0][1], 13.8686);
+        assert_eq!(orderbook.asks[0][2], 38704.5 * 13.8686);
+        assert_eq!(orderbook.asks[0][3], 138686.0);
+    }
+
+    #[test]
+    fn inverse_swap_update() {
+        let raw_msg = r#"{"channel":"push.depth","data":{"asks":[[38758.5,4172,2]],"bids":[],"version":1151578213},"symbol":"BTC_USD","ts":1622723010000}"#;
+        let orderbook = &parse_l2("mxc", MarketType::InverseSwap, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 1);
+        assert_eq!(orderbook.bids.len(), 0);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "mxc",
+            MarketType::InverseSwap,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622723010000);
+
+        assert_eq!(orderbook.asks[0][0], 38758.5);
+        assert_eq!(orderbook.asks[0][1], 417200.0 / 38758.5);
+        assert_eq!(orderbook.asks[0][2], 417200.0);
+        assert_eq!(orderbook.asks[0][3], 4172.0);
+    }
+}
