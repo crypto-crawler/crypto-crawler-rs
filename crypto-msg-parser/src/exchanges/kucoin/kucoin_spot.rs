@@ -1,7 +1,8 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, TradeMsg, TradeSide};
+use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
 
+use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
 use std::collections::HashMap;
@@ -22,16 +23,30 @@ struct SpotTradeMsg {
 }
 
 #[derive(Serialize, Deserialize)]
-struct WebsocketMsg {
+struct Changes {
+    asks: Vec<[String; 3]>, //price, size, sequence
+    bids: Vec<[String; 3]>,
+}
+// https://docs.kucoin.com/#level-2-market-data
+#[derive(Serialize, Deserialize)]
+struct SpotOrderbookMsg {
+    symbol: String,
+    changes: Changes,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+#[derive(Serialize, Deserialize)]
+struct WebsocketMsg<T: Sized> {
     subject: String,
     topic: String,
     #[serde(rename = "type")]
     type_: String,
-    data: SpotTradeMsg,
+    data: T,
 }
 
 pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg>(msg)?;
+    let ws_msg = serde_json::from_str::<WebsocketMsg<SpotTradeMsg>>(msg)?;
     let raw_trade = ws_msg.data;
     let price = raw_trade.price.parse::<f64>().unwrap();
     let quantity = raw_trade.size.parse::<f64>().unwrap();
@@ -57,4 +72,44 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
     };
 
     Ok(vec![trade])
+}
+
+pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<SpotOrderbookMsg>>(msg)?;
+    debug_assert_eq!(ws_msg.subject, "trade.l2update");
+    let symbol = ws_msg.data.symbol;
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+
+    let parse_order = |raw_order: &[String; 3]| -> Order {
+        let price = raw_order[0].parse::<f64>().unwrap();
+        let quantity_base = raw_order[1].parse::<f64>().unwrap();
+        vec![price, quantity_base, price * quantity_base]
+    };
+
+    let orderbook = OrderBookMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type: MarketType::Spot,
+        symbol,
+        pair,
+        msg_type: MessageType::L2Event,
+        timestamp: Utc::now().timestamp_millis(),
+        asks: ws_msg
+            .data
+            .changes
+            .asks
+            .iter()
+            .map(|x| parse_order(x))
+            .collect(),
+        bids: ws_msg
+            .data
+            .changes
+            .bids
+            .iter()
+            .map(|x| parse_order(x))
+            .collect(),
+        snapshot: false,
+        raw: serde_json::from_str(msg)?,
+    };
+
+    Ok(vec![orderbook])
 }

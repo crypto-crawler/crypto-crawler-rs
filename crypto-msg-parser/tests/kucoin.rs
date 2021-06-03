@@ -93,3 +93,101 @@ mod trade {
         assert_eq!(trade.side, TradeSide::Sell);
     }
 }
+
+#[cfg(test)]
+mod l2_orderbook {
+    use crypto_msg_parser::{parse_l2, MarketType};
+
+    #[test]
+    fn spot_update() {
+        let raw_msg = r#"{"data":{"sequenceStart":1617071937790,"symbol":"BTC-USDT","changes":{"asks":[],"bids":[["39272","0.0530867","1617071937790"]]},"sequenceEnd":1617071937790},"subject":"trade.l2update","topic":"/market/level2:BTC-USDT","type":"message"}"#;
+        let orderbook = &parse_l2("kucoin", MarketType::Spot, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 0);
+        assert_eq!(orderbook.bids.len(), 1);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "kucoin",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.bids[0][0], 39272.0);
+        assert_eq!(orderbook.bids[0][1], 0.0530867);
+        assert_eq!(orderbook.bids[0][2], 39272.0 * 0.0530867);
+    }
+
+    #[test]
+    fn inverse_swap_update() {
+        let raw_msg = r#"{"data":{"sequence":1617852459594,"change":"39069.0,buy,23960","timestamp":1622718985044},"subject":"level2","topic":"/contractMarket/level2:XBTUSDM","type":"message"}"#;
+        let orderbook = &parse_l2("kucoin", MarketType::InverseSwap, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 0);
+        assert_eq!(orderbook.bids.len(), 1);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "kucoin",
+            MarketType::InverseSwap,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622718985044);
+
+        assert_eq!(orderbook.bids[0][0], 39069.0);
+        assert_eq!(orderbook.bids[0][1], 23960.0 / 39069.0);
+        assert_eq!(orderbook.bids[0][2], 23960.0);
+        assert_eq!(orderbook.bids[0][3], 23960.0);
+    }
+
+    #[test]
+    fn linear_swap_update() {
+        let raw_msg = r#"{"data":{"sequence":1618232029293,"change":"38962.0,buy,4374","timestamp":1622719195286},"subject":"level2","topic":"/contractMarket/level2:XBTUSDTM","type":"message"}"#;
+        let orderbook = &parse_l2("kucoin", MarketType::LinearSwap, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 0);
+        assert_eq!(orderbook.bids.len(), 1);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "kucoin",
+            MarketType::LinearSwap,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622719195286);
+
+        assert_eq!(orderbook.bids[0][0], 38962.0);
+        assert_eq!(orderbook.bids[0][1], 4.374);
+        assert_eq!(orderbook.bids[0][2], 38962.0 * 4.374);
+        assert_eq!(orderbook.bids[0][3], 4374.0);
+    }
+
+    #[test]
+    fn inverse_future_update() {
+        let raw_msg = r#"{"data":{"sequence":1616827077941,"change":"39006.0,sell,11450","timestamp":1622719594867},"subject":"level2","topic":"/contractMarket/level2:XBTMM21","type":"message"}"#;
+        let orderbook = &parse_l2("kucoin", MarketType::InverseFuture, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 1);
+        assert_eq!(orderbook.bids.len(), 0);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "kucoin",
+            MarketType::InverseFuture,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622719594867);
+
+        assert_eq!(orderbook.asks[0][0], 39006.0);
+        assert_eq!(orderbook.asks[0][1], 11450.0 / 39006.0);
+        assert_eq!(orderbook.asks[0][2], 11450.0);
+        assert_eq!(orderbook.asks[0][3], 11450.0);
+    }
+}
