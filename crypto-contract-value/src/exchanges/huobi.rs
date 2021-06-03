@@ -6,107 +6,107 @@ use std::collections::{BTreeMap, HashMap};
 use super::utils::http_get;
 
 lazy_static! {
-    static ref CONTRACT_VALUES: HashMap<MarketType, HashMap<String, f32>> = {
-        let linear_swap: HashMap<String, f32> = {
+    static ref CONTRACT_VALUES: HashMap<MarketType, HashMap<String, f64>> = {
+        let linear_swap: HashMap<String, f64> = {
             // offline data, in case the network is down
-            let mut m: HashMap<String, f32> = vec![
-                ("1INCH/USDT", 1f32),
-                ("AAVE/USDT", 0.1f32),
-                ("ADA/USDT", 10f32),
-                ("AKRO/USDT", 100f32),
-                ("ALGO/USDT", 10f32),
-                ("ANKR/USDT", 10f32),
-                ("ATOM/USDT", 1f32),
-                ("AVAX/USDT", 1f32),
-                ("BAGS/USDT", 0.01f32),
-                ("BAL/USDT", 0.1f32),
-                ("BAND/USDT", 1f32),
-                ("BAT/USDT", 10f32),
-                ("BCH/USDT", 0.01f32),
-                ("BLZ/USDT", 10f32),
-                ("BNB/USDT", 0.1f32),
-                ("BNT/USDT", 1f32),
-                ("BSV/USDT", 0.01f32),
-                ("BTC/USDT", 0.001f32),
-                ("BTS/USDT", 100f32),
-                ("BTT/USDT", 1000f32),
-                ("CHR/USDT", 10f32),
-                ("CHZ/USDT", 10f32),
-                ("COMP/USDT", 0.01f32),
-                ("CRO/USDT", 10f32),
-                ("CRV/USDT", 1f32),
-                ("CSPR/USDT", 1f32),
-                ("CVC/USDT", 10f32),
-                ("DASH/USDT", 0.1f32),
-                ("DOGE/USDT", 100f32),
-                ("DOT/USDT", 1f32),
-                ("ENJ/USDT", 1f32),
-                ("EOS/USDT", 1f32),
-                ("ETC/USDT", 1f32),
-                ("ETH/USDT", 0.01f32),
-                ("FIL/USDT", 0.1f32),
-                ("FORTH/USDT", 0.1f32),
-                ("FRONT/USDT", 1f32),
-                ("GRT/USDT", 10f32),
-                ("HBAR/USDT", 10f32),
-                ("ICP/USDT", 0.01f32),
-                ("IOST/USDT", 100f32),
-                ("IOTA/USDT", 10f32),
-                ("KAVA/USDT", 1f32),
-                ("KNC/USDT", 1f32),
-                ("KSM/USDT", 0.1f32),
-                ("LAT/USDT", 10f32),
-                ("LINA/USDT", 10f32),
-                ("LINK/USDT", 0.1f32),
-                ("LRC/USDT", 10f32),
-                ("LTC/USDT", 0.1f32),
-                ("LUNA/USDT", 1f32),
-                ("MANA/USDT", 10f32),
-                ("MASK/USDT", 0.1f32),
-                ("MASS/USDT", 1f32),
-                ("MATIC/USDT", 100f32),
-                ("MDX/USDT", 1f32),
-                ("MKR/USDT", 0.001f32),
-                ("NEAR/USDT", 1f32),
-                ("NEO/USDT", 0.1f32),
-                ("O3/USDT", 1f32),
-                ("OGN/USDT", 1f32),
-                ("OMG/USDT", 1f32),
-                ("ONE/USDT", 100f32),
-                ("ONT/USDT", 10f32),
-                ("PHA/USDT", 1f32),
-                ("QTUM/USDT", 1f32),
-                ("REEF/USDT", 100f32),
-                ("REN/USDT", 10f32),
-                ("RNDR/USDT", 1f32),
-                ("RSR/USDT", 100f32),
-                ("RVN/USDT", 10f32),
-                ("SAND/USDT", 10f32),
-                ("SHIB/USDT", 1000f32),
-                ("SKL/USDT", 10f32),
-                ("SNX/USDT", 1f32),
-                ("SOL/USDT", 1f32),
-                ("STORJ/USDT", 1f32),
-                ("SUSHI/USDT", 1f32),
-                ("THETA/USDT", 10f32),
-                ("TRX/USDT", 100f32),
-                ("UMA/USDT", 0.1f32),
-                ("UNI/USDT", 1f32),
-                ("VET/USDT", 100f32),
-                ("WAVES/USDT", 1f32),
-                ("WOO/USDT", 10f32),
-                ("XCH/USDT", 0.001f32),
-                ("XEM/USDT", 10f32),
-                ("XLM/USDT", 10f32),
-                ("XMR/USDT", 0.01f32),
-                ("XRP/USDT", 10f32),
-                ("XTZ/USDT", 1f32),
-                ("YFI/USDT", 0.0001f32),
-                ("YFII/USDT", 0.001f32),
-                ("ZEC/USDT", 0.1f32),
-                ("ZEN/USDT", 0.1f32),
-                ("ZIL/USDT", 100f32),
-                ("ZKS/USDT", 0.1f32),
+            let mut m: HashMap<String, f64> = vec![
+                ("1INCH/USDT", 1f64),
+                ("AAVE/USDT", 0.1f64),
+                ("ADA/USDT", 10f64),
+                ("AKRO/USDT", 100f64),
+                ("ALGO/USDT", 10f64),
+                ("ANKR/USDT", 10f64),
+                ("ATOM/USDT", 1f64),
+                ("AVAX/USDT", 1f64),
+                ("BAGS/USDT", 0.01f64),
+                ("BAL/USDT", 0.1f64),
+                ("BAND/USDT", 1f64),
+                ("BAT/USDT", 10f64),
+                ("BCH/USDT", 0.01f64),
+                ("BLZ/USDT", 10f64),
+                ("BNB/USDT", 0.1f64),
+                ("BNT/USDT", 1f64),
+                ("BSV/USDT", 0.01f64),
+                ("BTC/USDT", 0.001f64),
+                ("BTS/USDT", 100f64),
+                ("BTT/USDT", 1000f64),
+                ("CHR/USDT", 10f64),
+                ("CHZ/USDT", 10f64),
+                ("COMP/USDT", 0.01f64),
+                ("CRO/USDT", 10f64),
+                ("CRV/USDT", 1f64),
+                ("CSPR/USDT", 1f64),
+                ("CVC/USDT", 10f64),
+                ("DASH/USDT", 0.1f64),
+                ("DOGE/USDT", 100f64),
+                ("DOT/USDT", 1f64),
+                ("ENJ/USDT", 1f64),
+                ("EOS/USDT", 1f64),
+                ("ETC/USDT", 1f64),
+                ("ETH/USDT", 0.01f64),
+                ("FIL/USDT", 0.1f64),
+                ("FORTH/USDT", 0.1f64),
+                ("FRONT/USDT", 1f64),
+                ("GRT/USDT", 10f64),
+                ("HBAR/USDT", 10f64),
+                ("ICP/USDT", 0.01f64),
+                ("IOST/USDT", 100f64),
+                ("IOTA/USDT", 10f64),
+                ("KAVA/USDT", 1f64),
+                ("KNC/USDT", 1f64),
+                ("KSM/USDT", 0.1f64),
+                ("LAT/USDT", 10f64),
+                ("LINA/USDT", 10f64),
+                ("LINK/USDT", 0.1f64),
+                ("LRC/USDT", 10f64),
+                ("LTC/USDT", 0.1f64),
+                ("LUNA/USDT", 1f64),
+                ("MANA/USDT", 10f64),
+                ("MASK/USDT", 0.1f64),
+                ("MASS/USDT", 1f64),
+                ("MATIC/USDT", 100f64),
+                ("MDX/USDT", 1f64),
+                ("MKR/USDT", 0.001f64),
+                ("NEAR/USDT", 1f64),
+                ("NEO/USDT", 0.1f64),
+                ("O3/USDT", 1f64),
+                ("OGN/USDT", 1f64),
+                ("OMG/USDT", 1f64),
+                ("ONE/USDT", 100f64),
+                ("ONT/USDT", 10f64),
+                ("PHA/USDT", 1f64),
+                ("QTUM/USDT", 1f64),
+                ("REEF/USDT", 100f64),
+                ("REN/USDT", 10f64),
+                ("RNDR/USDT", 1f64),
+                ("RSR/USDT", 100f64),
+                ("RVN/USDT", 10f64),
+                ("SAND/USDT", 10f64),
+                ("SHIB/USDT", 1000f64),
+                ("SKL/USDT", 10f64),
+                ("SNX/USDT", 1f64),
+                ("SOL/USDT", 1f64),
+                ("STORJ/USDT", 1f64),
+                ("SUSHI/USDT", 1f64),
+                ("THETA/USDT", 10f64),
+                ("TRX/USDT", 100f64),
+                ("UMA/USDT", 0.1f64),
+                ("UNI/USDT", 1f64),
+                ("VET/USDT", 100f64),
+                ("WAVES/USDT", 1f64),
+                ("WOO/USDT", 10f64),
+                ("XCH/USDT", 0.001f64),
+                ("XEM/USDT", 10f64),
+                ("XLM/USDT", 10f64),
+                ("XMR/USDT", 0.01f64),
+                ("XRP/USDT", 10f64),
+                ("XTZ/USDT", 1f64),
+                ("YFI/USDT", 0.0001f64),
+                ("YFII/USDT", 0.001f64),
+                ("ZEC/USDT", 0.1f64),
+                ("ZEN/USDT", 0.1f64),
+                ("ZIL/USDT", 100f64),
+                ("ZKS/USDT", 0.1f64),
             ]
             .into_iter()
             .map(|x| (x.0.to_string(), x.1))
@@ -120,11 +120,11 @@ lazy_static! {
             m
         };
 
-        let linear_option: HashMap<String, f32> = {
-            let mut m: HashMap<String, f32> = vec![("BTC/USDT", 0.001),
+        let linear_option: HashMap<String, f64> = {
+            let mut m: HashMap<String, f64> = vec![("BTC/USDT", 0.001),
             ("ETH/USDT", 0.01),]
                 .into_iter()
-                .map(|x| (x.0.to_string(), x.1 as f32))
+                .map(|x| (x.0.to_string(), x.1 as f64))
                 .collect();
 
             let from_online = fetch_contract_size(LINEAR_OPTION_URL);
@@ -135,7 +135,7 @@ lazy_static! {
             m
         };
 
-        let mut result = HashMap::<MarketType, HashMap<String, f32>>::new();
+        let mut result = HashMap::<MarketType, HashMap<String, f64>>::new();
         result.insert(MarketType::LinearSwap, linear_swap);
         result.insert(MarketType::EuropeanOption, linear_option);
         result
@@ -146,12 +146,12 @@ const LINEAR_SWAP_URL: &str = "https://api.hbdm.com/linear-swap-api/v1/swap_cont
 const LINEAR_OPTION_URL: &str = "https://api.hbdm.com/option-api/v1/option_contract_info";
 
 // get the contract_size field.
-fn fetch_contract_size(url: &str) -> BTreeMap<String, f32> {
+fn fetch_contract_size(url: &str) -> BTreeMap<String, f64> {
     #[derive(Serialize, Deserialize)]
     struct RawMarket {
         symbol: String,
         contract_code: String,
-        contract_size: f32,
+        contract_size: f64,
     }
 
     #[derive(Serialize, Deserialize)]
@@ -161,7 +161,7 @@ fn fetch_contract_size(url: &str) -> BTreeMap<String, f32> {
         ts: i64,
     }
 
-    let mut mapping: BTreeMap<String, f32> = BTreeMap::new();
+    let mut mapping: BTreeMap<String, f64> = BTreeMap::new();
 
     let txt = http_get(url).unwrap_or_else(|_| "[]".to_string());
     let response = serde_json::from_str::<Response>(&txt).unwrap();
@@ -175,7 +175,7 @@ fn fetch_contract_size(url: &str) -> BTreeMap<String, f32> {
     mapping
 }
 
-pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<f32> {
+pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<f64> {
     match market_type {
         MarketType::InverseSwap | MarketType::InverseFuture => {
             Some(if pair.starts_with("BTC") { 100.0 } else { 10.0 })
@@ -195,7 +195,7 @@ mod tests {
     fn linear_swap() {
         let mapping = fetch_contract_size(LINEAR_SWAP_URL);
         for (pair, contract_value) in &mapping {
-            println!("(\"{}\", {}f32),", pair, contract_value);
+            println!("(\"{}\", {}f64),", pair, contract_value);
         }
     }
 

@@ -7,69 +7,69 @@ use std::collections::{BTreeMap, HashMap};
 use super::utils::http_get;
 
 lazy_static! {
-    static ref LINEAR_CONTRACT_VALUES: HashMap<String, f32> = {
+    static ref LINEAR_CONTRACT_VALUES: HashMap<String, f64> = {
         // offline data, in case the network is down
-        let mut m: HashMap<String, f32> = vec![
-            ("1INCH/USDT", 1f32),
-            ("AAVE/USDT", 0.01f32),
-            ("ADA/USDT", 10f32),
-            ("ALGO/USDT", 1f32),
-            ("ATOM/USDT", 0.1f32),
-            ("AVAX/USDT", 0.1f32),
-            ("BAND/USDT", 0.1f32),
-            ("BAT/USDT", 1f32),
-            ("BCH/USDT", 0.01f32),
-            ("BNB/USDT", 0.01f32),
-            ("BSV/USDT", 0.01f32),
-            ("BTC/USDT", 0.001f32),
-            ("BTT/USDT", 1000f32),
-            ("CHZ/USDT", 1f32),
-            ("COMP/USDT", 0.01f32),
-            ("CRV/USDT", 1f32),
-            ("DASH/USDT", 0.01f32),
-            ("DENT/USDT", 100f32),
-            ("DGB/USDT", 10f32),
-            ("DOGE/USDT", 100f32),
-            ("DOT/USDT", 1f32),
-            ("ENJ/USDT", 1f32),
-            ("EOS/USDT", 1f32),
-            ("ETC/USDT", 0.1f32),
-            ("ETH/USDT", 0.01f32),
-            ("FIL/USDT", 0.1f32),
-            ("FTM/USDT", 1f32),
-            ("GRT/USDT", 1f32),
-            ("ICP/USDT", 0.01f32),
-            ("IOST/USDT", 100f32),
-            ("KSM/USDT", 0.01f32),
-            ("LINK/USDT", 0.1f32),
-            ("LTC/USDT", 0.1f32),
-            ("LUNA/USDT", 1f32),
-            ("MANA/USDT", 1f32),
-            ("MATIC/USDT", 10f32),
-            ("MIR/USDT", 0.1f32),
-            ("MKR/USDT", 0.001f32),
-            ("NEO/USDT", 0.1f32),
-            ("OCEAN/USDT", 1f32),
-            ("ONT/USDT", 1f32),
-            ("QTUM/USDT", 0.1f32),
-            ("RVN/USDT", 10f32),
-            ("SHIB/USDT", 100000f32),
-            ("SNX/USDT", 0.1f32),
-            ("SOL/USDT", 0.1f32),
-            ("SUSHI/USDT", 1f32),
-            ("SXP/USDT", 1f32),
-            ("THETA/USDT", 0.1f32),
-            ("TRX/USDT", 100f32),
-            ("UNI/USDT", 1f32),
-            ("VET/USDT", 100f32),
-            ("WAVES/USDT", 0.1f32),
-            ("XEM/USDT", 1f32),
-            ("XLM/USDT", 10f32),
-            ("XMR/USDT", 0.01f32),
-            ("XRP/USDT", 10f32),
-            ("XTZ/USDT", 1f32),
-            ("YFI/USDT", 0.0001f32),
-            ("ZEC/USDT", 0.01f32),
+        let mut m: HashMap<String, f64> = vec![
+            ("1INCH/USDT", 1f64),
+            ("AAVE/USDT", 0.01f64),
+            ("ADA/USDT", 10f64),
+            ("ALGO/USDT", 1f64),
+            ("ATOM/USDT", 0.1f64),
+            ("AVAX/USDT", 0.1f64),
+            ("BAND/USDT", 0.1f64),
+            ("BAT/USDT", 1f64),
+            ("BCH/USDT", 0.01f64),
+            ("BNB/USDT", 0.01f64),
+            ("BSV/USDT", 0.01f64),
+            ("BTC/USDT", 0.001f64),
+            ("BTT/USDT", 1000f64),
+            ("CHZ/USDT", 1f64),
+            ("COMP/USDT", 0.01f64),
+            ("CRV/USDT", 1f64),
+            ("DASH/USDT", 0.01f64),
+            ("DENT/USDT", 100f64),
+            ("DGB/USDT", 10f64),
+            ("DOGE/USDT", 100f64),
+            ("DOT/USDT", 1f64),
+            ("ENJ/USDT", 1f64),
+            ("EOS/USDT", 1f64),
+            ("ETC/USDT", 0.1f64),
+            ("ETH/USDT", 0.01f64),
+            ("FIL/USDT", 0.1f64),
+            ("FTM/USDT", 1f64),
+            ("GRT/USDT", 1f64),
+            ("ICP/USDT", 0.01f64),
+            ("IOST/USDT", 100f64),
+            ("KSM/USDT", 0.01f64),
+            ("LINK/USDT", 0.1f64),
+            ("LTC/USDT", 0.1f64),
+            ("LUNA/USDT", 1f64),
+            ("MANA/USDT", 1f64),
+            ("MATIC/USDT", 10f64),
+            ("MIR/USDT", 0.1f64),
+            ("MKR/USDT", 0.001f64),
+            ("NEO/USDT", 0.1f64),
+            ("OCEAN/USDT", 1f64),
+            ("ONT/USDT", 1f64),
+            ("QTUM/USDT", 0.1f64),
+            ("RVN/USDT", 10f64),
+            ("SHIB/USDT", 100000f64),
+            ("SNX/USDT", 0.1f64),
+            ("SOL/USDT", 0.1f64),
+            ("SUSHI/USDT", 1f64),
+            ("SXP/USDT", 1f64),
+            ("THETA/USDT", 0.1f64),
+            ("TRX/USDT", 100f64),
+            ("UNI/USDT", 1f64),
+            ("VET/USDT", 100f64),
+            ("WAVES/USDT", 0.1f64),
+            ("XEM/USDT", 1f64),
+            ("XLM/USDT", 10f64),
+            ("XMR/USDT", 0.01f64),
+            ("XRP/USDT", 10f64),
+            ("XTZ/USDT", 1f64),
+            ("YFI/USDT", 0.0001f64),
+            ("ZEC/USDT", 0.01f64),
         ]
         .into_iter()
         .map(|x| (x.0.to_string(), x.1))
@@ -88,7 +88,7 @@ lazy_static! {
 #[allow(non_snake_case)]
 struct SwapMarket {
     symbol: String,
-    multiplier: f32,
+    multiplier: f64,
     isInverse: bool,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
@@ -102,8 +102,8 @@ struct ResponseMsg {
 }
 
 // get the multiplier field from linear markets
-fn fetch_linear_multipliers() -> BTreeMap<String, f32> {
-    let mut mapping: BTreeMap<String, f32> = BTreeMap::new();
+fn fetch_linear_multipliers() -> BTreeMap<String, f64> {
+    let mut mapping: BTreeMap<String, f64> = BTreeMap::new();
 
     let txt = http_get("https://api-futures.kucoin.com/api/v1/contracts/active").unwrap();
     let resp = serde_json::from_str::<ResponseMsg>(&txt).unwrap();
@@ -117,7 +117,7 @@ fn fetch_linear_multipliers() -> BTreeMap<String, f32> {
     mapping
 }
 
-pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<f32> {
+pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<f64> {
     match market_type {
         MarketType::InverseSwap | MarketType::InverseFuture => Some(1.0),
         MarketType::LinearSwap => Some(LINEAR_CONTRACT_VALUES[pair]),
@@ -133,7 +133,7 @@ mod tests {
     fn linear() {
         let mapping = fetch_linear_multipliers();
         for (pair, contract_value) in &mapping {
-            println!("(\"{}\", {}f32),", pair, contract_value);
+            println!("(\"{}\", {}f64),", pair, contract_value);
         }
     }
 }

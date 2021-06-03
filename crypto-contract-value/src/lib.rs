@@ -2,7 +2,7 @@ mod exchanges;
 
 pub use crypto_market_type::MarketType;
 
-pub fn get_contract_value(exchange: &str, market_type: MarketType, pair: &str) -> Option<f32> {
+pub fn get_contract_value(exchange: &str, market_type: MarketType, pair: &str) -> Option<f64> {
     if market_type == MarketType::Spot {
         return Some(1.0);
     }

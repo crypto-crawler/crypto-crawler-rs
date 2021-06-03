@@ -1,6 +1,6 @@
 pub use crypto_market_type::MarketType;
 
-pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<f32> {
+pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<f64> {
     match market_type {
         MarketType::InverseSwap | MarketType::InverseFuture => {
             Some(if pair.starts_with("BTC") { 100.0 } else { 10.0 })
