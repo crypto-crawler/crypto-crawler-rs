@@ -1,6 +1,7 @@
 use crypto_market_type::MarketType;
 
 use super::utils::calc_quantity_and_volume;
+use crate::Order;
 use crate::{FundingRateMsg, MessageType, OrderBookMsg, TradeMsg, TradeSide};
 
 use chrono::prelude::*;
@@ -29,6 +30,20 @@ struct RawTradeMsg {
     extra: HashMap<String, Value>,
 }
 
+// https://www.okex.com/docs/en/#spot_ws-full_depth
+// https://www.okex.com/docs/en/#futures_ws-full_depth
+// https://www.okex.com/docs/en/#ws_swap-full_depth
+// https://www.okex.com/docs/en/#option_ws-full_depth
+#[derive(Serialize, Deserialize)]
+struct RawOrderbookMsg {
+    instrument_id: String,
+    timestamp: String,
+    asks: Vec<[String; 4]>,
+    bids: Vec<[String; 4]>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
 #[derive(Serialize, Deserialize)]
 struct RawFundingRateMsg {
     estimated_rate: String,
@@ -44,6 +59,7 @@ struct RawFundingRateMsg {
 struct WebsocketMsg<T: Sized> {
     table: String,
     data: Vec<T>,
+    action: Option<String>, // partial, update
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -132,6 +148,49 @@ pub(crate) fn parse_funding_rate(
     Ok(rates)
 }
 
-pub(crate) fn parse_l2(_market_type: MarketType, _msg: &str) -> Result<Vec<OrderBookMsg>> {
-    Ok(Vec::new())
+pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(msg)?;
+    let snapshot = ws_msg.action.unwrap() == "partial";
+    debug_assert_eq!(ws_msg.data.len(), 1);
+    let raw_orderbook = &ws_msg.data[0];
+
+    let symbol = raw_orderbook.instrument_id.clone();
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+    let timestamp = DateTime::parse_from_rfc3339(&raw_orderbook.timestamp).unwrap();
+
+    let parse_order = |raw_order: &[String; 4]| -> Order {
+        let price = raw_order[0].parse::<f64>().unwrap();
+        let quantity = raw_order[1].parse::<f64>().unwrap();
+        let (quantity_base, quantity_quote, quantity_contract) =
+            calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
+
+        if let Some(qc) = quantity_contract {
+            vec![price, quantity_base, quantity_quote, qc]
+        } else {
+            vec![price, quantity_base, quantity_quote]
+        }
+    };
+
+    let orderbook = OrderBookMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol,
+        pair: pair.clone(),
+        msg_type: MessageType::L2Event,
+        timestamp: timestamp.timestamp_millis(),
+        asks: raw_orderbook
+            .asks
+            .iter()
+            .map(|x| parse_order(x))
+            .collect::<Vec<Order>>(),
+        bids: raw_orderbook
+            .bids
+            .iter()
+            .map(|x| parse_order(x))
+            .collect::<Vec<Order>>(),
+        snapshot,
+        raw: serde_json::from_str(msg)?,
+    };
+
+    Ok(vec![orderbook])
 }

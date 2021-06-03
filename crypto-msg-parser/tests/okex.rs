@@ -222,3 +222,155 @@ mod funding_rate {
         assert_eq!(funding_rates[0].funding_time, 1617321600000);
     }
 }
+
+#[cfg(test)]
+mod l2_orderbook {
+    use crypto_msg_parser::{parse_l2, MarketType};
+    use float_cmp::approx_eq;
+
+    #[test]
+    fn spot_snapshot() {
+        let raw_msg = r#"{"table":"spot/depth_l2_tbt","action":"partial","data":[{"instrument_id":"BTC-USDT","asks":[["38930","3.84264467","0","12"],["38932.4","0.00135697","0","3"],["38932.5","0.14401147","0","2"]],"bids":[["38929.9","0.05005381","0","4"],["38925.7","0.00062109","0","2"],["38925.6","0.21438503","0","1"]],"timestamp":"2021-06-03T12:39:11.253Z","checksum":1860980846}]}"#;
+        let orderbook = &parse_l2("okex", MarketType::Spot, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 3);
+        assert_eq!(orderbook.bids.len(), 3);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "okex",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622723951253);
+
+        assert_eq!(orderbook.bids[0][0], 38929.9);
+        assert_eq!(orderbook.bids[0][1], 0.05005381);
+        assert_eq!(orderbook.bids[0][2], 38929.9 * 0.05005381);
+
+        assert_eq!(orderbook.asks[0][0], 38930.0);
+        assert_eq!(orderbook.asks[0][1], 3.84264467);
+        assert_eq!(orderbook.asks[0][2], 38930.0 * 3.84264467);
+    }
+
+    #[test]
+    fn spot_update() {
+        let raw_msg = r#"{"table":"spot/depth_l2_tbt","action":"update","data":[{"instrument_id":"BTC-USDT","asks":[["38888.7","4.14263198","0","12"]],"bids":[["38886.3","0","0","0"]],"timestamp":"2021-06-03T12:40:09.962Z","checksum":976527820}]}"#;
+        let orderbook = &parse_l2("okex", MarketType::Spot, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 1);
+        assert_eq!(orderbook.bids.len(), 1);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "okex",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622724009962);
+
+        assert_eq!(orderbook.bids[0][0], 38886.3);
+        assert_eq!(orderbook.bids[0][1], 0.0);
+        assert_eq!(orderbook.bids[0][2], 0.0);
+
+        assert_eq!(orderbook.asks[0][0], 38888.7);
+        assert_eq!(orderbook.asks[0][1], 4.14263198);
+        assert_eq!(orderbook.asks[0][2], 38888.7 * 4.14263198);
+    }
+
+    #[test]
+    fn linear_future_snapshot() {
+        let raw_msg = r#"{"table":"futures/depth_l2_tbt","action":"partial","data":[{"instrument_id":"BTC-USDT-210625","asks":[["39302.5","1","0","1"],["39302.6","5","0","2"],["39304.3","21","0","1"]],"bids":[["39302.2","4","0","1"],["39300.7","5","0","1"],["39299","4","0","1"]],"timestamp":"2021-06-03T13:09:34.429Z","checksum":698961978}]}"#;
+        let orderbook = &parse_l2("okex", MarketType::LinearFuture, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 3);
+        assert_eq!(orderbook.bids.len(), 3);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "okex",
+            MarketType::LinearFuture,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622725774429);
+
+        assert_eq!(orderbook.asks[0][0], 39302.5);
+        assert_eq!(orderbook.asks[0][1], 0.01);
+        assert_eq!(orderbook.asks[0][2], 39302.5 * 0.01);
+        assert_eq!(orderbook.asks[0][3], 1.0);
+
+        assert_eq!(orderbook.bids[0][0], 39302.2);
+        assert_eq!(orderbook.bids[0][1], 0.04);
+        assert_eq!(orderbook.bids[0][2], 39302.2 * 0.04);
+        assert_eq!(orderbook.bids[0][3], 4.0);
+    }
+
+    #[test]
+    fn inverse_swap_snapshot() {
+        let raw_msg = r#"{"table":"swap/depth_l2_tbt","action":"partial","data":[{"instrument_id":"BTC-USD-SWAP","asks":[["39167.2","130","0","3"],["39169.6","45","0","1"],["39173.1","1","0","1"]],"bids":[["39167.1","1536","0","8"],["39166.2","68","0","1"],["39165.9","47","0","1"]],"timestamp":"2021-06-03T13:14:24.831Z","checksum":-1582320415}]}"#;
+        let orderbook = &parse_l2("okex", MarketType::InverseSwap, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 3);
+        assert_eq!(orderbook.bids.len(), 3);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "okex",
+            MarketType::InverseSwap,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622726064831);
+
+        assert_eq!(orderbook.asks[0][0], 39167.2);
+        assert_eq!(orderbook.asks[0][1], 13000.0 / 39167.2);
+        assert_eq!(orderbook.asks[0][2], 13000.0);
+        assert_eq!(orderbook.asks[0][3], 130.0);
+
+        assert_eq!(orderbook.bids[0][0], 39167.1);
+        assert_eq!(orderbook.bids[0][1], 153600.0 / 39167.1);
+        assert_eq!(orderbook.bids[0][2], 153600.0);
+        assert_eq!(orderbook.bids[0][3], 1536.0);
+    }
+
+    #[test]
+    fn option_snapshot() {
+        let raw_msg = r#"{"table":"option/depth_l2_tbt","action":"partial","data":[{"instrument_id":"BTC-USD-210604-30000-P","asks":[["0.0015","906","0","3"]],"bids":[],"timestamp":"2021-06-03T13:18:55.745Z","checksum":-288111842}]}"#;
+        let orderbook = &parse_l2("okex", MarketType::EuropeanOption, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 1);
+        assert_eq!(orderbook.bids.len(), 0);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "okex",
+            MarketType::EuropeanOption,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622726335745);
+
+        assert_eq!(orderbook.asks[0][0], 0.0015);
+        assert!(approx_eq!(
+            f64,
+            orderbook.asks[0][1],
+            90.6 / 0.0015,
+            epsilon = 0.0000000001
+        ));
+        assert!(approx_eq!(
+            f64,
+            orderbook.asks[0][2],
+            90.6,
+            epsilon = 0.0000000000001
+        ));
+        assert_eq!(orderbook.asks[0][3], 906.0);
+    }
+}
