@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
@@ -22,6 +22,27 @@ struct SpotTradeMsg {
     size: String,
     price: String,
     side: String, // b, s
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+// https://docs.kraken.com/websockets/#message-book
+#[derive(Serialize, Deserialize)]
+struct OrderbookSnapshot {
+    #[serde(rename = "as")]
+    asks: Vec<[String; 3]>,
+    #[serde(rename = "bs")]
+    bids: Vec<[String; 3]>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+// https://docs.kraken.com/websockets/#message-book
+#[derive(Serialize, Deserialize)]
+struct OrderbookUpdate {
+    a: Option<Vec<Vec<String>>>,
+    b: Option<Vec<Vec<String>>>,
+    c: String,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -65,6 +86,82 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     Ok(trades)
 }
 
-pub(crate) fn parse_l2(_market_type: MarketType, _msg: &str) -> Result<Vec<OrderBookMsg>> {
-    Ok(Vec::new())
+pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+    debug_assert_eq!(market_type, MarketType::Spot);
+    let arr = serde_json::from_str::<Vec<Value>>(msg)?;
+    debug_assert_eq!(arr[2].as_str().unwrap(), "book-25");
+    let symbol = arr[3].as_str().unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let snapshot = arr[1].as_object().unwrap().contains_key("as");
+
+    let parse_order = |raw_order: &[String]| -> Order {
+        let price = raw_order[0].parse::<f64>().unwrap();
+        let quantity_base = raw_order[1].parse::<f64>().unwrap();
+        let quantity_quote = price * quantity_base;
+        vec![price, quantity_base, quantity_quote]
+    };
+
+    let orderbook = if snapshot {
+        let orderbook_snapshot = serde_json::from_value::<OrderbookSnapshot>(arr[1].clone())?;
+        let timestamp = (orderbook_snapshot.asks[0][2].parse::<f64>().unwrap() * 1000.0) as i64;
+
+        OrderBookMsg {
+            exchange: EXCHANGE_NAME.to_string(),
+            market_type: MarketType::Spot,
+            symbol: symbol.to_string(),
+            pair: pair.to_string(),
+            msg_type: MessageType::L2Event,
+            timestamp,
+            asks: orderbook_snapshot
+                .asks
+                .iter()
+                .map(|x| parse_order(x))
+                .collect(),
+            bids: orderbook_snapshot
+                .bids
+                .iter()
+                .map(|x| parse_order(x))
+                .collect(),
+            snapshot,
+            raw: serde_json::from_str(msg)?,
+        }
+    } else {
+        let orderbook_updates = serde_json::from_value::<OrderbookUpdate>(arr[1].clone())?;
+        let timestamp = if orderbook_updates.a.is_some() {
+            (orderbook_updates.a.clone().unwrap()[0][2]
+                .parse::<f64>()
+                .unwrap()
+                * 1000.0) as i64
+        } else if orderbook_updates.b.is_some() {
+            (orderbook_updates.b.clone().unwrap()[0][2]
+                .parse::<f64>()
+                .unwrap()
+                * 1000.0) as i64
+        } else {
+            panic!("Both a and b are empty");
+        };
+
+        OrderBookMsg {
+            exchange: EXCHANGE_NAME.to_string(),
+            market_type: MarketType::Spot,
+            symbol: symbol.to_string(),
+            pair: pair.to_string(),
+            msg_type: MessageType::L2Event,
+            timestamp,
+            asks: if let Some(asks) = orderbook_updates.a {
+                asks.iter().map(|x| parse_order(x)).collect::<Vec<Order>>()
+            } else {
+                Vec::new()
+            },
+            bids: if let Some(bids) = orderbook_updates.b {
+                bids.iter().map(|x| parse_order(x)).collect::<Vec<Order>>()
+            } else {
+                Vec::new()
+            },
+            snapshot,
+            raw: serde_json::from_str(msg)?,
+        }
+    };
+
+    Ok(vec![orderbook])
 }
