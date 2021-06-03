@@ -1,6 +1,9 @@
 use crypto_market_type::MarketType;
 
-use crate::{exchanges::utils::calc_quantity_and_volume, MessageType, TradeMsg, TradeSide};
+use crate::{
+    exchanges::utils::calc_quantity_and_volume, MessageType, Order, OrderBookMsg, TradeMsg,
+    TradeSide,
+};
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
@@ -18,6 +21,21 @@ struct InverseTradeMsg {
     quantity: f64,
     price: f64,
     direction: String, // sell, buy
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+// https://huobiapi.github.io/docs/coin_margined_swap/v1/en/#subscribe-incremental-market-depth-data
+// https://huobiapi.github.io/docs/usdt_swap/v1/en/#general-subscribe-incremental-market-depth-data
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct InverseOrderbookMsg {
+    id: i64,
+    ts: i64,
+    event: String, // snapshot, update
+    ch: String,
+    bids: Vec<[f64; 2]>,
+    asks: Vec<[f64; 2]>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -80,4 +98,43 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         .collect();
 
     Ok(trades)
+}
+
+pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<InverseOrderbookMsg>>(msg)?;
+    let symbol = {
+        let v: Vec<&str> = ws_msg.tick.ch.split('.').collect();
+        v[1]
+    };
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let timestamp = ws_msg.tick.ts;
+    let snapshot = ws_msg.tick.event == "snapshot";
+
+    let parse_order = |raw_order: &[f64; 2]| -> Order {
+        let price = raw_order[0];
+        let quantity = raw_order[1];
+
+        let (quantity_base, quantity_quote, quantity_contract) =
+            calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
+        if let Some(qc) = quantity_contract {
+            vec![price, quantity_base, quantity_quote, qc]
+        } else {
+            vec![price, quantity_base, quantity_quote]
+        }
+    };
+
+    let orderbook = OrderBookMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: symbol.to_string(),
+        pair: pair.to_string(),
+        msg_type: MessageType::L2Event,
+        timestamp,
+        asks: ws_msg.tick.asks.iter().map(|x| parse_order(x)).collect(),
+        bids: ws_msg.tick.bids.iter().map(|x| parse_order(x)).collect(),
+        snapshot,
+        raw: serde_json::from_str(msg)?,
+    };
+
+    Ok(vec![orderbook])
 }

@@ -167,3 +167,274 @@ mod funding_rate {
         assert_eq!(funding_rates[0].funding_time, 1617321600000);
     }
 }
+
+#[cfg(test)]
+mod l2_orderbook {
+    use crypto_msg_parser::{parse_l2, MarketType};
+    use float_cmp::approx_eq;
+
+    #[test]
+    fn spot_update() {
+        let raw_msg = r#"{"ch":"market.btcusdt.mbp.150","ts":1622707662703,"tick":{"seqNum":129803485567,"prevSeqNum":129803485424,"bids":[[38765.39,0.0],[38762.87,0.009708]],"asks":[[38762.88,0.102302]]}}"#;
+        let orderbook = &parse_l2("huobi", MarketType::Spot, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 1);
+        assert_eq!(orderbook.bids.len(), 2);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "huobi",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622707662703);
+
+        assert_eq!(orderbook.asks[0][0], 38762.88);
+        assert_eq!(orderbook.asks[0][1], 0.102302);
+        assert_eq!(orderbook.asks[0][2], 38762.88 * 0.102302);
+
+        assert_eq!(orderbook.bids[0][0], 38765.39);
+        assert_eq!(orderbook.bids[0][1], 0.0);
+        assert_eq!(orderbook.bids[0][2], 0.0);
+
+        assert_eq!(orderbook.bids[1][0], 38762.87);
+        assert_eq!(orderbook.bids[1][1], 0.009708);
+        assert_eq!(orderbook.bids[1][2], 38762.87 * 0.009708);
+    }
+
+    #[test]
+    fn inverse_future_snapshot() {
+        let raw_msg = r#"{"ch":"market.BTC_CQ.depth.size_150.high_freq","tick":{"asks":[[38884.91,652],[38886.32,21],[38887.88,4]],"bids":[[38884.9,6],[38883.86,6],[38880.25,3]],"ch":"market.BTC_CQ.depth.size_150.high_freq","event":"snapshot","id":138216299603,"mrid":138216299603,"ts":1622708089134,"version":1223482159},"ts":1622708089134}"#;
+        let orderbook = &parse_l2("huobi", MarketType::InverseFuture, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 3);
+        assert_eq!(orderbook.bids.len(), 3);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "huobi",
+            MarketType::InverseFuture,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622708089134);
+
+        assert_eq!(orderbook.asks[0][0], 38884.91);
+        assert_eq!(orderbook.asks[0][1], 65200.0 / 38884.91);
+        assert_eq!(orderbook.asks[0][2], 65200.0);
+        assert_eq!(orderbook.asks[0][3], 652.0);
+
+        assert_eq!(orderbook.asks[2][0], 38887.88);
+        assert_eq!(orderbook.asks[2][1], 400.0 / 38887.88);
+        assert_eq!(orderbook.asks[2][2], 400.0);
+        assert_eq!(orderbook.asks[2][3], 4.0);
+
+        assert_eq!(orderbook.bids[0][0], 38884.9);
+        assert_eq!(orderbook.bids[0][1], 600.0 / 38884.9);
+        assert_eq!(orderbook.bids[0][2], 600.0);
+        assert_eq!(orderbook.bids[0][3], 6.0);
+
+        assert_eq!(orderbook.bids[2][0], 38880.25);
+        assert_eq!(orderbook.bids[2][1], 300.0 / 38880.25);
+        assert_eq!(orderbook.bids[2][2], 300.0);
+        assert_eq!(orderbook.bids[2][3], 3.0);
+    }
+
+    #[test]
+    fn inverse_future_update() {
+        let raw_msg = r#"{"ch":"market.BTC_CQ.depth.size_150.high_freq","tick":{"asks":[[38939.82,10],[38958.06,100],[38973.97,0]],"bids":[[38932.53,200],[38926.08,0],[38912.29,0]],"ch":"market.BTC_CQ.depth.size_150.high_freq","event":"update","id":138219575176,"mrid":138219575176,"ts":1622711041458,"version":1223606224},"ts":1622711041458}"#;
+        let orderbook = &parse_l2("huobi", MarketType::InverseFuture, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 3);
+        assert_eq!(orderbook.bids.len(), 3);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "huobi",
+            MarketType::InverseFuture,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622711041458);
+
+        assert_eq!(orderbook.asks[0][0], 38939.82);
+        assert_eq!(orderbook.asks[0][1], 1000.0 / 38939.82);
+        assert_eq!(orderbook.asks[0][2], 1000.0);
+        assert_eq!(orderbook.asks[0][3], 10.0);
+
+        assert_eq!(orderbook.asks[2][0], 38973.97);
+        assert_eq!(orderbook.asks[2][1], 0.0);
+        assert_eq!(orderbook.asks[2][2], 0.0);
+        assert_eq!(orderbook.asks[2][3], 0.0);
+
+        assert_eq!(orderbook.bids[0][0], 38932.53);
+        assert_eq!(orderbook.bids[0][1], 20000.0 / 38932.53);
+        assert_eq!(orderbook.bids[0][2], 20000.0);
+        assert_eq!(orderbook.bids[0][3], 200.0);
+
+        assert_eq!(orderbook.bids[2][0], 38912.29);
+        assert_eq!(orderbook.bids[2][1], 0.0);
+        assert_eq!(orderbook.bids[2][2], 0.0);
+        assert_eq!(orderbook.bids[2][3], 0.0);
+    }
+
+    #[test]
+    fn inverse_swap_snapshot() {
+        let raw_msg = r#"{"ch":"market.BTC-USD.depth.size_150.high_freq","tick":{"asks":[[38888,9949],[38888.1,1],[38888.2,1]],"bids":[[38887.9,3832],[38887.8,4],[38887.7,3]],"ch":"market.BTC-USD.depth.size_150.high_freq","event":"snapshot","id":99893955238,"mrid":99893955238,"ts":1622711365595,"version":1300632701},"ts":1622711365595}"#;
+        let orderbook = &parse_l2("huobi", MarketType::InverseSwap, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 3);
+        assert_eq!(orderbook.bids.len(), 3);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "huobi",
+            MarketType::InverseSwap,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622711365595);
+
+        assert_eq!(orderbook.asks[0][0], 38888.0);
+        assert_eq!(orderbook.asks[0][1], 994900.0 / 38888.0);
+        assert_eq!(orderbook.asks[0][2], 994900.0);
+        assert_eq!(orderbook.asks[0][3], 9949.0);
+
+        assert_eq!(orderbook.asks[2][0], 38888.2);
+        assert_eq!(orderbook.asks[2][1], 100.0 / 38888.2);
+        assert_eq!(orderbook.asks[2][2], 100.0);
+        assert_eq!(orderbook.asks[2][3], 1.0);
+
+        assert_eq!(orderbook.bids[0][0], 38887.9);
+        assert_eq!(orderbook.bids[0][1], 383200.0 / 38887.9);
+        assert_eq!(orderbook.bids[0][2], 383200.0);
+        assert_eq!(orderbook.bids[0][3], 3832.0);
+
+        assert_eq!(orderbook.bids[2][0], 38887.7);
+        assert_eq!(orderbook.bids[2][1], 300.0 / 38887.7);
+        assert_eq!(orderbook.bids[2][2], 300.0);
+        assert_eq!(orderbook.bids[2][3], 3.0);
+    }
+
+    #[test]
+    fn inverse_swap_update() {
+        let raw_msg = r#"{"ch":"market.BTC-USD.depth.size_150.high_freq","tick":{"asks":[[38895.7,1635]],"bids":[[38880.6,0],[38868.2,50]],"ch":"market.BTC-USD.depth.size_150.high_freq","event":"update","id":99893958868,"mrid":99893958868,"ts":1622711368355,"version":1300632845},"ts":1622711368355}"#;
+        let orderbook = &parse_l2("huobi", MarketType::InverseSwap, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 1);
+        assert_eq!(orderbook.bids.len(), 2);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "huobi",
+            MarketType::InverseSwap,
+            "BTC/USD".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622711368355);
+
+        assert_eq!(orderbook.asks[0][0], 38895.7);
+        assert_eq!(orderbook.asks[0][1], 163500.0 / 38895.7);
+        assert_eq!(orderbook.asks[0][2], 163500.0);
+        assert_eq!(orderbook.asks[0][3], 1635.0);
+
+        assert_eq!(orderbook.bids[0][0], 38880.6);
+        assert_eq!(orderbook.bids[0][1], 0.0);
+        assert_eq!(orderbook.bids[0][2], 0.0);
+        assert_eq!(orderbook.bids[0][3], 0.0);
+
+        assert_eq!(orderbook.bids[1][0], 38868.2);
+        assert_eq!(orderbook.bids[1][1], 5000.0 / 38868.2);
+        assert_eq!(orderbook.bids[1][2], 5000.0);
+        assert_eq!(orderbook.bids[1][3], 50.0);
+    }
+
+    #[test]
+    fn linear_swap_snapshot() {
+        let raw_msg = r#"{"ch":"market.BTC-USDT.depth.size_150.high_freq","tick":{"asks":[[39055,19345],[39056.8,1200],[39057.5,85]],"bids":[[39054.9,4754],[39054.8,1],[39054.7,1]],"ch":"market.BTC-USDT.depth.size_150.high_freq","event":"snapshot","id":39536665398,"mrid":39536665398,"ts":1622711946534,"version":709648689},"ts":1622711946534}"#;
+        let orderbook = &parse_l2("huobi", MarketType::LinearSwap, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 3);
+        assert_eq!(orderbook.bids.len(), 3);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "huobi",
+            MarketType::LinearSwap,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622711946534);
+
+        assert_eq!(orderbook.asks[0][0], 39055.0);
+        assert_eq!(orderbook.asks[0][1], 19.345);
+        assert_eq!(orderbook.asks[0][2], 39055.0 * 19.345);
+        assert_eq!(orderbook.asks[0][3], 19345.0);
+
+        assert_eq!(orderbook.asks[2][0], 39057.5);
+        assert_eq!(orderbook.asks[2][1], 0.085);
+        assert_eq!(orderbook.asks[2][2], 39057.5 * 0.085);
+        assert_eq!(orderbook.asks[2][3], 85.0);
+
+        assert_eq!(orderbook.bids[0][0], 39054.9);
+        assert!(approx_eq!(
+            f64,
+            orderbook.bids[0][1],
+            4.754,
+            epsilon = 0.000000000000001
+        ));
+        assert!(approx_eq!(
+            f64,
+            orderbook.bids[0][2],
+            39054.9 * 4.754,
+            epsilon = 0.0000000001
+        ));
+        assert_eq!(orderbook.bids[0][3], 4754.0);
+
+        assert_eq!(orderbook.bids[2][0], 39054.7);
+        assert_eq!(orderbook.bids[2][1], 0.001);
+        assert_eq!(orderbook.bids[2][2], 39054.7 * 0.001);
+        assert_eq!(orderbook.bids[2][3], 1.0);
+    }
+
+    #[test]
+    fn linear_swap_update() {
+        let raw_msg = r#"{"ch":"market.BTC-USDT.depth.size_150.high_freq","tick":{"asks":[[39055,16634],[39060.1,0]],"bids":[[39050.8,40]],"ch":"market.BTC-USDT.depth.size_150.high_freq","event":"update","id":39536668357,"mrid":39536668357,"ts":1622711948514,"version":709648808},"ts":1622711948514}"#;
+        let orderbook = &parse_l2("huobi", MarketType::LinearSwap, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 2);
+        assert_eq!(orderbook.bids.len(), 1);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "huobi",
+            MarketType::LinearSwap,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622711948514);
+
+        assert_eq!(orderbook.asks[0][0], 39055.0);
+        assert_eq!(orderbook.asks[0][1], 16.634);
+        assert_eq!(orderbook.asks[0][2], 39055.0 * 16.634);
+        assert_eq!(orderbook.asks[0][3], 16634.0);
+
+        assert_eq!(orderbook.asks[1][0], 39060.1);
+        assert_eq!(orderbook.asks[1][1], 0.0);
+        assert_eq!(orderbook.asks[1][2], 0.0);
+        assert_eq!(orderbook.asks[1][3], 0.0);
+
+        assert_eq!(orderbook.bids[0][0], 39050.8);
+        assert_eq!(orderbook.bids[0][1], 0.04);
+        assert_eq!(orderbook.bids[0][2], 39050.8 * 0.04);
+        assert_eq!(orderbook.bids[0][3], 40.0);
+    }
+}

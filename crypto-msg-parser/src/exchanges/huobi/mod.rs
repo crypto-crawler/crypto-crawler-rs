@@ -33,6 +33,15 @@ pub(crate) fn parse_funding_rate(
     }
 }
 
-pub(crate) fn parse_l2(_market_type: MarketType, _msg: &str) -> Result<Vec<OrderBookMsg>> {
-    Ok(Vec::new())
+pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+    match market_type {
+        MarketType::Spot => huobi_spot::parse_l2(msg),
+        MarketType::InverseFuture | MarketType::InverseSwap => {
+            huobi_inverse::parse_l2(market_type, msg)
+        }
+        MarketType::LinearFuture | MarketType::LinearSwap | MarketType::EuropeanOption => {
+            huobi_inverse::parse_l2(market_type, msg)
+        }
+        _ => panic!("Unknown market type {}", market_type),
+    }
 }
