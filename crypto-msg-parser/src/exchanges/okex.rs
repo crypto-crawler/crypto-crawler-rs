@@ -152,7 +152,6 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(msg)?;
     let snapshot = ws_msg.action.unwrap() == "partial";
     debug_assert_eq!(ws_msg.data.len(), 1);
-    let raw_orderbook = &ws_msg.data[0];
 
     let orderbooks = ws_msg
         .data
