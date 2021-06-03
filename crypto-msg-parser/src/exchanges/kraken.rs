@@ -109,7 +109,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
             exchange: EXCHANGE_NAME.to_string(),
             market_type: MarketType::Spot,
             symbol: symbol.to_string(),
-            pair: pair.to_string(),
+            pair,
             msg_type: MessageType::L2Event,
             timestamp,
             asks: orderbook_snapshot
@@ -145,7 +145,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
             exchange: EXCHANGE_NAME.to_string(),
             market_type: MarketType::Spot,
             symbol: symbol.to_string(),
-            pair: pair.to_string(),
+            pair,
             msg_type: MessageType::L2Event,
             timestamp,
             asks: if let Some(asks) = orderbook_updates.a {
