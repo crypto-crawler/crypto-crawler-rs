@@ -22,7 +22,7 @@ impl_trait!(Trade, BybitLinearSwapWSClient, subscribe_trade, "trade", to_raw_cha
 #[rustfmt::skip]
 impl_trait!(BBO, BybitLinearSwapWSClient, subscribe_bbo, "orderBookL2_25", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBook, BybitLinearSwapWSClient, subscribe_orderbook, "orderBook_200.100ms", to_raw_channel);
+impl_trait!(OrderBook, BybitLinearSwapWSClient, subscribe_orderbook, "orderBookL2_25", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(Ticker, BybitLinearSwapWSClient, subscribe_ticker, "instrument_info.100ms", to_raw_channel);
 

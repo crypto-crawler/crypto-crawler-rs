@@ -95,7 +95,7 @@ mod huobi_spot {
 }
 
 #[cfg(test)]
-mod huobi_future {
+mod huobi_inverse_future {
     use crypto_ws_client::{HuobiFutureWSClient, WSClient};
     use std::sync::{Arc, Mutex};
 
