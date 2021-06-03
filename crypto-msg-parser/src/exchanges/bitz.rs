@@ -107,7 +107,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
         symbol: symbol.to_string(),
-        pair: pair.to_string(),
+        pair,
         msg_type: MessageType::L2Event,
         timestamp: ws_msg.time,
         asks: ws_msg.data.asks.iter().map(|x| parse_order(x)).collect(),

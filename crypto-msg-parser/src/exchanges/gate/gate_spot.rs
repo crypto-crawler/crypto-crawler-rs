@@ -95,7 +95,7 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
         exchange: EXCHANGE_NAME.to_string(),
         market_type: MarketType::Spot,
         symbol: symbol.to_string(),
-        pair: pair.to_string(),
+        pair,
         msg_type: MessageType::L2Event,
         timestamp: Utc::now().timestamp_millis(),
         asks: raw_orderbook.asks.iter().map(|x| parse_order(x)).collect(),
