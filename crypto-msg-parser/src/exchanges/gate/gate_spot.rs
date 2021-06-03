@@ -1,7 +1,8 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, TradeMsg, TradeSide};
+use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
 
+use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
 use std::collections::HashMap;
@@ -17,6 +18,15 @@ struct SpotTradeMsg {
     amount: String,
     #[serde(rename = "type")]
     type_: String, // buy, sell
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+// https://www.gate.io/docs/websocket/index.html#depth-subscription
+#[derive(Serialize, Deserialize)]
+struct SpotOrderbookMsg {
+    asks: Vec<[String; 2]>,
+    bids: Vec<[String; 2]>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -64,4 +74,35 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
         .collect();
 
     Ok(trades)
+}
+
+pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
+    let ws_msg = serde_json::from_str::<SpotWebsocketMsg>(msg)?;
+    debug_assert_eq!(ws_msg.params.len(), 3);
+    let snapshot = ws_msg.params[0].as_bool().unwrap();
+    let symbol = ws_msg.params[2].as_str().unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let raw_orderbook =
+        serde_json::from_value::<SpotOrderbookMsg>(ws_msg.params[1].clone()).unwrap();
+
+    let parse_order = |raw_order: &[String; 2]| -> Order {
+        let price = raw_order[0].parse::<f64>().unwrap();
+        let quantity_base = raw_order[1].parse::<f64>().unwrap();
+        vec![price, quantity_base, price * quantity_base]
+    };
+
+    let orderbook = OrderBookMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type: MarketType::Spot,
+        symbol: symbol.to_string(),
+        pair: pair.to_string(),
+        msg_type: MessageType::L2Event,
+        timestamp: Utc::now().timestamp_millis(),
+        asks: raw_orderbook.asks.iter().map(|x| parse_order(x)).collect(),
+        bids: raw_orderbook.bids.iter().map(|x| parse_order(x)).collect(),
+        snapshot,
+        raw: serde_json::from_str(msg)?,
+    };
+
+    Ok(vec![orderbook])
 }

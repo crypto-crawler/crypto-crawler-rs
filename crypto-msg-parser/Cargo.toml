@@ -10,7 +10,7 @@ keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
 chrono = "0.4"
-crypto-contract-value = "0.8.5"
+crypto-contract-value = "0.8.6"
 crypto-market-type = "0.1.4"
 crypto-pair = "2.0.3"
 lazy_static = "1"
