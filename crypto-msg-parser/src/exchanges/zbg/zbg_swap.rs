@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 
 use super::super::utils::http_get;
-use crate::{MessageType, TradeMsg, TradeSide};
+use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
@@ -70,24 +70,26 @@ fn fetch_swap_contracts() -> HashMap<i64, SwapContractInfo> {
     mapping
 }
 
-// https://mxcdevelop.github.io/APIDoc/contract.api.cn.html#4483df6e28
+// https://www.zbgpro.com/docs/future/v1/cn/#7d44b7792d
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct RawTradeMsg {
-    p: f64, // price
-    v: f64, // quantity
-    T: i64, // 1, buy; 2, sell
-    t: i64, // timestamp
+    contractId: i64,
+    trades: Vec<Value>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
 
+// https://www.zbgpro.com/docs/future/v1/cn/#1529c9267f
 #[derive(Serialize, Deserialize)]
-struct WebsocketMsg<T: Sized> {
-    channel: String,
-    symbol: String,
-    ts: i64,
-    data: T,
+#[allow(non_snake_case)]
+struct RawOrderbookMsg {
+    contractId: i64,
+    asks: Vec<[String; 2]>,
+    bids: Vec<[String; 2]>,
+    time: i64,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
 }
 
 fn calc_quantity_and_volume(
@@ -114,13 +116,6 @@ fn calc_quantity_and_volume(
 }
 
 pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    #[derive(Serialize, Deserialize)]
-    #[allow(non_snake_case)]
-    struct RawTradeMsg {
-        contractId: i64,
-        trades: Vec<Value>,
-    }
-
     let ws_msg = serde_json::from_str::<Vec<Value>>(msg)?;
     assert_eq!(ws_msg[0].as_str().unwrap(), "future_tick");
     let raw_trade: RawTradeMsg = serde_json::from_value(ws_msg[1].clone()).unwrap();
@@ -166,4 +161,45 @@ pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     };
 
     Ok(vec![trade])
+}
+
+pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+    let ws_msg = serde_json::from_str::<Vec<Value>>(msg)?;
+    assert_eq!(ws_msg[0].as_str().unwrap(), "future_snapshot_depth");
+    let raw_orderbook: RawOrderbookMsg = serde_json::from_value(ws_msg[1].clone()).unwrap();
+
+    let contract_info = SWAP_CONTRACT_MAP.get(&raw_orderbook.contractId).unwrap();
+    let symbol = contract_info.symbol.as_str();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+
+    let parse_order = |raw_order: &[String; 2]| -> Order {
+        let price = raw_order[0].parse::<f64>().unwrap();
+        let quantity = raw_order[1].parse::<f64>().unwrap();
+        let (quantity_base, quantity_quote) =
+            calc_quantity_and_volume(market_type, contract_info.contract_id, price, quantity);
+        vec![price, quantity_base, quantity_quote, quantity]
+    };
+
+    let orderbook = OrderBookMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: symbol.to_string(),
+        pair,
+        msg_type: MessageType::L2Event,
+        timestamp: raw_orderbook.time / 1000,
+        asks: raw_orderbook
+            .asks
+            .iter()
+            .map(|x| parse_order(x))
+            .collect::<Vec<Order>>(),
+        bids: raw_orderbook
+            .bids
+            .iter()
+            .map(|x| parse_order(x))
+            .collect::<Vec<Order>>(),
+        snapshot: false,
+        raw: serde_json::from_str(msg)?,
+    };
+
+    Ok(vec![orderbook])
 }
