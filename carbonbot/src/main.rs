@@ -78,6 +78,27 @@ pub fn crawl(
                         }
                     }
                 }
+                MessageType::L2Event => {
+                    let orderbooks =
+                        crypto_msg_parser::parse_l2(&msg.exchange, msg.market_type, &msg.json)
+                            .unwrap();
+                    for orderbook in orderbooks.iter() {
+                        let json = serde_json::to_string(orderbook).unwrap();
+
+                        if let Some(writer) = writers_map_clone.get(&key) {
+                            writer.write(&json);
+                        }
+
+                        let mut guard = redis_conn_clone.lock().unwrap();
+                        if let Some(ref mut conn) = *guard {
+                            if let Err(err) =
+                                conn.publish::<&str, String, i64>("carbonbot:l2_event", json)
+                            {
+                                error!("{}", err);
+                            }
+                        }
+                    }
+                }
                 MessageType::FundingRate => {
                     let rates = crypto_msg_parser::parse_funding_rate(
                         &msg.exchange,
