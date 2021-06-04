@@ -25,8 +25,8 @@ struct SpotTradeMsg {
 // https://www.gate.io/docs/websocket/index.html#depth-subscription
 #[derive(Serialize, Deserialize)]
 struct SpotOrderbookMsg {
-    asks: Vec<[String; 2]>,
-    bids: Vec<[String; 2]>,
+    asks: Option<Vec<[String; 2]>>,
+    bids: Option<Vec<[String; 2]>>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -98,8 +98,16 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
         pair,
         msg_type: MessageType::L2Event,
         timestamp: Utc::now().timestamp_millis(),
-        asks: raw_orderbook.asks.iter().map(|x| parse_order(x)).collect(),
-        bids: raw_orderbook.bids.iter().map(|x| parse_order(x)).collect(),
+        asks: if let Some(asks) = raw_orderbook.asks {
+            asks.iter().map(|x| parse_order(x)).collect()
+        } else {
+            Vec::new()
+        },
+        bids: if let Some(bids) = raw_orderbook.bids {
+            bids.iter().map(|x| parse_order(x)).collect()
+        } else {
+            Vec::new()
+        },
         snapshot,
         raw: serde_json::from_str(msg)?,
     };

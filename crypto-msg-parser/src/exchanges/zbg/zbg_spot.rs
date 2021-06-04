@@ -70,10 +70,19 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
 
     let orderbooks = if snapshot {
         let arr = serde_json::from_str::<Vec<Vec<Value>>>(msg)?;
-        let parse_order = |raw_order: &[String; 2]| -> Order {
-            let price = raw_order[0].parse::<f64>().unwrap();
-            let quantity_base = raw_order[1].parse::<f64>().unwrap();
-            vec![price, quantity_base, price * quantity_base]
+
+        let parse_order = |raw_order: &[Value; 2]| -> Order {
+            if raw_order[0].is_string() {
+                let price = raw_order[0].as_str().unwrap().parse::<f64>().unwrap();
+                let quantity_base = raw_order[1].as_str().unwrap().parse::<f64>().unwrap();
+                vec![price, quantity_base, price * quantity_base]
+            } else if raw_order[0].is_f64() {
+                let price = raw_order[0].as_f64().unwrap();
+                let quantity_base = raw_order[1].as_f64().unwrap();
+                vec![price, quantity_base, price * quantity_base]
+            } else {
+                panic!("Unknown format {}", msg);
+            }
         };
 
         arr.iter()
@@ -82,7 +91,7 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
                 let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
                 let timestamp = raw_orderbook[3].as_str().unwrap().parse::<i64>().unwrap() * 1000;
 
-                let mut asks = serde_json::from_value::<Vec<[String; 2]>>(
+                let mut asks = serde_json::from_value::<Vec<[Value; 2]>>(
                     raw_orderbook[4]
                         .as_object()
                         .unwrap()
@@ -105,7 +114,7 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
                     msg_type: MessageType::L2Event,
                     timestamp,
                     asks,
-                    bids: serde_json::from_value::<Vec<[String; 2]>>(
+                    bids: serde_json::from_value::<Vec<[Value; 2]>>(
                         raw_orderbook[5]
                             .as_object()
                             .unwrap()

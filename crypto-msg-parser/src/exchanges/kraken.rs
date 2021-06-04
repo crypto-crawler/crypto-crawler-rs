@@ -42,7 +42,6 @@ struct OrderbookSnapshot {
 struct OrderbookUpdate {
     a: Option<Vec<Vec<String>>>,
     b: Option<Vec<Vec<String>>>,
-    c: String,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -89,9 +88,6 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
 pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
     debug_assert_eq!(market_type, MarketType::Spot);
     let arr = serde_json::from_str::<Vec<Value>>(msg)?;
-    debug_assert_eq!(arr[2].as_str().unwrap(), "book-25");
-    let symbol = arr[3].as_str().unwrap();
-    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
     let snapshot = arr[1].as_object().unwrap().contains_key("as");
 
     let parse_order = |raw_order: &[String]| -> Order {
@@ -102,6 +98,9 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
     };
 
     let orderbook = if snapshot {
+        debug_assert_eq!(arr[2].as_str().unwrap(), "book-25");
+        let symbol = arr[3].as_str().unwrap();
+        let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
         let orderbook_snapshot = serde_json::from_value::<OrderbookSnapshot>(arr[1].clone())?;
         let timestamp = (orderbook_snapshot.asks[0][2].parse::<f64>().unwrap() * 1000.0) as i64;
 
@@ -126,6 +125,17 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
             raw: serde_json::from_str(msg)?,
         }
     } else {
+        let symbol = if arr.len() == 4 {
+            debug_assert_eq!(arr[2].as_str().unwrap(), "book-25");
+            arr[3].as_str().unwrap()
+        } else if arr.len() == 5 {
+            debug_assert_eq!(arr[3].as_str().unwrap(), "book-25");
+            arr[4].as_str().unwrap()
+        } else {
+            panic!("Unknown format: {}", msg);
+        };
+        let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+
         let orderbook_updates = serde_json::from_value::<OrderbookUpdate>(arr[1].clone())?;
         let timestamp = if orderbook_updates.a.is_some() {
             (orderbook_updates.a.clone().unwrap()[0][2]
@@ -141,6 +151,37 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
             panic!("Both a and b are empty");
         };
 
+        let mut asks: Vec<Order> = Vec::new();
+        let mut bids: Vec<Order> = Vec::new();
+
+        for x in orderbook_updates.a.iter() {
+            for raw_order in x.iter() {
+                let order = parse_order(raw_order);
+                asks.push(order);
+            }
+        }
+        for x in orderbook_updates.b.iter() {
+            for raw_order in x.iter() {
+                let order = parse_order(raw_order);
+                bids.push(order);
+            }
+        }
+        if arr.len() == 5 {
+            let orderbook_updates = serde_json::from_value::<OrderbookUpdate>(arr[2].clone())?;
+            for x in orderbook_updates.a.iter() {
+                for raw_order in x.iter() {
+                    let order = parse_order(raw_order);
+                    asks.push(order);
+                }
+            }
+            for x in orderbook_updates.b.iter() {
+                for raw_order in x.iter() {
+                    let order = parse_order(raw_order);
+                    bids.push(order);
+                }
+            }
+        }
+
         OrderBookMsg {
             exchange: EXCHANGE_NAME.to_string(),
             market_type: MarketType::Spot,
@@ -148,16 +189,8 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
             pair,
             msg_type: MessageType::L2Event,
             timestamp,
-            asks: if let Some(asks) = orderbook_updates.a {
-                asks.iter().map(|x| parse_order(x)).collect::<Vec<Order>>()
-            } else {
-                Vec::new()
-            },
-            bids: if let Some(bids) = orderbook_updates.b {
-                bids.iter().map(|x| parse_order(x)).collect::<Vec<Order>>()
-            } else {
-                Vec::new()
-            },
+            asks,
+            bids,
             snapshot,
             raw: serde_json::from_str(msg)?,
         }

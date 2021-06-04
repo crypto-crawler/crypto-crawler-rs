@@ -70,4 +70,28 @@ fn l2_orderbook_update() {
     assert_eq!(orderbook.bids[0][0], 39071.4);
     assert_eq!(orderbook.bids[0][1], 7.26106570);
     assert_eq!(orderbook.bids[0][2], 39071.4 * 7.26106570);
+
+    let raw_msg = r#"[320,{"a":[["38800.00000","0.02203518","1622766170.577187"]]},{"b":[["38800.00000","0.03017320","1622766170.577304"]],"c":"2479000840"},"book-25","XBT/USD"]"#;
+    let orderbook = &parse_l2("kraken", MarketType::Spot, raw_msg).unwrap()[0];
+
+    assert_eq!(orderbook.asks.len(), 1);
+    assert_eq!(orderbook.bids.len(), 1);
+    assert!(!orderbook.snapshot);
+
+    crate::utils::check_orderbook_fields(
+        "kraken",
+        MarketType::Spot,
+        "BTC/USD".to_string(),
+        orderbook,
+    );
+
+    assert_eq!(orderbook.timestamp, 1622766170577);
+
+    assert_eq!(orderbook.asks[0][0], 38800.0);
+    assert_eq!(orderbook.asks[0][1], 0.02203518);
+    assert_eq!(orderbook.asks[0][2], 38800.0 * 0.02203518);
+
+    assert_eq!(orderbook.bids[0][0], 38800.0);
+    assert_eq!(orderbook.bids[0][1], 0.03017320);
+    assert_eq!(orderbook.bids[0][2], 38800.0 * 0.03017320);
 }

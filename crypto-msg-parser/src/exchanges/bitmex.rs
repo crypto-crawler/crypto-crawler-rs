@@ -157,15 +157,11 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
     }
 
     let symbol_price_map = price_map.get_mut(&symbol).unwrap();
-    println!("{}", symbol_price_map.len());
 
     let parse_order = |raw_order: &RawOrder| -> Order {
         let price = if let Some(p) = raw_order.price {
             p
         } else {
-            if !symbol_price_map.contains_key(&raw_order.id) {
-                println!("{}", raw_order.id);
-            }
             *symbol_price_map.get(&raw_order.id).unwrap()
         };
 

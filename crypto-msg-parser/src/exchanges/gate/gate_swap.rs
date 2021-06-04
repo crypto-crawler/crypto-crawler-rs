@@ -4,9 +4,10 @@ use super::super::utils::calc_quantity_and_volume;
 
 use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
 
+use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Mutex};
 
 const EXCHANGE_NAME: &str = "gate";
 
@@ -41,6 +42,7 @@ struct RawOrder {
     p: String, // price
     s: f64,    // size, -, asks; +, bids
     contract: Option<String>,
+    c: Option<String>, // LinearFuture
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -162,6 +164,11 @@ pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     }
 }
 
+lazy_static! {
+    // symbol -> price -> (true, ask; false, bid)
+    static ref PRICE_HASHMAP: Mutex<HashMap<String,HashMap<String, bool>>> = Mutex::new(HashMap::new());
+}
+
 pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg)?;
     debug_assert_eq!(ws_msg.channel, "futures.order_book");
@@ -204,7 +211,11 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         }
     } else {
         let raw_orderbook = serde_json::from_value::<Vec<RawOrder>>(ws_msg.result).unwrap();
-        let symbol = raw_orderbook[0].contract.clone().unwrap();
+        let symbol = if market_type == MarketType::LinearFuture {
+            raw_orderbook[0].c.clone().unwrap()
+        } else {
+            raw_orderbook[0].contract.clone().unwrap()
+        };
         let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
         let timestamp = ws_msg.time * 1000;
 
@@ -221,6 +232,32 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
             }
         };
 
+        let mut guard = PRICE_HASHMAP.lock().unwrap();
+        if !guard.contains_key(&symbol) {
+            guard.insert(symbol.clone(), HashMap::new());
+        }
+        let price_map = guard.get_mut(&symbol).unwrap();
+
+        let mut asks: Vec<Order> = Vec::new();
+        let mut bids: Vec<Order> = Vec::new();
+        for x in raw_orderbook.iter() {
+            let price = x.p.clone();
+            let order = parse_order(x);
+            if x.s < 0.0 {
+                asks.push(order);
+                price_map.insert(price, true);
+            } else if x.s > 0.0 {
+                bids.push(order);
+                price_map.insert(price, false);
+            } else if let Some(ask) = price_map.remove(&price) {
+                if ask {
+                    asks.push(order);
+                } else {
+                    bids.push(order);
+                }
+            }
+        }
+
         OrderBookMsg {
             exchange: EXCHANGE_NAME.to_string(),
             market_type,
@@ -228,16 +265,8 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
             pair: pair.to_string(),
             msg_type: MessageType::L2Event,
             timestamp,
-            asks: raw_orderbook
-                .iter()
-                .filter(|x| x.s < 0.0)
-                .map(|x| parse_order(x))
-                .collect(),
-            bids: raw_orderbook
-                .iter()
-                .filter(|x| x.s > 0.0)
-                .map(|x| parse_order(x))
-                .collect(),
+            asks,
+            bids,
             snapshot,
             raw: serde_json::from_str(msg)?,
         }

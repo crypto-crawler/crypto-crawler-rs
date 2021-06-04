@@ -318,4 +318,38 @@ mod l2_orderbook {
         assert_eq!(orderbook.bids[2][2], 38373.0 * 0.2);
         assert_eq!(orderbook.bids[2][3], 2000.0);
     }
+
+    #[test]
+    fn linear_future_update() {
+        let raw_msg = r#"{"time":1622769533,"channel":"futures.order_book","event":"update","error":null,"result":[{"p":"38258.9","s":-500,"c":"BTC_USDT_20210625","id":90062644},{"p":"38258.9","s":0,"c":"BTC_USDT_20210625","id":90062645},{"p":"38013","s":500,"c":"BTC_USDT_20210625","id":90062646}]}"#;
+        let orderbook = &parse_l2("gate", MarketType::LinearFuture, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 2);
+        assert_eq!(orderbook.bids.len(), 1);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "gate",
+            MarketType::LinearFuture,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1622769533000);
+
+        assert_eq!(orderbook.asks[0][0], 38258.9);
+        assert_eq!(orderbook.asks[0][1], 0.05);
+        assert_eq!(orderbook.asks[0][2], 38258.9 * 0.05);
+        assert_eq!(orderbook.asks[0][3], 500.0);
+
+        assert_eq!(orderbook.asks[1][0], 38258.9);
+        assert_eq!(orderbook.asks[1][1], 0.0);
+        assert_eq!(orderbook.asks[1][2], 0.0);
+        assert_eq!(orderbook.asks[1][3], 0.0);
+
+        assert_eq!(orderbook.bids[0][0], 38013.0);
+        assert_eq!(orderbook.bids[0][1], 0.05);
+        assert_eq!(orderbook.bids[0][2], 38013.0 * 0.05);
+        assert_eq!(orderbook.bids[0][3], 500.0);
+    }
 }

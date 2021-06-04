@@ -26,8 +26,8 @@ struct SpotTradeMsg {
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct SpotOrderbookMsg {
-    asks: Vec<[String; 3]>,
-    bids: Vec<[String; 3]>,
+    asks: Option<Vec<[Value; 3]>>,
+    bids: Option<Vec<[Value; 3]>>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -95,10 +95,15 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
     let symbol = ws_msg.params.symbol.as_str();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
 
-    let parse_order = |raw_order: &[String; 3]| -> Order {
-        let price = raw_order[0].parse::<f64>().unwrap();
-        let quantity_base = raw_order[1].parse::<f64>().unwrap();
-        let quantity_quote = raw_order[2].parse::<f64>().unwrap();
+    let parse_order = |raw_order: &[Value; 3]| -> Order {
+        let price = raw_order[0].as_str().unwrap().parse::<f64>().unwrap();
+        let (quantity_base, quantity_quote) = if raw_order[1].is_i64() {
+            (0.0, 0.0)
+        } else {
+            let base = raw_order[1].as_str().unwrap().parse::<f64>().unwrap();
+            let quote = raw_order[2].as_str().unwrap().parse::<f64>().unwrap();
+            (base, quote)
+        };
 
         vec![price, quantity_base, quantity_quote]
     };
@@ -110,8 +115,16 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         pair,
         msg_type: MessageType::L2Event,
         timestamp: ws_msg.time,
-        asks: ws_msg.data.asks.iter().map(|x| parse_order(x)).collect(),
-        bids: ws_msg.data.bids.iter().map(|x| parse_order(x)).collect(),
+        asks: if let Some(asks) = ws_msg.data.asks {
+            asks.iter().map(|x| parse_order(x)).collect()
+        } else {
+            Vec::new()
+        },
+        bids: if let Some(bids) = ws_msg.data.bids {
+            bids.iter().map(|x| parse_order(x)).collect()
+        } else {
+            Vec::new()
+        },
         snapshot: false,
         raw: serde_json::from_str(msg)?,
     };
