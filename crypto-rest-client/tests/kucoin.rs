@@ -23,7 +23,7 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     assert!(!bids.is_empty());
 }
 
-#[test_case(MarketType::Spot, "BTC-USDT")]
+#[test_case(MarketType::Spot, "BTC-USDT"; "inconclusive")] // TODO: kucoin deprecated level2 and level3 snapshot APIs
 #[test_case(MarketType::InverseFuture, "XBTMM21")]
 #[test_case(MarketType::InverseSwap, "XBTUSDM")]
 #[test_case(MarketType::LinearSwap, "XBTUSDTM")]

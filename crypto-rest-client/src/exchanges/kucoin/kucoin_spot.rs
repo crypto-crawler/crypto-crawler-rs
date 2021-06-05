@@ -27,7 +27,7 @@ impl KuCoinSpotRestClient {
     ///
     /// For example: <https://api.kucoin.com/api/v2/market/orderbook/level2?symbol=BTC-USDT>,
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/api/v2/market/orderbook/level2?symbol={}", symbol))
+        gen_api!(format!("/api/v1/market/orderbook/level2_100?symbol={}", symbol))
     }
 
     /// Get the latest Level3 snapshot of orderbook.
