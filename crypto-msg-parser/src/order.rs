@@ -1,6 +1,8 @@
 use serde::de::{Deserializer, SeqAccess, Visitor};
 use serde::ser::{SerializeSeq, Serializer};
 use serde::{Deserialize, Serialize};
+
+
 /// An order in the orderbook asks or bids array.
 pub struct Order {
     /// price
