@@ -37,18 +37,12 @@ pub fn check_orderbook_fields(
     assert_eq!(orderbook.timestamp.to_string().len(), 13);
 
     for order in orderbook.asks.iter() {
-        assert!(order.len() == 3 || order.len() == 4);
+        assert!(order.price > 0.0);
+        assert!(order.quantity_base >= 0.0);
+        assert!(order.quantity_quote >= 0.0);
 
-        let price = order[0];
-        let quantity_base = order[1];
-        let quantity_quote = order[2];
-
-        assert!(price > 0.0);
-        assert!(quantity_base >= 0.0);
-        assert!(quantity_quote >= 0.0);
-
-        if order.len() == 4 {
-            assert!(order[3] >= 0.0);
+        if let Some(quantity_contract) = order.quantity_contract {
+            assert!(quantity_contract >= 0.0);
         }
     }
 }

@@ -170,25 +170,25 @@ mod l2_orderbook {
             orderbook,
         );
 
-        assert_eq!(orderbook.bids[0][0], 36145.0);
-        assert_eq!(orderbook.bids[0][1], 136.0 / 36145.0);
-        assert_eq!(orderbook.bids[0][2], 136.0);
-        assert_eq!(orderbook.bids[0][3], 136.0);
+        assert_eq!(orderbook.bids[0].price, 36145.0);
+        assert_eq!(orderbook.bids[0].quantity_base, 136.0 / 36145.0);
+        assert_eq!(orderbook.bids[0].quantity_quote, 136.0);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 136.0);
 
-        assert_eq!(orderbook.bids[2][0], 36142.0);
-        assert_eq!(orderbook.bids[2][1], 18067.0 / 36142.0);
-        assert_eq!(orderbook.bids[2][2], 18067.0);
-        assert_eq!(orderbook.bids[2][3], 18067.0);
+        assert_eq!(orderbook.bids[2].price, 36142.0);
+        assert_eq!(orderbook.bids[2].quantity_base, 18067.0 / 36142.0);
+        assert_eq!(orderbook.bids[2].quantity_quote, 18067.0);
+        assert_eq!(orderbook.bids[2].quantity_contract.unwrap(), 18067.0);
 
-        assert_eq!(orderbook.asks[0][0], 36190.0);
-        assert_eq!(orderbook.asks[0][1], 49900.0 / 36190.0);
-        assert_eq!(orderbook.asks[0][2], 49900.0);
-        assert_eq!(orderbook.asks[0][3], 49900.0);
+        assert_eq!(orderbook.asks[0].price, 36190.0);
+        assert_eq!(orderbook.asks[0].quantity_base, 49900.0 / 36190.0);
+        assert_eq!(orderbook.asks[0].quantity_quote, 49900.0);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 49900.0);
 
-        assert_eq!(orderbook.asks[2][0], 36189.0);
-        assert_eq!(orderbook.asks[2][1], 34600.0 / 36189.0);
-        assert_eq!(orderbook.asks[2][2], 34600.0);
-        assert_eq!(orderbook.asks[2][3], 34600.0);
+        assert_eq!(orderbook.asks[2].price, 36189.0);
+        assert_eq!(orderbook.asks[2].quantity_base, 34600.0 / 36189.0);
+        assert_eq!(orderbook.asks[2].quantity_quote, 34600.0);
+        assert_eq!(orderbook.asks[2].quantity_contract.unwrap(), 34600.0);
     }
 
     #[test]
@@ -209,10 +209,10 @@ mod l2_orderbook {
             orderbook,
         );
 
-        assert_eq!(orderbook.asks[0][0], 36760.5);
-        assert_eq!(orderbook.asks[0][1], 36760.0 / 36760.5);
-        assert_eq!(orderbook.asks[0][2], 36760.0);
-        assert_eq!(orderbook.asks[0][3], 36760.0);
+        assert_eq!(orderbook.asks[0].price, 36760.5);
+        assert_eq!(orderbook.asks[0].quantity_base, 36760.0 / 36760.5);
+        assert_eq!(orderbook.asks[0].quantity_quote, 36760.0);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 36760.0);
 
         let delete_msg = r#"{"table":"orderBookL2_25","action":"delete","data":[{"symbol":"XBTUSD","id":8796323950,"side":"Sell"}]}"#;
         let orderbook = &parse_l2("bitmex", MarketType::InverseSwap, delete_msg).unwrap()[0];
@@ -228,9 +228,9 @@ mod l2_orderbook {
             orderbook,
         );
 
-        assert_eq!(orderbook.asks[0][0], 36760.5);
-        assert_eq!(orderbook.asks[0][1], 0.0);
-        assert_eq!(orderbook.asks[0][2], 0.0);
-        assert_eq!(orderbook.asks[0][3], 0.0);
+        assert_eq!(orderbook.asks[0].price, 36760.5);
+        assert_eq!(orderbook.asks[0].quantity_base, 0.0);
+        assert_eq!(orderbook.asks[0].quantity_quote, 0.0);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 0.0);
     }
 }

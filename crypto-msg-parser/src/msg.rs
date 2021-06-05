@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use strum_macros::{Display, EnumString};
 
+use crate::order::Order;
+
 /// The type of a message
 ///
 /// Copied from crypto_crawler::MessageType
@@ -107,10 +109,6 @@ pub struct TradeMsg {
     /// the original message
     pub raw: Value,
 }
-
-/// price, quantity_base, quantity_quote, quantity_contract(for spot markets it is empty)
-/// A 0.0 quantity_base indicates the price level can be removed.
-pub type Order = Vec<f64>;
 
 /// Level2 orderbook message.
 #[derive(Serialize, Deserialize)]

@@ -216,21 +216,21 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.timestamp, 1622363903670);
 
-        assert_eq!(orderbook.bids[0][0], 35743.98);
-        assert_eq!(orderbook.bids[0][1], 0.0);
-        assert_eq!(orderbook.bids[0][2], 0.0);
+        assert_eq!(orderbook.bids[0].price, 35743.98);
+        assert_eq!(orderbook.bids[0].quantity_base, 0.0);
+        assert_eq!(orderbook.bids[0].quantity_quote, 0.0);
 
-        assert_eq!(orderbook.bids[1][0], 35743.87);
-        assert_eq!(orderbook.bids[1][1], 0.000015);
-        assert_eq!(orderbook.bids[1][2], 35743.87 * 0.000015);
+        assert_eq!(orderbook.bids[1].price, 35743.87);
+        assert_eq!(orderbook.bids[1].quantity_base, 0.000015);
+        assert_eq!(orderbook.bids[1].quantity_quote, 35743.87 * 0.000015);
 
-        assert_eq!(orderbook.asks[0][0], 35743.88);
-        assert_eq!(orderbook.asks[0][1], 0.24);
-        assert_eq!(orderbook.asks[0][2], 35743.88 * 0.24);
+        assert_eq!(orderbook.asks[0].price, 35743.88);
+        assert_eq!(orderbook.asks[0].quantity_base, 0.24);
+        assert_eq!(orderbook.asks[0].quantity_quote, 35743.88 * 0.24);
 
-        assert_eq!(orderbook.asks[1][0], 35743.97);
-        assert_eq!(orderbook.asks[1][1], 0.0);
-        assert_eq!(orderbook.asks[1][2], 0.0);
+        assert_eq!(orderbook.asks[1].price, 35743.97);
+        assert_eq!(orderbook.asks[1].quantity_base, 0.0);
+        assert_eq!(orderbook.asks[1].quantity_quote, 0.0);
     }
 
     #[test]
@@ -251,25 +251,25 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.timestamp, 1622368000234);
 
-        assert_eq!(orderbook.bids[0][0], 35943.8);
-        assert_eq!(orderbook.bids[0][1], 6000.0 / 35943.8);
-        assert_eq!(orderbook.bids[0][2], 6000.0);
-        assert_eq!(orderbook.bids[0][3], 60.0);
+        assert_eq!(orderbook.bids[0].price, 35943.8);
+        assert_eq!(orderbook.bids[0].quantity_base, 6000.0 / 35943.8);
+        assert_eq!(orderbook.bids[0].quantity_quote, 6000.0);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 60.0);
 
-        assert_eq!(orderbook.bids[1][0], 35965.2);
-        assert_eq!(orderbook.bids[1][1], 89600.0 / 35965.2);
-        assert_eq!(orderbook.bids[1][2], 89600.0);
-        assert_eq!(orderbook.bids[1][3], 896.0);
+        assert_eq!(orderbook.bids[1].price, 35965.2);
+        assert_eq!(orderbook.bids[1].quantity_base, 89600.0 / 35965.2);
+        assert_eq!(orderbook.bids[1].quantity_quote, 89600.0);
+        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 896.0);
 
-        assert_eq!(orderbook.asks[0][0], 36038.3);
-        assert_eq!(orderbook.asks[0][1], 900.0 / 36038.3);
-        assert_eq!(orderbook.asks[0][2], 900.0);
-        assert_eq!(orderbook.asks[0][3], 9.0);
+        assert_eq!(orderbook.asks[0].price, 36038.3);
+        assert_eq!(orderbook.asks[0].quantity_base, 900.0 / 36038.3);
+        assert_eq!(orderbook.asks[0].quantity_quote, 900.0);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 9.0);
 
-        assert_eq!(orderbook.asks[1][0], 36038.4);
-        assert_eq!(orderbook.asks[1][1], 2100.0 / 36038.4);
-        assert_eq!(orderbook.asks[1][2], 2100.0);
-        assert_eq!(orderbook.asks[1][3], 21.0);
+        assert_eq!(orderbook.asks[1].price, 36038.4);
+        assert_eq!(orderbook.asks[1].quantity_base, 2100.0 / 36038.4);
+        assert_eq!(orderbook.asks[1].quantity_quote, 2100.0);
+        assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 21.0);
     }
 
     #[test]
@@ -290,20 +290,20 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.timestamp, 1622368962065);
 
-        assert_eq!(orderbook.bids[0][0], 2437.04);
-        assert_eq!(orderbook.bids[0][1], 82.32);
-        assert_eq!(orderbook.bids[0][2], 2437.04 * 82.32);
-        assert_eq!(orderbook.bids[0][3], 82.32);
+        assert_eq!(orderbook.bids[0].price, 2437.04);
+        assert_eq!(orderbook.bids[0].quantity_base, 82.32);
+        assert_eq!(orderbook.bids[0].quantity_quote, 2437.04 * 82.32);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 82.32);
 
-        assert_eq!(orderbook.bids[1][0], 2437.07);
-        assert_eq!(orderbook.bids[1][1], 0.0);
-        assert_eq!(orderbook.bids[1][2], 0.0);
-        assert_eq!(orderbook.bids[1][3], 0.0);
+        assert_eq!(orderbook.bids[1].price, 2437.07);
+        assert_eq!(orderbook.bids[1].quantity_base, 0.0);
+        assert_eq!(orderbook.bids[1].quantity_quote, 0.0);
+        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 0.0);
 
-        assert_eq!(orderbook.asks[0][0], 2441.23);
-        assert_eq!(orderbook.asks[0][1], 1.5);
-        assert_eq!(orderbook.asks[0][2], 2441.23 * 1.5);
-        assert_eq!(orderbook.asks[0][3], 1.5);
+        assert_eq!(orderbook.asks[0].price, 2441.23);
+        assert_eq!(orderbook.asks[0].quantity_base, 1.5);
+        assert_eq!(orderbook.asks[0].quantity_quote, 2441.23 * 1.5);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 1.5);
     }
 
     #[test]
@@ -324,25 +324,25 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.timestamp, 1622371244687);
 
-        assert_eq!(orderbook.bids[0][0], 35729.77);
-        assert_eq!(orderbook.bids[0][1], 1.6);
-        assert_eq!(orderbook.bids[0][2], 35729.77 * 1.6);
-        assert_eq!(orderbook.bids[0][3], 1.6);
+        assert_eq!(orderbook.bids[0].price, 35729.77);
+        assert_eq!(orderbook.bids[0].quantity_base, 1.6);
+        assert_eq!(orderbook.bids[0].quantity_quote, 35729.77 * 1.6);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 1.6);
 
-        assert_eq!(orderbook.bids[1][0], 35750.0);
-        assert_eq!(orderbook.bids[1][1], 5.106);
-        assert_eq!(orderbook.bids[1][2], 35750.0 * 5.106);
-        assert_eq!(orderbook.bids[1][3], 5.106);
+        assert_eq!(orderbook.bids[1].price, 35750.0);
+        assert_eq!(orderbook.bids[1].quantity_base, 5.106);
+        assert_eq!(orderbook.bids[1].quantity_quote, 35750.0 * 5.106);
+        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 5.106);
 
-        assert_eq!(orderbook.asks[0][0], 35819.2);
-        assert_eq!(orderbook.asks[0][1], 0.211);
-        assert_eq!(orderbook.asks[0][2], 35819.2 * 0.211);
-        assert_eq!(orderbook.asks[0][3], 0.211);
+        assert_eq!(orderbook.asks[0].price, 35819.2);
+        assert_eq!(orderbook.asks[0].quantity_base, 0.211);
+        assert_eq!(orderbook.asks[0].quantity_quote, 35819.2 * 0.211);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 0.211);
 
-        assert_eq!(orderbook.asks[1][0], 35820.31);
-        assert_eq!(orderbook.asks[1][1], 0.001);
-        assert_eq!(orderbook.asks[1][2], 35820.31 * 0.001);
-        assert_eq!(orderbook.asks[1][3], 0.001);
+        assert_eq!(orderbook.asks[1].price, 35820.31);
+        assert_eq!(orderbook.asks[1].quantity_base, 0.001);
+        assert_eq!(orderbook.asks[1].quantity_quote, 35820.31 * 0.001);
+        assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 0.001);
     }
 
     #[test]
@@ -363,25 +363,25 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.timestamp, 1622370862553);
 
-        assert_eq!(orderbook.bids[0][0], 35365.9);
-        assert_eq!(orderbook.bids[0][1], 140000.0 / 35365.9);
-        assert_eq!(orderbook.bids[0][2], 140000.0);
-        assert_eq!(orderbook.bids[0][3], 1400.0);
+        assert_eq!(orderbook.bids[0].price, 35365.9);
+        assert_eq!(orderbook.bids[0].quantity_base, 140000.0 / 35365.9);
+        assert_eq!(orderbook.bids[0].quantity_quote, 140000.0);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 1400.0);
 
-        assert_eq!(orderbook.bids[1][0], 35425.8);
-        assert_eq!(orderbook.bids[1][1], 56100.0 / 35425.8);
-        assert_eq!(orderbook.bids[1][2], 56100.0);
-        assert_eq!(orderbook.bids[1][3], 561.0);
+        assert_eq!(orderbook.bids[1].price, 35425.8);
+        assert_eq!(orderbook.bids[1].quantity_base, 56100.0 / 35425.8);
+        assert_eq!(orderbook.bids[1].quantity_quote, 56100.0);
+        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 561.0);
 
-        assert_eq!(orderbook.asks[0][0], 35817.8);
-        assert_eq!(orderbook.asks[0][1], 788500.0 / 35817.8);
-        assert_eq!(orderbook.asks[0][2], 788500.0);
-        assert_eq!(orderbook.asks[0][3], 7885.0);
+        assert_eq!(orderbook.asks[0].price, 35817.8);
+        assert_eq!(orderbook.asks[0].quantity_base, 788500.0 / 35817.8);
+        assert_eq!(orderbook.asks[0].quantity_quote, 788500.0);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 7885.0);
 
-        assert_eq!(orderbook.asks[1][0], 35818.7);
-        assert_eq!(orderbook.asks[1][1], 30700.0 / 35818.7);
-        assert_eq!(orderbook.asks[1][2], 30700.0);
-        assert_eq!(orderbook.asks[1][3], 307.0);
+        assert_eq!(orderbook.asks[1].price, 35818.7);
+        assert_eq!(orderbook.asks[1].quantity_base, 30700.0 / 35818.7);
+        assert_eq!(orderbook.asks[1].quantity_quote, 30700.0);
+        assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 307.0);
     }
 
     #[test]

@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{order::Order, MessageType, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
@@ -75,11 +75,23 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
             if raw_order[0].is_string() {
                 let price = raw_order[0].as_str().unwrap().parse::<f64>().unwrap();
                 let quantity_base = raw_order[1].as_str().unwrap().parse::<f64>().unwrap();
-                vec![price, quantity_base, price * quantity_base]
+
+                Order {
+                    price,
+                    quantity_base,
+                    quantity_quote: price * quantity_base,
+                    quantity_contract: None,
+                }
             } else if raw_order[0].is_f64() {
                 let price = raw_order[0].as_f64().unwrap();
                 let quantity_base = raw_order[1].as_f64().unwrap();
-                vec![price, quantity_base, price * quantity_base]
+
+                Order {
+                    price,
+                    quantity_base,
+                    quantity_quote: price * quantity_base,
+                    quantity_contract: None,
+                }
             } else {
                 panic!("Unknown format {}", msg);
             }
@@ -104,7 +116,7 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
                 .map(|x| parse_order(x))
                 .collect::<Vec<Order>>();
                 // sort by price in ascending order
-                asks.sort_by(|a, b| a[0].partial_cmp(&b[0]).unwrap());
+                asks.sort_by(|a, b| a.price.partial_cmp(&b.price).unwrap());
 
                 OrderBookMsg {
                     exchange: EXCHANGE_NAME.to_string(),
@@ -146,7 +158,13 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
         let order: Order = {
             let price = arr[5].parse::<f64>().unwrap();
             let quantity_base = arr[6].parse::<f64>().unwrap();
-            vec![price, quantity_base, quantity_base * price]
+
+            Order {
+                price,
+                quantity_base,
+                quantity_quote: quantity_base * price,
+                quantity_contract: None,
+            }
         };
 
         if arr[4] == "BID" {

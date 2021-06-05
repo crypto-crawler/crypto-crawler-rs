@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 
 use super::utils::calc_quantity_and_volume;
-use crate::{FundingRateMsg, MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{order::Order, FundingRateMsg, MessageType, OrderBookMsg, TradeMsg, TradeSide};
 
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -130,10 +130,11 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
             let quantity = raw_order[1].parse::<f64>().unwrap();
             let (quantity_base, quantity_quote, quantity_contract) =
                 calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
-            if let Some(qc) = quantity_contract {
-                vec![price, quantity_base, quantity_quote, qc]
-            } else {
-                vec![price, quantity_base, quantity_quote]
+            Order {
+                price,
+                quantity_base,
+                quantity_quote,
+                quantity_contract,
             }
         };
 

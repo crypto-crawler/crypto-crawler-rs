@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 
 use crate::exchanges::utils::calc_quantity_and_volume;
-use crate::Order;
+use crate::order::Order;
 use crate::{FundingRateMsg, MessageType, OrderBookMsg, TradeMsg, TradeSide};
 
 use chrono::prelude::*;
@@ -168,12 +168,12 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         let quantity = raw_order.size.unwrap_or(0.0); // 0.0 means delete
         let (quantity_base, quantity_quote, quantity_contract) =
             calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
-        vec![
+        Order {
             price,
             quantity_base,
             quantity_quote,
-            quantity_contract.unwrap(),
-        ]
+            quantity_contract,
+        }
     };
 
     let orderbook = OrderBookMsg {

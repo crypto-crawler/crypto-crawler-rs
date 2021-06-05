@@ -1,5 +1,6 @@
 mod exchanges;
 mod msg;
+mod order;
 
 pub use msg::*;
 

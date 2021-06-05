@@ -97,9 +97,9 @@ mod l2_orderbook {
             orderbook,
         );
 
-        assert_eq!(orderbook.bids[0][0], 38932.19);
-        assert_eq!(orderbook.bids[0][1], 0.04901);
-        assert_eq!(orderbook.bids[0][2], 1908.06663);
+        assert_eq!(orderbook.bids[0].price, 38932.19);
+        assert_eq!(orderbook.bids[0].quantity_base, 0.04901);
+        assert_eq!(orderbook.bids[0].quantity_quote, 1908.06663);
     }
 
     #[test]
@@ -120,10 +120,10 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.timestamp, 1622722473816);
 
-        assert_eq!(orderbook.asks[0][0], 38704.5);
-        assert_eq!(orderbook.asks[0][1], 13.8686);
-        assert_eq!(orderbook.asks[0][2], 38704.5 * 13.8686);
-        assert_eq!(orderbook.asks[0][3], 138686.0);
+        assert_eq!(orderbook.asks[0].price, 38704.5);
+        assert_eq!(orderbook.asks[0].quantity_base, 13.8686);
+        assert_eq!(orderbook.asks[0].quantity_quote, 38704.5 * 13.8686);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 138686.0);
     }
 
     #[test]
@@ -144,9 +144,9 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.timestamp, 1622723010000);
 
-        assert_eq!(orderbook.asks[0][0], 38758.5);
-        assert_eq!(orderbook.asks[0][1], 417200.0 / 38758.5);
-        assert_eq!(orderbook.asks[0][2], 417200.0);
-        assert_eq!(orderbook.asks[0][3], 4172.0);
+        assert_eq!(orderbook.asks[0].price, 38758.5);
+        assert_eq!(orderbook.asks[0].quantity_base, 417200.0 / 38758.5);
+        assert_eq!(orderbook.asks[0].quantity_quote, 417200.0);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 4172.0);
     }
 }

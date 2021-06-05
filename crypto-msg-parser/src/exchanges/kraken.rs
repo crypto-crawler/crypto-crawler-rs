@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{order::Order, MessageType, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
@@ -93,8 +93,13 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
     let parse_order = |raw_order: &[String]| -> Order {
         let price = raw_order[0].parse::<f64>().unwrap();
         let quantity_base = raw_order[1].parse::<f64>().unwrap();
-        let quantity_quote = price * quantity_base;
-        vec![price, quantity_base, quantity_quote]
+
+        Order {
+            price,
+            quantity_base,
+            quantity_quote: price * quantity_base,
+            quantity_contract: None,
+        }
     };
 
     let orderbook = if snapshot {

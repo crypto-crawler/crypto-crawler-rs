@@ -1,9 +1,6 @@
 use crypto_market_type::MarketType;
 
-use crate::{
-    exchanges::utils::calc_quantity_and_volume, MessageType, Order, OrderBookMsg, TradeMsg,
-    TradeSide,
-};
+use crate::{order::Order, MessageType, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
@@ -84,13 +81,13 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
 
     let parse_order = |raw_order: &[String; 2]| -> Order {
         let price = raw_order[0].parse::<f64>().unwrap();
-        let quantity = raw_order[1].parse::<f64>().unwrap();
-        let (quantity_base, quantity_quote, quantity_contract) =
-            calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
-        if let Some(qc) = quantity_contract {
-            vec![price, quantity_base, quantity_quote, qc]
-        } else {
-            vec![price, quantity_base, quantity_quote]
+        let quantity_base = raw_order[1].parse::<f64>().unwrap();
+
+        Order {
+            price,
+            quantity_base,
+            quantity_quote: price * quantity_base,
+            quantity_contract: None,
         }
     };
 
@@ -98,7 +95,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
         symbol: symbol.to_string(),
-        pair: pair.clone(),
+        pair,
         msg_type: MessageType::L2Event,
         timestamp: raw_orderbook.microtimestamp.parse::<i64>().unwrap() / 1000,
         asks: raw_orderbook.asks.iter().map(|x| parse_order(x)).collect(),

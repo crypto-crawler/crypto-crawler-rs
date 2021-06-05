@@ -31,15 +31,15 @@ fn l2_orderbook_update() {
 
     assert_eq!(orderbook.timestamp, 1622520011989);
 
-    assert_eq!(orderbook.bids[0][0], 36653.62);
-    assert_eq!(orderbook.bids[0][1], 0.75);
-    assert_eq!(orderbook.bids[0][2], 36653.62 * 0.75);
+    assert_eq!(orderbook.bids[0].price, 36653.62);
+    assert_eq!(orderbook.bids[0].quantity_base, 0.75);
+    assert_eq!(orderbook.bids[0].quantity_quote, 36653.62 * 0.75);
 
-    assert_eq!(orderbook.asks[0][0], 36665.2);
-    assert_eq!(orderbook.asks[0][1], 0.0);
-    assert_eq!(orderbook.asks[0][2], 0.0);
+    assert_eq!(orderbook.asks[0].price, 36665.2);
+    assert_eq!(orderbook.asks[0].quantity_base, 0.0);
+    assert_eq!(orderbook.asks[0].quantity_quote, 0.0);
 
-    assert_eq!(orderbook.asks[1][0], 36669.76);
-    assert_eq!(orderbook.asks[1][1], 0.75);
-    assert_eq!(orderbook.asks[1][2], 36669.76 * 0.75);
+    assert_eq!(orderbook.asks[1].price, 36669.76);
+    assert_eq!(orderbook.asks[1].quantity_base, 0.75);
+    assert_eq!(orderbook.asks[1].quantity_quote, 36669.76 * 0.75);
 }

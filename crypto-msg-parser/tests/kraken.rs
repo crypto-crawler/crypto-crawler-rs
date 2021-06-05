@@ -32,21 +32,21 @@ fn l2_orderbook_snapshot() {
 
     assert_eq!(orderbook.timestamp, 1622714245847);
 
-    assert_eq!(orderbook.bids[0][0], 39071.4);
-    assert_eq!(orderbook.bids[0][1], 7.93106570);
-    assert_eq!(orderbook.bids[0][2], 39071.4 * 7.93106570);
+    assert_eq!(orderbook.bids[0].price, 39071.4);
+    assert_eq!(orderbook.bids[0].quantity_base, 7.93106570);
+    assert_eq!(orderbook.bids[0].quantity_quote, 39071.4 * 7.93106570);
 
-    assert_eq!(orderbook.bids[2][0], 39071.2);
-    assert_eq!(orderbook.bids[2][1], 0.76);
-    assert_eq!(orderbook.bids[2][2], 39071.2 * 0.76);
+    assert_eq!(orderbook.bids[2].price, 39071.2);
+    assert_eq!(orderbook.bids[2].quantity_base, 0.76);
+    assert_eq!(orderbook.bids[2].quantity_quote, 39071.2 * 0.76);
 
-    assert_eq!(orderbook.asks[0][0], 39090.6);
-    assert_eq!(orderbook.asks[0][1], 0.00007039);
-    assert_eq!(orderbook.asks[0][2], 39090.6 * 0.00007039);
+    assert_eq!(orderbook.asks[0].price, 39090.6);
+    assert_eq!(orderbook.asks[0].quantity_base, 0.00007039);
+    assert_eq!(orderbook.asks[0].quantity_quote, 39090.6 * 0.00007039);
 
-    assert_eq!(orderbook.asks[2][0], 39096.2);
-    assert_eq!(orderbook.asks[2][1], 0.25584089);
-    assert_eq!(orderbook.asks[2][2], 39096.2 * 0.25584089);
+    assert_eq!(orderbook.asks[2].price, 39096.2);
+    assert_eq!(orderbook.asks[2].quantity_base, 0.25584089);
+    assert_eq!(orderbook.asks[2].quantity_quote, 39096.2 * 0.25584089);
 }
 
 #[test]
@@ -67,9 +67,9 @@ fn l2_orderbook_update() {
 
     assert_eq!(orderbook.timestamp, 1622714256068);
 
-    assert_eq!(orderbook.bids[0][0], 39071.4);
-    assert_eq!(orderbook.bids[0][1], 7.26106570);
-    assert_eq!(orderbook.bids[0][2], 39071.4 * 7.26106570);
+    assert_eq!(orderbook.bids[0].price, 39071.4);
+    assert_eq!(orderbook.bids[0].quantity_base, 7.26106570);
+    assert_eq!(orderbook.bids[0].quantity_quote, 39071.4 * 7.26106570);
 
     let raw_msg = r#"[320,{"a":[["38800.00000","0.02203518","1622766170.577187"]]},{"b":[["38800.00000","0.03017320","1622766170.577304"]],"c":"2479000840"},"book-25","XBT/USD"]"#;
     let orderbook = &parse_l2("kraken", MarketType::Spot, raw_msg).unwrap()[0];
@@ -87,11 +87,11 @@ fn l2_orderbook_update() {
 
     assert_eq!(orderbook.timestamp, 1622766170577);
 
-    assert_eq!(orderbook.asks[0][0], 38800.0);
-    assert_eq!(orderbook.asks[0][1], 0.02203518);
-    assert_eq!(orderbook.asks[0][2], 38800.0 * 0.02203518);
+    assert_eq!(orderbook.asks[0].price, 38800.0);
+    assert_eq!(orderbook.asks[0].quantity_base, 0.02203518);
+    assert_eq!(orderbook.asks[0].quantity_quote, 38800.0 * 0.02203518);
 
-    assert_eq!(orderbook.bids[0][0], 38800.0);
-    assert_eq!(orderbook.bids[0][1], 0.03017320);
-    assert_eq!(orderbook.bids[0][2], 38800.0 * 0.03017320);
+    assert_eq!(orderbook.bids[0].price, 38800.0);
+    assert_eq!(orderbook.bids[0].quantity_base, 0.03017320);
+    assert_eq!(orderbook.bids[0].quantity_quote, 38800.0 * 0.03017320);
 }

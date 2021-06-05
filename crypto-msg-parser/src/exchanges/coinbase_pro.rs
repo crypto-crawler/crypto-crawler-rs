@@ -1,5 +1,6 @@
 use crypto_market_type::MarketType;
 
+use crate::order::Order;
 use crate::{MessageType, OrderBookMsg, TradeMsg, TradeSide};
 
 use chrono::prelude::*;
@@ -81,16 +82,28 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     Ok(vec![trade])
 }
 
-fn parse_order(raw_order: &[String; 2]) -> crate::Order {
+fn parse_order(raw_order: &[String; 2]) -> Order {
     let price = raw_order[0].parse::<f64>().unwrap();
     let quantity_base = raw_order[1].parse::<f64>().unwrap();
-    vec![price, quantity_base, quantity_base * price]
+
+    Order {
+        price,
+        quantity_base,
+        quantity_quote: price * quantity_base,
+        quantity_contract: None,
+    }
 }
 
-fn parse_change(raw_order: &[String; 3]) -> crate::Order {
+fn parse_change(raw_order: &[String; 3]) -> Order {
     let price = raw_order[1].parse::<f64>().unwrap();
     let quantity_base = raw_order[2].parse::<f64>().unwrap();
-    vec![price, quantity_base, quantity_base * price]
+
+    Order {
+        price,
+        quantity_base,
+        quantity_quote: price * quantity_base,
+        quantity_contract: None,
+    }
 }
 
 pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {

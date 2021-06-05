@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{order::Order, MessageType, OrderBookMsg, TradeMsg, TradeSide};
 
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -89,7 +89,12 @@ fn parse_order(raw_order: &RawOrder) -> Order {
     let quantity_base = raw_order.q.parse::<f64>().unwrap();
     let quantity_quote = raw_order.a.parse::<f64>().unwrap();
 
-    vec![price, quantity_base, quantity_quote]
+    Order {
+        price,
+        quantity_base,
+        quantity_quote,
+        quantity_contract: None,
+    }
 }
 
 pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
