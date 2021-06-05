@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
 
-use crate::order::Order;
+use crate::Order;
 use crate::{MessageType, OrderBookMsg, TradeMsg, TradeSide};
 
 use chrono::prelude::*;

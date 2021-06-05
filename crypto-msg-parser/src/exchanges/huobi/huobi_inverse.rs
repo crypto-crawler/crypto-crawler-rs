@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 
 use crate::{
-    exchanges::utils::calc_quantity_and_volume, order::Order, MessageType, OrderBookMsg, TradeMsg,
+    exchanges::utils::calc_quantity_and_volume, MessageType, Order, OrderBookMsg, TradeMsg,
     TradeSide,
 };
 

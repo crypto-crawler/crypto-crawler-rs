@@ -3,6 +3,7 @@ mod msg;
 mod order;
 
 pub use msg::*;
+pub use order::Order;
 
 pub use crypto_market_type::MarketType;
 

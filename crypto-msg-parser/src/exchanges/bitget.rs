@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 
 use super::utils::calc_quantity_and_volume;
-use crate::{order::Order, FundingRateMsg, MessageType, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{FundingRateMsg, MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
