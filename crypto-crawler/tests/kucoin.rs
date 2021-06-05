@@ -69,7 +69,7 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     )
 }
 
-#[test_case(MarketType::Spot, "BTC-USDT")]
+#[test_case(MarketType::Spot, "BTC-USDT"; "inconclusive")]
 #[test_case(MarketType::InverseSwap, "XBTUSDM")]
 #[test_case(MarketType::LinearSwap, "XBTUSDTM")]
 #[test_case(MarketType::InverseFuture, "XBTMM21")]
