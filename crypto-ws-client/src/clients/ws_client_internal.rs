@@ -290,7 +290,11 @@ impl<'a> WSClientInternal<'a> {
             if let Some(interval_and_msg) = self.ping_interval_and_msg {
                 let num_unanswered_ping = self.num_unanswered_ping.load(Ordering::Acquire);
                 if num_unanswered_ping > 3 {
-                    error!("num_unanswered_ping: {}", num_unanswered_ping);
+                    error!(
+                        "num_unanswered_ping: {}, duration: {} seconds",
+                        num_unanswered_ping,
+                        start_timstamp.elapsed().as_secs()
+                    );
                     break; // fail fast, pm2 will restart
                 }
                 if last_ping_timestamp.elapsed() >= Duration::from_secs(interval_and_msg.0 / 2) {
@@ -305,7 +309,11 @@ impl<'a> WSClientInternal<'a> {
                     }
                 }
             } else if num_read_timeout > 3 {
-                error!("num_read_timeout: {}", num_read_timeout);
+                error!(
+                    "num_read_timeout: {}, duration: {} seconds",
+                    num_read_timeout,
+                    start_timstamp.elapsed().as_secs()
+                );
                 break; // fail fast, pm2 will restart
             }
 
