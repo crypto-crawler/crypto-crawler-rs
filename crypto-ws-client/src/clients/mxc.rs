@@ -130,7 +130,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
             match channel {
                 "pong" => {
                     debug!("Received pong {} from {}", msg, EXCHANGE_NAME);
-                    MiscMessage::Misc
+                    MiscMessage::Pong
                 }
                 "rs.error" => {
                     error!("Received {} from {}", msg, EXCHANGE_NAME);
