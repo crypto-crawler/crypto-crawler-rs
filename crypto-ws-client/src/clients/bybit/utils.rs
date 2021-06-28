@@ -45,6 +45,11 @@ pub(super) fn on_misc_msg(msg: &str) -> MiscMessage {
         if obj.contains_key("success") {
             if obj.get("success").unwrap().as_bool().unwrap() {
                 info!("Received {} from {}", msg, EXCHANGE_NAME);
+                if obj.contains_key("ret_msg")
+                    && obj.get("ret_msg").unwrap().as_str().unwrap() == "pong"
+                {
+                    return MiscMessage::Pong;
+                }
             } else {
                 error!("Received {} from {}", msg, EXCHANGE_NAME);
                 panic!("Received {} from {}", msg, EXCHANGE_NAME);

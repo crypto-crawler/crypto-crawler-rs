@@ -59,7 +59,8 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
 
     match msg_type {
         // see https://docs.ftx.com/#response-format
-        "pong" | "subscribed" | "unsubscribed" | "info" => {
+        "pong" => MiscMessage::Pong,
+        "subscribed" | "unsubscribed" | "info" => {
             info!("Received {} from {}", msg, EXCHANGE_NAME);
             MiscMessage::Misc
         }

@@ -73,7 +73,8 @@ pub(super) fn on_misc_msg(msg: &str) -> MiscMessage {
     let obj = serde_json::from_str::<HashMap<String, Value>>(&msg).unwrap();
     let msg_type = obj.get("type").unwrap().as_str().unwrap();
     match msg_type {
-        "pong" | "welcome" | "ack" => {
+        "pong" => MiscMessage::Pong,
+        "welcome" | "ack" => {
             debug!("Received {} from {}", msg, EXCHANGE_NAME);
             MiscMessage::Misc
         }

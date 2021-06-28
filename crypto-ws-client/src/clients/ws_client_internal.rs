@@ -3,7 +3,7 @@ use std::{
     collections::HashSet,
     io::prelude::*,
     sync::{
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicIsize, Ordering},
         Arc, Mutex,
     },
     time::{Duration, Instant},
@@ -17,6 +17,7 @@ pub(super) enum MiscMessage {
     WebSocket(Message), // WebSocket message that needs to be sent to the server
     Reconnect,          // Needs to reconnect
     Misc,               // Misc message
+    Pong,               // Pong message
     Normal,             // Normal message will be passed to on_msg
 }
 
@@ -33,6 +34,8 @@ pub(super) struct WSClientInternal<'a> {
     // how often the client should send a ping, None means the client doesn't need to send
     // ping, instead the server will send ping and the client just needs to reply a pong
     ping_interval_and_msg: Option<(u64, &'static str)>,
+    // Number of unanswered ping messages, if greater than 3, the process will exit
+    num_unanswered_ping: AtomicIsize,
 }
 
 impl<'a> WSClientInternal<'a> {
@@ -58,6 +61,7 @@ impl<'a> WSClientInternal<'a> {
             channels_to_commands,
             should_stop: AtomicBool::new(false),
             ping_interval_and_msg,
+            num_unanswered_ping: AtomicIsize::new(0),
         }
     }
 
@@ -127,6 +131,10 @@ impl<'a> WSClientInternal<'a> {
     fn handle_msg(&self, txt: &str) -> bool {
         match (self.on_misc_msg)(txt) {
             MiscMessage::Misc => false,
+            MiscMessage::Pong => {
+                self.num_unanswered_ping.fetch_sub(1, Ordering::SeqCst);
+                false
+            }
             MiscMessage::Reconnect => {
                 // self.reconnect();
                 std::thread::sleep(Duration::from_secs(5));
@@ -162,7 +170,6 @@ impl<'a> WSClientInternal<'a> {
     pub fn run(&self, duration: Option<u64>) {
         let start_timstamp = Instant::now();
         let mut last_ping_timestamp = Instant::now();
-        let mut num_unanswered_ping = 0;
         let mut num_read_timeout = 0;
         while !self.should_stop.load(Ordering::Acquire) {
             let resp = self.ws_stream.lock().unwrap().read_message();
@@ -211,14 +218,14 @@ impl<'a> WSClientInternal<'a> {
                                 .write_message(Message::Pong(resp));
                             if let Err(err) = ret {
                                 error!("{}", err);
-                                num_unanswered_ping += 1;
+                                self.num_unanswered_ping.fetch_add(1, Ordering::SeqCst);
                             }
                             false
                         }
                         Message::Pong(resp) => {
                             let tmp = std::str::from_utf8(&resp);
                             warn!("Received a pong frame: {}", tmp.unwrap());
-                            num_unanswered_ping = 0;
+                            self.num_unanswered_ping.store(0, Ordering::Release);
                             false
                         }
                         Message::Close(resp) => {
@@ -281,6 +288,7 @@ impl<'a> WSClientInternal<'a> {
             };
 
             if let Some(interval_and_msg) = self.ping_interval_and_msg {
+                let num_unanswered_ping = self.num_unanswered_ping.load(Ordering::Acquire);
                 if num_unanswered_ping > 3 {
                     error!("num_unanswered_ping: {}", num_unanswered_ping);
                     break; // fail fast, pm2 will restart
@@ -293,7 +301,7 @@ impl<'a> WSClientInternal<'a> {
                     if let Err(err) = self.ws_stream.lock().unwrap().write_message(ping_msg) {
                         error!("{}", err);
                     } else {
-                        num_unanswered_ping += 1;
+                        self.num_unanswered_ping.fetch_add(1, Ordering::SeqCst);
                     }
                 }
             } else if num_read_timeout > 3 {

@@ -48,8 +48,10 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
 }
 
 fn on_misc_msg(msg: &str) -> MiscMessage {
-    if msg == r#"{"id":9527}"# || msg == r#"{"event":"pong"}"# {
+    if msg == r#"{"id":9527}"# {
         return MiscMessage::Misc;
+    } else if msg == r#"{"event":"pong"}"# {
+        return MiscMessage::Pong;
     }
 
     let resp = serde_json::from_str::<HashMap<String, Value>>(&msg);

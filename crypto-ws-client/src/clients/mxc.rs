@@ -109,13 +109,17 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
             // see https://stackoverflow.com/a/65244958/381712
             if msg.starts_with("0{") {
                 debug!("Connection opened {}", SPOT_WEBSOCKET_URL);
+                MiscMessage::Misc
             } else if msg == "40" {
                 debug!("Connected successfully {}", SPOT_WEBSOCKET_URL);
+                MiscMessage::Misc
             } else if msg == "3" {
                 // socket.io pong
                 debug!("Received pong from {}", SPOT_WEBSOCKET_URL);
+                MiscMessage::Pong
+            } else {
+                MiscMessage::Misc
             }
-            MiscMessage::Misc
         } else {
             MiscMessage::Normal
         }

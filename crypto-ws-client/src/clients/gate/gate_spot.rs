@@ -108,8 +108,10 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
         MiscMessage::Normal
     } else if obj.contains_key("result") {
         let result = obj.get("result").unwrap().clone();
-        if result == serde_json::json!("pong") || result == serde_json::json!({"status": "success"})
-        {
+        if result == serde_json::json!("pong") {
+            debug!("Received {} from {}", msg, EXCHANGE_NAME);
+            return MiscMessage::Pong;
+        } else if result == serde_json::json!({"status": "success"}) {
             debug!("Received {} from {}", msg, EXCHANGE_NAME);
         } else {
             warn!("Received {} from {}", msg, EXCHANGE_NAME);

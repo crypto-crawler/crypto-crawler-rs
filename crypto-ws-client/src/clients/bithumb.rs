@@ -57,6 +57,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     let code = code.parse::<i64>().unwrap();
     if code < 10000 {
         match code {
+            0 => MiscMessage::Pong,
             6 => {
                 let arr = obj.get("data").unwrap().as_array();
                 if arr != None && arr.unwrap().is_empty() {

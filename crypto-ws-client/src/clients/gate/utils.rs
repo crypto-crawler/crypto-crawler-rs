@@ -102,7 +102,7 @@ pub(super) fn on_misc_msg(msg: &str) -> MiscMessage {
         let event = obj.get("event").unwrap().as_str().unwrap();
         if channel == "futures.pong" {
             debug!("Received {} from {}", msg, EXCHANGE_NAME);
-            MiscMessage::Misc
+            MiscMessage::Pong
         } else if event == "all" || event == "update" {
             MiscMessage::Normal
         } else if event == "subscribe" || event == "unsubscribe" {

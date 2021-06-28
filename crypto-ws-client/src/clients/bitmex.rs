@@ -53,7 +53,7 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
 // see https://www.bitmex.com/app/wsAPI#Response-Format
 fn on_misc_msg(msg: &str) -> MiscMessage {
     if msg == "pong" {
-        return MiscMessage::Misc;
+        return MiscMessage::Pong;
     }
     let resp = serde_json::from_str::<HashMap<String, Value>>(&msg);
     if resp.is_err() {
