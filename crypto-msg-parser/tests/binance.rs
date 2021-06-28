@@ -71,6 +71,7 @@ mod trade {
             trade,
         );
 
+        assert_eq!(trade.price, 58570.1);
         assert_eq!(trade.quantity_base, 5800.0 / 58570.1);
         assert_eq!(trade.quantity_quote, 5800.0);
         assert_eq!(trade.quantity_contract, Some(58.0));

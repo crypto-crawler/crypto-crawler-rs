@@ -162,74 +162,81 @@ impl<'a> WSClientInternal<'a> {
     pub fn run(&self, duration: Option<u64>) {
         let start_timstamp = Instant::now();
         let mut last_ping_timestamp = Instant::now();
+        let mut num_unanswered_ping = 0;
+        let mut num_read_timeout = 0;
         while !self.should_stop.load(Ordering::Acquire) {
             let resp = self.ws_stream.lock().unwrap().read_message();
             let normal = match resp {
-                Ok(msg) => match msg {
-                    Message::Text(txt) => self.handle_msg(&txt),
-                    Message::Binary(binary) => {
-                        let mut txt = String::new();
-                        let resp = match self.exchange {
-                            super::huobi::EXCHANGE_NAME
-                            | super::binance::EXCHANGE_NAME
-                            | super::bitget::EXCHANGE_NAME
-                            | super::bitz::EXCHANGE_NAME => {
-                                let mut decoder = GzDecoder::new(&binary[..]);
-                                decoder.read_to_string(&mut txt)
-                            }
-                            super::okex::EXCHANGE_NAME => {
-                                let mut decoder = DeflateDecoder::new(&binary[..]);
-                                decoder.read_to_string(&mut txt)
-                            }
-                            _ => {
-                                error!("Unknown binary format from {}", self.url);
-                                panic!("Unknown binary format from {}", self.url);
-                            }
-                        };
+                Ok(msg) => {
+                    num_read_timeout = 0;
+                    match msg {
+                        Message::Text(txt) => self.handle_msg(&txt),
+                        Message::Binary(binary) => {
+                            let mut txt = String::new();
+                            let resp = match self.exchange {
+                                super::huobi::EXCHANGE_NAME
+                                | super::binance::EXCHANGE_NAME
+                                | super::bitget::EXCHANGE_NAME
+                                | super::bitz::EXCHANGE_NAME => {
+                                    let mut decoder = GzDecoder::new(&binary[..]);
+                                    decoder.read_to_string(&mut txt)
+                                }
+                                super::okex::EXCHANGE_NAME => {
+                                    let mut decoder = DeflateDecoder::new(&binary[..]);
+                                    decoder.read_to_string(&mut txt)
+                                }
+                                _ => {
+                                    error!("Unknown binary format from {}", self.url);
+                                    panic!("Unknown binary format from {}", self.url);
+                                }
+                            };
 
-                        match resp {
-                            Ok(_) => self.handle_msg(&txt),
-                            Err(err) => {
-                                error!("Decompression failed, {}", err);
-                                false
+                            match resp {
+                                Ok(_) => self.handle_msg(&txt),
+                                Err(err) => {
+                                    error!("Decompression failed, {}", err);
+                                    false
+                                }
                             }
                         }
-                    }
-                    Message::Ping(resp) => {
-                        info!(
-                            "Received a ping frame: {}",
-                            std::str::from_utf8(&resp).unwrap()
-                        );
-                        let ret = self
-                            .ws_stream
-                            .lock()
-                            .unwrap()
-                            .write_message(Message::Pong(resp));
-                        if let Err(err) = ret {
-                            error!("{}", err);
+                        Message::Ping(resp) => {
+                            info!(
+                                "Received a ping frame: {}",
+                                std::str::from_utf8(&resp).unwrap()
+                            );
+                            let ret = self
+                                .ws_stream
+                                .lock()
+                                .unwrap()
+                                .write_message(Message::Pong(resp));
+                            if let Err(err) = ret {
+                                error!("{}", err);
+                                num_unanswered_ping += 1;
+                            }
+                            false
                         }
-                        false
-                    }
-                    Message::Pong(resp) => {
-                        let tmp = std::str::from_utf8(&resp);
-                        warn!("Received a pong frame: {}", tmp.unwrap());
-                        false
-                    }
-                    Message::Close(resp) => {
-                        match resp {
-                            Some(frame) => warn!("Received a Message::Close message with a CloseFrame: code: {}, reason: {}", frame.code, frame.reason),
-                            None => warn!("Received a close message without CloseFrame"),
+                        Message::Pong(resp) => {
+                            let tmp = std::str::from_utf8(&resp);
+                            warn!("Received a pong frame: {}", tmp.unwrap());
+                            num_unanswered_ping = 0;
+                            false
                         }
-                        false
+                        Message::Close(resp) => {
+                            match resp {
+                                Some(frame) => warn!("Received a Message::Close message with a CloseFrame: code: {}, reason: {}", frame.code, frame.reason),
+                                None => warn!("Received a close message without CloseFrame"),
+                            }
+                            false
+                        }
                     }
-                },
+                }
                 Err(err) => {
                     match err {
                         Error::ConnectionClosed => {
                             error!("Server closed connection, exiting now...");
                             // self.reconnect();
                             std::thread::sleep(Duration::from_secs(5));
-                            std::process::exit(0); // fail fast, pm2 will restart
+                            break; // fail fast, pm2 will restart
                         }
                         Error::AlreadyClosed => {
                             error!("Impossible to happen, fix the bug in the code");
@@ -238,6 +245,7 @@ impl<'a> WSClientInternal<'a> {
                         Error::Io(io_err) => {
                             if io_err.kind() == std::io::ErrorKind::WouldBlock {
                                 info!("read_message() timeout");
+                                num_read_timeout += 1;
                             } else {
                                 error!(
                                     "I/O error thrown from read_message(): {}, {:?}",
@@ -246,7 +254,7 @@ impl<'a> WSClientInternal<'a> {
                                 );
                                 // self.reconnect();
                                 std::thread::sleep(Duration::from_secs(5));
-                                std::process::exit(0); // fail fast, pm2 will restart
+                                break; // fail fast, pm2 will restart
                             }
                         }
                         Error::Protocol(protocol_err) => {
@@ -254,7 +262,7 @@ impl<'a> WSClientInternal<'a> {
                                 error!("ResetWithoutClosingHandshake");
                                 // self.reconnect();
                                 std::thread::sleep(Duration::from_secs(5));
-                                std::process::exit(0); // fail fast, pm2 will restart
+                                break; // fail fast, pm2 will restart
                             } else {
                                 error!(
                                     "Protocol error thrown from read_message(): {}",
@@ -273,6 +281,10 @@ impl<'a> WSClientInternal<'a> {
             };
 
             if let Some(interval_and_msg) = self.ping_interval_and_msg {
+                if num_unanswered_ping > 3 {
+                    error!("num_unanswered_ping: {}", num_unanswered_ping);
+                    break; // fail fast, pm2 will restart
+                }
                 if last_ping_timestamp.elapsed() >= Duration::from_secs(interval_and_msg.0 / 2) {
                     info!("Sending ping: {}", interval_and_msg.1);
                     // send ping
@@ -280,8 +292,13 @@ impl<'a> WSClientInternal<'a> {
                     last_ping_timestamp = Instant::now();
                     if let Err(err) = self.ws_stream.lock().unwrap().write_message(ping_msg) {
                         error!("{}", err);
+                    } else {
+                        num_unanswered_ping += 1;
                     }
                 }
+            } else if num_read_timeout > 3 {
+                error!("num_read_timeout: {}", num_read_timeout);
+                break; // fail fast, pm2 will restart
             }
 
             if let Some(seconds) = duration {

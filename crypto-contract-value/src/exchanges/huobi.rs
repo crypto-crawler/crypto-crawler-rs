@@ -121,16 +121,17 @@ lazy_static! {
         };
 
         let linear_option: HashMap<String, f64> = {
-            let mut m: HashMap<String, f64> = vec![("BTC/USDT", 0.001),
+            let m: HashMap<String, f64> = vec![("BTC/USDT", 0.001),
             ("ETH/USDT", 0.01),]
                 .into_iter()
                 .map(|x| (x.0.to_string(), x.1 as f64))
                 .collect();
 
-            let from_online = fetch_contract_size(LINEAR_OPTION_URL);
-            for (pair, contract_value) in &from_online {
-                m.insert(pair.clone(), *contract_value);
-            }
+            debug_assert!(!LINEAR_OPTION_URL.is_empty());
+            // let from_online = fetch_contract_size(LINEAR_OPTION_URL);
+            // for (pair, contract_value) in &from_online {
+            //     m.insert(pair.clone(), *contract_value);
+            // }
 
             m
         };
@@ -200,6 +201,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn linear_option() {
         let mapping = fetch_contract_size(LINEAR_OPTION_URL);
         for (pair, contract_value) in &mapping {

@@ -11,7 +11,7 @@ mod bybit_inverse_future {
         gen_test_code!(
             BybitInverseFutureWSClient,
             subscribe,
-            &vec!["trade.BTCUSDM21".to_string()]
+            &vec!["trade.BTCUSDU21".to_string()]
         );
     }
 
@@ -20,7 +20,7 @@ mod bybit_inverse_future {
         gen_test_code!(
             BybitInverseFutureWSClient,
             subscribe,
-            &vec![r#"{"op":"subscribe","args":["trade.BTCUSDM21"]}"#.to_string()]
+            &vec![r#"{"op":"subscribe","args":["trade.BTCUSDU21"]}"#.to_string()]
         );
     }
 
@@ -29,7 +29,7 @@ mod bybit_inverse_future {
         gen_test_code!(
             BybitInverseFutureWSClient,
             subscribe_trade,
-            &vec!["BTCUSDM21".to_string()]
+            &vec!["BTCUSDU21".to_string()]
         );
     }
 
@@ -38,7 +38,7 @@ mod bybit_inverse_future {
         gen_test_code!(
             BybitInverseFutureWSClient,
             subscribe_bbo,
-            &vec!["BTCUSDM21".to_string()]
+            &vec!["BTCUSDU21".to_string()]
         );
     }
 
@@ -47,7 +47,7 @@ mod bybit_inverse_future {
         gen_test_code!(
             BybitInverseFutureWSClient,
             subscribe_orderbook,
-            &vec!["BTCUSDM21".to_string()]
+            &vec!["BTCUSDU21".to_string()]
         );
     }
 
@@ -56,7 +56,7 @@ mod bybit_inverse_future {
         gen_test_code!(
             BybitInverseFutureWSClient,
             subscribe_ticker,
-            &vec!["BTCUSDM21".to_string()]
+            &vec!["BTCUSDU21".to_string()]
         );
     }
 
@@ -64,12 +64,12 @@ mod bybit_inverse_future {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BybitInverseFutureWSClient,
-            &vec!["BTCUSDM21".to_string()],
+            &vec!["BTCUSDU21".to_string()],
             60
         );
         gen_test_subscribe_candlestick!(
             BybitInverseFutureWSClient,
-            &vec!["BTCUSDM21".to_string()],
+            &vec!["BTCUSDU21".to_string()],
             2592000
         );
     }

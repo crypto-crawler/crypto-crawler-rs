@@ -115,6 +115,7 @@ mod gate_inverse_swap {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(GateInverseSwapWSClient, &vec!["BTC_USD".to_string()], 10);
         gen_test_subscribe_candlestick!(
@@ -158,6 +159,7 @@ mod gate_linear_swap {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(GateLinearSwapWSClient, &vec!["BTC_USDT".to_string()], 10);
         gen_test_subscribe_candlestick!(
@@ -180,8 +182,8 @@ mod gate_linear_future {
             GateLinearFutureWSClient,
             subscribe_trade,
             &vec![
-                "BTC_USDT_20210625".to_string(),
-                "ETH_USDT_20210625".to_string()
+                "BTC_USDT_20210924".to_string(),
+                "ETH_USDT_20210924".to_string()
             ]
         );
     }
@@ -192,7 +194,7 @@ mod gate_linear_future {
         gen_test_code!(
             GateLinearFutureWSClient,
             subscribe_orderbook,
-            &vec!["BTC_USDT_20210625".to_string()]
+            &vec!["BTC_USDT_20210924".to_string()]
         );
     }
 
@@ -202,7 +204,7 @@ mod gate_linear_future {
         gen_test_code!(
             GateLinearFutureWSClient,
             subscribe_ticker,
-            &vec!["BTC_USDT_20210625".to_string()]
+            &vec!["BTC_USDT_20210924".to_string()]
         );
     }
 
@@ -211,12 +213,12 @@ mod gate_linear_future {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             GateLinearFutureWSClient,
-            &vec!["BTC_USDT_20210625".to_string()],
+            &vec!["BTC_USDT_20210924".to_string()],
             10
         );
         gen_test_subscribe_candlestick!(
             GateLinearFutureWSClient,
-            &vec!["BTC_USDT_20210625".to_string()],
+            &vec!["BTC_USDT_20210924".to_string()],
             604800
         );
     }

@@ -52,6 +52,7 @@ fn fetch_linear_swap_symbols() {
 }
 
 #[test]
+#[ignore]
 fn fetch_option_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::EuropeanOption).unwrap();
     assert!(!symbols.is_empty());

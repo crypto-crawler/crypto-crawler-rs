@@ -36,7 +36,7 @@ pub fn crawl(
     let on_msg_ext = Arc::new(Mutex::new(move |msg: Message| {
         let key = format!("{}-{}-{}", msg_type, exchange, market_type);
         if let Some(ref data_dir) = *data_dir_clone {
-            if !writers_map_clone.contains_key(&key) {
+            if !writers_map.contains_key(&key) {
                 let data_dir = Path::new(data_dir)
                     .join(msg_type.to_string())
                     .join(exchange)
@@ -48,7 +48,7 @@ pub fn crawl(
                 let file_path = Path::new(data_dir.as_os_str())
                     .join(file_name)
                     .into_os_string();
-                writers_map_clone.insert(
+                writers_map.insert(
                     key.clone(),
                     FileWriter::new(file_path.as_os_str().to_str().unwrap()),
                 );
@@ -64,7 +64,7 @@ pub fn crawl(
                     for trade in trades.iter() {
                         let json = serde_json::to_string(trade).unwrap();
 
-                        if let Some(writer) = writers_map_clone.get(&key) {
+                        if let Some(writer) = writers_map.get(&key) {
                             writer.write(&json);
                         }
 
@@ -85,7 +85,7 @@ pub fn crawl(
                     for orderbook in orderbooks.iter() {
                         let json = serde_json::to_string(orderbook).unwrap();
 
-                        if let Some(writer) = writers_map_clone.get(&key) {
+                        if let Some(writer) = writers_map.get(&key) {
                             writer.write(&json);
                         }
 
@@ -109,7 +109,7 @@ pub fn crawl(
                     for rate in rates.iter() {
                         let json = serde_json::to_string(rate).unwrap();
 
-                        if let Some(writer) = writers_map_clone.get(&key) {
+                        if let Some(writer) = writers_map.get(&key) {
                             writer.write(&json);
                         }
 
@@ -128,7 +128,7 @@ pub fn crawl(
         } else {
             let json = serde_json::to_string(&msg).unwrap();
 
-            if let Some(writer) = writers_map_clone.get(&key) {
+            if let Some(writer) = writers_map.get(&key) {
                 writer.write(&json);
             }
 
@@ -158,7 +158,7 @@ pub fn crawl(
         _ => panic!("Not implemented"),
     }
 
-    for kv in writers_map.iter() {
+    for kv in writers_map_clone.iter() {
         let writer = kv.value();
         writer.close();
     }
