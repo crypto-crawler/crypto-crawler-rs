@@ -25,14 +25,14 @@ mod inverse_future {
     #[test]
     fn test_agg_trades() {
         let text =
-            BinanceInverseRestClient::fetch_agg_trades("BTCUSD_210625", None, None, None).unwrap();
+            BinanceInverseRestClient::fetch_agg_trades("BTCUSD_210924", None, None, None).unwrap();
         assert!(text.starts_with("[{"));
     }
 
     #[test]
     fn test_l2_snapshot() {
         let text =
-            fetch_l2_snapshot("binance", MarketType::InverseFuture, "BTCUSD_210625").unwrap();
+            fetch_l2_snapshot("binance", MarketType::InverseFuture, "BTCUSD_210924").unwrap();
         assert!(text.starts_with("{"));
     }
 }

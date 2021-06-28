@@ -107,7 +107,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::InverseFuture,
             MarketType::LinearSwap,
             MarketType::InverseSwap,
-            MarketType::EuropeanOption,
+            // MarketType::EuropeanOption,
         ],
         "kraken" => vec![MarketType::Spot],
         "kucoin" => vec![

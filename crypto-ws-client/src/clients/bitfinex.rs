@@ -426,33 +426,37 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
 
     fn run(&self, duration: Option<u64>) {
         let now = Instant::now();
+        let mut num_read_timeout = 0;
         while !self.should_stop.load(Ordering::Acquire) {
             let resp = self.ws_stream.lock().unwrap().read_message();
             let mut succeeded = false;
             match resp {
-                Ok(msg) => match msg {
-                    Message::Text(txt) => succeeded = self.handle_msg(&txt),
-                    Message::Binary(_) => panic!("Unknown binary format from Bitfinex"),
-                    Message::Ping(resp) => {
-                        info!(
-                            "Received a ping frame: {}",
-                            std::str::from_utf8(&resp).unwrap()
-                        );
-                        if let Err(err) = self.ws_stream.lock().unwrap().write_message(Message::Pong(resp)) {
-                            error!("{}", err);
+                Ok(msg) => {
+                    num_read_timeout = 0;
+                    match msg {
+                        Message::Text(txt) => succeeded = self.handle_msg(&txt),
+                        Message::Binary(_) => panic!("Unknown binary format from Bitfinex"),
+                        Message::Ping(resp) => {
+                            info!(
+                                "Received a ping frame: {}",
+                                std::str::from_utf8(&resp).unwrap()
+                            );
+                            if let Err(err) = self.ws_stream.lock().unwrap().write_message(Message::Pong(resp)) {
+                                error!("{}", err);
+                            }
+                        }
+                        Message::Pong(resp) => {
+                            let tmp = std::str::from_utf8(&resp);
+                            warn!("Received a pong frame: {}", tmp.unwrap());
+                        }
+                        Message::Close(resp) => {
+                            match resp {
+                                Some(frame) => warn!("Received a Message::Close message with a CloseFrame: code: {}, reason: {}", frame.code, frame.reason),
+                                None => warn!("Received a close message without CloseFrame"),
+                            }
                         }
                     }
-                    Message::Pong(resp) => {
-                        let tmp = std::str::from_utf8(&resp);
-                        warn!("Received a pong frame: {}", tmp.unwrap());
-                    }
-                    Message::Close(resp) => {
-                        match resp {
-                            Some(frame) => warn!("Received a Message::Close message with a CloseFrame: code: {}, reason: {}", frame.code, frame.reason),
-                            None => warn!("Received a close message without CloseFrame"),
-                        }
-                    }
-                },
+                }
                 Err(err) => {
                     match err {
                         Error::ConnectionClosed => {
@@ -468,6 +472,7 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
                         Error::Io(io_err) => {
                             if io_err.kind() == std::io::ErrorKind::WouldBlock {
                                 info!("read_message() timeout");
+                                num_read_timeout += 1;
                             } else {
                                 error!(
                                     "I/O error thrown from read_message(): {}, {:?}",
@@ -499,6 +504,11 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
                     }
                 }
             };
+
+            if num_read_timeout > 3 {
+                error!("num_read_timeout: {}", num_read_timeout);
+                break; // fail fast, pm2 will restart
+            }
 
             if let Some(seconds) = duration {
                 if now.elapsed() > Duration::from_secs(seconds) && succeeded {

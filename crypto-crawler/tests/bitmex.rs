@@ -13,9 +13,9 @@ use std::{
 
 const EXCHANGE_NAME: &str = "bitmex";
 
-#[test_case(MarketType::InverseFuture, "XBTM21")]
-#[test_case(MarketType::LinearFuture, "ETHM21")]
-#[test_case(MarketType::QuantoFuture, "ETHUSDM21")]
+#[test_case(MarketType::InverseFuture, "XBTU21")]
+#[test_case(MarketType::LinearFuture, "ETHU21")]
+#[test_case(MarketType::QuantoFuture, "ETHUSDU21")]
 #[test_case(MarketType::InverseSwap, "XBTUSD")]
 #[test_case(MarketType::QuantoSwap, "ETHUSD")]
 fn test_crawl_trade(market_type: MarketType, symbol: &str) {
@@ -28,9 +28,9 @@ fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     )
 }
 
-#[test_case(MarketType::InverseFuture, "XBTM21")]
-#[test_case(MarketType::LinearFuture, "ETHM21")]
-#[test_case(MarketType::QuantoFuture, "ETHUSDM21")]
+#[test_case(MarketType::InverseFuture, "XBTU21")]
+#[test_case(MarketType::LinearFuture, "ETHU21")]
+#[test_case(MarketType::QuantoFuture, "ETHUSDU21")]
 #[test_case(MarketType::InverseSwap, "XBTUSD")]
 #[test_case(MarketType::QuantoSwap, "ETHUSD")]
 fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
@@ -43,9 +43,9 @@ fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
     )
 }
 
-#[test_case(MarketType::InverseFuture, "XBTM21")]
-#[test_case(MarketType::LinearFuture, "ETHM21")]
-#[test_case(MarketType::QuantoFuture, "ETHUSDM21")]
+#[test_case(MarketType::InverseFuture, "XBTU21")]
+#[test_case(MarketType::LinearFuture, "ETHU21")]
+#[test_case(MarketType::QuantoFuture, "ETHUSDU21")]
 #[test_case(MarketType::InverseSwap, "XBTUSD")]
 #[test_case(MarketType::QuantoSwap, "ETHUSD")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
