@@ -61,7 +61,7 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
 fn on_misc_msg(msg: &str) -> MiscMessage {
     if msg == "Pong" {
         debug!("Received {} from {}", msg, EXCHANGE_NAME);
-        return MiscMessage::Misc;
+        return MiscMessage::Pong;
     }
     if msg.starts_with('[') {
         MiscMessage::Normal
