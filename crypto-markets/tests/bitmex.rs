@@ -13,8 +13,10 @@ fn fetch_all_symbols() {
 #[test]
 fn fetch_inverse_swap_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
-    assert_eq!(1, symbols.len());
-    assert_eq!("XBTUSD", symbols[0]);
+    assert!(!symbols.is_empty());
+    for symbol in symbols.iter() {
+        assert!(symbol.ends_with("USD") || symbol.ends_with("EUR"));
+    }
 }
 
 #[test]

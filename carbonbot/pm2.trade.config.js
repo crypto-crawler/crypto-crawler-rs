@@ -24,13 +24,7 @@ const market_types = {
     deribit: ["inverse_future", "european_option"], // inverse_swap is included in inverse_future
     ftx: ["spot", "linear_swap", "linear_future", "move", "bvol"],
     gate: ["spot", "linear_future", "linear_swap", "inverse_swap"],
-    huobi: [
-        "spot",
-        "inverse_future",
-        "linear_swap",
-        "inverse_swap",
-        "european_option",
-    ],
+    huobi: ["spot", "inverse_future", "linear_swap", "inverse_swap"],
     kraken: ["spot"],
     kucoin: ["spot", "inverse_future", "linear_swap", "inverse_swap"],
     mxc: ["spot", "linear_swap", "inverse_swap"],
