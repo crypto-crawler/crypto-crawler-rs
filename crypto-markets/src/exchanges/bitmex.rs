@@ -138,8 +138,8 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
     // Inverse
     for x in instruments.iter().filter(|x| x.isInverse) {
         assert_eq!("XBT".to_string(), x.rootSymbol);
-        assert_eq!("USD".to_string(), x.quoteCurrency);
-        assert_eq!("USD".to_string(), x.positionCurrency);
+        // USD, EUR
+        assert_eq!(x.quoteCurrency, x.positionCurrency);
     }
     // Quanto
     for x in instruments.iter().filter(|x| x.isQuanto) {
