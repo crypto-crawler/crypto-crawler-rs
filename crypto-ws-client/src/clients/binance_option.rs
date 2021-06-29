@@ -86,7 +86,8 @@ define_client!(
     WEBSOCKET_URL,
     channels_to_commands,
     on_misc_msg,
-    Some(CLIENT_PING_INTERVAL_AND_MSG)
+    Some(CLIENT_PING_INTERVAL_AND_MSG),
+    None
 );
 
 fn to_raw_channel(channel: &str, pair: &str) -> String {

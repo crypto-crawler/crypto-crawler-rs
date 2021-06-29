@@ -16,6 +16,10 @@ pub(super) const EXCHANGE_NAME: &str = "kraken";
 
 const WEBSOCKET_URL: &str = "wss://ws.kraken.com";
 
+// Client can ping server to determine whether connection is alive
+// https://docs.kraken.com/websockets/#message-ping
+const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (10, r#"{"event":"ping"}"#);
+
 /// The WebSocket client for Kraken.
 ///
 /// Kraken has only Spot market.
@@ -197,6 +201,7 @@ define_client!(
     WEBSOCKET_URL,
     channels_to_commands,
     on_misc_msg,
+    Some(CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
 

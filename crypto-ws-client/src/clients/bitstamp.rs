@@ -11,6 +11,9 @@ pub(super) const EXCHANGE_NAME: &str = "bitstamp";
 
 const WEBSOCKET_URL: &str = "wss://ws.bitstamp.net";
 
+// Empty string means an empty ping frame
+const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (10, "");
+
 /// The WebSocket client for Bitstamp Spot market.
 ///
 /// Bitstamp has only Spot market.
@@ -110,6 +113,7 @@ define_client!(
     WEBSOCKET_URL,
     channels_to_commands,
     on_misc_msg,
+    Some(CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
 

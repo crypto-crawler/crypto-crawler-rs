@@ -149,6 +149,7 @@ define_client!(
     WEBSOCKET_URL,
     channels_to_commands,
     on_misc_msg,
+    None,
     None
 );
 

@@ -22,6 +22,10 @@ pub(super) const EXCHANGE_NAME: &str = "bitfinex";
 
 const WEBSOCKET_URL: &str = "wss://api-pub.bitfinex.com/ws/2";
 
+// If there is no activity in the channel for 15 seconds, the Websocket server will send you a heartbeat message
+// https://docs.bitfinex.com/docs/ws-general#heartbeating
+const SERVER_PING_INTERVAL: u64 = 15;
+
 /// The WebSocket client for Bitfinex, including all markets.
 ///
 /// * WebSocket API doc: <https://docs.bitfinex.com/docs/ws-general>
@@ -222,7 +226,7 @@ impl<'a> BitfinexWSClient<'a> {
         warn!("Reconnecting to {}", WEBSOCKET_URL);
         {
             let mut guard = self.ws_stream.lock().unwrap();
-            *guard = connect_with_retry(WEBSOCKET_URL, None);
+            *guard = connect_with_retry(WEBSOCKET_URL, Some(SERVER_PING_INTERVAL));
         }
 
         let channels = self
@@ -382,7 +386,7 @@ impl<'a> BitfinexWSClient<'a> {
 
 impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
     fn new(on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, _url: Option<&str>) -> Self {
-        let stream = connect_with_retry(WEBSOCKET_URL, None);
+        let stream = connect_with_retry(WEBSOCKET_URL, Some(SERVER_PING_INTERVAL));
         BitfinexWSClient {
             ws_stream: Mutex::new(stream),
             channels: Mutex::new(HashSet::new()),
