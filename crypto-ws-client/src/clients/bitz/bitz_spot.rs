@@ -14,7 +14,7 @@ const EXCHANGE_NAME: &str = "bitz";
 const WEBSOCKET_URL: &str = "wss://wsapi.bitz.plus/";
 
 // See https://apidocv2.bitz.plus/en/#heartbeat-and-persistent-connection-strategy
-const PING_INTERVAL_AND_MSG: (u64, &str) = (10, "ping");
+const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (10, "ping");
 
 /// The WebSocket client for Bitz spot market.
 ///
@@ -163,5 +163,5 @@ define_client!(
     WEBSOCKET_URL,
     channels_to_commands,
     on_misc_msg,
-    Some(PING_INTERVAL_AND_MSG)
+    Some(CLIENT_PING_INTERVAL_AND_MSG)
 );

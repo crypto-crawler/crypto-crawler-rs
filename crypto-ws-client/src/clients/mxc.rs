@@ -19,9 +19,9 @@ pub(super) const SPOT_WEBSOCKET_URL: &str =
     "wss://wbs.mxc.com/socket.io/?EIO=3&transport=websocket";
 pub(super) const SWAP_WEBSOCKET_URL: &str = "wss://contract.mxc.com/ws";
 
-const SPOT_PING_INTERVAL_AND_MSG: (u64, &str) = (5, "2");
+const SPOT_CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (5, "2");
 // more than 60 seconds no response, close the channel
-const SWAP_PING_INTERVAL_AND_MSG: (u64, &str) = (60, r#"{"method":"ping"}"#);
+const SWAP_CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (60, r#"{"method":"ping"}"#);
 
 /// MXC Spot market.
 ///
@@ -248,7 +248,7 @@ define_client!(
     SPOT_WEBSOCKET_URL,
     spot_channels_to_commands,
     on_misc_msg,
-    Some(SPOT_PING_INTERVAL_AND_MSG)
+    Some(SPOT_CLIENT_PING_INTERVAL_AND_MSG)
 );
 define_client!(
     MxcSwapWSClient,
@@ -256,7 +256,7 @@ define_client!(
     SWAP_WEBSOCKET_URL,
     swap_channels_to_commands,
     on_misc_msg,
-    Some(SWAP_PING_INTERVAL_AND_MSG)
+    Some(SWAP_CLIENT_PING_INTERVAL_AND_MSG)
 );
 
 #[cfg(test)]

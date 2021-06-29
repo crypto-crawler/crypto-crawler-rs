@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 use super::super::ws_client_internal::WSClientInternal;
 use super::super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
 use super::utils::{
-    channels_to_commands, on_misc_msg, to_raw_channel, EXCHANGE_NAME, PING_INTERVAL_AND_MSG,
+    channels_to_commands, on_misc_msg, to_raw_channel, CLIENT_PING_INTERVAL_AND_MSG, EXCHANGE_NAME,
 };
 
 const WEBSOCKET_URL: &str = "wss://stream.bybit.com/realtime";
@@ -59,5 +59,5 @@ define_client!(
     WEBSOCKET_URL,
     channels_to_commands,
     on_misc_msg,
-    Some(PING_INTERVAL_AND_MSG)
+    Some(CLIENT_PING_INTERVAL_AND_MSG)
 );

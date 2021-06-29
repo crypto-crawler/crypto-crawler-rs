@@ -15,7 +15,7 @@ const EXCHANGE_NAME: &str = "zbg";
 
 const WEBSOCKET_URL: &str = "wss://kline.zbg.com/websocket";
 
-const PING_INTERVAL_AND_MSG: (u64, &str) = (10, r#"{"action":"PING"}"#);
+const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (10, r#"{"action":"PING"}"#);
 
 lazy_static! {
     static ref SYMBOL_ID_MAP: RwLock<HashMap<String, String>> =
@@ -144,5 +144,5 @@ define_client!(
     WEBSOCKET_URL,
     channels_to_commands,
     on_misc_msg,
-    Some(PING_INTERVAL_AND_MSG)
+    Some(CLIENT_PING_INTERVAL_AND_MSG)
 );
