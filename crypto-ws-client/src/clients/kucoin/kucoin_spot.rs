@@ -77,5 +77,6 @@ define_client!(
     WEBSOCKET_URL.as_str(),
     channels_to_commands,
     on_misc_msg,
-    Some(CLIENT_PING_INTERVAL_AND_MSG)
+    Some(CLIENT_PING_INTERVAL_AND_MSG),
+    None
 );

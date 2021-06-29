@@ -21,6 +21,9 @@ const COIN_SWAP_WEBSOCKET_URL: &str = "wss://futures.huobi.com/swap-ws";
 const USDT_SWAP_WEBSOCKET_URL: &str = "wss://futures.huobi.com/linear-swap-ws";
 const OPTION_WEBSOCKET_URL: &str = "wss://futures.huobi.com/option-ws";
 
+// The server will send a heartbeat every 5 seconds
+const SERVER_PING_INTERVAL: u64 = 5;
+
 // Internal unified client
 struct HuobiWSClient<'a> {
     client: WSClientInternal<'a>,
@@ -80,6 +83,7 @@ impl<'a> HuobiWSClient<'a> {
                 Self::on_misc_msg,
                 Self::channels_to_commands,
                 None,
+                Some(SERVER_PING_INTERVAL),
             ),
         }
     }

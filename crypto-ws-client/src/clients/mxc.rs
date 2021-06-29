@@ -248,7 +248,8 @@ define_client!(
     SPOT_WEBSOCKET_URL,
     spot_channels_to_commands,
     on_misc_msg,
-    Some(SPOT_CLIENT_PING_INTERVAL_AND_MSG)
+    Some(SPOT_CLIENT_PING_INTERVAL_AND_MSG),
+    None
 );
 define_client!(
     MxcSwapWSClient,
@@ -256,7 +257,8 @@ define_client!(
     SWAP_WEBSOCKET_URL,
     swap_channels_to_commands,
     on_misc_msg,
-    Some(SWAP_CLIENT_PING_INTERVAL_AND_MSG)
+    Some(SWAP_CLIENT_PING_INTERVAL_AND_MSG),
+    None
 );
 
 #[cfg(test)]

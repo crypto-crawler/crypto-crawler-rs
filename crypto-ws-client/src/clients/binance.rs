@@ -18,6 +18,9 @@ const INVERSE_WEBSOCKET_URL: &str = "wss://dstream.binance.com/stream";
 // A single connection can listen to a maximum of 200 streams
 const MAX_NUM_CHANNELS: usize = 200;
 
+// The websocket server will send a ping frame every 5 minutes
+const SERVER_PING_INTERVAL: u64 = 300;
+
 // Internal unified client
 struct BinanceWSClient<'a> {
     client: WSClientInternal<'a>,
@@ -57,6 +60,7 @@ impl<'a> BinanceWSClient<'a> {
                 Self::on_misc_msg,
                 Self::channels_to_commands,
                 None,
+                Some(SERVER_PING_INTERVAL),
             ),
         }
     }

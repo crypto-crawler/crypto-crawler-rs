@@ -34,8 +34,12 @@ pub(super) struct WSClientInternal<'a> {
     // how often the client should send a ping, None means the client doesn't need to send
     // ping, instead the server will send ping and the client just needs to reply a pong
     client_ping_interval_and_msg: Option<(u64, &'static str)>,
-    // Number of unanswered ping messages, if greater than 3, the process will exit
+    // Number of unanswered client ping messages, if greater than 3, the process will exit
     num_unanswered_ping: AtomicIsize,
+    // How often the server sends a ping, only one of client_ping_interval_and_msg
+    // and server_ping_interval should exist
+    #[allow(dead_code)]
+    server_ping_interval: Option<u64>,
 }
 
 impl<'a> WSClientInternal<'a> {
@@ -46,11 +50,18 @@ impl<'a> WSClientInternal<'a> {
         on_misc_msg: fn(&str) -> MiscMessage,
         channels_to_commands: fn(&[String], bool) -> Vec<String>,
         client_ping_interval_and_msg: Option<(u64, &'static str)>,
+        server_ping_interval: Option<u64>,
     ) -> Self {
-        let stream = connect_with_retry(
-            url,
-            client_ping_interval_and_msg.map(|interval_and_msg| interval_and_msg.0 / 2),
-        );
+        let timeout = if client_ping_interval_and_msg.is_some() && server_ping_interval.is_some() {
+            panic!(
+                "Only one of client_ping_interval_and_msg and server_ping_interval can have value"
+            );
+        } else if let Some(timeout) = client_ping_interval_and_msg {
+            Some(timeout.0 / 2)
+        } else {
+            server_ping_interval
+        };
+        let stream = connect_with_retry(url, timeout);
         WSClientInternal {
             exchange,
             url: url.to_string(),
@@ -62,6 +73,7 @@ impl<'a> WSClientInternal<'a> {
             should_stop: AtomicBool::new(false),
             client_ping_interval_and_msg,
             num_unanswered_ping: AtomicIsize::new(0),
+            server_ping_interval,
         }
     }
 
@@ -101,11 +113,18 @@ impl<'a> WSClientInternal<'a> {
         warn!("Reconnecting to {}", &self.url);
         {
             let mut guard = self.ws_stream.lock().unwrap();
-            *guard = connect_with_retry(
-                self.url.as_str(),
-                self.client_ping_interval_and_msg
-                    .map(|interval_and_msg| interval_and_msg.0 / 2),
-            );
+            let timeout = if self.client_ping_interval_and_msg.is_some()
+                && self.server_ping_interval.is_some()
+            {
+                panic!(
+                    "Only one of client_ping_interval_and_msg and server_ping_interval can have value"
+                );
+            } else if let Some(timeout) = self.client_ping_interval_and_msg {
+                Some(timeout.0 / 2)
+            } else {
+                self.server_ping_interval
+            };
+            *guard = connect_with_retry(self.url.as_str(), timeout);
         }
         let channels = self
             .channels
@@ -288,7 +307,7 @@ impl<'a> WSClientInternal<'a> {
 
             if let Some(interval_and_msg) = self.client_ping_interval_and_msg {
                 let num_unanswered_ping = self.num_unanswered_ping.load(Ordering::Acquire);
-                if num_unanswered_ping > 3 {
+                if num_unanswered_ping > 5 {
                     error!(
                         "num_unanswered_ping: {}, duration: {} seconds",
                         num_unanswered_ping,
@@ -299,7 +318,11 @@ impl<'a> WSClientInternal<'a> {
                 if last_ping_timestamp.elapsed() >= Duration::from_secs(interval_and_msg.0 / 2) {
                     info!("Sending ping: {}", interval_and_msg.1);
                     // send ping
-                    let ping_msg = Message::Text(interval_and_msg.1.to_string());
+                    let ping_msg = if interval_and_msg.1.is_empty() {
+                        Message::Ping(Vec::new())
+                    } else {
+                        Message::Text(interval_and_msg.1.to_string())
+                    };
                     last_ping_timestamp = Instant::now();
                     if let Err(err) = self.ws_stream.lock().unwrap().write_message(ping_msg) {
                         error!("{}", err);
@@ -307,7 +330,7 @@ impl<'a> WSClientInternal<'a> {
                         self.num_unanswered_ping.fetch_add(1, Ordering::SeqCst);
                     }
                 }
-            } else if num_read_timeout > 3 {
+            } else if num_read_timeout > 5 {
                 error!(
                     "num_read_timeout: {}, duration: {} seconds",
                     num_read_timeout,
@@ -335,7 +358,7 @@ impl<'a> WSClientInternal<'a> {
 
 /// Define exchange specific client.
 macro_rules! define_client {
-    ($struct_name:ident, $exchange:ident, $default_url:expr, $channels_to_commands:ident, $on_misc_msg:ident, $ping_interval:expr) => {
+    ($struct_name:ident, $exchange:ident, $default_url:expr, $channels_to_commands:ident, $on_misc_msg:ident, $client_ping_interval_and_msg:expr, $server_ping_interval:expr) => {
         impl<'a> WSClient<'a> for $struct_name<'a> {
             fn new(
                 on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>,
@@ -352,7 +375,8 @@ macro_rules! define_client {
                         on_msg,
                         $on_misc_msg,
                         $channels_to_commands,
-                        $ping_interval,
+                        $client_ping_interval_and_msg,
+                        $server_ping_interval,
                     ),
                 }
             }
