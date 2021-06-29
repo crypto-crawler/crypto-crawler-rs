@@ -12,7 +12,7 @@ const EXCHANGE_NAME: &str = "gate";
 
 const WEBSOCKET_URL: &str = "wss://ws.gate.io/v3/";
 
-const PING_INTERVAL_AND_MSG: (u64, &str) =
+const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) =
     (10, r#"{"id":9527,"method":"server.ping", "params":[]}"#);
 
 /// The WebSocket client for Gate spot market.
@@ -175,5 +175,5 @@ define_client!(
     WEBSOCKET_URL,
     channels_to_commands,
     on_misc_msg,
-    Some(PING_INTERVAL_AND_MSG)
+    Some(CLIENT_PING_INTERVAL_AND_MSG)
 );

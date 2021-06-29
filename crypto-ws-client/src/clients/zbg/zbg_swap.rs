@@ -15,7 +15,7 @@ const EXCHANGE_NAME: &str = "zbg";
 
 const WEBSOCKET_URL: &str = "wss://kline.zbg.com/exchange/v1/futurews";
 
-const PING_INTERVAL_AND_MSG: (u64, &str) = (25, "PING");
+const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (25, "PING");
 
 lazy_static! {
     static ref SYMBOL_CONTRACT_ID_MAP: RwLock<HashMap<String, i64>> =
@@ -133,5 +133,5 @@ define_client!(
     WEBSOCKET_URL,
     channels_to_commands,
     on_misc_msg,
-    Some(PING_INTERVAL_AND_MSG)
+    Some(CLIENT_PING_INTERVAL_AND_MSG)
 );

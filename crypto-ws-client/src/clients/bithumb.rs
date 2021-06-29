@@ -15,7 +15,7 @@ pub(super) const EXCHANGE_NAME: &str = "bithumb";
 
 const WEBSOCKET_URL: &str = "wss://global-api.bithumb.pro/message/realtime";
 
-const PING_INTERVAL_AND_MSG: (u64, &str) = (60, r#"{"cmd":"ping"}"#);
+const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (60, r#"{"cmd":"ping"}"#);
 
 /// The WebSocket client for Bithumb.
 ///
@@ -114,5 +114,5 @@ define_client!(
     WEBSOCKET_URL,
     channels_to_commands,
     on_misc_msg,
-    Some(PING_INTERVAL_AND_MSG)
+    Some(CLIENT_PING_INTERVAL_AND_MSG)
 );

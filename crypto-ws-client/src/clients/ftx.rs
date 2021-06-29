@@ -15,7 +15,7 @@ pub(super) const EXCHANGE_NAME: &str = "ftx";
 
 const WEBSOCKET_URL: &str = "wss://ftx.com/ws/";
 
-const PING_INTERVAL_AND_MSG: (u64, &str) = (15, r#"{"op":"ping"}"#);
+const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (15, r#"{"op":"ping"}"#);
 
 /// The WebSocket client for FTX.
 ///
@@ -111,5 +111,5 @@ define_client!(
     WEBSOCKET_URL,
     channels_to_commands,
     on_misc_msg,
-    Some(PING_INTERVAL_AND_MSG)
+    Some(CLIENT_PING_INTERVAL_AND_MSG)
 );

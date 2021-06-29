@@ -11,7 +11,7 @@ pub(super) const EXCHANGE_NAME: &str = "kucoin";
 /// See:
 /// - https://docs.kucoin.com/#ping
 /// - https://docs.kucoin.cc/futures/#ping
-pub(super) const PING_INTERVAL_AND_MSG: (u64, &str) =
+pub(super) const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) =
     (60, r#"{"type":"ping", "id": "crypto-ws-client"}"#);
 
 // Maximum number of batch subscriptions at a time: 100 topics

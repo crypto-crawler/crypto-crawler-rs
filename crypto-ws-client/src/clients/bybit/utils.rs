@@ -10,7 +10,7 @@ pub(super) const EXCHANGE_NAME: &str = "bybit";
 /// See:
 /// - https://bybit-exchange.github.io/docs/inverse/#t-heartbeat
 /// - https://bybit-exchange.github.io/docs/linear/#t-heartbeat
-pub(super) const PING_INTERVAL_AND_MSG: (u64, &str) = (30, r#"{"op":"ping"}"#);
+pub(super) const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (30, r#"{"op":"ping"}"#);
 
 pub(super) fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
     let mut all_commands: Vec<String> = channels

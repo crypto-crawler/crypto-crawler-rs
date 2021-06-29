@@ -12,7 +12,7 @@ const EXCHANGE_NAME: &str = "bitget";
 
 const WEBSOCKET_URL: &str = "wss://csocketapi.bitget.com/ws/v1";
 
-const PING_INTERVAL_AND_MSG: (u64, &str) = (30, "ping");
+const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (30, "ping");
 
 /// The WebSocket client for Bitget swap markets.
 ///
@@ -118,5 +118,5 @@ define_client!(
     WEBSOCKET_URL,
     channels_to_commands,
     on_misc_msg,
-    Some(PING_INTERVAL_AND_MSG)
+    Some(CLIENT_PING_INTERVAL_AND_MSG)
 );

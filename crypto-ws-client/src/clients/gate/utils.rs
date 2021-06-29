@@ -8,7 +8,7 @@ use serde_json::Value;
 
 pub(super) const EXCHANGE_NAME: &str = "gate";
 
-pub(super) const PING_INTERVAL_AND_MSG: (u64, &str) = (10, r#"{"channel":"futures.ping"}"#);
+pub(super) const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (10, r#"{"channel":"futures.ping"}"#);
 
 fn channel_pairs_to_command(channel: &str, pairs: &[String], subscribe: bool) -> Vec<String> {
     match channel {

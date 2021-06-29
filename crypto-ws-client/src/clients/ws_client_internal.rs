@@ -33,7 +33,7 @@ pub(super) struct WSClientInternal<'a> {
     should_stop: AtomicBool, // used by close() and run()
     // how often the client should send a ping, None means the client doesn't need to send
     // ping, instead the server will send ping and the client just needs to reply a pong
-    ping_interval_and_msg: Option<(u64, &'static str)>,
+    client_ping_interval_and_msg: Option<(u64, &'static str)>,
     // Number of unanswered ping messages, if greater than 3, the process will exit
     num_unanswered_ping: AtomicIsize,
 }
@@ -45,11 +45,11 @@ impl<'a> WSClientInternal<'a> {
         on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>,
         on_misc_msg: fn(&str) -> MiscMessage,
         channels_to_commands: fn(&[String], bool) -> Vec<String>,
-        ping_interval_and_msg: Option<(u64, &'static str)>,
+        client_ping_interval_and_msg: Option<(u64, &'static str)>,
     ) -> Self {
         let stream = connect_with_retry(
             url,
-            ping_interval_and_msg.map(|interval_and_msg| interval_and_msg.0 / 2),
+            client_ping_interval_and_msg.map(|interval_and_msg| interval_and_msg.0 / 2),
         );
         WSClientInternal {
             exchange,
@@ -60,7 +60,7 @@ impl<'a> WSClientInternal<'a> {
             channels: Mutex::new(HashSet::new()),
             channels_to_commands,
             should_stop: AtomicBool::new(false),
-            ping_interval_and_msg,
+            client_ping_interval_and_msg,
             num_unanswered_ping: AtomicIsize::new(0),
         }
     }
@@ -103,7 +103,7 @@ impl<'a> WSClientInternal<'a> {
             let mut guard = self.ws_stream.lock().unwrap();
             *guard = connect_with_retry(
                 self.url.as_str(),
-                self.ping_interval_and_msg
+                self.client_ping_interval_and_msg
                     .map(|interval_and_msg| interval_and_msg.0 / 2),
             );
         }
@@ -132,7 +132,7 @@ impl<'a> WSClientInternal<'a> {
         match (self.on_misc_msg)(txt) {
             MiscMessage::Misc => false,
             MiscMessage::Pong => {
-                self.num_unanswered_ping.fetch_sub(1, Ordering::SeqCst);
+                self.num_unanswered_ping.store(0, Ordering::Release);
                 false
             }
             MiscMessage::Reconnect => {
@@ -218,7 +218,6 @@ impl<'a> WSClientInternal<'a> {
                                 .write_message(Message::Pong(resp));
                             if let Err(err) = ret {
                                 error!("{}", err);
-                                self.num_unanswered_ping.fetch_add(1, Ordering::SeqCst);
                             }
                             false
                         }
@@ -287,7 +286,7 @@ impl<'a> WSClientInternal<'a> {
                 }
             };
 
-            if let Some(interval_and_msg) = self.ping_interval_and_msg {
+            if let Some(interval_and_msg) = self.client_ping_interval_and_msg {
                 let num_unanswered_ping = self.num_unanswered_ping.load(Ordering::Acquire);
                 if num_unanswered_ping > 3 {
                     error!(

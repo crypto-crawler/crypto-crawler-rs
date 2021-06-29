@@ -5,7 +5,7 @@ use super::super::ws_client_internal::WSClientInternal;
 use super::super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
 use super::utils::{
     channels_to_commands, fetch_ws_token, on_misc_msg, to_raw_channel, WebsocketToken,
-    EXCHANGE_NAME, PING_INTERVAL_AND_MSG,
+    CLIENT_PING_INTERVAL_AND_MSG, EXCHANGE_NAME,
 };
 
 use lazy_static::lazy_static;
@@ -77,5 +77,5 @@ define_client!(
     WEBSOCKET_URL.as_str(),
     channels_to_commands,
     on_misc_msg,
-    Some(PING_INTERVAL_AND_MSG)
+    Some(CLIENT_PING_INTERVAL_AND_MSG)
 );

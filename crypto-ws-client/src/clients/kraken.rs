@@ -89,7 +89,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
             }
             "pong" => {
                 debug!("Received {} from {}", msg, EXCHANGE_NAME);
-                MiscMessage::Misc
+                MiscMessage::Pong
             }
             "subscriptionStatus" => {
                 let status = obj.get("status").unwrap().as_str().unwrap();
