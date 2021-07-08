@@ -11,6 +11,13 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+#[cfg(not(target_env = "msvc"))]
+use jemallocator::Jemalloc;
+
+#[cfg(not(target_env = "msvc"))]
+#[global_allocator]
+static GLOBAL: Jemalloc = Jemalloc;
+
 pub fn crawl(
     exchange: &'static str,
     market_type: MarketType,

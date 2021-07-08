@@ -14,6 +14,13 @@ use log::*;
 use redis::{self, Commands};
 use serde_json::Value;
 
+#[cfg(not(target_env = "msvc"))]
+use jemallocator::Jemalloc;
+
+#[cfg(not(target_env = "msvc"))]
+#[global_allocator]
+static GLOBAL: Jemalloc = Jemalloc;
+
 fn main() {
     let data_dir = if std::env::var("DATA_DIR").is_err() {
         info!("The DATA_DIR environment variable does not exist");
