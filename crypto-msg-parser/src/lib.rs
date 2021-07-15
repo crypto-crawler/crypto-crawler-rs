@@ -36,7 +36,7 @@ pub fn parse_trade(exchange: &str, market_type: MarketType, msg: &str) -> Result
 
 /// Parse level2 orderbook messages.
 pub fn parse_l2(exchange: &str, market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
-    match exchange {
+    let ret = match exchange {
         "binance" => exchanges::binance::parse_l2(market_type, msg),
         "bitfinex" => exchanges::bitfinex::parse_l2(market_type, msg),
         "bitget" => exchanges::bitget::parse_l2(market_type, msg),
@@ -56,6 +56,22 @@ pub fn parse_l2(exchange: &str, market_type: MarketType, msg: &str) -> Result<Ve
         "okex" => exchanges::okex::parse_l2(market_type, msg),
         "zbg" => exchanges::zbg::parse_l2(market_type, msg),
         _ => panic!("Unknown exchange {}", exchange),
+    };
+    match ret {
+        Ok(mut orderbooks) => {
+            for orderbook in orderbooks.iter_mut() {
+                // sorted in ascending order by price
+                orderbook
+                    .asks
+                    .sort_by(|a, b| a.price.partial_cmp(&b.price).unwrap());
+                // sorted in descending order by price
+                orderbook
+                    .bids
+                    .sort_by(|a, b| b.price.partial_cmp(&a.price).unwrap());
+            }
+            Ok(orderbooks)
+        }
+        Err(_) => ret,
     }
 }
 
