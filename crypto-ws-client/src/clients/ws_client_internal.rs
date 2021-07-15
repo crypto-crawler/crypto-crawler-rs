@@ -242,7 +242,7 @@ impl<'a> WSClientInternal<'a> {
                         }
                         Message::Pong(resp) => {
                             let tmp = std::str::from_utf8(&resp);
-                            warn!("Received a pong frame: {}", tmp.unwrap());
+                            info!("Received a pong frame: {}", tmp.unwrap());
                             self.num_unanswered_ping.store(0, Ordering::Release);
                             false
                         }
