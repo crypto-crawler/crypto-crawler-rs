@@ -17,13 +17,6 @@ use log::*;
 use redis::{self, Commands};
 use serde_json::Value;
 
-#[cfg(not(target_env = "msvc"))]
-use jemallocator::Jemalloc;
-
-#[cfg(not(target_env = "msvc"))]
-#[global_allocator]
-static GLOBAL: Jemalloc = Jemalloc;
-
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
