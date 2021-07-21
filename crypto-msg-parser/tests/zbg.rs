@@ -80,7 +80,7 @@ mod l2_orderbook {
     #[test]
     fn spot_snapshot() {
         let raw_msg = r#"[["AE","329","BTC_USDT","1622729950",{"asks":[["38394.8","0.01917"],["38394.2","0.195885"]]},{"bids":[["38388.7","0.146025"],["38388.1","0.155175"]]}]]"#;
-        let orderbook = &parse_l2("zbg", MarketType::Spot, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("zbg", MarketType::Spot, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
@@ -107,7 +107,7 @@ mod l2_orderbook {
     #[test]
     fn spot_update() {
         let raw_msg = r#"["E","329","1622729958","BTC_USDT","BID","38382.3","0.1842"]"#;
-        let orderbook = &parse_l2("zbg", MarketType::Spot, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("zbg", MarketType::Spot, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 0);
         assert_eq!(orderbook.bids.len(), 1);
@@ -130,7 +130,7 @@ mod l2_orderbook {
     #[test]
     fn linear_swap_update() {
         let raw_msg = r#"["future_snapshot_depth",{"asks":[["38704","2684"]],"contractId":1000000,"bids":[["38703","1606"],["38702.5","616"]],"tradeDate":20210603,"time":1622733219128160}]"#;
-        let orderbook = &parse_l2("zbg", MarketType::LinearSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("zbg", MarketType::LinearSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 1);
         assert_eq!(orderbook.bids.len(), 2);
@@ -159,7 +159,7 @@ mod l2_orderbook {
     #[test]
     fn inverse_swap_update() {
         let raw_msg = r#"["future_snapshot_depth",{"asks":[["38547.5","4406"],["38548","11545"]],"contractId":1000001,"bids":[["38547","24345"],["38546.5","63623"]],"tradeDate":20210603,"time":1622734001831219}]"#;
-        let orderbook = &parse_l2("zbg", MarketType::InverseSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("zbg", MarketType::InverseSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);

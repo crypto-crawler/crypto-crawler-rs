@@ -152,12 +152,19 @@ mod funding_rate {
 
 #[cfg(test)]
 mod l2_orderbook {
+    use chrono::prelude::*;
     use crypto_msg_parser::{parse_l2, MarketType};
 
     #[test]
     fn inverse_swap_snapshot() {
         let raw_msg = r#"{"table":"orderBookL2_25","action":"partial","data":[{"symbol":"XBTUSD","id":8796381000,"side":"Sell","size":49900,"price":36190},{"symbol":"XBTUSD","id":8796381050,"side":"Sell","size":125714,"price":36189.5},{"symbol":"XBTUSD","id":8796381100,"side":"Sell","size":34600,"price":36189},{"symbol":"XBTUSD","id":8796385500,"side":"Buy","size":136,"price":36145},{"symbol":"XBTUSD","id":8796385600,"side":"Buy","size":26,"price":36144},{"symbol":"XBTUSD","id":8796385800,"side":"Buy","size":18067,"price":36142}]}"#;
-        let orderbook = &parse_l2("bitmex", MarketType::InverseSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2(
+            "bitmex",
+            MarketType::InverseSwap,
+            raw_msg,
+            Some(Utc::now().timestamp_millis()),
+        )
+        .unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
@@ -180,23 +187,34 @@ mod l2_orderbook {
         assert_eq!(orderbook.bids[2].quantity_quote, 18067.0);
         assert_eq!(orderbook.bids[2].quantity_contract.unwrap(), 18067.0);
 
-        assert_eq!(orderbook.asks[0].price, 36190.0);
-        assert_eq!(orderbook.asks[0].quantity_base, 49900.0 / 36190.0);
-        assert_eq!(orderbook.asks[0].quantity_quote, 49900.0);
-        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 49900.0);
+        assert_eq!(orderbook.asks[2].price, 36190.0);
+        assert_eq!(orderbook.asks[2].quantity_base, 49900.0 / 36190.0);
+        assert_eq!(orderbook.asks[2].quantity_quote, 49900.0);
+        assert_eq!(orderbook.asks[2].quantity_contract.unwrap(), 49900.0);
 
-        assert_eq!(orderbook.asks[2].price, 36189.0);
-        assert_eq!(orderbook.asks[2].quantity_base, 34600.0 / 36189.0);
-        assert_eq!(orderbook.asks[2].quantity_quote, 34600.0);
-        assert_eq!(orderbook.asks[2].quantity_contract.unwrap(), 34600.0);
+        assert_eq!(orderbook.asks[0].price, 36189.0);
+        assert_eq!(orderbook.asks[0].quantity_base, 34600.0 / 36189.0);
+        assert_eq!(orderbook.asks[0].quantity_quote, 34600.0);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 34600.0);
     }
 
     #[test]
     fn inverse_swap_update() {
         let insert_msg = r#"{"table":"orderBookL2_25","action":"insert","data":[{"symbol":"XBTUSD","id":8796323950,"side":"Sell","size":38760,"price":36760.5}]}"#;
-        let _ = parse_l2("bitmex", MarketType::InverseSwap, insert_msg);
+        let _ = parse_l2(
+            "bitmex",
+            MarketType::InverseSwap,
+            insert_msg,
+            Some(Utc::now().timestamp_millis()),
+        );
         let update_msg = r#"{"table":"orderBookL2_25","action":"update","data":[{"symbol":"XBTUSD","id":8796323950,"side":"Sell","size":36760}]}"#;
-        let orderbook = &parse_l2("bitmex", MarketType::InverseSwap, update_msg).unwrap()[0];
+        let orderbook = &parse_l2(
+            "bitmex",
+            MarketType::InverseSwap,
+            update_msg,
+            Some(Utc::now().timestamp_millis()),
+        )
+        .unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 1);
         assert_eq!(orderbook.bids.len(), 0);
@@ -215,7 +233,13 @@ mod l2_orderbook {
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 36760.0);
 
         let delete_msg = r#"{"table":"orderBookL2_25","action":"delete","data":[{"symbol":"XBTUSD","id":8796323950,"side":"Sell"}]}"#;
-        let orderbook = &parse_l2("bitmex", MarketType::InverseSwap, delete_msg).unwrap()[0];
+        let orderbook = &parse_l2(
+            "bitmex",
+            MarketType::InverseSwap,
+            delete_msg,
+            Some(Utc::now().timestamp_millis()),
+        )
+        .unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 1);
         assert_eq!(orderbook.bids.len(), 0);

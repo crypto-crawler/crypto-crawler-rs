@@ -107,13 +107,20 @@ mod trade {
 
 #[cfg(test)]
 mod l2_orderbook {
+    use chrono::prelude::*;
     use crypto_msg_parser::{parse_l2, MarketType};
     use float_cmp::approx_eq;
 
     #[test]
     fn spot_snapshot() {
         let raw_msg = r#"{"method": "depth.update", "params": [true, {"asks": [["37483.21", "0.048"], ["37483.89", "0.0739"], ["37486.86", "0.1639"]], "bids": [["37483.19", "0.01"], ["37480.69", "0.0183"], ["37479.16", "0.0292"]], "id": 3166483561}, "BTC_USDT"], "id": null}"#;
-        let orderbook = &parse_l2("gate", MarketType::Spot, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2(
+            "gate",
+            MarketType::Spot,
+            raw_msg,
+            Some(Utc::now().timestamp_millis()),
+        )
+        .unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
@@ -146,7 +153,13 @@ mod l2_orderbook {
     #[test]
     fn spot_update() {
         let raw_msg = r#"{"method": "depth.update", "params": [false, {"asks": [["37483.89", "0"]], "bids": [["37479.16", "0"], ["37478.79", "0.0554"]]}, "BTC_USDT"], "id": null}"#;
-        let orderbook = &parse_l2("gate", MarketType::Spot, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2(
+            "gate",
+            MarketType::Spot,
+            raw_msg,
+            Some(Utc::now().timestamp_millis()),
+        )
+        .unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 1);
         assert_eq!(orderbook.bids.len(), 2);
@@ -175,7 +188,7 @@ mod l2_orderbook {
     #[test]
     fn inverse_swap_snapshot() {
         let raw_msg = r#"{"id":null,"time":1622682306,"channel":"futures.order_book","event":"all","error":null,"result":{"t":1622682306315,"id":2861474582,"contract":"BTC_USD","asks":[{"p":"37481.3","s":7766},{"p":"37484.7","s":1775},{"p":"37485.1","s":2004}],"bids":[{"p":"37481.2","s":51735},{"p":"37480.2","s":9111},{"p":"37479.1","s":2004}]}}"#;
-        let orderbook = &parse_l2("gate", MarketType::InverseSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("gate", MarketType::InverseSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
@@ -214,7 +227,7 @@ mod l2_orderbook {
     #[test]
     fn linear_swap_snapshot() {
         let raw_msg = r#"{"id":null,"time":1622689062,"channel":"futures.order_book","event":"all","error":null,"result":{"t":1622689062072,"id":4906611559,"contract":"BTC_USDT","asks":[{"p":"37396.5","s":22137},{"p":"37397.3","s":500},{"p":"37401.2","s":790}],"bids":[{"p":"37396.4","s":8553},{"p":"37393.9","s":525},{"p":"37393.6","s":500}]}}"#;
-        let orderbook = &parse_l2("gate", MarketType::LinearSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("gate", MarketType::LinearSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
@@ -283,7 +296,7 @@ mod l2_orderbook {
     #[test]
     fn linear_future_snapshot() {
         let raw_msg = r#"{"time":1622697760,"channel":"futures.order_book","event":"all","error":null,"result":{"contract":"BTC_USDT_20210625","asks":[{"p":"38624.6","s":500},{"p":"38708.3","s":500},{"p":"38821","s":2000}],"bids":[{"p":"38538","s":500},{"p":"38460","s":500},{"p":"38373","s":2000}]}}"#;
-        let orderbook = &parse_l2("gate", MarketType::LinearFuture, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("gate", MarketType::LinearFuture, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
@@ -322,7 +335,7 @@ mod l2_orderbook {
     #[test]
     fn linear_future_update() {
         let raw_msg = r#"{"time":1622769533,"channel":"futures.order_book","event":"update","error":null,"result":[{"p":"38258.9","s":-500,"c":"BTC_USDT_20210625","id":90062644},{"p":"38258.9","s":0,"c":"BTC_USDT_20210625","id":90062645},{"p":"38013","s":500,"c":"BTC_USDT_20210625","id":90062646}]}"#;
-        let orderbook = &parse_l2("gate", MarketType::LinearFuture, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("gate", MarketType::LinearFuture, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 1);

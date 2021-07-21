@@ -117,12 +117,19 @@ mod trade {
 
 #[cfg(test)]
 mod l2_orderbook {
+    use chrono::prelude::*;
     use crypto_msg_parser::{parse_l2, MarketType};
 
     #[test]
     fn spot_snapshot() {
         let raw_msg = r#"[{"symbol":"tBTCUST","len":"25","freq":"F0","channel":"book","prec":"P0"},[[36167,1,0.48403686],[36162,2,0.22625024],[36161,1,0.43250047],[36158,1,0.209],[36155,2,0.48229814],[36171,1,-0.000006],[36172,1,-0.0002],[36173,1,-0.0002],[36174,2,-0.0102],[36175,1,-0.0002]]]"#;
-        let orderbook = &parse_l2("bitfinex", MarketType::Spot, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2(
+            "bitfinex",
+            MarketType::Spot,
+            raw_msg,
+            Some(Utc::now().timestamp_millis()),
+        )
+        .unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 5);
         assert_eq!(orderbook.bids.len(), 5);
@@ -155,7 +162,13 @@ mod l2_orderbook {
     #[test]
     fn spot_update() {
         let raw_msg = r#"[{"symbol":"tBTCUST","channel":"book","len":"25","freq":"F0","prec":"P0"},[34668,1,-0.00813136]]"#;
-        let orderbook = &parse_l2("bitfinex", MarketType::Spot, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2(
+            "bitfinex",
+            MarketType::Spot,
+            raw_msg,
+            Some(Utc::now().timestamp_millis()),
+        )
+        .unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 1);
         assert_eq!(orderbook.bids.len(), 0);
@@ -175,7 +188,13 @@ mod l2_orderbook {
     #[test]
     fn linear_swap_snapshot() {
         let raw_msg = r#"[{"freq":"F0","channel":"book","prec":"P0","len":"25","symbol":"tBTCF0:USTF0"},[[34840,2,0.20047952],[34837,1,0.17573],[34829,1,0.0857],[34828,1,0.17155],[34826,2,0.25510833],[34841,1,-0.00034929],[34843,4,-0.70368583],[34844,1,-0.51672161],[34845,2,-0.78960194],[34846,1,-1.0339621]]]"#;
-        let orderbook = &parse_l2("bitfinex", MarketType::LinearSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2(
+            "bitfinex",
+            MarketType::LinearSwap,
+            raw_msg,
+            Some(Utc::now().timestamp_millis()),
+        )
+        .unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 5);
         assert_eq!(orderbook.bids.len(), 5);
@@ -212,7 +231,13 @@ mod l2_orderbook {
     #[test]
     fn linear_swap_update() {
         let raw_msg = r#"[{"freq":"F0","symbol":"tBTCF0:USTF0","channel":"book","len":"25","prec":"P0"},[34442,2,2.27726294]]"#;
-        let orderbook = &parse_l2("bitfinex", MarketType::LinearSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2(
+            "bitfinex",
+            MarketType::LinearSwap,
+            raw_msg,
+            Some(Utc::now().timestamp_millis()),
+        )
+        .unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 0);
         assert_eq!(orderbook.bids.len(), 1);

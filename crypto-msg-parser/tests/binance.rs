@@ -202,7 +202,7 @@ mod l2_orderbook {
     #[test]
     fn spot() {
         let raw_msg = r#"{"stream":"btcusdt@depth@100ms","data":{"e":"depthUpdate","E":1622363903670,"s":"BTCUSDT","U":11294093710,"u":11294093726,"b":[["35743.98000000","0.00000000"],["35743.87000000","0.00001500"]],"a":[["35743.88000000","0.24000000"],["35743.97000000","0.00000000"]]}}"#;
-        let orderbook = &parse_l2("binance", MarketType::Spot, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("binance", MarketType::Spot, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
@@ -237,7 +237,7 @@ mod l2_orderbook {
     #[test]
     fn inverse_future() {
         let raw_msg = r#"{"stream":"btcusd_210625@depth@100ms","data":{"e":"depthUpdate","E":1622368000245,"T":1622368000234,"s":"BTCUSD_210625","ps":"BTCUSD","U":127531213607,"u":127531214406,"pu":127531213513,"b":[["35943.8","60"],["35965.2","896"]],"a":[["36038.3","9"],["36038.4","21"]]}}"#;
-        let orderbook = &parse_l2("binance", MarketType::InverseFuture, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("binance", MarketType::InverseFuture, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
@@ -252,15 +252,15 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.timestamp, 1622368000234);
 
-        assert_eq!(orderbook.bids[0].price, 35943.8);
-        assert_eq!(orderbook.bids[0].quantity_base, 6000.0 / 35943.8);
-        assert_eq!(orderbook.bids[0].quantity_quote, 6000.0);
-        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 60.0);
+        assert_eq!(orderbook.bids[1].price, 35943.8);
+        assert_eq!(orderbook.bids[1].quantity_base, 6000.0 / 35943.8);
+        assert_eq!(orderbook.bids[1].quantity_quote, 6000.0);
+        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 60.0);
 
-        assert_eq!(orderbook.bids[1].price, 35965.2);
-        assert_eq!(orderbook.bids[1].quantity_base, 89600.0 / 35965.2);
-        assert_eq!(orderbook.bids[1].quantity_quote, 89600.0);
-        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 896.0);
+        assert_eq!(orderbook.bids[0].price, 35965.2);
+        assert_eq!(orderbook.bids[0].quantity_base, 89600.0 / 35965.2);
+        assert_eq!(orderbook.bids[0].quantity_quote, 89600.0);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 896.0);
 
         assert_eq!(orderbook.asks[0].price, 36038.3);
         assert_eq!(orderbook.asks[0].quantity_base, 900.0 / 36038.3);
@@ -276,7 +276,7 @@ mod l2_orderbook {
     #[test]
     fn linear_future() {
         let raw_msg = r#"{"stream":"ethusdt_210625@depth@100ms","data":{"e":"depthUpdate","E":1622368962075,"T":1622368962065,"s":"ETHUSDT_210625","U":475700780918,"u":475700783070,"pu":475700774972,"b":[["2437.04","82.320"],["2437.07","0.000"]],"a":[["2441.23","1.500"],["2441.24","0.220"]]}}"#;
-        let orderbook = &parse_l2("binance", MarketType::LinearFuture, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("binance", MarketType::LinearFuture, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
@@ -291,15 +291,15 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.timestamp, 1622368962065);
 
-        assert_eq!(orderbook.bids[0].price, 2437.04);
-        assert_eq!(orderbook.bids[0].quantity_base, 82.32);
-        assert_eq!(orderbook.bids[0].quantity_quote, 2437.04 * 82.32);
-        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 82.32);
+        assert_eq!(orderbook.bids[1].price, 2437.04);
+        assert_eq!(orderbook.bids[1].quantity_base, 82.32);
+        assert_eq!(orderbook.bids[1].quantity_quote, 2437.04 * 82.32);
+        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 82.32);
 
-        assert_eq!(orderbook.bids[1].price, 2437.07);
-        assert_eq!(orderbook.bids[1].quantity_base, 0.0);
-        assert_eq!(orderbook.bids[1].quantity_quote, 0.0);
-        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 0.0);
+        assert_eq!(orderbook.bids[0].price, 2437.07);
+        assert_eq!(orderbook.bids[0].quantity_base, 0.0);
+        assert_eq!(orderbook.bids[0].quantity_quote, 0.0);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 0.0);
 
         assert_eq!(orderbook.asks[0].price, 2441.23);
         assert_eq!(orderbook.asks[0].quantity_base, 1.5);
@@ -310,7 +310,7 @@ mod l2_orderbook {
     #[test]
     fn linear_swap() {
         let raw_msg = r#"{"stream":"btcusdt@depth@100ms","data":{"e":"depthUpdate","E":1622371244693,"T":1622371244687,"s":"BTCUSDT","U":475776377463,"u":475776380184,"pu":475776377452,"b":[["35729.77","1.600"],["35750.00","5.106"]],"a":[["35819.20","0.211"],["35820.31","0.001"]]}}"#;
-        let orderbook = &parse_l2("binance", MarketType::LinearSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("binance", MarketType::LinearSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
@@ -325,15 +325,15 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.timestamp, 1622371244687);
 
-        assert_eq!(orderbook.bids[0].price, 35729.77);
-        assert_eq!(orderbook.bids[0].quantity_base, 1.6);
-        assert_eq!(orderbook.bids[0].quantity_quote, 35729.77 * 1.6);
-        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 1.6);
+        assert_eq!(orderbook.bids[1].price, 35729.77);
+        assert_eq!(orderbook.bids[1].quantity_base, 1.6);
+        assert_eq!(orderbook.bids[1].quantity_quote, 35729.77 * 1.6);
+        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 1.6);
 
-        assert_eq!(orderbook.bids[1].price, 35750.0);
-        assert_eq!(orderbook.bids[1].quantity_base, 5.106);
-        assert_eq!(orderbook.bids[1].quantity_quote, 35750.0 * 5.106);
-        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 5.106);
+        assert_eq!(orderbook.bids[0].price, 35750.0);
+        assert_eq!(orderbook.bids[0].quantity_base, 5.106);
+        assert_eq!(orderbook.bids[0].quantity_quote, 35750.0 * 5.106);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 5.106);
 
         assert_eq!(orderbook.asks[0].price, 35819.2);
         assert_eq!(orderbook.asks[0].quantity_base, 0.211);
@@ -349,7 +349,7 @@ mod l2_orderbook {
     #[test]
     fn inverse_swap() {
         let raw_msg = r#"{"stream":"btcusd_perp@depth@100ms","data":{"e":"depthUpdate","E":1622370862564,"T":1622370862553,"s":"BTCUSD_PERP","ps":"BTCUSD","U":127559587191,"u":127559588177,"pu":127559587113,"b":[["35365.9","1400"],["35425.8","561"]],"a":[["35817.8","7885"],["35818.7","307"]]}}"#;
-        let orderbook = &parse_l2("binance", MarketType::InverseSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("binance", MarketType::InverseSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
@@ -364,15 +364,15 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.timestamp, 1622370862553);
 
-        assert_eq!(orderbook.bids[0].price, 35365.9);
-        assert_eq!(orderbook.bids[0].quantity_base, 140000.0 / 35365.9);
-        assert_eq!(orderbook.bids[0].quantity_quote, 140000.0);
-        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 1400.0);
+        assert_eq!(orderbook.bids[1].price, 35365.9);
+        assert_eq!(orderbook.bids[1].quantity_base, 140000.0 / 35365.9);
+        assert_eq!(orderbook.bids[1].quantity_quote, 140000.0);
+        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 1400.0);
 
-        assert_eq!(orderbook.bids[1].price, 35425.8);
-        assert_eq!(orderbook.bids[1].quantity_base, 56100.0 / 35425.8);
-        assert_eq!(orderbook.bids[1].quantity_quote, 56100.0);
-        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 561.0);
+        assert_eq!(orderbook.bids[0].price, 35425.8);
+        assert_eq!(orderbook.bids[0].quantity_base, 56100.0 / 35425.8);
+        assert_eq!(orderbook.bids[0].quantity_quote, 56100.0);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 561.0);
 
         assert_eq!(orderbook.asks[0].price, 35817.8);
         assert_eq!(orderbook.asks[0].quantity_base, 788500.0 / 35817.8);

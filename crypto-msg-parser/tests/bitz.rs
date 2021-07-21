@@ -23,7 +23,7 @@ fn trade() {
 #[test]
 fn l2_orderbook_update() {
     let raw_msg = r#"{"msgId":0,"params":{"symbol":"btc_usdt"},"action":"Pushdata.depth","data":{"asks":[["37520.67","0.8396","31502.3545"]],"bids":[["37328.48","0.0050","186.6424"],["37322.18","0.2462","9188.7207"]],"depthSerialNumber":329},"time":1622527417489,"source":"sub-api"}"#;
-    let orderbook = &parse_l2("bitz", MarketType::Spot, raw_msg).unwrap()[0];
+    let orderbook = &parse_l2("bitz", MarketType::Spot, raw_msg, None).unwrap()[0];
 
     assert_eq!(orderbook.asks.len(), 1);
     assert_eq!(orderbook.bids.len(), 2);

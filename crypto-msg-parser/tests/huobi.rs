@@ -176,7 +176,7 @@ mod l2_orderbook {
     #[test]
     fn spot_update() {
         let raw_msg = r#"{"ch":"market.btcusdt.mbp.150","ts":1622707662703,"tick":{"seqNum":129803485567,"prevSeqNum":129803485424,"bids":[[38765.39,0.0],[38762.87,0.009708]],"asks":[[38762.88,0.102302]]}}"#;
-        let orderbook = &parse_l2("huobi", MarketType::Spot, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("huobi", MarketType::Spot, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 1);
         assert_eq!(orderbook.bids.len(), 2);
@@ -207,7 +207,7 @@ mod l2_orderbook {
     #[test]
     fn inverse_future_snapshot() {
         let raw_msg = r#"{"ch":"market.BTC_CQ.depth.size_150.high_freq","tick":{"asks":[[38884.91,652],[38886.32,21],[38887.88,4]],"bids":[[38884.9,6],[38883.86,6],[38880.25,3]],"ch":"market.BTC_CQ.depth.size_150.high_freq","event":"snapshot","id":138216299603,"mrid":138216299603,"ts":1622708089134,"version":1223482159},"ts":1622708089134}"#;
-        let orderbook = &parse_l2("huobi", MarketType::InverseFuture, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("huobi", MarketType::InverseFuture, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
@@ -246,7 +246,7 @@ mod l2_orderbook {
     #[test]
     fn inverse_future_update() {
         let raw_msg = r#"{"ch":"market.BTC_CQ.depth.size_150.high_freq","tick":{"asks":[[38939.82,10],[38958.06,100],[38973.97,0]],"bids":[[38932.53,200],[38926.08,0],[38912.29,0]],"ch":"market.BTC_CQ.depth.size_150.high_freq","event":"update","id":138219575176,"mrid":138219575176,"ts":1622711041458,"version":1223606224},"ts":1622711041458}"#;
-        let orderbook = &parse_l2("huobi", MarketType::InverseFuture, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("huobi", MarketType::InverseFuture, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
@@ -285,7 +285,7 @@ mod l2_orderbook {
     #[test]
     fn inverse_swap_snapshot() {
         let raw_msg = r#"{"ch":"market.BTC-USD.depth.size_150.high_freq","tick":{"asks":[[38888,9949],[38888.1,1],[38888.2,1]],"bids":[[38887.9,3832],[38887.8,4],[38887.7,3]],"ch":"market.BTC-USD.depth.size_150.high_freq","event":"snapshot","id":99893955238,"mrid":99893955238,"ts":1622711365595,"version":1300632701},"ts":1622711365595}"#;
-        let orderbook = &parse_l2("huobi", MarketType::InverseSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("huobi", MarketType::InverseSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
@@ -324,7 +324,7 @@ mod l2_orderbook {
     #[test]
     fn inverse_swap_update() {
         let raw_msg = r#"{"ch":"market.BTC-USD.depth.size_150.high_freq","tick":{"asks":[[38895.7,1635]],"bids":[[38880.6,0],[38868.2,50]],"ch":"market.BTC-USD.depth.size_150.high_freq","event":"update","id":99893958868,"mrid":99893958868,"ts":1622711368355,"version":1300632845},"ts":1622711368355}"#;
-        let orderbook = &parse_l2("huobi", MarketType::InverseSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("huobi", MarketType::InverseSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 1);
         assert_eq!(orderbook.bids.len(), 2);
@@ -358,7 +358,7 @@ mod l2_orderbook {
     #[test]
     fn linear_swap_snapshot() {
         let raw_msg = r#"{"ch":"market.BTC-USDT.depth.size_150.high_freq","tick":{"asks":[[39055,19345],[39056.8,1200],[39057.5,85]],"bids":[[39054.9,4754],[39054.8,1],[39054.7,1]],"ch":"market.BTC-USDT.depth.size_150.high_freq","event":"snapshot","id":39536665398,"mrid":39536665398,"ts":1622711946534,"version":709648689},"ts":1622711946534}"#;
-        let orderbook = &parse_l2("huobi", MarketType::LinearSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("huobi", MarketType::LinearSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
@@ -407,7 +407,7 @@ mod l2_orderbook {
     #[test]
     fn linear_swap_update() {
         let raw_msg = r#"{"ch":"market.BTC-USDT.depth.size_150.high_freq","tick":{"asks":[[39055,16634],[39060.1,0]],"bids":[[39050.8,40]],"ch":"market.BTC-USDT.depth.size_150.high_freq","event":"update","id":39536668357,"mrid":39536668357,"ts":1622711948514,"version":709648808},"ts":1622711948514}"#;
-        let orderbook = &parse_l2("huobi", MarketType::LinearSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("huobi", MarketType::LinearSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 1);

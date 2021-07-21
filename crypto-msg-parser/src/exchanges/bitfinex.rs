@@ -5,7 +5,6 @@ use crate::{
     TradeSide,
 };
 
-use chrono::prelude::*;
 use serde_json::{Result, Value};
 
 const EXCHANGE_NAME: &str = "bitfinex";
@@ -75,7 +74,11 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     }
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+    timestamp: i64,
+) -> Result<Vec<OrderBookMsg>> {
     let ws_msg = serde_json::from_str::<Vec<Value>>(&msg)?;
 
     let symbol = ws_msg[0]
@@ -86,7 +89,6 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         .as_str()
         .unwrap();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
-    let now = Utc::now();
 
     let data = ws_msg[1].clone();
 
@@ -121,7 +123,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         symbol: symbol.to_string(),
         pair: pair.clone(),
         msg_type: MessageType::L2Event,
-        timestamp: now.timestamp_millis(),
+        timestamp,
         asks: Vec::new(),
         bids: Vec::new(),
         snapshot,

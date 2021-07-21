@@ -79,12 +79,19 @@ mod trade {
 
 #[cfg(test)]
 mod l2_orderbook {
+    use chrono::prelude::*;
     use crypto_msg_parser::{parse_l2, MarketType};
 
     #[test]
     fn spot_update() {
         let raw_msg = r#"["push.symbol",{"symbol":"BTC_USDT","data":{"bids":[{"p":"38932.19","q":"0.049010","a":"1908.06663"},{"p":"38931.18","q":"0.038220","a":"1487.94969"}],"asks":[{"p":"38941.81","q":"0.000000","a":"0.00000000"},{"p":"38940.71","q":"0.000000","a":"0.00000000"}]}}]"#;
-        let orderbook = &parse_l2("mxc", MarketType::Spot, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2(
+            "mxc",
+            MarketType::Spot,
+            raw_msg,
+            Some(Utc::now().timestamp_millis()),
+        )
+        .unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
@@ -105,7 +112,7 @@ mod l2_orderbook {
     #[test]
     fn linear_swap_update() {
         let raw_msg = r#"{"channel":"push.depth","data":{"asks":[[38704.5,138686,1]],"bids":[],"version":2427341830},"symbol":"BTC_USDT","ts":1622722473816}"#;
-        let orderbook = &parse_l2("mxc", MarketType::LinearSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("mxc", MarketType::LinearSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 1);
         assert_eq!(orderbook.bids.len(), 0);
@@ -129,7 +136,7 @@ mod l2_orderbook {
     #[test]
     fn inverse_swap_update() {
         let raw_msg = r#"{"channel":"push.depth","data":{"asks":[[38758.5,4172,2]],"bids":[],"version":1151578213},"symbol":"BTC_USD","ts":1622723010000}"#;
-        let orderbook = &parse_l2("mxc", MarketType::InverseSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("mxc", MarketType::InverseSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 1);
         assert_eq!(orderbook.bids.len(), 0);

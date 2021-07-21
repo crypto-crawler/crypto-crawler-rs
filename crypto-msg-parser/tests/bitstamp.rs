@@ -16,7 +16,7 @@ fn trade() {
 #[test]
 fn l2_orderbook_update() {
     let raw_msg = r#"{"data":{"timestamp":"1622520011","microtimestamp":"1622520011989838","bids":[["36653.62","0.75000000"]],"asks":[["36665.20","0.00000000"],["36669.76","0.75000000"]]},"channel":"diff_order_book_btcusd","event":"data"}"#;
-    let orderbook = &parse_l2("bitstamp", MarketType::Spot, raw_msg).unwrap()[0];
+    let orderbook = &parse_l2("bitstamp", MarketType::Spot, raw_msg, None).unwrap()[0];
 
     assert_eq!(orderbook.asks.len(), 2);
     assert_eq!(orderbook.bids.len(), 1);

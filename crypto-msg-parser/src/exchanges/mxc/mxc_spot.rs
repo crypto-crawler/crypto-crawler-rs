@@ -2,7 +2,6 @@ use crypto_market_type::MarketType;
 
 use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
 
-use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
 use std::collections::HashMap;
@@ -97,7 +96,7 @@ fn parse_order(raw_order: &RawOrder) -> Order {
     }
 }
 
-pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
+pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>> {
     let arr = serde_json::from_str::<Vec<Value>>(msg)?;
     assert_eq!(arr.len(), 2);
     let ws_msg: WebsocketMsg<PushSymbolData> = serde_json::from_value(arr[1].clone())?;
@@ -114,7 +113,7 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
         symbol: symbol.to_string(),
         pair,
         msg_type: MessageType::L2Event,
-        timestamp: Utc::now().timestamp_millis(),
+        timestamp,
         asks: if let Some(asks) = ws_msg.data.asks {
             asks.iter().map(|x| parse_order(x)).collect::<Vec<Order>>()
         } else {

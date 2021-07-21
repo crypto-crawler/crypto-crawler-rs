@@ -231,7 +231,7 @@ mod l2_orderbook {
     #[test]
     fn spot_snapshot() {
         let raw_msg = r#"{"table":"spot/depth_l2_tbt","action":"partial","data":[{"instrument_id":"BTC-USDT","asks":[["38930","3.84264467","0","12"],["38932.4","0.00135697","0","3"],["38932.5","0.14401147","0","2"]],"bids":[["38929.9","0.05005381","0","4"],["38925.7","0.00062109","0","2"],["38925.6","0.21438503","0","1"]],"timestamp":"2021-06-03T12:39:11.253Z","checksum":1860980846}]}"#;
-        let orderbook = &parse_l2("okex", MarketType::Spot, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("okex", MarketType::Spot, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
@@ -258,7 +258,7 @@ mod l2_orderbook {
     #[test]
     fn spot_update() {
         let raw_msg = r#"{"table":"spot/depth_l2_tbt","action":"update","data":[{"instrument_id":"BTC-USDT","asks":[["38888.7","4.14263198","0","12"]],"bids":[["38886.3","0","0","0"]],"timestamp":"2021-06-03T12:40:09.962Z","checksum":976527820}]}"#;
-        let orderbook = &parse_l2("okex", MarketType::Spot, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("okex", MarketType::Spot, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 1);
         assert_eq!(orderbook.bids.len(), 1);
@@ -285,7 +285,7 @@ mod l2_orderbook {
     #[test]
     fn linear_future_snapshot() {
         let raw_msg = r#"{"table":"futures/depth_l2_tbt","action":"partial","data":[{"instrument_id":"BTC-USDT-210625","asks":[["39302.5","1","0","1"],["39302.6","5","0","2"],["39304.3","21","0","1"]],"bids":[["39302.2","4","0","1"],["39300.7","5","0","1"],["39299","4","0","1"]],"timestamp":"2021-06-03T13:09:34.429Z","checksum":698961978}]}"#;
-        let orderbook = &parse_l2("okex", MarketType::LinearFuture, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("okex", MarketType::LinearFuture, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
@@ -314,7 +314,7 @@ mod l2_orderbook {
     #[test]
     fn inverse_swap_snapshot() {
         let raw_msg = r#"{"table":"swap/depth_l2_tbt","action":"partial","data":[{"instrument_id":"BTC-USD-SWAP","asks":[["39167.2","130","0","3"],["39169.6","45","0","1"],["39173.1","1","0","1"]],"bids":[["39167.1","1536","0","8"],["39166.2","68","0","1"],["39165.9","47","0","1"]],"timestamp":"2021-06-03T13:14:24.831Z","checksum":-1582320415}]}"#;
-        let orderbook = &parse_l2("okex", MarketType::InverseSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("okex", MarketType::InverseSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
@@ -343,7 +343,7 @@ mod l2_orderbook {
     #[test]
     fn option_snapshot() {
         let raw_msg = r#"{"table":"option/depth_l2_tbt","action":"partial","data":[{"instrument_id":"BTC-USD-210604-30000-P","asks":[["0.0015","906","0","3"]],"bids":[],"timestamp":"2021-06-03T13:18:55.745Z","checksum":-288111842}]}"#;
-        let orderbook = &parse_l2("okex", MarketType::EuropeanOption, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("okex", MarketType::EuropeanOption, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 1);
         assert_eq!(orderbook.bids.len(), 0);

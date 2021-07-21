@@ -2,7 +2,6 @@ use crypto_market_type::MarketType;
 
 use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
 
-use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
 use std::collections::HashMap;
@@ -76,7 +75,7 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
     Ok(trades)
 }
 
-pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
+pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>> {
     let ws_msg = serde_json::from_str::<SpotWebsocketMsg>(msg)?;
     debug_assert_eq!(ws_msg.params.len(), 3);
     let snapshot = ws_msg.params[0].as_bool().unwrap();
@@ -102,7 +101,7 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
         symbol: symbol.to_string(),
         pair,
         msg_type: MessageType::L2Event,
-        timestamp: Utc::now().timestamp_millis(),
+        timestamp,
         asks: if let Some(asks) = raw_orderbook.asks {
             asks.iter().map(|x| parse_order(x)).collect()
         } else {

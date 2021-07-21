@@ -131,7 +131,11 @@ lazy_static! {
     static ref PRICE_HASHMAP: Mutex<HashMap<String,HashMap<i64, f64>>> = Mutex::new(HashMap::new());
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+    timestamp: i64,
+) -> Result<Vec<OrderBookMsg>> {
     let mut price_map = PRICE_HASHMAP.lock().unwrap();
 
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrder>>(msg)?;
@@ -182,7 +186,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         symbol: symbol.to_string(),
         pair: pair.clone(),
         msg_type: MessageType::L2Event,
-        timestamp: Utc::now().timestamp_millis(),
+        timestamp,
         asks: ws_msg
             .data
             .iter()

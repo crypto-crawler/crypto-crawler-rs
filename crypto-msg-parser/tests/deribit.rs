@@ -79,7 +79,7 @@ mod l2_orderbook {
     #[test]
     fn inverse_future_snapshot() {
         let raw_msg = r#"{"jsonrpc":"2.0","method":"subscription","params":{"channel":"book.BTC-25JUN21.100ms","data":{"type":"snapshot","timestamp":1622626472678,"instrument_name":"BTC-25JUN21","change_id":31479219781,"bids":[["new",37317.0,2960.0],["new",37311.5,530.0],["new",37311.0,45170.0]],"asks":[["new",37327.0,10.0],["new",37327.5,20000.0],["new",37328.0,3000.0]]}}}"#;
-        let orderbook = &parse_l2("deribit", MarketType::InverseFuture, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("deribit", MarketType::InverseFuture, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
@@ -116,7 +116,7 @@ mod l2_orderbook {
     #[test]
     fn inverse_future_update() {
         let raw_msg = r#"{"jsonrpc":"2.0","method":"subscription","params":{"channel":"book.BTC-25JUN21.100ms","data":{"type":"change","timestamp":1622626784890,"prev_change_id":31479339296,"instrument_name":"BTC-25JUN21","change_id":31479339507,"bids":[["new",37392.5,3000.0],["change",37399.0,6530.0]],"asks":[["new",37850.0,8850.0],["delete",37848.5,0.0]]}}}"#;
-        let orderbook = &parse_l2("deribit", MarketType::InverseSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("deribit", MarketType::InverseSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
@@ -129,31 +129,31 @@ mod l2_orderbook {
             orderbook,
         );
 
-        assert_eq!(orderbook.bids[0].price, 37392.5);
-        assert_eq!(orderbook.bids[0].quantity_base, 3000.0 / 37392.5);
-        assert_eq!(orderbook.bids[0].quantity_quote, 3000.0);
-        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 3000.0);
+        assert_eq!(orderbook.bids[1].price, 37392.5);
+        assert_eq!(orderbook.bids[1].quantity_base, 3000.0 / 37392.5);
+        assert_eq!(orderbook.bids[1].quantity_quote, 3000.0);
+        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 3000.0);
 
-        assert_eq!(orderbook.bids[1].price, 37399.0);
-        assert_eq!(orderbook.bids[1].quantity_base, 6530.0 / 37399.0);
-        assert_eq!(orderbook.bids[1].quantity_quote, 6530.0);
-        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 6530.0);
+        assert_eq!(orderbook.bids[0].price, 37399.0);
+        assert_eq!(orderbook.bids[0].quantity_base, 6530.0 / 37399.0);
+        assert_eq!(orderbook.bids[0].quantity_quote, 6530.0);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 6530.0);
 
-        assert_eq!(orderbook.asks[0].price, 37850.0);
-        assert_eq!(orderbook.asks[0].quantity_base, 8850.0 / 37850.0);
-        assert_eq!(orderbook.asks[0].quantity_quote, 8850.0);
-        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 8850.0);
+        assert_eq!(orderbook.asks[1].price, 37850.0);
+        assert_eq!(orderbook.asks[1].quantity_base, 8850.0 / 37850.0);
+        assert_eq!(orderbook.asks[1].quantity_quote, 8850.0);
+        assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 8850.0);
 
-        assert_eq!(orderbook.asks[1].price, 37848.5);
-        assert_eq!(orderbook.asks[1].quantity_base, 0.0 / 37848.5);
-        assert_eq!(orderbook.asks[1].quantity_quote, 0.0);
-        assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 0.0);
+        assert_eq!(orderbook.asks[0].price, 37848.5);
+        assert_eq!(orderbook.asks[0].quantity_base, 0.0 / 37848.5);
+        assert_eq!(orderbook.asks[0].quantity_quote, 0.0);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 0.0);
     }
 
     #[test]
     fn inverse_swap_snapshot() {
         let raw_msg = r#"{"jsonrpc":"2.0","method":"subscription","params":{"channel":"book.BTC-PERPETUAL.100ms","data":{"type":"snapshot","timestamp":1622627433440,"instrument_name":"BTC-PERPETUAL","change_id":31479596557,"bids":[["new",37240.0,20.0],["new",37237.0,14270.0],["new",37233.0,50.0]],"asks":[["new",37240.5,14240.0],["new",37248.5,15690.0],["new",37251.0,650.0]]}}}"#;
-        let orderbook = &parse_l2("deribit", MarketType::InverseSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("deribit", MarketType::InverseSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
@@ -190,7 +190,7 @@ mod l2_orderbook {
     #[test]
     fn inverse_swap_update() {
         let raw_msg = r#"{"jsonrpc":"2.0","method":"subscription","params":{"channel":"book.BTC-PERPETUAL.100ms","data":{"type":"change","timestamp":1622627435737,"prev_change_id":31479598064,"instrument_name":"BTC-PERPETUAL","change_id":31479598217,"bids":[["delete",36779.0,0.0],["new",36809.5,254870.0]],"asks":[["delete",37462.5,0.0],["change",37394.0,42670.0]]}}}"#;
-        let orderbook = &parse_l2("deribit", MarketType::InverseSwap, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("deribit", MarketType::InverseSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
@@ -203,31 +203,31 @@ mod l2_orderbook {
             orderbook,
         );
 
-        assert_eq!(orderbook.bids[0].price, 36779.0);
-        assert_eq!(orderbook.bids[0].quantity_base, 0.0 / 36779.0);
-        assert_eq!(orderbook.bids[0].quantity_quote, 0.0);
-        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 0.0);
+        assert_eq!(orderbook.bids[1].price, 36779.0);
+        assert_eq!(orderbook.bids[1].quantity_base, 0.0 / 36779.0);
+        assert_eq!(orderbook.bids[1].quantity_quote, 0.0);
+        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 0.0);
 
-        assert_eq!(orderbook.bids[1].price, 36809.5);
-        assert_eq!(orderbook.bids[1].quantity_base, 254870.0 / 36809.5);
-        assert_eq!(orderbook.bids[1].quantity_quote, 254870.0);
-        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 254870.0);
+        assert_eq!(orderbook.bids[0].price, 36809.5);
+        assert_eq!(orderbook.bids[0].quantity_base, 254870.0 / 36809.5);
+        assert_eq!(orderbook.bids[0].quantity_quote, 254870.0);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 254870.0);
 
-        assert_eq!(orderbook.asks[0].price, 37462.5);
-        assert_eq!(orderbook.asks[0].quantity_base, 0.0 / 37462.5);
-        assert_eq!(orderbook.asks[0].quantity_quote, 0.0);
-        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 0.0);
+        assert_eq!(orderbook.asks[1].price, 37462.5);
+        assert_eq!(orderbook.asks[1].quantity_base, 0.0 / 37462.5);
+        assert_eq!(orderbook.asks[1].quantity_quote, 0.0);
+        assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 0.0);
 
-        assert_eq!(orderbook.asks[1].price, 37394.0);
-        assert_eq!(orderbook.asks[1].quantity_base, 42670.0 / 37394.0);
-        assert_eq!(orderbook.asks[1].quantity_quote, 42670.0);
-        assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 42670.0);
+        assert_eq!(orderbook.asks[0].price, 37394.0);
+        assert_eq!(orderbook.asks[0].quantity_base, 42670.0 / 37394.0);
+        assert_eq!(orderbook.asks[0].quantity_quote, 42670.0);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 42670.0);
     }
 
     #[test]
     fn option_snapshot() {
         let raw_msg = r#"{"jsonrpc":"2.0","method":"subscription","params":{"channel":"book.BTC-11JUN21-25000-P.100ms","data":{"type":"snapshot","timestamp":1622627851747,"instrument_name":"BTC-11JUN21-25000-P","change_id":31479771122,"bids":[["new",0.005,13.7],["new",0.0045,5.7],["new",0.004,61.6]],"asks":[["new",0.006,64.5],["new",0.0065,48.0],["new",0.0085,0.5]]}}}"#;
-        let orderbook = &parse_l2("deribit", MarketType::EuropeanOption, raw_msg).unwrap()[0];
+        let orderbook = &parse_l2("deribit", MarketType::EuropeanOption, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);

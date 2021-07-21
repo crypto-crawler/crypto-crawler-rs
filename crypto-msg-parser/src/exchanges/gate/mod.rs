@@ -15,9 +15,16 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     }
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+    timestamp: Option<i64>,
+) -> Result<Vec<OrderBookMsg>> {
     if market_type == MarketType::Spot {
-        gate_spot::parse_l2(msg)
+        gate_spot::parse_l2(
+            msg,
+            timestamp.expect("Gate spot orderbook messages don't have timestamp"),
+        )
     } else {
         gate_swap::parse_l2(market_type, msg)
     }

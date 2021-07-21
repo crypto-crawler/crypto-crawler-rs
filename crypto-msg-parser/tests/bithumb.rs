@@ -35,7 +35,7 @@ fn trade() {
 #[test]
 fn l2_orderbook_snapshot() {
     let raw_msg = r#"{"code":"00006","data":{"b":[["35909.4500000000","0.007308"],["35905.3800000000","0.015820"],["35898.7500000000","0.016811"]],"s":[["34578.8700000000","0.000000"],["35927.4900000000","0.019198"],["35934.6800000000","0.016004"]],"symbol":"BTC-USDT","ver":"509670288"},"timestamp":1622446974153,"topic":"ORDERBOOK"}"#;
-    let orderbook = &parse_l2("bithumb", MarketType::Spot, raw_msg).unwrap()[0];
+    let orderbook = &parse_l2("bithumb", MarketType::Spot, raw_msg, None).unwrap()[0];
 
     assert_eq!(orderbook.asks.len(), 3);
     assert_eq!(orderbook.bids.len(), 3);
@@ -70,7 +70,7 @@ fn l2_orderbook_snapshot() {
 #[test]
 fn l2_orderbook_update() {
     let raw_msg = r#"{"code":"00007","data":{"symbol":"BTC-USDT","b":[["34613.4400000000","0.015396"]],"ver":"509670303","s":[]},"topic":"ORDERBOOK","timestamp":1622446975394}"#;
-    let orderbook = &parse_l2("bithumb", MarketType::Spot, raw_msg).unwrap()[0];
+    let orderbook = &parse_l2("bithumb", MarketType::Spot, raw_msg, None).unwrap()[0];
 
     assert_eq!(orderbook.asks.len(), 0);
     assert_eq!(orderbook.bids.len(), 1);

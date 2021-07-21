@@ -1,5 +1,6 @@
 mod utils;
 
+use chrono::prelude::*;
 use crypto_msg_parser::{parse_l2, parse_trade, MarketType, TradeSide};
 
 #[test]
@@ -21,7 +22,13 @@ fn trade() {
 #[test]
 fn l2_orderbook_snapshot() {
     let raw_msg = r#"{"type":"snapshot","product_id":"BTC-USD","asks":[["37212.77","0.05724592"],["37215.39","0.00900000"],["37215.69","0.09654865"]],"bids":[["37209.96","0.04016376"],["37209.32","0.00192256"],["37209.16","0.01130000"]]}"#;
-    let orderbook = &parse_l2("coinbase_pro", MarketType::Spot, raw_msg).unwrap()[0];
+    let orderbook = &parse_l2(
+        "coinbase_pro",
+        MarketType::Spot,
+        raw_msg,
+        Some(Utc::now().timestamp_millis()),
+    )
+    .unwrap()[0];
 
     assert_eq!(orderbook.asks.len(), 3);
     assert_eq!(orderbook.bids.len(), 3);
@@ -54,7 +61,7 @@ fn l2_orderbook_snapshot() {
 #[test]
 fn l2_orderbook_update() {
     let raw_msg = r#"{"type":"l2update","product_id":"BTC-USD","changes":[["buy","37378.26","0.02460000"]],"time":"2021-06-02T09:02:09.048568Z"}"#;
-    let orderbook = &parse_l2("coinbase_pro", MarketType::Spot, raw_msg).unwrap()[0];
+    let orderbook = &parse_l2("coinbase_pro", MarketType::Spot, raw_msg, None).unwrap()[0];
 
     assert_eq!(orderbook.asks.len(), 0);
     assert_eq!(orderbook.bids.len(), 1);

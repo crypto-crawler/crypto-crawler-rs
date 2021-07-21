@@ -3,7 +3,6 @@ use crypto_market_type::MarketType;
 use crate::Order;
 use crate::{MessageType, OrderBookMsg, TradeMsg, TradeSide};
 
-use chrono::prelude::*;
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
@@ -106,7 +105,11 @@ fn parse_change(raw_order: &[String; 3]) -> Order {
     }
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+    timestamp: Option<i64>,
+) -> Result<Vec<OrderBookMsg>> {
     let snapshot = {
         let obj = serde_json::from_str::<HashMap<String, Value>>(msg)?;
         obj.get("type").unwrap().as_str().unwrap() == "snapshot"
@@ -122,7 +125,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
             symbol,
             pair,
             msg_type: MessageType::L2Event,
-            timestamp: Utc::now().timestamp_millis(),
+            timestamp: timestamp.expect("Coinbase level2 snapshot messages don't have timestamp"),
             asks: orderbook_snapshot
                 .asks
                 .iter()
