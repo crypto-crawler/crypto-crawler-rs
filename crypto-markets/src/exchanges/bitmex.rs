@@ -122,10 +122,10 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
         .collect();
 
     // Check
-    for x in instruments.iter() {
-        assert_eq!(x.underlying, x.rootSymbol);
-        assert_eq!("XBt".to_string(), x.settlCurrency);
-    }
+    // for x in instruments.iter() {
+    //     assert_eq!(x.underlying, x.rootSymbol);
+    //     assert_eq!("XBt".to_string(), x.settlCurrency);
+    // }
     for x in swap.iter() {
         assert_eq!("FundingRate", x.fairMethod.as_str());
         assert!(x.expiry.is_none());
