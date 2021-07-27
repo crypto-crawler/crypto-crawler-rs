@@ -4,10 +4,9 @@ use super::super::utils::calc_quantity_and_volume;
 
 use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
 
-use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
-use std::{collections::HashMap, sync::Mutex};
+use std::{cell::RefCell, collections::HashMap};
 
 const EXCHANGE_NAME: &str = "gate";
 
@@ -164,9 +163,9 @@ pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     }
 }
 
-lazy_static! {
+thread_local! {
     // symbol -> price -> (true, ask; false, bid)
-    static ref PRICE_HASHMAP: Mutex<HashMap<String,HashMap<String, bool>>> = Mutex::new(HashMap::new());
+    static PRICE_HASHMAP: RefCell<HashMap<String,HashMap<String, bool>>> = RefCell::new(HashMap::new());
 }
 
 pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
@@ -234,44 +233,46 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
             }
         };
 
-        let mut guard = PRICE_HASHMAP.lock().unwrap();
-        if !guard.contains_key(&symbol) {
-            guard.insert(symbol.clone(), HashMap::new());
-        }
-        let price_map = guard.get_mut(&symbol).unwrap();
+        PRICE_HASHMAP.with(|slf| {
+            let mut tmp = slf.borrow_mut();
+            if !tmp.contains_key(&symbol) {
+                tmp.insert(symbol.clone(), HashMap::new());
+            }
+            let price_map = tmp.get_mut(&symbol).unwrap();
 
-        let mut asks: Vec<Order> = Vec::new();
-        let mut bids: Vec<Order> = Vec::new();
-        for x in raw_orderbook.iter() {
-            let price = x.p.clone();
-            let order = parse_order(x);
-            if x.s < 0.0 {
-                asks.push(order);
-                price_map.insert(price, true);
-            } else if x.s > 0.0 {
-                bids.push(order);
-                price_map.insert(price, false);
-            } else if let Some(ask) = price_map.remove(&price) {
-                if ask {
+            let mut asks: Vec<Order> = Vec::new();
+            let mut bids: Vec<Order> = Vec::new();
+            for x in raw_orderbook.iter() {
+                let price = x.p.clone();
+                let order = parse_order(x);
+                if x.s < 0.0 {
                     asks.push(order);
-                } else {
+                    price_map.insert(price, true);
+                } else if x.s > 0.0 {
                     bids.push(order);
+                    price_map.insert(price, false);
+                } else if let Some(ask) = price_map.remove(&price) {
+                    if ask {
+                        asks.push(order);
+                    } else {
+                        bids.push(order);
+                    }
                 }
             }
-        }
 
-        OrderBookMsg {
-            exchange: EXCHANGE_NAME.to_string(),
-            market_type,
-            symbol,
-            pair: pair.to_string(),
-            msg_type: MessageType::L2Event,
-            timestamp,
-            asks,
-            bids,
-            snapshot,
-            raw: serde_json::from_str(msg)?,
-        }
+            OrderBookMsg {
+                exchange: EXCHANGE_NAME.to_string(),
+                market_type,
+                symbol,
+                pair: pair.to_string(),
+                msg_type: MessageType::L2Event,
+                timestamp,
+                asks,
+                bids,
+                snapshot,
+                raw: serde_json::from_str(msg).unwrap(),
+            }
+        })
     };
 
     Ok(vec![orderbook])

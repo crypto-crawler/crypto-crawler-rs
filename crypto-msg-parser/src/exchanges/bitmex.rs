@@ -6,11 +6,10 @@ use crate::{FundingRateMsg, MessageType, OrderBookMsg, TradeMsg, TradeSide};
 
 use chrono::prelude::*;
 use chrono::DateTime;
-use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
+use std::cell::RefCell;
 use std::collections::HashMap;
-use std::sync::Mutex;
 
 const EXCHANGE_NAME: &str = "bitmex";
 
@@ -126,9 +125,9 @@ pub(crate) fn parse_funding_rate(
     Ok(rates)
 }
 
-lazy_static! {
+thread_local! {
     // id -> price
-    static ref PRICE_HASHMAP: Mutex<HashMap<String,HashMap<i64, f64>>> = Mutex::new(HashMap::new());
+    static PRICE_HASHMAP: RefCell<HashMap<String,HashMap<i64, f64>>> = RefCell::new(HashMap::new());
 }
 
 pub(crate) fn parse_l2(
@@ -136,78 +135,80 @@ pub(crate) fn parse_l2(
     msg: &str,
     timestamp: i64,
 ) -> Result<Vec<OrderBookMsg>> {
-    let mut price_map = PRICE_HASHMAP.lock().unwrap();
+    PRICE_HASHMAP.with(|slf| {
+        let mut price_map = slf.borrow_mut();
 
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrder>>(msg)?;
-    let snapshot = ws_msg.action == "partial";
-    if ws_msg.data.is_empty() {
-        return Ok(Vec::new());
-    }
-    let symbol = ws_msg.data[0].symbol.clone();
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
-
-    if ws_msg.action == "insert" || ws_msg.action == "partial" {
-        if !price_map.contains_key(&symbol) {
-            price_map.insert(symbol.clone(), HashMap::new());
+        let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrder>>(msg)?;
+        let snapshot = ws_msg.action == "partial";
+        if ws_msg.data.is_empty() {
+            return Ok(Vec::new());
         }
+        let symbol = ws_msg.data[0].symbol.clone();
+        let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+
+        if ws_msg.action == "insert" || ws_msg.action == "partial" {
+            if !price_map.contains_key(&symbol) {
+                price_map.insert(symbol.clone(), HashMap::new());
+            }
+            let symbol_price_map = price_map.get_mut(&symbol).unwrap();
+
+            for x in ws_msg.data.iter() {
+                symbol_price_map.insert(x.id, x.price.unwrap());
+            }
+        } else if !price_map.contains_key(&symbol) {
+            panic!("{}", msg);
+            // return Ok(Vec::new());
+        }
+
         let symbol_price_map = price_map.get_mut(&symbol).unwrap();
 
-        for x in ws_msg.data.iter() {
-            symbol_price_map.insert(x.id, x.price.unwrap());
-        }
-    } else if !price_map.contains_key(&symbol) {
-        panic!("{}", msg);
-        // return Ok(Vec::new());
-    }
+        let parse_order = |raw_order: &RawOrder| -> Order {
+            let price = if let Some(p) = raw_order.price {
+                p
+            } else {
+                *symbol_price_map.get(&raw_order.id).unwrap()
+            };
 
-    let symbol_price_map = price_map.get_mut(&symbol).unwrap();
-
-    let parse_order = |raw_order: &RawOrder| -> Order {
-        let price = if let Some(p) = raw_order.price {
-            p
-        } else {
-            *symbol_price_map.get(&raw_order.id).unwrap()
+            let quantity = raw_order.size.unwrap_or(0.0); // 0.0 means delete
+            let (quantity_base, quantity_quote, quantity_contract) =
+                calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
+            Order {
+                price,
+                quantity_base,
+                quantity_quote,
+                quantity_contract,
+            }
         };
 
-        let quantity = raw_order.size.unwrap_or(0.0); // 0.0 means delete
-        let (quantity_base, quantity_quote, quantity_contract) =
-            calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
-        Order {
-            price,
-            quantity_base,
-            quantity_quote,
-            quantity_contract,
+        let orderbook = OrderBookMsg {
+            exchange: EXCHANGE_NAME.to_string(),
+            market_type,
+            symbol: symbol.to_string(),
+            pair: pair.clone(),
+            msg_type: MessageType::L2Event,
+            timestamp,
+            asks: ws_msg
+                .data
+                .iter()
+                .filter(|x| x.side == "Sell")
+                .map(|x| parse_order(x))
+                .collect(),
+            bids: ws_msg
+                .data
+                .iter()
+                .filter(|x| x.side == "Buy")
+                .map(|x| parse_order(x))
+                .collect(),
+            snapshot,
+            raw: serde_json::from_str(msg)?,
+        };
+
+        if ws_msg.action == "delete" {
+            for raw_order in ws_msg.data.iter() {
+                symbol_price_map.remove(&raw_order.id);
+            }
         }
-    };
 
-    let orderbook = OrderBookMsg {
-        exchange: EXCHANGE_NAME.to_string(),
-        market_type,
-        symbol: symbol.to_string(),
-        pair: pair.clone(),
-        msg_type: MessageType::L2Event,
-        timestamp,
-        asks: ws_msg
-            .data
-            .iter()
-            .filter(|x| x.side == "Sell")
-            .map(|x| parse_order(x))
-            .collect(),
-        bids: ws_msg
-            .data
-            .iter()
-            .filter(|x| x.side == "Buy")
-            .map(|x| parse_order(x))
-            .collect(),
-        snapshot,
-        raw: serde_json::from_str(msg)?,
-    };
-
-    if ws_msg.action == "delete" {
-        for raw_order in ws_msg.data.iter() {
-            symbol_price_map.remove(&raw_order.id);
-        }
-    }
-
-    Ok(vec![orderbook])
+        Ok(vec![orderbook])
+    })
 }
