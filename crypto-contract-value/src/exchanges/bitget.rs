@@ -56,15 +56,17 @@ fn fetch_contract_val() -> BTreeMap<String, f64> {
         forwardContractFlag: bool,
     }
 
-    let txt = http_get("https://capi.bitget.com/api/swap/v3/market/contracts").unwrap();
-    let swap_markets = serde_json::from_str::<Vec<SwapMarket>>(&txt).unwrap();
-
     let mut mapping: BTreeMap<String, f64> = BTreeMap::new();
-    for swap_market in swap_markets.iter().filter(|x| x.forwardContractFlag) {
-        mapping.insert(
-            crypto_pair::normalize_pair(&swap_market.symbol, "bitget").unwrap(),
-            swap_market.contract_val.parse::<f64>().unwrap(),
-        );
+
+    if let Ok(txt) = http_get("https://capi.bitget.com/api/swap/v3/market/contracts") {
+        if let Ok(swap_markets) = serde_json::from_str::<Vec<SwapMarket>>(&txt) {
+            for swap_market in swap_markets.iter().filter(|x| x.forwardContractFlag) {
+                mapping.insert(
+                    crypto_pair::normalize_pair(&swap_market.symbol, "bitget").unwrap(),
+                    swap_market.contract_val.parse::<f64>().unwrap(),
+                );
+            }
+        }
     }
 
     mapping

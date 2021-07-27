@@ -180,13 +180,15 @@ fn fetch_quanto_multipliers(url: &str) -> BTreeMap<String, f64> {
 
     let mut mapping: BTreeMap<String, f64> = BTreeMap::new();
 
-    let txt = http_get(url).unwrap_or_else(|_| "[]".to_string());
-    let markets = serde_json::from_str::<Vec<RawMarket>>(&txt).unwrap();
-    for market in markets.iter() {
-        mapping.insert(
-            crypto_pair::normalize_pair(&market.name, "gate").unwrap(),
-            market.quanto_multiplier.parse::<f64>().unwrap(),
-        );
+    if let Ok(txt) = http_get(url) {
+        if let Ok(markets) = serde_json::from_str::<Vec<RawMarket>>(&txt) {
+            for market in markets.iter() {
+                mapping.insert(
+                    crypto_pair::normalize_pair(&market.name, "gate").unwrap(),
+                    market.quanto_multiplier.parse::<f64>().unwrap(),
+                );
+            }
+        }
     }
 
     mapping

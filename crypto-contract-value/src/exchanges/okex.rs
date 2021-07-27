@@ -178,16 +178,16 @@ fn fetch_contract_val(market_type: &str) -> BTreeMap<String, f64> {
     }
     let mut mapping: BTreeMap<String, f64> = BTreeMap::new();
 
-    let txt = http_get(&format!(
+    if let Ok(txt) = http_get(&format!(
         "https://www.okex.com/api/{}/v3/instruments",
         market_type
-    ))
-    .unwrap();
-    let instruments = serde_json::from_str::<Vec<Instrument>>(&txt).unwrap();
-
-    for instrument in instruments.iter().filter(|x| x.is_inverse == "false") {
-        let pair = crypto_pair::normalize_pair(&instrument.instrument_id, "okex").unwrap();
-        mapping.insert(pair, instrument.contract_val.parse::<f64>().unwrap());
+    )) {
+        if let Ok(instruments) = serde_json::from_str::<Vec<Instrument>>(&txt) {
+            for instrument in instruments.into_iter().filter(|x| x.is_inverse == "false") {
+                let pair = crypto_pair::normalize_pair(&instrument.instrument_id, "okex").unwrap();
+                mapping.insert(pair, instrument.contract_val.parse::<f64>().unwrap());
+            }
+        }
     }
 
     mapping

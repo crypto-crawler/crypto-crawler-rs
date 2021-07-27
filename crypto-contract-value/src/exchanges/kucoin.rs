@@ -105,13 +105,15 @@ struct ResponseMsg {
 fn fetch_linear_multipliers() -> BTreeMap<String, f64> {
     let mut mapping: BTreeMap<String, f64> = BTreeMap::new();
 
-    let txt = http_get("https://api-futures.kucoin.com/api/v1/contracts/active").unwrap();
-    let resp = serde_json::from_str::<ResponseMsg>(&txt).unwrap();
-    for swap_market in resp.data.iter().filter(|x| !x.isInverse) {
-        mapping.insert(
-            crypto_pair::normalize_pair(&swap_market.symbol, "kucoin").unwrap(),
-            swap_market.multiplier,
-        );
+    if let Ok(txt) = http_get("https://api-futures.kucoin.com/api/v1/contracts/active") {
+        if let Ok(resp) = serde_json::from_str::<ResponseMsg>(&txt) {
+            for swap_market in resp.data.iter().filter(|x| !x.isInverse) {
+                mapping.insert(
+                    crypto_pair::normalize_pair(&swap_market.symbol, "kucoin").unwrap(),
+                    swap_market.multiplier,
+                );
+            }
+        }
     }
 
     mapping

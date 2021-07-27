@@ -164,13 +164,15 @@ fn fetch_contract_size(url: &str) -> BTreeMap<String, f64> {
 
     let mut mapping: BTreeMap<String, f64> = BTreeMap::new();
 
-    let txt = http_get(url).unwrap_or_else(|_| "[]".to_string());
-    let response = serde_json::from_str::<Response>(&txt).unwrap();
-    for market in response.data.iter() {
-        mapping.insert(
-            crypto_pair::normalize_pair(&market.contract_code, "huobi").unwrap(),
-            market.contract_size,
-        );
+    if let Ok(txt) = http_get(url) {
+        if let Ok(response) = serde_json::from_str::<Response>(&txt) {
+            for market in response.data.iter() {
+                mapping.insert(
+                    crypto_pair::normalize_pair(&market.contract_code, "huobi").unwrap(),
+                    market.contract_size,
+                );
+            }
+        }
     }
 
     mapping
