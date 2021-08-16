@@ -1,6 +1,6 @@
 [package]
 name = "crypto-contract-value"
-version = "0.9.0"
+version = "0.9.1"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "Get contract value."
@@ -12,7 +12,7 @@ keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
 crypto-market-type = "0.1.5"
-crypto-pair = "2.0.3"
+crypto-pair = "2.0.4"
 lazy_static = "1"
 reqwest = { version = "0.11", features = ["blocking", "gzip"] }
 serde = { version = "1.0", features = ["derive"] }
