@@ -33,8 +33,7 @@ fn main() {
 
     if args.len() == 3 {
         let exchange: &str = &args[2];
-        let tmp: &str = &exchange;
-        if !exchanges.contains(&tmp) {
+        if !exchanges.contains(&exchange) {
             println!("{} is not in [{}]", exchange, exchanges.join(","));
         } else {
             println!("{}", normalize_pair(symbol, exchange).unwrap());

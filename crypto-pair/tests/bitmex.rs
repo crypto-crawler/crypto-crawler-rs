@@ -69,7 +69,7 @@ fn verify_normalize_pair() {
 
         if instrument.isInverse {
             assert!(symbol.starts_with("XBT"));
-            assert_eq!(pair, "BTC/USD".to_string());
+            assert!(pair == "BTC/USD".to_string() || pair == "BTC/EUR".to_string());
         } else if instrument.isQuanto {
             // quanto positionCurrency is always empty
             assert!(instrument.positionCurrency.is_empty());

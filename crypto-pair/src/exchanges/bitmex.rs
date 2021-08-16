@@ -17,6 +17,11 @@ pub(crate) fn normalize_pair(mut symbol: &str) -> Option<String> {
             symbol.strip_suffix("USDT").unwrap().to_string(),
             "USDT".to_string(),
         )
+    } else if symbol.ends_with("EUR") {
+        (
+            symbol.strip_suffix("EUR").unwrap().to_string(),
+            "EUR".to_string(),
+        )
     } else {
         let base_symbol = symbol;
         let quote_symbol = if base_symbol == "XBT" { "USD" } else { "XBT" };

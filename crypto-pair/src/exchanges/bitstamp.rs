@@ -1,7 +1,7 @@
 pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
-    let (base, quote) = if symbol.ends_with("usdc") {
+    let (base, quote) = if symbol.ends_with("usdc") || symbol.ends_with("usdt") {
         (
-            symbol.strip_suffix("usdc").unwrap().to_string(),
+            symbol[0..(symbol.len() - 4)].to_string(),
             symbol[(symbol.len() - 4)..].to_string(),
         )
     } else {

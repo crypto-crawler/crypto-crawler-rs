@@ -89,6 +89,7 @@ fn fetch_option_markets_raw() -> Vec<OptionMarket> {
 }
 
 #[test]
+#[ignore]
 fn verify_option_symbols() {
     let markets = fetch_option_markets_raw();
     for market in markets.iter() {
