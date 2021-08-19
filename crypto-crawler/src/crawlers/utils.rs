@@ -87,7 +87,7 @@ pub(crate) fn crawl_snapshot(
                 if list.is_empty() {
                     true
                 } else {
-                    check_args(exchange, market_type, &list);
+                    check_args(exchange, market_type, list);
                     false
                 }
             }

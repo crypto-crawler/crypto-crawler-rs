@@ -44,7 +44,7 @@ fn test_crawl_trade_all(market_type: MarketType) {
 #[test_case(MarketType::LinearFuture, "BTC-USDT-210924")]
 #[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
 #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
-#[test_case(MarketType::EuropeanOption, "BTC-USD-210702-35000-C"; "inconclusive")]
+#[test_case(MarketType::EuropeanOption, "BTC-USD-210924-18000-P"; "inconclusive")]
 fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_trade,
@@ -60,7 +60,7 @@ fn test_crawl_trade(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::LinearFuture, "BTC-USDT-210924")]
 #[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
 #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
-#[test_case(MarketType::EuropeanOption, "BTC-USD-210702-35000-C")]
+#[test_case(MarketType::EuropeanOption, "BTC-USD-210924-18000-P")]
 fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_l2_event,
@@ -76,7 +76,7 @@ fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::LinearFuture, "BTC-USDT-210924")]
 #[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
 #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
-#[test_case(MarketType::EuropeanOption, "BTC-USD-210702-35000-C")]
+#[test_case(MarketType::EuropeanOption, "BTC-USD-210924-18000-P")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     gen_test_snapshot_code!(
         crawl_l2_snapshot,
@@ -104,7 +104,7 @@ fn test_crawl_funding_rate(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::LinearFuture, "BTC-USDT-210924")]
 #[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
 #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
-#[test_case(MarketType::EuropeanOption, "BTC-USD-210702-35000-C")]
+#[test_case(MarketType::EuropeanOption, "BTC-USD-210924-18000-P")]
 fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_ticker,
