@@ -349,7 +349,7 @@ impl<'a> BitfinexWSClient<'a> {
             false
         } else {
             debug_assert!(txt.starts_with('['));
-            let arr = serde_json::from_str::<Vec<Value>>(&txt).unwrap();
+            let arr = serde_json::from_str::<Vec<Value>>(txt).unwrap();
             if arr.len() == 2 && arr[1].as_str().unwrap_or("null") == "hb" {
                 // If there is no activity in the channel for 15 seconds, the Websocket server
                 // will send you a heartbeat message in this format.

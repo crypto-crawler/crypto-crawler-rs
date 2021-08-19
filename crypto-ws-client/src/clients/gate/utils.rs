@@ -81,7 +81,7 @@ pub(super) fn to_raw_channel(channel: &str, pair: &str) -> String {
 }
 
 pub(super) fn on_misc_msg(msg: &str) -> MiscMessage {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(&msg).unwrap();
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
 
     // null for success; object with code and message for failure
     let error = match obj.get("error") {

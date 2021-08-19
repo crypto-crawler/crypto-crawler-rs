@@ -50,7 +50,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     if msg == "pong" {
         return MiscMessage::Pong;
     }
-    let obj = serde_json::from_str::<HashMap<String, Value>>(&msg).unwrap();
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
 
     if obj.contains_key("event") {
         let event = obj.get("event").unwrap().as_str().unwrap();

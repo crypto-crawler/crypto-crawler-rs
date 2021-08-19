@@ -27,15 +27,14 @@ pub struct BitmexWSClient<'a> {
 }
 
 fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-    let channels_to_parse: Vec<&String> =
-        channels.iter().filter(|ch| !ch.starts_with('{')).collect();
+    let channels_to_parse = channels.iter().filter(|ch| !ch.starts_with('{'));
     let mut all_commands: Vec<String> = channels
         .iter()
         .filter(|ch| ch.starts_with('{'))
         .map(|s| s.to_string())
         .collect();
 
-    if !channels_to_parse.is_empty() {
+    if channels_to_parse.count() > 0 {
         all_commands.append(&mut vec![format!(
             r#"{{"op":"{}","args":{}}}"#,
             if subscribe {
@@ -55,7 +54,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     if msg == "pong" {
         return MiscMessage::Pong;
     }
-    let resp = serde_json::from_str::<HashMap<String, Value>>(&msg);
+    let resp = serde_json::from_str::<HashMap<String, Value>>(msg);
     if resp.is_err() {
         error!("{} is not a JSON string, {}", msg, EXCHANGE_NAME);
         return MiscMessage::Misc;
