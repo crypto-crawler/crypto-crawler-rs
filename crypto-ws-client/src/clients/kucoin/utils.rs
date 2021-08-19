@@ -21,7 +21,6 @@ const MAX_SUBSCRIPTIONS_PER_TIME: usize = 100;
 pub(super) struct WebsocketToken {
     pub token: String,
     pub endpoint: String,
-    pub ping_interval: i64,
 }
 
 fn http_post(url: &str) -> Result<String> {
@@ -65,12 +64,11 @@ pub(super) fn fetch_ws_token() -> WebsocketToken {
             .as_str()
             .unwrap()
             .to_string(),
-        ping_interval: server.get("pingInterval").unwrap().as_i64().unwrap(),
     }
 }
 
 pub(super) fn on_misc_msg(msg: &str) -> MiscMessage {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(&msg).unwrap();
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
     let msg_type = obj.get("type").unwrap().as_str().unwrap();
     match msg_type {
         "pong" => MiscMessage::Pong,

@@ -124,7 +124,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
             MiscMessage::Normal
         }
     } else {
-        let obj = serde_json::from_str::<HashMap<String, Value>>(&msg).unwrap();
+        let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
         if obj.contains_key("channel") && obj.contains_key("data") && obj.contains_key("ts") {
             let channel = obj.get("channel").unwrap().as_str().unwrap();
             match channel {

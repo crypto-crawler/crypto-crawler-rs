@@ -69,7 +69,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
         info!("Received {} from {}", msg, EXCHANGE_NAME);
         return MiscMessage::Pong;
     }
-    let obj = serde_json::from_str::<HashMap<String, Value>>(&msg).unwrap();
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
 
     if obj.contains_key("action")
         && obj

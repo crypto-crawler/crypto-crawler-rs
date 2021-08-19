@@ -37,7 +37,7 @@ pub(super) fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<
 }
 
 pub(super) fn on_misc_msg(msg: &str) -> MiscMessage {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(&msg).unwrap();
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
 
     if obj.contains_key("topic") && obj.contains_key("data") {
         MiscMessage::Normal

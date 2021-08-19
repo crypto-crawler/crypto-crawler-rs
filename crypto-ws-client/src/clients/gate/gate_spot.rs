@@ -75,7 +75,7 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
 }
 
 fn on_misc_msg(msg: &str) -> MiscMessage {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(&msg).unwrap();
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
 
     // null for success; object with code and message for failure
     let error = match obj.get("error") {

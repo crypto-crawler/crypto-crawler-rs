@@ -54,7 +54,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
         return MiscMessage::Pong;
     }
 
-    let resp = serde_json::from_str::<HashMap<String, Value>>(&msg);
+    let resp = serde_json::from_str::<HashMap<String, Value>>(msg);
     if resp.is_err() {
         error!("{} is not a JSON string, {}", msg, EXCHANGE_NAME);
         return MiscMessage::Misc;

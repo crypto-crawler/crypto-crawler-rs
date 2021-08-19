@@ -79,7 +79,7 @@ fn connect_with_timeout(
         Mode::Tls => 443,
     });
     let addrs = (host, port).to_socket_addrs()?;
-    let mut stream = connect_to_some(addrs.as_slice(), &request.uri(), mode, timeout)?;
+    let mut stream = connect_to_some(addrs.as_slice(), request.uri(), mode, timeout)?;
     NoDelay::set_nodelay(&mut stream, true)?;
     tungstenite::client(request, stream).map_err(|e| match e {
         HandshakeError::Failure(f) => f,
