@@ -64,6 +64,7 @@ pub(crate) fn crawl_trade(
     }
 }
 
+#[allow(clippy::unnecessary_unwrap)]
 pub(crate) fn crawl_l2_event(
     market_type: MarketType,
     symbols: Option<&[String]>,
@@ -130,6 +131,7 @@ pub(crate) fn crawl_ticker(
     }
 }
 
+#[allow(clippy::unnecessary_unwrap)]
 pub(crate) fn crawl_funding_rate(
     market_type: MarketType,
     symbols: Option<&[String]>,

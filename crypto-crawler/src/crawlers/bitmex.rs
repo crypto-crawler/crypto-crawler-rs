@@ -20,6 +20,7 @@ gen_crawl_event!(crawl_trade, BitmexWSClient, MessageType::Trade, subscribe_trad
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event, BitmexWSClient, MessageType::L2Event, subscribe_orderbook);
 
+#[allow(clippy::unnecessary_unwrap)]
 pub(crate) fn crawl_funding_rate(
     market_type: MarketType,
     symbols: Option<&[String]>,
