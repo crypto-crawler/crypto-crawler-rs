@@ -1,21 +1,38 @@
 use super::Writer;
 
-use std::{fs, io::Write, sync::Mutex};
-
 use log::*;
+use reopen::Reopen;
+use std::{
+    fs,
+    io::{Error, Write},
+    path::Path,
+    sync::Mutex,
+};
+
+#[cfg(not(windows))]
+use signal_hook::consts::signal::SIGHUP;
+#[cfg(windows)] // Windows has a very limited set of signals, but make it compile at least :-(
+use signal_hook::consts::signal::SIGINT as SIGHUP;
+
+fn open<P: AsRef<Path>>(p: P) -> Result<fs::File, Error> {
+    fs::OpenOptions::new()
+        .create(true)
+        .write(true)
+        .append(true)
+        .open(p)
+}
 
 pub struct FileWriter {
-    file: Mutex<fs::File>,
+    file: Mutex<Reopen<fs::File>>,
     path: String,
 }
 
 impl FileWriter {
     pub fn new(path: &str) -> Self {
-        let file = fs::OpenOptions::new()
-            .append(true)
-            .create(true)
-            .open(path)
-            .unwrap_or_else(|_| panic!("Failed to open {}", path));
+        let path_clone = path.to_string();
+        let file = Reopen::new(Box::new(move || open(&path_clone))).unwrap();
+        // Make sure it gets reopened on SIGHUP
+        file.handle().register_signal(SIGHUP).unwrap();
 
         FileWriter {
             file: Mutex::new(file),
@@ -34,10 +51,6 @@ impl Writer for FileWriter {
     fn close(&self) {
         let mut file = self.file.lock().unwrap();
         if let Err(e) = file.flush() {
-            error!("{}, {}", self.path, e);
-        }
-
-        if let Err(e) = file.sync_all() {
             error!("{}, {}", self.path, e);
         }
     }
