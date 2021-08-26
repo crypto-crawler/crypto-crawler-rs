@@ -271,6 +271,9 @@ impl<'a> WSClientInternal<'a> {
                             if io_err.kind() == std::io::ErrorKind::WouldBlock {
                                 info!("read_message() timeout");
                                 num_read_timeout += 1;
+                            } else if io_err.kind() == std::io::ErrorKind::Interrupted {
+                                // ignore SIGHUP, which will be handled by reopen
+                                info!("Ignoring SIGHUP");
                             } else {
                                 error!(
                                     "I/O error thrown from read_message(): {}, {:?}",
