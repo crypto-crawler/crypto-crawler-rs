@@ -17,7 +17,7 @@ COPY --from=builder /project/target/release/huobi_misc /usr/local/bin/
 
 # procps provides the ps command, which is needed by pm2
 RUN apt-get -qy update && apt-get -qy --no-install-recommends install \
-    pkg-config libssl-dev ca-certificates curl logrotate procps \
+    pkg-config libssl-dev ca-certificates curl logrotate procps pigz \
  && chown -R node:node /var/lib/logrotate/ \
  && npm install pm2 -g --production \
  && apt-get -qy install gzip unzip && curl https://rclone.org/install.sh | bash \
