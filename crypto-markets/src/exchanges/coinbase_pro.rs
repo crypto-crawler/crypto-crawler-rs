@@ -45,7 +45,7 @@ fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
 fn fetch_spot_symbols() -> Result<Vec<String>> {
     let symbols = fetch_spot_markets_raw()?
         .into_iter()
-        .filter(|m| !m.trading_disabled)
+        .filter(|m| !m.trading_disabled && m.status == "online" && m.cancel_only == false)
         .map(|m| m.id)
         .collect::<Vec<String>>();
     Ok(symbols)
