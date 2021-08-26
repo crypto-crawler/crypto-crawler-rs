@@ -34,9 +34,8 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
         .map(|s| s.to_string())
         .collect();
 
-    let channels_to_parse: Vec<&String> =
-        channels.iter().filter(|ch| !ch.starts_with('{')).collect();
-    if !channels_to_parse.is_empty() {
+    let raw_channels: Vec<&String> = channels.iter().filter(|ch| !ch.starts_with('{')).collect();
+    if !raw_channels.is_empty() {
         all_commands.append(&mut vec![format!(
             r#"{{"cmd":"{}","args":{}}}"#,
             if subscribe {
@@ -44,7 +43,7 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
             } else {
                 "unsubscribe"
             },
-            serde_json::to_string(&channels_to_parse).unwrap()
+            serde_json::to_string(&raw_channels).unwrap()
         )])
     };
 

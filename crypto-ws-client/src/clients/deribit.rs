@@ -26,23 +26,28 @@ pub struct DeribitWSClient<'a> {
 }
 
 fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-    let channels_to_parse = channels.iter().filter(|ch| !ch.starts_with('{'));
+    let raw_channels: Vec<&String> = channels.iter().filter(|ch| !ch.starts_with('{')).collect();
     let mut all_commands: Vec<String> = channels
         .iter()
         .filter(|ch| ch.starts_with('{'))
         .map(|s| s.to_string())
         .collect();
 
-    if channels_to_parse.count() > 0 {
-        all_commands.append(&mut vec![format!(
-            r#"{{"method": "public/{}", "params": {{"channels": {}}}}}"#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
-            serde_json::to_string(channels).unwrap()
-        )])
+    if !raw_channels.is_empty() {
+        // make sure each body size doesn't exceed the websocket frame limit 32KiB
+        for i in (0..raw_channels.len()).step_by(512) {
+            let chunk: Vec<&String> =
+                (&raw_channels[i..(std::cmp::min(i + 512, raw_channels.len()))]).to_vec();
+            all_commands.append(&mut vec![format!(
+                r#"{{"method": "public/{}", "params": {{"channels": {}}}}}"#,
+                if subscribe {
+                    "subscribe"
+                } else {
+                    "unsubscribe"
+                },
+                serde_json::to_string(&chunk).unwrap()
+            )])
+        }
     };
 
     all_commands

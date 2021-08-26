@@ -24,15 +24,14 @@ pub struct BinanceOptionWSClient<'a> {
 }
 
 fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-    let channels_to_parse: Vec<&String> =
-        channels.iter().filter(|ch| !ch.starts_with('{')).collect();
+    let raw_channels: Vec<&String> = channels.iter().filter(|ch| !ch.starts_with('{')).collect();
     let mut all_commands: Vec<String> = channels
         .iter()
         .filter(|ch| ch.starts_with('{'))
         .map(|s| s.to_string())
         .collect();
 
-    if !channels_to_parse.is_empty() {
+    if !raw_channels.is_empty() {
         all_commands.append(&mut vec![format!(
             r#"{{"id":9527,"method":"{}","params":{}}}"#,
             if subscribe {
@@ -40,7 +39,7 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
             } else {
                 "UNSUBSCRIBE"
             },
-            serde_json::to_string(&channels_to_parse).unwrap()
+            serde_json::to_string(&raw_channels).unwrap()
         )])
     };
 
