@@ -90,7 +90,18 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     match obj.get("type").unwrap().as_str().unwrap() {
         "error" => {
             error!("Received {} from {}", msg, EXCHANGE_NAME);
-            panic!("Received {} from {}", msg, EXCHANGE_NAME);
+            if obj.contains_key("reason")
+                && obj
+                    .get("reason")
+                    .unwrap()
+                    .as_str()
+                    .unwrap()
+                    .contains("is not a valid product")
+            {
+                panic!("Received {} from {}", msg, EXCHANGE_NAME);
+            } else {
+                MiscMessage::Misc
+            }
         }
         "subscriptions" => {
             info!("Received {} from {}", msg, EXCHANGE_NAME);
