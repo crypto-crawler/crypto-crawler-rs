@@ -514,7 +514,7 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
 
             if num_read_timeout > 3 {
                 error!("num_read_timeout: {}", num_read_timeout);
-                break; // fail fast, pm2 will restart
+                std::process::exit(0); // fail fast, pm2 will restart
             }
 
             if let Some(seconds) = duration {
