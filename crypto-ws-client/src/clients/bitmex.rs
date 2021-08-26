@@ -27,14 +27,14 @@ pub struct BitmexWSClient<'a> {
 }
 
 fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-    let channels_to_parse = channels.iter().filter(|ch| !ch.starts_with('{'));
+    let raw_channels: Vec<&String> = channels.iter().filter(|ch| !ch.starts_with('{')).collect();
     let mut all_commands: Vec<String> = channels
         .iter()
         .filter(|ch| ch.starts_with('{'))
         .map(|s| s.to_string())
         .collect();
 
-    if channels_to_parse.count() > 0 {
+    if !raw_channels.is_empty() {
         all_commands.append(&mut vec![format!(
             r#"{{"op":"{}","args":{}}}"#,
             if subscribe {
@@ -42,7 +42,7 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
             } else {
                 "unsubscribe"
             },
-            serde_json::to_string(channels).unwrap()
+            serde_json::to_string(&raw_channels).unwrap()
         )])
     };
 
