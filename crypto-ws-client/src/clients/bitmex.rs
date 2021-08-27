@@ -16,6 +16,9 @@ const WEBSOCKET_URL: &str = "wss://www.bitmex.com/realtime";
 
 const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (5, "ping");
 
+// Too many args sent. Max length is 20
+const MAX_CHANNELS_PER_COMMAND: usize = 20;
+
 /// The WebSocket client for BitMEX.
 ///
 /// BitMEX has Swap and Future markets.
@@ -35,15 +38,20 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
         .collect();
 
     if !raw_channels.is_empty() {
-        all_commands.append(&mut vec![format!(
-            r#"{{"op":"{}","args":{}}}"#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
-            serde_json::to_string(&raw_channels).unwrap()
-        )])
+        let n = raw_channels.len();
+        for i in (0..n).step_by(MAX_CHANNELS_PER_COMMAND) {
+            let chunk: Vec<&String> =
+                (&raw_channels[i..(std::cmp::min(i + MAX_CHANNELS_PER_COMMAND, n))]).to_vec();
+            all_commands.append(&mut vec![format!(
+                r#"{{"op":"{}","args":{}}}"#,
+                if subscribe {
+                    "subscribe"
+                } else {
+                    "unsubscribe"
+                },
+                serde_json::to_string(&chunk).unwrap()
+            )])
+        }
     };
 
     all_commands
