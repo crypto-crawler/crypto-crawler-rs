@@ -66,16 +66,19 @@ impl<'a> BinanceWSClient<'a> {
     }
 
     fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
+        let raw_channels: Vec<&String> =
+            channels.iter().filter(|ch| !ch.starts_with('{')).collect();
         let mut all_commands: Vec<String> = channels
             .iter()
             .filter(|ch| ch.starts_with('{'))
             .map(|s| s.to_string())
             .collect();
 
-        let mut chunk: Vec<String> = Vec::new();
-        for channel in channels.iter().filter(|ch| !ch.starts_with('{')) {
-            chunk.push(channel.clone());
-            if chunk.len() >= MAX_NUM_CHANNELS {
+        if !raw_channels.is_empty() {
+            let n = raw_channels.len();
+            for i in (0..n).step_by(MAX_NUM_CHANNELS) {
+                let chunk: Vec<&String> =
+                    (&raw_channels[i..(std::cmp::min(i + MAX_NUM_CHANNELS, n))]).to_vec();
                 let command = format!(
                     r#"{{"id":9527,"method":"{}","params":{}}}"#,
                     if subscribe {
@@ -86,21 +89,8 @@ impl<'a> BinanceWSClient<'a> {
                     serde_json::to_string(&chunk).unwrap()
                 );
                 all_commands.push(command);
-                chunk.clear();
             }
-        }
-        if !chunk.is_empty() {
-            let command = format!(
-                r#"{{"id":9527,"method":"{}","params":{}}}"#,
-                if subscribe {
-                    "SUBSCRIBE"
-                } else {
-                    "UNSUBSCRIBE"
-                },
-                serde_json::to_string(&chunk).unwrap()
-            );
-            all_commands.push(command);
-        }
+        };
 
         all_commands
     }

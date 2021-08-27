@@ -34,10 +34,10 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
         .collect();
 
     if !raw_channels.is_empty() {
+        let n = raw_channels.len();
         // make sure each body size doesn't exceed the websocket frame limit 32KiB
-        for i in (0..raw_channels.len()).step_by(512) {
-            let chunk: Vec<&String> =
-                (&raw_channels[i..(std::cmp::min(i + 512, raw_channels.len()))]).to_vec();
+        for i in (0..n).step_by(512) {
+            let chunk: Vec<&String> = (&raw_channels[i..(std::cmp::min(i + 512, n))]).to_vec();
             all_commands.append(&mut vec![format!(
                 r#"{{"method": "public/{}", "params": {{"channels": {}}}}}"#,
                 if subscribe {
