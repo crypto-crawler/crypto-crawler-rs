@@ -67,6 +67,16 @@ apps.push({
     autorestart: false,
 });
 
+apps.push({
+    name: "upload",
+    script: "upload.sh",
+    args: "l2_event",
+    exec_interpreter: "bash",
+    exec_mode: "fork_mode",
+    instances: 1,
+    restart_delay: 5000, // 5 seconds
+});
+
 module.exports = {
     apps,
 };

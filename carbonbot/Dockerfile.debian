@@ -44,6 +44,8 @@ COPY ./conf/logrotate.l2_event.conf /usr/local/etc/logrotate.l2_event.conf
 COPY ./conf/logrotate.funding_rate.conf /usr/local/etc/logrotate.funding_rate.conf
 COPY ./conf/logrotate.misc.conf /usr/local/etc/logrotate.misc.conf
 
+COPY ./conf/upload.sh /usr/local/bin/upload.sh
+
 ENV RUST_LOG "warn"
 ENV RUST_BACKTRACE 1
 
