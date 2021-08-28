@@ -98,6 +98,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
         ],
         "gate" => vec![
             MarketType::Spot,
+            MarketType::InverseFuture,
             MarketType::LinearFuture,
             MarketType::InverseSwap,
             MarketType::LinearSwap,

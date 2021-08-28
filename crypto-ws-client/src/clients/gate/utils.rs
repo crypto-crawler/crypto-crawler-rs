@@ -8,43 +8,56 @@ use serde_json::Value;
 
 pub(super) const EXCHANGE_NAME: &str = "gate";
 
-pub(super) const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (10, r#"{"channel":"futures.ping"}"#);
+// https://www.gate.io/docs/futures/ws/en/#ping-and-pong
+// https://www.gate.io/docs/delivery/ws/en/#ping-and-pong
+pub(super) const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (60, r#"{"channel":"futures.ping"}"#);
 
 fn channel_pairs_to_command(channel: &str, pairs: &[String], subscribe: bool) -> Vec<String> {
-    match channel {
-        "trades" | "tickers" => {
-            vec![format!(
-                r#"{{"channel":"{}","event":"{}", "payload":{}}}"#,
-                format!("futures.{}", channel),
-                if subscribe {
-                    "subscribe"
-                } else {
-                    "unsubscribe"
-                },
-                serde_json::to_string(pairs).unwrap(),
-            )]
-        }
-        _ => {
-            let commands: Vec<String> = pairs
-                .iter()
-                .map(|pair| {
-                    let command = serde_json::json!({
-                        "channel": format!("futures.{}", channel),
-                        "event": if subscribe {
-                            "subscribe"
+    if channel.contains(".order_book") {
+        pairs
+            .iter()
+            .map(|pair| {
+                format!(
+                    r#"{{"channel":"{}", "event":"{}", "payload":{}}}"#,
+                    channel,
+                    if subscribe {
+                        "subscribe"
+                    } else {
+                        "unsubscribe"
+                    },
+                    if channel.ends_with(".order_book") {
+                        if channel.starts_with("spot.") {
+                            serde_json::to_string(&[pair, "20", "1000ms"]).unwrap()
+                        } else if channel.starts_with("futures.") {
+                            serde_json::to_string(&[pair, "20", "0"]).unwrap()
                         } else {
-                            "unsubscribe"
-                        },
-                        "payload": match channel {
-                            "order_book" => [pair, "20", "0"],
-                            _ => panic!("Unknown channel {}", channel),
+                            panic!("unexpected channel: {}", channel)
                         }
-                    });
-                    serde_json::to_string(&command).unwrap()
-                })
-                .collect();
-            commands
-        }
+                    } else if channel.ends_with(".order_book_update") {
+                        if channel.starts_with("spot.") {
+                            serde_json::to_string(&[pair, "100ms"]).unwrap()
+                        } else if channel.starts_with("futures.") {
+                            serde_json::to_string(&[pair, "100ms", "20"]).unwrap()
+                        } else {
+                            panic!("unexpected channel: {}", channel)
+                        }
+                    } else {
+                        panic!("unexpected channel: {}", channel)
+                    },
+                )
+            })
+            .collect()
+    } else {
+        vec![format!(
+            r#"{{"channel":"{}", "event":"{}", "payload":{}}}"#,
+            channel,
+            if subscribe {
+                "subscribe"
+            } else {
+                "unsubscribe"
+            },
+            serde_json::to_string(pairs).unwrap(),
+        )]
     }
 }
 
@@ -69,8 +82,7 @@ pub(super) fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<
     }
 
     for (channel, pairs) in channel_pairs.iter() {
-        let mut commands = channel_pairs_to_command(channel, pairs, subscribe);
-        all_commands.append(&mut commands);
+        all_commands.extend(channel_pairs_to_command(channel, pairs, subscribe));
     }
 
     all_commands
@@ -83,7 +95,8 @@ pub(super) fn to_raw_channel(channel: &str, pair: &str) -> String {
 pub(super) fn on_misc_msg(msg: &str) -> MiscMessage {
     let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
 
-    // null for success; object with code and message for failure
+    // https://www.gate.io/docs/apiv4/ws/en/#server-response
+    // Null if the server accepts the client request; otherwise, the detailed reason why request is rejected.
     let error = match obj.get("error") {
         None => serde_json::Value::Null,
         Some(err) => {
@@ -95,27 +108,39 @@ pub(super) fn on_misc_msg(msg: &str) -> MiscMessage {
         }
     };
     if !error.is_null() {
-        // see https://www.gate.io/docs/futures/ws/index.html#error
-        panic!("Received {} from {}", msg, EXCHANGE_NAME);
-    } else {
-        let channel = obj.get("channel").unwrap().as_str().unwrap();
-        let event = obj.get("event").unwrap().as_str().unwrap();
-        if channel == "futures.pong" {
-            debug!("Received {} from {}", msg, EXCHANGE_NAME);
-            MiscMessage::Pong
-        } else if event == "all" || event == "update" {
-            MiscMessage::Normal
-        } else if event == "subscribe" || event == "unsubscribe" {
-            debug!("Received {} from {}", msg, EXCHANGE_NAME);
-            MiscMessage::Misc
-        } else {
-            warn!("Received {} from {}", msg, EXCHANGE_NAME);
-            MiscMessage::Misc
+        let err = error.as_object().unwrap();
+        // https://www.gate.io/docs/apiv4/ws/en/#schema_error
+        // https://www.gate.io/docs/futures/ws/en/#error
+        let code = err.get("code").unwrap().as_i64().unwrap();
+        match code {
+            1 | 2 => panic!("Received {} from {}", msg, EXCHANGE_NAME), // client side errors
+            _ => error!("Received {} from {}", msg, EXCHANGE_NAME),     // server side errors
         }
+        return MiscMessage::Misc;
+    }
+
+    let channel = obj.get("channel").unwrap().as_str().unwrap();
+    let event = obj.get("event").unwrap().as_str().unwrap();
+
+    if channel == "spot.pong" || channel == "futures.pong" {
+        debug!("Received {} from {}", msg, EXCHANGE_NAME);
+        MiscMessage::Pong
+    } else if event == "update" || event == "all" {
+        MiscMessage::Normal
+    } else if event == "subscribe" || event == "unsubscribe" {
+        debug!("Received {} from {}", msg, EXCHANGE_NAME);
+        MiscMessage::Misc
+    } else {
+        warn!("Received {} from {}", msg, EXCHANGE_NAME);
+        MiscMessage::Misc
     }
 }
 
-pub(super) fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+pub(super) fn to_candlestick_raw_channel_shared(
+    market_type: &str,
+    pair: &str,
+    interval: u32,
+) -> String {
     let interval_str = match interval {
         10 => "10s",
         60 => "1m",
@@ -130,7 +155,7 @@ pub(super) fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
         _ => panic!("Gate available intervals 10s,1m,5m,15m,30m,1h,4h,8h,1d,7d"),
     };
     format!(
-        r#"{{"channel": "futures.candlesticks", "event": "subscribe", "payload" : ["{}", "{}"]}}"#,
-        interval_str, pair
+        r#"{{"channel": "{}.candlesticks", "event": "subscribe", "payload" : ["{}", "{}"]}}"#,
+        market_type, interval_str, pair
     )
 }

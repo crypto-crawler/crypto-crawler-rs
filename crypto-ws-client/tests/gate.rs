@@ -11,7 +11,10 @@ mod gate_spot {
         gen_test_code!(
             GateSpotWSClient,
             subscribe,
-            &vec!["trades:BTC_USDT".to_string(), "trades:ETH_USDT".to_string()]
+            &vec![
+                "spot.trades:BTC_USDT".to_string(),
+                "spot.trades:ETH_USDT".to_string()
+            ]
         );
     }
 
@@ -21,8 +24,7 @@ mod gate_spot {
             GateSpotWSClient,
             subscribe,
             &vec![
-                r#"{"id":9527, "method":"trades.subscribe", "params":["BTC_USDT","ETH_USDT"]}"#
-                    .to_string()
+                r#"{"channel":"spot.trades", "event":"subscribe", "payload":["BTC_USDT","ETH_USDT"]}"#.to_string()
             ]
         );
     }
@@ -46,6 +48,24 @@ mod gate_spot {
     }
 
     #[test]
+    fn subscribe_orderbook_snapshot() {
+        gen_test_code!(
+            GateSpotWSClient,
+            subscribe_orderbook_snapshot,
+            &vec!["BTC_USDT".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_bbo() {
+        gen_test_code!(
+            GateSpotWSClient,
+            subscribe_bbo,
+            &vec!["BTC_USDT".to_string()]
+        );
+    }
+
+    #[test]
     fn subscribe_ticker() {
         gen_test_code!(
             GateSpotWSClient,
@@ -57,7 +77,7 @@ mod gate_spot {
     #[test]
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(GateSpotWSClient, &vec!["BTC_USDT".to_string()], 10);
-        gen_test_subscribe_candlestick!(GateSpotWSClient, &vec!["BTC_USDT".to_string()], 2592000);
+        gen_test_subscribe_candlestick!(GateSpotWSClient, &vec!["BTC_USDT".to_string()], 604800);
     }
 }
 
@@ -71,7 +91,10 @@ mod gate_inverse_swap {
         gen_test_code!(
             GateInverseSwapWSClient,
             subscribe,
-            &vec!["trades:BTC_USD".to_string(), "trades:ETH_USD".to_string()]
+            &vec![
+                "futures.trades:BTC_USD".to_string(),
+                "futures.trades:ETH_USD".to_string()
+            ]
         );
     }
 
@@ -81,7 +104,7 @@ mod gate_inverse_swap {
             GateInverseSwapWSClient,
             subscribe,
             &vec![
-                r#"{"channel":"futures.trades","event":"subscribe", "payload":["BTC_USD","ETH_USD"]}"#
+                r#"{"channel":"futures.trades", "event":"subscribe", "payload":["BTC_USD","ETH_USD"]}"#
                     .to_string()
             ]
         );
@@ -101,6 +124,24 @@ mod gate_inverse_swap {
         gen_test_code!(
             GateInverseSwapWSClient,
             subscribe_orderbook,
+            &vec!["BTC_USD".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_orderbook_snapshot() {
+        gen_test_code!(
+            GateInverseSwapWSClient,
+            subscribe_orderbook_snapshot,
+            &vec!["BTC_USD".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_bbo() {
+        gen_test_code!(
+            GateInverseSwapWSClient,
+            subscribe_bbo,
             &vec!["BTC_USD".to_string()]
         );
     }
@@ -150,6 +191,24 @@ mod gate_linear_swap {
     }
 
     #[test]
+    fn subscribe_orderbook_snapshot() {
+        gen_test_code!(
+            GateLinearSwapWSClient,
+            subscribe_orderbook_snapshot,
+            &vec!["BTC_USDT".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_bbo() {
+        gen_test_code!(
+            GateLinearSwapWSClient,
+            subscribe_bbo,
+            &vec!["BTC_USDT".to_string()]
+        );
+    }
+
+    #[test]
     fn subscribe_ticker() {
         gen_test_code!(
             GateLinearSwapWSClient,
@@ -165,6 +224,58 @@ mod gate_linear_swap {
         gen_test_subscribe_candlestick!(
             GateLinearSwapWSClient,
             &vec!["BTC_USDT".to_string()],
+            604800
+        );
+    }
+}
+
+#[cfg(test)]
+mod gate_inverse_future {
+    use crypto_ws_client::{GateInverseFutureWSClient, WSClient};
+    use std::sync::{Arc, Mutex};
+
+    #[test]
+    #[ignore]
+    fn subscribe_trade() {
+        gen_test_code!(
+            GateInverseFutureWSClient,
+            subscribe_trade,
+            &vec![
+                "BTC_USD_20210924".to_string(),
+                "BTC_USD_20211231".to_string()
+            ]
+        );
+    }
+
+    #[test]
+    fn subscribe_orderbook() {
+        gen_test_code!(
+            GateInverseFutureWSClient,
+            subscribe_orderbook,
+            &vec!["BTC_USD_20210924".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_ticker() {
+        gen_test_code!(
+            GateInverseFutureWSClient,
+            subscribe_ticker,
+            &vec!["BTC_USD_20210924".to_string()]
+        );
+    }
+
+    #[test]
+    #[ignore]
+    fn subscribe_candlestick() {
+        gen_test_subscribe_candlestick!(
+            GateInverseFutureWSClient,
+            &vec!["BTC_USD_20210924".to_string()],
+            10
+        );
+        gen_test_subscribe_candlestick!(
+            GateInverseFutureWSClient,
+            &vec!["BTC_USD_20210924".to_string()],
             604800
         );
     }
@@ -189,7 +300,6 @@ mod gate_linear_future {
     }
 
     #[test]
-    #[ignore]
     fn subscribe_orderbook() {
         gen_test_code!(
             GateLinearFutureWSClient,
@@ -199,7 +309,6 @@ mod gate_linear_future {
     }
 
     #[test]
-    #[ignore]
     fn subscribe_ticker() {
         gen_test_code!(
             GateLinearFutureWSClient,
