@@ -72,7 +72,7 @@ struct WebsocketMsg<T: Sized> {
 }
 
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(&msg)?;
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg)?;
     let data = obj.get("data").unwrap();
     let event_type = data.get("e").unwrap().as_str().unwrap();
 
@@ -140,7 +140,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
 }
 
 pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(&msg)?;
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(msg)?;
     let pair = crypto_pair::normalize_pair(&ws_msg.data.s, EXCHANGE_NAME).unwrap();
 
     let parse_order = |raw_order: &RawOrder| -> Order {
@@ -208,7 +208,7 @@ pub(crate) fn parse_funding_rate(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<FundingRateMsg>> {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(&msg)?;
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg)?;
     let stream = obj.get("stream").unwrap().as_str().unwrap();
     let data = if stream == "!markPrice@arr" {
         obj.get("data")

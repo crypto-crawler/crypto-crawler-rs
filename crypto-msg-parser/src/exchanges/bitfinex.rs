@@ -42,7 +42,7 @@ fn parse_one_trade(market_type: MarketType, symbol: &str, nums: &[f64]) -> Trade
 }
 
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let arr = serde_json::from_str::<Vec<Value>>(&msg)?;
+    let arr = serde_json::from_str::<Vec<Value>>(msg)?;
 
     let symbol = arr[0]
         .as_object()
@@ -66,7 +66,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             let mut trades = Vec::<TradeMsg>::new();
             let nums_arr: Vec<Vec<f64>> = serde_json::from_value(arr[1].clone()).unwrap();
             for nums in nums_arr.iter() {
-                let trade = parse_one_trade(market_type, symbol, &nums);
+                let trade = parse_one_trade(market_type, symbol, nums);
                 trades.push(trade);
             }
             Ok(trades)
@@ -79,7 +79,7 @@ pub(crate) fn parse_l2(
     msg: &str,
     timestamp: i64,
 ) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<Vec<Value>>(&msg)?;
+    let ws_msg = serde_json::from_str::<Vec<Value>>(msg)?;
 
     let symbol = ws_msg[0]
         .as_object()

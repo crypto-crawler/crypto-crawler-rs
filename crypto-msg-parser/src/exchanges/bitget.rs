@@ -41,7 +41,7 @@ struct WebsocketMsg<T: Sized> {
 }
 
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<SwapTradeMsg>>(&msg)?;
+    let ws_msg = serde_json::from_str::<WebsocketMsg<SwapTradeMsg>>(msg)?;
     let trades: Vec<TradeMsg> = ws_msg
         .data
         .into_iter()
@@ -116,7 +116,7 @@ pub(crate) fn parse_funding_rate(
 }
 
 pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<SwapOrderbookMsg>>(&msg)?;
+    let ws_msg = serde_json::from_str::<WebsocketMsg<SwapOrderbookMsg>>(msg)?;
     let snapshot = ws_msg.action.unwrap() == "partial";
     let mut orderbooks = Vec::<OrderBookMsg>::new();
 
