@@ -156,11 +156,11 @@ pub(crate) fn parse_l2(
                 symbol_price_map.insert(x.id, x.price.unwrap());
             }
         } else if !price_map.contains_key(&symbol) {
-            panic!("{}", msg);
-            // return Ok(Vec::new());
+            // panic!("{}", msg);
+            return Ok(Vec::new());
         }
 
-        let symbol_price_map = price_map.get_mut(&symbol).unwrap();
+        let symbol_price_map = price_map.get(&symbol).unwrap();
 
         let parse_order = |raw_order: &RawOrder| -> Order {
             let price = if let Some(p) = raw_order.price {
@@ -191,12 +191,14 @@ pub(crate) fn parse_l2(
                 .data
                 .iter()
                 .filter(|x| x.side == "Sell")
+                .filter(|x| symbol_price_map.contains_key(&x.id))
                 .map(|x| parse_order(x))
                 .collect(),
             bids: ws_msg
                 .data
                 .iter()
                 .filter(|x| x.side == "Buy")
+                .filter(|x| symbol_price_map.contains_key(&x.id))
                 .map(|x| parse_order(x))
                 .collect(),
             snapshot,
@@ -204,6 +206,7 @@ pub(crate) fn parse_l2(
         };
 
         if ws_msg.action == "delete" {
+            let symbol_price_map = price_map.get_mut(&symbol).unwrap();
             for raw_order in ws_msg.data.iter() {
                 symbol_price_map.remove(&raw_order.id);
             }
