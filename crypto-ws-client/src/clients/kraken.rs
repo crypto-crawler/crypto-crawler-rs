@@ -91,10 +91,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
                 }"#;
                 MiscMessage::WebSocket(Message::Text(ping.to_string()))
             }
-            "pong" => {
-                debug!("Received {} from {}", msg, EXCHANGE_NAME);
-                MiscMessage::Pong
-            }
+            "pong" => MiscMessage::Pong,
             "subscriptionStatus" => {
                 let status = obj.get("status").unwrap().as_str().unwrap();
                 match status {
