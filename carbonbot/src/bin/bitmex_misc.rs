@@ -15,6 +15,8 @@ use redis::{self, Commands};
 use serde_json::Value;
 
 fn main() {
+    env_logger::init();
+
     let data_dir = if std::env::var("DATA_DIR").is_err() {
         info!("The DATA_DIR environment variable does not exist");
         None

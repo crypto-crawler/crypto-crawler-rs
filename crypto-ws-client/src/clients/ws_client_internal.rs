@@ -152,6 +152,12 @@ impl<'a> WSClientInternal<'a> {
             MiscMessage::Misc => false,
             MiscMessage::Pong => {
                 self.num_unanswered_ping.store(0, Ordering::Release);
+                debug!(
+                    "Received {} from {}, reset num_unanswered_ping to {}",
+                    txt,
+                    self.exchange,
+                    self.num_unanswered_ping.load(Ordering::Acquire)
+                );
                 false
             }
             MiscMessage::Reconnect => {
@@ -242,8 +248,8 @@ impl<'a> WSClientInternal<'a> {
                         }
                         Message::Pong(resp) => {
                             let tmp = std::str::from_utf8(&resp);
-                            info!("Received a pong frame: {}", tmp.unwrap());
                             self.num_unanswered_ping.store(0, Ordering::Release);
+                            debug!("Received a pong frame: {} from {}, reset num_unanswered_ping to {}", tmp.unwrap(), self.exchange, self.num_unanswered_ping.load(Ordering::Acquire));
                             false
                         }
                         Message::Close(resp) => {
@@ -269,8 +275,11 @@ impl<'a> WSClientInternal<'a> {
                         }
                         Error::Io(io_err) => {
                             if io_err.kind() == std::io::ErrorKind::WouldBlock {
-                                info!("read_message() timeout");
                                 num_read_timeout += 1;
+                                debug!(
+                                    "read_message() timeout, increased num_read_timeout to {}",
+                                    num_read_timeout
+                                );
                             } else if io_err.kind() == std::io::ErrorKind::Interrupted {
                                 // ignore SIGHUP, which will be handled by reopen
                                 info!("Ignoring SIGHUP");
@@ -312,14 +321,14 @@ impl<'a> WSClientInternal<'a> {
                 let num_unanswered_ping = self.num_unanswered_ping.load(Ordering::Acquire);
                 if num_unanswered_ping > 5 {
                     error!(
-                        "num_unanswered_ping: {}, duration: {} seconds",
+                        "Exiting due to num_unanswered_ping: {}, duration: {} seconds",
                         num_unanswered_ping,
                         start_timstamp.elapsed().as_secs()
                     );
                     std::process::exit(0); // fail fast, pm2 will restart
                 }
                 if last_ping_timestamp.elapsed() >= Duration::from_secs(interval_and_msg.0 / 2) {
-                    info!("Sending ping: {}", interval_and_msg.1);
+                    debug!("Sending ping: {}", interval_and_msg.1);
                     // send ping
                     let ping_msg = if interval_and_msg.1.is_empty() {
                         Message::Ping(Vec::new())
@@ -329,13 +338,11 @@ impl<'a> WSClientInternal<'a> {
                     last_ping_timestamp = Instant::now();
                     if let Err(err) = self.ws_stream.lock().unwrap().write_message(ping_msg) {
                         error!("{}", err);
-                    } else {
-                        self.num_unanswered_ping.fetch_add(1, Ordering::SeqCst);
                     }
                 }
             } else if num_read_timeout > 5 {
                 error!(
-                    "num_read_timeout: {}, duration: {} seconds",
+                    "Exiting due to num_read_timeout: {}, duration: {} seconds",
                     num_read_timeout,
                     start_timstamp.elapsed().as_secs()
                 );

@@ -115,7 +115,6 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
                 MiscMessage::Misc
             } else if msg == "3" {
                 // socket.io pong
-                debug!("Received pong from {}", SPOT_WEBSOCKET_URL);
                 MiscMessage::Pong
             } else {
                 MiscMessage::Misc
@@ -128,10 +127,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
         if obj.contains_key("channel") && obj.contains_key("data") && obj.contains_key("ts") {
             let channel = obj.get("channel").unwrap().as_str().unwrap();
             match channel {
-                "pong" => {
-                    debug!("Received pong {} from {}", msg, EXCHANGE_NAME);
-                    MiscMessage::Pong
-                }
+                "pong" => MiscMessage::Pong,
                 "rs.error" => {
                     error!("Received {} from {}", msg, EXCHANGE_NAME);
                     panic!("Received {} from {}", msg, EXCHANGE_NAME);

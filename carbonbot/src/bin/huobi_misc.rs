@@ -18,6 +18,8 @@ use redis::{self, Commands};
 use serde_json::Value;
 
 fn main() {
+    env_logger::init();
+
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
         println!("Usage: carbonbot <market_type>");
