@@ -28,7 +28,7 @@ struct Response {
 
 // see <https://mxcdevelop.github.io/APIDoc/open.api.v2.en.html#all-symbols>
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
-    let txt = mxc_http_get("https://www.mxc.co/open/api/v2/market/symbols")?;
+    let txt = mxc_http_get("https://www.mexc.com/open/api/v2/market/symbols")?;
     let resp = serde_json::from_str::<Response>(&txt)?;
     Ok(resp.data)
 }
