@@ -32,6 +32,14 @@ fn fetch_future_markets_raw(settle: &str) -> Result<Vec<FutureMarket>> {
         .collect::<Vec<FutureMarket>>())
 }
 
+pub(super) fn fetch_inverse_future_symbols() -> Result<Vec<String>> {
+    let symbols = fetch_future_markets_raw("btc")?
+        .into_iter()
+        .map(|m| m.name)
+        .collect::<Vec<String>>();
+    Ok(symbols)
+}
+
 pub(super) fn fetch_linear_future_symbols() -> Result<Vec<String>> {
     let symbols = fetch_future_markets_raw("usdt")?
         .into_iter()
