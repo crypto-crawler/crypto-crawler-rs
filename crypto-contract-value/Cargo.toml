@@ -1,6 +1,6 @@
 [package]
 name = "crypto-contract-value"
-version = "0.9.3"
+version = "1.0.0"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "Get contract value."
