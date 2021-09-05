@@ -82,22 +82,21 @@ fn fetch_future_markets_internal() -> Result<Vec<Market>> {
                     MarketType::InverseFuture
                 },
                 symbol: m.symbol.clone(),
-                pair: format!("{}/{}", m.baseAsset, m.quoteAsset),
-                base: m.baseAsset.clone(),
-                quote: m.quoteAsset.clone(),
-                settle: m.baseAsset.clone(),
                 base_id: m.baseAsset.clone(),
                 quote_id: m.quoteAsset.clone(),
+                base: m.baseAsset.clone(),
+                quote: m.quoteAsset.clone(),
                 active: m.contractStatus == "TRADING",
                 margin: true,
                 // see https://www.binance.com/en/fee/futureFee
                 fees: Fees {
                     maker: 0.00015,
                     taker: 0.0004,
+                    percentage: true,
                 },
                 precision: Precision {
                     price: m.pricePrecision,
-                    base: m.quantityPrecision,
+                    base: Some(m.quantityPrecision),
                     quote: None,
                 },
                 min_quantity: MinQuantity {

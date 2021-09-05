@@ -7,18 +7,23 @@ use serde_json::{Map, Value};
 pub struct Fees {
     pub maker: f64,
     pub taker: f64,
+    pub percentage: bool,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Precision {
     pub price: i64,
-    pub base: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub base: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub quote: Option<i64>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct MinQuantity {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub base: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub quote: Option<f64>,
 }
 
@@ -29,20 +34,16 @@ pub struct Market {
     pub exchange: String,
     /// Market type
     pub market_type: MarketType,
-    /// exchange-specific trading symbol, used by RESTful API
+    /// exchange-specific trading symbol, recognized by RESTful API, equivalent to ccxt's Market.id.
     pub symbol: String,
-    /// unified pair of trading currencies, e.g., BTC_USDT
-    pub pair: String,
-    /// unified base currency, e.g., BTC
-    pub base: String,
-    /// unified quote currency, e.g., USDT
-    pub quote: String,
-    // settled currency
-    pub settle: String,
     /// exchange-specific base currency
     pub base_id: String,
     /// exchange-specific quote currency
     pub quote_id: String,
+    /// unified uppercase string of base fiat or crypto currency
+    pub base: String,
+    /// unified uppercase string of quote fiat or crypto currency
+    pub quote: String,
     /// market status
     pub active: bool,
     /// Margin enabled.
@@ -51,7 +52,7 @@ pub struct Market {
     /// * Only a few exchanges have spot market with margin enabled.
     pub margin: bool,
     pub fees: Fees,
-    /// number of decimal digits "after the dot"
+    /// number of decimal digits after the dot
     pub precision: Precision,
     /// minimum quantity when placing orders
     pub min_quantity: MinQuantity,

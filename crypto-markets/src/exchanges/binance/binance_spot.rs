@@ -52,10 +52,8 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 exchange: "binance".to_string(),
                 market_type: MarketType::Spot,
                 symbol: m.symbol.clone(),
-                pair: format!("{}/{}", m.baseAsset, m.quoteAsset),
                 base: m.baseAsset.clone(),
                 quote: m.quoteAsset.clone(),
-                settle: m.quoteAsset.clone(),
                 base_id: m.baseAsset.clone(),
                 quote_id: m.quoteAsset.clone(),
                 active: m.status == "TRADING" && m.isSpotTradingAllowed,
@@ -64,10 +62,13 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 fees: Fees {
                     maker: 0.001,
                     taker: 0.001,
+                    percentage: true,
                 },
                 precision: Precision {
                     price: calc_precision(parse_filter(&m.filters, "PRICE_FILTER", "tickSize")),
-                    base: calc_precision(parse_filter(&m.filters, "LOT_SIZE", "stepSize")),
+                    base: Some(calc_precision(parse_filter(
+                        &m.filters, "LOT_SIZE", "stepSize",
+                    ))),
                     quote: None,
                 },
                 min_quantity: MinQuantity {

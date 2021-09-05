@@ -72,10 +72,8 @@ pub(super) fn fetch_option_markets() -> Result<Vec<Market>> {
                 exchange: "binance".to_string(),
                 market_type: MarketType::EuropeanOption,
                 symbol: m.symbol.clone(),
-                pair: format!("{}/{}", base_currency, m.quoteAsset),
                 base: base_currency.to_string(),
                 quote: m.quoteAsset.clone(),
-                settle: m.quoteAsset.clone(),
                 base_id: base_currency.to_string(),
                 quote_id: m.quoteAsset.clone(),
                 active: true,
@@ -84,10 +82,11 @@ pub(super) fn fetch_option_markets() -> Result<Vec<Market>> {
                 fees: Fees {
                     maker: m.makerFeeRate,
                     taker: m.takerFeeRate,
+                    percentage: true,
                 },
                 precision: Precision {
                     price: m.priceScale,
-                    base: m.quantityScale,
+                    base: Some(m.quantityScale),
                     quote: None,
                 },
                 min_quantity: MinQuantity {

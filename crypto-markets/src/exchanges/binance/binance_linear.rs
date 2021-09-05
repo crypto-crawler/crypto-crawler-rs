@@ -80,10 +80,8 @@ fn fetch_linear_markets() -> Result<Vec<Market>> {
                     MarketType::LinearFuture
                 },
                 symbol: m.symbol.clone(),
-                pair: format!("{}/{}", m.baseAsset, m.quoteAsset),
                 base: m.baseAsset.clone(),
                 quote: m.quoteAsset.clone(),
-                settle: m.quoteAsset.clone(),
                 base_id: m.baseAsset.clone(),
                 quote_id: m.quoteAsset.clone(),
                 active: m.status == "TRADING",
@@ -92,10 +90,11 @@ fn fetch_linear_markets() -> Result<Vec<Market>> {
                 fees: Fees {
                     maker: 0.0002,
                     taker: 0.0004,
+                    percentage: true,
                 },
                 precision: Precision {
                     price: m.pricePrecision,
-                    base: m.quantityPrecision,
+                    base: Some(m.quantityPrecision),
                     quote: None,
                 },
                 min_quantity: MinQuantity {
