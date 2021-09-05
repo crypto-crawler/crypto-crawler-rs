@@ -39,6 +39,17 @@ fn fetch_linear_swap_symbols() {
 }
 
 #[test]
+fn fetch_inverse_future_symbols() {
+    let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
+    assert!(!symbols.is_empty());
+    for symbol in symbols.iter() {
+        let date = &symbol[(symbol.len() - 8)..];
+        assert!(date.parse::<i64>().is_ok());
+        assert!(symbol.contains("_USD_"));
+    }
+}
+
+#[test]
 fn fetch_linear_future_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::LinearFuture).unwrap();
     assert!(!symbols.is_empty());
