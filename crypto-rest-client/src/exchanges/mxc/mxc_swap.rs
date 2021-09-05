@@ -2,7 +2,7 @@ use super::super::utils::http_get;
 use crate::error::Result;
 use std::collections::HashMap;
 
-const BASE_URL: &str = "https://contract.mxc.com";
+const BASE_URL: &str = "https://contract.mexc.com";
 
 /// MXC Swap market.
 ///
