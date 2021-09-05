@@ -73,9 +73,6 @@ fn verify_all_symbols() {
             normalize_currency(&market.quote_currency, EXCHANGE_NAME)
         );
 
-        // TODO: why option quote_currency is not USD?
-        if market.kind != "option" {
-            assert_eq!(pair.as_str(), pair_expected);
-        }
+        assert_eq!(pair.as_str(), pair_expected);
     }
 }
