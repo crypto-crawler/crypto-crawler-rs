@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 crypto-crawler = "1.8.1"
-crypto-msg-parser = "1.3.1"
+crypto-msg-parser = "1.3.2"
 crypto-ws-client = "2.5.23"
 dashmap = "4"
 redis = "0.20"
