@@ -214,7 +214,7 @@ fn fetch_quanto_multipliers(url: &str) -> BTreeMap<String, f64> {
 
 pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<f64> {
     match market_type {
-        MarketType::InverseSwap => Some(1.0),
+        MarketType::InverseSwap | MarketType::InverseFuture => Some(1.0),
         MarketType::LinearSwap | MarketType::LinearFuture => {
             Some(CONTRACT_VALUES[&market_type][pair])
         }
