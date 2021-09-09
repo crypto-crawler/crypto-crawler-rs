@@ -3,6 +3,7 @@ use serde::ser::{SerializeSeq, Serializer};
 use serde::{Deserialize, Serialize};
 
 /// An order in the orderbook asks or bids array.
+#[derive(Clone)]
 pub struct Order {
     /// price
     pub price: f64,
