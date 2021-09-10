@@ -126,9 +126,9 @@ pub struct OrderBookMsg {
     /// Unix timestamp, in milliseconds
     pub timestamp: i64,
 
-    /// sorted from smallest to largest
+    /// sorted in ascending order by price if snapshot=true, otherwise not sorted
     pub asks: Vec<Order>,
-    /// sorted from largest to smallest
+    /// sorted in descending order by price if snapshot=true, otherwise not sorted
     pub bids: Vec<Order>,
     // true means snapshot, false means updates
     pub snapshot: bool,

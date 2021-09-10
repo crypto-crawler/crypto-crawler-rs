@@ -103,7 +103,7 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
                 let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
                 let timestamp = raw_orderbook[3].as_str().unwrap().parse::<i64>().unwrap() * 1000;
 
-                let mut asks = serde_json::from_value::<Vec<[Value; 2]>>(
+                let asks = serde_json::from_value::<Vec<[Value; 2]>>(
                     raw_orderbook[4]
                         .as_object()
                         .unwrap()
@@ -115,8 +115,18 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
                 .iter()
                 .map(|x| parse_order(x))
                 .collect::<Vec<Order>>();
-                // sort by price in ascending order
-                asks.sort_by(|a, b| a.price.partial_cmp(&b.price).unwrap());
+                let bids = serde_json::from_value::<Vec<[Value; 2]>>(
+                    raw_orderbook[5]
+                        .as_object()
+                        .unwrap()
+                        .get("bids")
+                        .unwrap()
+                        .clone(),
+                )
+                .unwrap()
+                .iter()
+                .map(|x| parse_order(x))
+                .collect::<Vec<Order>>();
 
                 OrderBookMsg {
                     exchange: EXCHANGE_NAME.to_string(),
@@ -126,18 +136,7 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
                     msg_type: MessageType::L2Event,
                     timestamp,
                     asks,
-                    bids: serde_json::from_value::<Vec<[Value; 2]>>(
-                        raw_orderbook[5]
-                            .as_object()
-                            .unwrap()
-                            .get("bids")
-                            .unwrap()
-                            .clone(),
-                    )
-                    .unwrap()
-                    .iter()
-                    .map(|x| parse_order(x))
-                    .collect(),
+                    bids,
                     snapshot,
                     raw: serde_json::from_str(
                         serde_json::to_string(raw_orderbook).unwrap().as_str(),

@@ -73,14 +73,16 @@ pub fn parse_l2(
     match ret {
         Ok(mut orderbooks) => {
             for orderbook in orderbooks.iter_mut() {
-                // sorted in ascending order by price
-                orderbook
-                    .asks
-                    .sort_by(|a, b| a.price.partial_cmp(&b.price).unwrap());
-                // sorted in descending order by price
-                orderbook
-                    .bids
-                    .sort_by(|a, b| b.price.partial_cmp(&a.price).unwrap());
+                if orderbook.snapshot {
+                    // sorted in ascending order by price
+                    orderbook
+                        .asks
+                        .sort_by(|a, b| a.price.partial_cmp(&b.price).unwrap());
+                    // sorted in descending order by price
+                    orderbook
+                        .bids
+                        .sort_by(|a, b| b.price.partial_cmp(&a.price).unwrap());
+                }
             }
             Ok(orderbooks)
         }
