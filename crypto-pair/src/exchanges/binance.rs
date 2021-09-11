@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{BTreeSet, HashSet};
 
 use super::utils::{http_get, normalize_pair_with_quotes};
 use lazy_static::lazy_static;
@@ -8,7 +8,47 @@ use serde_json::Value;
 use std::collections::HashMap;
 
 lazy_static! {
-    static ref SPOT_QUOTES: HashSet<String> = fetch_spot_quotes();
+    static ref SPOT_QUOTES: HashSet<String> = {
+        // offline data, in case the network is down
+        let mut set: HashSet<String> = vec![
+            "AUD",
+            "BIDR",
+            "BKRW",
+            "BNB",
+            "BRL",
+            "BTC",
+            "BUSD",
+            "BVND",
+            "DAI",
+            "ETH",
+            "EUR",
+            "GBP",
+            "GYEN",
+            "IDRT",
+            "NGN",
+            "PAX",
+            "RUB",
+            "TRX",
+            "TRY",
+            "TUSD",
+            "UAH",
+            "USDC",
+            "USDP",
+            "USDS",
+            "USDT",
+            "VAI",
+            "XRP",
+            "ZAR",
+        ]
+        .into_iter()
+        .map(|x| x.to_string())
+        .collect();
+
+        let from_online = fetch_spot_quotes();
+        set.extend(from_online.into_iter());
+
+        set
+    };
 }
 
 #[derive(Serialize, Deserialize)]
@@ -25,13 +65,16 @@ struct SpotMarket {
 }
 
 // see <https://binance-docs.github.io/apidocs/spot/en/#exchange-information>
-fn fetch_spot_quotes() -> HashSet<String> {
-    let txt = http_get("https://api.binance.com/api/v3/exchangeInfo").unwrap();
-    let resp = serde_json::from_str::<BinanceResponse>(&txt).unwrap();
-    resp.symbols
-        .into_iter()
-        .map(|m| m.quoteAsset)
-        .collect::<HashSet<String>>()
+fn fetch_spot_quotes() -> BTreeSet<String> {
+    if let Ok(txt) = http_get("https://api.binance.com/api/v3/exchangeInfo") {
+        let resp = serde_json::from_str::<BinanceResponse>(&txt).unwrap();
+        resp.symbols
+            .into_iter()
+            .map(|m| m.quoteAsset)
+            .collect::<BTreeSet<String>>()
+    } else {
+        BTreeSet::new()
+    }
 }
 
 pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
@@ -58,5 +101,18 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
     } else {
         let quotes = &(*SPOT_QUOTES);
         normalize_pair_with_quotes(symbol, quotes)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::fetch_spot_quotes;
+
+    #[test]
+    fn spot_quotes() {
+        let map = fetch_spot_quotes();
+        for quote in map {
+            println!("\"{}\",", quote);
+        }
     }
 }

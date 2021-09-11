@@ -1,22 +1,86 @@
 use super::utils::http_get;
 use lazy_static::lazy_static;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 lazy_static! {
-    static ref BITFINEX_MAPPING: HashMap<String, String> = fetch_currency_mapping();
+    static ref BITFINEX_MAPPING: HashMap<String, String> = {
+        // offline data, in case the network is down
+        let mut set: HashMap<String, String> = vec![
+            ("AAA", "TESTAAA"),
+            ("ALG", "ALGO"),
+            ("AMP", "AMPL"),
+            ("AMPF0", "AMPLF0"),
+            ("ATO", "ATOM"),
+            ("B21X", "B21"),
+            ("BBB", "TESTBBB"),
+            ("BCHABC", "XEC"),
+            ("BTCF0", "BTC"),
+            ("CNHT", "CNHt"),
+            ("DAT", "DATA"),
+            ("DOG", "MDOGE"),
+            ("DSH", "DASH"),
+            ("EDO", "PNT"),
+            ("ETH2P", "ETH2Pending"),
+            ("ETH2R", "ETH2Rewards"),
+            ("ETH2X", "ETH2"),
+            ("EUS", "EURS"),
+            ("EUT", "EURt"),
+            ("GNT", "GLM"),
+            ("IDX", "ID"),
+            ("IOT", "IOTA"),
+            ("LBT", "LBTC"),
+            ("LES", "LEO-EOS"),
+            ("LET", "LEO-ERC20"),
+            ("LNX", "LN-BTC"),
+            ("MNA", "MANA"),
+            ("OMN", "OMNI"),
+            ("PAS", "PASS"),
+            ("PBTCEOS", "pBTC-EOS"),
+            ("PBTCETH", "PBTC-ETH"),
+            ("PETHEOS", "pETH-EOS"),
+            ("PLTCEOS", "PLTC-EOS"),
+            ("PLTCETH", "PLTC-ETH"),
+            ("QSH", "QASH"),
+            ("QTM", "QTUM"),
+            ("RBT", "RBTC"),
+            ("REP", "REP2"),
+            ("SNG", "SNGLS"),
+            ("STJ", "STORJ"),
+            ("TSD", "TUSD"),
+            ("UDC", "USDC"),
+            ("UST", "USDt"),
+            ("USTF0", "USDt"),
+            ("VSY", "VSYS"),
+            ("WBT", "WBTC"),
+            ("XAUT", "XAUt"),
+            ("XCH", "XCHF"),
+            ("YGG", "MCS"),
+        ]
+        .into_iter()
+        .map(|x| (x.0.to_string(), x.1.to_string()))
+        .collect();
+
+        let from_online = fetch_currency_mapping();
+        set.extend(from_online.into_iter());
+
+        set
+    };
 }
 
 // see <https://api-pub.bitfinex.com/v2/conf/pub:map:currency:sym>
-fn fetch_currency_mapping() -> HashMap<String, String> {
-    let txt = http_get("https://api-pub.bitfinex.com/v2/conf/pub:map:currency:sym").unwrap();
-    let arr = serde_json::from_str::<Vec<Vec<Vec<String>>>>(&txt).unwrap();
-    assert!(arr.len() == 1);
+fn fetch_currency_mapping() -> BTreeMap<String, String> {
+    let mut mapping = BTreeMap::<String, String>::new();
 
-    let mut mapping = HashMap::<String, String>::new();
-    for v in arr[0].iter() {
-        assert!(v.len() == 2);
-        mapping.insert(v[0].clone(), v[1].clone());
+    if let Ok(txt) = http_get("https://api-pub.bitfinex.com/v2/conf/pub:map:currency:sym") {
+        let arr = serde_json::from_str::<Vec<Vec<Vec<String>>>>(&txt).unwrap();
+        assert!(arr.len() == 1);
+
+        for v in arr[0].iter() {
+            assert!(v.len() == 2);
+            mapping.insert(v[0].clone(), v[1].clone());
+        }
     }
+
     mapping
 }
 
@@ -56,4 +120,17 @@ pub(crate) fn normalize_pair(mut symbol: &str) -> Option<String> {
         normalize_currency(&base),
         normalize_currency(&quote)
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::fetch_currency_mapping;
+
+    #[test]
+    fn test_currency_mapping() {
+        let map = fetch_currency_mapping();
+        for (name, new_name) in map {
+            println!("(\"{}\", \"{}\"),", name, new_name);
+        }
+    }
 }

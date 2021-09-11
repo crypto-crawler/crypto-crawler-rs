@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{BTreeSet, HashSet};
 
 use super::utils::{http_get, normalize_pair_with_quotes};
 use lazy_static::lazy_static;
@@ -8,7 +8,26 @@ use serde_json::Value;
 use std::collections::HashMap;
 
 lazy_static! {
-    static ref SPOT_QUOTES: HashSet<String> = fetch_spot_quotes();
+    static ref SPOT_QUOTES: HashSet<String> = {
+        // offline data, in case the network is down
+        let mut set: HashSet<String> = vec![
+            "btc",
+            "eth",
+            "ht",
+            "husd",
+            "trx",
+            "usdc",
+            "usdt",
+        ]
+        .into_iter()
+        .map(|x| x.to_string())
+        .collect();
+
+        let from_online = fetch_spot_quotes();
+        set.extend(from_online.into_iter());
+
+        set
+    };
 }
 
 #[derive(Serialize, Deserialize)]
@@ -28,13 +47,16 @@ struct Response<T: Sized> {
 }
 
 // see <https://huobiapi.github.io/docs/spot/v1/en/#get-all-supported-trading-symbol>
-fn fetch_spot_quotes() -> HashSet<String> {
-    let txt = http_get("https://api.huobi.pro/v1/common/symbols").unwrap();
-    let resp = serde_json::from_str::<Response<SpotMarket>>(&txt).unwrap();
-    resp.data
-        .into_iter()
-        .map(|m| m.quote_currency)
-        .collect::<HashSet<String>>()
+fn fetch_spot_quotes() -> BTreeSet<String> {
+    if let Ok(txt) = http_get("https://api.huobi.pro/v1/common/symbols") {
+        let resp = serde_json::from_str::<Response<SpotMarket>>(&txt).unwrap();
+        resp.data
+            .into_iter()
+            .map(|m| m.quote_currency)
+            .collect::<BTreeSet<String>>()
+    } else {
+        BTreeSet::new()
+    }
 }
 
 pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
@@ -60,5 +82,18 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
         // spot
         let quotes = &(*SPOT_QUOTES);
         normalize_pair_with_quotes(symbol, quotes)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::fetch_spot_quotes;
+
+    #[test]
+    fn spot_quotes() {
+        let map = fetch_spot_quotes();
+        for quote in map {
+            println!("\"{}\",", quote);
+        }
     }
 }
