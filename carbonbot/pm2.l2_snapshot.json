@@ -31,6 +31,24 @@
             "exec_interpreter": "none",
             "exec_mode": "fork_mode",
             "instances": 1
+        },
+        {
+            "name": "logrotate",
+            "script": "/usr/local/bin/logrotate.sh",
+            "args": "/usr/local/etc/logrotate.l2_snapshot.conf",
+            "exec_interpreter": "none",
+            "exec_mode": "fork_mode",
+            "cron_restart": "*/15 * * * *",
+            "autorestart": false
+        },
+        {
+            "name": "upload",
+            "script": "/usr/local/bin/upload.sh",
+            "args": "l2_snapshot",
+            "exec_interpreter": "bash",
+            "exec_mode": "fork_mode",
+            "instances": 1,
+            "restart_delay": 5000
         }
     ]
 }

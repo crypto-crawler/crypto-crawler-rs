@@ -52,7 +52,7 @@ apps.push({
 
 apps.push({
     name: "logrotate",
-    script: "logrotate",
+    script: "/usr/local/bin/logrotate.sh",
     args: "/usr/local/etc/logrotate.misc.conf",
     exec_interpreter: "none",
     exec_mode: "fork_mode",
@@ -62,7 +62,7 @@ apps.push({
 
 apps.push({
     name: "upload",
-    script: "upload.sh",
+    script: "/usr/local/bin/upload.sh",
     args: "misc",
     exec_interpreter: "bash",
     exec_mode: "fork_mode",
