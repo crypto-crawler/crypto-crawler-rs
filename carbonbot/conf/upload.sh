@@ -11,6 +11,6 @@ while :
 do
   sleep 60
   # Find .json files and compress them
-  find "$DATA_DIR/$market_type" -name "*.json" -type f -print0 | xargs -0 -r pigz
+  find "$DATA_DIR/$market_type" -name "*.json" -type f -print0 | xargs -0 -r pigz -f
   rclone move "$DATA_DIR/$market_type" "$AWS_S3_DIR/$market_type" --include '*.json.gz' --no-traverse
 done
