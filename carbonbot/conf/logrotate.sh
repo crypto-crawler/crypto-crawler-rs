@@ -5,7 +5,8 @@
 # This script is a thin wrapper around logrotate, to make it skip the first
 # run if timestamp is not at "*/15 * * * *"
 
-minute=$(date +%M)
+# https://unix.stackexchange.com/a/79372/40515
+minute=$(date +%-M)
 
 if [ ! -f /tmp/logrotate.first.done ] ; then
     if [ $(( minute % 15 )) != 0 ]; then
