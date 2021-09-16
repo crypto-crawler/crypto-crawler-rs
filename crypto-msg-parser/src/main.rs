@@ -2,7 +2,6 @@ use crypto_msg_parser::{parse_l2, parse_trade, MarketType, MessageType};
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
 use flate2::Compression;
-use log::*;
 use serde_json::Value;
 use std::io::prelude::*;
 use std::path::Path;
@@ -73,8 +72,6 @@ fn parse_lines(buf_reader: &mut dyn std::io::BufRead, writer: &mut dyn std::io::
 }
 
 fn main() {
-    env_logger::init();
-
     let args: Vec<String> = env::args().collect();
     if args.len() != 3 {
         println!("Usage: crypto-msg-parser <input_file> <output_file>");
@@ -110,6 +107,7 @@ fn main() {
     } else {
         Box::new(std::io::BufWriter::new(f_out))
     };
+
     let error_lines = parse_lines(buf_reader.as_mut(), writer.as_mut());
-    warn!("Dropped {} malformed lines", error_lines);
+    println!("Parse succeeded, but dropped {} malformed lines", error_lines);
 }
