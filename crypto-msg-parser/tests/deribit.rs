@@ -59,7 +59,7 @@ mod trade {
             crate::utils::check_trade_fields(
                 "deribit",
                 MarketType::EuropeanOption,
-                "BTC/USD".to_string(),
+                "BTC/BTC".to_string(),
                 trade,
             );
 
@@ -129,25 +129,25 @@ mod l2_orderbook {
             orderbook,
         );
 
-        assert_eq!(orderbook.bids[1].price, 37392.5);
-        assert_eq!(orderbook.bids[1].quantity_base, 3000.0 / 37392.5);
-        assert_eq!(orderbook.bids[1].quantity_quote, 3000.0);
-        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 3000.0);
+        assert_eq!(orderbook.bids[0].price, 37392.5);
+        assert_eq!(orderbook.bids[0].quantity_base, 3000.0 / 37392.5);
+        assert_eq!(orderbook.bids[0].quantity_quote, 3000.0);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 3000.0);
 
-        assert_eq!(orderbook.bids[0].price, 37399.0);
-        assert_eq!(orderbook.bids[0].quantity_base, 6530.0 / 37399.0);
-        assert_eq!(orderbook.bids[0].quantity_quote, 6530.0);
-        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 6530.0);
+        assert_eq!(orderbook.bids[1].price, 37399.0);
+        assert_eq!(orderbook.bids[1].quantity_base, 6530.0 / 37399.0);
+        assert_eq!(orderbook.bids[1].quantity_quote, 6530.0);
+        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 6530.0);
 
-        assert_eq!(orderbook.asks[1].price, 37850.0);
-        assert_eq!(orderbook.asks[1].quantity_base, 8850.0 / 37850.0);
-        assert_eq!(orderbook.asks[1].quantity_quote, 8850.0);
-        assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 8850.0);
+        assert_eq!(orderbook.asks[0].price, 37850.0);
+        assert_eq!(orderbook.asks[0].quantity_base, 8850.0 / 37850.0);
+        assert_eq!(orderbook.asks[0].quantity_quote, 8850.0);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 8850.0);
 
-        assert_eq!(orderbook.asks[0].price, 37848.5);
-        assert_eq!(orderbook.asks[0].quantity_base, 0.0 / 37848.5);
-        assert_eq!(orderbook.asks[0].quantity_quote, 0.0);
-        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 0.0);
+        assert_eq!(orderbook.asks[1].price, 37848.5);
+        assert_eq!(orderbook.asks[1].quantity_base, 0.0 / 37848.5);
+        assert_eq!(orderbook.asks[1].quantity_quote, 0.0);
+        assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 0.0);
     }
 
     #[test]
@@ -203,25 +203,25 @@ mod l2_orderbook {
             orderbook,
         );
 
-        assert_eq!(orderbook.bids[1].price, 36779.0);
-        assert_eq!(orderbook.bids[1].quantity_base, 0.0 / 36779.0);
-        assert_eq!(orderbook.bids[1].quantity_quote, 0.0);
-        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 0.0);
+        assert_eq!(orderbook.bids[0].price, 36779.0);
+        assert_eq!(orderbook.bids[0].quantity_base, 0.0 / 36779.0);
+        assert_eq!(orderbook.bids[0].quantity_quote, 0.0);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 0.0);
 
-        assert_eq!(orderbook.bids[0].price, 36809.5);
-        assert_eq!(orderbook.bids[0].quantity_base, 254870.0 / 36809.5);
-        assert_eq!(orderbook.bids[0].quantity_quote, 254870.0);
-        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 254870.0);
+        assert_eq!(orderbook.bids[1].price, 36809.5);
+        assert_eq!(orderbook.bids[1].quantity_base, 254870.0 / 36809.5);
+        assert_eq!(orderbook.bids[1].quantity_quote, 254870.0);
+        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 254870.0);
 
-        assert_eq!(orderbook.asks[1].price, 37462.5);
-        assert_eq!(orderbook.asks[1].quantity_base, 0.0 / 37462.5);
-        assert_eq!(orderbook.asks[1].quantity_quote, 0.0);
-        assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 0.0);
+        assert_eq!(orderbook.asks[0].price, 37462.5);
+        assert_eq!(orderbook.asks[0].quantity_base, 0.0 / 37462.5);
+        assert_eq!(orderbook.asks[0].quantity_quote, 0.0);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 0.0);
 
-        assert_eq!(orderbook.asks[0].price, 37394.0);
-        assert_eq!(orderbook.asks[0].quantity_base, 42670.0 / 37394.0);
-        assert_eq!(orderbook.asks[0].quantity_quote, 42670.0);
-        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 42670.0);
+        assert_eq!(orderbook.asks[1].price, 37394.0);
+        assert_eq!(orderbook.asks[1].quantity_base, 42670.0 / 37394.0);
+        assert_eq!(orderbook.asks[1].quantity_quote, 42670.0);
+        assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 42670.0);
     }
 
     #[test]
@@ -236,7 +236,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "deribit",
             MarketType::EuropeanOption,
-            "BTC/USD".to_string(),
+            "BTC/BTC".to_string(),
             orderbook,
         );
 
