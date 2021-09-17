@@ -6,7 +6,7 @@ mod trade {
     use float_cmp::approx_eq;
 
     #[test]
-    fn spot() {
+    fn spot_20210916() {
         let raw_msg = r#"{"method": "trades.update", "params": ["BTC_USDT", [{"id": 643716793, "time": 1616327474.6243241, "price": "56173.28", "amount": "0.0037", "type": "sell"}]], "id": null}"#;
         let trades = &parse_trade("gate", MarketType::Spot, raw_msg).unwrap();
 
@@ -19,6 +19,23 @@ mod trade {
         assert_eq!(trades[0].quantity_quote, 0.0037 * 56173.28);
         assert_eq!(trades[0].quantity_contract, None);
         assert_eq!(trades[0].side, TradeSide::Sell);
+    }
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"time":1631824310,"channel":"spot.trades","event":"update","result":{"id":1638417041,"create_time":1631824310,"create_time_ms":"1631824310261.896","side":"buy","currency_pair":"BTC_USDT","amount":"0.00052","price":"47395.009"}}"#;
+        let trades = &parse_trade("gate", MarketType::Spot, raw_msg).unwrap();
+
+        assert_eq!(trades.len(), 1);
+        let trade = &trades[0];
+
+        crate::utils::check_trade_fields("gate", MarketType::Spot, "BTC/USDT".to_string(), trade);
+
+        assert_eq!(trades[0].price, 47395.009);
+        assert_eq!(trades[0].quantity_base, 0.00052);
+        assert_eq!(trades[0].quantity_quote, 0.00052 * 47395.009);
+        assert_eq!(trades[0].quantity_contract, None);
+        assert_eq!(trades[0].side, TradeSide::Buy);
     }
 
     #[test]
@@ -112,7 +129,7 @@ mod l2_orderbook {
     use float_cmp::approx_eq;
 
     #[test]
-    fn spot_snapshot() {
+    fn spot_snapshot_20200916() {
         let raw_msg = r#"{"method": "depth.update", "params": [true, {"asks": [["37483.21", "0.048"], ["37483.89", "0.0739"], ["37486.86", "0.1639"]], "bids": [["37483.19", "0.01"], ["37480.69", "0.0183"], ["37479.16", "0.0292"]], "id": 3166483561}, "BTC_USDT"], "id": null}"#;
         let orderbook = &parse_l2(
             "gate",
@@ -151,7 +168,50 @@ mod l2_orderbook {
     }
 
     #[test]
-    fn spot_update() {
+    fn spot_snapshot() {
+        let raw_msg = r#"{"time":1631845776,"channel":"spot.order_book","event":"update","result":{"t":1631845775906,"lastUpdateId":4622752959,"s":"BTC_USDT","bids":[["47815.97","0.0608"],["47815.07","0.0367"],["47815.01","0.0001"]],"asks":[["47815.98","0.004"],["47815.99","0.00290642"],["47816","0.001"]]}}"#;
+        let orderbook = &parse_l2(
+            "gate",
+            MarketType::Spot,
+            raw_msg,
+            Some(Utc::now().timestamp_millis()),
+        )
+        .unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 3);
+        assert_eq!(orderbook.bids.len(), 3);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "gate",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.asks[0].price, 47815.98);
+        assert_eq!(orderbook.asks[0].quantity_base, 0.004);
+        assert_eq!(orderbook.asks[0].quantity_quote, 47815.98 * 0.004);
+        assert_eq!(orderbook.asks[0].quantity_contract, None);
+
+        assert_eq!(orderbook.asks[2].price, 47816.0);
+        assert_eq!(orderbook.asks[2].quantity_base, 0.001);
+        assert_eq!(orderbook.asks[2].quantity_quote, 47816.0 * 0.001);
+        assert_eq!(orderbook.asks[2].quantity_contract, None);
+
+        assert_eq!(orderbook.bids[0].price, 47815.97);
+        assert_eq!(orderbook.bids[0].quantity_base, 0.0608);
+        assert_eq!(orderbook.bids[0].quantity_quote, 47815.97 * 0.0608);
+        assert_eq!(orderbook.bids[0].quantity_contract, None);
+
+        assert_eq!(orderbook.bids[2].price, 47815.01);
+        assert_eq!(orderbook.bids[2].quantity_base, 0.0001);
+        assert_eq!(orderbook.bids[2].quantity_quote, 47815.01 * 0.0001);
+        assert_eq!(orderbook.bids[2].quantity_contract, None);
+    }
+
+    #[test]
+    fn spot_update_20210916() {
         let raw_msg = r#"{"method": "depth.update", "params": [false, {"asks": [["37483.89", "0"]], "bids": [["37479.16", "0"], ["37478.79", "0.0554"]]}, "BTC_USDT"], "id": null}"#;
         let orderbook = &parse_l2(
             "gate",
@@ -183,6 +243,49 @@ mod l2_orderbook {
         assert_eq!(orderbook.bids[1].price, 37478.79);
         assert_eq!(orderbook.bids[1].quantity_base, 0.0554);
         assert_eq!(orderbook.bids[1].quantity_quote, 37478.79 * 0.0554);
+    }
+
+    #[test]
+    fn spot_update() {
+        let raw_msg = r#"{"time":1631836142,"channel":"spot.order_book_update","event":"update","result":{"t":1631836142325,"e":"depthUpdate","E":1631836142,"s":"BTC_USDT","U":4622074361,"u":4622074364,"b":[["47737.89","0.002"],["47741.35","0"]],"a":[["47813.04","0.0355"],["47978.86","0"]]}}"#;
+        let orderbook = &parse_l2(
+            "gate",
+            MarketType::Spot,
+            raw_msg,
+            Some(Utc::now().timestamp_millis()),
+        )
+        .unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 2);
+        assert_eq!(orderbook.bids.len(), 2);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "gate",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.asks[0].price, 47813.04);
+        assert_eq!(orderbook.asks[0].quantity_base, 0.0355);
+        assert_eq!(orderbook.asks[0].quantity_quote, 0.0355 * 47813.04);
+        assert_eq!(orderbook.asks[0].quantity_contract, None);
+
+        assert_eq!(orderbook.asks[1].price, 47978.86);
+        assert_eq!(orderbook.asks[1].quantity_base, 0.0);
+        assert_eq!(orderbook.asks[1].quantity_quote, 0.0);
+        assert_eq!(orderbook.asks[1].quantity_contract, None);
+
+        assert_eq!(orderbook.bids[0].price, 47737.89);
+        assert_eq!(orderbook.bids[0].quantity_base, 0.002);
+        assert_eq!(orderbook.bids[0].quantity_quote, 0.002 * 47737.89);
+        assert_eq!(orderbook.bids[0].quantity_contract, None);
+
+        assert_eq!(orderbook.bids[1].price, 47741.35);
+        assert_eq!(orderbook.bids[1].quantity_base, 0.0);
+        assert_eq!(orderbook.bids[1].quantity_quote, 0.0);
+        assert_eq!(orderbook.bids[1].quantity_contract, None);
     }
 
     #[test]

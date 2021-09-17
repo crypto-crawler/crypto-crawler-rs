@@ -109,5 +109,8 @@ fn main() {
     };
 
     let error_lines = parse_lines(buf_reader.as_mut(), writer.as_mut());
-    println!("Parse succeeded, but dropped {} malformed lines", error_lines);
+    println!(
+        "Parse succeeded, but dropped {} malformed lines",
+        error_lines
+    );
 }
