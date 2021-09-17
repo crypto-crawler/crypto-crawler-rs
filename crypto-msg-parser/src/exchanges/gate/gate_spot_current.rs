@@ -1,26 +1,12 @@
 use crypto_market_type::MarketType;
 
+use super::messages::WebsocketMsg;
 use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
-
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
 use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "gate";
-
-// https://www.gateio.pro/docs/apiv4/ws/en/#server-response
-// https://www.gateio.pro/docs/futures/ws/en/#response
-// https://www.gateio.pro/docs/delivery/ws/en/#response
-#[derive(Serialize, Deserialize)]
-struct WebsocketMsg<T: Sized> {
-    time: i64,
-    channel: String,
-    event: String,
-    error: Option<Value>,
-    result: T,
-    #[serde(flatten)]
-    extra: HashMap<String, Value>,
-}
 
 // https://www.gateio.pro/docs/apiv4/ws/en/#server-notification-2
 #[derive(Serialize, Deserialize)]

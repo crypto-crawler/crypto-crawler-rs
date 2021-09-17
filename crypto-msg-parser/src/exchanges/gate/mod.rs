@@ -2,6 +2,7 @@ mod gate_spot;
 mod gate_spot_20210916;
 mod gate_spot_current;
 mod gate_swap;
+mod messages;
 
 use crypto_market_type::MarketType;
 

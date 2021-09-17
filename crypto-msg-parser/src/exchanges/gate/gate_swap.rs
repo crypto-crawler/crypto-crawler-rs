@@ -1,6 +1,7 @@
 use crypto_market_type::MarketType;
 
 use super::super::utils::calc_quantity_and_volume;
+use super::messages::WebsocketMsg;
 
 use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
 
@@ -55,16 +56,6 @@ struct SwapTradeMsg {
     create_time_ms: i64,
     price: String,
     contract: String,
-    #[serde(flatten)]
-    extra: HashMap<String, Value>,
-}
-
-#[derive(Serialize, Deserialize)]
-struct WebsocketMsg<T: Sized> {
-    time: i64,
-    channel: String,
-    event: String,
-    result: T,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
