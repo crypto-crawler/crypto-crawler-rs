@@ -1,6 +1,6 @@
 [package]
 name = "crypto-msg-parser"
-version = "1.4.0"
+version = "1.4.1"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2018"
 description   = "Parse websocket messages from cryptocurreny exchanges"
@@ -13,14 +13,12 @@ chrono = "0.4"
 crypto-contract-value = "1.0.2"
 crypto-market-type = "0.1.6"
 crypto-pair = "2.0.6"
-flate2 = "1"
 lazy_static = "1"
 reqwest = { version = "0.11", features = ["blocking", "gzip"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 strum = "0.20"
 strum_macros = "0.20"
-xz2 = "0.1"
 
 [dev-dependencies]
 float-cmp = "0.8.0"
