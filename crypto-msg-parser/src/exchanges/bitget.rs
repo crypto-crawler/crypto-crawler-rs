@@ -42,7 +42,7 @@ struct WebsocketMsg<T: Sized> {
 
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<SwapTradeMsg>>(msg)?;
-    let trades: Vec<TradeMsg> = ws_msg
+    let mut trades: Vec<TradeMsg> = ws_msg
         .data
         .into_iter()
         .map(|raw_trade| {
@@ -71,11 +71,13 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 },
                 // Use timestamp as ID because bitget doesn't provide trade_id
                 trade_id: raw_trade.timestamp.to_string(),
-                raw: serde_json::to_value(&raw_trade).unwrap(),
+                json: serde_json::to_string(&raw_trade).unwrap(),
             }
         })
         .collect();
-
+    if trades.len() == 1 {
+        trades[0].json = msg.to_string();
+    }
     Ok(trades)
 }
 
@@ -95,7 +97,7 @@ pub(crate) fn parse_funding_rate(
 ) -> Result<Vec<FundingRateMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawFundingRateMsg>>(msg)?;
 
-    let rates: Vec<FundingRateMsg> = ws_msg
+    let mut rates: Vec<FundingRateMsg> = ws_msg
         .data
         .into_iter()
         .map(|raw_msg| FundingRateMsg {
@@ -108,10 +110,12 @@ pub(crate) fn parse_funding_rate(
             funding_rate: raw_msg.funding_rate.parse::<f64>().unwrap(),
             funding_time: raw_msg.funding_time.parse::<i64>().unwrap(),
             estimated_rate: None,
-            raw: serde_json::to_value(&raw_msg).unwrap(),
+            json: serde_json::to_string(&raw_msg).unwrap(),
         })
         .collect();
-
+    if rates.len() == 1 {
+        rates[0].json = msg.to_string();
+    }
     Ok(rates)
 }
 
@@ -148,7 +152,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
             asks: raw_orderbook.asks.iter().map(|x| parse_order(x)).collect(),
             bids: raw_orderbook.bids.iter().map(|x| parse_order(x)).collect(),
             snapshot,
-            raw: serde_json::from_str(msg)?,
+            json: msg.to_string(),
         };
 
         orderbooks.push(orderbook)

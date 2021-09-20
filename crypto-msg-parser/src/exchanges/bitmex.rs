@@ -65,7 +65,7 @@ struct WebsocketMsg<T: Sized> {
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradeMsg>>(msg)?;
     let raw_trades = ws_msg.data;
-    let trades: Vec<TradeMsg> = raw_trades
+    let mut trades: Vec<TradeMsg> = raw_trades
         .into_iter()
         .map(|raw_trade| {
             // assert_eq!(raw_trade.foreignNotional, raw_trade.homeNotional * raw_trade.price); // tiny diff actually exists
@@ -88,11 +88,13 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                     TradeSide::Buy
                 },
                 trade_id: raw_trade.trdMatchID.clone(),
-                raw: serde_json::to_value(&raw_trade).unwrap(),
+                json: serde_json::to_string(&raw_trade).unwrap(),
             }
         })
         .collect();
-
+    if trades.len() == 1 {
+        trades[0].json = msg.to_string();
+    }
     Ok(trades)
 }
 
@@ -101,7 +103,7 @@ pub(crate) fn parse_funding_rate(
     msg: &str,
 ) -> Result<Vec<FundingRateMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawFundingRateMsg>>(msg)?;
-    let rates: Vec<FundingRateMsg> = ws_msg
+    let mut rates: Vec<FundingRateMsg> = ws_msg
         .data
         .into_iter()
         .map(|raw_msg| {
@@ -117,11 +119,13 @@ pub(crate) fn parse_funding_rate(
                 funding_rate: raw_msg.fundingRate,
                 funding_time: settlement_time.timestamp_millis(),
                 estimated_rate: None,
-                raw: serde_json::to_value(&raw_msg).unwrap(),
+                json: serde_json::to_string(&raw_msg).unwrap(),
             }
         })
         .collect();
-
+    if rates.len() == 1 {
+        rates[0].json = msg.to_string();
+    }
     Ok(rates)
 }
 
@@ -202,7 +206,7 @@ pub(crate) fn parse_l2(
                 .map(|x| parse_order(x))
                 .collect(),
             snapshot,
-            raw: serde_json::from_str(msg)?,
+            json: msg.to_string(),
         };
 
         if ws_msg.action == "delete" {

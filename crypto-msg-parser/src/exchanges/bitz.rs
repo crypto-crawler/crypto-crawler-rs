@@ -53,7 +53,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     let symbol = ws_msg.params.symbol.as_str();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
 
-    let trades: Vec<TradeMsg> = ws_msg
+    let mut trades: Vec<TradeMsg> = ws_msg
         .data
         .into_iter()
         .map(|raw_trade| {
@@ -81,11 +81,13 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                     TradeSide::Buy
                 },
                 trade_id: timestamp.to_string(),
-                raw: serde_json::to_value(&raw_trade).unwrap(),
+                json: serde_json::to_string(&raw_trade).unwrap(),
             }
         })
         .collect();
-
+    if trades.len() == 1 {
+        trades[0].json = msg.to_string();
+    }
     Ok(trades)
 }
 
@@ -131,7 +133,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
             Vec::new()
         },
         snapshot: false,
-        raw: serde_json::from_str(msg)?,
+        json: msg.to_string(),
     };
 
     Ok(vec![orderbook])

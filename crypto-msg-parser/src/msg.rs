@@ -1,6 +1,5 @@
 use crypto_market_type::MarketType;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use strum_macros::{Display, EnumString};
 
 use crate::order::Order;
@@ -49,8 +48,8 @@ macro_rules! add_common_fields {
             pub msg_type: MessageType,
             /// Unix timestamp, in milliseconds
             pub timestamp: i64,
-            /// the original message
-            pub raw: Value,
+            /// the original JSON message
+            pub json: String,
 
             $(
                 $(#[$inner])*
@@ -106,8 +105,8 @@ pub struct TradeMsg {
     pub side: TradeSide,
     // Trade ID
     pub trade_id: String,
-    /// the original message
-    pub raw: Value,
+    /// the original JSON message
+    pub json: String,
 }
 
 /// Level2 orderbook message.
@@ -133,8 +132,8 @@ pub struct OrderBookMsg {
     // true means snapshot, false means updates
     pub snapshot: bool,
 
-    /// the original message
-    pub raw: Value,
+    /// the original JSON message
+    pub json: String,
 }
 
 /// Funding rate message.
@@ -160,8 +159,8 @@ pub struct FundingRateMsg {
     // Estimated funding rate between [funding_time-h, funding_time], it will be static after funding_time
     #[serde(skip_serializing_if = "Option::is_none")]
     pub estimated_rate: Option<f64>,
-    /// the original message
-    pub raw: Value,
+    /// the original JSON message
+    pub json: String,
 }
 
 add_common_fields!(

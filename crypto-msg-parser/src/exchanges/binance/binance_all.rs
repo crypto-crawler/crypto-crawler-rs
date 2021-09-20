@@ -101,7 +101,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                     TradeSide::Buy
                 },
                 trade_id: agg_trade.a.to_string(),
-                raw: serde_json::from_str(msg)?,
+                json: msg.to_string(),
             };
 
             Ok(vec![trade])
@@ -130,7 +130,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                     TradeSide::Buy
                 },
                 trade_id: raw_trade.t.to_string(),
-                raw: serde_json::from_str(msg)?,
+                json: msg.to_string(),
             };
 
             Ok(vec![trade])
@@ -184,7 +184,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
             .map(|raw_order| parse_order(raw_order))
             .collect::<Vec<Order>>(),
         snapshot: false,
-        raw: serde_json::from_str(msg)?,
+        json: msg.to_string(),
     };
     Ok(vec![orderbook])
 }
@@ -223,7 +223,7 @@ pub(crate) fn parse_funding_rate(
     } else {
         panic!("Unknown funding rate messaeg {}", msg);
     };
-    let funding_rates: Vec<FundingRateMsg> = data
+    let mut funding_rates: Vec<FundingRateMsg> = data
         .into_iter()
         .filter(|x| !x.r.is_empty())
         .map(|raw_msg| FundingRateMsg {
@@ -236,12 +236,11 @@ pub(crate) fn parse_funding_rate(
             funding_rate: raw_msg.r.parse::<f64>().unwrap(),
             funding_time: raw_msg.T,
             estimated_rate: None,
-            raw: if stream == "!markPrice@arr" {
-                serde_json::to_value(&raw_msg).unwrap()
-            } else {
-                serde_json::from_str(msg).unwrap()
-            },
+            json: serde_json::to_string(&raw_msg).unwrap(),
         })
         .collect();
+    if funding_rates.len() == 1 {
+        funding_rates[0].json = msg.to_string();
+    }
     Ok(funding_rates)
 }

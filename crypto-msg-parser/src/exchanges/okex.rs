@@ -67,7 +67,7 @@ struct WebsocketMsg<T: Sized> {
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradeMsg>>(msg)?;
     let option_trades = ws_msg.table.as_str() == "option/trades";
-    let trades: Vec<TradeMsg> = ws_msg
+    let mut trades: Vec<TradeMsg> = ws_msg
         .data
         .into_iter()
         .map(|raw_trade| {
@@ -111,11 +111,14 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                     TradeSide::Buy
                 },
                 trade_id: raw_trade.trade_id.to_string(),
-                raw: serde_json::to_value(&raw_trade).unwrap(),
+                json: serde_json::to_string(&raw_trade).unwrap(),
             }
         })
         .collect();
 
+    if trades.len() == 1 {
+        trades[0].json = msg.to_string();
+    }
     Ok(trades)
 }
 
@@ -125,7 +128,7 @@ pub(crate) fn parse_funding_rate(
 ) -> Result<Vec<FundingRateMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawFundingRateMsg>>(msg)?;
 
-    let rates: Vec<FundingRateMsg> = ws_msg
+    let mut rates: Vec<FundingRateMsg> = ws_msg
         .data
         .into_iter()
         .map(|raw_msg| {
@@ -140,11 +143,14 @@ pub(crate) fn parse_funding_rate(
                 funding_rate: raw_msg.funding_rate.parse::<f64>().unwrap(),
                 funding_time: funding_time.timestamp_millis(),
                 estimated_rate: Some(raw_msg.estimated_rate.parse::<f64>().unwrap()),
-                raw: serde_json::to_value(&raw_msg).unwrap(),
+                json: serde_json::to_string(&raw_msg).unwrap(),
             }
         })
         .collect();
 
+    if rates.len() == 1 {
+        rates[0].json = msg.to_string();
+    }
     Ok(rates)
 }
 
@@ -153,7 +159,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
     let snapshot = ws_msg.action.unwrap() == "partial";
     debug_assert_eq!(ws_msg.data.len(), 1);
 
-    let orderbooks = ws_msg
+    let mut orderbooks = ws_msg
         .data
         .iter()
         .map(|raw_orderbook| {
@@ -193,10 +199,13 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
                     .map(|x| parse_order(x))
                     .collect::<Vec<Order>>(),
                 snapshot,
-                raw: serde_json::to_value(raw_orderbook).unwrap(),
+                json: serde_json::to_string(raw_orderbook).unwrap(),
             }
         })
         .collect::<Vec<OrderBookMsg>>();
 
+    if orderbooks.len() == 1 {
+        orderbooks[0].json = msg.to_string();
+    }
     Ok(orderbooks)
 }

@@ -70,7 +70,7 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
             TradeSide::Buy
         },
         trade_id: raw_trade.sequence.to_string(),
-        raw: serde_json::to_value(&raw_trade).unwrap(),
+        json: msg.to_string(),
     };
 
     Ok(vec![trade])
@@ -117,7 +117,7 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
             .map(|x| parse_order(x))
             .collect(),
         snapshot: false,
-        raw: serde_json::from_str(msg)?,
+        json: msg.to_string(),
     };
 
     Ok(vec![orderbook])

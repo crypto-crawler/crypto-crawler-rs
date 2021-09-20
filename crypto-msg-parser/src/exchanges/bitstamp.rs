@@ -67,7 +67,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             TradeSide::Buy
         },
         trade_id: raw_trade.id.to_string(),
-        raw: serde_json::to_value(&raw_trade).unwrap(),
+        json: msg.to_string(),
     };
 
     Ok(vec![trade])
@@ -101,7 +101,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         asks: raw_orderbook.asks.iter().map(|x| parse_order(x)).collect(),
         bids: raw_orderbook.bids.iter().map(|x| parse_order(x)).collect(),
         snapshot: false,
-        raw: serde_json::from_str(msg)?,
+        json: msg.to_string(),
     };
 
     Ok(vec![orderbook])

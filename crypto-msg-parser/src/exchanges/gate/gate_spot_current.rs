@@ -77,7 +77,7 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
             TradeSide::Buy
         },
         trade_id: result.id.to_string(),
-        raw: serde_json::from_str::<Value>(msg)?,
+        json: msg.to_string(),
     };
 
     Ok(vec![trade])
@@ -131,7 +131,7 @@ fn parse_l2_update(msg: &str) -> Result<Vec<OrderBookMsg>> {
             Vec::new()
         },
         snapshot: false,
-        raw: serde_json::from_str(msg)?,
+        json: msg.to_string(),
     };
 
     Ok(vec![orderbook])
@@ -174,7 +174,7 @@ fn parse_l2_snapshot(msg: &str) -> Result<Vec<OrderBookMsg>> {
             Vec::new()
         },
         snapshot: true,
-        raw: serde_json::from_str(msg)?,
+        json: msg.to_string(),
     };
 
     Ok(vec![orderbook])

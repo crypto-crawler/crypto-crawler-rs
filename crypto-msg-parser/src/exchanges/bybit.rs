@@ -85,7 +85,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         MarketType::InverseSwap | MarketType::InverseFuture => {
             let ws_msg = serde_json::from_str::<WebsocketMsg<InverseTradeMsg>>(msg)?;
 
-            let trades: Vec<TradeMsg> = ws_msg
+            let mut trades: Vec<TradeMsg> = ws_msg
                 .data
                 .into_iter()
                 .map(|raw_trade| TradeMsg {
@@ -108,16 +108,18 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                         TradeSide::Buy
                     },
                     trade_id: raw_trade.trade_id.clone(),
-                    raw: serde_json::to_value(&raw_trade).unwrap(),
+                    json: serde_json::to_string(&raw_trade).unwrap(),
                 })
                 .collect();
-
+            if trades.len() == 1 {
+                trades[0].json = msg.to_string();
+            }
             Ok(trades)
         }
         MarketType::LinearSwap => {
             let ws_msg = serde_json::from_str::<WebsocketMsg<LinearTradeMsg>>(msg)?;
 
-            let trades: Vec<TradeMsg> = ws_msg
+            let mut trades: Vec<TradeMsg> = ws_msg
                 .data
                 .into_iter()
                 .map(|raw_trade| {
@@ -142,11 +144,13 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                             TradeSide::Buy
                         },
                         trade_id: raw_trade.trade_id.clone(),
-                        raw: serde_json::to_value(&raw_trade).unwrap(),
+                        json: serde_json::to_string(&raw_trade).unwrap(),
                     }
                 })
                 .collect();
-
+            if trades.len() == 1 {
+                trades[0].json = msg.to_string();
+            }
             Ok(trades)
         }
         _ => panic!("Unknown market_type {}", market_type),
@@ -193,7 +197,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         asks: Vec::new(),
         bids: Vec::new(),
         snapshot,
-        raw: serde_json::from_str(msg)?,
+        json: msg.to_string(),
     };
 
     let raw_orders = match market_type {

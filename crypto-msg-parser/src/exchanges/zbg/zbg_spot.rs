@@ -19,7 +19,7 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
         panic!("Invalid trade msg {}", msg);
     };
 
-    let trades: Vec<TradeMsg> = arr
+    let mut trades: Vec<TradeMsg> = arr
         .into_iter()
         .map(|raw_trade| {
             assert_eq!(raw_trade[0], "T");
@@ -46,11 +46,14 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
                 quantity_contract: None,
                 side,
                 trade_id: timestamp.to_string(),
-                raw: serde_json::to_value(&raw_trade).unwrap(),
+                json: serde_json::to_string(&raw_trade).unwrap(),
             }
         })
         .collect();
 
+    if trades.len() == 1 {
+        trades[0].json = msg.to_string();
+    }
     Ok(trades)
 }
 
@@ -97,7 +100,8 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
             }
         };
 
-        arr.iter()
+        let mut v = arr
+            .iter()
             .map(|raw_orderbook| {
                 let symbol = raw_orderbook[2].as_str().unwrap();
                 let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
@@ -138,13 +142,18 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
                     asks,
                     bids,
                     snapshot,
-                    raw: serde_json::from_str(
-                        serde_json::to_string(raw_orderbook).unwrap().as_str(),
-                    )
-                    .unwrap(),
+                    json: serde_json::to_string(raw_orderbook)
+                        .unwrap()
+                        .as_str()
+                        .to_string(),
                 }
             })
-            .collect::<Vec<OrderBookMsg>>()
+            .collect::<Vec<OrderBookMsg>>();
+
+        if v.len() == 1 {
+            v[0].json = msg.to_string();
+        }
+        v
     } else {
         let arr = serde_json::from_str::<Vec<String>>(msg)?;
         let symbol = arr[3].clone();
@@ -182,7 +191,7 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
             asks,
             bids,
             snapshot,
-            raw: serde_json::from_str(msg)?,
+            json: msg.to_string(),
         };
         vec![orderbook]
     };

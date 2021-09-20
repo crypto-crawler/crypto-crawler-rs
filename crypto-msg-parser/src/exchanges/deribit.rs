@@ -63,7 +63,7 @@ fn calc_quantity_and_volume(market_type: MarketType, price: f64, amount: f64) ->
 
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<Vec<RawTradeMsg>>>(msg)?;
-    let trades: Vec<TradeMsg> = ws_msg
+    let mut trades: Vec<TradeMsg> = ws_msg
         .params
         .data
         .into_iter()
@@ -89,11 +89,14 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                     TradeSide::Buy
                 },
                 trade_id: raw_trade.trade_id.to_string(),
-                raw: serde_json::to_value(&raw_trade).unwrap(),
+                json: serde_json::to_string(&raw_trade).unwrap(),
             }
         })
         .collect();
 
+    if trades.len() == 1 {
+        trades[0].json = msg.to_string();
+    }
     Ok(trades)
 }
 
@@ -130,7 +133,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         asks: raw_orderbook.asks.iter().map(|x| parse_order(x)).collect(),
         bids: raw_orderbook.bids.iter().map(|x| parse_order(x)).collect(),
         snapshot,
-        raw: serde_json::from_str(msg)?,
+        json: msg.to_string(),
     };
 
     Ok(vec![orderbook])

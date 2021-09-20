@@ -33,7 +33,7 @@ pub(crate) fn parse_funding_rate(
     msg: &str,
 ) -> Result<Vec<FundingRateMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg>(msg)?;
-    let funding_rates = ws_msg
+    let mut funding_rates: Vec<FundingRateMsg> = ws_msg
         .data
         .into_iter()
         .map(|raw_msg| FundingRateMsg {
@@ -46,8 +46,11 @@ pub(crate) fn parse_funding_rate(
             funding_rate: raw_msg.funding_rate.parse::<f64>().unwrap(),
             funding_time: raw_msg.settlement_time.parse::<i64>().unwrap(),
             estimated_rate: Some(raw_msg.estimated_rate.parse::<f64>().unwrap()),
-            raw: serde_json::to_value(&raw_msg).unwrap(),
+            json: serde_json::to_string(&raw_msg).unwrap(),
         })
         .collect();
+    if funding_rates.len() == 1 {
+        funding_rates[0].json = msg.to_string();
+    }
     Ok(funding_rates)
 }

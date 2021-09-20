@@ -65,7 +65,7 @@ pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         MarketType::LinearFuture => {
             let ws_msg = serde_json::from_str::<WebsocketMsg<Vec<FutureTradeMsg>>>(msg)?;
 
-            let trades: Vec<TradeMsg> = ws_msg
+            let mut trades: Vec<TradeMsg> = ws_msg
                 .result
                 .into_iter()
                 .map(|raw_trade| {
@@ -99,17 +99,19 @@ pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                             TradeSide::Buy
                         },
                         trade_id: raw_trade.id.to_string(),
-                        raw: serde_json::to_value(&raw_trade).unwrap(),
+                        json: serde_json::to_string(&raw_trade).unwrap(),
                     }
                 })
                 .collect();
-
+            if trades.len() == 1 {
+                trades[0].json = msg.to_string();
+            }
             Ok(trades)
         }
         MarketType::InverseSwap | MarketType::LinearSwap => {
             let ws_msg = serde_json::from_str::<WebsocketMsg<Vec<SwapTradeMsg>>>(msg)?;
 
-            let trades: Vec<TradeMsg> = ws_msg
+            let mut trades: Vec<TradeMsg> = ws_msg
                 .result
                 .into_iter()
                 .map(|raw_trade| {
@@ -143,11 +145,13 @@ pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                             TradeSide::Buy
                         },
                         trade_id: raw_trade.id.to_string(),
-                        raw: serde_json::to_value(&raw_trade).unwrap(),
+                        json: serde_json::to_string(&raw_trade).unwrap(),
                     }
                 })
                 .collect();
-
+            if trades.len() == 1 {
+                trades[0].json = msg.to_string();
+            }
             Ok(trades)
         }
         _ => panic!("Unknown market type {}", market_type),
@@ -198,7 +202,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
             asks: raw_orderbook.asks.iter().map(|x| parse_order(x)).collect(),
             bids: raw_orderbook.bids.iter().map(|x| parse_order(x)).collect(),
             snapshot,
-            raw: serde_json::from_str(msg)?,
+            json: msg.to_string(),
         }
     } else {
         let raw_orderbook = serde_json::from_value::<Vec<RawOrder>>(ws_msg.result).unwrap();
@@ -261,7 +265,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
                 asks,
                 bids,
                 snapshot,
-                raw: serde_json::from_str(msg).unwrap(),
+                json: msg.to_string(),
             }
         })
     };

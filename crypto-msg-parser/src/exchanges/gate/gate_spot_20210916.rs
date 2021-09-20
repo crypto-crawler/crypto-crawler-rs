@@ -45,7 +45,7 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
     let raw_trades: Vec<SpotTradeMsg> = serde_json::from_value(ws_msg.params[1].clone()).unwrap();
 
-    let trades: Vec<TradeMsg> = raw_trades
+    let mut trades: Vec<TradeMsg> = raw_trades
         .into_iter()
         .map(|raw_trade| {
             let price = raw_trade.price.parse::<f64>().unwrap();
@@ -68,11 +68,14 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
                     TradeSide::Buy
                 },
                 trade_id: raw_trade.id.to_string(),
-                raw: serde_json::to_value(&raw_trade).unwrap(),
+                json: serde_json::to_string(&raw_trade).unwrap(),
             }
         })
         .collect();
 
+    if trades.len() == 1 {
+        trades[0].json = msg.to_string();
+    }
     Ok(trades)
 }
 
@@ -115,7 +118,7 @@ pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>> {
             Vec::new()
         },
         snapshot,
-        raw: serde_json::from_str(msg)?,
+        json: msg.to_string(),
     };
 
     Ok(vec![orderbook])

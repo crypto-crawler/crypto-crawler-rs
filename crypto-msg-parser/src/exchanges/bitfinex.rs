@@ -37,7 +37,7 @@ fn parse_one_trade(market_type: MarketType, symbol: &str, nums: &[f64]) -> Trade
             TradeSide::Buy
         },
         trade_id: trade_id.to_string(),
-        raw: serde_json::to_value(&nums).unwrap(),
+        json: serde_json::to_string(&nums).unwrap(),
     }
 }
 
@@ -58,16 +58,18 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             // te, tu
             let nums: Vec<f64> = serde_json::from_value(arr[2].clone()).unwrap();
             let mut trade = parse_one_trade(market_type, symbol, &nums);
-            trade.raw = serde_json::from_str(msg).unwrap();
+            trade.json = msg.to_string();
             Ok(vec![trade])
         }
         None => {
             // snapshot
-            let mut trades = Vec::<TradeMsg>::new();
             let nums_arr: Vec<Vec<f64>> = serde_json::from_value(arr[1].clone()).unwrap();
-            for nums in nums_arr.iter() {
-                let trade = parse_one_trade(market_type, symbol, nums);
-                trades.push(trade);
+            let mut trades: Vec<TradeMsg> = nums_arr
+                .iter()
+                .map(|nums| parse_one_trade(market_type, symbol, nums))
+                .collect();
+            if trades.len() == 1 {
+                trades[0].json = msg.to_string();
             }
             Ok(trades)
         }
@@ -127,7 +129,7 @@ pub(crate) fn parse_l2(
         asks: Vec::new(),
         bids: Vec::new(),
         snapshot,
-        raw: serde_json::from_str(msg)?,
+        json: msg.to_string(),
     };
 
     let raw_orders = if snapshot {
