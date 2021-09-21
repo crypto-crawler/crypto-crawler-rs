@@ -22,6 +22,7 @@ lazy_static! {
             ("ETC/USDT", 1_f64),
             ("ETH/USDT", 0.1_f64),
             ("FIL/USDT", 0.1_f64),
+            ("ICP/USDT", 0.1_f64),
             ("LINK/USDT", 1_f64),
             ("LTC/USDT", 0.1_f64),
             ("SUSHI/USDT", 1_f64),
