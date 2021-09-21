@@ -110,7 +110,13 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         let symbol = arr[3].as_str().unwrap();
         let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
         let orderbook_snapshot = serde_json::from_value::<OrderbookSnapshot>(arr[1].clone())?;
-        let timestamp = (orderbook_snapshot.asks[0][2].parse::<f64>().unwrap() * 1000.0) as i64;
+        let timestamp = if !orderbook_snapshot.asks.is_empty() {
+            (orderbook_snapshot.asks[0][2].parse::<f64>().unwrap() * 1000.0) as i64
+        } else if !orderbook_snapshot.bids.is_empty() {
+            (orderbook_snapshot.bids[0][2].parse::<f64>().unwrap() * 1000.0) as i64
+        } else {
+            panic!("{}", msg);
+        };
 
         OrderBookMsg {
             exchange: EXCHANGE_NAME.to_string(),
