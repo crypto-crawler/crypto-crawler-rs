@@ -9,29 +9,29 @@ lazy_static! {
     static ref LINEAR_SWAP_CONTRACT_VALUES: HashMap<String, f64> = {
         // offline data, in case the network is down
         let mut m: HashMap<String, f64> = vec![
-            ("AAVE/USDT", 0.1f64),
-            ("ADA/USDT", 100f64),
-            ("ALGO/USDT", 10f64),
-            ("ATOM/USDT", 1f64),
-            ("BCH/USDT", 0.01f64),
-            ("BTC/USDT", 0.001f64),
-            ("COMP/USDT", 0.01f64),
-            ("DOGE/USDT", 10f64),
-            ("DOT/USDT", 1f64),
-            ("EOS/USDT", 1f64),
-            ("ETC/USDT", 1f64),
-            ("ETH/USDT", 0.1f64),
-            ("FIL/USDT", 0.1f64),
-            ("LINK/USDT", 1f64),
-            ("LTC/USDT", 0.1f64),
-            ("SUSHI/USDT", 1f64),
-            ("TRX/USDT", 100f64),
-            ("UNI/USDT", 1f64),
-            ("XLM/USDT", 10f64),
-            ("XRP/USDT", 10f64),
-            ("XTZ/USDT", 1f64),
-            ("YFI/USDT", 0.0001f64),
-            ("ZEC/USDT", 0.1f64),
+            ("AAVE/USDT", 0.1_f64),
+            ("ADA/USDT", 100_f64),
+            ("ALGO/USDT", 10_f64),
+            ("ATOM/USDT", 1_f64),
+            ("BCH/USDT", 0.01_f64),
+            ("BTC/USDT", 0.001_f64),
+            ("COMP/USDT", 0.01_f64),
+            ("DOGE/USDT", 10_f64),
+            ("DOT/USDT", 1_f64),
+            ("EOS/USDT", 1_f64),
+            ("ETC/USDT", 1_f64),
+            ("ETH/USDT", 0.1_f64),
+            ("FIL/USDT", 0.1_f64),
+            ("LINK/USDT", 1_f64),
+            ("LTC/USDT", 0.1_f64),
+            ("SUSHI/USDT", 1_f64),
+            ("TRX/USDT", 100_f64),
+            ("UNI/USDT", 1_f64),
+            ("XLM/USDT", 10_f64),
+            ("XRP/USDT", 10_f64),
+            ("XTZ/USDT", 1_f64),
+            ("YFI/USDT", 0.0001_f64),
+            ("ZEC/USDT", 0.1_f64),
         ]
         .into_iter()
         .map(|x| (x.0.to_string(), x.1))
@@ -88,7 +88,7 @@ mod tests {
     fn linear_swap() {
         let mapping = fetch_contract_val();
         for (pair, contract_value) in &mapping {
-            println!("(\"{}\", {}f64),", pair, contract_value);
+            println!("(\"{}\", {}_f64),", pair, contract_value);
         }
     }
 }
