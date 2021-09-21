@@ -155,8 +155,8 @@ lazy_static! {
             .collect();
 
             let from_online = fetch_quanto_multipliers(LINEAR_SWAP_URL);
-            for (pair, contract_value) in &from_online {
-                m.insert(pair.clone(), *contract_value);
+            for (pair, contract_value) in from_online {
+                m.insert(pair, contract_value);
             }
 
             m
