@@ -2,7 +2,7 @@ mod utils;
 
 #[cfg(test)]
 mod trade {
-    use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
+    use crypto_msg_parser::{extract_symbol, parse_trade, MarketType, TradeSide};
     use float_cmp::approx_eq;
 
     #[test]
@@ -17,6 +17,7 @@ mod trade {
                 "bitget",
                 MarketType::InverseSwap,
                 "BTC/USD".to_string(),
+                extract_symbol("bitget", MarketType::InverseSwap, raw_msg).unwrap(),
                 trade,
             );
             assert_eq!(trade.side, TradeSide::Sell);
@@ -47,6 +48,7 @@ mod trade {
                 "bitget",
                 MarketType::LinearSwap,
                 "BTC/USDT".to_string(),
+                extract_symbol("bitget", MarketType::LinearSwap, raw_msg).unwrap(),
                 trade,
             );
 
@@ -113,7 +115,7 @@ mod funding_rate {
 
 #[cfg(test)]
 mod l2_orderbook {
-    use crypto_msg_parser::{parse_l2, MarketType};
+    use crypto_msg_parser::{extract_symbol, parse_l2, MarketType};
     use float_cmp::approx_eq;
 
     #[test]
@@ -129,6 +131,7 @@ mod l2_orderbook {
             "bitget",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("bitget", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -208,6 +211,7 @@ mod l2_orderbook {
             "bitget",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("bitget", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -272,6 +276,7 @@ mod l2_orderbook {
             "bitget",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("bitget", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -311,6 +316,7 @@ mod l2_orderbook {
             "bitget",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("bitget", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
         );
 

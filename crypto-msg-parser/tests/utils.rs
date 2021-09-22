@@ -2,10 +2,17 @@ use crypto_market_type::MarketType;
 use crypto_msg_parser::{FundingRateMsg, MessageType, OrderBookMsg, TradeMsg};
 use float_cmp::approx_eq;
 
-pub fn check_trade_fields(exchange: &str, market_type: MarketType, pair: String, trade: &TradeMsg) {
+pub fn check_trade_fields(
+    exchange: &str,
+    market_type: MarketType,
+    pair: String,
+    symbol: String,
+    trade: &TradeMsg,
+) {
     assert_eq!(trade.exchange, exchange);
     assert_eq!(trade.market_type, market_type);
     assert_eq!(trade.pair, pair);
+    assert_eq!(trade.symbol, symbol);
     assert_eq!(trade.msg_type, MessageType::Trade);
     assert!(trade.price > 0.0);
     assert!(trade.quantity_base > 0.0);
@@ -28,11 +35,13 @@ pub fn check_orderbook_fields(
     exchange: &str,
     market_type: MarketType,
     pair: String,
+    symbol: String,
     orderbook: &OrderBookMsg,
 ) {
     assert_eq!(orderbook.exchange, exchange);
     assert_eq!(orderbook.market_type, market_type);
     assert_eq!(orderbook.pair, pair);
+    assert_eq!(orderbook.symbol, symbol);
     assert_eq!(orderbook.msg_type, MessageType::L2Event);
     assert_eq!(orderbook.timestamp.to_string().len(), 13);
 

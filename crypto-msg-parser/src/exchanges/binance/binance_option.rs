@@ -46,7 +46,7 @@ pub(crate) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
     assert_eq!(event_type, "trade_all");
 
     let all_trades: OptionTradeAllMsg = serde_json::from_value(data.clone()).unwrap();
-    let mut trades: Vec<TradeMsg> = all_trades
+    let trades: Vec<TradeMsg> = all_trades
         .t
         .into_iter()
         .map(|trade| {
@@ -75,9 +75,5 @@ pub(crate) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
             }
         })
         .collect();
-    if trades.len() == 1 {
-        trades[0].json = msg.to_string();
-    }
-
     Ok(trades)
 }

@@ -1,6 +1,6 @@
 mod utils;
 
-use crypto_msg_parser::{parse_l2, parse_trade, MarketType, TradeSide};
+use crypto_msg_parser::{extract_symbol, parse_l2, parse_trade, MarketType, TradeSide};
 
 #[test]
 fn trade() {
@@ -8,7 +8,13 @@ fn trade() {
         r#"[321,[["57126.70000","0.02063928","1616333924.737428","b","m",""]],"trade","XBT/USD"]"#;
     let trade = &parse_trade("kraken", MarketType::Spot, raw_msg).unwrap()[0];
 
-    crate::utils::check_trade_fields("kraken", MarketType::Spot, "BTC/USD".to_string(), trade);
+    crate::utils::check_trade_fields(
+        "kraken",
+        MarketType::Spot,
+        "BTC/USD".to_string(),
+        extract_symbol("kraken", MarketType::Spot, raw_msg).unwrap(),
+        trade,
+    );
 
     assert_eq!(trade.quantity_base, 0.02063928);
     assert_eq!(trade.side, TradeSide::Buy);
@@ -31,10 +37,11 @@ fn l2_orderbook_snapshot() {
         "kraken",
         MarketType::Spot,
         "BTC/USD".to_string(),
+        extract_symbol("kraken", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
     );
 
-    assert_eq!(orderbook.timestamp, 1622714245847);
+    assert_eq!(orderbook.timestamp, 1622714255963);
 
     assert_eq!(orderbook.bids[0].price, 39071.4);
     assert_eq!(orderbook.bids[0].quantity_base, 7.93106570);
@@ -66,6 +73,7 @@ fn l2_orderbook_update() {
         "kraken",
         MarketType::Spot,
         "BTC/USD".to_string(),
+        extract_symbol("kraken", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
     );
 
@@ -86,6 +94,7 @@ fn l2_orderbook_update() {
         "kraken",
         MarketType::Spot,
         "BTC/USD".to_string(),
+        extract_symbol("kraken", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
     );
 

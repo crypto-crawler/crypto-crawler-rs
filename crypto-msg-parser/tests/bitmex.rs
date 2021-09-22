@@ -2,7 +2,7 @@ mod utils;
 
 #[cfg(test)]
 mod trade {
-    use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
+    use crypto_msg_parser::{extract_symbol, parse_trade, MarketType, TradeSide};
     use float_cmp::approx_eq;
 
     #[test]
@@ -14,6 +14,7 @@ mod trade {
             "bitmex",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("bitmex", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
         );
 
@@ -32,6 +33,7 @@ mod trade {
             "bitmex",
             MarketType::QuantoSwap,
             "ETH/USD".to_string(),
+            extract_symbol("bitmex", MarketType::QuantoSwap, raw_msg).unwrap(),
             trade,
         );
 
@@ -55,6 +57,7 @@ mod trade {
             "bitmex",
             MarketType::InverseFuture,
             "BTC/USD".to_string(),
+            extract_symbol("bitmex", MarketType::InverseFuture, raw_msg).unwrap(),
             trade,
         );
 
@@ -73,6 +76,7 @@ mod trade {
             "bitmex",
             MarketType::LinearFuture,
             "ETH/BTC".to_string(),
+            extract_symbol("bitmex", MarketType::LinearFuture, raw_msg).unwrap(),
             trade,
         );
 
@@ -91,6 +95,7 @@ mod trade {
             "bitmex",
             MarketType::QuantoFuture,
             "ETH/USD".to_string(),
+            extract_symbol("bitmex", MarketType::QuantoFuture, raw_msg).unwrap(),
             trade,
         );
 
@@ -153,7 +158,7 @@ mod funding_rate {
 #[cfg(test)]
 mod l2_orderbook {
     use chrono::prelude::*;
-    use crypto_msg_parser::{parse_l2, MarketType};
+    use crypto_msg_parser::{extract_symbol, parse_l2, MarketType};
 
     #[test]
     fn inverse_swap_snapshot() {
@@ -174,6 +179,7 @@ mod l2_orderbook {
             "bitmex",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("bitmex", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -224,6 +230,7 @@ mod l2_orderbook {
             "bitmex",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("bitmex", MarketType::InverseSwap, update_msg).unwrap(),
             orderbook,
         );
 
@@ -249,6 +256,7 @@ mod l2_orderbook {
             "bitmex",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("bitmex", MarketType::InverseSwap, delete_msg).unwrap(),
             orderbook,
         );
 

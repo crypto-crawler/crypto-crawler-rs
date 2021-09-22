@@ -45,6 +45,11 @@ struct WebsocketMsg<T: Sized> {
     data: T,
 }
 
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
+    Some(ws_msg.market)
+}
+
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<Vec<RawTradeMsg>>>(msg)?;
     let symbol = ws_msg.market.as_str();

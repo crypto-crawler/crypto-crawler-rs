@@ -80,6 +80,18 @@ struct RawOrderbookMsg {
     timestamp_e6: Value, // i64 or String
 }
 
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
+    let ws_msg = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
+    let arr = ws_msg
+        .get("topic")
+        .unwrap()
+        .as_str()
+        .unwrap()
+        .split('.')
+        .collect::<Vec<&str>>();
+    Some(arr[1].to_string())
+}
+
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     match market_type {
         MarketType::InverseSwap | MarketType::InverseFuture => {

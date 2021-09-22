@@ -2,7 +2,7 @@ mod utils;
 
 #[cfg(test)]
 mod trade {
-    use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
+    use crypto_msg_parser::{extract_symbol, parse_trade, MarketType, TradeSide};
     use float_cmp::approx_eq;
 
     #[test]
@@ -13,7 +13,13 @@ mod trade {
         assert_eq!(trades.len(), 1);
         let trade = &trades[0];
 
-        crate::utils::check_trade_fields("okex", MarketType::Spot, "BTC/USDT".to_string(), trade);
+        crate::utils::check_trade_fields(
+            "okex",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            extract_symbol("okex", MarketType::Spot, raw_msg).unwrap(),
+            trade,
+        );
 
         assert_eq!(trade.quantity_base, 0.00020621);
         assert_eq!(trade.quantity_contract, None);
@@ -32,6 +38,7 @@ mod trade {
             "okex",
             MarketType::LinearFuture,
             "BTC/USDT".to_string(),
+            extract_symbol("okex", MarketType::LinearFuture, raw_msg).unwrap(),
             trade,
         );
 
@@ -63,6 +70,7 @@ mod trade {
             "okex",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("okex", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
         );
 
@@ -94,6 +102,7 @@ mod trade {
             "okex",
             MarketType::InverseFuture,
             "BTC/USD".to_string(),
+            extract_symbol("okex", MarketType::InverseFuture, raw_msg).unwrap(),
             trade,
         );
 
@@ -115,6 +124,7 @@ mod trade {
             "okex",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("okex", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
         );
 
@@ -136,6 +146,7 @@ mod trade {
             "okex",
             MarketType::EuropeanOption,
             "BTC/USD".to_string(),
+            extract_symbol("okex", MarketType::EuropeanOption, raw_msg).unwrap(),
             trade,
         );
 
@@ -164,6 +175,7 @@ mod trade {
             "okex",
             MarketType::EuropeanOption,
             "BTC/USD".to_string(),
+            extract_symbol("okex", MarketType::EuropeanOption, raw_msg).unwrap(),
             trade,
         );
 
@@ -225,7 +237,7 @@ mod funding_rate {
 
 #[cfg(test)]
 mod l2_orderbook {
-    use crypto_msg_parser::{parse_l2, MarketType};
+    use crypto_msg_parser::{extract_symbol, parse_l2, MarketType};
     use float_cmp::approx_eq;
 
     #[test]
@@ -241,6 +253,7 @@ mod l2_orderbook {
             "okex",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("okex", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -268,6 +281,7 @@ mod l2_orderbook {
             "okex",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("okex", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -295,6 +309,7 @@ mod l2_orderbook {
             "okex",
             MarketType::LinearFuture,
             "BTC/USDT".to_string(),
+            extract_symbol("okex", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -324,6 +339,7 @@ mod l2_orderbook {
             "okex",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("okex", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -353,6 +369,7 @@ mod l2_orderbook {
             "okex",
             MarketType::EuropeanOption,
             "BTC/USD".to_string(),
+            extract_symbol("okex", MarketType::EuropeanOption, raw_msg).unwrap(),
             orderbook,
         );
 

@@ -2,7 +2,7 @@ mod utils;
 
 #[cfg(test)]
 mod trade {
-    use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
+    use crypto_msg_parser::{extract_symbol, parse_trade, MarketType, TradeSide};
 
     #[test]
     fn spot() {
@@ -13,6 +13,7 @@ mod trade {
             "binance",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("binance", MarketType::Spot, raw_msg).unwrap(),
             trade,
         );
 
@@ -31,6 +32,7 @@ mod trade {
             "binance",
             MarketType::InverseFuture,
             "BTC/USD".to_string(),
+            extract_symbol("binance", MarketType::InverseFuture, raw_msg).unwrap(),
             trade,
         );
 
@@ -49,6 +51,7 @@ mod trade {
             "binance",
             MarketType::LinearFuture,
             "BTC/USDT".to_string(),
+            extract_symbol("binance", MarketType::LinearFuture, raw_msg).unwrap(),
             trade,
         );
 
@@ -68,6 +71,7 @@ mod trade {
             "binance",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("binance", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
         );
 
@@ -88,6 +92,7 @@ mod trade {
             "binance",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("binance", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
         );
 
@@ -99,6 +104,7 @@ mod trade {
     }
 
     #[test]
+    #[ignore]
     fn option() {
         let raw_msg = r#"{"stream":"BTCUSDT_C@TRADE_ALL","data":{"e":"trade_all","E":1616205287778,"s":"BTCUSDT_C","t":[{"t":"315","p":"4842.24","q":"0.0001","b":"4612047757752932782","a":"4612057653433061439","T":1616204382000,"s":"1","S":"BTC-210430-68000-C"},{"t":"805","p":"5616.36","q":"0.0001","b":"4612047757752932781","a":"4612057653433055969","T":1616204357000,"s":"1","S":"BTC-210430-64000-C"},{"t":"313","p":"7028.44","q":"0.0001","b":"4612015871915728334","a":"4612057653433051715","T":1616204344000,"s":"1","S":"BTC-210430-60000-C"}]}}"#;
         let trades = &parse_trade("binance", MarketType::EuropeanOption, raw_msg).unwrap();
@@ -110,6 +116,7 @@ mod trade {
                 "binance",
                 MarketType::EuropeanOption,
                 "BTC/USDT".to_string(),
+                extract_symbol("binance", MarketType::EuropeanOption, raw_msg).unwrap(),
                 trade,
             );
         }
@@ -197,7 +204,7 @@ mod funding_rate {
 
 #[cfg(test)]
 mod l2_orderbook {
-    use crypto_msg_parser::{parse_l2, MarketType};
+    use crypto_msg_parser::{extract_symbol, parse_l2, MarketType};
 
     #[test]
     fn spot() {
@@ -212,6 +219,7 @@ mod l2_orderbook {
             "binance",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("binance", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -247,6 +255,7 @@ mod l2_orderbook {
             "binance",
             MarketType::InverseFuture,
             "BTC/USD".to_string(),
+            extract_symbol("binance", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -286,6 +295,7 @@ mod l2_orderbook {
             "binance",
             MarketType::LinearFuture,
             "ETH/USDT".to_string(),
+            extract_symbol("binance", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -325,6 +335,7 @@ mod l2_orderbook {
             "binance",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("binance", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -364,6 +375,7 @@ mod l2_orderbook {
             "binance",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("binance", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
         );
 

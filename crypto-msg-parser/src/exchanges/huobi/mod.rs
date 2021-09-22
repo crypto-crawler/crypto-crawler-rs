@@ -2,12 +2,21 @@ mod funding_rate;
 mod huobi_inverse;
 mod huobi_linear;
 mod huobi_spot;
+mod message;
 
 use crypto_market_type::MarketType;
 
 use crate::{FundingRateMsg, OrderBookMsg, TradeMsg};
 
-use serde_json::Result;
+use serde_json::{Result, Value};
+
+use message::WebsocketMsg;
+
+pub(crate) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Option<String> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
+    let v = ws_msg.ch.split('.').collect::<Vec<&str>>();
+    Some(v[1].to_string())
+}
 
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     match market_type {

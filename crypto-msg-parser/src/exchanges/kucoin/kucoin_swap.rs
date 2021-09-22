@@ -1,8 +1,8 @@
 use crypto_market_type::MarketType;
 
 use crate::{
-    exchanges::utils::calc_quantity_and_volume, MessageType, Order, OrderBookMsg, TradeMsg,
-    TradeSide,
+    exchanges::{kucoin::message::WebsocketMsg, utils::calc_quantity_and_volume},
+    MessageType, Order, OrderBookMsg, TradeMsg, TradeSide,
 };
 
 use serde::{Deserialize, Serialize};
@@ -51,17 +51,10 @@ struct ContractOrderbookMsg {
     extra: HashMap<String, Value>,
 }
 
-#[derive(Serialize, Deserialize)]
-struct WebsocketMsg<T: Sized> {
-    subject: String,
-    topic: String,
-    #[serde(rename = "type")]
-    type_: String,
-    data: T,
-}
-
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<ContractTradeMsg>>(msg)?;
+    debug_assert_eq!(ws_msg.subject, "match");
+    debug_assert!(ws_msg.topic.starts_with("/contractMarket/execution:"));
     let raw_trade = ws_msg.data;
     let pair = crypto_pair::normalize_pair(&raw_trade.symbol, EXCHANGE_NAME).unwrap();
     let (quantity_base, quantity_quote, quantity_contract) = calc_quantity_and_volume(
@@ -98,6 +91,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
 pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<ContractOrderbookMsg>>(msg)?;
     debug_assert_eq!(ws_msg.subject, "level2");
+    debug_assert!(ws_msg.topic.starts_with("/contractMarket/level2:"));
     let symbol = ws_msg
         .topic
         .strip_prefix("/contractMarket/level2:")

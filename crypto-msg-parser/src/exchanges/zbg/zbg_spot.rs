@@ -7,6 +7,20 @@ use serde_json::{Result, Value};
 
 const EXCHANGE_NAME: &str = "zbg";
 
+pub(super) fn extract_symbol(msg: &str) -> Option<String> {
+    if let Ok(list) = serde_json::from_str::<Vec<Vec<Value>>>(msg) {
+        if msg.starts_with(r#"[["T","#) || msg.starts_with(r#"["T","#) {
+            Some(list[0][3].as_str().unwrap().to_string())
+        } else {
+            Some(list[0][2].as_str().unwrap().to_string())
+        }
+    } else if let Ok(list) = serde_json::from_str::<Vec<Value>>(msg) {
+        Some(list[3].as_str().unwrap().to_string())
+    } else {
+        None
+    }
+}
+
 // https://zbgapi.github.io/docs/spot/v1/en/#market-trade
 // [T, symbol-id, symbol, timestamp, ask/bid, price, quantity]
 pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {

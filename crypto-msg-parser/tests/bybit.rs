@@ -2,7 +2,7 @@ mod utils;
 
 #[cfg(test)]
 mod trade {
-    use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
+    use crypto_msg_parser::{extract_symbol, parse_trade, MarketType, TradeSide};
 
     #[test]
     fn inverse_future() {
@@ -16,6 +16,7 @@ mod trade {
                 "bybit",
                 MarketType::InverseFuture,
                 "BTC/USD".to_string(),
+                extract_symbol("bybit", MarketType::InverseFuture, raw_msg).unwrap(),
                 trade,
             );
         }
@@ -44,6 +45,7 @@ mod trade {
             "bybit",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("bybit", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
         );
 
@@ -66,6 +68,7 @@ mod trade {
             "bybit",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("bybit", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
         );
 
@@ -78,7 +81,7 @@ mod trade {
 
 #[cfg(test)]
 mod l2_orderbook {
-    use crypto_msg_parser::{parse_l2, MarketType};
+    use crypto_msg_parser::{extract_symbol, parse_l2, MarketType};
 
     #[test]
     fn inverse_future_snapshot() {
@@ -93,6 +96,7 @@ mod l2_orderbook {
             "bybit",
             MarketType::InverseFuture,
             "BTC/USD".to_string(),
+            extract_symbol("bybit", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -132,6 +136,7 @@ mod l2_orderbook {
             "bybit",
             MarketType::InverseFuture,
             "BTC/USD".to_string(),
+            extract_symbol("bybit", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -166,6 +171,7 @@ mod l2_orderbook {
             "bybit",
             MarketType::InverseFuture,
             "BTC/USD".to_string(),
+            extract_symbol("bybit", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -205,6 +211,7 @@ mod l2_orderbook {
             "bybit",
             MarketType::InverseFuture,
             "BTC/USD".to_string(),
+            extract_symbol("bybit", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -239,6 +246,7 @@ mod l2_orderbook {
             "bybit",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("bybit", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -278,6 +286,7 @@ mod l2_orderbook {
             "bybit",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("bybit", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
         );
 

@@ -1,7 +1,7 @@
 mod utils;
 
 use chrono::prelude::*;
-use crypto_msg_parser::{parse_l2, parse_trade, MarketType, TradeSide};
+use crypto_msg_parser::{extract_symbol, parse_l2, parse_trade, MarketType, TradeSide};
 
 #[test]
 fn trade() {
@@ -12,6 +12,7 @@ fn trade() {
         "coinbase_pro",
         MarketType::Spot,
         "BTC/USD".to_string(),
+        extract_symbol("coinbase_pro", MarketType::Spot, raw_msg).unwrap(),
         trade,
     );
 
@@ -38,6 +39,7 @@ fn l2_orderbook_snapshot() {
         "coinbase_pro",
         MarketType::Spot,
         "BTC/USD".to_string(),
+        extract_symbol("coinbase_pro", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
     );
 
@@ -71,6 +73,7 @@ fn l2_orderbook_update() {
         "coinbase_pro",
         MarketType::Spot,
         "BTC/USD".to_string(),
+        extract_symbol("coinbase_pro", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
     );
 

@@ -1,6 +1,6 @@
 mod utils;
 
-use crypto_msg_parser::{parse_l2, parse_trade, MarketType, TradeSide};
+use crypto_msg_parser::{extract_symbol, parse_l2, parse_trade, MarketType, TradeSide};
 
 #[test]
 fn trade() {
@@ -14,6 +14,7 @@ fn trade() {
             "bithumb",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("bithumb", MarketType::Spot, raw_msg).unwrap(),
             trade,
         );
 
@@ -26,7 +27,13 @@ fn trade() {
     assert_eq!(trades.len(), 1);
     let trade = &trades[0];
 
-    crate::utils::check_trade_fields("bithumb", MarketType::Spot, "ETH/USDT".to_string(), trade);
+    crate::utils::check_trade_fields(
+        "bithumb",
+        MarketType::Spot,
+        "ETH/USDT".to_string(),
+        extract_symbol("bithumb", MarketType::Spot, raw_msg).unwrap(),
+        trade,
+    );
 
     assert_eq!(trade.quantity_base, 0.065614);
     assert_eq!(trade.side, TradeSide::Buy);
@@ -45,6 +52,7 @@ fn l2_orderbook_snapshot() {
         "bithumb",
         MarketType::Spot,
         "BTC/USDT".to_string(),
+        extract_symbol("bithumb", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
     );
 
@@ -80,6 +88,7 @@ fn l2_orderbook_update() {
         "bithumb",
         MarketType::Spot,
         "BTC/USDT".to_string(),
+        extract_symbol("bithumb", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
     );
 

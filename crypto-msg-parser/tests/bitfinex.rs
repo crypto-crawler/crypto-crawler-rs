@@ -2,7 +2,7 @@ mod utils;
 
 #[cfg(test)]
 mod trade {
-    use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
+    use crypto_msg_parser::{extract_symbol, parse_trade, MarketType, TradeSide};
 
     #[test]
     fn spot_te() {
@@ -13,6 +13,7 @@ mod trade {
             "bitfinex",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("bitfinex", MarketType::Spot, raw_msg).unwrap(),
             trade,
         );
 
@@ -32,6 +33,7 @@ mod trade {
             "bitfinex",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("bitfinex", MarketType::Spot, raw_msg).unwrap(),
             trade,
         );
 
@@ -54,6 +56,7 @@ mod trade {
                 "bitfinex",
                 MarketType::Spot,
                 "BTC/USDT".to_string(),
+                extract_symbol("bitfinex", MarketType::Spot, raw_msg).unwrap(),
                 trade,
             );
         }
@@ -68,6 +71,7 @@ mod trade {
             "bitfinex",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("bitfinex", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
         );
 
@@ -87,6 +91,7 @@ mod trade {
             "bitfinex",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("bitfinex", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
         );
 
@@ -109,6 +114,7 @@ mod trade {
                 "bitfinex",
                 MarketType::LinearSwap,
                 "BTC/USDT".to_string(),
+                extract_symbol("bitfinex", MarketType::LinearSwap, raw_msg).unwrap(),
                 trade,
             );
         }
@@ -118,7 +124,7 @@ mod trade {
 #[cfg(test)]
 mod l2_orderbook {
     use chrono::prelude::*;
-    use crypto_msg_parser::{parse_l2, MarketType};
+    use crypto_msg_parser::{extract_symbol, parse_l2, MarketType};
 
     #[test]
     fn spot_snapshot() {
@@ -139,6 +145,7 @@ mod l2_orderbook {
             "bitfinex",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("bitfinex", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -178,6 +185,7 @@ mod l2_orderbook {
             "bitfinex",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("bitfinex", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
         );
         assert_eq!(orderbook.asks[0].price, 34668.0);
@@ -204,6 +212,7 @@ mod l2_orderbook {
             "bitfinex",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("bitfinex", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -247,6 +256,7 @@ mod l2_orderbook {
             "bitfinex",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("bitfinex", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
         );
 

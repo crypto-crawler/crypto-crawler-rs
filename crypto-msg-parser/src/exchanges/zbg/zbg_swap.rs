@@ -92,6 +92,14 @@ struct RawOrderbookMsg {
     extra: HashMap<String, Value>,
 }
 
+pub(super) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
+    let ws_msg = serde_json::from_str::<Vec<Value>>(msg).unwrap();
+    let contract_id = ws_msg[1]["contractId"].as_i64().unwrap();
+    let contract_info = SWAP_CONTRACT_MAP.get(&contract_id).unwrap();
+    let symbol = contract_info.symbol.as_str();
+    Some(symbol.to_string())
+}
+
 fn calc_quantity_and_volume(
     market_type: MarketType,
     contract_id: i64,

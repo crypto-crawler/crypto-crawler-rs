@@ -2,7 +2,7 @@ mod utils;
 
 #[cfg(test)]
 mod trade {
-    use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
+    use crypto_msg_parser::{extract_symbol, parse_trade, MarketType, TradeSide};
 
     #[test]
     fn spot() {
@@ -12,7 +12,13 @@ mod trade {
         assert_eq!(trades.len(), 1);
         let trade = &trades[0];
 
-        crate::utils::check_trade_fields("zbg", MarketType::Spot, "BTC/USDT".to_string(), trade);
+        crate::utils::check_trade_fields(
+            "zbg",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            extract_symbol("zbg", MarketType::Spot, raw_msg).unwrap(),
+            trade,
+        );
 
         assert_eq!(trade.quantity_base, 0.048800);
         assert_eq!(trade.side, TradeSide::Buy);
@@ -23,7 +29,13 @@ mod trade {
         assert_eq!(trades.len(), 1);
         let trade = &trades[0];
 
-        crate::utils::check_trade_fields("zbg", MarketType::Spot, "BTC/USDT".to_string(), trade);
+        crate::utils::check_trade_fields(
+            "zbg",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            extract_symbol("zbg", MarketType::Spot, raw_msg).unwrap(),
+            trade,
+        );
 
         assert_eq!(trade.quantity_base, 0.654172);
         assert_eq!(trade.side, TradeSide::Sell);
@@ -42,6 +54,7 @@ mod trade {
             "zbg",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("zbg", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
         );
 
@@ -63,6 +76,7 @@ mod trade {
             "zbg",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("zbg", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
         );
 
@@ -75,7 +89,7 @@ mod trade {
 
 #[cfg(test)]
 mod l2_orderbook {
-    use crypto_msg_parser::{parse_l2, MarketType};
+    use crypto_msg_parser::{extract_symbol, parse_l2, MarketType};
 
     #[test]
     fn spot_snapshot() {
@@ -90,6 +104,7 @@ mod l2_orderbook {
             "zbg",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("zbg", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -117,6 +132,7 @@ mod l2_orderbook {
             "zbg",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("zbg", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -140,6 +156,7 @@ mod l2_orderbook {
             "zbg",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("zbg", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -169,6 +186,7 @@ mod l2_orderbook {
             "zbg",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("zbg", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
         );
 

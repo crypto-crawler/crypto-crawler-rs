@@ -64,6 +64,20 @@ struct WebsocketMsg<T: Sized> {
     extra: HashMap<String, Value>,
 }
 
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
+    let symbols = ws_msg
+        .data
+        .iter()
+        .map(|v| v["instrument_id"].as_str().unwrap())
+        .collect::<Vec<&str>>();
+    if symbols.is_empty() {
+        None
+    } else {
+        Some(symbols[0].to_string())
+    }
+}
+
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradeMsg>>(msg)?;
     let option_trades = ws_msg.table.as_str() == "option/trades";

@@ -9,6 +9,31 @@ pub use crypto_market_type::MarketType;
 
 use serde_json::Result;
 
+/// Extract the symbol from the message.
+pub fn extract_symbol(exchange: &str, market_type: MarketType, msg: &str) -> Option<String> {
+    match exchange {
+        "binance" => exchanges::binance::extract_symbol(market_type, msg),
+        "bitfinex" => exchanges::bitfinex::extract_symbol(market_type, msg),
+        "bitget" => exchanges::bitget::extract_symbol(market_type, msg),
+        "bithumb" => exchanges::bithumb::extract_symbol(market_type, msg),
+        "bitmex" => exchanges::bitmex::extract_symbol(market_type, msg),
+        "bitstamp" => exchanges::bitstamp::extract_symbol(market_type, msg),
+        "bitz" => exchanges::bitz::extract_symbol(market_type, msg),
+        "bybit" => exchanges::bybit::extract_symbol(market_type, msg),
+        "coinbase_pro" => exchanges::coinbase_pro::extract_symbol(market_type, msg),
+        "deribit" => exchanges::deribit::extract_symbol(market_type, msg),
+        "ftx" => exchanges::ftx::extract_symbol(market_type, msg),
+        "gate" => exchanges::gate::extract_symbol(market_type, msg),
+        "huobi" => exchanges::huobi::extract_symbol(market_type, msg),
+        "kraken" => exchanges::kraken::extract_symbol(market_type, msg),
+        "kucoin" => exchanges::kucoin::extract_symbol(market_type, msg),
+        "mxc" => exchanges::mxc::extract_symbol(market_type, msg),
+        "okex" => exchanges::okex::extract_symbol(market_type, msg),
+        "zbg" => exchanges::zbg::extract_symbol(market_type, msg),
+        _ => panic!("Unknown exchange {}", exchange),
+    }
+}
+
 /// Parse trade messages.
 pub fn parse_trade(exchange: &str, market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     match exchange {

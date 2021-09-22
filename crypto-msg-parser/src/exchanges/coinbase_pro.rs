@@ -52,6 +52,12 @@ struct OrderbookUpdateMsg {
     extra: HashMap<String, Value>,
 }
 
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
+    let ws_msg = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
+    let symbol = ws_msg.get("product_id").unwrap().as_str().unwrap();
+    Some(symbol.to_string())
+}
+
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let raw_trade = serde_json::from_str::<SpotTradeMsg>(msg)?;
     let timestamp = DateTime::parse_from_rfc3339(&raw_trade.time).unwrap();

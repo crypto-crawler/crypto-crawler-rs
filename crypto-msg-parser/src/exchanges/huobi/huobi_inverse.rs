@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
 use std::collections::HashMap;
 
+use super::message::WebsocketMsg;
+
 const EXCHANGE_NAME: &str = "huobi";
 
 // see https://huobiapi.github.io/docs/coin_margined_swap/v1/en/#subscribe-trade-detail-data
@@ -45,13 +47,6 @@ struct TradeTick {
     id: i64,
     ts: i64,
     data: Vec<InverseTradeMsg>,
-}
-
-#[derive(Serialize, Deserialize)]
-struct WebsocketMsg<T: Sized> {
-    ch: String,
-    ts: i64,
-    tick: T,
 }
 
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {

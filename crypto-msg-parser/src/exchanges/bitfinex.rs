@@ -9,6 +9,13 @@ use serde_json::{Result, Value};
 
 const EXCHANGE_NAME: &str = "bitfinex";
 
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
+    let arr = serde_json::from_str::<Vec<Value>>(msg).unwrap();
+
+    let symbol = arr[0].as_object().unwrap()["symbol"].as_str().unwrap();
+    Some(symbol.to_string())
+}
+
 fn parse_one_trade(market_type: MarketType, symbol: &str, nums: &[f64]) -> TradeMsg {
     assert_eq!(4, nums.len());
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
@@ -44,13 +51,7 @@ fn parse_one_trade(market_type: MarketType, symbol: &str, nums: &[f64]) -> Trade
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let arr = serde_json::from_str::<Vec<Value>>(msg)?;
 
-    let symbol = arr[0]
-        .as_object()
-        .unwrap()
-        .get("symbol")
-        .unwrap()
-        .as_str()
-        .unwrap();
+    let symbol = arr[0].as_object().unwrap()["symbol"].as_str().unwrap();
 
     // see https://docs.bitfinex.com/reference#ws-public-trades
     match arr[1].as_str() {
@@ -83,13 +84,7 @@ pub(crate) fn parse_l2(
 ) -> Result<Vec<OrderBookMsg>> {
     let ws_msg = serde_json::from_str::<Vec<Value>>(msg)?;
 
-    let symbol = ws_msg[0]
-        .as_object()
-        .unwrap()
-        .get("symbol")
-        .unwrap()
-        .as_str()
-        .unwrap();
+    let symbol = ws_msg[0].as_object().unwrap()["symbol"].as_str().unwrap();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
 
     let data = ws_msg[1].clone();

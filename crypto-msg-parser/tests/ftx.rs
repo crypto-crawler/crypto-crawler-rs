@@ -2,7 +2,7 @@ mod utils;
 
 #[cfg(test)]
 mod trade {
-    use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
+    use crypto_msg_parser::{extract_symbol, parse_trade, MarketType, TradeSide};
 
     #[test]
     fn spot() {
@@ -12,7 +12,13 @@ mod trade {
         assert_eq!(trades.len(), 1);
 
         for trade in trades.iter() {
-            crate::utils::check_trade_fields("ftx", MarketType::Spot, "BTC/USD".to_string(), trade);
+            crate::utils::check_trade_fields(
+                "ftx",
+                MarketType::Spot,
+                "BTC/USD".to_string(),
+                extract_symbol("ftx", MarketType::Spot, raw_msg).unwrap(),
+                trade,
+            );
 
             assert_eq!(trade.side, TradeSide::Buy);
         }
@@ -31,6 +37,7 @@ mod trade {
                 "ftx",
                 MarketType::LinearFuture,
                 "BTC/USD".to_string(),
+                extract_symbol("ftx", MarketType::LinearFuture, raw_msg).unwrap(),
                 trade,
             );
         }
@@ -53,6 +60,7 @@ mod trade {
                 "ftx",
                 MarketType::LinearSwap,
                 "BTC/USD".to_string(),
+                extract_symbol("ftx", MarketType::LinearSwap, raw_msg).unwrap(),
                 trade,
             );
         }
@@ -75,6 +83,7 @@ mod trade {
                 "ftx",
                 MarketType::Move,
                 "BTC-MOVE/USD".to_string(),
+                extract_symbol("ftx", MarketType::Move, raw_msg).unwrap(),
                 trade,
             );
         }
@@ -88,7 +97,7 @@ mod trade {
 
 #[cfg(test)]
 mod l2_orderbook {
-    use crypto_msg_parser::{parse_l2, MarketType};
+    use crypto_msg_parser::{extract_symbol, parse_l2, MarketType};
 
     #[test]
     fn spot_snapshot() {
@@ -103,6 +112,7 @@ mod l2_orderbook {
             "ftx",
             MarketType::Spot,
             "BTC/USD".to_string(),
+            extract_symbol("ftx", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -138,6 +148,7 @@ mod l2_orderbook {
             "ftx",
             MarketType::Spot,
             "BTC/USD".to_string(),
+            extract_symbol("ftx", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -169,6 +180,7 @@ mod l2_orderbook {
             "ftx",
             MarketType::LinearFuture,
             "BTC/USD".to_string(),
+            extract_symbol("ftx", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -208,6 +220,7 @@ mod l2_orderbook {
             "ftx",
             MarketType::LinearFuture,
             "BTC/USD".to_string(),
+            extract_symbol("ftx", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -237,6 +250,7 @@ mod l2_orderbook {
             "ftx",
             MarketType::LinearSwap,
             "BTC/USD".to_string(),
+            extract_symbol("ftx", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -276,6 +290,7 @@ mod l2_orderbook {
             "ftx",
             MarketType::LinearSwap,
             "BTC/USD".to_string(),
+            extract_symbol("ftx", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
         );
 

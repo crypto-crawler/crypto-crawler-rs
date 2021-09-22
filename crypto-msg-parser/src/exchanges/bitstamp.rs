@@ -44,6 +44,14 @@ struct WebsocketMsg<T: Sized> {
     data: T,
 }
 
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
+    let channel = ws_msg.channel;
+    let pos = channel.rfind('_').unwrap();
+    let symbol = &channel[pos + 1..];
+    Some(symbol.to_string())
+}
+
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<SpotTradeMsg>>(msg)?;
     let symbol = ws_msg.channel.strip_prefix("live_trades_").unwrap();

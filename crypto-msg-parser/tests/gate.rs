@@ -2,7 +2,7 @@ mod utils;
 
 #[cfg(test)]
 mod trade {
-    use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
+    use crypto_msg_parser::{extract_symbol, parse_trade, MarketType, TradeSide};
     use float_cmp::approx_eq;
 
     #[test]
@@ -13,7 +13,13 @@ mod trade {
         assert_eq!(trades.len(), 1);
         let trade = &trades[0];
 
-        crate::utils::check_trade_fields("gate", MarketType::Spot, "BTC/USDT".to_string(), trade);
+        crate::utils::check_trade_fields(
+            "gate",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            extract_symbol("gate", MarketType::Spot, raw_msg).unwrap(),
+            trade,
+        );
 
         assert_eq!(trades[0].quantity_base, 0.0037);
         assert_eq!(trades[0].quantity_quote, 0.0037 * 56173.28);
@@ -29,7 +35,13 @@ mod trade {
         assert_eq!(trades.len(), 1);
         let trade = &trades[0];
 
-        crate::utils::check_trade_fields("gate", MarketType::Spot, "BTC/USDT".to_string(), trade);
+        crate::utils::check_trade_fields(
+            "gate",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            extract_symbol("gate", MarketType::Spot, raw_msg).unwrap(),
+            trade,
+        );
 
         assert_eq!(trades[0].price, 47395.009);
         assert_eq!(trades[0].quantity_base, 0.00052);
@@ -50,6 +62,7 @@ mod trade {
             "gate",
             MarketType::LinearFuture,
             "BTC/USDT".to_string(),
+            extract_symbol("gate", MarketType::LinearFuture, raw_msg).unwrap(),
             trade,
         );
 
@@ -81,6 +94,7 @@ mod trade {
             "gate",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("gate", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
         );
 
@@ -102,6 +116,7 @@ mod trade {
             "gate",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("gate", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
         );
 
@@ -125,7 +140,7 @@ mod trade {
 #[cfg(test)]
 mod l2_orderbook {
     use chrono::prelude::*;
-    use crypto_msg_parser::{parse_l2, MarketType};
+    use crypto_msg_parser::{extract_symbol, parse_l2, MarketType};
     use float_cmp::approx_eq;
 
     #[test]
@@ -147,6 +162,7 @@ mod l2_orderbook {
             "gate",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("gate", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -186,6 +202,7 @@ mod l2_orderbook {
             "gate",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("gate", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -229,6 +246,7 @@ mod l2_orderbook {
             "gate",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("gate", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -264,6 +282,7 @@ mod l2_orderbook {
             "gate",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("gate", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -301,6 +320,7 @@ mod l2_orderbook {
             "gate",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("gate", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -340,6 +360,7 @@ mod l2_orderbook {
             "gate",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("gate", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -409,6 +430,7 @@ mod l2_orderbook {
             "gate",
             MarketType::LinearFuture,
             "BTC/USDT".to_string(),
+            extract_symbol("gate", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -448,6 +470,7 @@ mod l2_orderbook {
             "gate",
             MarketType::LinearFuture,
             "BTC/USDT".to_string(),
+            extract_symbol("gate", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
         );
 

@@ -39,6 +39,22 @@ struct WebsocketMsg<T: Sized> {
     topic: String,
 }
 
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
+    if ws_msg.data.is_object() {
+        Some(ws_msg.data["symbol"].as_str().unwrap().to_string())
+    } else if ws_msg.data.is_array() {
+        let arr = ws_msg.data.as_array().unwrap();
+        let symbols = arr
+            .iter()
+            .map(|v| v["symbol"].as_str().unwrap())
+            .collect::<Vec<&str>>();
+        Some(symbols[0].to_string())
+    } else {
+        panic!("Unknown message format: {}", msg);
+    }
+}
+
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg)?;
     let raw_trades = if ws_msg.code == "00006" {

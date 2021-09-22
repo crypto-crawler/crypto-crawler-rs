@@ -2,14 +2,20 @@ mod utils;
 
 #[cfg(test)]
 mod trade {
-    use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
+    use crypto_msg_parser::{extract_symbol, parse_trade, MarketType, TradeSide};
 
     #[test]
     fn spot() {
         let raw_msg = r#"{"ch":"market.btcusdt.trade.detail","ts":1616243199157,"tick":{"id":123140716701,"ts":1616243199156,"data":[{"id":123140716701236887569077664,"ts":1616243199156,"tradeId":102357140867,"amount":1.98E-4,"price":58911.07,"direction":"sell"}]}}"#;
         let trade = &parse_trade("huobi", MarketType::Spot, raw_msg).unwrap()[0];
 
-        crate::utils::check_trade_fields("huobi", MarketType::Spot, "BTC/USDT".to_string(), trade);
+        crate::utils::check_trade_fields(
+            "huobi",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            extract_symbol("huobi", MarketType::Spot, raw_msg).unwrap(),
+            trade,
+        );
 
         assert_eq!(trade.quantity_base, 1.98E-4);
         assert_eq!(trade.side, TradeSide::Sell);
@@ -23,6 +29,7 @@ mod trade {
             "huobi",
             MarketType::InverseFuture,
             "BTC/USD".to_string(),
+            extract_symbol("huobi", MarketType::InverseFuture, raw_msg).unwrap(),
             trade,
         );
         assert_eq!(trade.quantity_base, 200.0 / 62774.97);
@@ -36,6 +43,7 @@ mod trade {
             "huobi",
             MarketType::InverseFuture,
             "ETH/USD".to_string(),
+            extract_symbol("huobi", MarketType::InverseFuture, raw_msg).unwrap(),
             trade,
         );
         assert_eq!(trade.quantity_base, 20.0 / 1997.132);
@@ -52,6 +60,7 @@ mod trade {
             "huobi",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("huobi", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
         );
         assert_eq!(trade.quantity_base, 600.0 / 58666.3);
@@ -65,6 +74,7 @@ mod trade {
             "huobi",
             MarketType::InverseSwap,
             "ETH/USD".to_string(),
+            extract_symbol("huobi", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
         );
         assert_eq!(trade.quantity_base, 3460.0 / 1849.18);
@@ -81,6 +91,7 @@ mod trade {
             "huobi",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("huobi", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
         );
         assert_eq!(trade.quantity_base, 0.04);
@@ -94,6 +105,7 @@ mod trade {
             "huobi",
             MarketType::LinearSwap,
             "ETH/USDT".to_string(),
+            extract_symbol("huobi", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
         );
         assert_eq!(trade.quantity_base, 0.18);
@@ -113,6 +125,7 @@ mod trade {
                 "huobi",
                 MarketType::EuropeanOption,
                 "BTC/USDT".to_string(),
+                extract_symbol("huobi", MarketType::EuropeanOption, raw_msg).unwrap(),
                 trade,
             );
         }
@@ -170,7 +183,7 @@ mod funding_rate {
 
 #[cfg(test)]
 mod l2_orderbook {
-    use crypto_msg_parser::{parse_l2, MarketType};
+    use crypto_msg_parser::{extract_symbol, parse_l2, MarketType};
     use float_cmp::approx_eq;
 
     #[test]
@@ -186,6 +199,7 @@ mod l2_orderbook {
             "huobi",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("huobi", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -217,6 +231,7 @@ mod l2_orderbook {
             "huobi",
             MarketType::InverseFuture,
             "BTC/USD".to_string(),
+            extract_symbol("huobi", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -256,6 +271,7 @@ mod l2_orderbook {
             "huobi",
             MarketType::InverseFuture,
             "BTC/USD".to_string(),
+            extract_symbol("huobi", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -295,6 +311,7 @@ mod l2_orderbook {
             "huobi",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("huobi", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -334,6 +351,7 @@ mod l2_orderbook {
             "huobi",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("huobi", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -368,6 +386,7 @@ mod l2_orderbook {
             "huobi",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("huobi", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -417,6 +436,7 @@ mod l2_orderbook {
             "huobi",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("huobi", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
         );
 

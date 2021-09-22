@@ -46,9 +46,17 @@ struct OrderbookUpdate {
     extra: HashMap<String, Value>,
 }
 
+pub(crate) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Option<String> {
+    let arr = serde_json::from_str::<Vec<Value>>(msg).unwrap();
+    let symbol = arr[arr.len() - 1].as_str().unwrap();
+    Some(symbol.to_string())
+}
+
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let arr = serde_json::from_str::<Vec<Value>>(msg)?;
-    let symbol = arr[3].as_str().unwrap();
+    debug_assert_eq!(arr[2].as_str().unwrap(), "trade");
+    debug_assert_eq!(arr.len(), 4);
+    let symbol = arr[arr.len() - 1].as_str().unwrap();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
     let raw_trades: Vec<Vec<String>> = serde_json::from_value(arr[1].clone()).unwrap();
 
@@ -91,6 +99,9 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
 pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
     debug_assert_eq!(market_type, MarketType::Spot);
     let arr = serde_json::from_str::<Vec<Value>>(msg)?;
+    debug_assert_eq!(arr[arr.len() - 2].as_str().unwrap(), "book-25");
+    let symbol = arr[arr.len() - 1].as_str().unwrap().to_string();
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
     let snapshot = arr[1].as_object().unwrap().contains_key("as");
 
     let parse_order = |raw_order: &[String]| -> Order {
@@ -105,24 +116,32 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         }
     };
 
-    let orderbook = if snapshot {
-        debug_assert_eq!(arr[2].as_str().unwrap(), "book-25");
-        let symbol = arr[3].as_str().unwrap();
-        let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let orderbooks = if snapshot {
         let orderbook_snapshot = serde_json::from_value::<OrderbookSnapshot>(arr[1].clone())?;
-        let timestamp = if !orderbook_snapshot.asks.is_empty() {
-            Some((orderbook_snapshot.asks[0][2].parse::<f64>().unwrap() * 1000.0) as i64)
-        } else if !orderbook_snapshot.bids.is_empty() {
-            Some((orderbook_snapshot.bids[0][2].parse::<f64>().unwrap() * 1000.0) as i64)
-        } else {
-            None
+
+        let timestamp = {
+            let mut timestamps: Vec<i64> = Vec::new();
+            for ask in orderbook_snapshot.asks.iter() {
+                let t = (ask[2].parse::<f64>().unwrap() * 1000.0) as i64;
+                timestamps.push(t);
+            }
+            for bid in orderbook_snapshot.bids.iter() {
+                let t = (bid[2].parse::<f64>().unwrap() * 1000.0) as i64;
+                timestamps.push(t);
+            }
+            if timestamps.is_empty() {
+                None
+            } else {
+                let max = *timestamps.iter().max().unwrap();
+                Some(max)
+            }
         };
 
         if let Some(timestamp) = timestamp {
-            Some(OrderBookMsg {
+            vec![OrderBookMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type: MarketType::Spot,
-                symbol: symbol.to_string(),
+                symbol,
                 pair,
                 msg_type: MessageType::L2Event,
                 timestamp,
@@ -138,75 +157,55 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
                     .collect(),
                 snapshot,
                 json: msg.to_string(),
-            })
+            }]
         } else {
-            None
+            vec![]
         }
     } else {
-        let symbol = if arr.len() == 4 {
-            debug_assert_eq!(arr[2].as_str().unwrap(), "book-25");
-            arr[3].as_str().unwrap()
-        } else if arr.len() == 5 {
-            debug_assert_eq!(arr[3].as_str().unwrap(), "book-25");
-            arr[4].as_str().unwrap()
-        } else {
-            panic!("Unknown format: {}", msg);
-        };
-        let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
-
-        let orderbook_updates = serde_json::from_value::<OrderbookUpdate>(arr[1].clone())?;
-        let timestamp = if orderbook_updates.a.is_some() {
-            let t = (orderbook_updates.a.clone().unwrap()[0][2]
-                .parse::<f64>()
-                .unwrap()
-                * 1000.0) as i64;
-            Some(t)
-        } else if orderbook_updates.b.is_some() {
-            let t = (orderbook_updates.b.clone().unwrap()[0][2]
-                .parse::<f64>()
-                .unwrap()
-                * 1000.0) as i64;
-            Some(t)
-        } else {
-            None
-        };
-
-        if let Some(timestamp) = timestamp {
-            let mut asks: Vec<Order> = Vec::new();
-            let mut bids: Vec<Order> = Vec::new();
-
-            for x in orderbook_updates.a.iter() {
-                for raw_order in x.iter() {
+        let mut asks: Vec<Order> = Vec::new();
+        let mut bids: Vec<Order> = Vec::new();
+        let mut timestamps: Vec<i64> = Vec::new();
+        let mut process_update = |update: OrderbookUpdate| {
+            if let Some(a) = update.a {
+                for raw_order in a.iter() {
                     let order = parse_order(raw_order);
                     asks.push(order);
+                    let t = (raw_order[2].parse::<f64>().unwrap() * 1000.0) as i64;
+                    timestamps.push(t);
                 }
             }
-            for x in orderbook_updates.b.iter() {
-                for raw_order in x.iter() {
+            if let Some(b) = update.b {
+                for raw_order in b.iter() {
                     let order = parse_order(raw_order);
                     bids.push(order);
+                    let t = (raw_order[2].parse::<f64>().unwrap() * 1000.0) as i64;
+                    timestamps.push(t);
                 }
             }
-            if arr.len() == 5 {
-                let orderbook_updates = serde_json::from_value::<OrderbookUpdate>(arr[2].clone())?;
-                for x in orderbook_updates.a.iter() {
-                    for raw_order in x.iter() {
-                        let order = parse_order(raw_order);
-                        asks.push(order);
-                    }
-                }
-                for x in orderbook_updates.b.iter() {
-                    for raw_order in x.iter() {
-                        let order = parse_order(raw_order);
-                        bids.push(order);
-                    }
-                }
-            }
+        };
+        if arr.len() == 4 {
+            let update = serde_json::from_value::<OrderbookUpdate>(arr[1].clone())?;
+            process_update(update);
+        } else if arr.len() == 5 {
+            let update = serde_json::from_value::<OrderbookUpdate>(arr[1].clone())?;
+            process_update(update);
+            let update = serde_json::from_value::<OrderbookUpdate>(arr[2].clone())?;
+            process_update(update);
+        } else {
+            panic!("Unknown message format {}", msg);
+        };
 
-            Some(OrderBookMsg {
+        let timestamp = if timestamps.is_empty() {
+            None
+        } else {
+            let max = *timestamps.iter().max().unwrap();
+            Some(max)
+        };
+        if let Some(timestamp) = timestamp {
+            vec![OrderBookMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type: MarketType::Spot,
-                symbol: symbol.to_string(),
+                symbol,
                 pair,
                 msg_type: MessageType::L2Event,
                 timestamp,
@@ -214,15 +213,11 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
                 bids,
                 snapshot,
                 json: msg.to_string(),
-            })
+            }]
         } else {
-            None
+            vec![]
         }
     };
 
-    if let Some(orderbook) = orderbook {
-        Ok(vec![orderbook])
-    } else {
-        Ok(vec![])
-    }
+    Ok(orderbooks)
 }

@@ -60,6 +60,43 @@ struct SwapTradeMsg {
     extra: HashMap<String, Value>,
 }
 
+pub(super) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Option<String> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
+    let result = ws_msg.result;
+    if ws_msg.channel == "futures.trades" {
+        let symbols = result
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|trade_msg| trade_msg["contract"].as_str().unwrap())
+            .collect::<Vec<&str>>();
+        Some(symbols[0].to_string())
+    } else if ws_msg.channel == "futures.order_book" {
+        if ws_msg.event == "all" {
+            Some(result["contract"].as_str().unwrap().to_string())
+        } else {
+            debug_assert_eq!(ws_msg.event, "update");
+            let arr = result.as_array().unwrap();
+            let symbols = arr
+                .iter()
+                .map(|x| x.as_object().unwrap())
+                .map(|x| {
+                    if x.contains_key("contract") {
+                        x["contract"].as_str().unwrap()
+                    } else {
+                        x["c"].as_str().unwrap()
+                    }
+                })
+                .collect::<Vec<&str>>();
+            Some(symbols[0].to_string())
+        }
+    } else if ws_msg.channel == "futures.order_book_update" {
+        Some(result["s"].as_str().unwrap().to_string())
+    } else {
+        panic!("Unknown message format: {}", msg);
+    }
+}
+
 pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     match market_type {
         MarketType::LinearFuture => {

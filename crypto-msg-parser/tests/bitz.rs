@@ -1,6 +1,6 @@
 mod utils;
 
-use crypto_msg_parser::{parse_l2, parse_trade, MarketType, TradeSide};
+use crypto_msg_parser::{extract_symbol, parse_l2, parse_trade, MarketType, TradeSide};
 
 #[test]
 fn trade() {
@@ -10,7 +10,13 @@ fn trade() {
     assert_eq!(trades.len(), 2);
 
     for trade in trades.iter() {
-        crate::utils::check_trade_fields("bitz", MarketType::Spot, "BTC/USDT".to_string(), trade);
+        crate::utils::check_trade_fields(
+            "bitz",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            extract_symbol("bitz", MarketType::Spot, raw_msg).unwrap(),
+            trade,
+        );
     }
 
     assert_eq!(trades[0].side, TradeSide::Sell);
@@ -33,6 +39,7 @@ fn l2_orderbook_update() {
         "bitz",
         MarketType::Spot,
         "BTC/USDT".to_string(),
+        extract_symbol("bitz", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
     );
 

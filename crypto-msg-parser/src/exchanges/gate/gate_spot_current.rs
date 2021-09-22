@@ -51,8 +51,20 @@ struct SpotOrderbookSnapshotMsg {
     extra: HashMap<String, Value>,
 }
 
+pub(super) fn extract_symbol(msg: &str) -> Option<String> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
+    if ws_msg.channel == "spot.trades" {
+        Some(ws_msg.result["currency_pair"].as_str().unwrap().to_string())
+    } else if ws_msg.channel.starts_with("spot.order_book") {
+        Some(ws_msg.result["s"].as_str().unwrap().to_string())
+    } else {
+        panic!("Unsupported message format: {}", msg);
+    }
+}
+
 pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<SpotTradeMsg>>(msg)?;
+    debug_assert_eq!(ws_msg.channel, "spot.trades");
     debug_assert_eq!(ws_msg.event, "update");
     let result = ws_msg.result;
     let symbol = result.currency_pair;

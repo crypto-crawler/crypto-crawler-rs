@@ -48,6 +48,23 @@ struct WebsocketMsg<T: Sized> {
     params: Params<T>,
 }
 
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
+    let data = ws_msg.params.data;
+    if data.is_object() {
+        Some(data["instrument_name"].as_str().unwrap().to_string())
+    } else if data.is_array() {
+        let arr = data.as_array().unwrap();
+        let symbols = arr
+            .iter()
+            .map(|v| v["instrument_name"].as_str().unwrap())
+            .collect::<Vec<&str>>();
+        Some(symbols[0].to_string())
+    } else {
+        panic!("Unknown message format: {}", msg);
+    }
+}
+
 fn calc_quantity_and_volume(market_type: MarketType, price: f64, amount: f64) -> (f64, f64) {
     match market_type {
         MarketType::InverseSwap | MarketType::InverseFuture => {

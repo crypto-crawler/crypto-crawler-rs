@@ -38,6 +38,17 @@ struct SpotWebsocketMsg {
     extra: HashMap<String, Value>,
 }
 
+pub(super) fn extract_symbol(msg: &str) -> Option<String> {
+    let ws_msg = serde_json::from_str::<SpotWebsocketMsg>(msg).unwrap();
+    if ws_msg.method == "trades.update" {
+        Some(ws_msg.params[0].as_str().unwrap().to_string())
+    } else if ws_msg.method == "depth.update" {
+        Some(ws_msg.params[2].as_str().unwrap().to_string())
+    } else {
+        panic!("Unsupported message format: {}", msg);
+    }
+}
+
 #[deprecated(since = "1.3.7", note = "Gate has new data format since 2020-09-16")]
 pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<SpotWebsocketMsg>(msg)?;

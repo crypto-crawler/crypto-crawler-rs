@@ -2,7 +2,7 @@ mod utils;
 
 #[cfg(test)]
 mod trade {
-    use crypto_msg_parser::{parse_trade, MarketType, TradeSide};
+    use crypto_msg_parser::{extract_symbol, parse_trade, MarketType, TradeSide};
     use float_cmp::approx_eq;
 
     #[test]
@@ -13,7 +13,13 @@ mod trade {
         assert_eq!(trades.len(), 1);
         let trade = &trades[0];
 
-        crate::utils::check_trade_fields("mxc", MarketType::Spot, "BTC/USDT".to_string(), trade);
+        crate::utils::check_trade_fields(
+            "mxc",
+            MarketType::Spot,
+            "BTC/USDT".to_string(),
+            extract_symbol("mxc", MarketType::Spot, raw_msg).unwrap(),
+            trade,
+        );
 
         assert_eq!(trade.quantity_base, 0.007811);
         assert_eq!(trade.side, TradeSide::Buy);
@@ -31,6 +37,7 @@ mod trade {
             "mxc",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("mxc", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
         );
 
@@ -62,6 +69,7 @@ mod trade {
             "mxc",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("mxc", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
         );
 
@@ -80,7 +88,7 @@ mod trade {
 #[cfg(test)]
 mod l2_orderbook {
     use chrono::prelude::*;
-    use crypto_msg_parser::{parse_l2, MarketType};
+    use crypto_msg_parser::{extract_symbol, parse_l2, MarketType};
 
     #[test]
     fn spot_update() {
@@ -101,6 +109,7 @@ mod l2_orderbook {
             "mxc",
             MarketType::Spot,
             "BTC/USDT".to_string(),
+            extract_symbol("mxc", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -122,6 +131,7 @@ mod l2_orderbook {
             "mxc",
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
+            extract_symbol("mxc", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
         );
 
@@ -146,6 +156,7 @@ mod l2_orderbook {
             "mxc",
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
+            extract_symbol("mxc", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
         );
 

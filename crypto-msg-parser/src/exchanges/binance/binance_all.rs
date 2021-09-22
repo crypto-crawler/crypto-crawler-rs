@@ -74,7 +74,7 @@ struct WebsocketMsg<T: Sized> {
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let obj = serde_json::from_str::<HashMap<String, Value>>(msg)?;
     let data = obj.get("data").unwrap();
-    let event_type = data.get("e").unwrap().as_str().unwrap();
+    let event_type = data["e"].as_str().unwrap();
 
     match event_type {
         "aggTrade" => {
