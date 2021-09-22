@@ -88,12 +88,12 @@ pub(crate) fn parse_l2(
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
 
     let data = ws_msg[1].clone();
+    if data.as_array().unwrap().is_empty() {
+        return Ok(vec![]);
+    }
 
     let snapshot = {
         let arr = data.as_array().unwrap();
-        if arr.is_empty() {
-            panic!("{}", msg);
-        }
         arr[0].is_array()
     };
 
