@@ -16,6 +16,10 @@ fn trade() {
 
 #[test]
 fn l2_orderbook_snapshot() {
+    let raw_msg = r#"[6304,{"as":[],"bs":[]},"book-25","PERP/EUR"]"#;
+    let result = parse_l2("kraken", MarketType::Spot, raw_msg, None);
+    assert!(result.unwrap().is_empty());
+
     let raw_msg = r#"[320,{"as":[["39090.60000","0.00007039","1622714245.847093"],["39094.90000","0.20000000","1622714255.810162"],["39096.20000","0.25584089","1622714249.255261"]],"bs":[["39071.40000","7.93106570","1622714255.963942"],["39071.30000","0.01090000","1622714249.826684"],["39071.20000","0.76000000","1622714253.348549"]]},"book-25","XBT/USD"]"#;
     let orderbook = &parse_l2("kraken", MarketType::Spot, raw_msg, None).unwrap()[0];
 
