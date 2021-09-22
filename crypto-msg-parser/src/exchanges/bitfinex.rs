@@ -91,6 +91,9 @@ pub(crate) fn parse_l2(
 
     let snapshot = {
         let arr = data.as_array().unwrap();
+        if arr.is_empty() {
+            panic!("{}", msg);
+        }
         arr[0].is_array()
     };
 
