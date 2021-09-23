@@ -71,13 +71,12 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
     Ok(vec![trade])
 }
 
-pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
+pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<SpotOrderbookMsg>>(msg)?;
     debug_assert_eq!(ws_msg.subject, "trade.l2update");
     debug_assert!(ws_msg.topic.starts_with("/market/level2:"));
     let symbol = ws_msg.data.symbol;
     let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
-    let timestamp = ws_msg.data.sequenceEnd;
 
     let parse_order = |raw_order: &[String; 3]| -> Order {
         let price = raw_order[0].parse::<f64>().unwrap();

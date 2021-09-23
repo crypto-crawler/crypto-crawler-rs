@@ -89,7 +89,7 @@ pub fn parse_l2(
         "gate" => exchanges::gate::parse_l2(market_type, msg, timestamp),
         "huobi" => exchanges::huobi::parse_l2(market_type, msg),
         "kraken" => exchanges::kraken::parse_l2(market_type, msg),
-        "kucoin" => exchanges::kucoin::parse_l2(market_type, msg),
+        "kucoin" => exchanges::kucoin::parse_l2(market_type, msg, timestamp),
         "mxc" => exchanges::mxc::parse_l2(market_type, msg, timestamp),
         "okex" => exchanges::okex::parse_l2(market_type, msg),
         "zbg" => exchanges::zbg::parse_l2(market_type, msg),

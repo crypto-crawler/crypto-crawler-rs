@@ -110,12 +110,13 @@ mod l2_orderbook {
     #[test]
     fn spot_update() {
         let raw_msg = r#"{"data":{"sequenceStart":1617071937790,"symbol":"BTC-USDT","changes":{"asks":[],"bids":[["39272","0.0530867","1617071937790"]]},"sequenceEnd":1617071937790},"subject":"trade.l2update","topic":"/market/level2:BTC-USDT","type":"message"}"#;
-        let orderbook = &parse_l2("kucoin", MarketType::Spot, raw_msg, None).unwrap()[0];
+        let orderbook =
+            &parse_l2("kucoin", MarketType::Spot, raw_msg, Some(1625097804231)).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 0);
         assert_eq!(orderbook.bids.len(), 1);
         assert!(!orderbook.snapshot);
-        assert_eq!(orderbook.timestamp, 1617071937790);
+        assert_eq!(orderbook.timestamp, 1625097804231);
 
         crate::utils::check_orderbook_fields(
             "kucoin",

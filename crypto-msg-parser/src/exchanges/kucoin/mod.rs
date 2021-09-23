@@ -25,9 +25,13 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     }
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+    timestamp: Option<i64>,
+) -> Result<Vec<OrderBookMsg>> {
     if market_type == MarketType::Spot {
-        kucoin_spot::parse_l2(msg)
+        kucoin_spot::parse_l2(msg, timestamp.unwrap())
     } else {
         kucoin_swap::parse_l2(market_type, msg)
     }
