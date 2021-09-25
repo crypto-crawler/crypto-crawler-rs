@@ -7,7 +7,7 @@ COPY ./Cargo.toml ./Cargo.toml
 COPY ./src/ ./src/
 
 RUN apt -qy update && apt -qy install pkg-config libssl-dev \
- && cargo build --release
+ && RUSTFLAGS="-C target-cpu=x86-64-v3" cargo build --release
 
 
 FROM node:buster-slim
