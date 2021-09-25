@@ -50,6 +50,7 @@ impl BitzSwapRestClient {
 struct SwapMarket {
     contractId: String, // contract id
     pair: String,       //contract market
+    status: String,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -74,7 +75,9 @@ fn get_symbol_id_map() -> Result<HashMap<String, String>> {
 
     let mut symbol_id_map = HashMap::<String, String>::new();
     for x in resp.data.iter() {
-        symbol_id_map.insert(x.pair.clone(), x.contractId.clone());
+        if x.status == "1" {
+            symbol_id_map.insert(x.pair.clone(), x.contractId.clone());
+        }
     }
     Ok(symbol_id_map)
 }
