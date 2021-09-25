@@ -13,7 +13,7 @@ const LINEAR_FUTURE_WEBSOCKET_URL: &str = "wss://fx-ws.gateio.ws/v4/ws/delivery/
 
 /// The WebSocket client for Gate InverseFuture market.
 ///
-/// * WebSocket API doc: <https://www.gate.io/docs/delivery/ws/en/>
+/// * WebSocket API doc: <https://www.gate.io/docs/delivery/ws/en/index.html>
 /// * Trading at <https://www.gate.io/cn/futures-delivery/btc>
 pub struct GateInverseFutureWSClient<'a> {
     client: WSClientInternal<'a>,
@@ -21,7 +21,7 @@ pub struct GateInverseFutureWSClient<'a> {
 
 /// The WebSocket client for Gate LinearFuture market.
 ///
-/// * WebSocket API doc: <https://www.gate.io/docs/delivery/ws/en/>
+/// * WebSocket API doc: <https://www.gate.io/docs/delivery/ws/en/index.html>
 /// * Trading at <https://www.gate.io/cn/futures-delivery/usdt>
 pub struct GateLinearFutureWSClient<'a> {
     client: WSClientInternal<'a>,
