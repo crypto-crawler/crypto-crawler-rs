@@ -6,7 +6,7 @@ const BASE_URL: &str = "https://api.gateio.ws/api/v4";
 
 /// The RESTful client for Gate Swap markets.
 ///
-/// * RESTful API doc: <https://www.gateio.pro/docs/apiv4/zh_CN/index.html#gate-api-v4-futures>
+/// * RESTful API doc: <https://www.gate.io/docs/apiv4/en/index.html#futures>
 /// * Trading at: <https://www.gateio.pro/cn/futures_trade/USDT/BTC_USDT>
 pub struct GateSwapRestClient {
     _api_key: Option<String>,
