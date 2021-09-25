@@ -6,7 +6,7 @@ const BASE_URL: &str = "https://api.gateio.ws/api/v4";
 
 /// The RESTful client for Gate Future markets.
 ///
-/// * RESTful API doc: <https://www.gateio.pro/docs/apiv4/zh_CN/index.html#gate-api-v4-delivery>
+/// * RESTful API doc: <https://www.gate.io/docs/apiv4/en/index.html#delivery>
 /// * Trading at: <https://www.gateio.pro/cn/futures-delivery/usdt>
 pub struct GateFutureRestClient {
     _api_key: Option<String>,
@@ -27,7 +27,7 @@ impl GateFutureRestClient {
     ///
     /// For example:
     ///
-    /// - <https://api.gateio.ws/api/v4/delivery/usdt/order_book?contract=BTC_USDT_20210625&limit=50>
+    /// - <https://api.gateio.ws/api/v4/delivery/usdt/order_book?contract=BTC_USDT_20211001&limit=50>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         let without_date = &symbol[..(symbol.len() - 8)];
         let settle = if without_date.ends_with("_USD_") {
