@@ -2,7 +2,7 @@
 name = "crypto-rest-client"
 version = "0.6.6"
 authors = ["soulmachine <soulmachine@gmail.com>"]
-edition = "2018"
+edition = "2021"
 description   = "An restful client for all cryptocurrency exchanges."
 license = "Apache-2.0"
 repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-rest-client"

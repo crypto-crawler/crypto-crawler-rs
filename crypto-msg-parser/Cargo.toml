@@ -2,7 +2,7 @@
 name = "crypto-msg-parser"
 version = "1.4.9"
 authors = ["soulmachine <soulmachine@gmail.com>"]
-edition = "2018"
+edition = "2021"
 description = "Parse websocket messages from cryptocurreny exchanges"
 license = "Apache-2.0"
 repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-msg-parser"

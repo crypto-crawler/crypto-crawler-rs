@@ -2,7 +2,7 @@
 name = "crypto-pair"
 version = "2.0.6"
 authors = ["soulmachine <soulmachine@gmail.com>"]
-edition = "2018"
+edition = "2021"
 description   = "Normalize cryptocurrency trading pairs"
 license = "Apache-2.0"
 repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-pair"
