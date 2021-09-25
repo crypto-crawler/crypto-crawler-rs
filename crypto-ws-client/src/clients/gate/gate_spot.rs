@@ -15,7 +15,7 @@ const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (60, r#"{"channel":"spot.ping"
 
 /// The WebSocket client for Gate spot market.
 ///
-/// * WebSocket API doc: <https://www.gate.io/docs/apiv4/ws/en/>
+/// * WebSocket API doc: <https://www.gate.io/docs/apiv4/ws/en/index.html>
 /// * Trading at <https://www.gate.io/en/trade/BTC_USDT>
 pub struct GateSpotWSClient<'a> {
     client: WSClientInternal<'a>,

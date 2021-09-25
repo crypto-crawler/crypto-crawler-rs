@@ -134,7 +134,7 @@ impl_trait!(Ticker, BinanceWSClient, subscribe_ticker, "ticker", to_raw_channel)
 #[rustfmt::skip]
 impl_trait!(BBO, BinanceWSClient, subscribe_bbo, "bookTicker", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBook, BinanceWSClient, subscribe_orderbook, "depth@100ms", to_raw_channel);
+impl_trait!(OrderBook, BinanceWSClient, subscribe_orderbook, "depth", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBookSnapshot, BinanceWSClient, subscribe_orderbook_snapshot, "depth20", to_raw_channel);
 

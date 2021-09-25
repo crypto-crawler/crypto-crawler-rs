@@ -21,7 +21,7 @@ pub struct GateInverseSwapWSClient<'a> {
 
 /// The WebSocket client for Gate LinearSwap market.
 ///
-/// * WebSocket API doc: <https://www.gate.io/docs/futures/ws/en/>
+/// * WebSocket API doc: <https://www.gate.io/docs/futures/ws/en/index.html>
 /// * Trading at <https://www.gate.io/cn/futures_trade/USDT/BTC_USDT>
 pub struct GateLinearSwapWSClient<'a> {
     client: WSClientInternal<'a>,

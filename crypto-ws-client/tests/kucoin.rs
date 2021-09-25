@@ -282,7 +282,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe,
-            &vec!["/contractMarket/execution:XBTMU21".to_string()]
+            &vec!["/contractMarket/execution:XBTMZ21".to_string()]
         );
     }
 
@@ -292,7 +292,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe,
-            &vec![r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/contractMarket/execution:XBTMU21","privateChannel":false,"response":true}"#.to_string()]
+            &vec![r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/contractMarket/execution:XBTMZ21","privateChannel":false,"response":true}"#.to_string()]
         );
     }
 
@@ -302,7 +302,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_trade,
-            &vec!["XBTMU21".to_string()]
+            &vec!["XBTMZ21".to_string()]
         );
     }
 
@@ -312,7 +312,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_bbo,
-            &vec!["XBTMU21".to_string()]
+            &vec!["XBTMZ21".to_string()]
         );
     }
 
@@ -321,7 +321,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_orderbook,
-            &vec!["XBTMU21".to_string()]
+            &vec!["XBTMZ21".to_string()]
         );
     }
 
@@ -330,7 +330,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_l3_orderbook,
-            &vec!["XBTMU21".to_string()]
+            &vec!["XBTMZ21".to_string()]
         );
     }
 
@@ -339,7 +339,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_orderbook_snapshot,
-            &vec!["XBTMU21".to_string()]
+            &vec!["XBTMZ21".to_string()]
         );
     }
 
@@ -348,14 +348,14 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_ticker,
-            &vec!["XBTMU21".to_string()]
+            &vec!["XBTMZ21".to_string()]
         );
     }
 
     #[test]
     #[ignore]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(KuCoinSwapWSClient, &vec!["XBTMU21".to_string()], 60);
-        gen_test_subscribe_candlestick!(KuCoinSwapWSClient, &vec!["XBTMU21".to_string()], 604800);
+        gen_test_subscribe_candlestick!(KuCoinSwapWSClient, &vec!["XBTMZ21".to_string()], 60);
+        gen_test_subscribe_candlestick!(KuCoinSwapWSClient, &vec!["XBTMZ21".to_string()], 604800);
     }
 }
