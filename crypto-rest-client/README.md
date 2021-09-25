@@ -1,6 +1,6 @@
 # crypto-rest-client
 
-A restful client for all cryptocurrency exchanges.
+An RESTful client for all cryptocurrency exchanges.
 
 ## Example
 
