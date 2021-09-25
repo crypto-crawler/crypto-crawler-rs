@@ -33,6 +33,6 @@ fn fetch_linear_swap_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
-        assert!(symbol.ends_with("_USDT") || symbol.ends_with("_USD"));
+        assert!(symbol.ends_with("_USDT"));
     }
 }
