@@ -2,7 +2,7 @@
 name = "crypto-markets"
 version = "0.7.1"
 authors = ["soulmachine <soulmachine@gmail.com>"]
-edition = "2018"
+edition = "2021"
 description   = "Get all trading pairs of a cryptocurrency exchange"
 license = "Apache-2.0"
 repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-markets"
