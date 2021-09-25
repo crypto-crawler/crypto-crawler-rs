@@ -129,12 +129,12 @@ pub trait WSClient<'a> {
     ///
     /// This function subscribes to exchange specific channels as the following:
     ///
-    /// * Binance `depth@100ms`
+    /// * Binance `depth`
     /// * Bitfinex `book` channel with `prec=P0`, `frec=F0` and `len=25`
     /// * BitMEX `orderBookL2_25`
     /// * Bitstamp `diff_order_book`, top 100
     /// * CoinbasePro `level2`
-    /// * Huobi `depth.size_150.high_freq` with `data_type=incremental` for contracts, `mbp.150` for Spot
+    /// * Huobi `depth.size_20.high_freq` with `data_type=incremental` for contracts, `mbp.20` for Spot
     /// * Kraken `book` with `depth=25`
     /// * MXC `depth` for Swap, `symbol` for Spot
     /// * OKEx `depth_l2_tbt`, top 100

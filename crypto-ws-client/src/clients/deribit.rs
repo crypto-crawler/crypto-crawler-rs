@@ -129,7 +129,7 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
         "trade" => format!("trades.{}.raw", pair),
         "ticker" => format!("ticker.{}.100ms", pair),
         "orderbook" => format!("book.{}.100ms", pair),
-        "orderbook_snapshot" => format!("book.{}.none.20.100ms", pair),
+        "orderbook_snapshot" => format!("book.{}.5.20.100ms", pair),
         "bbo" => format!("quote.{}", pair),
         _ => panic!("Unknown channel {}", channel),
     }

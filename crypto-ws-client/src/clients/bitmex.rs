@@ -114,7 +114,7 @@ impl_trait!(BBO, BitmexWSClient, subscribe_bbo, "quote", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, BitmexWSClient, subscribe_orderbook, "orderBookL2_25", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, BitmexWSClient, subscribe_orderbook_snapshot, "orderBook10", to_raw_channel);
+impl_trait!(OrderBookSnapshot, BitmexWSClient, subscribe_orderbook_snapshot, "orderBookL2", to_raw_channel);
 
 impl<'a> Ticker for BitmexWSClient<'a> {
     fn subscribe_ticker(&self, _pairs: &[String]) {

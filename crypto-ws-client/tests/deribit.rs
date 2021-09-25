@@ -36,7 +36,7 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_trade,
-            &vec!["BTC-24SEP21".to_string(), "BTC-24SEP21".to_string()]
+            &vec!["BTC-31DEC21".to_string(), "BTC-31DEC21".to_string()]
         );
     }
 
@@ -45,7 +45,7 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_ticker,
-            &vec!["BTC-24SEP21".to_string()]
+            &vec!["BTC-31DEC21".to_string()]
         );
     }
 
@@ -54,7 +54,7 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_orderbook,
-            &vec!["BTC-24SEP21".to_string()]
+            &vec!["BTC-31DEC21".to_string()]
         );
     }
 
@@ -63,14 +63,14 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_orderbook_snapshot,
-            &vec!["BTC-24SEP21".to_string()]
+            &vec!["BTC-31DEC21".to_string()]
         );
     }
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(DeribitWSClient, &vec!["BTC-24SEP21".to_string()], 60);
-        gen_test_subscribe_candlestick!(DeribitWSClient, &vec!["BTC-24SEP21".to_string()], 86400);
+        gen_test_subscribe_candlestick!(DeribitWSClient, &vec!["BTC-31DEC21".to_string()], 60);
+        gen_test_subscribe_candlestick!(DeribitWSClient, &vec!["BTC-31DEC21".to_string()], 86400);
     }
 }
 
@@ -136,6 +136,13 @@ mod deribit_option {
     use crypto_ws_client::{DeribitWSClient, WSClient};
     use std::sync::{Arc, Mutex};
 
+    const SYMBOLS: &'static [&str] = &[
+        "BTC-26SEP21-40000-P",
+        "BTC-31DEC21-300000-C",
+        "BTC-1OCT21-40000-P",
+        "BTC-1OCT21-39000-P",
+    ];
+
     #[test]
     fn subscribe() {
         gen_test_code!(
@@ -151,12 +158,10 @@ mod deribit_option {
         gen_test_code!(
             DeribitWSClient,
             subscribe_trade,
-            &vec![
-                "BTC-3SEP21-48000-C".to_string(),
-                "BTC-10SEP21-52000-C".to_string(),
-                "BTC-3SEP21-38000-P".to_string(),
-                "BTC-3SEP21-44000-P".to_string(),
-            ]
+            &SYMBOLS
+                .iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>()
         );
     }
 
@@ -165,7 +170,10 @@ mod deribit_option {
         gen_test_code!(
             DeribitWSClient,
             subscribe_ticker,
-            &vec!["BTC-10SEP21-52000-C".to_string()]
+            &SYMBOLS
+                .iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>()
         );
     }
 
@@ -174,7 +182,10 @@ mod deribit_option {
         gen_test_code!(
             DeribitWSClient,
             subscribe_orderbook,
-            &vec!["BTC-10SEP21-52000-C".to_string()]
+            &SYMBOLS
+                .iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>()
         );
     }
 
@@ -183,7 +194,10 @@ mod deribit_option {
         gen_test_code!(
             DeribitWSClient,
             subscribe_orderbook_snapshot,
-            &vec!["BTC-10SEP21-52000-C".to_string()]
+            &SYMBOLS
+                .iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>()
         );
     }
 
@@ -191,12 +205,18 @@ mod deribit_option {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             DeribitWSClient,
-            &vec!["BTC-10SEP21-52000-C".to_string()],
+            &SYMBOLS
+                .iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>(),
             60
         );
         gen_test_subscribe_candlestick!(
             DeribitWSClient,
-            &vec!["BTC-10SEP21-52000-C".to_string()],
+            &SYMBOLS
+                .iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>(),
             86400
         );
     }
