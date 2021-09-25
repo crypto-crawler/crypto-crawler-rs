@@ -13,7 +13,7 @@ const LINEAR_SWAP_WEBSOCKET_URL: &str = "wss://fx-ws.gateio.ws/v4/ws/usdt";
 
 /// The WebSocket client for Gate InverseSwap market.
 ///
-/// * WebSocket API doc: <https://www.gate.io/docs/futures/ws/en/>
+/// * WebSocket API doc: <https://www.gate.io/docs/futures/ws/en/index.html>
 /// * Trading at <https://www.gate.io/cn/futures_trade/BTC/BTC_USD>
 pub struct GateInverseSwapWSClient<'a> {
     client: WSClientInternal<'a>,
