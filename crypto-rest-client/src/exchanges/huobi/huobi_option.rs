@@ -9,6 +9,8 @@ const BASE_URL: &str = "https://api.hbdm.com/option-ex";
 ///
 /// * REST API doc: <https://huobiapi.github.io/docs/option/v1/en/>
 /// * Trading at: <https://futures.huobi.com/en-us/option/exchange/>
+/// * Rate Limits: <https://huobiapi.github.io/docs/option/v1/en/#api-rate-limit-illustration>
+///   * For restful interfaces：all products(futures, coin margined swap, usdt margined swap and option) 800 times/second for one IP at most
 pub struct HuobiOptionRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,

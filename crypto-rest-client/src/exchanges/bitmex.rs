@@ -8,8 +8,11 @@ const BASE_URL: &str = "https://www.bitmex.com/api/v1";
 ///
 /// BitMEX has Swap and Future markets.
 ///
-///   * REST API doc: <https://www.bitmex.com/api/explorer/>
-///   * Trading at: <https://www.bitmex.com/app/trade/>
+/// * REST API doc: <https://www.bitmex.com/api/explorer/>
+/// * Trading at: <https://www.bitmex.com/app/trade/>
+/// * Rate Limits: <https://www.bitmex.com/app/restAPI#Limits>
+///   * 60 requests per minute on all routes (reduced to 30 when unauthenticated)
+///   * 10 requests per second on certain routes (see below)
 pub struct BitmexRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,

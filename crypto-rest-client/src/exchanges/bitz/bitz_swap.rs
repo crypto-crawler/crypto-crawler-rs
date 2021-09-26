@@ -11,6 +11,8 @@ const BASE_URL: &str = "https://apiv2.bitz.com";
 ///
 /// * RESTful API doc: <https://apidocv2.bitz.plus/en/>
 /// * Trading at: <https://swap.bitz.plus/en/>
+/// * Rate Limits: <https://apidocv2.bitz.plus/en/#limit>
+///   * no more than 30 times within 1 sec
 pub struct BitzSwapRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,

@@ -7,8 +7,10 @@ const BASE_URL: &str = "https://dapi.binance.com";
 
 /// Binance Coin-margined Future and Swap market
 ///
-///   * REST API doc: <https://binance-docs.github.io/apidocs/delivery/en/>
-///   * Trading at: <https://www.binance.com/en/delivery/btcusd_perpetual>
+/// * REST API doc: <https://binance-docs.github.io/apidocs/delivery/en/>
+/// * Trading at: <https://www.binance.com/en/delivery/btcusd_perpetual>
+/// Rate Limits: <https://binance-docs.github.io/apidocs/delivery/en/#limits>
+///   * 2400 request weight per minute
 pub struct BinanceInverseRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,

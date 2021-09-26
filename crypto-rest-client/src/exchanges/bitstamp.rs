@@ -8,8 +8,10 @@ const BASE_URL: &str = "https://www.bitstamp.net/api";
 ///
 /// Bitstamp has only Spot market.
 ///
-///   * REST API doc: <https://www.bitstamp.net/api/>
-///   * Trading at: <https://www.bitstamp.net/market/tradeview/>
+/// * REST API doc: <https://www.bitstamp.net/api/>
+/// * Trading at: <https://www.bitstamp.net/market/tradeview/>
+/// * Rate Limits: <https://www.bitstamp.net/api/#what-is-api>
+///   * Do not make more than 8000 requests per 10 minutes or we will ban your IP address.
 pub struct BitstampRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,

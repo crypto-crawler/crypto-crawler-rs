@@ -7,8 +7,11 @@ const BASE_URL: &str = "https://api.binance.com";
 
 /// Binance Spot market.
 ///
-///   * RESTful API doc: <https://binance-docs.github.io/apidocs/spot/en/>
-///   * Trading at: <https://www.binance.com/en/trade/BTC_USDT>
+/// * RESTful API doc: <https://binance-docs.github.io/apidocs/spot/en/>
+/// * Trading at: <https://www.binance.com/en/trade/BTC_USDT>
+/// * Rate Limits: <https://binance-docs.github.io/apidocs/spot/en/#limits>
+///   * 1200 request weight per minute
+///   * 6100 raw requests per 5 minutes
 pub struct BinanceSpotRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,

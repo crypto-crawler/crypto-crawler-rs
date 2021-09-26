@@ -45,10 +45,11 @@ impl BitfinexRestClient {
     /// Equivalent to `/v2/book/Symbol/P0` with `len=100`
     ///
     /// For example: <https://api-pub.bitfinex.com/v2/book/tBTCUSD/P0?len=100>
-    /// /v2/book/Symbol/Precision
+    ///
+    /// Ratelimit: 90 req/min
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         let len = Some(100);
-        gen_api!(format!("/v2/book/{}/{}", symbol, "P0"), len)
+        gen_api!(format!("/v2/book/{}/P0", symbol), len)
     }
 
     /// Get a Level3 snapshot of orderbook.

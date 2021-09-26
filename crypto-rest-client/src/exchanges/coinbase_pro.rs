@@ -10,6 +10,8 @@ const BASE_URL: &str = "https://api.pro.coinbase.com";
 ///
 ///   * REST API doc: <https://docs.pro.coinbase.com/#market-data>
 ///   * Trading at: <https://pro.coinbase.com/>
+///   * Rate Limits: <https://docs.pro.coinbase.com/#rate-limits>
+///     * We throttle public endpoints by IP: 10 requests per second, up to 15 requests per second in bursts.
 pub struct CoinbaseProRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,

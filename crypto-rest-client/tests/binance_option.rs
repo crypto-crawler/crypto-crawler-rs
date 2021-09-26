@@ -3,13 +3,13 @@ use crypto_rest_client::{fetch_l2_snapshot, BinanceOptionRestClient};
 
 #[test]
 fn test_agg_trades() {
-    let text = BinanceOptionRestClient::fetch_trades("BTC-210129-40000-C", None).unwrap();
+    let text = BinanceOptionRestClient::fetch_trades("BTC-211001-50000-C", None).unwrap();
     assert!(text.starts_with("{"));
 }
 
 #[test]
 fn test_l2_snapshot() {
     let text =
-        fetch_l2_snapshot("binance", MarketType::EuropeanOption, "BTC-210129-40000-C").unwrap();
+        fetch_l2_snapshot("binance", MarketType::EuropeanOption, "BTC-211001-50000-C").unwrap();
     assert!(text.starts_with("{"));
 }

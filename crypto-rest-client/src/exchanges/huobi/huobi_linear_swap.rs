@@ -10,6 +10,8 @@ const BASE_URL: &str = "https://api.hbdm.com/linear-swap-ex";
 ///
 /// * REST API doc: <https://huobiapi.github.io/docs/usdt_swap/v1/en/>
 /// * Trading at: <https://futures.huobi.com/en-us/linear_swap/exchange/>
+/// * Rate Limits: <https://huobiapi.github.io/docs/usdt_swap/v1/en/#api-rate-limit-illustration>
+///   * For restful interfaces, products, (future, coin margined swap, usdt margined swap)800 times/second for one IP at most
 pub struct HuobiLinearSwapRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
