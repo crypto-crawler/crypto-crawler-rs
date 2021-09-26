@@ -10,6 +10,9 @@ const BASE_URL: &str = "https://ftx.com/api";
 ///
 /// * RESTful API doc: <https://docs.ftx.com/?python#rest-api>
 /// * Trading at <https://ftx.com/markets>
+/// * Rate Limits: <https://docs.ftx.com/?python#rate-limits>
+///   * Non-order placement requests do not count towards rate limits.
+///   * Rate limits are tiered by account trading volumes.
 pub struct FtxRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,

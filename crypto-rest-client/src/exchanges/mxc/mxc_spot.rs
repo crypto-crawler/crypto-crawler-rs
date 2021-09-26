@@ -8,6 +8,8 @@ const BASE_URL: &str = "https://www.mexc.com";
 ///
 /// * REST API doc: <https://mxcdevelop.github.io/APIDoc/>
 /// * Trading at: <https://www.mxc.com/trade/pro>
+/// * Rate Limits: <https://mxcdevelop.github.io/APIDoc/open.api.v2.en.html#rate-limit>
+///   * The default rate limiting rule for an endpoint is 20 times per second.
 pub struct MxcSpotRestClient {
     _access_key: String,
     _secret_key: Option<String>,

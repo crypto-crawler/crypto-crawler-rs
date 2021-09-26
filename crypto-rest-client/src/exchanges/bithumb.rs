@@ -8,8 +8,11 @@ const BASE_URL: &str = "https://global-openapi.bithumb.pro/openapi/v1";
 ///
 /// Bithumb has only Spot market.
 ///
-///   * REST API doc: <https://github.com/bithumb-pro/bithumb.pro-official-api-docs/blob/master/rest-api.md>
-///   * Trading at: <https://en.bithumb.com/trade/order/BTC_KRW>
+/// * REST API doc: <https://github.com/bithumb-pro/bithumb.pro-official-api-docs/blob/master/rest-api.md>
+/// * Trading at: <https://en.bithumb.com/trade/order/BTC_KRW>
+/// * Rate Limits: <https://apidocs.bithumb.com/docs/rate_limits>
+///   * 135 requests per 1 second for public APIs.
+///   * 15 requests per 1 second for private APIs.
 pub struct BithumbRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,

@@ -23,9 +23,9 @@ impl BitgetSwapRestClient {
 
     /// Get the latest Level2 snapshot of orderbook.
     ///
-    /// Top 20 bids and asks are returned.
+    /// For example: <https://capi.bitget.com/api/swap/v3/market/depth?symbol=btcusd&limit=1000>
     ///
-    /// For example: <https://capi.bitget.com/api/swap/v3/market/depth?symbol=btcusd&limit=1000>,
+    /// Rate Limit：20 requests per 2 seconds
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         gen_api!(format!("/v3/market/depth?symbol={}&limit=1000", symbol))
     }

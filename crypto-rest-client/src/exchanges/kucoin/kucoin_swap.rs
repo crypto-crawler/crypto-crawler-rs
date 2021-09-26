@@ -8,6 +8,7 @@ const BASE_URL: &str = "https://api-futures.kucoin.com";
 ///
 /// * RESTful API doc: <https://docs.kucoin.cc/futures>
 /// * Trading at: <https://futures.kucoin.com/>
+/// * Rate Limits: <https://docs.kucoin.cc/futures/#request-rate-limit>
 pub struct KuCoinSwapRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
@@ -27,6 +28,7 @@ impl KuCoinSwapRestClient {
     ///
     /// For example: <https://api-futures.kucoin.com/api/v1/level2/snapshot?symbol=XBTUSDM>,
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
+        // the request rate limit is 30 times/3s
         gen_api!(format!("/api/v1/level2/snapshot?symbol={}", symbol))
     }
 

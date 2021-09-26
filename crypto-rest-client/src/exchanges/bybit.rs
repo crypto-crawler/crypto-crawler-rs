@@ -12,6 +12,13 @@ const BASE_URL: &str = "https://api.bybit.com/v2";
 /// * Trading at:
 ///     * InverseSwap <https://www.bybit.com/trade/inverse/>
 ///     * LinearSwap <https://www.bybit.com/trade/usdt/>
+/// * Rate Limit: <https://bybit-exchange.github.io/docs/inverse/#t-ratelimits>
+///   * GET method:
+///     * 50 requests per second continuously for 2 minutes
+///     * 70 requests per second continuously for 5 seconds
+///   * POST method:
+///     * 20 requests per second continuously for 2 minutes
+///     * 50 requests per second continuously for 5 seconds
 pub struct BybitRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
@@ -27,7 +34,7 @@ impl BybitRestClient {
 
     /// Get the latest Level2 snapshot of orderbook.
     ///
-    /// Top 100 bids and asks are returned.
+    /// Top 50 bids and asks are returned.
     ///
     /// For example: <https://api.bybit.com/v2/public/orderBook/L2?symbol=BTCUSD>,
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {

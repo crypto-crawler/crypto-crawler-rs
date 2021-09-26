@@ -8,8 +8,10 @@ const BASE_URL: &str = "https://api.hbdm.com/swap-ex";
 ///
 /// Inverse Swap market uses coins like BTC as collateral.
 ///
-/// * REST API doc: <<https://huobiapi.github.io/docs/coin_margined_swap/v1/en/>>
+/// * REST API doc: <https://huobiapi.github.io/docs/coin_margined_swap/v1/en/>
 /// * Trading at: <https://futures.huobi.com/en-us/swap/exchange/>
+/// * Rate Limits: <https://huobiapi.github.io/docs/coin_margined_swap/v1/en/#api-rate-limit-illustration>
+///  * For restful interfaces：all products(futures, coin margined swap, usdt margined swap) 800 times/second for one IP at most
 pub struct HuobiInverseSwapRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,

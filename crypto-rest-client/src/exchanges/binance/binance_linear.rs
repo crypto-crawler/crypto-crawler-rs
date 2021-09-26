@@ -7,8 +7,10 @@ const BASE_URL: &str = "https://fapi.binance.com";
 
 /// Binance USDT-margined Future and Swap market.
 ///
-///   * REST API doc: <https://binance-docs.github.io/apidocs/futures/en/>
-///   * Trading at: <https://www.binance.com/en/futures/BTC_USDT>
+/// * REST API doc: <https://binance-docs.github.io/apidocs/futures/en/>
+/// * Trading at: <https://www.binance.com/en/futures/BTC_USDT>
+/// * Rate Limits: <https://binance-docs.github.io/apidocs/futures/en/#limits>
+///   * 2400 request weight per minute
 pub struct BinanceLinearRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,

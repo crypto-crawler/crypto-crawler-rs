@@ -8,8 +8,10 @@ const BASE_URL: &str = "https://api.kraken.com";
 ///
 /// Kraken has only Spot market.
 ///
-///   * REST API doc: <https://www.kraken.com/features/api>
-///   * Trading at: <https://trade.kraken.com/>
+/// * REST API doc: <https://docs.kraken.com/rest/>
+/// * Trading at: <https://trade.kraken.com/>
+/// * Rate Limits: <https://docs.kraken.com/rest/#section/Rate-Limits/REST-API-Rate-Limits>
+///   * 15 requests per 45 seconds
 pub struct KrakenRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,

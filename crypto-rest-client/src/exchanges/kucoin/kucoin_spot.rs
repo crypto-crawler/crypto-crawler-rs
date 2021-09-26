@@ -8,6 +8,7 @@ const BASE_URL: &str = "https://api.kucoin.com";
 ///
 /// * RESTful API doc: <https://docs.kucoin.com/>
 /// * Trading at: <https://trade.kucoin.com/>
+/// * Rate Limits: <https://docs.kucoin.com/#request-rate-limit>
 pub struct KuCoinSpotRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
@@ -23,14 +24,15 @@ impl KuCoinSpotRestClient {
 
     /// Get the latest Level2 snapshot of orderbook.
     ///
-    /// All bids and asks are returned.
-    ///
-    /// For example: <https://api.kucoin.com/api/v2/market/orderbook/level2?symbol=BTC-USDT>,
+    /// For example: <https://api.kucoin.com/api/v1/market/orderbook/level2_100?symbol=BTC-USDT>,
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!(
-            "/api/v1/market/orderbook/level2_100?symbol={}",
-            symbol
-        ))
+        let api = if std::env::var("KC-API-KEY").is_ok() {
+            // the request rate limit is 30 times/3s
+            "/api/v3/market/orderbook/level2"
+        } else {
+            "/api/v1/market/orderbook/level2_100"
+        };
+        gen_api!(format!("{}?symbol={}", api, symbol))
     }
 
     /// Get the latest Level3 snapshot of orderbook.

@@ -12,6 +12,8 @@ const BASE_URL: &str = "https://www.deribit.com/api/v2";
 /// * Trading at:
 ///     * Future <https://www.deribit.com/main#/futures>
 ///     * Option <https://www.deribit.com/main#/options>
+/// * Rate Limits: <https://www.deribit.com/pages/information/rate-limits>
+///   * Each sub-account has a rate limit of 20 requests per second
 pub struct DeribitRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
