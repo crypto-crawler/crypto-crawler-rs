@@ -17,14 +17,14 @@ struct OptionMarket {
     underlying: String,
     quoteAsset: String,
     symbol: String,
-    unit: i64,
-    minQty: f64,
-    maxQty: f64,
+    unit: String,
+    minQty: String,
+    maxQty: String,
     priceScale: i64,
     quantityScale: i64,
     side: String,
-    makerFeeRate: f64,
-    takerFeeRate: f64,
+    makerFeeRate: String,
+    takerFeeRate: String,
     expiryDate: u64,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
@@ -48,8 +48,7 @@ fn fetch_option_markets_raw() -> Result<Vec<OptionMarket>> {
         data: OptionData,
     }
 
-    let txt =
-        binance_http_get("https://voptions.binance.com/options-api/v1/public/exchange/symbols")?;
+    let txt = binance_http_get("https://vapi.binance.com/vapi/v1/exchangeInfo")?;
     let resp = serde_json::from_str::<BinanceOptionResponse>(&txt)?;
     Ok(resp.data.optionSymbols)
 }
@@ -80,8 +79,8 @@ pub(super) fn fetch_option_markets() -> Result<Vec<Market>> {
                 margin: true,
                 // see https://www.binance.com/en/fee/optionFee
                 fees: Fees {
-                    maker: m.makerFeeRate,
-                    taker: m.takerFeeRate,
+                    maker: m.makerFeeRate.parse::<f64>().unwrap(),
+                    taker: m.takerFeeRate.parse::<f64>().unwrap(),
                     percentage: true,
                 },
                 precision: Precision {
@@ -90,7 +89,7 @@ pub(super) fn fetch_option_markets() -> Result<Vec<Market>> {
                     quote: None,
                 },
                 min_quantity: MinQuantity {
-                    base: Some(m.minQty),
+                    base: Some(m.minQty.parse::<f64>().unwrap()),
                     quote: None,
                 },
                 contract_value: Some(1.0),
