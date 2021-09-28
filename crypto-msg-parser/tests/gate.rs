@@ -308,6 +308,31 @@ mod l2_orderbook {
     }
 
     #[test]
+    fn inverse_swap_update() {
+        let raw_msg = r#"{"id":null,"time":1632793098,"channel":"futures.order_book_update","event":"update","error":null,"result":{"t":1632793098358,"s":"BTC_USD","U":3136077080,"u":3136077083,"b":[],"a":[{"p":"42372.9","s":0},{"p":"42367.1","s":738}]}}"#;
+        let orderbook = &parse_l2("gate", MarketType::InverseSwap, raw_msg, None).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 2);
+        assert_eq!(orderbook.bids.len(), 0);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "gate",
+            MarketType::InverseSwap,
+            "BTC/USD".to_string(),
+            extract_symbol("gate", MarketType::InverseSwap, raw_msg).unwrap(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1632793098358);
+
+        assert_eq!(orderbook.asks[0].price, 42372.9);
+        assert_eq!(orderbook.asks[0].quantity_base, 0.0);
+        assert_eq!(orderbook.asks[0].quantity_quote, 0.0);
+        assert_eq!(orderbook.asks[0].quantity_contract, Some(0.0));
+    }
+
+    #[test]
     fn inverse_swap_snapshot() {
         let raw_msg = r#"{"id":null,"time":1622682306,"channel":"futures.order_book","event":"all","error":null,"result":{"t":1622682306315,"id":2861474582,"contract":"BTC_USD","asks":[{"p":"37481.3","s":7766},{"p":"37484.7","s":1775},{"p":"37485.1","s":2004}],"bids":[{"p":"37481.2","s":51735},{"p":"37480.2","s":9111},{"p":"37479.1","s":2004}]}}"#;
         let orderbook = &parse_l2("gate", MarketType::InverseSwap, raw_msg, None).unwrap()[0];
@@ -345,6 +370,31 @@ mod l2_orderbook {
         assert_eq!(orderbook.bids[2].quantity_base, 2004.0 / 37479.1);
         assert_eq!(orderbook.bids[2].quantity_quote, 2004.0);
         assert_eq!(orderbook.bids[2].quantity_contract.unwrap(), 2004.0);
+    }
+
+    #[test]
+    fn linear_swap_update() {
+        let raw_msg = r#"{"id":null,"time":1632799979,"channel":"futures.order_book_update","event":"update","error":null,"result":{"t":1632799979523,"s":"BTC_USDT","U":8179159885,"u":8179159933,"b":[{"p":"42459.2","s":73982}],"a":[]}}"#;
+        let orderbook = &parse_l2("gate", MarketType::LinearSwap, raw_msg, None).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 0);
+        assert_eq!(orderbook.bids.len(), 1);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "gate",
+            MarketType::LinearSwap,
+            "BTC/USDT".to_string(),
+            extract_symbol("gate", MarketType::LinearSwap, raw_msg).unwrap(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.timestamp, 1632799979523);
+
+        assert_eq!(orderbook.bids[0].price, 42459.2);
+        assert_eq!(orderbook.bids[0].quantity_base, 7.3982);
+        assert_eq!(orderbook.bids[0].quantity_quote, 42459.2 * 7.3982);
+        assert_eq!(orderbook.bids[0].quantity_contract, Some(73982.0));
     }
 
     #[test]

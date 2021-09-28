@@ -120,7 +120,6 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
 fn parse_l2_update(msg: &str) -> Result<Vec<OrderBookMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<SpotOrderbookUpdateMsg>>(msg)?;
     debug_assert_eq!(ws_msg.channel, "spot.order_book_update");
-    debug_assert_eq!(ws_msg.event, "update");
     let result = ws_msg.result;
     let symbol = result.s;
     let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
@@ -142,7 +141,7 @@ fn parse_l2_update(msg: &str) -> Result<Vec<OrderBookMsg>> {
         } else {
             Vec::new()
         },
-        snapshot: false,
+        snapshot: ws_msg.event == "all",
         json: msg.to_string(),
     };
 
