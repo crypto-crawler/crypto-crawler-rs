@@ -221,7 +221,7 @@ mod tests {
     #[ignore]
     fn linear_option() {
         let mapping = fetch_contract_size(LINEAR_OPTION_URL);
-        for (pair, contract_value) in &mapping {
+        for (pair, contract_value) in mapping {
             println!("(\"{}\", {}),", pair, contract_value);
         }
     }
