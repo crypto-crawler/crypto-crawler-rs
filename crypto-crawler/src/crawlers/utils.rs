@@ -141,7 +141,11 @@ pub(crate) fn crawl_snapshot(
                     } else if err.0.contains("403") {
                         // 403 is very serious, we should stop crawling
                         success_count = 0;
-                        back_off_minutes += 1;
+                        back_off_minutes = if back_off_minutes == 0 {
+                            1
+                        } else {
+                            back_off_minutes * 2
+                        };
                         error!(
                             "{} {} {} {} {} {}, error: {}, back off for {} minutes",
                             current_timestamp,
