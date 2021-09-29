@@ -1,6 +1,6 @@
 [package]
 name = "crypto-markets"
-version = "0.7.2"
+version = "0.7.3"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "Get all trading pairs of a cryptocurrency exchange"
