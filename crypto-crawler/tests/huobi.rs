@@ -58,6 +58,20 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     )
 }
 
+#[test_case(MarketType::Spot)]
+#[test_case(MarketType::InverseFuture)]
+#[test_case(MarketType::InverseSwap)]
+#[test_case(MarketType::LinearSwap)]
+#[test_case(MarketType::EuropeanOption; "inconclusive")]
+fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
+    gen_test_snapshot_without_symbol_code!(
+        crawl_l2_snapshot,
+        EXCHANGE_NAME,
+        market_type,
+        MessageType::L2Snapshot
+    )
+}
+
 #[test_case(MarketType::InverseSwap, "BTC-USD")]
 #[test_case(MarketType::LinearSwap, "BTC-USDT")]
 fn test_crawl_funding_rate(market_type: MarketType, symbol: &str) {

@@ -52,6 +52,18 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     )
 }
 
+#[test_case(MarketType::Spot)]
+#[test_case(MarketType::InverseSwap)]
+#[test_case(MarketType::LinearSwap)]
+fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
+    gen_test_snapshot_without_symbol_code!(
+        crawl_l2_snapshot,
+        EXCHANGE_NAME,
+        market_type,
+        MessageType::L2Snapshot
+    )
+}
+
 #[test_case(MarketType::Spot, "btc_usdt")]
 // #[test_case(MarketType::InverseSwap, "BTC_USD")]
 // #[test_case(MarketType::LinearSwap, "BTC_USDT")]

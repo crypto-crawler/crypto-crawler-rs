@@ -14,8 +14,8 @@ use std::{
 const EXCHANGE_NAME: &str = "binance";
 
 #[test_case(MarketType::Spot, "BTCUSDT")]
-#[test_case(MarketType::InverseFuture, "BTCUSD_210924")]
-#[test_case(MarketType::LinearFuture, "BTCUSDT_210924")]
+#[test_case(MarketType::InverseFuture, "BTCUSD_211231")]
+#[test_case(MarketType::LinearFuture, "BTCUSDT_211231")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_PERP")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 #[test_case(MarketType::EuropeanOption, "BTC-210129-40000-C"; "inconclusive")]
@@ -30,8 +30,8 @@ fn test_crawl_trade(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::Spot, "BTCUSDT")]
-#[test_case(MarketType::InverseFuture, "BTCUSD_210924")]
-#[test_case(MarketType::LinearFuture, "BTCUSDT_210924")]
+#[test_case(MarketType::InverseFuture, "BTCUSD_211231")]
+#[test_case(MarketType::LinearFuture, "BTCUSDT_211231")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_PERP")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 #[test_case(MarketType::EuropeanOption, "BTC-210129-40000-C"; "inconclusive")]
@@ -46,8 +46,8 @@ fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::Spot, "BTCUSDT")]
-#[test_case(MarketType::InverseFuture, "BTCUSD_210924")]
-#[test_case(MarketType::LinearFuture, "BTCUSDT_210924")]
+#[test_case(MarketType::InverseFuture, "BTCUSD_211231")]
+#[test_case(MarketType::LinearFuture, "BTCUSDT_211231")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_PERP")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 #[test_case(MarketType::EuropeanOption, "BTC-210129-40000-C"; "inconclusive")]
@@ -61,9 +61,24 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     )
 }
 
+#[test_case(MarketType::Spot)]
+#[test_case(MarketType::InverseFuture)]
+#[test_case(MarketType::LinearFuture)]
+#[test_case(MarketType::InverseSwap)]
+#[test_case(MarketType::LinearSwap)]
+#[test_case(MarketType::EuropeanOption; "inconclusive")]
+fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
+    gen_test_snapshot_without_symbol_code!(
+        crawl_l2_snapshot,
+        EXCHANGE_NAME,
+        market_type,
+        MessageType::L2Snapshot
+    )
+}
+
 #[test_case(MarketType::Spot, "BTCUSDT")]
-#[test_case(MarketType::InverseFuture, "BTCUSD_210924")]
-#[test_case(MarketType::LinearFuture, "BTCUSDT_210924")]
+#[test_case(MarketType::InverseFuture, "BTCUSD_211231")]
+#[test_case(MarketType::LinearFuture, "BTCUSDT_211231")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_PERP")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 #[test_case(MarketType::EuropeanOption, "BTC-210129-40000-C"; "inconclusive")]

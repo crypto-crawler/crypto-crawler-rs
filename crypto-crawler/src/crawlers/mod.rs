@@ -21,3 +21,4 @@ pub(super) mod okex;
 pub(super) mod zbg;
 
 pub(super) use utils::crawl_snapshot;
+pub use utils::fetch_symbols_retry;
