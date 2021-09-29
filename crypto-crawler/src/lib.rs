@@ -39,7 +39,7 @@
 //! }));
 //!
 //! // Crawl BitMEX inverse_swap market level2 orderbook snapshots every 60 seconds, for all symbols, only run for 5 seconds
-//! crawl_l2_snapshot("bitmex", MarketType::InverseSwap, None, on_msg, Some(60), Some(5));
+//! crawl_l2_snapshot("bitmex", MarketType::InverseSwap, None, on_msg, Some(5));
 //! ```
 //!
 //! ## Crawl level3 orderbook update events
@@ -67,15 +67,18 @@
 //! }));
 //!
 //! // Crawl CoinbasePro spot market level2 orderbook snapshots every 60 seconds, for all symbols, only run for 5 seconds
-//! crawl_l3_snapshot("coinbase_pro", MarketType::Spot, None, on_msg, Some(60), Some(5));
+//! crawl_l3_snapshot("coinbase_pro", MarketType::Spot, None, on_msg, Some(5));
 //! ```
 mod crawlers;
 mod msg;
+mod utils;
 
-pub use crypto_markets::MarketType;
 use std::sync::{Arc, Mutex};
 
+pub use crawlers::fetch_symbols_retry;
+pub use crypto_market_type::MarketType;
 pub use msg::*;
+pub use utils::get_hot_spot_symbols;
 
 /// Crawl realtime trades.
 ///
@@ -178,7 +181,6 @@ pub fn crawl_l2_snapshot(
     market_type: MarketType,
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
-    interval: Option<u64>,
     duration: Option<u64>,
 ) {
     crawlers::crawl_snapshot(
@@ -187,7 +189,6 @@ pub fn crawl_l2_snapshot(
         MessageType::L2Snapshot,
         symbols,
         on_msg,
-        interval,
         duration,
     )
 }
@@ -198,7 +199,6 @@ pub fn crawl_l3_snapshot(
     market_type: MarketType,
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
-    interval: Option<u64>,
     duration: Option<u64>,
 ) {
     crawlers::crawl_snapshot(
@@ -207,7 +207,6 @@ pub fn crawl_l3_snapshot(
         MessageType::L3Snapshot,
         symbols,
         on_msg,
-        interval,
         duration,
     )
 }

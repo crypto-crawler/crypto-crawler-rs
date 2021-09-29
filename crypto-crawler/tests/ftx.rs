@@ -40,8 +40,8 @@ fn test_crawl_trade_all(market_type: MarketType) {
 
 #[test_case(MarketType::Spot, "BTC/USD")]
 #[test_case(MarketType::LinearSwap, "BTC-PERP")]
-#[test_case(MarketType::LinearFuture, "BTC-0924")]
-// #[test_case(MarketType::Move, "BTC-MOVE-2021Q3")]
+#[test_case(MarketType::LinearFuture, "BTC-1231")]
+// #[test_case(MarketType::Move, "BTC-MOVE-2021Q4")]
 // #[test_case(MarketType::BVOL, "BVOL/USD")]
 fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     gen_test_code!(
@@ -55,8 +55,8 @@ fn test_crawl_trade(market_type: MarketType, symbol: &str) {
 
 #[test_case(MarketType::Spot, "BTC/USD")]
 #[test_case(MarketType::LinearSwap, "BTC-PERP")]
-#[test_case(MarketType::LinearFuture, "BTC-0924")]
-#[test_case(MarketType::Move, "BTC-MOVE-2021Q3")]
+#[test_case(MarketType::LinearFuture, "BTC-1231")]
+#[test_case(MarketType::Move, "BTC-MOVE-2021Q4")]
 #[test_case(MarketType::BVOL, "BVOL/USD")]
 fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
     gen_test_code!(
@@ -70,8 +70,8 @@ fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 
 #[test_case(MarketType::Spot, "BTC/USD")]
 #[test_case(MarketType::LinearSwap, "BTC-PERP")]
-#[test_case(MarketType::LinearFuture, "BTC-0924")]
-#[test_case(MarketType::Move, "BTC-MOVE-2021Q3")]
+#[test_case(MarketType::LinearFuture, "BTC-1231")]
+#[test_case(MarketType::Move, "BTC-MOVE-2021Q4")]
 #[test_case(MarketType::BVOL, "BVOL/USD")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     gen_test_snapshot_code!(
@@ -79,6 +79,20 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
         EXCHANGE_NAME,
         market_type,
         symbol,
+        MessageType::L2Snapshot
+    )
+}
+
+#[test_case(MarketType::Spot)]
+#[test_case(MarketType::LinearSwap)]
+#[test_case(MarketType::LinearFuture)]
+#[test_case(MarketType::Move)]
+#[test_case(MarketType::BVOL)]
+fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
+    gen_test_snapshot_without_symbol_code!(
+        crawl_l2_snapshot,
+        EXCHANGE_NAME,
+        market_type,
         MessageType::L2Snapshot
     )
 }

@@ -1,47 +1,40 @@
 use std::{
     sync::{Arc, Mutex},
-    time::{Duration, Instant},
+    time::{Duration, Instant, SystemTime},
 };
 
 use crypto_markets::{fetch_symbols, get_market_types, MarketType};
 use crypto_rest_client::{fetch_l2_snapshot, fetch_l3_snapshot};
 use log::*;
 
-use crate::{Message, MessageType};
+use crate::{
+    utils::{cmc_rank::sort_by_cmc_rank, get_hot_spot_symbols},
+    Message, MessageType,
+};
 
-pub(super) fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<String> {
-    if std::env::var("https_proxy").is_ok() {
-        // retry retry_count times if there is a https_proxy
-        let retry_count = std::env::var("REST_RETRY_COUNT")
-            .unwrap_or_else(|_| "5".to_string())
-            .parse::<i64>()
-            .unwrap();
-        let mut symbols = Vec::<String>::new();
-        for i in 0..retry_count {
-            match fetch_symbols(exchange, market_type) {
-                Ok(list) => {
-                    symbols = list;
-                    break;
-                }
-                Err(err) => {
-                    if i == retry_count - 1 {
-                        error!("The {}th time, {}", i, err);
-                    } else {
-                        warn!("The {}th time, {}", i, err);
-                    }
-                }
-            }
-        }
-        symbols
-    } else {
+pub fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<String> {
+    let retry_count = std::env::var("REST_RETRY_COUNT")
+        .unwrap_or_else(|_| "5".to_string())
+        .parse::<i64>()
+        .unwrap();
+    let mut symbols = Vec::<String>::new();
+    for i in 0..retry_count {
         match fetch_symbols(exchange, market_type) {
-            Ok(symbols) => symbols,
+            Ok(list) => {
+                symbols = list;
+                break;
+            }
             Err(err) => {
-                error!("{}", err);
-                Vec::<String>::new()
+                std::thread::sleep(Duration::from_secs(60));
+                if i == retry_count - 1 {
+                    error!("The {}th time, {}", i, err);
+                } else {
+                    warn!("The {}th time, {}", i, err);
+                }
             }
         }
     }
+    symbols
 }
 
 pub(super) fn check_args(exchange: &str, market_type: MarketType, symbols: &[String]) {
@@ -74,14 +67,10 @@ pub(crate) fn crawl_snapshot(
     msg_type: MessageType, // L2Snapshot or L3Snapshot
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
-    interval: Option<u64>,
     duration: Option<u64>,
 ) {
-    let interval = Duration::from_secs(interval.unwrap_or(60));
     let now = Instant::now();
     loop {
-        let loop_start = Instant::now();
-
         let is_empty = match symbols {
             Some(list) => {
                 if list.is_empty() {
@@ -94,24 +83,65 @@ pub(crate) fn crawl_snapshot(
             None => true,
         };
 
-        let real_symbols = if is_empty {
-            fetch_symbols_retry(exchange, market_type)
+        let mut real_symbols = if is_empty {
+            if market_type == MarketType::Spot {
+                let spot_symbols = fetch_symbols_retry(exchange, market_type);
+                get_hot_spot_symbols(exchange, &spot_symbols)
+            } else {
+                fetch_symbols_retry(exchange, market_type)
+            }
         } else {
             symbols.unwrap().to_vec()
         };
+        sort_by_cmc_rank(exchange, &mut real_symbols);
 
-        for symbol in real_symbols.iter() {
+        let mut index = 0_usize;
+        let mut success_count = 0_u64;
+        let mut back_off_minutes = 0;
+        while index < real_symbols.len() {
+            let symbol = &real_symbols[index];
             let resp = match msg_type {
                 MessageType::L2Snapshot => fetch_l2_snapshot(exchange, market_type, symbol),
                 MessageType::L3Snapshot => fetch_l3_snapshot(exchange, market_type, symbol),
                 _ => panic!("msg_type must be L2Snapshot or L3Snapshot"),
             };
+            // std::thread::sleep(Duration::from_millis(sleep_time));
             match resp {
                 Ok(msg) => {
+                    index += 1;
+                    success_count += 1;
+                    back_off_minutes = 0;
                     let message = Message::new(exchange.to_string(), market_type, msg_type, msg);
                     (on_msg.lock().unwrap())(message);
                 }
-                Err(err) => error!("{} {} {}, error: {}", exchange, market_type, symbol, err),
+                Err(err) => {
+                    if err.0.contains("429") || err.0.contains("418") {
+                        let current_timestamp = SystemTime::now()
+                            .duration_since(SystemTime::UNIX_EPOCH)
+                            .unwrap()
+                            .as_millis() as u64;
+                        let next_minute = (current_timestamp as f64 / (1000_f64 * 60_f64)).ceil()
+                            * (1000_f64 * 60_f64);
+                        let duration =
+                            next_minute as u64 - current_timestamp + 60000 * back_off_minutes + 1;
+                        warn!(
+                            "{} {} {} {} {} {}, error: {}, back off for {} milliseconds",
+                            current_timestamp,
+                            success_count,
+                            back_off_minutes,
+                            exchange,
+                            market_type,
+                            symbol,
+                            err,
+                            duration
+                        );
+                        success_count = 0;
+                        back_off_minutes += 1;
+                        std::thread::sleep(Duration::from_millis(duration));
+                    } else {
+                        error!("{} {} {}, error: {}", exchange, market_type, symbol, err);
+                    }
+                }
             }
         }
 
@@ -119,9 +149,6 @@ pub(crate) fn crawl_snapshot(
             if now.elapsed() > Duration::from_secs(seconds) {
                 break;
             }
-        }
-        if loop_start.elapsed() < interval {
-            std::thread::sleep(interval - loop_start.elapsed());
         }
     }
 }
@@ -152,7 +179,6 @@ macro_rules! gen_crawl_event {
                 symbols.unwrap().iter().cloned().collect::<Vec<String>>()
             };
             if real_symbols.is_empty() {
-                error!("real_symbols is empty");
                 panic!("real_symbols is empty");
             }
 

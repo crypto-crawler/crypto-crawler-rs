@@ -14,8 +14,8 @@ use std::{
 const EXCHANGE_NAME: &str = "deribit";
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
-#[test_case(MarketType::InverseFuture, "BTC-24SEP21")]
-#[test_case(MarketType::EuropeanOption, "BTC-10SEP21-52000-C"; "inconclusive")]
+#[test_case(MarketType::InverseFuture, "BTC-31DEC21")]
+#[test_case(MarketType::EuropeanOption, "BTC-31DEC21-400000-C"; "inconclusive")]
 fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_trade,
@@ -50,8 +50,8 @@ fn test_crawl_trade_all(market_type: MarketType) {
 }
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
-#[test_case(MarketType::InverseFuture, "BTC-24SEP21")]
-#[test_case(MarketType::EuropeanOption, "BTC-10SEP21-52000-C")]
+#[test_case(MarketType::InverseFuture, "BTC-31DEC21")]
+#[test_case(MarketType::EuropeanOption, "BTC-31DEC21-400000-C")]
 fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_l2_event,
@@ -63,8 +63,8 @@ fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
-#[test_case(MarketType::InverseFuture, "BTC-24SEP21")]
-#[test_case(MarketType::EuropeanOption, "BTC-10SEP21-52000-C")]
+#[test_case(MarketType::InverseFuture, "BTC-31DEC21")]
+#[test_case(MarketType::EuropeanOption, "BTC-31DEC21-400000-C")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     gen_test_snapshot_code!(
         crawl_l2_snapshot,
@@ -75,9 +75,21 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     )
 }
 
+#[test_case(MarketType::InverseSwap)]
+#[test_case(MarketType::InverseFuture)]
+#[test_case(MarketType::EuropeanOption; "inconclusive")]
+fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
+    gen_test_snapshot_without_symbol_code!(
+        crawl_l2_snapshot,
+        EXCHANGE_NAME,
+        market_type,
+        MessageType::L2Snapshot
+    )
+}
+
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
-#[test_case(MarketType::InverseFuture, "BTC-24SEP21")]
-#[test_case(MarketType::EuropeanOption, "BTC-10SEP21-52000-C")]
+#[test_case(MarketType::InverseFuture, "BTC-31DEC21")]
+#[test_case(MarketType::EuropeanOption, "BTC-31DEC21-400000-C")]
 fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_ticker,

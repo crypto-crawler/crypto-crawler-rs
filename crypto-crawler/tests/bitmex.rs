@@ -13,9 +13,9 @@ use std::{
 
 const EXCHANGE_NAME: &str = "bitmex";
 
-#[test_case(MarketType::InverseFuture, "XBTU21")]
-#[test_case(MarketType::LinearFuture, "ETHU21")]
-#[test_case(MarketType::QuantoFuture, "ETHUSDU21")]
+#[test_case(MarketType::InverseFuture, "XBTZ21")]
+#[test_case(MarketType::LinearFuture, "ETHZ21")]
+#[test_case(MarketType::QuantoFuture, "ETHUSDZ21")]
 #[test_case(MarketType::InverseSwap, "XBTUSD")]
 #[test_case(MarketType::QuantoSwap, "ETHUSD")]
 fn test_crawl_trade(market_type: MarketType, symbol: &str) {
@@ -28,9 +28,9 @@ fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     )
 }
 
-#[test_case(MarketType::InverseFuture, "XBTU21")]
-#[test_case(MarketType::LinearFuture, "ETHU21")]
-#[test_case(MarketType::QuantoFuture, "ETHUSDU21")]
+#[test_case(MarketType::InverseFuture, "XBTZ21")]
+#[test_case(MarketType::LinearFuture, "ETHZ21")]
+#[test_case(MarketType::QuantoFuture, "ETHUSDZ21")]
 #[test_case(MarketType::InverseSwap, "XBTUSD")]
 #[test_case(MarketType::QuantoSwap, "ETHUSD")]
 fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
@@ -43,9 +43,9 @@ fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
     )
 }
 
-#[test_case(MarketType::InverseFuture, "XBTU21")]
-#[test_case(MarketType::LinearFuture, "ETHU21")]
-#[test_case(MarketType::QuantoFuture, "ETHUSDU21")]
+#[test_case(MarketType::InverseFuture, "XBTZ21")]
+#[test_case(MarketType::LinearFuture, "ETHZ21")]
+#[test_case(MarketType::QuantoFuture, "ETHUSDZ21")]
 #[test_case(MarketType::InverseSwap, "XBTUSD")]
 #[test_case(MarketType::QuantoSwap, "ETHUSD")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
@@ -54,6 +54,20 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
         EXCHANGE_NAME,
         market_type,
         symbol,
+        MessageType::L2Snapshot
+    )
+}
+
+#[test_case(MarketType::InverseFuture)]
+#[test_case(MarketType::LinearFuture)]
+#[test_case(MarketType::QuantoFuture)]
+#[test_case(MarketType::InverseSwap)]
+#[test_case(MarketType::QuantoSwap)]
+fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
+    gen_test_snapshot_without_symbol_code!(
+        crawl_l2_snapshot,
+        EXCHANGE_NAME,
+        market_type,
         MessageType::L2Snapshot
     )
 }

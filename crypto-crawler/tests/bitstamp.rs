@@ -46,6 +46,16 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     )
 }
 
+#[test_case(MarketType::Spot)]
+fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
+    gen_test_snapshot_without_symbol_code!(
+        crawl_l2_snapshot,
+        EXCHANGE_NAME,
+        market_type,
+        MessageType::L2Snapshot
+    )
+}
+
 #[test_case(MarketType::Spot, "btcusd")]
 fn test_crawl_l3_event(market_type: MarketType, symbol: &str) {
     gen_test_code!(
