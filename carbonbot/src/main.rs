@@ -115,22 +115,17 @@ pub fn crawl(
         }
     }));
 
-    match msg_type {
-        MessageType::Trade => crawl_trade(exchange, market_type, None, on_msg_ext, None),
-        MessageType::L2Event => crawl_l2_event(exchange, market_type, None, on_msg_ext, None),
-        MessageType::L3Event => crawl_l3_event(exchange, market_type, None, on_msg_ext, None),
-        MessageType::L2Snapshot => {
-            crawl_l2_snapshot(exchange, market_type, None, on_msg_ext, None, None)
-        }
-        MessageType::L3Snapshot => {
-            crawl_l3_snapshot(exchange, market_type, None, on_msg_ext, None, None)
-        }
-        MessageType::Ticker => crawl_ticker(exchange, market_type, None, on_msg_ext, None),
-        MessageType::FundingRate => {
-            crawl_funding_rate(exchange, market_type, None, on_msg_ext, None)
-        }
+    let crawl_func = match msg_type {
+        MessageType::Trade => crawl_trade,
+        MessageType::L2Event => crawl_l2_event,
+        MessageType::L3Event => crawl_l3_event,
+        MessageType::L2Snapshot => crawl_l2_snapshot,
+        MessageType::L3Snapshot => crawl_l3_snapshot,
+        MessageType::Ticker => crawl_ticker,
+        MessageType::FundingRate => crawl_funding_rate,
         _ => panic!("Not implemented"),
-    }
+    };
+    crawl_func(exchange, market_type, None, on_msg_ext, None);
 
     for kv in writers_map_clone.iter() {
         let writer = kv.value();
