@@ -1,6 +1,6 @@
 use super::super::utils::http_get;
 use crate::error::{Error, Result};
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -68,7 +68,7 @@ struct Response {
 }
 
 fn get_symbol_id_map() -> Result<HashMap<String, String>> {
-    let params = HashMap::new();
+    let params = BTreeMap::new();
     let txt = http_get("https://apiv2.bitz.com/Market/getContractCoin", &params)?;
     let resp = serde_json::from_str::<Response>(&txt)?;
     if resp.status != 200 {

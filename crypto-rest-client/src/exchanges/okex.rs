@@ -1,6 +1,6 @@
 use super::utils::http_get;
 use crate::error::Result;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 const BASE_URL: &str = "https://www.okex.com/api";
 
@@ -66,7 +66,7 @@ impl OkexRestClient {
     pub fn fetch_option_underlying() -> Result<Vec<String>> {
         let txt = http_get(
             "https://www.okex.com/api/option/v3/underlying",
-            &HashMap::new(),
+            &BTreeMap::new(),
         )?;
         let underlying_indexes = serde_json::from_str::<Vec<String>>(&txt)?;
         Ok(underlying_indexes)
