@@ -115,11 +115,11 @@ pub(crate) fn crawl_snapshot(
                     (on_msg.lock().unwrap())(message);
                 }
                 Err(err) => {
+                    let current_timestamp = SystemTime::now()
+                        .duration_since(SystemTime::UNIX_EPOCH)
+                        .unwrap()
+                        .as_millis() as u64;
                     if err.0.contains("429") || err.0.contains("418") {
-                        let current_timestamp = SystemTime::now()
-                            .duration_since(SystemTime::UNIX_EPOCH)
-                            .unwrap()
-                            .as_millis() as u64;
                         let next_minute = (current_timestamp as f64 / (1000_f64 * 60_f64)).ceil()
                             * (1000_f64 * 60_f64);
                         let duration =
@@ -138,6 +138,22 @@ pub(crate) fn crawl_snapshot(
                         success_count = 0;
                         back_off_minutes += 1;
                         std::thread::sleep(Duration::from_millis(duration));
+                    } else if err.0.contains("403") {
+                        // 403 is very serious, we should stop crawling
+                        success_count = 0;
+                        back_off_minutes += 1;
+                        error!(
+                            "{} {} {} {} {} {}, error: {}, back off for {} minutes",
+                            current_timestamp,
+                            success_count,
+                            back_off_minutes,
+                            exchange,
+                            market_type,
+                            symbol,
+                            err,
+                            back_off_minutes
+                        );
+                        std::thread::sleep(Duration::from_secs(back_off_minutes * 60));
                     } else {
                         error!("{} {} {}, error: {}", exchange, market_type, symbol, err);
                     }
