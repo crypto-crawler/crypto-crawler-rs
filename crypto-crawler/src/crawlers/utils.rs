@@ -70,31 +70,30 @@ pub(crate) fn crawl_snapshot(
     duration: Option<u64>,
 ) {
     let now = Instant::now();
-    loop {
-        let is_empty = match symbols {
-            Some(list) => {
-                if list.is_empty() {
-                    true
-                } else {
-                    check_args(exchange, market_type, list);
-                    false
-                }
-            }
-            None => true,
-        };
-
-        let mut real_symbols = if is_empty {
-            if market_type == MarketType::Spot {
-                let spot_symbols = fetch_symbols_retry(exchange, market_type);
-                get_hot_spot_symbols(exchange, &spot_symbols)
+    let is_empty = match symbols {
+        Some(list) => {
+            if list.is_empty() {
+                true
             } else {
-                fetch_symbols_retry(exchange, market_type)
+                check_args(exchange, market_type, list);
+                false
             }
-        } else {
-            symbols.unwrap().to_vec()
-        };
-        sort_by_cmc_rank(exchange, &mut real_symbols);
+        }
+        None => true,
+    };
 
+    let mut real_symbols = if is_empty {
+        if market_type == MarketType::Spot {
+            let spot_symbols = fetch_symbols_retry(exchange, market_type);
+            get_hot_spot_symbols(exchange, &spot_symbols)
+        } else {
+            fetch_symbols_retry(exchange, market_type)
+        }
+    } else {
+        symbols.unwrap().to_vec()
+    };
+    sort_by_cmc_rank(exchange, &mut real_symbols);
+    loop {
         let mut index = 0_usize;
         let mut success_count = 0_u64;
         let mut back_off_minutes = 0;
