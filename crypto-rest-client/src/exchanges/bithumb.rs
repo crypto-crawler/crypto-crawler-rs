@@ -1,6 +1,6 @@
 use super::utils::http_get;
 use crate::error::Result;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 const BASE_URL: &str = "https://global-openapi.bithumb.pro/openapi/v1";
 

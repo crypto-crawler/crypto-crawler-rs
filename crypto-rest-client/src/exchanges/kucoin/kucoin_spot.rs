@@ -1,6 +1,6 @@
 use super::super::utils::http_get;
 use crate::error::Result;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 const BASE_URL: &str = "https://api.kucoin.com";
 

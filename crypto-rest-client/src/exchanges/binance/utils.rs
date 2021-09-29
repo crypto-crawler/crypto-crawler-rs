@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use crate::error::{Error, Result};
 
@@ -20,7 +20,7 @@ pub(super) fn check_symbol(symbol: &str) {
 }
 
 pub(super) fn check_code_in_body(resp: String) -> Result<String> {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(&resp);
+    let obj = serde_json::from_str::<BTreeMap<String, Value>>(&resp);
     if obj.is_err() {
         return Ok(resp);
     }
@@ -41,7 +41,7 @@ macro_rules! gen_api_binance {
     ( $path:expr$(, $param_name:ident )* ) => {
         {
             #[allow(unused_mut)]
-            let mut params = HashMap::new();
+            let mut params = BTreeMap::new();
             $(
                 if let Some(param_name) = $param_name {
                     params.insert(stringify!($param_name).to_string(), param_name.to_string());

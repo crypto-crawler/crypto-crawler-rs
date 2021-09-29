@@ -1,9 +1,9 @@
 use reqwest::header;
 
 use crate::error::{Error, Result};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
-pub(super) fn http_get(url: &str, params: &HashMap<String, String>) -> Result<String> {
+pub(super) fn http_get(url: &str, params: &BTreeMap<String, String>) -> Result<String> {
     let mut full_url = url.to_string();
     let mut first = true;
     for (k, v) in params.iter() {
@@ -39,7 +39,7 @@ macro_rules! gen_api {
     ( $path:expr$(, $param_name:ident )* ) => {
         {
             #[allow(unused_mut)]
-            let mut params = HashMap::new();
+            let mut params = BTreeMap::new();
             $(
                 if let Some(param_name) = $param_name {
                     params.insert(stringify!($param_name).to_string(), param_name.to_string());
@@ -53,7 +53,7 @@ macro_rules! gen_api {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
+    use std::collections::BTreeMap;
 
     use serde_json::Value;
 
@@ -62,8 +62,9 @@ mod tests {
     #[ignore]
     fn use_system_socks_proxy() {
         std::env::set_var("https_proxy", "socks5://127.0.0.1:9050");
-        let text = super::http_get("https://check.torproject.org/api/ip", &HashMap::new()).unwrap();
-        let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
+        let text =
+            super::http_get("https://check.torproject.org/api/ip", &BTreeMap::new()).unwrap();
+        let obj = serde_json::from_str::<BTreeMap<String, Value>>(&text).unwrap();
         assert!(obj.get("IsTor").unwrap().as_bool().unwrap());
     }
 
@@ -71,8 +72,9 @@ mod tests {
     #[ignore]
     fn use_system_https_proxy() {
         std::env::set_var("https_proxy", "http://127.0.0.1:8118");
-        let text = super::http_get("https://check.torproject.org/api/ip", &HashMap::new()).unwrap();
-        let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
+        let text =
+            super::http_get("https://check.torproject.org/api/ip", &BTreeMap::new()).unwrap();
+        let obj = serde_json::from_str::<BTreeMap<String, Value>>(&text).unwrap();
         assert!(obj.get("IsTor").unwrap().as_bool().unwrap());
     }
 }
