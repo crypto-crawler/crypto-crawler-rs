@@ -115,7 +115,9 @@ pub(crate) fn crawl_snapshot(
         symbols.unwrap().to_vec()
     };
     sort_by_cmc_rank(exchange, &mut real_symbols);
+
     let cooldown_time = get_cooldown_time_per_request(exchange);
+
     let mut lock = if exchange == "bitmex"
         || (exchange == "binance"
             && (market_type == MarketType::InverseSwap
@@ -148,7 +150,7 @@ pub(crate) fn crawl_snapshot(
     loop {
         let mut index = 0_usize;
         let mut success_count = 0_u64;
-        let mut back_off_minutes = 0;
+        let mut back_off_factor = 1;
         while index < real_symbols.len() {
             let symbol = &real_symbols[index];
             if let Some(ref mut lock) = lock {
@@ -168,7 +170,7 @@ pub(crate) fn crawl_snapshot(
                 Ok(msg) => {
                     index += 1;
                     success_count += 1;
-                    back_off_minutes = 0;
+                    back_off_factor = 1;
                     let message = Message::new(exchange.to_string(), market_type, msg_type, msg);
                     (on_msg.lock().unwrap())(message);
                 }
@@ -177,45 +179,24 @@ pub(crate) fn crawl_snapshot(
                         .duration_since(SystemTime::UNIX_EPOCH)
                         .unwrap()
                         .as_millis() as u64;
+                    warn!(
+                        "{} {} {} {} {} {}, error: {}, back off for {} milliseconds",
+                        current_timestamp,
+                        success_count,
+                        back_off_factor,
+                        exchange,
+                        market_type,
+                        symbol,
+                        err,
+                        (back_off_factor * cooldown_time).as_millis()
+                    );
+                    std::thread::sleep(back_off_factor * cooldown_time);
+                    success_count = 0;
                     if err.0.contains("429") {
-                        let next_minute = (current_timestamp as f64 / (1000_f64 * 60_f64)).ceil()
-                            * (1000_f64 * 60_f64);
-                        let duration =
-                            next_minute as u64 - current_timestamp + 60000 * back_off_minutes + 1;
-                        warn!(
-                            "{} {} {} {} {} {}, error: {}, back off for {} milliseconds",
-                            current_timestamp,
-                            success_count,
-                            back_off_minutes,
-                            exchange,
-                            market_type,
-                            symbol,
-                            err,
-                            duration
-                        );
-                        success_count = 0;
-                        back_off_minutes += 1;
-                        std::thread::sleep(Duration::from_millis(duration));
+                        back_off_factor += 1;
                     } else {
                         // Handle 403, 418, etc.
-                        success_count = 0;
-                        back_off_minutes = if back_off_minutes == 0 {
-                            1
-                        } else {
-                            back_off_minutes * 2
-                        };
-                        error!(
-                            "{} {} {} {} {} {}, error: {}, back off for {} minutes",
-                            current_timestamp,
-                            success_count,
-                            back_off_minutes,
-                            exchange,
-                            market_type,
-                            symbol,
-                            err,
-                            back_off_minutes
-                        );
-                        std::thread::sleep(Duration::from_secs(back_off_minutes * 60));
+                        back_off_factor *= 2;
                     }
                 }
             }
