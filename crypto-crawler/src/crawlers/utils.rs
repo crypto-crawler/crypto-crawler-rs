@@ -186,12 +186,12 @@ pub(crate) fn crawl_snapshot(
                 }
             }
         }
-        std::thread::sleep(Duration::from_secs(5)); // sleep 5 seconds after each round
         if let Some(seconds) = duration {
             if now.elapsed() > Duration::from_secs(seconds) {
                 break;
             }
         }
+        std::thread::sleep(Duration::from_secs(5)); // sleep 5 seconds after each round
     }
 }
 
