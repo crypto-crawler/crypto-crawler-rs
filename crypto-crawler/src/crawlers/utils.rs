@@ -116,51 +116,50 @@ pub(crate) fn crawl_snapshot(
     };
     sort_by_cmc_rank(exchange, &mut real_symbols);
     let cooldown_time = get_cooldown_time_per_request(exchange);
+    let mut lock = if exchange == "bitmex"
+        || (exchange == "binance"
+            && (market_type == MarketType::InverseSwap
+                || market_type == MarketType::InverseFuture
+                || market_type == MarketType::LinearFuture
+                || market_type == MarketType::LinearSwap))
+    {
+        let mut dir = std::env::temp_dir();
+        let filename = if exchange == "bitmex" {
+            "bitmex.lock"
+        } else if exchange == "binance" {
+            if market_type == MarketType::InverseSwap || market_type == MarketType::InverseFuture {
+                "binance_inverse.lock"
+            } else if market_type == MarketType::LinearFuture
+                || market_type == MarketType::LinearSwap
+            {
+                "binance_linear.lock"
+            } else {
+                panic!("Unneccesary lock {} {}", exchange, market_type);
+            }
+        } else {
+            panic!("Unneccesary lock {} {}", exchange, market_type);
+        };
+        dir.push(filename);
+        let file = LockFile::open(dir.as_path()).unwrap();
+        Some(file)
+    } else {
+        None
+    };
     loop {
         let mut index = 0_usize;
         let mut success_count = 0_u64;
         let mut back_off_minutes = 0;
         while index < real_symbols.len() {
             let symbol = &real_symbols[index];
-            let lock = if exchange == "bitmex"
-                || (exchange == "binance"
-                    && (market_type == MarketType::InverseSwap
-                        || market_type == MarketType::InverseFuture
-                        || market_type == MarketType::LinearFuture
-                        || market_type == MarketType::LinearSwap))
-            {
-                // lock
-                let mut dir = std::env::temp_dir();
-                let filename = if exchange == "bitmex" {
-                    "bitmex.lock"
-                } else if exchange == "binance" {
-                    if market_type == MarketType::InverseSwap
-                        || market_type == MarketType::InverseFuture
-                    {
-                        "binance_inverse.lock"
-                    } else if market_type == MarketType::LinearFuture
-                        || market_type == MarketType::LinearSwap
-                    {
-                        "binance_linear.lock"
-                    } else {
-                        panic!("Unneccesary lock {} {}", exchange, market_type);
-                    }
-                } else {
-                    panic!("Unneccesary lock {} {}", exchange, market_type);
-                };
-                dir.push(filename);
-                let mut file = LockFile::open(dir.as_path()).unwrap();
-                file.lock().unwrap();
-                Some(file)
-            } else {
-                None
-            };
+            if let Some(ref mut lock) = lock {
+                lock.lock().unwrap();
+            }
             let resp = match msg_type {
                 MessageType::L2Snapshot => fetch_l2_snapshot(exchange, market_type, symbol, None),
                 MessageType::L3Snapshot => fetch_l3_snapshot(exchange, market_type, symbol, None),
                 _ => panic!("msg_type must be L2Snapshot or L3Snapshot"),
             };
-            if let Some(mut lock) = lock {
+            if let Some(ref mut lock) = lock {
                 lock.unlock().unwrap();
             }
             // Cooldown after each request
