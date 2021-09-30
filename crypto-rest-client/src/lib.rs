@@ -131,6 +131,9 @@ fn retriable(
             count
         }
     };
+    if retry_count == 1 {
+        return crawl_func(exchange, market_type, symbol);
+    }
     let mut back_off_minutes = 0;
     for _ in 0..retry_count {
         let resp = crawl_func(exchange, market_type, symbol);
