@@ -1,6 +1,6 @@
 [package]
 name = "crypto-rest-client"
-version = "0.7.3"
+version = "0.7.4"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "An RESTful client for all cryptocurrency exchanges."
