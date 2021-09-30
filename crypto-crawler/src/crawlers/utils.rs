@@ -68,15 +68,15 @@ fn get_cooldown_time_per_request(exchange: &str) -> Duration {
         "bitget" => 100,       // 20 requests per 2 seconds
         "bithumb" => 8,        // 135 requests per 1 second for public APIs
         "bitmex" => 2000, // 60 requests per minute on all routes (reduced to 30 when unauthenticated)
-        "bitstamp" => 75, // 8000 requests per 10 minutes
-        "bitz" => 34,     // no more than 30 times within 1 second
-        "bybit" => 20,    // 50 requests per second continuously for 2 minutes
+        "bitstamp" => 30000, // 8000 requests per 10 minutes, but bitstamp orderbook is too big, need to reduce its frequency
+        "bitz" => 34,        // no more than 30 times within 1 second
+        "bybit" => 20,       // 50 requests per second continuously for 2 minutes
         "coinbase_pro" => 100, //  10 requests per second
-        "deribit" => 50,  // 20 requests per second
-        "gate" => 4,      // 300 read operations per IP per second
-        "huobi" => 2,     // 800 times/second for one IP
-        "mxc" => 100,     // 20 times per 2 seconds
-        "okex" => 100,    // 20 requests per 2 seconds
+        "deribit" => 50,     // 20 requests per second
+        "gate" => 4,         // 300 read operations per IP per second
+        "huobi" => 2,        // 800 times/second for one IP
+        "mxc" => 100,        // 20 times per 2 seconds
+        "okex" => 100,       // 20 requests per 2 seconds
         _ => 100,
     };
     Duration::from_millis(millis)
