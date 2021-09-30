@@ -104,7 +104,8 @@ pub(crate) fn crawl_snapshot(
                 MessageType::L3Snapshot => fetch_l3_snapshot(exchange, market_type, symbol),
                 _ => panic!("msg_type must be L2Snapshot or L3Snapshot"),
             };
-            // std::thread::sleep(Duration::from_millis(sleep_time));
+            // sleep 100ms after each request
+            std::thread::sleep(Duration::from_millis(100));
             match resp {
                 Ok(msg) => {
                     index += 1;
@@ -163,7 +164,7 @@ pub(crate) fn crawl_snapshot(
                 }
             }
         }
-
+        std::thread::sleep(Duration::from_secs(2)); // sleep 2 seconds after each round
         if let Some(seconds) = duration {
             if now.elapsed() > Duration::from_secs(seconds) {
                 break;
