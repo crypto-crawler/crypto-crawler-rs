@@ -63,9 +63,20 @@ pub(super) fn check_args(exchange: &str, market_type: MarketType, symbols: &[Str
 
 fn get_cooldown_time_per_request(exchange: &str) -> Duration {
     let millis = match exchange {
-        "binance" => 500, // spot weitht 1200, contract weight 2400
+        "binance" => 500,      // spot weitht 1200, contract weight 2400
+        "bitget" => 100,       // 20 requests per 2 seconds
+        "bithumb" => 8,        // 135 requests per 1 second for public APIs
         "bitmex" => 2000, // 60 requests per minute on all routes (reduced to 30 when unauthenticated)
-        _ => 200,
+        "bitstamp" => 75, // 8000 requests per 10 minutes
+        "bitz" => 34,     // no more than 30 times within 1 second
+        "bybit" => 20,    // 50 requests per second continuously for 2 minutes
+        "coinbase_pro" => 100, //  10 requests per second
+        "deribit" => 50,  // 20 requests per second
+        "gate" => 4,      // 300 read operations per IP per second
+        "huobi" => 2,     // 800 times/second for one IP
+        "mxc" => 100,     // 20 times per 2 seconds
+        "okex" => 100,    // 20 requests per 2 seconds
+        _ => 100,
     };
     Duration::from_millis(millis)
 }
