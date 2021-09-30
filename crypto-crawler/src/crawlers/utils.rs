@@ -104,15 +104,15 @@ fn get_cooldown_time_per_request(exchange: &str) -> Duration {
         "bitget" => 100,       // 20 requests per 2 seconds
         "bithumb" => 8,        // 135 requests per 1 second for public APIs
         "bitmex" => 2000, // 60 requests per minute on all routes (reduced to 30 when unauthenticated)
-        "bitstamp" => 1000, // 8000 requests per 10 minutes, but bitstamp orderbook is too big, need to reduce its frequency
-        "bitz" => 34,       // no more than 30 times within 1 second
-        "bybit" => 20,      // 50 requests per second continuously for 2 minutes
+        "bitstamp" => 750, // 8000 requests per 10 minutes, but bitstamp orderbook is too big, need to reduce its frequency
+        "bitz" => 34,      // no more than 30 times within 1 second
+        "bybit" => 20,     // 50 requests per second continuously for 2 minutes
         "coinbase_pro" => 100, //  10 requests per second
-        "deribit" => 50,    // 20 requests per second
-        "gate" => 4,        // 300 read operations per IP per second
-        "huobi" => 2,       // 800 times/second for one IP
-        "mxc" => 100,       // 20 times per 2 seconds
-        "okex" => 100,      // 20 requests per 2 seconds
+        "deribit" => 50,   // 20 requests per second
+        "gate" => 4,       // 300 read operations per IP per second
+        "huobi" => 2,      // 800 times/second for one IP
+        "mxc" => 100,      // 20 times per 2 seconds
+        "okex" => 100,     // 20 requests per 2 seconds
         _ => 100,
     };
     Duration::from_millis(millis)
@@ -158,7 +158,7 @@ pub(crate) fn crawl_snapshot(
 
         let mut index = 0_usize;
         let mut success_count = 0_u64;
-        let mut back_off_factor = 1;
+        let mut backoff_factor = 1;
         while index < real_symbols.len() {
             let symbol = &real_symbols[index];
             if let Some(ref mut lock) = lock {
@@ -182,7 +182,7 @@ pub(crate) fn crawl_snapshot(
                 Ok(msg) => {
                     index += 1;
                     success_count += 1;
-                    back_off_factor = 1;
+                    backoff_factor = 1;
                     let message = Message::new(exchange.to_string(), market_type, msg_type, msg);
                     (on_msg.lock().unwrap())(message);
                 }
@@ -195,20 +195,20 @@ pub(crate) fn crawl_snapshot(
                         "{} {} {} {} {} {}, error: {}, back off for {} milliseconds",
                         current_timestamp,
                         success_count,
-                        back_off_factor,
+                        backoff_factor,
                         exchange,
                         market_type,
                         symbol,
                         err,
-                        (back_off_factor * cooldown_time).as_millis()
+                        (backoff_factor * cooldown_time).as_millis()
                     );
-                    std::thread::sleep(back_off_factor * cooldown_time);
+                    std::thread::sleep(backoff_factor * cooldown_time);
                     success_count = 0;
                     if err.0.contains("429") {
-                        back_off_factor += 1;
+                        backoff_factor += 1;
                     } else {
                         // Handle 403, 418, etc.
-                        back_off_factor *= 2;
+                        backoff_factor *= 2;
                     }
                 }
             }
@@ -218,7 +218,7 @@ pub(crate) fn crawl_snapshot(
                 break;
             }
         }
-        std::thread::sleep(Duration::from_secs(2)); // sleep 2 seconds after each round
+        std::thread::sleep(cooldown_time * 2); // if real_symbols is empty, CPU will be 100% without this line
     }
 }
 
