@@ -11,6 +11,12 @@ fn fetch_all_symbols() {
 }
 
 #[test]
+fn fetch_all_symbols_via_unknown() {
+    let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::Unknown).unwrap();
+    assert!(!symbols.is_empty());
+}
+
+#[test]
 fn fetch_inverse_swap_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
     assert!(!symbols.is_empty());

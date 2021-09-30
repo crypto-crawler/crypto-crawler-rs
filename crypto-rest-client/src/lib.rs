@@ -158,8 +158,8 @@ fn retriable(
                     );
                     back_off_minutes += 1;
                     std::thread::sleep(Duration::from_millis(duration));
-                } else if err.0.contains("403") {
-                    // 403 is very serious, we should stop crawling
+                } else {
+                    // Handle 403, 418, etc.
                     back_off_minutes = if back_off_minutes == 0 {
                         1
                     } else {
@@ -176,12 +176,6 @@ fn retriable(
                         back_off_minutes
                     );
                     std::thread::sleep(Duration::from_secs(back_off_minutes * 60));
-                } else {
-                    error!(
-                        "{} {} {} {}, error: {}. back off for 1 second",
-                        current_timestamp, exchange, market_type, symbol, err
-                    );
-                    std::thread::sleep(Duration::from_secs(1));
                 }
             }
         }
