@@ -20,7 +20,7 @@ fn test_trades(symbol: &str) {
 #[test_case(MarketType::InverseFuture, "BTC-31DEC21")]
 #[test_case(MarketType::EuropeanOption, "BTC-31DEC21-400000-C")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
-    let text = fetch_l2_snapshot("deribit", market_type, symbol).unwrap();
+    let text = fetch_l2_snapshot("deribit", market_type, symbol, Some(3)).unwrap();
 
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
     let result = obj.get("result").unwrap().as_object().unwrap();

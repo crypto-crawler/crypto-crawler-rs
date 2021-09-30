@@ -16,7 +16,7 @@ fn test_trades() {
 
 #[test]
 fn test_l2_snapshot() {
-    let text = fetch_l2_snapshot("bithumb", MarketType::Spot, "BTC-USDT").unwrap();
+    let text = fetch_l2_snapshot("bithumb", MarketType::Spot, "BTC-USDT", Some(3)).unwrap();
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
     assert_eq!(obj.get("code").unwrap().as_str().unwrap(), "0");
 

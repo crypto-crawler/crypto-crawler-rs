@@ -28,7 +28,7 @@ mod mxc_swap {
 
     #[test]
     fn test_l2_snapshot() {
-        let text = fetch_l2_snapshot("mxc", MarketType::LinearSwap, "BTC_USDT").unwrap();
+        let text = fetch_l2_snapshot("mxc", MarketType::LinearSwap, "BTC_USDT", Some(3)).unwrap();
         assert!(text.starts_with("{"));
     }
 }

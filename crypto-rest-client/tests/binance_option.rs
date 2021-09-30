@@ -9,7 +9,12 @@ fn test_agg_trades() {
 
 #[test]
 fn test_l2_snapshot() {
-    let text =
-        fetch_l2_snapshot("binance", MarketType::EuropeanOption, "BTC-211001-50000-C").unwrap();
+    let text = fetch_l2_snapshot(
+        "binance",
+        MarketType::EuropeanOption,
+        "BTC-211001-50000-C",
+        Some(3),
+    )
+    .unwrap();
     assert!(text.starts_with("{"));
 }

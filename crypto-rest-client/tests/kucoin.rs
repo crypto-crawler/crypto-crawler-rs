@@ -9,7 +9,7 @@ use test_case::test_case;
 #[test_case(MarketType::InverseSwap, "XBTUSDM")]
 #[test_case(MarketType::LinearSwap, "XBTUSDTM")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
-    let text = fetch_l2_snapshot("kucoin", market_type, symbol).unwrap();
+    let text = fetch_l2_snapshot("kucoin", market_type, symbol, Some(3)).unwrap();
 
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
     assert_eq!("200000", obj.get("code").unwrap().as_str().unwrap());
@@ -28,7 +28,7 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::InverseSwap, "XBTUSDM")]
 #[test_case(MarketType::LinearSwap, "XBTUSDTM")]
 fn test_l3_snapshot(market_type: MarketType, symbol: &str) {
-    let text = fetch_l3_snapshot("kucoin", market_type, symbol).unwrap();
+    let text = fetch_l3_snapshot("kucoin", market_type, symbol, Some(3)).unwrap();
 
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
     assert_eq!("200000", obj.get("code").unwrap().as_str().unwrap());

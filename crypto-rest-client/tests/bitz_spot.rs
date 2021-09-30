@@ -6,7 +6,7 @@ use serde_json::Value;
 
 #[test]
 fn test_l2_snapshot() {
-    let text = fetch_l2_snapshot("bitz", MarketType::Spot, "btc_usdt").unwrap();
+    let text = fetch_l2_snapshot("bitz", MarketType::Spot, "btc_usdt", Some(3)).unwrap();
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
 
     assert_eq!(obj.get("status").unwrap().as_i64().unwrap(), 200);
