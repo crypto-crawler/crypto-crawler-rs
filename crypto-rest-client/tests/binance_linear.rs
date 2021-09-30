@@ -11,7 +11,8 @@ mod linear_swap {
 
     #[test]
     fn test_l2_snapshot() {
-        let text = fetch_l2_snapshot("binance", MarketType::LinearSwap, "BTCUSDT").unwrap();
+        let text =
+            fetch_l2_snapshot("binance", MarketType::LinearSwap, "BTCUSDT", Some(3)).unwrap();
         assert!(text.starts_with("{"));
     }
 }
@@ -30,7 +31,8 @@ mod linear_future {
 
     #[test]
     fn test_l2_snapshot() {
-        let text = fetch_l2_snapshot("binance", MarketType::LinearSwap, "BTCUSDT_211231").unwrap();
+        let text = fetch_l2_snapshot("binance", MarketType::LinearSwap, "BTCUSDT_211231", Some(3))
+            .unwrap();
         assert!(text.starts_with("{"));
     }
 }

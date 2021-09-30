@@ -9,6 +9,6 @@ fn test_trades() {
 
 #[test]
 fn test_l2_snapshot() {
-    let text = fetch_l2_snapshot("kraken", MarketType::Spot, "XXBTZUSD").unwrap();
+    let text = fetch_l2_snapshot("kraken", MarketType::Spot, "XXBTZUSD", Some(3)).unwrap();
     assert!(text.starts_with("{"));
 }

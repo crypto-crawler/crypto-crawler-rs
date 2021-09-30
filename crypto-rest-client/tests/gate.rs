@@ -9,7 +9,7 @@ use test_case::test_case;
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
 #[test_case(MarketType::LinearFuture, "BTC_USDT_20211001")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
-    let text = fetch_l2_snapshot("gate", market_type, symbol).unwrap();
+    let text = fetch_l2_snapshot("gate", market_type, symbol, Some(3)).unwrap();
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
 
     let asks = obj.get("asks").unwrap().as_array().unwrap();

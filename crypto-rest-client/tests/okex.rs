@@ -9,7 +9,7 @@ use test_case::test_case;
 #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
 #[test_case(MarketType::EuropeanOption, "BTC-USD-211231-10000-P")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
-    let text = fetch_l2_snapshot("okex", market_type, symbol).unwrap();
+    let text = fetch_l2_snapshot("okex", market_type, symbol, Some(3)).unwrap();
     assert!(text.starts_with("{"));
 }
 
