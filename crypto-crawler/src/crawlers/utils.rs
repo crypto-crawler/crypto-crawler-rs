@@ -13,13 +13,41 @@ use crate::{
     Message, MessageType,
 };
 
+fn get_lock_file(exchange: &str, market_type: MarketType) -> Option<LockFile> {
+    let filename = if exchange == "bitmex" {
+        Some("bitmex.lock")
+    } else if exchange == "binance" {
+        if market_type == MarketType::InverseSwap || market_type == MarketType::InverseFuture {
+            Some("binance_inverse.lock")
+        } else if market_type == MarketType::LinearFuture || market_type == MarketType::LinearSwap {
+            Some("binance_linear.lock")
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+    if let Some(filename) = filename {
+        let mut dir = std::env::temp_dir();
+        dir.push(filename);
+        let file = LockFile::open(dir.as_path()).unwrap();
+        Some(file)
+    } else {
+        None
+    }
+}
+
 pub fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<String> {
     let retry_count = std::env::var("REST_RETRY_COUNT")
         .unwrap_or_else(|_| "5".to_string())
         .parse::<i64>()
         .unwrap();
+    let mut lock = get_lock_file(exchange, market_type);
     let mut symbols = Vec::<String>::new();
     for i in 0..retry_count {
+        if let Some(ref mut lock) = lock {
+            lock.lock().unwrap();
+        }
         match fetch_symbols(exchange, market_type) {
             Ok(list) => {
                 symbols = list;
@@ -34,7 +62,15 @@ pub fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<Strin
             }
         }
         let cooldown_time = get_cooldown_time_per_request(exchange);
-        std::thread::sleep(cooldown_time);
+        if let Some(ref mut lock) = lock {
+            // Cooldown after each request, and make all other processes wait
+            // on the lock to avoid parallel requests, thus avoid 429 error
+            std::thread::sleep(cooldown_time);
+            lock.unlock().unwrap();
+        } else {
+            // Cooldown after each request
+            std::thread::sleep(cooldown_time);
+        }
     }
     symbols
 }
@@ -106,35 +142,7 @@ pub(crate) fn crawl_snapshot(
 
     let cooldown_time = get_cooldown_time_per_request(exchange);
 
-    let mut lock = if exchange == "bitmex"
-        || (exchange == "binance"
-            && (market_type == MarketType::InverseSwap
-                || market_type == MarketType::InverseFuture
-                || market_type == MarketType::LinearFuture
-                || market_type == MarketType::LinearSwap))
-    {
-        let mut dir = std::env::temp_dir();
-        let filename = if exchange == "bitmex" {
-            "bitmex.lock"
-        } else if exchange == "binance" {
-            if market_type == MarketType::InverseSwap || market_type == MarketType::InverseFuture {
-                "binance_inverse.lock"
-            } else if market_type == MarketType::LinearFuture
-                || market_type == MarketType::LinearSwap
-            {
-                "binance_linear.lock"
-            } else {
-                panic!("Unneccesary lock {} {}", exchange, market_type);
-            }
-        } else {
-            panic!("Unneccesary lock {} {}", exchange, market_type);
-        };
-        dir.push(filename);
-        let file = LockFile::open(dir.as_path()).unwrap();
-        Some(file)
-    } else {
-        None
-    };
+    let mut lock = get_lock_file(exchange, market_type);
     loop {
         let mut real_symbols = if is_empty {
             if market_type == MarketType::Spot {
@@ -162,8 +170,8 @@ pub(crate) fn crawl_snapshot(
                 _ => panic!("msg_type must be L2Snapshot or L3Snapshot"),
             };
             if let Some(ref mut lock) = lock {
-                // Cooldown after each request,
-                // and make all other processes wait on the lock to avoid "429 Too Many Requests"
+                // Cooldown after each request, and make all other processes wait
+                // on the lock to avoid parallel requests, thus avoid 429 error
                 std::thread::sleep(cooldown_time);
                 lock.unlock().unwrap();
             } else {
