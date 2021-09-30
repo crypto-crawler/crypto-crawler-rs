@@ -25,7 +25,6 @@ pub fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<Strin
                 break;
             }
             Err(err) => {
-                std::thread::sleep(Duration::from_secs(60));
                 if i == retry_count - 1 {
                     error!("The {}th time, {}", i, err);
                 } else {
@@ -33,6 +32,8 @@ pub fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<Strin
                 }
             }
         }
+        let cooldown_time = get_cooldown_time_per_request(exchange);
+        std::thread::sleep(cooldown_time);
     }
     symbols
 }
