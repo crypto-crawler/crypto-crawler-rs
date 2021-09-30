@@ -134,7 +134,8 @@ fn retriable(
     if retry_count == 1 {
         return crawl_func(exchange, market_type, symbol);
     }
-    let mut back_off_minutes = 0;
+    let mut backoff_factor = 0;
+    let cooldown_time = Duration::from_secs(2);
     for _ in 0..retry_count {
         let resp = crawl_func(exchange, market_type, symbol);
         match resp {
@@ -144,41 +145,22 @@ fn retriable(
                     .duration_since(SystemTime::UNIX_EPOCH)
                     .unwrap()
                     .as_millis() as u64;
-                if err.0.contains("429") || err.0.contains("418") {
-                    let next_minute = (current_timestamp as f64 / (1000_f64 * 60_f64)).ceil()
-                        * (1000_f64 * 60_f64);
-                    let duration =
-                        next_minute as u64 - current_timestamp + 60000 * back_off_minutes + 1;
-                    warn!(
-                        "{} {} {} {} {}, error: {}, back off for {} milliseconds",
-                        current_timestamp,
-                        back_off_minutes,
-                        exchange,
-                        market_type,
-                        symbol,
-                        err,
-                        duration
-                    );
-                    back_off_minutes += 1;
-                    std::thread::sleep(Duration::from_millis(duration));
+                warn!(
+                    "{} {} {} {} {}, error: {}, back off for {} milliseconds",
+                    current_timestamp,
+                    backoff_factor,
+                    exchange,
+                    market_type,
+                    symbol,
+                    err,
+                    (backoff_factor * cooldown_time).as_millis()
+                );
+                std::thread::sleep(backoff_factor * cooldown_time);
+                if err.0.contains("429") {
+                    backoff_factor += 1;
                 } else {
                     // Handle 403, 418, etc.
-                    back_off_minutes = if back_off_minutes == 0 {
-                        1
-                    } else {
-                        back_off_minutes * 2
-                    };
-                    error!(
-                        "{} {} {} {} {}, error: {}, back off for {} minutes",
-                        current_timestamp,
-                        back_off_minutes,
-                        exchange,
-                        market_type,
-                        symbol,
-                        err,
-                        back_off_minutes
-                    );
-                    std::thread::sleep(Duration::from_secs(back_off_minutes * 60));
+                    backoff_factor *= 2;
                 }
             }
         }
