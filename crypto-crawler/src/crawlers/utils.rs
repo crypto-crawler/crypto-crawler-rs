@@ -60,6 +60,15 @@ pub(super) fn check_args(exchange: &str, market_type: MarketType, symbols: &[Str
     }
 }
 
+fn get_cooldown_time_per_request(exchange: &str) -> Duration {
+    let millis = match exchange {
+        "binance" => 500, // spot weitht 1200, contract weight 2400
+        "bitmex" => 2000, // 60 requests per minute on all routes (reduced to 30 when unauthenticated)
+        _ => 200,
+    };
+    Duration::from_millis(millis)
+}
+
 /// Crawl leve2 or level3 orderbook snapshots through RESTful APIs.
 pub(crate) fn crawl_snapshot(
     exchange: &str,
@@ -93,6 +102,7 @@ pub(crate) fn crawl_snapshot(
         symbols.unwrap().to_vec()
     };
     sort_by_cmc_rank(exchange, &mut real_symbols);
+    let cooldown_time = get_cooldown_time_per_request(exchange);
     loop {
         let mut index = 0_usize;
         let mut success_count = 0_u64;
@@ -104,8 +114,8 @@ pub(crate) fn crawl_snapshot(
                 MessageType::L3Snapshot => fetch_l3_snapshot(exchange, market_type, symbol),
                 _ => panic!("msg_type must be L2Snapshot or L3Snapshot"),
             };
-            // sleep 100ms after each request
-            std::thread::sleep(Duration::from_millis(100));
+            // Cooldown after each request
+            std::thread::sleep(cooldown_time);
             match resp {
                 Ok(msg) => {
                     index += 1;
@@ -164,7 +174,7 @@ pub(crate) fn crawl_snapshot(
                 }
             }
         }
-        std::thread::sleep(Duration::from_secs(2)); // sleep 2 seconds after each round
+        std::thread::sleep(Duration::from_secs(5)); // sleep 5 seconds after each round
         if let Some(seconds) = duration {
             if now.elapsed() > Duration::from_secs(seconds) {
                 break;
