@@ -1,9 +1,10 @@
-use reqwest::header;
+use reqwest::{blocking::Response, header};
 
 use crate::error::{Error, Result};
 use std::collections::BTreeMap;
 
-pub(super) fn http_get(url: &str, params: &BTreeMap<String, String>) -> Result<String> {
+// Returns the raw response directly.
+pub(super) fn http_get_raw(url: &str, params: &BTreeMap<String, String>) -> Result<Response> {
     let mut full_url = url.to_string();
     let mut first = true;
     for (k, v) in params.iter() {
@@ -28,10 +29,17 @@ pub(super) fn http_get(url: &str, params: &BTreeMap<String, String>) -> Result<S
          .gzip(true)
          .build()?;
     let response = client.get(full_url.as_str()).send()?;
+    Ok(response)
+}
 
-    match response.error_for_status() {
-        Ok(resp) => Ok(resp.text()?),
-        Err(error) => Err(Error::from(error)),
+// Returns the text in response.
+pub(super) fn http_get(url: &str, params: &BTreeMap<String, String>) -> Result<String> {
+    match http_get_raw(url, params) {
+        Ok(response) => match response.error_for_status() {
+            Ok(resp) => Ok(resp.text()?),
+            Err(error) => Err(Error::from(error)),
+        },
+        Err(err) => Err(err),
     }
 }
 
