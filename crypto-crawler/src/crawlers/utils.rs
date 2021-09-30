@@ -104,18 +104,6 @@ pub(crate) fn crawl_snapshot(
         None => true,
     };
 
-    let mut real_symbols = if is_empty {
-        if market_type == MarketType::Spot {
-            let spot_symbols = fetch_symbols_retry(exchange, market_type);
-            get_hot_spot_symbols(exchange, &spot_symbols)
-        } else {
-            fetch_symbols_retry(exchange, market_type)
-        }
-    } else {
-        symbols.unwrap().to_vec()
-    };
-    sort_by_cmc_rank(exchange, &mut real_symbols);
-
     let cooldown_time = get_cooldown_time_per_request(exchange);
 
     let mut lock = if exchange == "bitmex"
@@ -148,6 +136,18 @@ pub(crate) fn crawl_snapshot(
         None
     };
     loop {
+        let mut real_symbols = if is_empty {
+            if market_type == MarketType::Spot {
+                let spot_symbols = fetch_symbols_retry(exchange, market_type);
+                get_hot_spot_symbols(exchange, &spot_symbols)
+            } else {
+                fetch_symbols_retry(exchange, market_type)
+            }
+        } else {
+            symbols.unwrap().to_vec()
+        };
+        sort_by_cmc_rank(exchange, &mut real_symbols);
+
         let mut index = 0_usize;
         let mut success_count = 0_u64;
         let mut back_off_factor = 1;
@@ -206,7 +206,7 @@ pub(crate) fn crawl_snapshot(
                 break;
             }
         }
-        std::thread::sleep(Duration::from_secs(5)); // sleep 5 seconds after each round
+        std::thread::sleep(Duration::from_secs(2)); // sleep 2 seconds after each round
     }
 }
 
