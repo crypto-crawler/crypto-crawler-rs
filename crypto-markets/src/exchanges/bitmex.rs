@@ -152,6 +152,7 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
     }
 
     let filtered: Vec<Instrument> = match market_type {
+        MarketType::Unknown => instruments,
         MarketType::InverseSwap => swap.iter().filter(|x| x.isInverse).cloned().collect(),
         MarketType::QuantoSwap => swap.iter().filter(|x| x.isQuanto).cloned().collect(),
         MarketType::LinearFuture => futures

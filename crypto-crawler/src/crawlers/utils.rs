@@ -122,8 +122,8 @@ pub(crate) fn crawl_snapshot(
         while index < real_symbols.len() {
             let symbol = &real_symbols[index];
             let resp = match msg_type {
-                MessageType::L2Snapshot => fetch_l2_snapshot(exchange, market_type, symbol),
-                MessageType::L3Snapshot => fetch_l3_snapshot(exchange, market_type, symbol),
+                MessageType::L2Snapshot => fetch_l2_snapshot(exchange, market_type, symbol, None),
+                MessageType::L3Snapshot => fetch_l3_snapshot(exchange, market_type, symbol, None),
                 _ => panic!("msg_type must be L2Snapshot or L3Snapshot"),
             };
             // Cooldown after each request
@@ -141,7 +141,7 @@ pub(crate) fn crawl_snapshot(
                         .duration_since(SystemTime::UNIX_EPOCH)
                         .unwrap()
                         .as_millis() as u64;
-                    if err.0.contains("429") || err.0.contains("418") {
+                    if err.0.contains("429") {
                         let next_minute = (current_timestamp as f64 / (1000_f64 * 60_f64)).ceil()
                             * (1000_f64 * 60_f64);
                         let duration =
@@ -160,8 +160,8 @@ pub(crate) fn crawl_snapshot(
                         success_count = 0;
                         back_off_minutes += 1;
                         std::thread::sleep(Duration::from_millis(duration));
-                    } else if err.0.contains("403") {
-                        // 403 is very serious, we should stop crawling
+                    } else {
+                        // Handle 403, 418, etc.
                         success_count = 0;
                         back_off_minutes = if back_off_minutes == 0 {
                             1
@@ -180,8 +180,6 @@ pub(crate) fn crawl_snapshot(
                             back_off_minutes
                         );
                         std::thread::sleep(Duration::from_secs(back_off_minutes * 60));
-                    } else {
-                        error!("{} {} {}, error: {}", exchange, market_type, symbol, err);
                     }
                 }
             }
