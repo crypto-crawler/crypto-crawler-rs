@@ -240,9 +240,7 @@ mod gate_inverse_future {
         gen_test_code!(
             GateInverseFutureWSClient,
             subscribe_trade,
-            &vec![
-                "BTC_USD_20211231".to_string()
-            ]
+            &vec!["BTC_USD_20211231".to_string()]
         );
     }
 
@@ -291,9 +289,7 @@ mod gate_linear_future {
         gen_test_code!(
             GateLinearFutureWSClient,
             subscribe_trade,
-            &vec![
-                "BTC_USDT_20211008".to_string()
-            ]
+            &vec!["BTC_USDT_20211008".to_string()]
         );
     }
 
