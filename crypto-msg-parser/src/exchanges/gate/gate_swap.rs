@@ -334,7 +334,7 @@ fn parse_order(market_type: MarketType, raw_order: &RawOrderNew, pair: &str) -> 
     let quantity = raw_order.s;
 
     let (quantity_base, quantity_quote, quantity_contract) =
-        calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
+        calc_quantity_and_volume(EXCHANGE_NAME, market_type, pair, price, quantity);
     Order {
         price,
         quantity_base,

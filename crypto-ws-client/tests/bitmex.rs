@@ -95,7 +95,7 @@ mod bitmex_inverse_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe,
-            &vec!["trade:XBTU21".to_string(), "quote:XBTU21".to_string()]
+            &vec!["trade:XBTZ21".to_string(), "quote:XBTZ21".to_string()]
         );
     }
 
@@ -104,7 +104,7 @@ mod bitmex_inverse_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe_trade,
-            &vec!["XBTZ21".to_string(), "XBTU21".to_string()]
+            &vec!["XBTZ21".to_string(), "XBTZ21".to_string()]
         );
     }
 
@@ -113,7 +113,7 @@ mod bitmex_inverse_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe_bbo,
-            &vec!["XBTZ21".to_string(), "XBTU21".to_string()]
+            &vec!["XBTZ21".to_string(), "XBTZ21".to_string()]
         );
     }
 
@@ -122,7 +122,7 @@ mod bitmex_inverse_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe_orderbook,
-            &vec!["XBTZ21".to_string(), "XBTU21".to_string()]
+            &vec!["XBTZ21".to_string(), "XBTZ21".to_string()]
         );
     }
 
@@ -131,7 +131,7 @@ mod bitmex_inverse_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe_orderbook_snapshot,
-            &vec!["XBTZ21".to_string(), "XBTU21".to_string()]
+            &vec!["XBTZ21".to_string(), "XBTZ21".to_string()]
         );
     }
 
@@ -139,12 +139,12 @@ mod bitmex_inverse_future {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BitmexWSClient,
-            &vec!["XBTZ21".to_string(), "XBTU21".to_string()],
+            &vec!["XBTZ21".to_string(), "XBTZ21".to_string()],
             60
         );
         gen_test_subscribe_candlestick!(
             BitmexWSClient,
-            &vec!["XBTZ21".to_string(), "XBTU21".to_string()],
+            &vec!["XBTZ21".to_string(), "XBTZ21".to_string()],
             86400
         );
     }
