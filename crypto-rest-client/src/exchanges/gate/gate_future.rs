@@ -27,7 +27,7 @@ impl GateFutureRestClient {
     ///
     /// For example:
     ///
-    /// - <https://api.gateio.ws/api/v4/delivery/usdt/order_book?contract=BTC_USDT_20211001&limit=50>
+    /// - <https://api.gateio.ws/api/v4/delivery/usdt/order_book?contract=BTC_USDT_20211015&limit=50>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         let without_date = &symbol[..(symbol.len() - 8)];
         let settle = if without_date.ends_with("_USD_") {

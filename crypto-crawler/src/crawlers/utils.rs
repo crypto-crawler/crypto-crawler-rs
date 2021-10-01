@@ -58,7 +58,7 @@ pub fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<Strin
                 }
             }
         }
-        let cooldown_time = get_cooldown_time_per_request(exchange);
+        let cooldown_time = get_cooldown_time_per_request(exchange, market_type);
         if let Some(ref mut lock) = lock {
             // Cooldown after each request, and make all other processes wait
             // on the lock to avoid parallel requests, thus avoid 429 error
@@ -95,7 +95,7 @@ pub(super) fn check_args(exchange: &str, market_type: MarketType, symbols: &[Str
     }
 }
 
-fn get_cooldown_time_per_request(exchange: &str) -> Duration {
+fn get_cooldown_time_per_request(exchange: &str, market_type: MarketType) -> Duration {
     let millis = match exchange {
         "binance" => 500,      // spot weitht 1200, contract weight 2400
         "bitget" => 100,       // 20 requests per 2 seconds
@@ -108,8 +108,12 @@ fn get_cooldown_time_per_request(exchange: &str) -> Duration {
         "deribit" => 50,    // 20 requests per second
         "gate" => 4,        // 300 read operations per IP per second
         "huobi" => 2,       // 800 times/second for one IP
-        "mxc" => 100,       // 20 times per 2 seconds
-        "okex" => 100,      // 20 requests per 2 seconds
+        "kucoin" => match market_type {
+            MarketType::Spot => 110, // addtional 10ms to avoid 429
+            _ => 100,                // 30 times/3s
+        },
+        "mxc" => 100,  // 20 times per 2 seconds
+        "okex" => 100, // 20 requests per 2 seconds
         _ => 100,
     };
     Duration::from_millis(millis)
@@ -137,7 +141,7 @@ pub(crate) fn crawl_snapshot(
         None => true,
     };
 
-    let cooldown_time = get_cooldown_time_per_request(exchange);
+    let cooldown_time = get_cooldown_time_per_request(exchange, market_type);
 
     let mut lock = get_lock_file(exchange, market_type);
     loop {
