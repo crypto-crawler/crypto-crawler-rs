@@ -8,10 +8,7 @@ use crypto_rest_client::{fetch_l2_snapshot, fetch_l3_snapshot};
 use fslock::LockFile;
 use log::*;
 
-use crate::{
-    utils::{cmc_rank::sort_by_cmc_rank, get_hot_spot_symbols},
-    Message, MessageType,
-};
+use crate::{utils::cmc_rank::sort_by_cmc_rank, Message, MessageType};
 
 fn get_lock_file(exchange: &str, market_type: MarketType) -> Option<LockFile> {
     let filename = if exchange == "bitmex" {
@@ -145,12 +142,7 @@ pub(crate) fn crawl_snapshot(
     let mut lock = get_lock_file(exchange, market_type);
     loop {
         let mut real_symbols = if is_empty {
-            if market_type == MarketType::Spot {
-                let spot_symbols = fetch_symbols_retry(exchange, market_type);
-                get_hot_spot_symbols(exchange, &spot_symbols)
-            } else {
-                fetch_symbols_retry(exchange, market_type)
-            }
+            fetch_symbols_retry(exchange, market_type)
         } else {
             symbols.unwrap().to_vec()
         };
