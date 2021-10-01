@@ -99,10 +99,10 @@ fn get_cooldown_time_per_request(exchange: &str) -> Duration {
     let millis = match exchange {
         "binance" => 500,      // spot weitht 1200, contract weight 2400
         "bitget" => 100,       // 20 requests per 2 seconds
-        "bithumb" => 8 * 4, // 135 requests per 1 second for public APIs, multiplied by 4 to reduce its frequency
+        "bithumb" => 8 * 10, // 135 requests per 1 second for public APIs, multiplied by 10 to reduce its frequency
         "bitmex" => 2000, // 60 requests per minute on all routes (reduced to 30 when unauthenticated)
-        "bitstamp" => 750, // 8000 requests per 10 minutes, but bitstamp orderbook is too big, need to reduce its frequency
-        "bitz" => 34,      // no more than 30 times within 1 second
+        "bitstamp" => 75 * 10, // 8000 requests per 10 minutes, but bitstamp orderbook is too big, need to reduce its frequency
+        "bitz" => 34,          // no more than 30 times within 1 second
         "bybit" => 20 * 10, // 50 requests per second continuously for 2 minutes, multiplied by 10 to reduce its frequency
         "coinbase_pro" => 100, //  10 requests per second
         "deribit" => 50,    // 20 requests per second
