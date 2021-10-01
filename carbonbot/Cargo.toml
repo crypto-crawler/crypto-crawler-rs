@@ -1,13 +1,13 @@
 [package]
 name = "carbonbot"
-version = "1.6.2"
+version = "1.6.3"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-crypto-crawler = "2.0.2"
+crypto-crawler = "2.0.3"
 crypto-msg-parser = "1.5.1"
 crypto-ws-client = "2.6.1"
 dashmap = "4"
