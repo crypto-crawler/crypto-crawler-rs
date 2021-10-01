@@ -90,23 +90,27 @@ fn connect_with_timeout(
 // This function is equivalent to tungstenite::connect(), with an additional benefit that
 // it can make read_message() timeout after 5 seconds
 pub(super) fn connect_with_retry(url: &str, timeout: Option<u64>) -> WebSocket<AutoStream> {
-    let count = 3;
+    let max_count = 5;
+    let mut backoff_factor = 1;
+    let backoff_duration = time::Duration::from_secs(8);
     let mut error_msg: String = String::new();
-    for i in 0..count {
+    for i in 0..max_count {
         let res = connect_with_timeout(url, timeout);
         match res {
             Ok((ws_stream, _)) => return ws_stream,
             Err(err) => {
-                warn!("Error connecting to {}, {}, aborted", url, err);
-                thread::sleep(time::Duration::from_secs(3));
-                if i == count - 1 {
-                    error_msg = err.to_string();
-                }
+                warn!(
+                    "Failed connecting to {} the {}th time, error: {}",
+                    url, i, err
+                );
+                thread::sleep(backoff_duration * backoff_factor);
+                backoff_factor *= 2;
+                error_msg = err.to_string();
             }
         }
     }
 
-    panic!("Error connecting to {}, {}, aborted", url, error_msg);
+    panic!("Error connecting to {}, error: {}, aborted", url, error_msg);
 }
 
 pub(super) const CHANNEL_PAIR_DELIMITER: char = ':';
