@@ -38,6 +38,15 @@ gen_crawl_event!(crawl_l2_event_linear, BinanceLinearWSClient, MessageType::L2Ev
 gen_crawl_event!(crawl_l2_event_linear_option, BinanceOptionWSClient, MessageType::L2Event, subscribe_orderbook);
 
 #[rustfmt::skip]
+gen_crawl_event!(crawl_bbo_spot, BinanceSpotWSClient, MessageType::BBO, subscribe_bbo);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_bbo_inverse, BinanceInverseWSClient, MessageType::BBO, subscribe_bbo);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_bbo_linear, BinanceLinearWSClient, MessageType::BBO, subscribe_bbo);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_bbo_linear_option, BinanceOptionWSClient, MessageType::BBO, subscribe_bbo);
+
+#[rustfmt::skip]
 gen_crawl_event!(crawl_ticker_spot, BinanceSpotWSClient, MessageType::Ticker, subscribe_ticker);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_ticker_inverse, BinanceInverseWSClient, MessageType::Ticker, subscribe_ticker);
@@ -105,6 +114,65 @@ pub(crate) fn crawl_l2_event(
             crawl_l2_event_linear_option(market_type, symbols, on_msg, duration)
         }
         _ => panic!("Binance does NOT have the {} market type", market_type),
+    }
+}
+
+pub(crate) fn crawl_bbo(
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) -> Option<std::thread::JoinHandle<()>> {
+    if symbols.is_none() || symbols.unwrap().is_empty() {
+        let channels = vec!["!bookTicker".to_string()]; // All Book Tickers Stream
+        let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
+            let message = Message::new(
+                EXCHANGE_NAME.to_string(),
+                market_type,
+                MessageType::BBO,
+                msg,
+            );
+            (on_msg.lock().unwrap())(message);
+        }));
+        match market_type {
+            MarketType::Spot => {
+                let ws_client = BinanceSpotWSClient::new(on_msg_ext, None);
+                ws_client.subscribe(&channels);
+                ws_client.run(duration);
+            }
+            MarketType::InverseFuture | MarketType::InverseSwap => {
+                let ws_client = BinanceInverseWSClient::new(on_msg_ext, None);
+                ws_client.subscribe(&channels);
+                ws_client.run(duration);
+            }
+            MarketType::LinearFuture | MarketType::LinearSwap => {
+                let ws_client = BinanceLinearWSClient::new(on_msg_ext, None);
+                ws_client.subscribe(&channels);
+                ws_client.run(duration);
+            }
+            _ => panic!(
+                "Binance {} market does NOT have the BBO channel",
+                market_type
+            ),
+        }
+        None
+    } else {
+        match market_type {
+            MarketType::Spot => crawl_bbo_spot(market_type, symbols, on_msg, duration),
+            MarketType::InverseFuture | MarketType::InverseSwap => {
+                crawl_bbo_inverse(market_type, symbols, on_msg, duration)
+            }
+            MarketType::LinearFuture | MarketType::LinearSwap => {
+                crawl_bbo_linear(market_type, symbols, on_msg, duration)
+            }
+            MarketType::EuropeanOption => {
+                crawl_bbo_linear_option(market_type, symbols, on_msg, duration)
+            }
+            _ => panic!(
+                "Binance {} market does NOT have the BBO channel",
+                market_type
+            ),
+        }
     }
 }
 

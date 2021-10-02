@@ -92,20 +92,24 @@ fn connect_with_timeout(
 pub(super) fn connect_with_retry(url: &str, timeout: Option<u64>) -> WebSocket<AutoStream> {
     let max_count = 5;
     let mut backoff_factor = 1;
-    let backoff_duration = time::Duration::from_secs(8);
+    let backoff_duration = time::Duration::from_secs(if url.contains("bitmex") { 16 } else { 4 });
     let mut error_msg: String = String::new();
     for i in 0..max_count {
         let res = connect_with_timeout(url, timeout);
         match res {
             Ok((ws_stream, _)) => return ws_stream,
             Err(err) => {
+                error_msg = err.to_string();
+                if error_msg.contains("429") {
+                    backoff_factor += 1;
+                } else {
+                    backoff_factor *= 2;
+                }
                 warn!(
                     "Failed connecting to {} the {}th time, error: {}",
                     url, i, err
                 );
                 thread::sleep(backoff_duration * backoff_factor);
-                backoff_factor *= 2;
-                error_msg = err.to_string();
             }
         }
     }

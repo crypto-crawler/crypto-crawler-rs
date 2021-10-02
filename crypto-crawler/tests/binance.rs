@@ -51,6 +51,22 @@ fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::InverseSwap, "BTCUSD_PERP")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 #[test_case(MarketType::EuropeanOption, "BTC-210129-40000-C"; "inconclusive")]
+fn test_crawl_bbo(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_bbo,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::BBO
+    )
+}
+
+#[test_case(MarketType::Spot, "BTCUSDT")]
+#[test_case(MarketType::InverseFuture, "BTCUSD_211231")]
+#[test_case(MarketType::LinearFuture, "BTCUSDT_211231")]
+#[test_case(MarketType::InverseSwap, "BTCUSD_PERP")]
+#[test_case(MarketType::LinearSwap, "BTCUSDT")]
+#[test_case(MarketType::EuropeanOption, "BTC-210129-40000-C"; "inconclusive")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     gen_test_snapshot_code!(
         crawl_l2_snapshot,

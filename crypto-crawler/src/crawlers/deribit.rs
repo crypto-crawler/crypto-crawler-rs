@@ -58,4 +58,6 @@ pub(crate) fn crawl_trade(
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event, DeribitWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
+gen_crawl_event!(crawl_bbo, DeribitWSClient, MessageType::BBO, subscribe_bbo);
+#[rustfmt::skip]
 gen_crawl_event!(crawl_ticker, DeribitWSClient, MessageType::Ticker, subscribe_ticker);

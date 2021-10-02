@@ -19,4 +19,6 @@ gen_crawl_event!(crawl_trade, KrakenWSClient, MessageType::Trade, subscribe_trad
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event, KrakenWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
+gen_crawl_event!(crawl_bbo, KrakenWSClient, MessageType::BBO, subscribe_bbo);
+#[rustfmt::skip]
 gen_crawl_event!(crawl_ticker, KrakenWSClient, MessageType::Ticker, subscribe_ticker);

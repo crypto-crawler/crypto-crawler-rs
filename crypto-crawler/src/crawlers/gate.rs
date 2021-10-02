@@ -23,6 +23,7 @@ gen_crawl_event!(crawl_trade_inverse_swap, GateInverseSwapWSClient, MessageType:
 gen_crawl_event!(crawl_trade_linear_swap, GateLinearSwapWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_trade_linear_future, GateLinearFutureWSClient, MessageType::Trade, subscribe_trade);
+
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event_spot, GateSpotWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
@@ -31,6 +32,14 @@ gen_crawl_event!(crawl_l2_event_inverse_swap, GateInverseSwapWSClient, MessageTy
 gen_crawl_event!(crawl_l2_event_linear_swap, GateLinearSwapWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event_linear_future, GateLinearFutureWSClient, MessageType::L2Event, subscribe_orderbook);
+
+#[rustfmt::skip]
+gen_crawl_event!(crawl_bbo_spot, GateSpotWSClient, MessageType::BBO, subscribe_bbo);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_bbo_inverse_swap, GateInverseSwapWSClient, MessageType::BBO, subscribe_bbo);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_bbo_linear_swap, GateLinearSwapWSClient, MessageType::BBO, subscribe_bbo);
+
 #[rustfmt::skip]
 gen_crawl_event!(crawl_ticker_spot, GateSpotWSClient, MessageType::Ticker, subscribe_ticker);
 #[rustfmt::skip]
@@ -74,6 +83,20 @@ pub(crate) fn crawl_l2_event(
         MarketType::LinearFuture => {
             crawl_l2_event_linear_future(market_type, symbols, on_msg, duration)
         }
+        _ => panic!("Gate does NOT have the {} market type", market_type),
+    }
+}
+
+pub(crate) fn crawl_bbo(
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) -> Option<std::thread::JoinHandle<()>> {
+    match market_type {
+        MarketType::Spot => crawl_bbo_spot(market_type, symbols, on_msg, duration),
+        MarketType::InverseSwap => crawl_bbo_inverse_swap(market_type, symbols, on_msg, duration),
+        MarketType::LinearSwap => crawl_bbo_linear_swap(market_type, symbols, on_msg, duration),
         _ => panic!("Gate does NOT have the {} market type", market_type),
     }
 }
