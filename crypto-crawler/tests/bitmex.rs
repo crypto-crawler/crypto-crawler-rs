@@ -26,6 +26,7 @@ fn crawl_all(msg_type: MessageType) {
         MessageType::L2Event => crawl_l2_event,
         MessageType::L2Snapshot => crawl_l2_snapshot,
         MessageType::BBO => crawl_bbo,
+        MessageType::L2TopK => crawl_l2_topk,
         MessageType::FundingRate => crawl_funding_rate,
         _ => panic!("unsupported message type {}", msg_type),
     };
@@ -54,6 +55,11 @@ fn test_crawl_l2_event_all() {
 #[test]
 fn test_crawl_bbo_all() {
     crawl_all(MessageType::BBO);
+}
+
+#[test]
+fn test_crawl_l2_topk_all() {
+    crawl_all(MessageType::L2TopK);
 }
 
 #[test]

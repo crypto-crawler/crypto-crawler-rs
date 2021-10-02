@@ -47,6 +47,15 @@ gen_crawl_event!(crawl_bbo_linear, BinanceLinearWSClient, MessageType::BBO, subs
 gen_crawl_event!(crawl_bbo_linear_option, BinanceOptionWSClient, MessageType::BBO, subscribe_bbo);
 
 #[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_spot, BinanceSpotWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_inverse, BinanceInverseWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_linear, BinanceLinearWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_linear_option, BinanceOptionWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+
+#[rustfmt::skip]
 gen_crawl_event!(crawl_ticker_spot, BinanceSpotWSClient, MessageType::Ticker, subscribe_ticker);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_ticker_inverse, BinanceInverseWSClient, MessageType::Ticker, subscribe_ticker);
@@ -173,6 +182,27 @@ pub(crate) fn crawl_bbo(
                 market_type
             ),
         }
+    }
+}
+
+pub(crate) fn crawl_l2_topk(
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) -> Option<std::thread::JoinHandle<()>> {
+    match market_type {
+        MarketType::Spot => crawl_l2_topk_spot(market_type, symbols, on_msg, duration),
+        MarketType::InverseFuture | MarketType::InverseSwap => {
+            crawl_l2_topk_inverse(market_type, symbols, on_msg, duration)
+        }
+        MarketType::LinearFuture | MarketType::LinearSwap => {
+            crawl_l2_topk_linear(market_type, symbols, on_msg, duration)
+        }
+        MarketType::EuropeanOption => {
+            crawl_l2_topk_linear_option(market_type, symbols, on_msg, duration)
+        }
+        _ => panic!("Binance does NOT have the {} market type", market_type),
     }
 }
 

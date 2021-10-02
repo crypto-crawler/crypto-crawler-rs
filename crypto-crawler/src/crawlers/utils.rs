@@ -25,7 +25,14 @@ fn get_lock_file(exchange: &str, market_type: MarketType) -> Option<LockFile> {
         None
     };
     if let Some(filename) = filename {
-        let mut dir = std::env::temp_dir();
+        let mut dir = if std::env::var("DATA_DIR").is_ok() {
+            let dir =
+                std::path::Path::new(std::env::var("DATA_DIR").unwrap().as_str()).join("lock");
+            std::fs::create_dir_all(&dir).unwrap();
+            dir
+        } else {
+            std::env::temp_dir()
+        };
         dir.push(filename);
         let file = LockFile::open(dir.as_path()).unwrap();
         Some(file)

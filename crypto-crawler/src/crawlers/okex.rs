@@ -63,6 +63,9 @@ gen_crawl_event!(crawl_l2_event, OkexWSClient, MessageType::L2Event, subscribe_o
 gen_crawl_event!(crawl_bbo, OkexWSClient, MessageType::BBO, subscribe_bbo);
 
 #[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk, OkexWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+
+#[rustfmt::skip]
 gen_crawl_event!(crawl_ticker, OkexWSClient, MessageType::Ticker, subscribe_ticker);
 
 #[allow(clippy::unnecessary_unwrap)]

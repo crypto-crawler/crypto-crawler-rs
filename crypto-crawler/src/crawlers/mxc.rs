@@ -26,6 +26,11 @@ gen_crawl_event!(crawl_l2_event_spot, MxcSpotWSClient, MessageType::L2Event, sub
 gen_crawl_event!(crawl_l2_event_swap, MxcSwapWSClient, MessageType::L2Event, subscribe_orderbook);
 
 #[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_spot, MxcSpotWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_swap, MxcSwapWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+
+#[rustfmt::skip]
 gen_crawl_event!(crawl_ticker_swap, MxcSwapWSClient, MessageType::Ticker, subscribe_ticker);
 
 pub(crate) fn crawl_trade(
@@ -58,7 +63,23 @@ pub(crate) fn crawl_l2_event(
             crawl_l2_event_swap(market_type, symbols, on_msg, duration)
         }
         _ => {
-            error!("Unknown market type {} of {}", market_type, EXCHANGE_NAME);
+            panic!("Unknown market type {} of {}", market_type, EXCHANGE_NAME);
+        }
+    }
+}
+
+pub(crate) fn crawl_l2_topk(
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) -> Option<std::thread::JoinHandle<()>> {
+    match market_type {
+        MarketType::Spot => crawl_l2_topk_spot(market_type, symbols, on_msg, duration),
+        MarketType::LinearSwap | MarketType::InverseSwap => {
+            crawl_l2_topk_swap(market_type, symbols, on_msg, duration)
+        }
+        _ => {
             panic!("Unknown market type {} of {}", market_type, EXCHANGE_NAME);
         }
     }

@@ -30,6 +30,13 @@ gen_crawl_event!(crawl_l2_event_inverse_swap, BybitInverseSwapWSClient, MessageT
 gen_crawl_event!(crawl_l2_event_linear_swap, BybitLinearSwapWSClient, MessageType::L2Event, subscribe_orderbook);
 
 #[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_inverse_future, BybitInverseFutureWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_inverse_swap, BybitInverseSwapWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_linear_swap, BybitLinearSwapWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+
+#[rustfmt::skip]
 gen_crawl_event!(crawl_ticker_inverse_future, BybitInverseFutureWSClient, MessageType::Ticker, subscribe_ticker);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_ticker_inverse_swap, BybitInverseSwapWSClient, MessageType::Ticker, subscribe_ticker);
@@ -68,6 +75,24 @@ pub(crate) fn crawl_l2_event(
         MarketType::LinearSwap => {
             crawl_l2_event_linear_swap(market_type, symbols, on_msg, duration)
         }
+        _ => panic!("Bybit does NOT have the {} market type", market_type),
+    }
+}
+
+pub(crate) fn crawl_l2_topk(
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) -> Option<std::thread::JoinHandle<()>> {
+    match market_type {
+        MarketType::InverseFuture => {
+            crawl_l2_topk_inverse_future(market_type, symbols, on_msg, duration)
+        }
+        MarketType::InverseSwap => {
+            crawl_l2_topk_inverse_swap(market_type, symbols, on_msg, duration)
+        }
+        MarketType::LinearSwap => crawl_l2_topk_linear_swap(market_type, symbols, on_msg, duration),
         _ => panic!("Bybit does NOT have the {} market type", market_type),
     }
 }

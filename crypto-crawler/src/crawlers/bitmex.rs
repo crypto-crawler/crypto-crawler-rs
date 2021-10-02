@@ -21,6 +21,8 @@ gen_crawl_event!(crawl_trade_internal, BitmexWSClient, MessageType::Trade, subsc
 gen_crawl_event!(crawl_l2_event_internal, BitmexWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_bbo_internal, BitmexWSClient, MessageType::BBO, subscribe_bbo);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_internal, BitmexWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
 
 fn crawl_all(
     msg_type: MessageType,
@@ -40,6 +42,7 @@ fn crawl_all(
     let channel: &str = match msg_type {
         MessageType::Trade => "trade",
         MessageType::L2Event => "orderBookL2_25",
+        MessageType::L2TopK => "orderBookL10",
         MessageType::BBO => "quote",
         MessageType::L2Snapshot => "orderBookL2",
         MessageType::FundingRate => "funding",
@@ -92,6 +95,20 @@ pub(crate) fn crawl_bbo(
         crawl_all(MessageType::BBO, on_msg, duration)
     } else {
         crawl_bbo_internal(market_type, symbols, on_msg, duration)
+    }
+}
+
+pub(crate) fn crawl_l2_topk(
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) -> Option<std::thread::JoinHandle<()>> {
+    if market_type == MarketType::Unknown {
+        // crawl all symbols
+        crawl_all(MessageType::L2TopK, on_msg, duration)
+    } else {
+        crawl_l2_topk_internal(market_type, symbols, on_msg, duration)
     }
 }
 

@@ -220,6 +220,33 @@ pub fn crawl_bbo(
     }
 }
 
+/// Crawl level2 orderbook top-k snapshots through websocket.
+pub fn crawl_l2_topk(
+    exchange: &str,
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) {
+    let func = match exchange {
+        "binance" => crawlers::binance::crawl_l2_topk,
+        "bitget" => crawlers::bitget::crawl_l2_topk,
+        "bitmex" => crawlers::bitmex::crawl_l2_topk,
+        "bitstamp" => crawlers::bitstamp::crawl_l2_topk,
+        "bybit" => crawlers::bybit::crawl_l2_topk,
+        "deribit" => crawlers::deribit::crawl_l2_topk,
+        "huobi" => crawlers::huobi::crawl_l2_topk,
+        "kucoin" => crawlers::kucoin::crawl_l2_topk,
+        "mxc" => crawlers::mxc::crawl_l2_topk,
+        "okex" => crawlers::okex::crawl_l2_topk,
+        _ => panic!("Unknown exchange {}", exchange),
+    };
+    let handle = func(market_type, symbols, on_msg, duration);
+    if let Some(h) = handle {
+        h.join().expect("The thread panicked");
+    }
+}
+
 /// Crawl level3 orderbook snapshots through RESTful APIs.
 pub fn crawl_l3_snapshot(
     exchange: &str,

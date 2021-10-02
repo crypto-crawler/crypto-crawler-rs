@@ -59,6 +59,20 @@ fn test_crawl_bbo(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::InverseSwap, "XBTUSDM")]
 #[test_case(MarketType::LinearSwap, "XBTUSDTM")]
 #[test_case(MarketType::InverseFuture, "XBTMZ21")]
+fn test_crawl_l2_topk(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_l2_topk,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::L2TopK
+    )
+}
+
+#[test_case(MarketType::Spot, "BTC-USDT")]
+#[test_case(MarketType::InverseSwap, "XBTUSDM")]
+#[test_case(MarketType::LinearSwap, "XBTUSDTM")]
+#[test_case(MarketType::InverseFuture, "XBTMZ21")]
 fn test_crawl_l3_event(market_type: MarketType, symbol: &str) {
     gen_test_code!(
         crawl_l3_event,

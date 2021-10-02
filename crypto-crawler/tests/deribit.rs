@@ -78,6 +78,19 @@ fn test_crawl_bbo(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
 #[test_case(MarketType::InverseFuture, "BTC-31DEC21")]
 #[test_case(MarketType::EuropeanOption, "BTC-31DEC21-400000-C")]
+fn test_crawl_l2_topk(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_l2_topk,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::L2TopK
+    )
+}
+
+#[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
+#[test_case(MarketType::InverseFuture, "BTC-31DEC21")]
+#[test_case(MarketType::EuropeanOption, "BTC-31DEC21-400000-C")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     gen_test_snapshot_code!(
         crawl_l2_snapshot,

@@ -36,6 +36,17 @@ fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::Spot, "btcusd")]
+fn test_crawl_l2_topk(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_l2_topk,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::L2TopK
+    )
+}
+
+#[test_case(MarketType::Spot, "btcusd")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     gen_test_snapshot_code!(
         crawl_l2_snapshot,
