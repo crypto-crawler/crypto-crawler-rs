@@ -60,4 +60,6 @@ gen_crawl_event!(crawl_l2_event, DeribitWSClient, MessageType::L2Event, subscrib
 #[rustfmt::skip]
 gen_crawl_event!(crawl_bbo, DeribitWSClient, MessageType::BBO, subscribe_bbo);
 #[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk, DeribitWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+#[rustfmt::skip]
 gen_crawl_event!(crawl_ticker, DeribitWSClient, MessageType::Ticker, subscribe_ticker);

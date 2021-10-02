@@ -32,6 +32,11 @@ gen_crawl_event!(crawl_bbo_spot, KuCoinSpotWSClient, MessageType::BBO, subscribe
 gen_crawl_event!(crawl_bbo_swap, KuCoinSwapWSClient, MessageType::BBO, subscribe_bbo);
 
 #[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_spot, KuCoinSpotWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_swap, KuCoinSwapWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+
+#[rustfmt::skip]
 gen_crawl_event!(crawl_l3_event_spot, KuCoinSpotWSClient, MessageType::L3Event, subscribe_l3_orderbook);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l3_event_swap, KuCoinSwapWSClient, MessageType::L3Event, subscribe_l3_orderbook);
@@ -104,6 +109,21 @@ pub(crate) fn crawl_bbo(
         }
         MarketType::InverseSwap | MarketType::LinearSwap | MarketType::InverseFuture => {
             crawl_bbo_swap(market_type, symbols, on_msg, duration)
+        }
+        _ => panic!("KuCoin does NOT have the {} market type", market_type),
+    }
+}
+
+pub(crate) fn crawl_l2_topk(
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) -> Option<std::thread::JoinHandle<()>> {
+    match market_type {
+        MarketType::Spot => crawl_l2_topk_spot(market_type, symbols, on_msg, duration),
+        MarketType::InverseSwap | MarketType::LinearSwap | MarketType::InverseFuture => {
+            crawl_l2_topk_swap(market_type, symbols, on_msg, duration)
         }
         _ => panic!("KuCoin does NOT have the {} market type", market_type),
     }

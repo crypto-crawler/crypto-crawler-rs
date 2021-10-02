@@ -47,6 +47,17 @@ gen_crawl_event!(crawl_bbo_inverse_swap, HuobiInverseSwapWSClient, MessageType::
 gen_crawl_event!(crawl_bbo_option, HuobiOptionWSClient, MessageType::BBO, subscribe_bbo);
 
 #[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_spot, HuobiSpotWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_inverse_future, HuobiFutureWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_linear_swap, HuobiLinearSwapWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_inverse_swap, HuobiInverseSwapWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk_option, HuobiOptionWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+
+#[rustfmt::skip]
 gen_crawl_event!(crawl_ticker_spot, HuobiSpotWSClient, MessageType::Ticker, subscribe_ticker);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_ticker_inverse_future, HuobiFutureWSClient, MessageType::Ticker, subscribe_ticker);
@@ -136,6 +147,26 @@ pub(crate) fn crawl_bbo(
         MarketType::LinearSwap => crawl_bbo_linear_swap(market_type, symbols, on_msg, duration),
         MarketType::InverseSwap => crawl_bbo_inverse_swap(market_type, symbols, on_msg, duration),
         MarketType::EuropeanOption => crawl_bbo_option(market_type, symbols, on_msg, duration),
+        _ => panic!("Huobi does NOT have the {} market type", market_type),
+    }
+}
+
+pub(crate) fn crawl_l2_topk(
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) -> Option<std::thread::JoinHandle<()>> {
+    match market_type {
+        MarketType::Spot => crawl_l2_topk_spot(market_type, symbols, on_msg, duration),
+        MarketType::InverseFuture => {
+            crawl_l2_topk_inverse_future(market_type, symbols, on_msg, duration)
+        }
+        MarketType::LinearSwap => crawl_l2_topk_linear_swap(market_type, symbols, on_msg, duration),
+        MarketType::InverseSwap => {
+            crawl_l2_topk_inverse_swap(market_type, symbols, on_msg, duration)
+        }
+        MarketType::EuropeanOption => crawl_l2_topk_option(market_type, symbols, on_msg, duration),
         _ => panic!("Huobi does NOT have the {} market type", market_type),
     }
 }

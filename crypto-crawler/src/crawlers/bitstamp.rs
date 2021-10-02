@@ -19,4 +19,6 @@ gen_crawl_event!(crawl_trade, BitstampWSClient, MessageType::Trade, subscribe_tr
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event, BitstampWSClient, MessageType::L2Event, subscribe_orderbook);
 #[rustfmt::skip]
+gen_crawl_event!(crawl_l2_topk, BitstampWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
+#[rustfmt::skip]
 gen_crawl_event!(crawl_l3_event, BitstampWSClient, MessageType::L3Event, subscribe_l3_orderbook);

@@ -121,6 +121,7 @@ pub fn crawl(
         MessageType::L2Event => crawl_l2_event,
         MessageType::L3Event => crawl_l3_event,
         MessageType::L2Snapshot => crawl_l2_snapshot,
+        MessageType::L2TopK => crawl_l2_topk,
         MessageType::L3Snapshot => crawl_l3_snapshot,
         MessageType::Ticker => crawl_ticker,
         MessageType::FundingRate => crawl_funding_rate,
