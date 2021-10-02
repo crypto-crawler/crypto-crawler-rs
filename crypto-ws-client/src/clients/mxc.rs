@@ -6,7 +6,7 @@ use crate::WSClient;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
+    Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
 };
 
 use log::*;
@@ -170,9 +170,9 @@ impl_trait!(OrderBook, MxcSpotWSClient, subscribe_orderbook, "symbol", to_raw_ch
 #[rustfmt::skip]
 impl_trait!(OrderBook, MxcSwapWSClient, subscribe_orderbook, "depth", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, MxcSpotWSClient, subscribe_orderbook_snapshot, "get.depth", to_raw_channel);
+impl_trait!(OrderBookTopK, MxcSpotWSClient, subscribe_orderbook_topk, "get.depth", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, MxcSwapWSClient, subscribe_orderbook_snapshot, "depth.full", to_raw_channel);
+impl_trait!(OrderBookTopK, MxcSwapWSClient, subscribe_orderbook_topk, "depth.full", to_raw_channel);
 
 impl<'a> BBO for MxcSpotWSClient<'a> {
     fn subscribe_bbo(&self, _pairs: &[String]) {

@@ -399,8 +399,8 @@ macro_rules! define_client {
                 <$struct_name as OrderBook>::subscribe_orderbook(self, channels);
             }
 
-            fn subscribe_orderbook_snapshot(&self, channels: &[String]) {
-                <$struct_name as OrderBookSnapshot>::subscribe_orderbook_snapshot(self, channels);
+            fn subscribe_orderbook_topk(&self, channels: &[String]) {
+                <$struct_name as OrderBookTopK>::subscribe_orderbook_topk(self, channels);
             }
 
             fn subscribe_ticker(&self, channels: &[String]) {

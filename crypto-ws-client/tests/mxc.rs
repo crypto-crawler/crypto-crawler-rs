@@ -61,10 +61,11 @@ mod mxc_spot {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    #[ignore]
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             MxcSpotWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec![
                 "BTC_USDT".to_string(),
                 "ETH_USDT".to_string(),
@@ -148,10 +149,10 @@ mod mxc_linear_swap {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             MxcSwapWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["BTC_USDT".to_string()]
         );
     }
@@ -196,10 +197,10 @@ mod mxc_inverse_swap {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             MxcSwapWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["BTC_USD".to_string()]
         );
     }

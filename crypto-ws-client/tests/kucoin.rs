@@ -70,10 +70,10 @@ mod kucoin_spot {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             KuCoinSpotWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["BTC-USDT".to_string()]
         );
     }
@@ -154,10 +154,10 @@ mod kucoin_inverse_swap {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             KuCoinSwapWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["XBTUSDM".to_string()]
         );
     }
@@ -247,10 +247,10 @@ mod kucoin_linear_swap {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             KuCoinSwapWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["XBTUSDTM".to_string()]
         );
     }
@@ -344,10 +344,10 @@ mod kucoin_inverse_future {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             KuCoinSwapWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["XBTMZ21".to_string()]
         );
     }

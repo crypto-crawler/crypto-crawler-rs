@@ -71,10 +71,10 @@ fn subscribe_orderbook() {
 
 #[test]
 #[ignore]
-fn subscribe_orderbook_snapshot() {
+fn subscribe_orderbook_topk() {
     gen_test_code!(
         BinanceOptionWSClient,
-        subscribe_orderbook_snapshot,
+        subscribe_orderbook_topk,
         &vec![
             "BTC-210430-64000-C".to_string(),
             "BTC-210430-68000-C".to_string()

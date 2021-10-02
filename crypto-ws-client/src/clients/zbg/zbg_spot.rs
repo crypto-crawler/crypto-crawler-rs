@@ -5,7 +5,7 @@ use std::{
 };
 
 use super::super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
+use super::super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 use super::utils::fetch_symbol_id_map_spot;
 
 use lazy_static::lazy_static;
@@ -96,8 +96,8 @@ impl<'a> BBO for ZbgSpotWSClient<'a> {
     }
 }
 
-impl<'a> OrderBookSnapshot for ZbgSpotWSClient<'a> {
-    fn subscribe_orderbook_snapshot(&self, _pairs: &[String]) {
+impl<'a> OrderBookTopK for ZbgSpotWSClient<'a> {
+    fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
         panic!("Bitget does NOT have orderbook snapshot channel");
     }
 }

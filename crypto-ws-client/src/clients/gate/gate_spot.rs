@@ -2,7 +2,7 @@ use crate::WSClient;
 use std::sync::{Arc, Mutex};
 
 use super::super::ws_client_internal::WSClientInternal;
-use super::super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
+use super::super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 use super::utils::{
     channels_to_commands, on_misc_msg, to_candlestick_raw_channel_shared, to_raw_channel,
     EXCHANGE_NAME,
@@ -26,7 +26,7 @@ impl_trait!(Trade, GateSpotWSClient, subscribe_trade, "spot.trades", to_raw_chan
 #[rustfmt::skip]
 impl_trait!(OrderBook, GateSpotWSClient, subscribe_orderbook, "spot.order_book_update", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, GateSpotWSClient, subscribe_orderbook_snapshot, "spot.order_book", to_raw_channel);
+impl_trait!(OrderBookTopK, GateSpotWSClient, subscribe_orderbook_topk, "spot.order_book", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(BBO, GateSpotWSClient, subscribe_bbo, "spot.book_ticker", to_raw_channel);
 #[rustfmt::skip]

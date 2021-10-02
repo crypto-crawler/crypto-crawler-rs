@@ -2,7 +2,7 @@ use crate::{Level3OrderBook, WSClient};
 use std::sync::{Arc, Mutex};
 
 use super::super::ws_client_internal::WSClientInternal;
-use super::super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
+use super::super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 use super::utils::{
     channels_to_commands, fetch_ws_token, on_misc_msg, to_raw_channel, WebsocketToken,
     CLIENT_PING_INTERVAL_AND_MSG, EXCHANGE_NAME,
@@ -30,7 +30,7 @@ impl_trait!(BBO, KuCoinSpotWSClient, subscribe_bbo, "/market/ticker", to_raw_cha
 #[rustfmt::skip]
 impl_trait!(OrderBook, KuCoinSpotWSClient, subscribe_orderbook, "/market/level2", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, KuCoinSpotWSClient, subscribe_orderbook_snapshot, "/spotMarket/level2Depth50", to_raw_channel);
+impl_trait!(OrderBookTopK, KuCoinSpotWSClient, subscribe_orderbook_topk, "/spotMarket/level2Depth5", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(Ticker, KuCoinSpotWSClient, subscribe_ticker, "/market/snapshot", to_raw_channel);
 

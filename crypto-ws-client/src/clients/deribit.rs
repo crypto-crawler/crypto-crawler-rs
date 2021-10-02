@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
+use super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 
 use log::*;
 use serde_json::Value;
@@ -129,7 +129,7 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
         "trade" => format!("trades.{}.raw", pair),
         "ticker" => format!("ticker.{}.100ms", pair),
         "orderbook" => format!("book.{}.100ms", pair),
-        "orderbook_snapshot" => format!("book.{}.5.20.100ms", pair),
+        "orderbook_snapshot" => format!("book.{}.5.10.100ms", pair),
         "bbo" => format!("quote.{}", pair),
         _ => panic!("Unknown channel {}", channel),
     }
@@ -142,7 +142,7 @@ impl_trait!(Ticker, DeribitWSClient, subscribe_ticker, "ticker", to_raw_channel)
 #[rustfmt::skip]
 impl_trait!(OrderBook, DeribitWSClient, subscribe_orderbook, "orderbook", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, DeribitWSClient, subscribe_orderbook_snapshot, "orderbook_snapshot", to_raw_channel);
+impl_trait!(OrderBookTopK, DeribitWSClient, subscribe_orderbook_topk, "orderbook_snapshot", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(BBO, DeribitWSClient, subscribe_bbo, "bbo", to_raw_channel);
 

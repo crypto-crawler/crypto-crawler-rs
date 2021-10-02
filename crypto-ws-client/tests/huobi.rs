@@ -67,10 +67,10 @@ mod huobi_spot {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             HuobiSpotWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["btcusdt".to_string()]
         );
     }
@@ -133,10 +133,10 @@ mod huobi_inverse_future {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             HuobiFutureWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["BTC_CQ".to_string()]
         );
     }
@@ -199,10 +199,10 @@ mod huobi_linear_swap {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             HuobiLinearSwapWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["BTC-USDT".to_string()]
         );
     }
@@ -305,10 +305,10 @@ mod huobi_inverse_swap {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             HuobiInverseSwapWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["BTC-USD".to_string()]
         );
     }
@@ -395,6 +395,7 @@ mod huobi_option {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_ticker() {
         gen_test_code!(
             HuobiOptionWSClient,
@@ -414,6 +415,7 @@ mod huobi_option {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_orderbook() {
         gen_test_code!(
             HuobiOptionWSClient,
@@ -423,15 +425,17 @@ mod huobi_option {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    #[ignore]
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             HuobiOptionWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["BTC-USDT-210625-P-27000".to_string()]
         );
     }
 
     #[test]
+    #[ignore]
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             HuobiOptionWSClient,
@@ -446,6 +450,7 @@ mod huobi_option {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_overview() {
         gen_test_code!(
             HuobiOptionWSClient,

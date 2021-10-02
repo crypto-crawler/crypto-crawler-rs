@@ -52,10 +52,10 @@ mod bitmex_inverse_swap {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             BitmexWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["XBTUSD".to_string()]
         );
     }
@@ -127,10 +127,10 @@ mod bitmex_inverse_future {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             BitmexWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["XBTZ21".to_string(), "XBTZ21".to_string()]
         );
     }
@@ -175,10 +175,10 @@ mod bitmex_quanto_swap {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             BitmexWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["ETHUSD".to_string()]
         );
     }

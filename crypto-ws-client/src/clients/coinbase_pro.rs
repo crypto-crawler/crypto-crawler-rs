@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
+    Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
 };
 
 use log::*;
@@ -132,8 +132,8 @@ impl<'a> BBO for CoinbaseProWSClient<'a> {
     }
 }
 
-impl<'a> OrderBookSnapshot for CoinbaseProWSClient<'a> {
-    fn subscribe_orderbook_snapshot(&self, _pairs: &[String]) {
+impl<'a> OrderBookTopK for CoinbaseProWSClient<'a> {
+    fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
         panic!("CoinbasePro does NOT have orderbook snapshot channel");
     }
 }

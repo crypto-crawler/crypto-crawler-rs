@@ -11,7 +11,7 @@ use std::{
 
 use super::{
     utils::{connect_with_retry, CHANNEL_PAIR_DELIMITER},
-    Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
+    Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
 };
 
 use log::*;
@@ -132,8 +132,8 @@ impl<'a> OrderBook for BitfinexWSClient<'a> {
     }
 }
 
-impl<'a> OrderBookSnapshot for BitfinexWSClient<'a> {
-    fn subscribe_orderbook_snapshot(&self, _symbols: &[String]) {
+impl<'a> OrderBookTopK for BitfinexWSClient<'a> {
+    fn subscribe_orderbook_topk(&self, _symbols: &[String]) {
         panic!("Bitfinex does NOT have orderbook snapshot channel");
     }
 }
@@ -404,8 +404,8 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
         <Self as OrderBook>::subscribe_orderbook(self, channels);
     }
 
-    fn subscribe_orderbook_snapshot(&self, channels: &[String]) {
-        <Self as OrderBookSnapshot>::subscribe_orderbook_snapshot(self, channels);
+    fn subscribe_orderbook_topk(&self, channels: &[String]) {
+        <Self as OrderBookTopK>::subscribe_orderbook_topk(self, channels);
     }
 
     fn subscribe_ticker(&self, channels: &[String]) {

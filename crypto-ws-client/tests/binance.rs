@@ -79,10 +79,10 @@ mod binance_spot {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             BinanceSpotWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["btcusdt".to_string(), "ethusdt".to_string()]
         );
     }
@@ -171,10 +171,10 @@ mod binance_inverse_future {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             BinanceInverseWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["btcusd_211231".to_string(), "ethusd_211231".to_string()]
         );
     }
@@ -263,10 +263,10 @@ mod binance_linear_future {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             BinanceLinearWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["btcusdt_211231".to_string(), "ethusdt_211231".to_string()]
         );
     }
@@ -355,10 +355,10 @@ mod binance_inverse_swap {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             BinanceInverseWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
         );
     }
@@ -465,10 +465,10 @@ mod binance_linear_swap {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             BinanceLinearWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["btcusdt".to_string(), "ethusdt".to_string()]
         );
     }

@@ -6,7 +6,7 @@ use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
 };
-use super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
+use super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 
 use log::*;
 use serde_json::Value;
@@ -87,8 +87,8 @@ impl_trait!(BBO, FtxWSClient, subscribe_bbo, "ticker", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, FtxWSClient, subscribe_orderbook, "orderbook", to_raw_channel);
 
-impl<'a> OrderBookSnapshot for FtxWSClient<'a> {
-    fn subscribe_orderbook_snapshot(&self, _pairs: &[String]) {
+impl<'a> OrderBookTopK for FtxWSClient<'a> {
+    fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
         panic!("FTX does NOT have orderbook snapshot channel");
     }
 }

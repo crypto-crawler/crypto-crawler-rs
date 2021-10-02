@@ -65,10 +65,10 @@ mod okex_spot {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             OkexWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["BTC-USDT".to_string()]
         );
     }
@@ -122,10 +122,10 @@ mod okex_future {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             OkexWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["BTC-USDT-211231".to_string()]
         );
     }
@@ -179,10 +179,10 @@ mod okex_swap {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             OkexWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["BTC-USDT-SWAP".to_string()]
         );
     }
@@ -253,10 +253,10 @@ mod okex_option {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             OkexWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["BTC-USD-211231-18000-P".to_string()]
         );
     }

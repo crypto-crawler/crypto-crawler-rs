@@ -44,10 +44,10 @@ fn subscribe_orderbook() {
 }
 
 #[test]
-fn subscribe_orderbook_snapshot() {
+fn subscribe_orderbook_topk() {
     gen_test_code!(
         BitstampWSClient,
-        subscribe_orderbook_snapshot,
+        subscribe_orderbook_topk,
         &vec!["btcusd".to_string(), "ethusd".to_string()]
     );
 }

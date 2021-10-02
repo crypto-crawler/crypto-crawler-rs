@@ -2,7 +2,7 @@ use crate::WSClient;
 use std::sync::{Arc, Mutex};
 
 use super::super::ws_client_internal::WSClientInternal;
-use super::super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
+use super::super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 use super::utils::{
     channels_to_commands, on_misc_msg, to_candlestick_raw_channel_shared, to_raw_channel,
     CLIENT_PING_INTERVAL_AND_MSG, EXCHANGE_NAME,
@@ -39,8 +39,8 @@ impl<'a> BBO for GateInverseFutureWSClient<'a> {
         panic!("Gate does NOT have BBO channel");
     }
 }
-impl<'a> OrderBookSnapshot for GateInverseFutureWSClient<'a> {
-    fn subscribe_orderbook_snapshot(&self, _pairs: &[String]) {
+impl<'a> OrderBookTopK for GateInverseFutureWSClient<'a> {
+    fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
         panic!("Gate does NOT have orderbook snapshot channel");
     }
 }
@@ -57,8 +57,8 @@ impl<'a> BBO for GateLinearFutureWSClient<'a> {
         panic!("Gate does NOT have BBO channel");
     }
 }
-impl<'a> OrderBookSnapshot for GateLinearFutureWSClient<'a> {
-    fn subscribe_orderbook_snapshot(&self, _pairs: &[String]) {
+impl<'a> OrderBookTopK for GateLinearFutureWSClient<'a> {
+    fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
         panic!("Gate does NOT have orderbook snapshot channel");
     }
 }

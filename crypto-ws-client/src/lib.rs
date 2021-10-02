@@ -146,16 +146,16 @@ pub trait WSClient<'a> {
     ///
     /// This function subscribes to exchange specific channels as the following:
     ///
-    /// * Binance `depth20`, every 1000ms
+    /// * Binance `depth5`, every 1000ms
     /// * Bitfinex has no snapshot channel
     /// * BitMEX `orderBook10`, top 10, every tick
-    /// * Bitstamp `order_book`, top 100, every 100ms
+    /// * Bitstamp `order_book`, top 10, every 100ms
     /// * CoinbasePro has no snapshot channel
-    /// * Huobi `depth.step0`, top 150, every 1s
+    /// * Huobi `depth.step1` and `depth.step7`, top 20, every 1s
     /// * Kraken has no snapshot channel
     /// * MXC `depth.full` for Swap, top 20, every 100ms; `get.depth` for Spot, full, every 26s
     /// * OKEx `depth5`, top 5, every 100ms
-    fn subscribe_orderbook_snapshot(&self, pairs: &[String]);
+    fn subscribe_orderbook_topk(&self, pairs: &[String]);
 
     /// Subscribes to ticker channels.
     ///
