@@ -19,6 +19,7 @@ pub enum MessageType {
     L2Snapshot,
     /// Level2 top K snapshots from websocket
     #[serde(rename = "l2_topk")]
+    #[strum(serialize = "l2_topk")]
     L2TopK,
     /// Incremental level3 orderbook updates
     L3Event,
