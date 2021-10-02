@@ -17,7 +17,7 @@ const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (240, r#"{"event":"ping"}"#);
 
 /// Binance Option market
 ///
-///   * WebSocket API doc: None
+///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/voptions/en/>
 ///   * Trading at: <https://voptions.binance.com/en>
 pub struct BinanceOptionWSClient<'a> {
     client: WSClientInternal<'a>,

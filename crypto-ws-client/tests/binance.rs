@@ -16,6 +16,15 @@ mod binance_spot {
     }
 
     #[test]
+    fn subscribe_all_bbo() {
+        gen_test_code!(
+            BinanceSpotWSClient,
+            subscribe,
+            &vec!["!bookTicker".to_string()]
+        );
+    }
+
+    #[test]
     fn subscribe_raw_json() {
         gen_test_code!(
             BinanceSpotWSClient,
@@ -108,6 +117,15 @@ mod binance_inverse_future {
     }
 
     #[test]
+    fn subscribe_all_bbo() {
+        gen_test_code!(
+            BinanceInverseWSClient,
+            subscribe,
+            &vec!["!bookTicker".to_string()]
+        );
+    }
+
+    #[test]
     fn subscribe_trade() {
         gen_test_code!(
             BinanceInverseWSClient,
@@ -191,6 +209,15 @@ mod binance_linear_future {
     }
 
     #[test]
+    fn subscribe_all_bbo() {
+        gen_test_code!(
+            BinanceLinearWSClient,
+            subscribe,
+            &vec!["!bookTicker".to_string()]
+        );
+    }
+
+    #[test]
     fn subscribe_trade() {
         gen_test_code!(
             BinanceLinearWSClient,
@@ -270,6 +297,15 @@ mod binance_inverse_swap {
             BinanceInverseWSClient,
             subscribe,
             &vec!["btcusd_perp@aggTrade".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_all_bbo() {
+        gen_test_code!(
+            BinanceInverseWSClient,
+            subscribe,
+            &vec!["!bookTicker".to_string()]
         );
     }
 
@@ -371,6 +407,15 @@ mod binance_linear_swap {
             BinanceLinearWSClient,
             subscribe,
             &vec!["btcusdt@aggTrade".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_all_bbo() {
+        gen_test_code!(
+            BinanceLinearWSClient,
+            subscribe,
+            &vec!["!bookTicker".to_string()]
         );
     }
 
