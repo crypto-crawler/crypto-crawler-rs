@@ -48,10 +48,10 @@ mod gate_spot {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             GateSpotWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["BTC_USDT".to_string()]
         );
     }
@@ -129,10 +129,10 @@ mod gate_inverse_swap {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             GateInverseSwapWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["BTC_USD".to_string()]
         );
     }
@@ -191,10 +191,10 @@ mod gate_linear_swap {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             GateLinearSwapWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["BTC_USDT".to_string()]
         );
     }
@@ -245,6 +245,7 @@ mod gate_inverse_future {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_orderbook() {
         gen_test_code!(
             GateInverseFutureWSClient,
@@ -294,6 +295,7 @@ mod gate_linear_future {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_orderbook() {
         gen_test_code!(
             GateLinearFutureWSClient,

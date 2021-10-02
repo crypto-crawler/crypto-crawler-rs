@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use super::{
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
+    Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
 };
 use log::*;
 use serde_json::Value;
@@ -102,7 +102,7 @@ impl_trait!(BBO, BinanceOptionWSClient, subscribe_bbo, "bookTicker", to_raw_chan
 #[rustfmt::skip]
 impl_trait!(OrderBook, BinanceOptionWSClient, subscribe_orderbook, "depth@100ms", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, BinanceOptionWSClient, subscribe_orderbook_snapshot, "depth100", to_raw_channel);
+impl_trait!(OrderBookTopK, BinanceOptionWSClient, subscribe_orderbook_topk, "depth10", to_raw_channel);
 
 fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
     let interval_str = match interval {

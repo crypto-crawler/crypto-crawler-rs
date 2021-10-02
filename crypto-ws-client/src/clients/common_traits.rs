@@ -19,9 +19,9 @@ pub(super) trait OrderBook {
     fn subscribe_orderbook(&self, pairs: &[String]);
 }
 
-pub(super) trait OrderBookSnapshot {
-    /// Subscribes to level2 orderbook snapshot channels.
-    fn subscribe_orderbook_snapshot(&self, pairs: &[String]);
+pub(super) trait OrderBookTopK {
+    /// Subscribes to level2 orderbook top-k snapshot channels.
+    fn subscribe_orderbook_topk(&self, pairs: &[String]);
 }
 
 pub(super) trait Candlestick {

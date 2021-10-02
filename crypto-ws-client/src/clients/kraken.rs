@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
+    Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
 };
 
 use log::*;
@@ -160,8 +160,8 @@ impl<'a> OrderBook for KrakenWSClient<'a> {
     }
 }
 
-impl<'a> OrderBookSnapshot for KrakenWSClient<'a> {
-    fn subscribe_orderbook_snapshot(&self, _pairs: &[String]) {
+impl<'a> OrderBookTopK for KrakenWSClient<'a> {
+    fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
         panic!("Kraken does NOT have orderbook snapshot channel");
     }
 }

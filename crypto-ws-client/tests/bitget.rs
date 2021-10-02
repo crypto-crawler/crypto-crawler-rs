@@ -34,10 +34,10 @@ mod bitget_inverse_swap {
     }
 
     #[test]
-    fn subscribe_bbo() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             BitgetSwapWSClient,
-            subscribe_bbo,
+            subscribe_orderbook_topk,
             &vec!["btcusd".to_string()]
         );
     }
@@ -66,6 +66,7 @@ mod bitget_inverse_swap {
         gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec!["btcusd".to_string()], 604800);
     }
 
+    #[ignore]
     #[test]
     fn subscribe_funding_rate() {
         gen_test_code!(
@@ -91,10 +92,10 @@ mod bitget_linear_swap {
     }
 
     #[test]
-    fn subscribe_bbo() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             BitgetSwapWSClient,
-            subscribe_bbo,
+            subscribe_orderbook_topk,
             &vec!["cmt_btcusdt".to_string()]
         );
     }
@@ -127,6 +128,7 @@ mod bitget_linear_swap {
         );
     }
 
+    #[ignore]
     #[test]
     fn subscribe_funding_rate() {
         gen_test_code!(

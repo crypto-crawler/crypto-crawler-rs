@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use super::super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
+use super::super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 
 use log::*;
 use serde_json::Value;
@@ -83,15 +83,15 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
 #[rustfmt::skip]
 impl_trait!(Trade, BitgetSwapWSClient, subscribe_trade, "trade", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(BBO, BitgetSwapWSClient, subscribe_bbo, "depth5", to_raw_channel);
+impl_trait!(OrderBookTopK, BitgetSwapWSClient, subscribe_orderbook_topk, "depth5", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, BitgetSwapWSClient, subscribe_orderbook, "depth", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(Ticker, BitgetSwapWSClient, subscribe_ticker, "ticker", to_raw_channel);
 
-impl<'a> OrderBookSnapshot for BitgetSwapWSClient<'a> {
-    fn subscribe_orderbook_snapshot(&self, _pairs: &[String]) {
-        panic!("Bitget does NOT have orderbook snapshot channel");
+impl<'a> BBO for BitgetSwapWSClient<'a> {
+    fn subscribe_bbo(&self, _pairs: &[String]) {
+        panic!("Bitget does NOT have BBO channel");
     }
 }
 

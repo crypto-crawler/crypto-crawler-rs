@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use super::{
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
+    Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
 };
 use log::*;
 use serde_json::Value;
@@ -136,7 +136,7 @@ impl_trait!(BBO, BinanceWSClient, subscribe_bbo, "bookTicker", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, BinanceWSClient, subscribe_orderbook, "depth", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, BinanceWSClient, subscribe_orderbook_snapshot, "depth20", to_raw_channel);
+impl_trait!(OrderBookTopK, BinanceWSClient, subscribe_orderbook_topk, "depth5", to_raw_channel);
 
 fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
     let interval_str = match interval {
@@ -184,8 +184,8 @@ macro_rules! define_market_client {
                 <$struct_name as OrderBook>::subscribe_orderbook(self, channels);
             }
 
-            fn subscribe_orderbook_snapshot(&self, channels: &[String]) {
-                <$struct_name as OrderBookSnapshot>::subscribe_orderbook_snapshot(self, channels);
+            fn subscribe_orderbook_topk(&self, channels: &[String]) {
+                <$struct_name as OrderBookTopK>::subscribe_orderbook_topk(self, channels);
             }
 
             fn subscribe_ticker(&self, channels: &[String]) {
@@ -281,9 +281,9 @@ impl_orderbook!(BinanceLinearWSClient);
 
 macro_rules! impl_orderbook_snapshot {
     ($struct_name:ident) => {
-        impl<'a> OrderBookSnapshot for $struct_name<'a> {
-            fn subscribe_orderbook_snapshot(&self, pairs: &[String]) {
-                self.client.subscribe_orderbook_snapshot(pairs);
+        impl<'a> OrderBookTopK for $struct_name<'a> {
+            fn subscribe_orderbook_topk(&self, pairs: &[String]) {
+                self.client.subscribe_orderbook_topk(pairs);
             }
         }
     };

@@ -59,10 +59,10 @@ mod deribit_inverse_future {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             DeribitWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["BTC-31DEC21".to_string()]
         );
     }
@@ -116,10 +116,10 @@ mod deribit_inverse_swap {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             DeribitWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &vec!["BTC-PERPETUAL".to_string()]
         );
     }
@@ -190,10 +190,10 @@ mod deribit_option {
     }
 
     #[test]
-    fn subscribe_orderbook_snapshot() {
+    fn subscribe_orderbook_topk() {
         gen_test_code!(
             DeribitWSClient,
-            subscribe_orderbook_snapshot,
+            subscribe_orderbook_topk,
             &SYMBOLS
                 .iter()
                 .map(|s| s.to_string())

@@ -2,7 +2,7 @@ use crate::WSClient;
 use std::sync::{Arc, Mutex};
 
 use super::super::ws_client_internal::WSClientInternal;
-use super::super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
+use super::super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 use super::utils::{
     channels_to_commands, on_misc_msg, to_raw_channel, CLIENT_PING_INTERVAL_AND_MSG, EXCHANGE_NAME,
 };
@@ -20,15 +20,15 @@ pub struct BybitInverseFutureWSClient<'a> {
 #[rustfmt::skip]
 impl_trait!(Trade, BybitInverseFutureWSClient, subscribe_trade, "trade", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(BBO, BybitInverseFutureWSClient, subscribe_bbo, "orderBookL2_25", to_raw_channel);
+impl_trait!(OrderBookTopK, BybitInverseFutureWSClient, subscribe_orderbook_topk, "orderBookL2_25", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, BybitInverseFutureWSClient, subscribe_orderbook, "orderBookL2_25", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(Ticker, BybitInverseFutureWSClient, subscribe_ticker, "instrument_info.100ms", to_raw_channel);
 
-impl<'a> OrderBookSnapshot for BybitInverseFutureWSClient<'a> {
-    fn subscribe_orderbook_snapshot(&self, _pairs: &[String]) {
-        panic!("FTX does NOT have orderbook snapshot channel");
+impl<'a> BBO for BybitInverseFutureWSClient<'a> {
+    fn subscribe_bbo(&self, _pairs: &[String]) {
+        panic!("bybit does NOT have BBO channel");
     }
 }
 

@@ -2,7 +2,7 @@ use crate::WSClient;
 use std::sync::{Arc, Mutex};
 
 use super::super::ws_client_internal::WSClientInternal;
-use super::super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
+use super::super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 use super::utils::{
     channels_to_commands, on_misc_msg, to_candlestick_raw_channel_shared, to_raw_channel,
     CLIENT_PING_INTERVAL_AND_MSG, EXCHANGE_NAME,
@@ -32,7 +32,7 @@ impl_trait!(Trade, GateInverseSwapWSClient, subscribe_trade, "futures.trades", t
 #[rustfmt::skip]
 impl_trait!(OrderBook, GateInverseSwapWSClient, subscribe_orderbook, "futures.order_book_update", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, GateInverseSwapWSClient, subscribe_orderbook_snapshot, "futures.order_book", to_raw_channel);
+impl_trait!(OrderBookTopK, GateInverseSwapWSClient, subscribe_orderbook_topk, "futures.order_book", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(BBO, GateInverseSwapWSClient, subscribe_bbo, "futures.book_ticker", to_raw_channel);
 #[rustfmt::skip]
@@ -43,7 +43,7 @@ impl_trait!(Trade, GateLinearSwapWSClient, subscribe_trade, "futures.trades", to
 #[rustfmt::skip]
 impl_trait!(OrderBook, GateLinearSwapWSClient, subscribe_orderbook, "futures.order_book_update", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, GateLinearSwapWSClient, subscribe_orderbook_snapshot, "futures.order_book", to_raw_channel);
+impl_trait!(OrderBookTopK, GateLinearSwapWSClient, subscribe_orderbook_topk, "futures.order_book", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(BBO, GateLinearSwapWSClient, subscribe_bbo, "futures.book_ticker", to_raw_channel);
 #[rustfmt::skip]

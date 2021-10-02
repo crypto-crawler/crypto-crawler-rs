@@ -5,7 +5,7 @@ macro_rules! gen_test_code {
             let on_msg = Arc::new(Mutex::new(|msg: String| messages.push(msg)));
             let ws_client = $client::new(on_msg.clone(), None);
             ws_client.$func_name($pairs);
-            ws_client.run(Some(0)); // return immediately once after a normal message
+            ws_client.run(Some(5)); // return immediately once after a normal message
             ws_client.close();
         }
         assert!(!messages.is_empty());

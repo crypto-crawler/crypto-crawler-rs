@@ -5,7 +5,7 @@ use std::{collections::HashMap, time::Duration};
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO,
+    Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
 };
 use log::*;
 use serde_json::Value;
@@ -114,7 +114,7 @@ impl_trait!(BBO, BitmexWSClient, subscribe_bbo, "quote", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, BitmexWSClient, subscribe_orderbook, "orderBookL2_25", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, BitmexWSClient, subscribe_orderbook_snapshot, "orderBookL2", to_raw_channel);
+impl_trait!(OrderBookTopK, BitmexWSClient, subscribe_orderbook_topk, "orderBook10", to_raw_channel);
 
 impl<'a> Ticker for BitmexWSClient<'a> {
     fn subscribe_ticker(&self, _pairs: &[String]) {

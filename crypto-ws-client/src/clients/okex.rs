@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
+use super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 
 use log::*;
 use serde_json::Value;
@@ -120,13 +120,8 @@ impl_trait!(BBO, OkexWSClient, subscribe_bbo, "ticker", to_raw_channel);
 impl_trait!(Ticker, OkexWSClient, subscribe_ticker, "ticker", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, OkexWSClient, subscribe_orderbook, "depth_l2_tbt", to_raw_channel);
-impl_trait!(
-    OrderBookSnapshot,
-    OkexWSClient,
-    subscribe_orderbook_snapshot,
-    "depth5",
-    to_raw_channel
-);
+#[rustfmt::skip]
+impl_trait!(OrderBookTopK, OkexWSClient, subscribe_orderbook_topk, "depth5", to_raw_channel);
 
 fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
     let valid_set: Vec<u32> = vec![

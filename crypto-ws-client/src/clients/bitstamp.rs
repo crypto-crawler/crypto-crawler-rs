@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
+use super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 use log::*;
 use serde_json::Value;
 
@@ -85,7 +85,7 @@ impl_trait!(Trade, BitstampWSClient, subscribe_trade, "live_trades", to_raw_chan
 #[rustfmt::skip]
 impl_trait!(OrderBook, BitstampWSClient, subscribe_orderbook, "diff_order_book", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, BitstampWSClient, subscribe_orderbook_snapshot, "order_book", to_raw_channel);
+impl_trait!(OrderBookTopK, BitstampWSClient, subscribe_orderbook_topk, "order_book", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(Level3OrderBook, BitstampWSClient, subscribe_l3_orderbook, "live_orders", to_raw_channel);
 

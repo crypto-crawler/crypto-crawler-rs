@@ -7,7 +7,7 @@ use serde_json::Value;
 use tungstenite::Message;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{Candlestick, OrderBook, OrderBookSnapshot, Ticker, Trade, BBO};
+use super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 
 pub(super) const EXCHANGE_NAME: &str = "huobi";
 
@@ -190,7 +190,7 @@ impl_trait!(Ticker, HuobiWSClient, subscribe_ticker, "detail", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(BBO, HuobiWSClient, subscribe_bbo, "bbo", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, HuobiWSClient, subscribe_orderbook_snapshot, "depth.step7", to_raw_channel);
+impl_trait!(OrderBookTopK, HuobiWSClient, subscribe_orderbook_topk, "depth.step7", to_raw_channel);
 
 impl<'a> OrderBook for HuobiWSClient<'a> {
     fn subscribe_orderbook(&self, pairs: &[String]) {
@@ -249,8 +249,8 @@ macro_rules! define_market_client {
                 <$struct_name as OrderBook>::subscribe_orderbook(self, channels);
             }
 
-            fn subscribe_orderbook_snapshot(&self, channels: &[String]) {
-                <$struct_name as OrderBookSnapshot>::subscribe_orderbook_snapshot(self, channels);
+            fn subscribe_orderbook_topk(&self, channels: &[String]) {
+                <$struct_name as OrderBookTopK>::subscribe_orderbook_topk(self, channels);
             }
 
             fn subscribe_ticker(&self, channels: &[String]) {
@@ -378,16 +378,16 @@ impl_candlestick!(HuobiOptionWSClient);
 
 macro_rules! impl_orderbook_snapshot {
     ($struct_name:ident) => {
-        impl<'a> OrderBookSnapshot for $struct_name<'a> {
-            fn subscribe_orderbook_snapshot(&self, pairs: &[String]) {
-                self.client.subscribe_orderbook_snapshot(pairs);
+        impl<'a> OrderBookTopK for $struct_name<'a> {
+            fn subscribe_orderbook_topk(&self, pairs: &[String]) {
+                self.client.subscribe_orderbook_topk(pairs);
             }
         }
     };
 }
 
 #[rustfmt::skip]
-impl_trait!(OrderBookSnapshot, HuobiSpotWSClient, subscribe_orderbook_snapshot, "depth.step1", to_raw_channel);
+impl_trait!(OrderBookTopK, HuobiSpotWSClient, subscribe_orderbook_topk, "depth.step1", to_raw_channel);
 impl_orderbook_snapshot!(HuobiFutureWSClient);
 impl_orderbook_snapshot!(HuobiInverseSwapWSClient);
 impl_orderbook_snapshot!(HuobiLinearSwapWSClient);
