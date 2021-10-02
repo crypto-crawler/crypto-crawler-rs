@@ -33,7 +33,7 @@ pub struct MxcSpotWSClient<'a> {
 
 /// MXC Swap market.
 ///
-///   * WebSocket API doc: <https://github.com/mxcdevelop/APIDoc/blob/master/contract/contract-api.md#websocket-module>
+///   * WebSocket API doc: <https://mxcdevelop.github.io/APIDoc/contract.api.en.html#websocket-api>
 ///   * Trading at: <https://contract.mxc.com/exchange>
 pub struct MxcSwapWSClient<'a> {
     client: WSClientInternal<'a>,
