@@ -39,6 +39,18 @@ fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 
 #[test_case(MarketType::Spot, "tBTCUSD")]
 #[test_case(MarketType::LinearSwap, "tBTCF0:USTF0")]
+fn test_crawl_bbo(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_bbo,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::BBO
+    )
+}
+
+#[test_case(MarketType::Spot, "tBTCUSD")]
+#[test_case(MarketType::LinearSwap, "tBTCF0:USTF0")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     gen_test_snapshot_code!(
         crawl_l2_snapshot,

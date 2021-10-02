@@ -31,6 +31,7 @@ RUN curl -SsL https://github.com/boxboat/fixuid/releases/download/v0.5/fixuid-0.
     mkdir -p /etc/fixuid && \
     printf "user: node\ngroup: node\n" > /etc/fixuid/config.yml
 
+COPY --chown=node:node ./conf/pm2/pm2.bbo.config.js /home/node/pm2.bbo.config.js
 COPY --chown=node:node ./conf/pm2/pm2.trade.config.js /home/node/pm2.trade.config.js
 COPY --chown=node:node ./conf/pm2/pm2.ticker.config.js /home/node/pm2.ticker.config.js
 COPY --chown=node:node ./conf/pm2/pm2.l2_event.config.js /home/node/pm2.l2_event.config.js
@@ -38,6 +39,7 @@ COPY --chown=node:node ./conf/pm2/pm2.l2_snapshot.config.js /home/node/pm2.l2_sn
 COPY --chown=node:node ./conf/pm2/pm2.funding_rate.config.js /home/node/pm2.funding_rate.config.js
 COPY --chown=node:node ./conf/pm2/pm2.misc.config.js /home/node/pm2.misc.config.js
 
+COPY ./conf/logrotate/logrotate.bbo.conf /usr/local/etc/logrotate.bbo.conf
 COPY ./conf/logrotate/logrotate.trade.conf /usr/local/etc/logrotate.trade.conf
 COPY ./conf/logrotate/logrotate.ticker.conf /usr/local/etc/logrotate.ticker.conf
 COPY ./conf/logrotate/logrotate.l2_event.conf /usr/local/etc/logrotate.l2_event.conf

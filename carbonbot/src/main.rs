@@ -116,6 +116,7 @@ pub fn crawl(
     }));
 
     let crawl_func = match msg_type {
+        MessageType::BBO => crawl_bbo,
         MessageType::Trade => crawl_trade,
         MessageType::L2Event => crawl_l2_event,
         MessageType::L3Event => crawl_l3_event,

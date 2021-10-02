@@ -60,6 +60,11 @@ mod okex_spot {
     }
 
     #[test]
+    fn subscribe_bbo() {
+        gen_test_code!(OkexWSClient, subscribe_bbo, &vec!["BTC-USDT".to_string()]);
+    }
+
+    #[test]
     fn subscribe_orderbook_snapshot() {
         gen_test_code!(
             OkexWSClient,

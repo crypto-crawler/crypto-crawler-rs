@@ -73,6 +73,21 @@ fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::LinearFuture, "BTC-1231")]
 #[test_case(MarketType::Move, "BTC-MOVE-2021Q4")]
 #[test_case(MarketType::BVOL, "BVOL/USD")]
+fn test_crawl_bbo(market_type: MarketType, symbol: &str) {
+    gen_test_code!(
+        crawl_bbo,
+        EXCHANGE_NAME,
+        market_type,
+        symbol,
+        MessageType::BBO
+    )
+}
+
+#[test_case(MarketType::Spot, "BTC/USD")]
+#[test_case(MarketType::LinearSwap, "BTC-PERP")]
+#[test_case(MarketType::LinearFuture, "BTC-1231")]
+#[test_case(MarketType::Move, "BTC-MOVE-2021Q4")]
+#[test_case(MarketType::BVOL, "BVOL/USD")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     gen_test_snapshot_code!(
         crawl_l2_snapshot,

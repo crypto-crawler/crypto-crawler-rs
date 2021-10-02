@@ -193,6 +193,33 @@ pub fn crawl_l2_snapshot(
     )
 }
 
+/// Crawl best bid and ask.
+pub fn crawl_bbo(
+    exchange: &str,
+    market_type: MarketType,
+    symbols: Option<&[String]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) {
+    let func = match exchange {
+        "binance" => crawlers::binance::crawl_bbo,
+        "bitfinex" => crawlers::bitfinex::crawl_bbo,
+        "bitmex" => crawlers::bitmex::crawl_bbo,
+        "deribit" => crawlers::deribit::crawl_bbo,
+        "ftx" => crawlers::ftx::crawl_bbo,
+        "gate" => crawlers::gate::crawl_bbo,
+        "huobi" => crawlers::huobi::crawl_bbo,
+        "kraken" => crawlers::kraken::crawl_bbo,
+        "kucoin" => crawlers::kucoin::crawl_bbo,
+        "okex" => crawlers::okex::crawl_bbo,
+        _ => panic!("Unknown exchange {}", exchange),
+    };
+    let handle = func(market_type, symbols, on_msg, duration);
+    if let Some(h) = handle {
+        h.join().expect("The thread panicked");
+    }
+}
+
 /// Crawl level3 orderbook snapshots through RESTful APIs.
 pub fn crawl_l3_snapshot(
     exchange: &str,

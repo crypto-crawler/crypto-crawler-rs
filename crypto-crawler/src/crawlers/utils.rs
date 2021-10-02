@@ -39,8 +39,10 @@ pub fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<Strin
         .unwrap_or_else(|_| "5".to_string())
         .parse::<i64>()
         .unwrap();
+    let cooldown_time = get_cooldown_time_per_request(exchange, market_type);
     let mut lock = get_lock_file(exchange, market_type);
     let mut symbols = Vec::<String>::new();
+    let mut backoff_factor = 1;
     for i in 0..retry_count {
         if let Some(ref mut lock) = lock {
             lock.lock().unwrap();
@@ -51,6 +53,7 @@ pub fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<Strin
                 break;
             }
             Err(err) => {
+                backoff_factor *= 2;
                 if i == retry_count - 1 {
                     error!("The {}th time, {}", i, err);
                 } else {
@@ -58,15 +61,14 @@ pub fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<Strin
                 }
             }
         }
-        let cooldown_time = get_cooldown_time_per_request(exchange, market_type);
         if let Some(ref mut lock) = lock {
             // Cooldown after each request, and make all other processes wait
             // on the lock to avoid parallel requests, thus avoid 429 error
-            std::thread::sleep(cooldown_time);
+            std::thread::sleep(cooldown_time * backoff_factor);
             lock.unlock().unwrap();
         } else {
             // Cooldown after each request
-            std::thread::sleep(cooldown_time);
+            std::thread::sleep(cooldown_time * backoff_factor);
         }
     }
     symbols
@@ -109,7 +111,7 @@ fn get_cooldown_time_per_request(exchange: &str, market_type: MarketType) -> Dur
         "gate" => 4,        // 300 read operations per IP per second
         "huobi" => 2,       // 800 times/second for one IP
         "kucoin" => match market_type {
-            MarketType::Spot => 110, // addtional 10ms to avoid 429
+            MarketType::Spot => 200, // addtional 10ms to avoid 429
             _ => 100,                // 30 times/3s
         },
         "mxc" => 100,  // 20 times per 2 seconds
@@ -267,12 +269,12 @@ macro_rules! gen_crawl_event {
                 let ws_client = Arc::new($struct_name::new(on_msg_ext, None));
 
                 if symbols.is_none() {
-                    let should_stop2 = should_stop.clone();
+                    let should_stop_clone = should_stop.clone();
                     let ws_client2 = ws_client.clone();
 
                     let mut subscribed_symbols = real_symbols.clone();
                     std::thread::spawn(move || {
-                        while !should_stop2.load(Ordering::Acquire) {
+                        while !should_stop_clone.load(Ordering::Acquire) {
                             let latest_symbols = fetch_symbols_retry(EXCHANGE_NAME, market_type);
                             let mut new_symbols: Vec<String> = latest_symbols
                                 .iter()
@@ -293,6 +295,7 @@ macro_rules! gen_crawl_event {
 
                 ws_client.$crawl_func(&real_symbols);
                 ws_client.run(duration);
+                ws_client.close();
                 should_stop.store(true, Ordering::Release);
             } else {
                 // split to chunks
@@ -321,10 +324,12 @@ macro_rules! gen_crawl_event {
                             if chunk.len() < MAX_SUBSCRIPTIONS_PER_CONNECTION {
                                 last_client_clone.$crawl_func(&chunk);
                                 last_client_clone.run(duration);
+                                last_client_clone.close();
                             } else {
                                 let ws_client = $struct_name::new(on_msg_ext_clone, None);
                                 ws_client.$crawl_func(&chunk);
                                 ws_client.run(duration);
+                                ws_client.close();
                             }
 
                             num_threads_clone.fetch_sub(1, Ordering::SeqCst);
@@ -356,6 +361,7 @@ macro_rules! gen_crawl_event {
                             let ws_client = $struct_name::new(on_msg_ext_clone, None);
                             ws_client.$crawl_func(&chunk);
                             ws_client.run(duration);
+                            ws_client.close();
                         });
                         join_handles.push(handle);
                     }

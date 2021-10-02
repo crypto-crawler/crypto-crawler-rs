@@ -19,3 +19,5 @@ const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = usize::MAX;
 gen_crawl_event!(crawl_trade, FtxWSClient, MessageType::Trade, subscribe_trade);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_l2_event, FtxWSClient, MessageType::L2Event, subscribe_orderbook);
+#[rustfmt::skip]
+gen_crawl_event!(crawl_bbo, FtxWSClient, MessageType::BBO, subscribe_bbo);

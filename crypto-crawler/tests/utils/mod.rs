@@ -1,3 +1,4 @@
+#[allow(unused_macros)]
 macro_rules! gen_test_code {
     ($crawl_func:ident, $exchange:expr, $market_type:expr, $symbol:expr, $msg_type:expr) => {{
         thread_local! {
@@ -21,6 +22,7 @@ macro_rules! gen_test_code {
     }};
 }
 
+#[allow(unused_macros)]
 macro_rules! gen_test_snapshot_code {
     ($crawl_func:ident, $exchange:expr, $market_type:expr, $symbol:expr, $msg_type:expr) => {{
         thread_local! {

@@ -8,20 +8,13 @@ const market_types = {
         "inverse_swap",
     ],
     bitfinex: ["spot", "linear_swap"],
-    bitget: ["inverse_swap", "linear_swap"],
-    bithumb: ["spot"],
     bitmex: ["unknown"], // unknown means all
-    bitstamp: ["spot"],
-    bitz: ["spot"],
-    bybit: ["inverse_future", "inverse_swap", "linear_swap"],
-    coinbase_pro: ["spot"],
     deribit: ["inverse_future", "european_option"], // inverse_swap is included in inverse_future
     ftx: ["spot", "linear_swap", "linear_future", "move", "bvol"],
-    gate: ["spot", "linear_future", "linear_swap", "inverse_swap"],
+    gate: ["spot", "linear_swap", "inverse_swap"],
     huobi: ["spot", "inverse_future", "linear_swap", "inverse_swap"],
     kraken: ["spot"],
     kucoin: ["spot", "inverse_future", "linear_swap", "inverse_swap"],
-    mxc: ["spot", "linear_swap", "inverse_swap"],
     okex: [
         "spot",
         "linear_future",
@@ -30,7 +23,6 @@ const market_types = {
         "inverse_swap",
         "european_option",
     ],
-    zbg: ["spot", "inverse_swap", "linear_swap"],
 };
 
 const apps = [];
@@ -38,9 +30,9 @@ const apps = [];
 Object.keys(market_types).forEach((exchange) => {
     market_types[exchange].forEach((market_ype) => {
         const app = {
-            name: `crawler-trade-${exchange}-${market_ype}`,
+            name: `crawler-bbo-${exchange}-${market_ype}`,
             script: "carbonbot",
-            args: `${exchange} ${market_ype} trade`,
+            args: `${exchange} ${market_ype} bbo`,
             exec_interpreter: "none",
             exec_mode: "fork_mode",
             instances: 1,
@@ -54,7 +46,7 @@ Object.keys(market_types).forEach((exchange) => {
 apps.push({
     name: "logrotate",
     script: "/usr/local/bin/logrotate.sh",
-    args: "/usr/local/etc/logrotate.trade.conf",
+    args: "/usr/local/etc/logrotate.bbo.conf",
     exec_interpreter: "none",
     exec_mode: "fork_mode",
     cron_restart: "*/15 * * * *",
@@ -64,7 +56,7 @@ apps.push({
 apps.push({
     name: "upload",
     script: "/usr/local/bin/upload.sh",
-    args: "trade",
+    args: "bbo",
     exec_interpreter: "bash",
     exec_mode: "fork_mode",
     instances: 1,

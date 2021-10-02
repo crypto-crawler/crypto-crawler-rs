@@ -80,18 +80,6 @@ mod huobi_spot {
         gen_test_subscribe_candlestick!(HuobiSpotWSClient, &vec!["btcusdt".to_string()], 60);
         gen_test_subscribe_candlestick!(HuobiSpotWSClient, &vec!["btcusdt".to_string()], 2592000);
     }
-
-    #[test]
-    fn huobi_hb10() {
-        gen_test_code!(
-            HuobiSpotWSClient,
-            subscribe,
-            &vec![
-                "market.hb10usdt.trade.detail".to_string(),
-                "market.huobi10.kline.1min".to_string()
-            ]
-        );
-    }
 }
 
 #[cfg(test)]
