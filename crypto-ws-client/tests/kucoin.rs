@@ -16,6 +16,15 @@ mod kucoin_spot {
     }
 
     #[test]
+    fn subscribe_all_bbo() {
+        gen_test_code!(
+            KuCoinSpotWSClient,
+            subscribe,
+            &vec!["/market/ticker:all".to_string()]
+        );
+    }
+
+    #[test]
     fn subscribe_raw_json() {
         gen_test_code!(
             KuCoinSpotWSClient,

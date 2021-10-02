@@ -156,7 +156,7 @@ impl<'a> HuobiWSClient<'a> {
                     "error" => {
                         error!("Received {} from {}", msg, EXCHANGE_NAME);
                         let err_msg = obj.get("err-msg").unwrap().as_str().unwrap();
-                        if err_msg.starts_with("invalid topic") {
+                        if err_msg.starts_with("invalid") {
                             panic!("Received {} from {}", msg, EXCHANGE_NAME);
                         }
                     }

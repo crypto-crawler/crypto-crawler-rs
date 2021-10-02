@@ -115,6 +115,8 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
 #[rustfmt::skip]
 impl_trait!(Trade, OkexWSClient, subscribe_trade, "trade", to_raw_channel);
 #[rustfmt::skip]
+impl_trait!(BBO, OkexWSClient, subscribe_bbo, "ticker", to_raw_channel);
+#[rustfmt::skip]
 impl_trait!(Ticker, OkexWSClient, subscribe_ticker, "ticker", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, OkexWSClient, subscribe_orderbook, "depth_l2_tbt", to_raw_channel);
@@ -125,12 +127,6 @@ impl_trait!(
     "depth5",
     to_raw_channel
 );
-
-impl<'a> BBO for OkexWSClient<'a> {
-    fn subscribe_bbo(&self, _pairs: &[String]) {
-        panic!("OKEx WebSocket does NOT have BBO channel");
-    }
-}
 
 fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
     let valid_set: Vec<u32> = vec![

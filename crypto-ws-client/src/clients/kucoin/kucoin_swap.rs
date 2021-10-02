@@ -26,7 +26,7 @@ pub struct KuCoinSwapWSClient<'a> {
 #[rustfmt::skip]
 impl_trait!(Trade, KuCoinSwapWSClient, subscribe_trade, "/contractMarket/execution", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(BBO, KuCoinSwapWSClient, subscribe_bbo, "/contractMarket/ticker", to_raw_channel);
+impl_trait!(BBO, KuCoinSwapWSClient, subscribe_bbo, "/contractMarket/tickerV2", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, KuCoinSwapWSClient, subscribe_orderbook, "/contractMarket/level2", to_raw_channel);
 #[rustfmt::skip]
