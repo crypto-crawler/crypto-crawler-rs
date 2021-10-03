@@ -36,7 +36,7 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_trade,
-            &vec!["BTC-31DEC21".to_string(), "BTC-31DEC21".to_string()]
+            &vec!["BTC-26NOV21".to_string(), "BTC-31DEC21".to_string()]
         );
     }
 
@@ -178,6 +178,7 @@ mod deribit_option {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_orderbook() {
         gen_test_code!(
             DeribitWSClient,
@@ -190,6 +191,7 @@ mod deribit_option {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_orderbook_topk() {
         gen_test_code!(
             DeribitWSClient,

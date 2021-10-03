@@ -1,6 +1,6 @@
 [package]
 name = "crypto-ws-client"
-version = "2.6.4"
+version = "2.6.5"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "A versatile websocket client that supports many cryptocurrency exchanges."
@@ -14,7 +14,7 @@ lazy_static = "1"
 log = "0.4"
 reqwest = { version = "0.11", features = ["blocking", "gzip"] }
 serde_json = "1"
-tungstenite = { version = "0.13", default-features = false, features = ["rustls-tls"] }
+tungstenite = { version = "0.14", features = ["rustls-tls"] }
 http = "0.2"
 rustls = "0.19.0"
 webpki = "0.21.4"
