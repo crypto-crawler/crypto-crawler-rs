@@ -42,7 +42,7 @@ fn crawl_all(
     let channel: &str = match msg_type {
         MessageType::Trade => "trade",
         MessageType::L2Event => "orderBookL2_25",
-        MessageType::L2TopK => "orderBookL10",
+        MessageType::L2TopK => "orderBook10",
         MessageType::BBO => "quote",
         MessageType::L2Snapshot => "orderBookL2",
         MessageType::FundingRate => "funding",
