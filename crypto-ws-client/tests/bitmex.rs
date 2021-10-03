@@ -67,6 +67,7 @@ mod bitmex_inverse_swap {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_funding_rate() {
         gen_test_code!(
             BitmexWSClient,
@@ -190,6 +191,7 @@ mod bitmex_quanto_swap {
     }
 
     #[test]
+    #[ignore]
     fn subscribe_funding_rate() {
         gen_test_code!(
             BitmexWSClient,

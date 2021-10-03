@@ -80,8 +80,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
                 std::thread::sleep(Duration::from_secs(3));
             }
             400 => {
-                if error_msg.starts_with("Unknown or expired symbol") {
-                    error!("Received {} from {}", msg, EXCHANGE_NAME);
+                if error_msg.starts_with("Unknown") {
                     panic!("Received {} from {}", msg, EXCHANGE_NAME);
                 } else if error_msg.starts_with("You are already subscribed to this topic") {
                     info!("Received {} from {}", msg, EXCHANGE_NAME)
