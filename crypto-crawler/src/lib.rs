@@ -162,12 +162,11 @@ pub fn crawl_l3_event(
     duration: Option<u64>,
 ) {
     let func = match exchange {
-        "binance" => panic!("Binance does NOT provide level3 orderbook data"),
         "bitfinex" => crawlers::bitfinex::crawl_l3_event,
         "bitstamp" => crawlers::bitstamp::crawl_l3_event,
         "coinbase_pro" => crawlers::coinbase_pro::crawl_l3_event,
         "kucoin" => crawlers::kucoin::crawl_l3_event,
-        _ => panic!("Unknown exchange {}", exchange),
+        _ => panic!("{} does NOT have level3 orderbook data", exchange),
     };
     let handle = func(market_type, symbols, on_msg, duration);
     if let Some(h) = handle {
