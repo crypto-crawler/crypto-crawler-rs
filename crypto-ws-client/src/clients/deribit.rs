@@ -60,38 +60,10 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
 
     if obj.contains_key("error") {
-        error!("Received {} from {}", msg, EXCHANGE_NAME);
         panic!("Received {} from {}", msg, EXCHANGE_NAME);
     } else if obj.contains_key("result") {
-        let result = obj.get("result").unwrap();
-        if result.is_string() {
-            if result.as_str().unwrap() == "ok" {
-                info!("Received {} from {}", msg, EXCHANGE_NAME);
-            } else {
-                warn!("Received {} from {}", msg, EXCHANGE_NAME);
-            }
-            MiscMessage::Misc
-        } else if result.is_array() {
-            let arr = result.as_array().unwrap();
-            if !arr.is_empty() {
-                if arr[0].is_object() {
-                    MiscMessage::Normal
-                } else {
-                    MiscMessage::Misc
-                }
-            } else {
-                panic!("Subscribed invalid symbols, {}, {}", msg, EXCHANGE_NAME);
-            }
-        } else if result.is_object() {
-            if result.as_object().unwrap().contains_key("version") {
-                MiscMessage::Misc
-            } else {
-                MiscMessage::Normal
-            }
-        } else {
-            warn!("Received {} from {}", msg, EXCHANGE_NAME);
-            MiscMessage::Misc
-        }
+        info!("Received {} from {}", msg, EXCHANGE_NAME);
+        MiscMessage::Misc
     } else if obj.contains_key("method") && obj.contains_key("params") {
         match obj.get("method").unwrap().as_str().unwrap() {
             "subscription" => MiscMessage::Normal,
