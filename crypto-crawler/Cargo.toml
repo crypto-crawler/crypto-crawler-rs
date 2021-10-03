@@ -1,6 +1,6 @@
 [package]
 name = "crypto-crawler"
-version = "2.1.1"
+version = "2.1.2"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "A rock-solid cryprocurrency crawler."
@@ -13,7 +13,7 @@ crypto-markets = "0.7.6"
 crypto-market-type = "0.1.7"
 crypto-pair = "2.0.6"
 crypto-rest-client = "0.7.4"
-crypto-ws-client = "2.6.4"
+crypto-ws-client = "2.6.6"
 fslock = "0.1.8"
 lazy_static = "1"
 log = "0.4"
