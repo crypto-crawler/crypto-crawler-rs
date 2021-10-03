@@ -37,6 +37,7 @@ COPY --chown=node:node ./conf/pm2/pm2.ticker.config.js /home/node/pm2.ticker.con
 COPY --chown=node:node ./conf/pm2/pm2.l2_event.config.js /home/node/pm2.l2_event.config.js
 COPY --chown=node:node ./conf/pm2/pm2.l2_snapshot.config.js /home/node/pm2.l2_snapshot.config.js
 COPY --chown=node:node ./conf/pm2/pm2.l2_topk.config.js /home/node/pm2.l2_topk.config.js
+COPY --chown=node:node ./conf/pm2/pm2.l3_event.config.js /home/node/pm2.l3_event.config.js
 COPY --chown=node:node ./conf/pm2/pm2.funding_rate.config.js /home/node/pm2.funding_rate.config.js
 COPY --chown=node:node ./conf/pm2/pm2.misc.config.js /home/node/pm2.misc.config.js
 
@@ -46,6 +47,7 @@ COPY ./conf/logrotate/logrotate.ticker.conf /usr/local/etc/logrotate.ticker.conf
 COPY ./conf/logrotate/logrotate.l2_event.conf /usr/local/etc/logrotate.l2_event.conf
 COPY ./conf/logrotate/logrotate.l2_snapshot.conf /usr/local/etc/logrotate.l2_snapshot.conf
 COPY ./conf/logrotate/logrotate.l2_topk.conf /usr/local/etc/logrotate.l2_topk.conf
+COPY ./conf/logrotate/logrotate.l3_event.conf /usr/local/etc/logrotate.l3_event.conf
 COPY ./conf/logrotate/logrotate.funding_rate.conf /usr/local/etc/logrotate.funding_rate.conf
 COPY ./conf/logrotate/logrotate.misc.conf /usr/local/etc/logrotate.misc.conf
 
