@@ -16,7 +16,7 @@ pub(super) const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) =
 
 // Maximum number of batch subscriptions at a time: 100 topics
 // See https://docs.kucoin.cc/#request-rate-limit
-const MAX_SUBSCRIPTIONS_PER_TIME: usize = 100;
+const MAX_TOPICS_PER_COMMAND: usize = 100;
 
 pub(super) struct WebsocketToken {
     pub token: String,
@@ -129,7 +129,7 @@ pub(super) fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<
         let mut chunk: Vec<String> = Vec::new();
         for pair in pairs.iter() {
             chunk.push(pair.clone());
-            if chunk.len() >= MAX_SUBSCRIPTIONS_PER_TIME {
+            if chunk.len() >= MAX_TOPICS_PER_COMMAND {
                 all_commands.push(channel_pairs_to_command(channel, &chunk, subscribe));
                 chunk.clear();
             }
