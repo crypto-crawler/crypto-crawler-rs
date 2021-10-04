@@ -8,6 +8,7 @@ use super::{
 };
 use log::*;
 use serde_json::Value;
+use super::utils::WS_FRAME_SIZE;
 
 pub(super) const EXCHANGE_NAME: &str = "binance";
 
@@ -15,13 +16,12 @@ const SPOT_WEBSOCKET_URL: &str = "wss://stream.binance.com:9443/stream";
 const LINEAR_WEBSOCKET_URL: &str = "wss://fstream.binance.com/stream";
 const INVERSE_WEBSOCKET_URL: &str = "wss://dstream.binance.com/stream";
 
+// https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
 // A single connection can listen to a maximum of 200 streams
 const MAX_NUM_CHANNELS: usize = 200;
 
 // The websocket server will send a ping frame every 5 minutes
 const SERVER_PING_INTERVAL: u64 = 300;
-
-const WS_FRAME_SIZE: usize = 4096;
 
 // Internal unified client
 struct BinanceWSClient<'a> {

@@ -16,6 +16,9 @@ use tungstenite::{
 };
 use webpki::DNSNameRef;
 
+/// The total size of websocket message
+pub(crate) const WS_FRAME_SIZE: usize = 4096;
+
 // copied from https://github.com/snapview/tungstenite-rs/blob/master/src/client.rs#L69
 fn wrap_stream(stream: TcpStream, domain: &str, mode: Mode) -> Result<AutoStream> {
     match mode {

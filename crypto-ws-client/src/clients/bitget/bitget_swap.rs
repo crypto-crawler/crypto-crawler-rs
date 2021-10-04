@@ -12,9 +12,14 @@ const EXCHANGE_NAME: &str = "bitget";
 
 const WEBSOCKET_URL: &str = "wss://csocketapi.bitget.com/ws/v1";
 
+// https://bitgetlimited.github.io/apidoc/en/swap/#brief-introduction
+// System will auto-disconnect while subscription has been done within 30sec
+// or no ping command sent by user after 30sec after ws is connected
 const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (30, "ping");
 
 /// The WebSocket client for Bitget swap markets.
+///
+/// User has the opinion to subscribe 1 or more channels, total length of multiple channel can not exceeds 4096 bytes.
 ///
 /// * WebSocket API doc: <https://bitgetlimited.github.io/apidoc/en/swap/#websocketapi>
 /// * Trading at: <https://www.bitget.com/en/swap/>
