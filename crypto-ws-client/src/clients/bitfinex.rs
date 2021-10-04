@@ -297,7 +297,7 @@ impl<'a> BitfinexWSClient<'a> {
                                 // Stop/Restart Websocket Server (please reconnect)
                                 // self.reconnect();
                                 error!("Stop/Restart Websocket Server, exiting now...");
-                                std::process::exit(0); // fail fast, pm2 will restart
+                                std::process::exit(1); // fail fast, pm2 will restart
                             }
                             20060 => {
                                 // Entering in Maintenance mode. Please pause any activity and resume
@@ -467,7 +467,7 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
                             error!("Server closed connection, exiting now...");
                             // self.reconnect();
                             std::thread::sleep(Duration::from_secs(5));
-                            std::process::exit(0); // fail fast, pm2 will restart
+                            std::process::exit(1); // fail fast, pm2 will restart
                         }
                         Error::AlreadyClosed => {
                             error!("Impossible to happen, fix the bug in the code");
@@ -488,7 +488,7 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
                                 );
                                 // self.reconnect();
                                 std::thread::sleep(Duration::from_secs(5));
-                                std::process::exit(0); // fail fast, pm2 will restart
+                                std::process::exit(1); // fail fast, pm2 will restart
                             }
                         }
                         Error::Protocol(protocol_err) => {
@@ -496,7 +496,7 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
                                 error!("ResetWithoutClosingHandshake");
                                 // self.reconnect();
                                 std::thread::sleep(Duration::from_secs(5));
-                                std::process::exit(0); // fail fast, pm2 will restart
+                                std::process::exit(1); // fail fast, pm2 will restart
                             } else {
                                 error!(
                                     "Protocol error thrown from read_message(): {}",
@@ -514,7 +514,7 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
 
             if num_read_timeout > 3 {
                 error!("num_read_timeout: {}", num_read_timeout);
-                std::process::exit(0); // fail fast, pm2 will restart
+                std::process::exit(1); // fail fast, pm2 will restart
             }
 
             if let Some(seconds) = duration {

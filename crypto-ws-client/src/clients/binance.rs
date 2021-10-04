@@ -21,6 +21,8 @@ const MAX_NUM_CHANNELS: usize = 200;
 // The websocket server will send a ping frame every 5 minutes
 const SERVER_PING_INTERVAL: u64 = 300;
 
+const WS_FRAME_SIZE: usize = 4096;
+
 // Internal unified client
 struct BinanceWSClient<'a> {
     client: WSClientInternal<'a>,
@@ -75,20 +77,42 @@ impl<'a> BinanceWSClient<'a> {
             .collect();
 
         if !raw_channels.is_empty() {
-            let n = raw_channels.len();
-            for i in (0..n).step_by(MAX_NUM_CHANNELS) {
-                let chunk: Vec<&String> =
-                    (&raw_channels[i..(std::cmp::min(i + MAX_NUM_CHANNELS, n))]).to_vec();
-                let command = format!(
-                    r#"{{"id":9527,"method":"{}","params":{}}}"#,
-                    if subscribe {
-                        "SUBSCRIBE"
+            let mut index = 0;
+            while index < raw_channels.len() {
+                for end in (index + 1)..(raw_channels.len() + 1) {
+                    let num_subscriptions = end - index;
+                    let chunk = &raw_channels[index..end];
+                    let command = format!(
+                        r#"{{"id":9527,"method":"{}","params":{}}}"#,
+                        if subscribe {
+                            "SUBSCRIBE"
+                        } else {
+                            "UNSUBSCRIBE"
+                        },
+                        serde_json::to_string(&chunk).unwrap()
+                    );
+                    if end == raw_channels.len() || num_subscriptions >= MAX_NUM_CHANNELS {
+                        all_commands.push(command);
+                        index = end;
+                        break;
                     } else {
-                        "UNSUBSCRIBE"
-                    },
-                    serde_json::to_string(&chunk).unwrap()
-                );
-                all_commands.push(command);
+                        let chunk = &raw_channels[index..end + 1];
+                        let command_next = format!(
+                            r#"{{"id":9527,"method":"{}","params":{}}}"#,
+                            if subscribe {
+                                "SUBSCRIBE"
+                            } else {
+                                "UNSUBSCRIBE"
+                            },
+                            serde_json::to_string(&chunk).unwrap()
+                        );
+                        if command_next.len() > WS_FRAME_SIZE {
+                            all_commands.push(command);
+                            index = end;
+                            break;
+                        }
+                    };
+                }
             }
         };
 
