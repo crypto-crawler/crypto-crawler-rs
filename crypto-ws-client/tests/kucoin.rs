@@ -89,8 +89,11 @@ mod kucoin_spot {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(KuCoinSpotWSClient, &vec!["BTC-USDT".to_string()], 60);
-        gen_test_subscribe_candlestick!(KuCoinSpotWSClient, &vec!["BTC-USDT".to_string()], 604800);
+        gen_test_subscribe_candlestick!(KuCoinSpotWSClient, &vec![("BTC-USDT".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(
+            KuCoinSpotWSClient,
+            &vec![("BTC-USDT".to_string(), 604800)]
+        );
     }
 }
 
@@ -176,13 +179,14 @@ mod kucoin_inverse_swap {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             KuCoinSwapWSClient,
-            &vec!["XBTUSDM".to_string(), "ETHUSDM".to_string()],
-            60
+            &vec![("XBTUSDM".to_string(), 60), ("ETHUSDM".to_string(), 60)]
         );
         gen_test_subscribe_candlestick!(
             KuCoinSwapWSClient,
-            &vec!["XBTUSDM".to_string(), "ETHUSDM".to_string()],
-            604800
+            &vec![
+                ("XBTUSDM".to_string(), 604800),
+                ("ETHUSDM".to_string(), 604800)
+            ]
         );
     }
 }
@@ -269,13 +273,14 @@ mod kucoin_linear_swap {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             KuCoinSwapWSClient,
-            &vec!["XBTUSDTM".to_string(), "ETHUSDTM".to_string()],
-            60
+            &vec![("XBTUSDTM".to_string(), 60), ("ETHUSDTM".to_string(), 60)]
         );
         gen_test_subscribe_candlestick!(
             KuCoinSwapWSClient,
-            &vec!["XBTUSDTM".to_string(), "ETHUSDTM".to_string()],
-            604800
+            &vec![
+                ("XBTUSDTM".to_string(), 604800),
+                ("ETHUSDTM".to_string(), 604800)
+            ]
         );
     }
 }
@@ -364,7 +369,7 @@ mod kucoin_inverse_future {
     #[test]
     #[ignore]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(KuCoinSwapWSClient, &vec!["XBTMZ21".to_string()], 60);
-        gen_test_subscribe_candlestick!(KuCoinSwapWSClient, &vec!["XBTMZ21".to_string()], 604800);
+        gen_test_subscribe_candlestick!(KuCoinSwapWSClient, &vec![("XBTMZ21".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(KuCoinSwapWSClient, &vec![("XBTMZ21".to_string(), 604800)]);
     }
 }

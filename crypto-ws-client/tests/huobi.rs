@@ -77,8 +77,8 @@ mod huobi_spot {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(HuobiSpotWSClient, &vec!["btcusdt".to_string()], 60);
-        gen_test_subscribe_candlestick!(HuobiSpotWSClient, &vec!["btcusdt".to_string()], 2592000);
+        gen_test_subscribe_candlestick!(HuobiSpotWSClient, &vec![("btcusdt".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(HuobiSpotWSClient, &vec![("btcusdt".to_string(), 2592000)]);
     }
 }
 
@@ -143,8 +143,11 @@ mod huobi_inverse_future {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(HuobiFutureWSClient, &vec!["BTC_CQ".to_string()], 60);
-        gen_test_subscribe_candlestick!(HuobiFutureWSClient, &vec!["BTC_CQ".to_string()], 2592000);
+        gen_test_subscribe_candlestick!(HuobiFutureWSClient, &vec![("BTC_CQ".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(
+            HuobiFutureWSClient,
+            &vec![("BTC_CQ".to_string(), 2592000)]
+        );
     }
 }
 
@@ -209,11 +212,13 @@ mod huobi_linear_swap {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(HuobiLinearSwapWSClient, &vec!["BTC-USDT".to_string()], 60);
         gen_test_subscribe_candlestick!(
             HuobiLinearSwapWSClient,
-            &vec!["BTC-USDT".to_string()],
-            2592000
+            &vec![("BTC-USDT".to_string(), 60)]
+        );
+        gen_test_subscribe_candlestick!(
+            HuobiLinearSwapWSClient,
+            &vec![("BTC-USDT".to_string(), 2592000)]
         );
     }
 
@@ -315,11 +320,13 @@ mod huobi_inverse_swap {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(HuobiInverseSwapWSClient, &vec!["BTC-USD".to_string()], 60);
         gen_test_subscribe_candlestick!(
             HuobiInverseSwapWSClient,
-            &vec!["BTC-USD".to_string()],
-            2592000
+            &vec![("BTC-USD".to_string(), 60)]
+        );
+        gen_test_subscribe_candlestick!(
+            HuobiInverseSwapWSClient,
+            &vec![("BTC-USD".to_string(), 2592000)]
         );
     }
 
@@ -439,13 +446,11 @@ mod huobi_option {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             HuobiOptionWSClient,
-            &vec!["BTC-USDT-210625-P-27000".to_string()],
-            60
+            &vec![("BTC-USDT-210625-P-27000".to_string(), 60)]
         );
         gen_test_subscribe_candlestick!(
             HuobiOptionWSClient,
-            &vec!["BTC-USDT-210625-P-27000".to_string()],
-            2592000
+            &vec![("BTC-USDT-210625-P-27000".to_string(), 2592000)]
         );
     }
 

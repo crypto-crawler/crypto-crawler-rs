@@ -64,13 +64,11 @@ mod bybit_inverse_future {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BybitInverseFutureWSClient,
-            &vec!["BTCUSDZ21".to_string()],
-            60
+            &vec![("BTCUSDZ21".to_string(), 60)]
         );
         gen_test_subscribe_candlestick!(
             BybitInverseFutureWSClient,
-            &vec!["BTCUSDZ21".to_string()],
-            2592000
+            &vec![("BTCUSDZ21".to_string(), 2592000)]
         );
     }
 }
@@ -136,11 +134,13 @@ mod bybit_inverse_swap {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(BybitInverseSwapWSClient, &vec!["BTCUSD".to_string()], 60);
         gen_test_subscribe_candlestick!(
             BybitInverseSwapWSClient,
-            &vec!["BTCUSD".to_string()],
-            2592000
+            &vec![("BTCUSD".to_string(), 60)]
+        );
+        gen_test_subscribe_candlestick!(
+            BybitInverseSwapWSClient,
+            &vec![("BTCUSD".to_string(), 2592000)]
         );
     }
 }
@@ -188,11 +188,13 @@ mod bybit_linear_swap {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(BybitLinearSwapWSClient, &vec!["BTCUSDT".to_string()], 60);
         gen_test_subscribe_candlestick!(
             BybitLinearSwapWSClient,
-            &vec!["BTCUSDT".to_string()],
-            2592000
+            &vec![("BTCUSDT".to_string(), 60)]
+        );
+        gen_test_subscribe_candlestick!(
+            BybitLinearSwapWSClient,
+            &vec![("BTCUSDT".to_string(), 2592000)]
         );
     }
 }

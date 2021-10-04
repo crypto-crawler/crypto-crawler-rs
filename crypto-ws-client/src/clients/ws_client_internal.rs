@@ -411,8 +411,8 @@ macro_rules! define_client {
                 <$struct_name as BBO>::subscribe_bbo(self, channels);
             }
 
-            fn subscribe_candlestick(&self, pairs: &[String], interval: u32) {
-                <$struct_name as Candlestick>::subscribe_candlestick(self, pairs, interval);
+            fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
+                <$struct_name as Candlestick>::subscribe_candlestick(self, symbol_interval_list);
             }
 
             fn subscribe(&self, channels: &[String]) {

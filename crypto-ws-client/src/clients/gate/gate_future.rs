@@ -63,7 +63,7 @@ impl<'a> OrderBookTopK for GateLinearFutureWSClient<'a> {
     }
 }
 
-fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
     to_candlestick_raw_channel_shared("futures", pair, interval)
 }
 

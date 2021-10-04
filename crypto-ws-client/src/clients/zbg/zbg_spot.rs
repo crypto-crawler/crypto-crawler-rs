@@ -102,7 +102,7 @@ impl<'a> OrderBookTopK for ZbgSpotWSClient<'a> {
     }
 }
 
-fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
     let interval_str = match interval {
         60 => "1M",
         300 => "5M",

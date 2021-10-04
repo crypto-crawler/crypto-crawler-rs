@@ -76,8 +76,8 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     }
 }
 
-fn to_raw_channel(channel: &str, pair: &str) -> String {
-    format!("swap/{}:{}", channel, pair)
+fn to_raw_channel(channel: &str, symbol: &str) -> String {
+    format!("swap/{}:{}", channel, symbol)
 }
 
 #[rustfmt::skip]
@@ -90,13 +90,13 @@ impl_trait!(OrderBook, BitgetSwapWSClient, subscribe_orderbook, "depth", to_raw_
 impl_trait!(Ticker, BitgetSwapWSClient, subscribe_ticker, "ticker", to_raw_channel);
 
 impl<'a> BBO for BitgetSwapWSClient<'a> {
-    fn subscribe_bbo(&self, _pairs: &[String]) {
+    fn subscribe_bbo(&self, _symbols: &[String]) {
         panic!("Bitget does NOT have BBO channel");
     }
 }
 
-fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
-    let valid_set: Vec<u32> = vec![60, 300, 900, 1800, 3600, 14400, 43200, 86400, 604800];
+fn to_candlestick_raw_channel(symbol: &str, interval: usize) -> String {
+    let valid_set: Vec<usize> = vec![60, 300, 900, 1800, 3600, 14400, 43200, 86400, 604800];
     if !valid_set.contains(&interval) {
         let joined = valid_set
             .into_iter()
@@ -106,7 +106,7 @@ fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
         panic!("Bitget available intervals: {}", joined);
     }
     let channel = format!("candle{}s", interval);
-    to_raw_channel(&channel, pair)
+    to_raw_channel(&channel, symbol)
 }
 
 impl_candlestick!(BitgetSwapWSClient);

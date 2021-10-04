@@ -49,7 +49,7 @@ impl_trait!(BBO, GateLinearSwapWSClient, subscribe_bbo, "futures.book_ticker", t
 #[rustfmt::skip]
 impl_trait!(Ticker, GateLinearSwapWSClient, subscribe_ticker, "futures.tickers", to_raw_channel);
 
-fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
     to_candlestick_raw_channel_shared("futures", pair, interval)
 }
 

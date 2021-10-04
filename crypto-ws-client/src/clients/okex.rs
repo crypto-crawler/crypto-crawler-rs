@@ -123,8 +123,8 @@ impl_trait!(OrderBook, OkexWSClient, subscribe_orderbook, "depth_l2_tbt", to_raw
 #[rustfmt::skip]
 impl_trait!(OrderBookTopK, OkexWSClient, subscribe_orderbook_topk, "depth5", to_raw_channel);
 
-fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
-    let valid_set: Vec<u32> = vec![
+fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
+    let valid_set: Vec<usize> = vec![
         60, 180, 300, 900, 1800, 3600, 7200, 14400, 21600, 43200, 86400, 604800,
     ];
     if !valid_set.contains(&interval) {

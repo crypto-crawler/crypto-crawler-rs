@@ -70,13 +70,14 @@ fn subscribe_orderbook() {
 fn subscribe_candlestick() {
     gen_test_subscribe_candlestick!(
         KrakenWSClient,
-        &vec!["XBT/USD".to_string(), "ETH/USD".to_string()],
-        60
+        &vec![("XBT/USD".to_string(), 60), ("ETH/USD".to_string(), 60)]
     );
 
     gen_test_subscribe_candlestick!(
         KrakenWSClient,
-        &vec!["XBT/USD".to_string(), "ETH/USD".to_string()],
-        1296000
+        &vec![
+            ("XBT/USD".to_string(), 1296000),
+            ("ETH/USD".to_string(), 1296000)
+        ]
     );
 }

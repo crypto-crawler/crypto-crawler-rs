@@ -104,22 +104,18 @@ impl<'a> BinanceWSClient<'a> {
         let obj = resp.unwrap();
 
         if obj.contains_key("error") {
-            error!("Received {} from {}", msg, EXCHANGE_NAME);
             panic!("Received {} from {}", msg, EXCHANGE_NAME);
-        }
-
-        if let Some(result) = obj.get("result") {
-            if serde_json::Value::Null == *result {
-                return MiscMessage::Misc;
+        } else if obj.contains_key("stream") && obj.contains_key("data") {
+            MiscMessage::Normal
+        } else {
+            if let Some(result) = obj.get("result") {
+                if serde_json::Value::Null != *result {
+                    panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                }
             }
-        }
-
-        if !obj.contains_key("stream") || !obj.contains_key("data") {
             warn!("Received {} from {}", msg, EXCHANGE_NAME);
-            return MiscMessage::Misc;
+            MiscMessage::Misc
         }
-
-        MiscMessage::Normal
     }
 }
 
@@ -138,7 +134,7 @@ impl_trait!(OrderBook, BinanceWSClient, subscribe_orderbook, "depth", to_raw_cha
 #[rustfmt::skip]
 impl_trait!(OrderBookTopK, BinanceWSClient, subscribe_orderbook_topk, "depth5", to_raw_channel);
 
-fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
     let interval_str = match interval {
         60 => "1m",
         180 => "3m",
@@ -196,8 +192,8 @@ macro_rules! define_market_client {
                 <$struct_name as BBO>::subscribe_bbo(self, channels);
             }
 
-            fn subscribe_candlestick(&self, pairs: &[String], interval: u32) {
-                <$struct_name as Candlestick>::subscribe_candlestick(self, pairs, interval);
+            fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
+                <$struct_name as Candlestick>::subscribe_candlestick(self, symbol_interval_list);
             }
 
             fn subscribe(&self, channels: &[String]) {
@@ -296,8 +292,8 @@ impl_orderbook_snapshot!(BinanceLinearWSClient);
 macro_rules! impl_candlestick {
     ($struct_name:ident) => {
         impl<'a> Candlestick for $struct_name<'a> {
-            fn subscribe_candlestick(&self, pairs: &[String], interval: u32) {
-                self.client.subscribe_candlestick(pairs, interval);
+            fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
+                self.client.subscribe_candlestick(symbol_interval_list);
             }
         }
     };

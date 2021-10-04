@@ -185,7 +185,7 @@ impl<'a> BBO for MxcSwapWSClient<'a> {
     }
 }
 
-fn interval_to_string(interval: u32) -> String {
+fn interval_to_string(interval: usize) -> String {
     let tmp = match interval {
         60 => "Min1",
         300 => "Min5",
@@ -203,15 +203,14 @@ fn interval_to_string(interval: u32) -> String {
 }
 
 impl<'a> Candlestick for MxcSpotWSClient<'a> {
-    fn subscribe_candlestick(&self, pairs: &[String], interval: u32) {
-        let interval_str = interval_to_string(interval);
-
-        let channels = pairs
+    fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
+        let channels = symbol_interval_list
             .iter()
-            .map(|pair| {
+            .map(|(symbol, interval)| {
                 format!(
                     r#"["sub.kline",{{"symbol":"{}","interval":"{}"}}]"#,
-                    pair, interval_str
+                    symbol,
+                    interval_to_string(*interval)
                 )
             })
             .collect::<Vec<String>>();
@@ -221,15 +220,14 @@ impl<'a> Candlestick for MxcSpotWSClient<'a> {
 }
 
 impl<'a> Candlestick for MxcSwapWSClient<'a> {
-    fn subscribe_candlestick(&self, pairs: &[String], interval: u32) {
-        let interval_str = interval_to_string(interval);
-
-        let channels = pairs
+    fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
+        let channels = symbol_interval_list
             .iter()
-            .map(|pair| {
+            .map(|(symbol, interval)| {
                 format!(
                     r#"{{"method":"sub.kline","param":{{"symbol":"{}","interval":"{}"}}}}"#,
-                    pair, interval_str
+                    symbol,
+                    interval_to_string(*interval)
                 )
             })
             .collect::<Vec<String>>();

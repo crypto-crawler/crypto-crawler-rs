@@ -34,8 +34,8 @@ impl_trait!(OrderBookTopK, KuCoinSwapWSClient, subscribe_orderbook_topk, "/contr
 #[rustfmt::skip]
 impl_trait!(Ticker, KuCoinSwapWSClient, subscribe_ticker, "/contractMarket/snapshot", to_raw_channel);
 
-fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
-    let valid_set: Vec<u32> = vec![
+fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
+    let valid_set: Vec<usize> = vec![
         60, 300, 900, 1800, 3600, 7200, 14400, 28800, 43200, 86400, 604800,
     ];
     if !valid_set.contains(&interval) {

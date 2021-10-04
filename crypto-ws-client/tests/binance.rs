@@ -91,13 +91,14 @@ mod binance_spot {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceSpotWSClient,
-            &vec!["btcusdt".to_string(), "ethusdt".to_string()],
-            60
+            &vec![("btcusdt".to_string(), 60), ("ethusdt".to_string(), 60)]
         );
         gen_test_subscribe_candlestick!(
             BinanceSpotWSClient,
-            &vec!["btcusdt".to_string(), "ethusdt".to_string()],
-            2592000
+            &vec![
+                ("btcusdt".to_string(), 2592000),
+                ("ethusdt".to_string(), 2592000)
+            ]
         );
     }
 }
@@ -183,13 +184,17 @@ mod binance_inverse_future {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceInverseWSClient,
-            &vec!["btcusd_211231".to_string(), "ethusd_211231".to_string()],
-            60
+            &vec![
+                ("btcusd_211231".to_string(), 60),
+                ("ethusd_211231".to_string(), 60)
+            ]
         );
         gen_test_subscribe_candlestick!(
             BinanceInverseWSClient,
-            &vec!["btcusd_211231".to_string(), "ethusd_211231".to_string()],
-            2592000
+            &vec![
+                ("btcusd_211231".to_string(), 2592000),
+                ("ethusd_211231".to_string(), 2592000)
+            ]
         );
     }
 }
@@ -275,13 +280,17 @@ mod binance_linear_future {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceLinearWSClient,
-            &vec!["btcusdt_211231".to_string(), "ethusdt_211231".to_string()],
-            60
+            &vec![
+                ("btcusdt_211231".to_string(), 60),
+                ("ethusdt_211231".to_string(), 60)
+            ]
         );
         gen_test_subscribe_candlestick!(
             BinanceLinearWSClient,
-            &vec!["btcusdt_211231".to_string(), "ethusdt_211231".to_string()],
-            2592000
+            &vec![
+                ("btcusdt_211231".to_string(), 2592000),
+                ("ethusdt_211231".to_string(), 2592000)
+            ]
         );
     }
 }
@@ -367,13 +376,17 @@ mod binance_inverse_swap {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceInverseWSClient,
-            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()],
-            60
+            &vec![
+                ("btcusd_perp".to_string(), 60),
+                ("ethusd_perp".to_string(), 60)
+            ]
         );
         gen_test_subscribe_candlestick!(
             BinanceInverseWSClient,
-            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()],
-            2592000
+            &vec![
+                ("btcusd_perp".to_string(), 2592000),
+                ("ethusd_perp".to_string(), 2592000)
+            ]
         );
     }
 
@@ -477,13 +490,14 @@ mod binance_linear_swap {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceLinearWSClient,
-            &vec!["btcusdt".to_string(), "ethusdt".to_string()],
-            60
+            &vec![("btcusdt".to_string(), 60), ("ethusdt".to_string(), 60)]
         );
         gen_test_subscribe_candlestick!(
             BinanceLinearWSClient,
-            &vec!["btcusdt".to_string(), "ethusdt".to_string()],
-            2592000
+            &vec![
+                ("btcusdt".to_string(), 2592000),
+                ("ethusdt".to_string(), 2592000)
+            ]
         );
     }
 

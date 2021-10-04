@@ -166,29 +166,56 @@ impl<'a> OrderBookTopK for KrakenWSClient<'a> {
     }
 }
 
+fn convert_symbol_interval_list(
+    symbol_interval_list: &[(String, usize)],
+) -> Vec<(Vec<String>, usize)> {
+    let mut map = HashMap::<usize, Vec<String>>::new();
+    for task in symbol_interval_list {
+        let v = map.entry(task.1).or_insert_with(Vec::new);
+        v.push(task.0.clone());
+    }
+    let mut result = Vec::new();
+    for (k, v) in map {
+        result.push((v, k));
+    }
+    result
+}
+
 impl<'a> Candlestick for KrakenWSClient<'a> {
-    fn subscribe_candlestick(&self, pairs: &[String], interval: u32) {
-        let valid_set: Vec<u32> = vec![1, 5, 15, 30, 60, 240, 1440, 10080, 21600]
+    fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
+        let valid_set: Vec<usize> = vec![1, 5, 15, 30, 60, 240, 1440, 10080, 21600]
             .into_iter()
             .map(|x| x * 60)
             .collect();
-        if !valid_set.contains(&interval) {
-            let joined = valid_set
-                .into_iter()
-                .map(|x| (x / 60).to_string())
-                .collect::<Vec<String>>()
-                .join(",");
-            panic!("Kraken has intervals {}", joined);
+        let invalid_intervals = symbol_interval_list
+            .iter()
+            .map(|(_, interval)| *interval)
+            .filter(|x| !valid_set.contains(x))
+            .collect::<Vec<usize>>();
+        if !invalid_intervals.is_empty() {
+            panic!(
+                "Invalid intervals: {}, available intervals: {}",
+                invalid_intervals
+                    .into_iter()
+                    .map(|x| x.to_string())
+                    .collect::<Vec<String>>()
+                    .join(","),
+                valid_set
+                    .into_iter()
+                    .map(|x| x.to_string())
+                    .collect::<Vec<String>>()
+                    .join(",")
+            );
         }
+        let symbols_interval_list = convert_symbol_interval_list(symbol_interval_list);
 
-        let command = format!(
+        let commands: Vec<String> = symbols_interval_list.into_iter().map(|(symbols, interval)| format!(
             r#"{{"event":"subscribe","pair":{},"subscription":{{"name":"ohlc", "interval":{}}}}}"#,
-            serde_json::to_string(pairs).unwrap(),
+            serde_json::to_string(&symbols).unwrap(),
             interval / 60
-        );
-        let channels = vec![command];
+        )).collect();
 
-        self.client.subscribe(&channels);
+        self.client.subscribe(&commands);
     }
 }
 

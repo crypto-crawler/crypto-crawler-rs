@@ -75,8 +75,8 @@ mod okex_spot {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(OkexWSClient, &vec!["BTC-USDT".to_string()], 60);
-        gen_test_subscribe_candlestick!(OkexWSClient, &vec!["BTC-USDT".to_string()], 604800);
+        gen_test_subscribe_candlestick!(OkexWSClient, &vec![("BTC-USDT".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(OkexWSClient, &vec![("BTC-USDT".to_string(), 604800)]);
     }
 }
 
@@ -132,8 +132,11 @@ mod okex_future {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(OkexWSClient, &vec!["BTC-USDT-211231".to_string()], 60);
-        gen_test_subscribe_candlestick!(OkexWSClient, &vec!["BTC-USDT-211231".to_string()], 604800);
+        gen_test_subscribe_candlestick!(OkexWSClient, &vec![("BTC-USDT-211231".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(
+            OkexWSClient,
+            &vec![("BTC-USDT-211231".to_string(), 604800)]
+        );
     }
 }
 
@@ -189,8 +192,8 @@ mod okex_swap {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(OkexWSClient, &vec!["BTC-USDT-SWAP".to_string()], 60);
-        gen_test_subscribe_candlestick!(OkexWSClient, &vec!["BTC-USDT-SWAP".to_string()], 604800);
+        gen_test_subscribe_candlestick!(OkexWSClient, &vec![("BTC-USDT-SWAP".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(OkexWSClient, &vec![("BTC-USDT-SWAP".to_string(), 604800)]);
     }
 
     #[test]
@@ -265,13 +268,11 @@ mod okex_option {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             OkexWSClient,
-            &vec!["BTC-USD-211231-18000-P".to_string()],
-            60
+            &vec![("BTC-USD-211231-18000-P".to_string(), 60)]
         );
         gen_test_subscribe_candlestick!(
             OkexWSClient,
-            &vec!["BTC-USD-211231-18000-P".to_string()],
-            604800
+            &vec![("BTC-USD-211231-18000-P".to_string(), 604800)]
         );
     }
 }

@@ -100,7 +100,7 @@ impl<'a> Ticker for FtxWSClient<'a> {
 }
 
 impl<'a> Candlestick for FtxWSClient<'a> {
-    fn subscribe_candlestick(&self, _pairs: &[String], _interval: u32) {
+    fn subscribe_candlestick(&self, _symbol_interval_list: &[(String, usize)]) {
         panic!("FTX does NOT have candlestick channel");
     }
 }

@@ -53,8 +53,8 @@ mod zbg_spot {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(ZbgSpotWSClient, &vec!["btc_usdt".to_string()], 60);
-        gen_test_subscribe_candlestick!(ZbgSpotWSClient, &vec!["btc_usdt".to_string()], 604800);
+        gen_test_subscribe_candlestick!(ZbgSpotWSClient, &vec![("btc_usdt".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(ZbgSpotWSClient, &vec![("btc_usdt".to_string(), 604800)]);
     }
 }
 
@@ -124,13 +124,14 @@ mod zbg_inverse_swap {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             ZbgSwapWSClient,
-            &vec!["BTC_USD-R".to_string(), "ETH_USD-R".to_string()],
-            60
+            &vec![("BTC_USD-R".to_string(), 60), ("ETH_USD-R".to_string(), 60)]
         );
         gen_test_subscribe_candlestick!(
             ZbgSwapWSClient,
-            &vec!["BTC_USD-R".to_string(), "ETH_USD-R".to_string()],
-            604800
+            &vec![
+                ("BTC_USD-R".to_string(), 604800),
+                ("ETH_USD-R".to_string(), 604800)
+            ]
         );
     }
 }
@@ -201,13 +202,14 @@ mod zbg_linear_swap {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             ZbgSwapWSClient,
-            &vec!["BTC_USDT".to_string(), "ETH_USDT".to_string()],
-            60
+            &vec![("BTC_USDT".to_string(), 60), ("ETH_USDT".to_string(), 60)]
         );
         gen_test_subscribe_candlestick!(
             ZbgSwapWSClient,
-            &vec!["BTC_USDT".to_string(), "ETH_USDT".to_string()],
-            604800
+            &vec![
+                ("BTC_USDT".to_string(), 604800),
+                ("ETH_USDT".to_string(), 604800)
+            ]
         );
     }
 }

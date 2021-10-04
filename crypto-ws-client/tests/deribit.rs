@@ -69,8 +69,8 @@ mod deribit_inverse_future {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(DeribitWSClient, &vec!["BTC-31DEC21".to_string()], 60);
-        gen_test_subscribe_candlestick!(DeribitWSClient, &vec!["BTC-31DEC21".to_string()], 86400);
+        gen_test_subscribe_candlestick!(DeribitWSClient, &vec![("BTC-31DEC21".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(DeribitWSClient, &vec![("BTC-31DEC21".to_string(), 86400)]);
     }
 }
 
@@ -126,8 +126,11 @@ mod deribit_inverse_swap {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(DeribitWSClient, &vec!["BTC-PERPETUAL".to_string()], 60);
-        gen_test_subscribe_candlestick!(DeribitWSClient, &vec!["BTC-PERPETUAL".to_string()], 86400);
+        gen_test_subscribe_candlestick!(DeribitWSClient, &vec![("BTC-PERPETUAL".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(
+            DeribitWSClient,
+            &vec![("BTC-PERPETUAL".to_string(), 86400)]
+        );
     }
 }
 
@@ -207,19 +210,19 @@ mod deribit_option {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             DeribitWSClient,
-            &SYMBOLS
+            SYMBOLS
                 .iter()
-                .map(|s| s.to_string())
-                .collect::<Vec<String>>(),
-            60
+                .map(|s| (s.to_string(), 60))
+                .collect::<Vec<(String, usize)>>()
+                .as_slice()
         );
         gen_test_subscribe_candlestick!(
             DeribitWSClient,
-            &SYMBOLS
+            SYMBOLS
                 .iter()
-                .map(|s| s.to_string())
-                .collect::<Vec<String>>(),
-            86400
+                .map(|s| (s.to_string(), 86400))
+                .collect::<Vec<(String, usize)>>()
+                .as_slice()
         );
     }
 }

@@ -170,11 +170,11 @@ pub trait WSClient<'a> {
     ///
     /// The candlestick channel sends OHLCV messages at interval.
     ///
-    /// `interval` specifies the interval of candlesticks in seconds.
+    /// `symbol_interval_list` is a list of symbols and intervals of candlesticks in seconds.
     ///
     /// Not all exchanges have candlestick channels, for example, Bitstamp
     /// and CoinbasePro.
-    fn subscribe_candlestick(&self, pairs: &[String], interval: u32);
+    fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]);
 
     /// Subscribes to raw channels, lower level API.
     ///

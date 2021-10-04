@@ -32,7 +32,7 @@ impl<'a> BBO for BybitInverseFutureWSClient<'a> {
     }
 }
 
-fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+fn to_candlestick_raw_channel(symbol: &str, interval: usize) -> String {
     let interval_str = match interval {
         60 => "1",
         180 => "3",
@@ -48,7 +48,7 @@ fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
         2592000 => "M",
         _ => panic!("Huobi has intervals 1min,5min,15min,30min,60min,4hour,1day,1week,1mon"),
     };
-    format!("klineV2.{}.{}", interval_str, pair)
+    format!("klineV2.{}.{}", interval_str, symbol)
 }
 
 impl_candlestick!(BybitInverseFutureWSClient);

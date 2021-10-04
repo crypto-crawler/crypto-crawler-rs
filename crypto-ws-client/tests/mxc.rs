@@ -80,20 +80,18 @@ mod mxc_spot {
         gen_test_subscribe_candlestick!(
             MxcSpotWSClient,
             &vec![
-                "BTC_USDT".to_string(),
-                "ETH_USDT".to_string(),
-                "MX_USDT".to_string()
-            ],
-            60
+                ("BTC_USDT".to_string(), 60),
+                ("ETH_USDT".to_string(), 60),
+                ("MX_USDT".to_string(), 60)
+            ]
         );
         gen_test_subscribe_candlestick!(
             MxcSpotWSClient,
             &vec![
-                "BTC_USDT".to_string(),
-                "ETH_USDT".to_string(),
-                "MX_USDT".to_string()
-            ],
-            2592000
+                ("BTC_USDT".to_string(), 2592000),
+                ("ETH_USDT".to_string(), 2592000),
+                ("MX_USDT".to_string(), 2592000)
+            ]
         );
     }
 }
@@ -159,8 +157,8 @@ mod mxc_linear_swap {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(MxcSwapWSClient, &vec!["BTC_USDT".to_string()], 60);
-        gen_test_subscribe_candlestick!(MxcSwapWSClient, &vec!["BTC_USDT".to_string()], 2592000);
+        gen_test_subscribe_candlestick!(MxcSwapWSClient, &vec![("BTC_USDT".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(MxcSwapWSClient, &vec![("BTC_USDT".to_string(), 2592000)]);
     }
 }
 
@@ -207,7 +205,7 @@ mod mxc_inverse_swap {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(MxcSwapWSClient, &vec!["BTC_USD".to_string()], 60);
-        gen_test_subscribe_candlestick!(MxcSwapWSClient, &vec!["BTC_USD".to_string()], 2592000);
+        gen_test_subscribe_candlestick!(MxcSwapWSClient, &vec![("BTC_USD".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(MxcSwapWSClient, &vec![("BTC_USD".to_string(), 2592000)]);
     }
 }

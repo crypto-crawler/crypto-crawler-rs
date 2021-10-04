@@ -209,7 +209,7 @@ impl<'a> OrderBook for HuobiWSClient<'a> {
     }
 }
 
-fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
     let interval_str = match interval {
         60 => "1min",
         300 => "5min",
@@ -261,8 +261,8 @@ macro_rules! define_market_client {
                 <$struct_name as BBO>::subscribe_bbo(self, channels);
             }
 
-            fn subscribe_candlestick(&self, pairs: &[String], interval: u32) {
-                <$struct_name as Candlestick>::subscribe_candlestick(self, pairs, interval);
+            fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
+                <$struct_name as Candlestick>::subscribe_candlestick(self, symbol_interval_list);
             }
 
             fn subscribe(&self, channels: &[String]) {
