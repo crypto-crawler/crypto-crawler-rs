@@ -62,8 +62,8 @@ mod bitget_inverse_swap {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec!["btcusd".to_string()], 60);
-        gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec!["btcusd".to_string()], 604800);
+        gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec![("btcusd".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec![("btcusd".to_string(), 604800)]);
     }
 
     #[ignore]
@@ -120,11 +120,10 @@ mod bitget_linear_swap {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec!["cmt_btcusdt".to_string()], 60);
+        gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec![("cmt_btcusdt".to_string(), 60)]);
         gen_test_subscribe_candlestick!(
             BitgetSwapWSClient,
-            &vec!["cmt_btcusdt".to_string()],
-            604800
+            &vec![("cmt_btcusdt".to_string(), 604800)]
         );
     }
 

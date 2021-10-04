@@ -32,7 +32,7 @@ impl_trait!(BBO, GateSpotWSClient, subscribe_bbo, "spot.book_ticker", to_raw_cha
 #[rustfmt::skip]
 impl_trait!(Ticker, GateSpotWSClient, subscribe_ticker, "spot.tickers", to_raw_channel);
 
-fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
     to_candlestick_raw_channel_shared("spot", pair, interval)
 }
 

@@ -1,6 +1,6 @@
 [package]
 name = "crypto-ws-client"
-version = "2.6.7"
+version = "2.6.8"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "A versatile websocket client that supports many cryptocurrency exchanges."

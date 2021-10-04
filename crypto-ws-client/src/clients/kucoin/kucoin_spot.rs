@@ -34,7 +34,7 @@ impl_trait!(OrderBookTopK, KuCoinSpotWSClient, subscribe_orderbook_topk, "/spotM
 #[rustfmt::skip]
 impl_trait!(Ticker, KuCoinSpotWSClient, subscribe_ticker, "/market/snapshot", to_raw_channel);
 
-fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
     let interval_str = match interval {
         60 => "1min",
         180 => "3min",

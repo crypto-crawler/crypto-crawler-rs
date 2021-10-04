@@ -139,7 +139,7 @@ impl<'a> OrderBookTopK for CoinbaseProWSClient<'a> {
 }
 
 impl<'a> Candlestick for CoinbaseProWSClient<'a> {
-    fn subscribe_candlestick(&self, _pairs: &[String], _interval: u32) {
+    fn subscribe_candlestick(&self, _symbol_interval_list: &[(String, usize)]) {
         panic!("CoinbasePro does NOT have candlestick channel");
     }
 }

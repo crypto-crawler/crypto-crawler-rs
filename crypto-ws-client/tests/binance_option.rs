@@ -88,17 +88,15 @@ fn subscribe_candlestick() {
     gen_test_subscribe_candlestick!(
         BinanceOptionWSClient,
         &vec![
-            "BTC-210430-64000-C".to_string(),
-            "BTC-210430-68000-C".to_string()
-        ],
-        60
+            ("BTC-210430-64000-C".to_string(), 60),
+            ("BTC-210430-68000-C".to_string(), 60),
+        ]
     );
     gen_test_subscribe_candlestick!(
         BinanceOptionWSClient,
         &vec![
-            "BTC-210430-64000-C".to_string(),
-            "BTC-210430-68000-C".to_string()
-        ],
-        2592000
+            ("BTC-210430-64000-C".to_string(), 60),
+            ("BTC-210430-68000-C".to_string(), 60),
+        ]
     );
 }

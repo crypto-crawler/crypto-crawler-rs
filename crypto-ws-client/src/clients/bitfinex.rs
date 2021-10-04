@@ -160,7 +160,7 @@ impl<'a> Level3OrderBook for BitfinexWSClient<'a> {
     }
 }
 
-fn to_candlestick_raw_channel(symbol: &str, interval: u32) -> String {
+fn to_candlestick_raw_channel(symbol: &str, interval: usize) -> String {
     let interval_str = match interval {
         60 => "1m",
         300 => "5m",
@@ -188,10 +188,10 @@ fn to_candlestick_raw_channel(symbol: &str, interval: u32) -> String {
 }
 
 impl<'a> Candlestick for BitfinexWSClient<'a> {
-    fn subscribe_candlestick(&self, symbols: &[String], interval: u32) {
-        let raw_channels: Vec<String> = symbols
+    fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
+        let raw_channels: Vec<String> = symbol_interval_list
             .iter()
-            .map(|symbol| to_candlestick_raw_channel(symbol, interval))
+            .map(|(symbol, interval)| to_candlestick_raw_channel(symbol, *interval))
             .collect();
         self.subscribe(&raw_channels);
     }
@@ -416,8 +416,8 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
         <Self as BBO>::subscribe_bbo(self, channels);
     }
 
-    fn subscribe_candlestick(&self, symbols: &[String], interval: u32) {
-        <Self as Candlestick>::subscribe_candlestick(self, symbols, interval);
+    fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
+        <Self as Candlestick>::subscribe_candlestick(self, symbol_interval_list);
     }
 
     fn subscribe(&self, channels: &[String]) {

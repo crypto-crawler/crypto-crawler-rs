@@ -72,8 +72,8 @@ mod bitfinex_spot {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(BitfinexWSClient, &vec!["tBTCUST".to_string()], 60);
-        gen_test_subscribe_candlestick!(BitfinexWSClient, &vec!["tBTCUST".to_string()], 2592000);
+        gen_test_subscribe_candlestick!(BitfinexWSClient, &vec![("tBTCUST".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(BitfinexWSClient, &vec![("tBTCUST".to_string(), 2592000)]);
     }
 }
 
@@ -138,11 +138,10 @@ mod bitfinex_swap {
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(BitfinexWSClient, &vec!["tBTCF0:USTF0".to_string()], 60);
+        gen_test_subscribe_candlestick!(BitfinexWSClient, &vec![("tBTCF0:USTF0".to_string(), 60)]);
         gen_test_subscribe_candlestick!(
             BitfinexWSClient,
-            &vec!["tBTCF0:USTF0".to_string()],
-            2592000
+            &vec![("tBTCF0:USTF0".to_string(), 2592000)]
         );
     }
 }

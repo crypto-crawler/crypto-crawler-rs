@@ -27,8 +27,8 @@ pub(super) trait OrderBookTopK {
 pub(super) trait Candlestick {
     /// Subscribes to candlestick channels which send OHLCV messages.
     ///
-    /// `interval` specifies the interval of candlesticks in second unit.
-    fn subscribe_candlestick(&self, pairs: &[String], interval: u32);
+    /// `symbol_interval_list` is a list of symbols and intervals of candlesticks in seconds.
+    fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]);
 }
 
 macro_rules! impl_trait {
@@ -50,10 +50,10 @@ macro_rules! impl_trait {
 macro_rules! impl_candlestick {
     ($struct_name:ident) => {
         impl<'a> Candlestick for $struct_name<'a> {
-            fn subscribe_candlestick(&self, pairs: &[String], interval: u32) {
-                let raw_channels: Vec<String> = pairs
+            fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
+                let raw_channels: Vec<String> = symbol_interval_list
                     .iter()
-                    .map(|pair| to_candlestick_raw_channel(pair, interval))
+                    .map(|(symbol, interval)| to_candlestick_raw_channel(&symbol, *interval))
                     .collect();
                 self.client.subscribe(&raw_channels);
             }

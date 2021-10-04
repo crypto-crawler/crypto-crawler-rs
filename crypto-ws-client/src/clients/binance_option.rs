@@ -104,7 +104,7 @@ impl_trait!(OrderBook, BinanceOptionWSClient, subscribe_orderbook, "depth@100ms"
 #[rustfmt::skip]
 impl_trait!(OrderBookTopK, BinanceOptionWSClient, subscribe_orderbook_topk, "depth10", to_raw_channel);
 
-fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+fn to_candlestick_raw_channel(symbol: &str, interval: usize) -> String {
     let interval_str = match interval {
         60 => "1m",
         300 => "5m",
@@ -116,7 +116,7 @@ fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
         604800 => "1w",
         _ => panic!("Binance has intervals 1m,5m,15m,30m,1h4h,1d,1w"),
     };
-    format!("{}@kline_{}", pair, interval_str)
+    format!("{}@kline_{}", symbol, interval_str)
 }
 
 impl_candlestick!(BinanceOptionWSClient);

@@ -127,7 +127,7 @@ impl<'a> OrderBookTopK for BitzSpotWSClient<'a> {
     }
 }
 
-fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
+fn to_candlestick_raw_channel(symbol: &str, interval: usize) -> String {
     let interval_str = match interval {
         60 => "1min",
         300 => "5min",
@@ -145,7 +145,7 @@ fn to_candlestick_raw_channel(pair: &str, interval: u32) -> String {
     };
     format!(
         r#"{{"action":"Topic.sub", "data":{{"symbol":"{}", "type":"kline", "resolution":"{}", "_CDID":"100002", "dataType":"1"}}, "msg_id":{}}}"#,
-        pair,
+        symbol,
         interval_str,
         SystemTime::now()
             .duration_since(UNIX_EPOCH)

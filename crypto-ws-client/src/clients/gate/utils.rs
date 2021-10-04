@@ -138,7 +138,7 @@ pub(super) fn on_misc_msg(msg: &str) -> MiscMessage {
 pub(super) fn to_candlestick_raw_channel_shared(
     market_type: &str,
     pair: &str,
-    interval: u32,
+    interval: usize,
 ) -> String {
     let interval_str = match interval {
         10 => "10s",

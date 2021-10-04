@@ -102,7 +102,7 @@ impl<'a> BBO for BitstampWSClient<'a> {
 }
 
 impl<'a> Candlestick for BitstampWSClient<'a> {
-    fn subscribe_candlestick(&self, _pairs: &[String], _interval: u32) {
+    fn subscribe_candlestick(&self, _symbol_interval_list: &[(String, usize)]) {
         panic!("Bitstamp does NOT have candlestick channel");
     }
 }
