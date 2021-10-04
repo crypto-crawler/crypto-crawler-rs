@@ -90,8 +90,15 @@ pub(super) fn check_args(exchange: &str, market_type: MarketType, symbols: &[Str
     let valid_symbols = fetch_symbols_retry(exchange, market_type);
     let invalid_symbols: Vec<String> = symbols
         .iter()
+        // at Binance all symbols for websocket are lowercase while for REST they are uppercase
+        .map(|symbol| {
+            if exchange == "binance" {
+                symbol.to_uppercase()
+            } else {
+                symbol.to_string()
+            }
+        })
         .filter(|symbol| !valid_symbols.contains(symbol))
-        .cloned()
         .collect();
     if !invalid_symbols.is_empty() {
         panic!(
@@ -118,7 +125,7 @@ fn get_cooldown_time_per_request(exchange: &str, market_type: MarketType) -> Dur
         "gate" => 4,        // 300 read operations per IP per second
         "huobi" => 2,       // 800 times/second for one IP
         "kucoin" => match market_type {
-            MarketType::Spot => 400, // 4x to avoid 429
+            MarketType::Spot => 200, // 2x to avoid 429
             _ => 100,                // 30 times/3s
         },
         "mxc" => 100,  // 20 times per 2 seconds
@@ -233,7 +240,7 @@ pub(crate) fn crawl_snapshot(
 }
 
 macro_rules! gen_crawl_event {
-    ($func_name:ident, $struct_name:ident, $msg_type:expr, $crawl_func:ident) => {
+    ($func_name:ident, $struct_name:ident, $msg_type:expr, $subscribe_func:ident) => {
         pub(crate) fn $func_name(
             market_type: MarketType,
             symbols: Option<&[String]>,
@@ -251,9 +258,17 @@ macro_rules! gen_crawl_event {
                 }
                 None => true,
             };
+            let automatic_symbol_discovery = is_empty && duration.is_none();
 
             let real_symbols = if is_empty {
-                fetch_symbols_retry(EXCHANGE_NAME, market_type)
+                if EXCHANGE_NAME == "binance" {
+                    fetch_symbols_retry(EXCHANGE_NAME, market_type)
+                        .into_iter()
+                        .map(|s| s.to_lowercase())
+                        .collect()
+                } else {
+                    fetch_symbols_retry(EXCHANGE_NAME, market_type)
+                }
             } else {
                 symbols.unwrap().iter().cloned().collect::<Vec<String>>()
             };
@@ -271,18 +286,26 @@ macro_rules! gen_crawl_event {
                 (on_msg.lock().unwrap())(message);
             }));
 
-            if real_symbols.len() <= MAX_SUBSCRIPTIONS_PER_CONNECTION {
-                let should_stop = Arc::new(AtomicBool::new(false));
-                let ws_client = Arc::new($struct_name::new(on_msg_ext, None));
-
-                if symbols.is_none() {
+            let on_msg_ext_clone = on_msg_ext.clone();
+            let mut subscribed_symbols = real_symbols.clone();
+            let create_symbol_discovery_thread = move || -> std::thread::JoinHandle<()> {
+                std::thread::spawn(move || {
+                    let ws_client = Arc::new($struct_name::new(on_msg_ext_clone, None));
+                    let ws_client_clone = ws_client.clone();
+                    let should_stop = Arc::new(AtomicBool::new(false));
                     let should_stop_clone = should_stop.clone();
-                    let ws_client2 = ws_client.clone();
-
-                    let mut subscribed_symbols = real_symbols.clone();
                     std::thread::spawn(move || {
                         while !should_stop_clone.load(Ordering::Acquire) {
-                            let latest_symbols = fetch_symbols_retry(EXCHANGE_NAME, market_type);
+                            // update symbols every hour
+                            std::thread::sleep(Duration::from_secs(3600));
+                            let latest_symbols = if EXCHANGE_NAME == "binance" {
+                                fetch_symbols_retry(EXCHANGE_NAME, market_type)
+                                    .into_iter()
+                                    .map(|s| s.to_lowercase())
+                                    .collect()
+                            } else {
+                                fetch_symbols_retry(EXCHANGE_NAME, market_type)
+                            };
                             let mut new_symbols: Vec<String> = latest_symbols
                                 .iter()
                                 .filter(|s| !subscribed_symbols.contains(s))
@@ -291,19 +314,31 @@ macro_rules! gen_crawl_event {
 
                             if !new_symbols.is_empty() {
                                 warn!("Found new symbols: {}", new_symbols.join(", "));
-                                ws_client2.$crawl_func(&new_symbols);
+                                ws_client_clone.$subscribe_func(&new_symbols);
                                 subscribed_symbols.append(&mut new_symbols);
                             }
-                            // update symbols every hour
-                            std::thread::sleep(Duration::from_secs(3600));
+                            if subscribed_symbols.len() > MAX_SUBSCRIPTIONS_PER_CONNECTION {
+                                std::process::exit(0); // restart the whole process
+                            }
                         }
                     });
-                }
+                    ws_client.run(duration);
+                    ws_client.close();
+                    should_stop.store(true, Ordering::Release);
+                })
+            };
 
-                ws_client.$crawl_func(&real_symbols);
+            let thread = if automatic_symbol_discovery {
+                Some(create_symbol_discovery_thread())
+            } else {
+                None
+            };
+
+            if real_symbols.len() <= MAX_SUBSCRIPTIONS_PER_CONNECTION {
+                let ws_client = $struct_name::new(on_msg_ext, None);
+                ws_client.$subscribe_func(&real_symbols);
                 ws_client.run(duration);
                 ws_client.close();
-                should_stop.store(true, Ordering::Release);
             } else {
                 // split to chunks
                 let mut chunks: Vec<Vec<String>> = Vec::new();
@@ -319,65 +354,198 @@ macro_rules! gen_crawl_event {
                 }
                 assert!(chunks.len() > 1);
 
-                if symbols.is_none() {
-                    let num_threads = Arc::new(AtomicUsize::new(chunks.len()));
-                    let last_client = Arc::new($struct_name::new(on_msg_ext.clone(), None));
+                let mut join_handles: Vec<std::thread::JoinHandle<()>> = Vec::new();
 
-                    for chunk in chunks.into_iter() {
-                        let on_msg_ext_clone = on_msg_ext.clone();
-                        let num_threads_clone = num_threads.clone();
-                        let last_client_clone = last_client.clone();
-                        std::thread::spawn(move || {
-                            if chunk.len() < MAX_SUBSCRIPTIONS_PER_CONNECTION {
-                                last_client_clone.$crawl_func(&chunk);
-                                last_client_clone.run(duration);
-                                last_client_clone.close();
-                            } else {
-                                let ws_client = $struct_name::new(on_msg_ext_clone, None);
-                                ws_client.$crawl_func(&chunk);
-                                ws_client.run(duration);
-                                ws_client.close();
-                            }
-
-                            num_threads_clone.fetch_sub(1, Ordering::SeqCst);
-                        });
-                    }
-
-                    let mut subscribed_symbols = real_symbols.clone();
-                    while num_threads.load(Ordering::Acquire) > 0 {
-                        let latest_symbols = fetch_symbols_retry(EXCHANGE_NAME, market_type);
-                        let mut new_symbols: Vec<String> = latest_symbols
-                            .iter()
-                            .filter(|s| !subscribed_symbols.contains(s))
-                            .cloned()
-                            .collect();
-                        if !new_symbols.is_empty() {
-                            warn!("Found new symbols: {}", new_symbols.join(", "));
-                            last_client.$crawl_func(&new_symbols);
-                            subscribed_symbols.append(&mut new_symbols);
-                        }
-                        // update symbols every hour
-                        std::thread::sleep(Duration::from_secs(duration.unwrap_or(3600)));
-                    }
-                } else {
-                    let mut join_handles: Vec<std::thread::JoinHandle<()>> = Vec::new();
-
-                    for chunk in chunks.into_iter() {
-                        let on_msg_ext_clone = on_msg_ext.clone();
-                        let handle = std::thread::spawn(move || {
-                            let ws_client = $struct_name::new(on_msg_ext_clone, None);
-                            ws_client.$crawl_func(&chunk);
-                            ws_client.run(duration);
-                            ws_client.close();
-                        });
-                        join_handles.push(handle);
-                    }
-                    for handle in join_handles {
-                        handle.join().unwrap();
-                    }
+                for chunk in chunks.into_iter() {
+                    let on_msg_ext_clone = on_msg_ext.clone();
+                    let handle = std::thread::spawn(move || {
+                        let ws_client = $struct_name::new(on_msg_ext_clone, None);
+                        ws_client.$subscribe_func(&chunk);
+                        ws_client.run(duration);
+                        ws_client.close();
+                    });
+                    join_handles.push(handle);
+                }
+                for handle in join_handles {
+                    handle.join().unwrap();
                 }
             }
-            None
+            thread
+        }
+    };
+}
+
+pub(crate) fn get_all_intervals(exchange: &str, _market_type: MarketType) -> Vec<usize> {
+    match exchange {
+        "binance" => vec![
+            60, 180, 300, 900, 1800, 3600, 7200, 14400, 21600, 28800, 43200, 86400, 259200, 604800,
+            2592000,
+        ],
+        _ => panic!("Unknown exchange {}", exchange),
+    }
+}
+
+macro_rules! gen_crawl_candlestick {
+    ($func_name:ident, $struct_name:ident) => {
+        pub(crate) fn $func_name(
+            market_type: MarketType,
+            symbol_interval_list: Option<&[(String, usize)]>,
+            on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+            duration: Option<u64>,
+        ) -> Option<std::thread::JoinHandle<()>> {
+            let is_empty = match symbol_interval_list {
+                Some(list) => {
+                    if list.is_empty() {
+                        true
+                    } else {
+                        let symbols: Vec<String> = list.iter().map(|t| t.0.clone()).collect();
+                        check_args(EXCHANGE_NAME, market_type, symbols.as_slice());
+                        false
+                    }
+                }
+                None => true,
+            };
+            let automatic_symbol_discovery = is_empty && duration.is_none();
+
+            let symbol_interval_list: Vec<(String, usize)> = if is_empty {
+                let symbols = if EXCHANGE_NAME == "binance" {
+                    fetch_symbols_retry(EXCHANGE_NAME, market_type)
+                        .into_iter()
+                        .map(|s| s.to_lowercase())
+                        .collect()
+                } else {
+                    fetch_symbols_retry(EXCHANGE_NAME, market_type)
+                };
+                let intervals = get_all_intervals(EXCHANGE_NAME, market_type);
+                symbols
+                    .iter()
+                    .flat_map(|symbol| {
+                        intervals
+                            .clone()
+                            .into_iter()
+                            .map(move |interval| (symbol.clone(), interval))
+                    })
+                    .collect::<Vec<(String, usize)>>()
+            } else {
+                symbol_interval_list
+                    .unwrap()
+                    .iter()
+                    .cloned()
+                    .collect::<Vec<(String, usize)>>()
+            };
+            if symbol_interval_list.is_empty() {
+                panic!("symbol_interval_list is empty");
+            }
+            println!("symbol_interval_list.len(): {}", symbol_interval_list.len());
+            let real_symbols: Vec<String> =
+                symbol_interval_list.iter().map(|t| t.0.clone()).collect();
+            let real_intervals: Vec<usize> = symbol_interval_list.iter().map(|t| t.1).collect();
+
+            let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
+                let message = Message::new(
+                    EXCHANGE_NAME.to_string(),
+                    market_type,
+                    MessageType::Candlestick,
+                    msg.to_string(),
+                );
+                (on_msg.lock().unwrap())(message);
+            }));
+
+            let on_msg_ext_clone = on_msg_ext.clone();
+            let intervals_clone = real_intervals.clone();
+            let mut subscribed_symbols = real_symbols.clone();
+            let create_symbol_discovery_thread = move || -> std::thread::JoinHandle<()> {
+                std::thread::spawn(move || {
+                    let ws_client = Arc::new($struct_name::new(on_msg_ext_clone, None));
+                    let ws_client_clone = ws_client.clone();
+                    let should_stop = Arc::new(AtomicBool::new(false));
+                    let should_stop_clone = should_stop.clone();
+                    std::thread::spawn(move || {
+                        while !should_stop_clone.load(Ordering::Acquire) {
+                            // update symbols every hour
+                            std::thread::sleep(Duration::from_secs(3600));
+                            let latest_symbols = if EXCHANGE_NAME == "binance" {
+                                fetch_symbols_retry(EXCHANGE_NAME, market_type)
+                                    .into_iter()
+                                    .map(|s| s.to_lowercase())
+                                    .collect()
+                            } else {
+                                fetch_symbols_retry(EXCHANGE_NAME, market_type)
+                            };
+                            let mut new_symbols: Vec<String> = latest_symbols
+                                .iter()
+                                .filter(|s| !subscribed_symbols.contains(s))
+                                .cloned()
+                                .collect();
+                            if !new_symbols.is_empty() {
+                                warn!("Found new symbols: {}", new_symbols.join(", "));
+                                let new_symbol_interval_list = new_symbols
+                                    .iter()
+                                    .flat_map(|symbol| {
+                                        intervals_clone
+                                            .clone()
+                                            .into_iter()
+                                            .map(move |interval| (symbol.clone(), interval))
+                                    })
+                                    .collect::<Vec<(String, usize)>>();
+                                ws_client_clone
+                                    .subscribe_candlestick(&new_symbol_interval_list.as_slice());
+                                subscribed_symbols.append(&mut new_symbols);
+                            }
+                            if subscribed_symbols.len() > MAX_SUBSCRIPTIONS_PER_CONNECTION {
+                                std::process::exit(0); // restart the whole process
+                            }
+                        }
+                    });
+                    ws_client.run(duration);
+                    ws_client.close();
+                    should_stop.store(true, Ordering::Release);
+                })
+            };
+
+            let thread = if automatic_symbol_discovery {
+                Some(create_symbol_discovery_thread())
+            } else {
+                None
+            };
+
+            if symbol_interval_list.len() <= MAX_SUBSCRIPTIONS_PER_CONNECTION {
+                let ws_client = $struct_name::new(on_msg_ext, None);
+                ws_client.subscribe_candlestick(symbol_interval_list.as_slice());
+                ws_client.run(duration);
+                ws_client.close();
+            } else {
+                // split to chunks
+                let mut chunks: Vec<Vec<(String, usize)>> = Vec::new();
+                for i in (0..symbol_interval_list.len()).step_by(MAX_SUBSCRIPTIONS_PER_CONNECTION) {
+                    let chunk: Vec<(String, usize)> = (&symbol_interval_list[i..(std::cmp::min(
+                        i + MAX_SUBSCRIPTIONS_PER_CONNECTION,
+                        symbol_interval_list.len(),
+                    ))])
+                        .iter()
+                        .cloned()
+                        .collect();
+                    chunks.push(chunk);
+                }
+                assert!(chunks.len() > 1);
+
+                let mut join_handles: Vec<std::thread::JoinHandle<()>> = Vec::new();
+
+                for chunk in chunks.into_iter() {
+                    let on_msg_ext_clone = on_msg_ext.clone();
+                    let handle = std::thread::spawn(move || {
+                        let ws_client = $struct_name::new(on_msg_ext_clone, None);
+                        ws_client.subscribe_candlestick(chunk.as_slice());
+                        ws_client.run(duration);
+                        ws_client.close();
+                    });
+                    join_handles.push(handle);
+                }
+                for handle in join_handles {
+                    handle.join().unwrap();
+                }
+            }
+            thread
         }
     };
 }

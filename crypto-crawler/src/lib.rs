@@ -317,3 +317,21 @@ pub fn crawl_funding_rate(
     };
     func(market_type, symbols, on_msg, duration);
 }
+
+/// Crawl candlestick(i.e., OHLCV) data.
+pub fn crawl_candlestick(
+    exchange: &str,
+    market_type: MarketType,
+    symbol_interval_list: Option<&[(String, usize)]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) {
+    let func = match exchange {
+        "binance" => crawlers::binance::crawl_candlestick,
+        _ => panic!("Unknown exchange {}", exchange),
+    };
+    let handle = func(market_type, symbol_interval_list, on_msg, duration);
+    if let Some(h) = handle {
+        h.join().expect("The thread panicked");
+    }
+}
