@@ -98,7 +98,6 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::LinearFuture)]
 #[test_case(MarketType::InverseSwap)]
 #[test_case(MarketType::LinearSwap)]
-#[test_case(MarketType::EuropeanOption; "inconclusive")]
 fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
     gen_test_snapshot_without_symbol_code!(
         crawl_l2_snapshot,
@@ -134,4 +133,13 @@ fn test_crawl_funding_rate(market_type: MarketType, symbol: &str) {
         symbol,
         MessageType::FundingRate
     )
+}
+
+#[test_case(MarketType::Spot)]
+#[test_case(MarketType::InverseFuture)]
+#[test_case(MarketType::LinearFuture)]
+#[test_case(MarketType::InverseSwap)]
+#[test_case(MarketType::LinearSwap)]
+fn test_crawl_candlestick(market_type: MarketType) {
+    gen_test_crawl_candlestick!(EXCHANGE_NAME, market_type)
 }

@@ -103,7 +103,7 @@ impl<'a> WSClientInternal<'a> {
             let commands = (self.channels_to_commands)(&diff, subscribe);
             let mut ws_stream = self.ws_stream.lock().unwrap();
             commands.into_iter().for_each(|command| {
-                if command.len() > 4096 {
+                if command.len() > 4096 && self.exchange == "binance" {
                     error!("command {} is larger than 4096 bytes", command);
                     std::process::exit(1); // fail fast, pm2 will restart
                 }
@@ -144,7 +144,7 @@ impl<'a> WSClientInternal<'a> {
             let commands = (self.channels_to_commands)(&channels, true);
             let mut ws_stream = self.ws_stream.lock().unwrap();
             commands.into_iter().for_each(|command| {
-                if command.len() > 4096 {
+                if command.len() > 4096 && self.exchange == "binance" {
                     error!("command {} is larger than 4096 bytes", command);
                     std::process::exit(1); // fail fast, pm2 will restart
                 }

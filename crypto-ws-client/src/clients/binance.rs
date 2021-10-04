@@ -77,11 +77,11 @@ impl<'a> BinanceWSClient<'a> {
             .collect();
 
         if !raw_channels.is_empty() {
-            let mut index = 0;
-            while index < raw_channels.len() {
-                for end in (index + 1)..(raw_channels.len() + 1) {
-                    let num_subscriptions = end - index;
-                    let chunk = &raw_channels[index..end];
+            let mut begin = 0;
+            while begin < raw_channels.len() {
+                for end in (begin + 1)..(raw_channels.len() + 1) {
+                    let num_subscriptions = end - begin;
+                    let chunk = &raw_channels[begin..end];
                     let command = format!(
                         r#"{{"id":9527,"method":"{}","params":{}}}"#,
                         if subscribe {
@@ -93,10 +93,10 @@ impl<'a> BinanceWSClient<'a> {
                     );
                     if end == raw_channels.len() || num_subscriptions >= MAX_NUM_CHANNELS {
                         all_commands.push(command);
-                        index = end;
+                        begin = end;
                         break;
                     } else {
-                        let chunk = &raw_channels[index..end + 1];
+                        let chunk = &raw_channels[begin..end + 1];
                         let command_next = format!(
                             r#"{{"id":9527,"method":"{}","params":{}}}"#,
                             if subscribe {
@@ -108,7 +108,7 @@ impl<'a> BinanceWSClient<'a> {
                         );
                         if command_next.len() > WS_FRAME_SIZE {
                             all_commands.push(command);
-                            index = end;
+                            begin = end;
                             break;
                         }
                     };

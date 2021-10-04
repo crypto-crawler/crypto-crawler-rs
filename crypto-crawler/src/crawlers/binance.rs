@@ -1,13 +1,13 @@
 use core::panic;
 use std::{
     sync::{
-        atomic::{AtomicBool, AtomicUsize, Ordering},
+        atomic::{AtomicBool, Ordering},
         Arc, Mutex,
     },
     time::Duration,
 };
 
-use super::utils::{check_args, fetch_symbols_retry};
+use super::utils::{check_args, fetch_symbols_retry, get_all_intervals};
 use crate::{msg::Message, MessageType};
 use crypto_markets::MarketType;
 use crypto_ws_client::*;
@@ -62,12 +62,30 @@ gen_crawl_event!(crawl_ticker_inverse, BinanceInverseWSClient, MessageType::Tick
 #[rustfmt::skip]
 gen_crawl_event!(crawl_ticker_linear, BinanceLinearWSClient, MessageType::Ticker, subscribe_ticker);
 
+#[rustfmt::skip]
+gen_crawl_candlestick!(crawl_candlestick_spot, BinanceSpotWSClient);
+#[rustfmt::skip]
+gen_crawl_candlestick!(crawl_candlestick_inverse, BinanceInverseWSClient);
+#[rustfmt::skip]
+gen_crawl_candlestick!(crawl_candlestick_linear, BinanceLinearWSClient);
+
 pub(crate) fn crawl_trade(
     market_type: MarketType,
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
 ) -> Option<std::thread::JoinHandle<()>> {
+    // All symbols for websocket are lowercase while for REST they are uppercase
+    let symbols = symbols
+        .unwrap_or_default()
+        .iter()
+        .map(|symbol| symbol.to_lowercase())
+        .collect::<Vec<String>>();
+    let symbols = if symbols.is_empty() {
+        None
+    } else {
+        Some(symbols.as_slice())
+    };
     match market_type {
         MarketType::Spot => crawl_trade_spot(market_type, symbols, on_msg, duration),
         MarketType::InverseFuture | MarketType::InverseSwap => {
@@ -111,6 +129,17 @@ pub(crate) fn crawl_l2_event(
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
 ) -> Option<std::thread::JoinHandle<()>> {
+    // All symbols for websocket are lowercase while for REST they are uppercase
+    let symbols = symbols
+        .unwrap_or_default()
+        .iter()
+        .map(|symbol| symbol.to_lowercase())
+        .collect::<Vec<String>>();
+    let symbols = if symbols.is_empty() {
+        None
+    } else {
+        Some(symbols.as_slice())
+    };
     match market_type {
         MarketType::Spot => crawl_l2_event_spot(market_type, symbols, on_msg, duration),
         MarketType::InverseFuture | MarketType::InverseSwap => {
@@ -132,6 +161,17 @@ pub(crate) fn crawl_bbo(
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
 ) -> Option<std::thread::JoinHandle<()>> {
+    // All symbols for websocket are lowercase while for REST they are uppercase
+    let symbols = symbols
+        .unwrap_or_default()
+        .iter()
+        .map(|symbol| symbol.to_lowercase())
+        .collect::<Vec<String>>();
+    let symbols = if symbols.is_empty() {
+        None
+    } else {
+        Some(symbols.as_slice())
+    };
     if symbols.is_none() || symbols.unwrap().is_empty() {
         let channels = vec!["!bookTicker".to_string()]; // All Book Tickers Stream
         let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
@@ -191,6 +231,17 @@ pub(crate) fn crawl_l2_topk(
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
 ) -> Option<std::thread::JoinHandle<()>> {
+    // All symbols for websocket are lowercase while for REST they are uppercase
+    let symbols = symbols
+        .unwrap_or_default()
+        .iter()
+        .map(|symbol| symbol.to_lowercase())
+        .collect::<Vec<String>>();
+    let symbols = if symbols.is_empty() {
+        None
+    } else {
+        Some(symbols.as_slice())
+    };
     match market_type {
         MarketType::Spot => crawl_l2_topk_spot(market_type, symbols, on_msg, duration),
         MarketType::InverseFuture | MarketType::InverseSwap => {
@@ -212,6 +263,17 @@ pub(crate) fn crawl_ticker(
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
 ) -> Option<std::thread::JoinHandle<()>> {
+    // All symbols for websocket are lowercase while for REST they are uppercase
+    let symbols = symbols
+        .unwrap_or_default()
+        .iter()
+        .map(|symbol| symbol.to_lowercase())
+        .collect::<Vec<String>>();
+    let symbols = if symbols.is_empty() {
+        None
+    } else {
+        Some(symbols.as_slice())
+    };
     let on_msg_clone = on_msg.clone();
     let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
         let message = Message::new(
@@ -272,6 +334,17 @@ pub(crate) fn crawl_funding_rate(
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
 ) {
+    // All symbols for websocket are lowercase while for REST they are uppercase
+    let symbols = symbols
+        .unwrap_or_default()
+        .iter()
+        .map(|symbol| symbol.to_lowercase())
+        .collect::<Vec<String>>();
+    let symbols = if symbols.is_empty() {
+        None
+    } else {
+        Some(symbols.as_slice())
+    };
     let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
         let message = Message::new(
             EXCHANGE_NAME.to_string(),
@@ -288,7 +361,7 @@ pub(crate) fn crawl_funding_rate(
         symbols
             .unwrap()
             .iter()
-            .map(|symbol| format!("{}@markPrice", symbol.to_lowercase()))
+            .map(|symbol| format!("{}@markPrice", symbol))
             .collect()
     };
 
@@ -304,5 +377,36 @@ pub(crate) fn crawl_funding_rate(
             ws_client.run(duration);
         }
         _ => panic!("Binance {} does NOT have funding rates", market_type),
+    }
+}
+
+pub(crate) fn crawl_candlestick(
+    market_type: MarketType,
+    symbol_interval_list: Option<&[(String, usize)]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) -> Option<std::thread::JoinHandle<()>> {
+    // All symbols for websocket are lowercase while for REST they are uppercase
+    let symbol_interval_list = symbol_interval_list
+        .unwrap_or_default()
+        .iter()
+        .map(|(symbol, interval)| (symbol.to_lowercase(), *interval))
+        .collect::<Vec<(String, usize)>>();
+    let symbol_interval_list = if symbol_interval_list.is_empty() {
+        None
+    } else {
+        Some(symbol_interval_list.as_slice())
+    };
+    match market_type {
+        MarketType::Spot => {
+            crawl_candlestick_spot(market_type, symbol_interval_list, on_msg, duration)
+        }
+        MarketType::InverseFuture | MarketType::InverseSwap => {
+            crawl_candlestick_inverse(market_type, symbol_interval_list, on_msg, duration)
+        }
+        MarketType::LinearFuture | MarketType::LinearSwap => {
+            crawl_candlestick_linear(market_type, symbol_interval_list, on_msg, duration)
+        }
+        _ => panic!("Binance {} does NOT have candlestick", market_type),
     }
 }
