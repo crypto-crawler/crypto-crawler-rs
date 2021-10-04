@@ -11,7 +11,10 @@ use std::{
 
 use flate2::read::{DeflateDecoder, GzDecoder};
 use log::*;
-use tungstenite::{client::AutoStream, error::ProtocolError, Error, Message, WebSocket};
+use tungstenite::{
+    client::AutoStream, error::ProtocolError, protocol::frame::coding::CloseCode, Error, Message,
+    WebSocket,
+};
 
 pub(super) enum MiscMessage {
     WebSocket(Message), // WebSocket message that needs to be sent to the server
@@ -100,6 +103,10 @@ impl<'a> WSClientInternal<'a> {
             let commands = (self.channels_to_commands)(&diff, subscribe);
             let mut ws_stream = self.ws_stream.lock().unwrap();
             commands.into_iter().for_each(|command| {
+                if command.len() > 4096 {
+                    error!("command {} is larger than 4096 bytes", command);
+                    std::process::exit(1); // fail fast, pm2 will restart
+                }
                 let ret = ws_stream.write_message(Message::Text(command));
                 if let Err(err) = ret {
                     error!("{}", err);
@@ -137,6 +144,10 @@ impl<'a> WSClientInternal<'a> {
             let commands = (self.channels_to_commands)(&channels, true);
             let mut ws_stream = self.ws_stream.lock().unwrap();
             commands.into_iter().for_each(|command| {
+                if command.len() > 4096 {
+                    error!("command {} is larger than 4096 bytes", command);
+                    std::process::exit(1); // fail fast, pm2 will restart
+                }
                 let ret = ws_stream.write_message(Message::Text(command));
                 if let Err(err) = ret {
                     error!("{}", err);
@@ -163,7 +174,7 @@ impl<'a> WSClientInternal<'a> {
             MiscMessage::Reconnect => {
                 // self.reconnect();
                 std::thread::sleep(Duration::from_secs(5));
-                std::process::exit(0); // fail fast, pm2 will restart
+                std::process::exit(1); // fail fast, pm2 will restart
             }
             MiscMessage::WebSocket(ws_msg) => {
                 let ret = self.ws_stream.lock().unwrap().write_message(ws_msg);
@@ -254,7 +265,22 @@ impl<'a> WSClientInternal<'a> {
                         }
                         Message::Close(resp) => {
                             match resp {
-                                Some(frame) => warn!("Received a Message::Close message with a CloseFrame: code: {}, reason: {}", frame.code, frame.reason),
+                                Some(frame) => {
+                                    if frame.code != CloseCode::Normal
+                                        && frame.code != CloseCode::Away
+                                    {
+                                        error!(
+                                            "Received a CloseFrame: code: {}, reason: {} from {}",
+                                            frame.code, frame.reason, self.url
+                                        );
+                                        std::process::exit(1); // fail fast, pm2 will restart
+                                    } else {
+                                        warn!(
+                                            "Received a CloseFrame: code: {}, reason: {} from {}",
+                                            frame.code, frame.reason, self.url
+                                        );
+                                    }
+                                }
                                 None => warn!("Received a close message without CloseFrame"),
                             }
                             false
@@ -267,7 +293,7 @@ impl<'a> WSClientInternal<'a> {
                             error!("Server closed connection, exiting now...");
                             // self.reconnect();
                             std::thread::sleep(Duration::from_secs(5));
-                            std::process::exit(0); // fail fast, pm2 will restart
+                            std::process::exit(1); // fail fast, pm2 will restart
                         }
                         Error::AlreadyClosed => {
                             error!("Impossible to happen, fix the bug in the code");
@@ -291,7 +317,7 @@ impl<'a> WSClientInternal<'a> {
                                 );
                                 // self.reconnect();
                                 std::thread::sleep(Duration::from_secs(5));
-                                std::process::exit(0); // fail fast, pm2 will restart
+                                std::process::exit(1); // fail fast, pm2 will restart
                             }
                         }
                         Error::Protocol(protocol_err) => {
@@ -299,7 +325,7 @@ impl<'a> WSClientInternal<'a> {
                                 error!("ResetWithoutClosingHandshake");
                                 // self.reconnect();
                                 std::thread::sleep(Duration::from_secs(5));
-                                std::process::exit(0); // fail fast, pm2 will restart
+                                std::process::exit(1); // fail fast, pm2 will restart
                             } else {
                                 error!(
                                     "Protocol error thrown from read_message(): {}",
@@ -325,7 +351,7 @@ impl<'a> WSClientInternal<'a> {
                         num_unanswered_ping,
                         start_timstamp.elapsed().as_secs()
                     );
-                    std::process::exit(0); // fail fast, pm2 will restart
+                    std::process::exit(1); // fail fast, pm2 will restart
                 }
                 if last_ping_timestamp.elapsed() >= Duration::from_secs(interval_and_msg.0 / 2) {
                     debug!("Sending ping: {}", interval_and_msg.1);
@@ -346,7 +372,7 @@ impl<'a> WSClientInternal<'a> {
                     num_read_timeout,
                     start_timstamp.elapsed().as_secs()
                 );
-                std::process::exit(0); // fail fast, pm2 will restart
+                std::process::exit(1); // fail fast, pm2 will restart
             }
 
             if let Some(seconds) = duration {
