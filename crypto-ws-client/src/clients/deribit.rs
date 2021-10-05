@@ -2,6 +2,7 @@ use crate::WSClient;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
+use super::utils::ensure_frame_size;
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
 use super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 
@@ -12,6 +13,10 @@ use tungstenite::Message;
 pub(super) const EXCHANGE_NAME: &str = "deribit";
 
 const WEBSOCKET_URL: &str = "wss://www.deribit.com/ws/api/v2/";
+
+// -32600	"request entity too large"
+/// single frame in websocket connection frame exceeds the limit (32 kB)
+const WS_FRAME_SIZE: usize = 32 * 1024;
 
 /// The WebSocket client for Deribit.
 ///
@@ -25,30 +30,21 @@ pub struct DeribitWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
-fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-    let raw_channels: Vec<&String> = channels.iter().filter(|ch| !ch.starts_with('{')).collect();
-    let mut all_commands: Vec<String> = channels
-        .iter()
-        .filter(|ch| ch.starts_with('{'))
-        .map(|s| s.to_string())
-        .collect();
+fn topics_to_command(chunk: &[String], subscribe: bool) -> String {
+    format!(
+        r#"{{"method": "public/{}", "params": {{"channels": {}}}}}"#,
+        if subscribe {
+            "subscribe"
+        } else {
+            "unsubscribe"
+        },
+        serde_json::to_string(chunk).unwrap()
+    )
+}
 
-    if !raw_channels.is_empty() {
-        let n = raw_channels.len();
-        // make sure each body size doesn't exceed the websocket frame limit 32KiB
-        for i in (0..n).step_by(512) {
-            let chunk: Vec<&String> = (&raw_channels[i..(std::cmp::min(i + 512, n))]).to_vec();
-            all_commands.append(&mut vec![format!(
-                r#"{{"method": "public/{}", "params": {{"channels": {}}}}}"#,
-                if subscribe {
-                    "subscribe"
-                } else {
-                    "unsubscribe"
-                },
-                serde_json::to_string(&chunk).unwrap()
-            )])
-        }
-    };
+fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
+    let mut all_commands: Vec<String> =
+        ensure_frame_size(channels, subscribe, topics_to_command, WS_FRAME_SIZE, None);
 
     all_commands
         .push(r#"{"method": "public/set_heartbeat", "params": {"interval": 10}}"#.to_string());

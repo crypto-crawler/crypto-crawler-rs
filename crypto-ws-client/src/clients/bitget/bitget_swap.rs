@@ -4,6 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use super::super::ws_client_internal::{MiscMessage, WSClientInternal};
 use super::super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
+use crate::clients::utils::{ensure_frame_size, WS_FRAME_SIZE};
 
 use log::*;
 use serde_json::Value;
@@ -27,27 +28,20 @@ pub struct BitgetSwapWSClient<'a> {
     client: WSClientInternal<'a>,
 }
 
+fn topics_to_command(chunk: &[String], subscribe: bool) -> String {
+    format!(
+        r#"{{"op":"{}","args":{}}}"#,
+        if subscribe {
+            "subscribe"
+        } else {
+            "unsubscribe"
+        },
+        serde_json::to_string(chunk).unwrap()
+    )
+}
+
 fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-    let mut all_commands: Vec<String> = channels
-        .iter()
-        .filter(|ch| ch.starts_with('{'))
-        .map(|s| s.to_string())
-        .collect();
-
-    let raw_channels: Vec<&String> = channels.iter().filter(|ch| !ch.starts_with('{')).collect();
-    if !raw_channels.is_empty() {
-        all_commands.append(&mut vec![format!(
-            r#"{{"op":"{}","args":{}}}"#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
-            serde_json::to_string(&raw_channels).unwrap()
-        )])
-    };
-
-    all_commands
+    ensure_frame_size(channels, subscribe, topics_to_command, WS_FRAME_SIZE, None)
 }
 
 fn on_misc_msg(msg: &str) -> MiscMessage {

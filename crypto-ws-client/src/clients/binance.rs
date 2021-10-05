@@ -2,13 +2,13 @@ use crate::WSClient;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
+use super::utils::{ensure_frame_size, WS_FRAME_SIZE};
 use super::{
     ws_client_internal::{MiscMessage, WSClientInternal},
     Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
 };
 use log::*;
 use serde_json::Value;
-use super::utils::WS_FRAME_SIZE;
 
 pub(super) const EXCHANGE_NAME: &str = "binance";
 
@@ -67,56 +67,26 @@ impl<'a> BinanceWSClient<'a> {
         }
     }
 
+    fn topics_to_command(chunk: &[String], subscribe: bool) -> String {
+        format!(
+            r#"{{"id":9527,"method":"{}","params":{}}}"#,
+            if subscribe {
+                "SUBSCRIBE"
+            } else {
+                "UNSUBSCRIBE"
+            },
+            serde_json::to_string(chunk).unwrap()
+        )
+    }
+
     fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-        let raw_channels: Vec<&String> =
-            channels.iter().filter(|ch| !ch.starts_with('{')).collect();
-        let mut all_commands: Vec<String> = channels
-            .iter()
-            .filter(|ch| ch.starts_with('{'))
-            .map(|s| s.to_string())
-            .collect();
-
-        if !raw_channels.is_empty() {
-            let mut begin = 0;
-            while begin < raw_channels.len() {
-                for end in (begin + 1)..(raw_channels.len() + 1) {
-                    let num_subscriptions = end - begin;
-                    let chunk = &raw_channels[begin..end];
-                    let command = format!(
-                        r#"{{"id":9527,"method":"{}","params":{}}}"#,
-                        if subscribe {
-                            "SUBSCRIBE"
-                        } else {
-                            "UNSUBSCRIBE"
-                        },
-                        serde_json::to_string(&chunk).unwrap()
-                    );
-                    if end == raw_channels.len() || num_subscriptions >= MAX_NUM_CHANNELS {
-                        all_commands.push(command);
-                        begin = end;
-                        break;
-                    } else {
-                        let chunk = &raw_channels[begin..end + 1];
-                        let command_next = format!(
-                            r#"{{"id":9527,"method":"{}","params":{}}}"#,
-                            if subscribe {
-                                "SUBSCRIBE"
-                            } else {
-                                "UNSUBSCRIBE"
-                            },
-                            serde_json::to_string(&chunk).unwrap()
-                        );
-                        if command_next.len() > WS_FRAME_SIZE {
-                            all_commands.push(command);
-                            begin = end;
-                            break;
-                        }
-                    };
-                }
-            }
-        };
-
-        all_commands
+        ensure_frame_size(
+            channels,
+            subscribe,
+            Self::topics_to_command,
+            WS_FRAME_SIZE,
+            Some(MAX_NUM_CHANNELS),
+        )
     }
 
     fn on_misc_msg(msg: &str) -> MiscMessage {

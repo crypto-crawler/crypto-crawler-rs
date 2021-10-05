@@ -121,3 +121,52 @@ pub(super) fn connect_with_retry(url: &str, timeout: Option<u64>) -> WebSocket<A
 }
 
 pub(super) const CHANNEL_PAIR_DELIMITER: char = ':';
+
+/// Ensure that length of a websocket message does not exceed the max size or the number of topics does not exceed the threshold.
+pub(crate) fn ensure_frame_size(
+    channels: &[String],
+    subscribe: bool,
+    topics_to_command: fn(&[String], bool) -> String,
+    max_bytes: usize,
+    max_topics_per_command: Option<usize>,
+) -> Vec<String> {
+    let raw_channels: Vec<String> = channels
+        .iter()
+        .filter(|ch| !ch.starts_with('{'))
+        .cloned()
+        .collect();
+    let mut all_commands: Vec<String> = channels
+        .iter()
+        .filter(|ch| ch.starts_with('{'))
+        .cloned()
+        .collect();
+
+    if !raw_channels.is_empty() {
+        let mut begin = 0;
+        while begin < raw_channels.len() {
+            for end in (begin + 1)..(raw_channels.len() + 1) {
+                let num_subscriptions = end - begin;
+                let chunk = &raw_channels[begin..end];
+                let command = topics_to_command(chunk, subscribe);
+                if end == raw_channels.len() {
+                    all_commands.push(command);
+                    begin = end;
+                } else if num_subscriptions >= max_topics_per_command.unwrap_or(usize::MAX) {
+                    all_commands.push(command);
+                    begin = end;
+                    break;
+                } else {
+                    let chunk = &raw_channels[begin..end + 1];
+                    let command_next = topics_to_command(chunk, subscribe);
+                    if command_next.len() > max_bytes {
+                        all_commands.push(command);
+                        begin = end;
+                        break;
+                    }
+                };
+            }
+        }
+    };
+
+    all_commands
+}
