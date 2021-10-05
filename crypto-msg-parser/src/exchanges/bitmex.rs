@@ -76,20 +76,25 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<Stri
     }
 }
 
+// Copied from crypto-markets/tests/bitmex.rs
 fn get_market_type_from_symbol(symbol: &str) -> MarketType {
     let date = &symbol[(symbol.len() - 2)..];
     if date.parse::<i64>().is_ok() {
         // future
         if symbol.starts_with("XBT") {
+            // Settled in XBT, quoted in USD
             MarketType::InverseFuture
-        } else if symbol.len() == 6 {
-            MarketType::LinearFuture
-        } else {
+        } else if (&symbol[..(symbol.len() - 3)]).ends_with("USD") {
+            // Settled in XBT, quoted in USD
             MarketType::QuantoFuture
+        } else {
+            // Settled in XBT, quoted in XBT
+            MarketType::LinearFuture
         }
     } else {
         // swap
         if symbol.starts_with("XBT") {
+            // Settled in XBT, quoted in USD
             MarketType::InverseSwap
         } else {
             MarketType::QuantoSwap
