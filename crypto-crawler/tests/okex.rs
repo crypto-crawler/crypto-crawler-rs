@@ -161,3 +161,13 @@ fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
         MessageType::Ticker
     )
 }
+
+#[test_case(MarketType::Spot)]
+#[test_case(MarketType::InverseFuture)]
+#[test_case(MarketType::LinearFuture)]
+#[test_case(MarketType::InverseSwap)]
+#[test_case(MarketType::LinearSwap)]
+#[test_case(MarketType::EuropeanOption)]
+fn test_crawl_candlestick(market_type: MarketType) {
+    gen_test_crawl_candlestick!(EXCHANGE_NAME, market_type)
+}

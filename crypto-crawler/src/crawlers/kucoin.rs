@@ -5,7 +5,11 @@ use std::sync::{
 
 use std::time::Duration;
 
-use super::utils::{check_args, fetch_symbols_retry};
+use super::utils::{
+    check_args, fetch_symbols_retry, get_candlestick_intervals, get_connection_interval_ms,
+    get_send_interval_ms,
+};
+use crate::utils::WS_LOCKS;
 use crate::{msg::Message, MessageType};
 use crypto_markets::MarketType;
 use crypto_ws_client::*;
@@ -13,6 +17,7 @@ use log::*;
 
 const EXCHANGE_NAME: &str = "kucoin";
 // See https://docs.kucoin.cc/#request-rate-limit
+// Subscription limit for each connection: 300 topics
 const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = 300;
 
 #[rustfmt::skip]
@@ -46,6 +51,11 @@ gen_crawl_event!(crawl_ticker_spot, KuCoinSpotWSClient, MessageType::Ticker, sub
 #[rustfmt::skip]
 gen_crawl_event!(crawl_ticker_swap, KuCoinSwapWSClient, MessageType::Ticker, subscribe_ticker);
 #[rustfmt::skip]
+
+#[rustfmt::skip]
+gen_crawl_candlestick!(crawl_candlestick_spot, KuCoinSpotWSClient);
+#[rustfmt::skip]
+gen_crawl_candlestick!(crawl_candlestick_swap, KuCoinSwapWSClient);
 
 pub(crate) fn crawl_trade(
     market_type: MarketType,
@@ -154,6 +164,23 @@ pub(crate) fn crawl_ticker(
         MarketType::Spot => crawl_ticker_spot(market_type, symbols, on_msg, duration),
         MarketType::InverseSwap | MarketType::LinearSwap | MarketType::InverseFuture => {
             crawl_ticker_swap(market_type, symbols, on_msg, duration)
+        }
+        _ => panic!("KuCoin does NOT have the {} market type", market_type),
+    }
+}
+
+pub(crate) fn crawl_candlestick(
+    market_type: MarketType,
+    symbol_interval_list: Option<&[(String, usize)]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) -> Option<std::thread::JoinHandle<()>> {
+    match market_type {
+        MarketType::Spot => {
+            crawl_candlestick_spot(market_type, symbol_interval_list, on_msg, duration)
+        }
+        MarketType::InverseSwap | MarketType::LinearSwap | MarketType::InverseFuture => {
+            crawl_candlestick_swap(market_type, symbol_interval_list, on_msg, duration)
         }
         _ => panic!("KuCoin does NOT have the {} market type", market_type),
     }

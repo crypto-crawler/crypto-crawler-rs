@@ -3,43 +3,12 @@ use std::{
     time::{Duration, Instant, SystemTime},
 };
 
+use crate::utils::REST_LOCKS;
 use crypto_markets::{fetch_symbols, get_market_types, MarketType};
 use crypto_rest_client::{fetch_l2_snapshot, fetch_l3_snapshot};
-use fslock::LockFile;
 use log::*;
 
 use crate::{get_hot_spot_symbols, utils::cmc_rank::sort_by_cmc_rank, Message, MessageType};
-
-fn get_lock_file(exchange: &str, market_type: MarketType) -> Option<LockFile> {
-    let filename = if exchange == "bitmex" {
-        Some("bitmex.lock")
-    } else if exchange == "binance" {
-        if market_type == MarketType::InverseSwap || market_type == MarketType::InverseFuture {
-            Some("binance_inverse.lock")
-        } else if market_type == MarketType::LinearFuture || market_type == MarketType::LinearSwap {
-            Some("binance_linear.lock")
-        } else {
-            None
-        }
-    } else {
-        None
-    };
-    if let Some(filename) = filename {
-        let mut dir = if std::env::var("DATA_DIR").is_ok() {
-            let dir =
-                std::path::Path::new(std::env::var("DATA_DIR").unwrap().as_str()).join("lock");
-            std::fs::create_dir_all(&dir).unwrap();
-            dir
-        } else {
-            std::env::temp_dir()
-        };
-        dir.push(filename);
-        let file = LockFile::open(dir.as_path()).unwrap();
-        Some(file)
-    } else {
-        None
-    }
-}
 
 pub fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<String> {
     let retry_count = std::env::var("REST_RETRY_COUNT")
@@ -47,16 +16,21 @@ pub fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<Strin
         .parse::<i64>()
         .unwrap();
     let cooldown_time = get_cooldown_time_per_request(exchange, market_type);
-    let mut lock = get_lock_file(exchange, market_type);
+    let lock = REST_LOCKS
+        .get(exchange)
+        .unwrap()
+        .get(&market_type)
+        .unwrap()
+        .clone();
     let mut symbols = Vec::<String>::new();
     let mut backoff_factor = 1;
     for i in 0..retry_count {
-        if let Some(ref mut lock) = lock {
-            lock.lock().unwrap();
-        }
+        let mut lock_ = lock.lock().unwrap();
+        lock_.lock().unwrap();
         match fetch_symbols(exchange, market_type) {
             Ok(list) => {
                 symbols = list;
+                lock_.unlock().unwrap();
                 break;
             }
             Err(err) => {
@@ -68,15 +42,10 @@ pub fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<Strin
                 }
             }
         }
-        if let Some(ref mut lock) = lock {
-            // Cooldown after each request, and make all other processes wait
-            // on the lock to avoid parallel requests, thus avoid 429 error
-            std::thread::sleep(cooldown_time * backoff_factor);
-            lock.unlock().unwrap();
-        } else {
-            // Cooldown after each request
-            std::thread::sleep(cooldown_time * backoff_factor);
-        }
+        // Cooldown after each request, and make all other processes wait
+        // on the lock to avoid parallel requests, thus avoid 429 error
+        std::thread::sleep(cooldown_time * backoff_factor);
+        lock_.unlock().unwrap();
     }
     symbols
 }
@@ -159,7 +128,12 @@ pub(crate) fn crawl_snapshot(
 
     let cooldown_time = get_cooldown_time_per_request(exchange, market_type);
 
-    let mut lock = get_lock_file(exchange, market_type);
+    let lock = REST_LOCKS
+        .get(exchange)
+        .unwrap()
+        .get(&market_type)
+        .unwrap()
+        .clone();
     loop {
         let mut real_symbols = if is_empty {
             if market_type == MarketType::Spot {
@@ -178,23 +152,17 @@ pub(crate) fn crawl_snapshot(
         let mut backoff_factor = 1;
         while index < real_symbols.len() {
             let symbol = &real_symbols[index];
-            if let Some(ref mut lock) = lock {
-                lock.lock().unwrap();
-            }
+            let mut lock_ = lock.lock().unwrap();
+            lock_.lock().unwrap();
             let resp = match msg_type {
                 MessageType::L2Snapshot => fetch_l2_snapshot(exchange, market_type, symbol, None),
                 MessageType::L3Snapshot => fetch_l3_snapshot(exchange, market_type, symbol, None),
                 _ => panic!("msg_type must be L2Snapshot or L3Snapshot"),
             };
-            if let Some(ref mut lock) = lock {
-                // Cooldown after each request, and make all other processes wait
-                // on the lock to avoid parallel requests, thus avoid 429 error
-                std::thread::sleep(cooldown_time);
-                lock.unlock().unwrap();
-            } else {
-                // Cooldown after each request
-                std::thread::sleep(cooldown_time);
-            }
+            // Cooldown after each request, and make all other processes wait
+            // on the lock to avoid parallel requests, thus avoid 429 error
+            std::thread::sleep(cooldown_time);
+            lock_.unlock().unwrap();
             match resp {
                 Ok(msg) => {
                     index += 1;
@@ -221,7 +189,7 @@ pub(crate) fn crawl_snapshot(
                     );
                     std::thread::sleep(backoff_factor * cooldown_time);
                     success_count = 0;
-                    if err.0.contains("429") {
+                    if err.0.contains("429") || err.0.contains("509") {
                         backoff_factor += 1;
                     } else {
                         // Handle 403, 418, etc.
@@ -237,6 +205,21 @@ pub(crate) fn crawl_snapshot(
         }
         std::thread::sleep(cooldown_time * 2); // if real_symbols is empty, CPU will be 100% without this line
     }
+}
+
+macro_rules! subscribe_with_lock {
+    ($ws_client:ident, $exchange:expr, $market_type: expr, $subscribe_func:ident, $symbols:expr, $lock:ident) => {{
+        let mut lock = $lock.lock().unwrap();
+        let interval = get_send_interval_ms($exchange, $market_type);
+        if interval.is_some() {
+            lock.lock().unwrap();
+        }
+        $ws_client.$subscribe_func($symbols);
+        if let Some(interval) = interval {
+            std::thread::sleep(Duration::from_millis(interval));
+            lock.unlock().unwrap();
+        }
+    }};
 }
 
 macro_rules! gen_crawl_event {
@@ -286,15 +269,36 @@ macro_rules! gen_crawl_event {
                 (on_msg.lock().unwrap())(message);
             }));
 
+            let lock = WS_LOCKS
+                .get(EXCHANGE_NAME)
+                .unwrap()
+                .get(&market_type)
+                .unwrap()
+                .clone();
+
             let on_msg_ext_clone = on_msg_ext.clone();
             let mut subscribed_symbols = real_symbols.clone();
+            let lock_clone = lock.clone();
             let create_symbol_discovery_thread = move || -> std::thread::JoinHandle<()> {
                 std::thread::spawn(move || {
-                    let ws_client = Arc::new($struct_name::new(on_msg_ext_clone, None));
+                    let ws_client = {
+                        let mut lock_ = lock_clone.lock().unwrap();
+                        let interval = get_connection_interval_ms(EXCHANGE_NAME, market_type);
+                        if interval.is_some() {
+                            lock_.lock().unwrap();
+                        }
+                        let ws_client = Arc::new($struct_name::new(on_msg_ext_clone, None));
+                        if let Some(interval) = interval {
+                            std::thread::sleep(Duration::from_millis(interval));
+                            lock_.unlock().unwrap();
+                        }
+                        ws_client
+                    };
                     let ws_client_clone = ws_client.clone();
                     let should_stop = Arc::new(AtomicBool::new(false));
                     let should_stop_clone = should_stop.clone();
                     std::thread::spawn(move || {
+                        let mut total_new_symbols = 0;
                         while !should_stop_clone.load(Ordering::Acquire) {
                             // update symbols every hour
                             std::thread::sleep(Duration::from_secs(3600));
@@ -314,10 +318,22 @@ macro_rules! gen_crawl_event {
 
                             if !new_symbols.is_empty() {
                                 warn!("Found new symbols: {}", new_symbols.join(", "));
-                                ws_client_clone.$subscribe_func(&new_symbols);
+                                subscribe_with_lock!(
+                                    ws_client_clone,
+                                    EXCHANGE_NAME,
+                                    market_type,
+                                    $subscribe_func,
+                                    &new_symbols,
+                                    lock_clone
+                                );
                                 subscribed_symbols.append(&mut new_symbols);
                             }
-                            if subscribed_symbols.len() > MAX_SUBSCRIPTIONS_PER_CONNECTION {
+                            total_new_symbols += new_symbols.len();
+                            if total_new_symbols > MAX_SUBSCRIPTIONS_PER_CONNECTION {
+                                warn!(
+                                    "Found {} new symbols, restarting the process",
+                                    new_symbols.len()
+                                );
                                 std::process::exit(0); // restart the whole process
                             }
                         }
@@ -335,8 +351,30 @@ macro_rules! gen_crawl_event {
             };
 
             if real_symbols.len() <= MAX_SUBSCRIPTIONS_PER_CONNECTION {
-                let ws_client = $struct_name::new(on_msg_ext, None);
-                ws_client.$subscribe_func(&real_symbols);
+                let lock_clone = lock.clone();
+                let on_msg_ext_clone = on_msg_ext.clone();
+                let ws_client = {
+                    let mut lock_ = lock_clone.lock().unwrap();
+                    let interval = get_connection_interval_ms(EXCHANGE_NAME, market_type);
+                    if interval.is_some() {
+                        lock_.lock().unwrap();
+                    }
+                    let ws_client = Arc::new($struct_name::new(on_msg_ext_clone, None));
+                    if let Some(interval) = interval {
+                        std::thread::sleep(Duration::from_millis(interval));
+                        lock_.unlock().unwrap();
+                    }
+                    ws_client
+                };
+                subscribe_with_lock!(
+                    ws_client,
+                    EXCHANGE_NAME,
+                    market_type,
+                    $subscribe_func,
+                    &real_symbols,
+                    lock_clone
+                );
+                drop(lock);
                 ws_client.run(duration);
                 ws_client.close();
             } else {
@@ -355,12 +393,31 @@ macro_rules! gen_crawl_event {
                 assert!(chunks.len() > 1);
 
                 let mut join_handles: Vec<std::thread::JoinHandle<()>> = Vec::new();
-
                 for chunk in chunks.into_iter() {
                     let on_msg_ext_clone = on_msg_ext.clone();
+                    let lock_clone = lock.clone();
                     let handle = std::thread::spawn(move || {
-                        let ws_client = $struct_name::new(on_msg_ext_clone, None);
-                        ws_client.$subscribe_func(&chunk);
+                        let ws_client = {
+                            let mut lock_ = lock_clone.lock().unwrap();
+                            let interval = get_connection_interval_ms(EXCHANGE_NAME, market_type);
+                            if interval.is_some() {
+                                lock_.lock().unwrap();
+                            }
+                            let ws_client = Arc::new($struct_name::new(on_msg_ext_clone, None));
+                            if let Some(interval) = interval {
+                                std::thread::sleep(Duration::from_millis(interval));
+                                lock_.unlock().unwrap();
+                            }
+                            ws_client
+                        };
+                        subscribe_with_lock!(
+                            ws_client,
+                            EXCHANGE_NAME,
+                            market_type,
+                            $subscribe_func,
+                            &chunk,
+                            lock_clone
+                        );
                         ws_client.run(duration);
                         ws_client.close();
                     });
@@ -375,13 +432,41 @@ macro_rules! gen_crawl_event {
     };
 }
 
-pub(crate) fn get_all_intervals(exchange: &str, _market_type: MarketType) -> Vec<usize> {
+// from 1m to 5m
+pub(crate) fn get_candlestick_intervals(exchange: &str, market_type: MarketType) -> Vec<usize> {
     match exchange {
-        "binance" => vec![
-            60, 180, 300, 900, 1800, 3600, 7200, 14400, 21600, 28800, 43200, 86400, 259200, 604800,
-            2592000,
-        ],
-        _ => panic!("Unknown exchange {}", exchange),
+        "binance" => vec![60, 180, 300],
+        "bybit" => vec![60, 180, 300],
+        "deribit" => vec![60, 180, 300],
+        "gate" => vec![10, 60, 300],
+        "kucoin" => match market_type {
+            MarketType::Spot => vec![60, 180, 300],
+            _ => vec![60, 300],
+        },
+        "okex" => vec![60, 180, 300],
+        "zbg" => match market_type {
+            MarketType::Spot => vec![60, 300],
+            _ => vec![60, 180, 300],
+        },
+        _ => vec![60, 300],
+    }
+}
+
+pub(crate) fn get_connection_interval_ms(exchange: &str, _market_type: MarketType) -> Option<u64> {
+    match exchange {
+        // "bitmex" => Some(9000), // 40 per hour
+        "kucoin" => Some(2000), //  Connection Limit: 30 per minute
+        "okex" => Some(1000),   //  Connection limit：1 times/s
+        _ => Some(20),
+    }
+}
+
+pub(crate) fn get_send_interval_ms(exchange: &str, _market_type: MarketType) -> Option<u64> {
+    match exchange {
+        "binance" => Some(100), // WebSocket connections have a limit of 10 incoming messages per second
+        "kucoin" => Some(100),  //  Message limit sent to the server: 100 per 10 seconds
+        // "okex" => Some(15000), // 240 times/hour
+        _ => None,
     }
 }
 
@@ -416,7 +501,7 @@ macro_rules! gen_crawl_candlestick {
                 } else {
                     fetch_symbols_retry(EXCHANGE_NAME, market_type)
                 };
-                let intervals = get_all_intervals(EXCHANGE_NAME, market_type);
+                let intervals = get_candlestick_intervals(EXCHANGE_NAME, market_type);
                 symbols
                     .iter()
                     .flat_map(|symbol| {
@@ -436,7 +521,6 @@ macro_rules! gen_crawl_candlestick {
             if symbol_interval_list.is_empty() {
                 panic!("symbol_interval_list is empty");
             }
-            println!("symbol_interval_list.len(): {}", symbol_interval_list.len());
             let real_symbols: Vec<String> =
                 symbol_interval_list.iter().map(|t| t.0.clone()).collect();
             let real_intervals: Vec<usize> = symbol_interval_list.iter().map(|t| t.1).collect();
@@ -451,16 +535,37 @@ macro_rules! gen_crawl_candlestick {
                 (on_msg.lock().unwrap())(message);
             }));
 
-            let on_msg_ext_clone = on_msg_ext.clone();
-            let intervals_clone = real_intervals.clone();
-            let mut subscribed_symbols = real_symbols.clone();
-            let create_symbol_discovery_thread = move || -> std::thread::JoinHandle<()> {
-                std::thread::spawn(move || {
-                    let ws_client = Arc::new($struct_name::new(on_msg_ext_clone, None));
+            let lock = WS_LOCKS
+                .get(EXCHANGE_NAME)
+                .unwrap()
+                .get(&market_type)
+                .unwrap()
+                .clone();
+
+            let thread = if automatic_symbol_discovery {
+                let on_msg_ext_clone = on_msg_ext.clone();
+                let intervals_clone = real_intervals.clone();
+                let mut subscribed_symbols = real_symbols.clone();
+                let lock_clone = lock.clone();
+                let thread = std::thread::spawn(move || {
+                    let ws_client = {
+                        let mut lock_ = lock_clone.lock().unwrap();
+                        let interval = get_connection_interval_ms(EXCHANGE_NAME, market_type);
+                        if interval.is_some() {
+                            lock_.lock().unwrap();
+                        }
+                        let ws_client = Arc::new($struct_name::new(on_msg_ext_clone, None));
+                        if let Some(interval) = interval {
+                            std::thread::sleep(Duration::from_millis(interval));
+                            lock_.unlock().unwrap();
+                        }
+                        ws_client
+                    };
                     let ws_client_clone = ws_client.clone();
                     let should_stop = Arc::new(AtomicBool::new(false));
                     let should_stop_clone = should_stop.clone();
                     std::thread::spawn(move || {
+                        let mut total_new_symbols = 0;
                         while !should_stop_clone.load(Ordering::Acquire) {
                             // update symbols every hour
                             std::thread::sleep(Duration::from_secs(3600));
@@ -488,11 +593,22 @@ macro_rules! gen_crawl_candlestick {
                                             .map(move |interval| (symbol.clone(), interval))
                                     })
                                     .collect::<Vec<(String, usize)>>();
-                                ws_client_clone
-                                    .subscribe_candlestick(&new_symbol_interval_list.as_slice());
+                                subscribe_with_lock!(
+                                    ws_client_clone,
+                                    EXCHANGE_NAME,
+                                    market_type,
+                                    subscribe_candlestick,
+                                    new_symbol_interval_list.as_slice(),
+                                    lock_clone
+                                );
                                 subscribed_symbols.append(&mut new_symbols);
                             }
-                            if subscribed_symbols.len() > MAX_SUBSCRIPTIONS_PER_CONNECTION {
+                            total_new_symbols += new_symbols.len();
+                            if total_new_symbols > MAX_SUBSCRIPTIONS_PER_CONNECTION {
+                                warn!(
+                                    "Found {} new symbols, restarting the process",
+                                    new_symbols.len()
+                                );
                                 std::process::exit(0); // restart the whole process
                             }
                         }
@@ -500,18 +616,37 @@ macro_rules! gen_crawl_candlestick {
                     ws_client.run(duration);
                     ws_client.close();
                     should_stop.store(true, Ordering::Release);
-                })
-            };
-
-            let thread = if automatic_symbol_discovery {
-                Some(create_symbol_discovery_thread())
+                });
+                Some(thread)
             } else {
                 None
             };
 
             if symbol_interval_list.len() <= MAX_SUBSCRIPTIONS_PER_CONNECTION {
-                let ws_client = $struct_name::new(on_msg_ext, None);
-                ws_client.subscribe_candlestick(symbol_interval_list.as_slice());
+                let lock_clone = lock.clone();
+                let on_msg_ext_clone = on_msg_ext.clone();
+                let ws_client = {
+                    let mut lock_ = lock_clone.lock().unwrap();
+                    let interval = get_connection_interval_ms(EXCHANGE_NAME, market_type);
+                    if interval.is_some() {
+                        lock_.lock().unwrap();
+                    }
+                    let ws_client = Arc::new($struct_name::new(on_msg_ext_clone, None));
+                    if let Some(interval) = interval {
+                        std::thread::sleep(Duration::from_millis(interval));
+                        lock_.unlock().unwrap();
+                    }
+                    ws_client
+                };
+                subscribe_with_lock!(
+                    ws_client,
+                    EXCHANGE_NAME,
+                    market_type,
+                    subscribe_candlestick,
+                    symbol_interval_list.as_slice(),
+                    lock_clone
+                );
+                drop(lock);
                 ws_client.run(duration);
                 ws_client.close();
             } else {
@@ -530,12 +665,31 @@ macro_rules! gen_crawl_candlestick {
                 assert!(chunks.len() > 1);
 
                 let mut join_handles: Vec<std::thread::JoinHandle<()>> = Vec::new();
-
                 for chunk in chunks.into_iter() {
                     let on_msg_ext_clone = on_msg_ext.clone();
+                    let lock_clone = lock.clone();
                     let handle = std::thread::spawn(move || {
-                        let ws_client = $struct_name::new(on_msg_ext_clone, None);
-                        ws_client.subscribe_candlestick(chunk.as_slice());
+                        let ws_client = {
+                            let mut lock_ = lock_clone.lock().unwrap();
+                            let interval = get_connection_interval_ms(EXCHANGE_NAME, market_type);
+                            if interval.is_some() {
+                                lock_.lock().unwrap();
+                            }
+                            let ws_client = Arc::new($struct_name::new(on_msg_ext_clone, None));
+                            if let Some(interval) = interval {
+                                std::thread::sleep(Duration::from_millis(interval));
+                                lock_.unlock().unwrap();
+                            }
+                            ws_client
+                        };
+                        subscribe_with_lock!(
+                            ws_client,
+                            EXCHANGE_NAME,
+                            market_type,
+                            subscribe_candlestick,
+                            chunk.as_slice(),
+                            lock_clone
+                        );
                         ws_client.run(duration);
                         ws_client.close();
                     });

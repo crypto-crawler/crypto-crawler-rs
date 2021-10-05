@@ -51,7 +51,9 @@ macro_rules! gen_test_snapshot_without_symbol_code {
     ($crawl_func:ident, $exchange:expr, $market_type:expr, $msg_type:expr) => {{
         let messages: Arc<Mutex<Vec<Message>>> = Arc::new(Mutex::new(Vec::new()));
         let messages_clone = messages.clone();
-        let on_msg = Arc::new(Mutex::new(move |msg: Message| messages_clone.lock().unwrap().push(msg)));
+        let on_msg = Arc::new(Mutex::new(move |msg: Message| {
+            messages_clone.lock().unwrap().push(msg)
+        }));
         let symbols = if $market_type == MarketType::Spot {
             let spot_symbols = fetch_symbols_retry($exchange, $market_type);
             get_hot_spot_symbols($exchange, &spot_symbols)
@@ -75,7 +77,9 @@ macro_rules! gen_test_crawl_candlestick {
     ($exchange:expr, $market_type:expr) => {{
         let messages: Arc<Mutex<Vec<Message>>> = Arc::new(Mutex::new(Vec::new()));
         let messages_clone = messages.clone();
-        let on_msg = Arc::new(Mutex::new(move |msg: Message| messages_clone.lock().unwrap().push(msg)));
+        let on_msg = Arc::new(Mutex::new(move |msg: Message| {
+            messages_clone.lock().unwrap().push(msg)
+        }));
         crawl_candlestick($exchange, $market_type, None, on_msg, Some(0));
         let messages = messages.lock().unwrap();
         assert!(!messages.is_empty());

@@ -5,7 +5,11 @@ use std::sync::{
 
 use std::time::Duration;
 
-use super::utils::{check_args, fetch_symbols_retry};
+use super::utils::{
+    check_args, fetch_symbols_retry, get_candlestick_intervals, get_connection_interval_ms,
+    get_send_interval_ms,
+};
+use crate::utils::WS_LOCKS;
 use crate::{msg::Message, MessageType};
 use crypto_markets::MarketType;
 use crypto_rest_client::*;
@@ -67,6 +71,9 @@ gen_crawl_event!(crawl_l2_topk, OkexWSClient, MessageType::L2TopK, subscribe_ord
 
 #[rustfmt::skip]
 gen_crawl_event!(crawl_ticker, OkexWSClient, MessageType::Ticker, subscribe_ticker);
+
+#[rustfmt::skip]
+gen_crawl_candlestick!(crawl_candlestick, OkexWSClient);
 
 #[allow(clippy::unnecessary_unwrap)]
 pub(crate) fn crawl_funding_rate(
