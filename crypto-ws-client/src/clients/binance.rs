@@ -105,9 +105,12 @@ impl<'a> BinanceWSClient<'a> {
             if let Some(result) = obj.get("result") {
                 if serde_json::Value::Null != *result {
                     panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                } else {
+                    info!("Received {} from {}", msg, EXCHANGE_NAME);
                 }
+            } else {
+                warn!("Received {} from {}", msg, EXCHANGE_NAME);
             }
-            warn!("Received {} from {}", msg, EXCHANGE_NAME);
             MiscMessage::Misc
         }
     }
