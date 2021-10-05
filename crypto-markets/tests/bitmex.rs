@@ -5,6 +5,31 @@ mod utils;
 
 const EXCHANGE_NAME: &str = "bitmex";
 
+fn get_market_type_from_symbol(symbol: &str) -> MarketType {
+    let date = &symbol[(symbol.len() - 2)..];
+    if date.parse::<i64>().is_ok() {
+        // future
+        if symbol.starts_with("XBT") {
+            // Settled in XBT, quoted in USD
+            MarketType::InverseFuture
+        } else if (&symbol[..(symbol.len() - 3)]).ends_with("USD") {
+            // Settled in XBT, quoted in USD
+            MarketType::QuantoFuture
+        } else {
+            // Settled in XBT, quoted in XBT
+            MarketType::LinearFuture
+        }
+    } else {
+        // swap
+        if symbol.starts_with("XBT") {
+            // Settled in XBT, quoted in USD
+            MarketType::InverseSwap
+        } else {
+            MarketType::QuantoSwap
+        }
+    }
+}
+
 #[test]
 fn fetch_all_symbols() {
     gen_all_symbols!();
@@ -22,6 +47,7 @@ fn fetch_inverse_swap_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("USD") || symbol.ends_with("EUR"));
+        assert_eq!(MarketType::InverseSwap, get_market_type_from_symbol(symbol));
     }
 }
 
@@ -31,6 +57,7 @@ fn fetch_quanto_swap_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("USD") || symbol.ends_with("USDT"));
+        assert_eq!(MarketType::QuantoSwap, get_market_type_from_symbol(symbol));
     }
 }
 
@@ -42,6 +69,10 @@ fn fetch_inverse_future_symbols() {
         assert!(symbol.starts_with("XBT"));
         let date = &symbol[(symbol.len() - 2)..];
         assert!(date.parse::<i64>().is_ok());
+        assert_eq!(
+            MarketType::InverseFuture,
+            get_market_type_from_symbol(symbol)
+        );
     }
 }
 
@@ -59,6 +90,10 @@ fn fetch_quanto_future_symbols() {
             &symbol[(symbol.len() - 6)..(symbol.len() - 3)]
         };
         assert!(quote == "USD" || quote == "USDT");
+        assert_eq!(
+            MarketType::QuantoFuture,
+            get_market_type_from_symbol(symbol)
+        );
     }
 }
 
@@ -69,5 +104,9 @@ fn fetch_linear_future_symbols() {
     for symbol in symbols.iter() {
         let date = &symbol[(symbol.len() - 2)..];
         assert!(date.parse::<i64>().is_ok());
+        assert_eq!(
+            MarketType::LinearFuture,
+            get_market_type_from_symbol(symbol)
+        );
     }
 }
