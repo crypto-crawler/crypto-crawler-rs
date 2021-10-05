@@ -76,6 +76,27 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<Stri
     }
 }
 
+fn get_market_type_from_symbol(symbol: &str) -> MarketType {
+    let date = &symbol[(symbol.len() - 2)..];
+    if date.parse::<i64>().is_ok() {
+        // future
+        if symbol.starts_with("XBT") {
+            MarketType::InverseFuture
+        } else if symbol.len() == 6 {
+            MarketType::LinearFuture
+        } else {
+            MarketType::QuantoFuture
+        }
+    } else {
+        // swap
+        if symbol.starts_with("XBT") {
+            MarketType::InverseSwap
+        } else {
+            MarketType::QuantoSwap
+        }
+    }
+}
+
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradeMsg>>(msg)?;
     let raw_trades = ws_msg.data;
@@ -84,7 +105,11 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         .map(|raw_trade| {
             // assert_eq!(raw_trade.foreignNotional, raw_trade.homeNotional * raw_trade.price); // tiny diff actually exists
             let timestamp = DateTime::parse_from_rfc3339(&raw_trade.timestamp).unwrap();
-
+            let market_type = if market_type == MarketType::Unknown {
+                get_market_type_from_symbol(&raw_trade.symbol)
+            } else {
+                market_type
+            };
             TradeMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type,
@@ -122,7 +147,11 @@ pub(crate) fn parse_funding_rate(
         .into_iter()
         .map(|raw_msg| {
             let settlement_time = DateTime::parse_from_rfc3339(&raw_msg.timestamp).unwrap();
-
+            let market_type = if market_type == MarketType::Unknown {
+                get_market_type_from_symbol(&raw_msg.symbol)
+            } else {
+                market_type
+            };
             FundingRateMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type,
@@ -163,6 +192,11 @@ pub(crate) fn parse_l2(
         }
         let symbol = ws_msg.data[0].symbol.clone();
         let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+        let market_type = if market_type == MarketType::Unknown {
+            get_market_type_from_symbol(&symbol)
+        } else {
+            market_type
+        };
 
         if ws_msg.action == "insert" || ws_msg.action == "partial" {
             if !price_map.contains_key(&symbol) {
