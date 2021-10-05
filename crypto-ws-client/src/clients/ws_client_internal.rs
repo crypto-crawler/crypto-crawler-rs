@@ -88,6 +88,14 @@ impl<'a> WSClientInternal<'a> {
         self.subscribe_or_unsubscribe(channels, false);
     }
 
+    fn get_send_interval_ms(&self) -> Option<u64> {
+        match self.exchange {
+            "binance" => Some(100), // WebSocket connections have a limit of 10 incoming messages per second
+            "kucoin" => Some(100),  //  Message limit sent to the server: 100 per 10 seconds
+            _ => None,
+        }
+    }
+
     fn subscribe_or_unsubscribe(&self, channels: &[String], subscribe: bool) {
         let mut diff = Vec::<String>::new();
         {
@@ -106,6 +114,9 @@ impl<'a> WSClientInternal<'a> {
                 let ret = ws_stream.write_message(Message::Text(command));
                 if let Err(err) = ret {
                     error!("{}", err);
+                }
+                if let Some(interval) = self.get_send_interval_ms() {
+                    std::thread::sleep(Duration::from_millis(interval));
                 }
             });
         }
@@ -143,6 +154,9 @@ impl<'a> WSClientInternal<'a> {
                 let ret = ws_stream.write_message(Message::Text(command));
                 if let Err(err) = ret {
                     error!("{}", err);
+                }
+                if let Some(interval) = self.get_send_interval_ms() {
+                    std::thread::sleep(Duration::from_millis(interval));
                 }
             });
         }
@@ -303,9 +317,11 @@ impl<'a> WSClientInternal<'a> {
                                 info!("Ignoring SIGHUP");
                             } else {
                                 error!(
-                                    "I/O error thrown from read_message(): {}, {:?}",
+                                    "I/O error thrown from read_message(): {}, {:?} {} {}",
                                     io_err,
-                                    io_err.kind()
+                                    io_err.kind(),
+                                    self.exchange,
+                                    self.url
                                 );
                                 // self.reconnect();
                                 std::thread::sleep(Duration::from_secs(5));
