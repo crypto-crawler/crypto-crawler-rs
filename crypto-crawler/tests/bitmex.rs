@@ -72,6 +72,27 @@ fn test_crawl_funding_rate_all() {
     crawl_all(MessageType::FundingRate);
 }
 
+#[test]
+fn test_crawl_candlestick_rate_all() {
+    thread_local! {
+        static MESSAGES: RefCell<Vec<Message>> = RefCell::new(Vec::new());
+    }
+
+    let on_msg = Arc::new(Mutex::new(|msg: Message| {
+        MESSAGES.with(|messages| messages.borrow_mut().push(msg))
+    }));
+    crawl_candlestick(EXCHANGE_NAME, MarketType::Unknown, None, on_msg, Some(0));
+
+    MESSAGES.with(|slf| {
+        let messages = slf.borrow();
+
+        assert!(!messages.is_empty());
+        assert_eq!(messages[0].exchange, EXCHANGE_NAME.to_string());
+        assert_eq!(messages[0].market_type, MarketType::Unknown);
+        assert_eq!(messages[0].msg_type, MessageType::Candlestick);
+    });
+}
+
 #[test_case(MarketType::InverseSwap, "XBTUSD")]
 #[test_case(MarketType::QuantoSwap, "ETHUSD")]
 fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {

@@ -328,6 +328,19 @@ pub fn crawl_candlestick(
 ) {
     let func = match exchange {
         "binance" => crawlers::binance::crawl_candlestick,
+        "bitfinex" => crawlers::bitfinex::crawl_candlestick,
+        "bitget" => crawlers::bitget::crawl_candlestick,
+        "bitmex" => crawlers::bitmex::crawl_candlestick,
+        "bitz" => crawlers::bitz::crawl_candlestick,
+        "bybit" => crawlers::bybit::crawl_candlestick,
+        "deribit" => crawlers::deribit::crawl_candlestick,
+        "gate" => crawlers::gate::crawl_candlestick,
+        "huobi" => crawlers::huobi::crawl_candlestick,
+        "kraken" => crawlers::kraken::crawl_candlestick,
+        "kucoin" => crawlers::kucoin::crawl_candlestick,
+        "mxc" => crawlers::mxc::crawl_candlestick,
+        "okex" => crawlers::okex::crawl_candlestick,
+        "zbg" => crawlers::zbg::crawl_candlestick,
         _ => panic!("Unknown exchange {}", exchange),
     };
     let handle = func(market_type, symbol_interval_list, on_msg, duration);

@@ -91,19 +91,19 @@ impl_trait!(OrderBook, BithumbWSClient, subscribe_orderbook, "ORDERBOOK", to_raw
 
 impl<'a> BBO for BithumbWSClient<'a> {
     fn subscribe_bbo(&self, _pairs: &[String]) {
-        panic!("CoinbasePro WebSocket does NOT have BBO channel");
+        panic!("bithumb WebSocket does NOT have BBO channel");
     }
 }
 
 impl<'a> OrderBookTopK for BithumbWSClient<'a> {
     fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
-        panic!("CoinbasePro does NOT have orderbook snapshot channel");
+        panic!("bithumb does NOT have orderbook snapshot channel");
     }
 }
 
 impl<'a> Candlestick for BithumbWSClient<'a> {
     fn subscribe_candlestick(&self, _symbol_interval_list: &[(String, usize)]) {
-        panic!("CoinbasePro does NOT have candlestick channel");
+        panic!("bithumb does NOT have candlestick channel");
     }
 }
 

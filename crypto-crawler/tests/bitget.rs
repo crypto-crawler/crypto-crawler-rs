@@ -97,3 +97,9 @@ fn test_crawl_funding_rate(market_type: MarketType, symbol: &str) {
         MessageType::FundingRate
     )
 }
+
+#[test_case(MarketType::InverseSwap)]
+#[test_case(MarketType::LinearSwap)]
+fn test_crawl_candlestick(market_type: MarketType) {
+    gen_test_crawl_candlestick!(EXCHANGE_NAME, market_type)
+}

@@ -5,7 +5,11 @@ use std::sync::{
 
 use std::time::Duration;
 
-use super::utils::{check_args, fetch_symbols_retry};
+use super::utils::{
+    check_args, fetch_symbols_retry, get_candlestick_intervals, get_connection_interval_ms,
+    get_send_interval_ms,
+};
+use crate::utils::WS_LOCKS;
 use crate::{msg::Message, MessageType};
 use crypto_markets::MarketType;
 use crypto_ws_client::*;
@@ -23,6 +27,8 @@ gen_crawl_event!(crawl_l2_event_swap, BitgetSwapWSClient, MessageType::L2Event, 
 gen_crawl_event!(crawl_l2_topk_swap, BitgetSwapWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_ticker_swap, BitgetSwapWSClient, MessageType::Ticker, subscribe_ticker);
+#[rustfmt::skip]
+gen_crawl_candlestick!(crawl_candlestick_swap, BitgetSwapWSClient);
 
 pub(crate) fn crawl_trade(
     market_type: MarketType,
@@ -118,5 +124,19 @@ pub(crate) fn crawl_funding_rate(
             ws_client.run(duration);
         }
         _ => panic!("Bitget {} does NOT have funding rates", market_type),
+    }
+}
+
+pub(crate) fn crawl_candlestick(
+    market_type: MarketType,
+    symbol_interval_list: Option<&[(String, usize)]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) -> Option<std::thread::JoinHandle<()>> {
+    match market_type {
+        MarketType::InverseSwap | MarketType::LinearSwap => {
+            crawl_candlestick_swap(market_type, symbol_interval_list, on_msg, duration)
+        }
+        _ => panic!("Bitget does NOT have the {} market type", market_type),
     }
 }

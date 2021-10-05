@@ -7,7 +7,11 @@ use std::{
     time::Duration,
 };
 
-use super::utils::{check_args, fetch_symbols_retry, get_all_intervals};
+use super::utils::{
+    check_args, fetch_symbols_retry, get_candlestick_intervals, get_connection_interval_ms,
+    get_send_interval_ms,
+};
+use crate::utils::WS_LOCKS;
 use crate::{msg::Message, MessageType};
 use crypto_markets::MarketType;
 use crypto_ws_client::*;

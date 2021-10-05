@@ -5,7 +5,11 @@ use std::sync::{
 
 use std::time::Duration;
 
-use super::utils::{check_args, fetch_symbols_retry};
+use super::utils::{
+    check_args, fetch_symbols_retry, get_candlestick_intervals, get_connection_interval_ms,
+    get_send_interval_ms,
+};
+use crate::utils::WS_LOCKS;
 use crate::{msg::Message, MessageType};
 use crypto_markets::MarketType;
 use crypto_ws_client::*;
@@ -67,6 +71,17 @@ gen_crawl_event!(crawl_ticker_linear_swap, HuobiLinearSwapWSClient, MessageType:
 gen_crawl_event!(crawl_ticker_inverse_swap, HuobiInverseSwapWSClient, MessageType::Ticker, subscribe_ticker);
 #[rustfmt::skip]
 gen_crawl_event!(crawl_ticker_option, HuobiOptionWSClient, MessageType::Ticker, subscribe_ticker);
+
+#[rustfmt::skip]
+gen_crawl_candlestick!(crawl_candlestick_spot, HuobiSpotWSClient);
+#[rustfmt::skip]
+gen_crawl_candlestick!(crawl_candlestick_inverse_future, HuobiFutureWSClient);
+#[rustfmt::skip]
+gen_crawl_candlestick!(crawl_candlestick_linear_swap, HuobiLinearSwapWSClient);
+#[rustfmt::skip]
+gen_crawl_candlestick!(crawl_candlestick_inverse_swap, HuobiInverseSwapWSClient);
+#[rustfmt::skip]
+gen_crawl_candlestick!(crawl_candlestick_option, HuobiOptionWSClient);
 
 pub(crate) fn crawl_trade(
     market_type: MarketType,
@@ -236,5 +251,31 @@ pub(crate) fn crawl_funding_rate(
             ws_client.run(duration);
         }
         _ => panic!("Huobi {} does NOT have funding rates", market_type),
+    }
+}
+
+pub(crate) fn crawl_candlestick(
+    market_type: MarketType,
+    symbol_interval_list: Option<&[(String, usize)]>,
+    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    duration: Option<u64>,
+) -> Option<std::thread::JoinHandle<()>> {
+    match market_type {
+        MarketType::Spot => {
+            crawl_candlestick_spot(market_type, symbol_interval_list, on_msg, duration)
+        }
+        MarketType::InverseFuture => {
+            crawl_candlestick_inverse_future(market_type, symbol_interval_list, on_msg, duration)
+        }
+        MarketType::LinearSwap => {
+            crawl_candlestick_linear_swap(market_type, symbol_interval_list, on_msg, duration)
+        }
+        MarketType::InverseSwap => {
+            crawl_candlestick_inverse_swap(market_type, symbol_interval_list, on_msg, duration)
+        }
+        MarketType::EuropeanOption => {
+            crawl_candlestick_option(market_type, symbol_interval_list, on_msg, duration)
+        }
+        _ => panic!("Huobi does NOT have the {} market type", market_type),
     }
 }
