@@ -9,7 +9,7 @@ use chrono::DateTime;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::{BTreeMap, HashMap};
 
 const EXCHANGE_NAME: &str = "bitmex";
 
@@ -74,71 +74,6 @@ lazy_static! {
     };
 }
 
-fn fetch_active_symbols() -> BTreeSet<String> {
-    let mut active_symbols: BTreeSet<String> = vec![
-        "AAVEUSDT",
-        "ADAUSD",
-        "ADAUSDT",
-        "ADAZ21",
-        "ALTMEXUSD",
-        "AVAXUSD",
-        "AXSUSDT",
-        "BCHUSD",
-        "BCHZ21",
-        "BNBUSD",
-        "BNBUSDT",
-        "DEFIMEXUSD",
-        "DOGEUSD",
-        "DOGEUSDT",
-        "DOTUSD",
-        "DOTUSDT",
-        "EOSUSDT",
-        "EOSZ21",
-        "ETHUSD",
-        "ETHUSDZ21",
-        "ETHZ21",
-        "FILUSDT",
-        "LINKUSDT",
-        "LTCUSD",
-        "LTCZ21",
-        "LUNAUSD",
-        "MATICUSDT",
-        "SOLUSDT",
-        "SRMUSDT",
-        "SUSHIUSDT",
-        "TRXUSDT",
-        "TRXZ21",
-        "UNIUSDT",
-        "VETUSDT",
-        "XBTEUR",
-        "XBTEURZ21",
-        "XBTH22",
-        "XBTUSD",
-        "XBTV21",
-        "XBTZ21",
-        "XLMUSDT",
-        "XRPUSD",
-        "XRPZ21",
-    ]
-    .into_iter()
-    .map(|x| (x.to_string()))
-    .collect();
-    if let Ok(txt) = http_get("https://www.bitmex.com/api/v1/instrument/active") {
-        if let Ok(instruments) = serde_json::from_str::<Vec<HashMap<String, Value>>>(&txt) {
-            for instrument in instruments {
-                let symbol = instrument
-                    .get("symbol")
-                    .unwrap()
-                    .as_str()
-                    .unwrap()
-                    .to_string();
-                active_symbols.insert(symbol);
-            }
-        }
-    }
-    active_symbols
-}
-
 fn fetch_tick_sizes() -> BTreeMap<String, (usize, f64)> {
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
@@ -147,7 +82,6 @@ fn fetch_tick_sizes() -> BTreeMap<String, (usize, f64)> {
         timestamp: String,
         tickSize: f64,
     }
-    let active_symbols = fetch_active_symbols();
     let mut m: BTreeMap<String, (usize, f64)> = BTreeMap::new();
     let mut start = 0_usize;
     loop {
@@ -159,14 +93,12 @@ fn fetch_tick_sizes() -> BTreeMap<String, (usize, f64)> {
             if let Ok(tick_sizes) = serde_json::from_str::<Vec<TickSize>>(&txt) {
                 let n = tick_sizes.len();
                 for (index, tick_size) in tick_sizes.into_iter().enumerate() {
-                    if active_symbols.contains(&tick_size.symbol) {
-                        let real_tick_size = if tick_size.symbol == "XBTUSD" {
-                            0.01 // legacy reason, see https://www.bitmex.com/app/wsAPI#OrderBookL2
-                        } else {
-                            tick_size.tickSize
-                        };
-                        m.insert(tick_size.symbol, (index, real_tick_size));
-                    }
+                    let real_tick_size = if tick_size.symbol == "XBTUSD" {
+                        0.01 // legacy reason, see https://www.bitmex.com/app/wsAPI#OrderBookL2
+                    } else {
+                        tick_size.tickSize
+                    };
+                    m.insert(tick_size.symbol, (index, real_tick_size));
                 }
                 if n < 500 {
                     break;
@@ -176,7 +108,6 @@ fn fetch_tick_sizes() -> BTreeMap<String, (usize, f64)> {
             }
         }
     }
-    assert_eq!(active_symbols.len(), m.len());
     m
 }
 
@@ -416,14 +347,33 @@ pub(crate) fn parse_l2(
 
 #[cfg(test)]
 mod tests {
+    use std::collections::{BTreeSet, HashMap};
+
+    use serde_json::Value;
+
+    use crate::exchanges::utils::http_get;
+
+    fn fetch_active_symbols() -> BTreeSet<String> {
+        let mut active_symbols: BTreeSet<String> = BTreeSet::new();
+        let txt = http_get("https://www.bitmex.com/api/v1/instrument/active").unwrap();
+        let instruments = serde_json::from_str::<Vec<HashMap<String, Value>>>(&txt).unwrap();
+        for instrument in instruments {
+            let symbol = instrument
+                .get("symbol")
+                .unwrap()
+                .as_str()
+                .unwrap()
+                .to_string();
+            active_symbols.insert(symbol);
+        }
+        active_symbols
+    }
+
     #[test]
     #[ignore]
     fn test_fetch_active_symbols() {
-        let active_symbols = super::fetch_active_symbols();
+        let active_symbols = fetch_active_symbols();
         assert!(active_symbols.len() > 0);
-        for symbol in active_symbols {
-            println!("\"{}\",", symbol);
-        }
     }
 
     #[test]
@@ -431,8 +381,11 @@ mod tests {
     fn test_fetch_tick_sizes() {
         let tick_sizes = super::fetch_tick_sizes();
         assert!(tick_sizes.len() > 0);
+        let active_symbols = fetch_active_symbols();
         for (symbol, tick_size) in tick_sizes {
-            println!("(\"{}\", ({}, {})),", symbol, tick_size.0, tick_size.1);
+            if active_symbols.contains(&symbol) {
+                println!("(\"{}\", ({}, {})),", symbol, tick_size.0, tick_size.1);
+            }
         }
     }
 
