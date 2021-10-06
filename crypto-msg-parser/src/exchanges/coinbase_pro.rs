@@ -132,16 +132,8 @@ pub(crate) fn parse_l2(
             pair,
             msg_type: MessageType::L2Event,
             timestamp: timestamp.expect("Coinbase level2 snapshot messages don't have timestamp"),
-            asks: orderbook_snapshot
-                .asks
-                .iter()
-                .map(|x| parse_order(x))
-                .collect(),
-            bids: orderbook_snapshot
-                .bids
-                .iter()
-                .map(|x| parse_order(x))
-                .collect(),
+            asks: orderbook_snapshot.asks.iter().map(parse_order).collect(),
+            bids: orderbook_snapshot.bids.iter().map(parse_order).collect(),
             snapshot,
             json: msg.to_string(),
         };
@@ -164,13 +156,13 @@ pub(crate) fn parse_l2(
                 .changes
                 .iter()
                 .filter(|x| x[0] == "sell")
-                .map(|x| parse_change(x))
+                .map(parse_change)
                 .collect(),
             bids: orderbook_updates
                 .changes
                 .iter()
                 .filter(|x| x[0] == "buy")
-                .map(|x| parse_change(x))
+                .map(parse_change)
                 .collect(),
             snapshot,
             json: msg.to_string(),

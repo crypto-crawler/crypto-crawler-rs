@@ -132,12 +132,12 @@ fn parse_l2_update(msg: &str) -> Result<Vec<OrderBookMsg>> {
         msg_type: MessageType::L2Event,
         timestamp: result.t,
         asks: if let Some(asks) = result.a {
-            asks.iter().map(|x| parse_order(x)).collect()
+            asks.iter().map(parse_order).collect()
         } else {
             Vec::new()
         },
         bids: if let Some(bids) = result.b {
-            bids.iter().map(|x| parse_order(x)).collect()
+            bids.iter().map(parse_order).collect()
         } else {
             Vec::new()
         },

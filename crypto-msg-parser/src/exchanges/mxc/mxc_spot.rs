@@ -118,12 +118,12 @@ pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>> {
         msg_type: MessageType::L2Event,
         timestamp,
         asks: if let Some(asks) = ws_msg.data.asks {
-            asks.iter().map(|x| parse_order(x)).collect::<Vec<Order>>()
+            asks.iter().map(parse_order).collect::<Vec<Order>>()
         } else {
             Vec::new()
         },
         bids: if let Some(bids) = ws_msg.data.bids {
-            bids.iter().map(|x| parse_order(x)).collect::<Vec<Order>>()
+            bids.iter().map(parse_order).collect::<Vec<Order>>()
         } else {
             Vec::new()
         },
