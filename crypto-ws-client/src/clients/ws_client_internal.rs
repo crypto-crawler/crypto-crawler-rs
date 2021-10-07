@@ -403,11 +403,17 @@ impl<'a> WSClientInternal<'a> {
 /// Define exchange specific client.
 macro_rules! define_client {
     ($struct_name:ident, $exchange:ident, $default_url:expr, $channels_to_commands:ident, $on_misc_msg:ident, $client_ping_interval_and_msg:expr, $server_ping_interval:expr) => {
-        impl<'a> WSClient<'a> for $struct_name<'a> {
-            fn new(
+        impl<'a> $struct_name<'a> {
+            /// Creates a websocket client.
+            ///
+            /// # Arguments
+            ///
+            /// * `on_msg` - A callback function to process websocket messages
+            /// * `url` - Optional server url, usually you don't need specify it
+            pub fn new(
                 on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>,
                 url: Option<&str>,
-            ) -> $struct_name<'a> {
+            ) -> Self {
                 let real_url = match url {
                     Some(endpoint) => endpoint,
                     None => $default_url,
@@ -424,7 +430,9 @@ macro_rules! define_client {
                     ),
                 }
             }
+        }
 
+        impl<'a> WSClient<'a> for $struct_name<'a> {
             fn subscribe_trade(&self, channels: &[String]) {
                 <$struct_name as Trade>::subscribe_trade(self, channels);
             }
