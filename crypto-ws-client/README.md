@@ -10,13 +10,14 @@ A versatile websocket client that supports many cryptocurrency exchanges.
 ## Usage
 
 ```rust
+use std::sync::{Arc, Mutex};
 use crypto_ws_client::{BinanceSpotWSClient, WSClient};
 
 fn main() {
-    let mut ws_client = BinanceSpotWSClient::new(Box::new(|msg| println!("{}", msg)), None);
+    let mut ws_client = BinanceSpotWSClient::new(Arc::new(Mutex::new(|msg| println!("{}", msg))), None);
     let channels = vec!["btcusdt@aggTrade".to_string(), "btcusdt@depth".to_string(),];
     ws_client.subscribe(&channels);
-    ws_client.run(None);
+    ws_client.run(Some(2)); // run for 2 seconds
 }
 ```
 
