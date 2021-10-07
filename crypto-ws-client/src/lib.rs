@@ -61,8 +61,6 @@
 
 mod clients;
 
-use std::sync::{Arc, Mutex};
-
 pub use clients::binance::*;
 pub use clients::binance_option::*;
 // pub use clients::bitfinex::*;
@@ -86,14 +84,6 @@ pub use clients::zbg::*;
 
 /// The public interface of every WebSocket client.
 pub trait WSClient<'a> {
-    /// Creates a new client.
-    ///
-    /// # Arguments
-    ///
-    /// * `on_msg` - A callback function to process original JSON messages
-    /// * `url` - Optional server url, usually you don't need specify it
-    fn new(on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, url: Option<&str>) -> Self;
-
     /// Subscribes to trade channels.
     ///
     /// A trade channel sends tick-by-tick trade data,  which is the complete

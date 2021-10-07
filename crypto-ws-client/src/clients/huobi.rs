@@ -230,8 +230,17 @@ impl_candlestick!(HuobiWSClient);
 /// Define market specific client.
 macro_rules! define_market_client {
     ($struct_name:ident, $default_url:ident) => {
-        impl<'a> WSClient<'a> for $struct_name<'a> {
-            fn new(on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, url: Option<&str>) -> Self {
+        impl<'a> $struct_name<'a> {
+            /// Creates a Huobi websocket client.
+            ///
+            /// # Arguments
+            ///
+            /// * `on_msg` - A callback function to process websocket messages
+            /// * `url` - Optional server url, usually you don't need specify it
+            pub fn new(
+                on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>,
+                url: Option<&str>,
+            ) -> Self {
                 let real_url = match url {
                     Some(endpoint) => endpoint,
                     None => $default_url,
@@ -240,7 +249,9 @@ macro_rules! define_market_client {
                     client: HuobiWSClient::new(real_url, on_msg),
                 }
             }
+        }
 
+        impl<'a> WSClient<'a> for $struct_name<'a> {
             fn subscribe_trade(&self, channels: &[String]) {
                 <$struct_name as Trade>::subscribe_trade(self, channels);
             }

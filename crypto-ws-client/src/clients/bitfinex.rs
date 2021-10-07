@@ -40,6 +40,25 @@ pub struct BitfinexWSClient<'a> {
     should_stop: AtomicBool,          // used by close() and run()
 }
 
+impl<'a> BitfinexWSClient<'a> {
+    /// Creates a Bitfinex websocket client.
+    ///
+    /// # Arguments
+    ///
+    /// * `on_msg` - A callback function to process websocket messages
+    /// * `url` - Optional server url, usually you don't need specify it
+    pub fn new(on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, _url: Option<&str>) -> Self {
+        let stream = connect_with_retry(WEBSOCKET_URL, Some(SERVER_PING_INTERVAL));
+        BitfinexWSClient {
+            ws_stream: Mutex::new(stream),
+            channels: Mutex::new(HashSet::new()),
+            on_msg,
+            channel_id_meta: Mutex::new(HashMap::new()),
+            should_stop: AtomicBool::new(false),
+        }
+    }
+}
+
 fn channel_to_command(channel: &str, subscribe: bool) -> String {
     if channel.starts_with('{') {
         return channel.to_string();
@@ -385,17 +404,6 @@ impl<'a> BitfinexWSClient<'a> {
 }
 
 impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
-    fn new(on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, _url: Option<&str>) -> Self {
-        let stream = connect_with_retry(WEBSOCKET_URL, Some(SERVER_PING_INTERVAL));
-        BitfinexWSClient {
-            ws_stream: Mutex::new(stream),
-            channels: Mutex::new(HashSet::new()),
-            on_msg,
-            channel_id_meta: Mutex::new(HashMap::new()),
-            should_stop: AtomicBool::new(false),
-        }
-    }
-
     fn subscribe_trade(&self, channels: &[String]) {
         <Self as Trade>::subscribe_trade(self, channels);
     }
