@@ -13,7 +13,7 @@ fn crawl_all(
     msg_type: MessageType,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) -> Option<std::thread::JoinHandle<()>> {
+) {
     let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
         let message = Message::new(
             EXCHANGE_NAME.to_string(),
@@ -38,7 +38,6 @@ fn crawl_all(
     let ws_client = BitmexWSClient::new(on_msg_ext, None);
     ws_client.subscribe(channels.as_slice());
     ws_client.run(duration);
-    None
 }
 
 pub(crate) fn crawl_trade(
@@ -46,7 +45,7 @@ pub(crate) fn crawl_trade(
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) -> Option<std::thread::JoinHandle<()>> {
+) {
     if market_type == MarketType::Unknown {
         // crawl all symbols
         crawl_all(MessageType::Trade, on_msg, duration)
@@ -58,7 +57,7 @@ pub(crate) fn crawl_trade(
             symbols,
             on_msg,
             duration,
-        )
+        );
     }
 }
 
@@ -67,10 +66,10 @@ pub(crate) fn crawl_l2_event(
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) -> Option<std::thread::JoinHandle<()>> {
+) {
     if market_type == MarketType::Unknown {
         // crawl all symbols
-        crawl_all(MessageType::L2Event, on_msg, duration)
+        crawl_all(MessageType::L2Event, on_msg, duration);
     } else {
         crawl_event(
             EXCHANGE_NAME,
@@ -79,7 +78,7 @@ pub(crate) fn crawl_l2_event(
             symbols,
             on_msg,
             duration,
-        )
+        );
     }
 }
 
@@ -88,10 +87,10 @@ pub(crate) fn crawl_bbo(
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) -> Option<std::thread::JoinHandle<()>> {
+) {
     if market_type == MarketType::Unknown {
         // crawl all symbols
-        crawl_all(MessageType::BBO, on_msg, duration)
+        crawl_all(MessageType::BBO, on_msg, duration);
     } else {
         crawl_event(
             EXCHANGE_NAME,
@@ -100,7 +99,7 @@ pub(crate) fn crawl_bbo(
             symbols,
             on_msg,
             duration,
-        )
+        );
     }
 }
 
@@ -109,10 +108,10 @@ pub(crate) fn crawl_l2_topk(
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) -> Option<std::thread::JoinHandle<()>> {
+) {
     if market_type == MarketType::Unknown {
         // crawl all symbols
-        crawl_all(MessageType::L2TopK, on_msg, duration)
+        crawl_all(MessageType::L2TopK, on_msg, duration);
     } else {
         crawl_event(
             EXCHANGE_NAME,
@@ -121,7 +120,7 @@ pub(crate) fn crawl_l2_topk(
             symbols,
             on_msg,
             duration,
-        )
+        );
     }
 }
 
@@ -187,7 +186,7 @@ pub(crate) fn crawl_candlestick(
     symbol_interval_list: Option<&[(String, usize)]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) -> Option<std::thread::JoinHandle<()>> {
+) {
     if market_type == MarketType::Unknown {
         let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
             let message = Message::new(
@@ -204,7 +203,6 @@ pub(crate) fn crawl_candlestick(
         let ws_client = BitmexWSClient::new(on_msg_ext, None);
         ws_client.subscribe(channels.as_slice());
         ws_client.run(duration);
-        None
     } else {
         crawl_candlestick_ext(
             EXCHANGE_NAME,
@@ -212,6 +210,6 @@ pub(crate) fn crawl_candlestick(
             symbol_interval_list,
             on_msg,
             duration,
-        )
+        );
     }
 }
