@@ -25,6 +25,7 @@ pub(super) enum MiscMessage {
     Normal,             // Normal message will be passed to on_msg
 }
 
+// `WSClientInternal` should be Sync + Send so that it can be put into Arc directly.
 pub(super) struct WSClientInternal {
     exchange: &'static str, // Eexchange name
     pub(super) url: String, // Websocket base url
