@@ -2,7 +2,7 @@ use crate::WSClient;
 use std::sync::{Arc, Mutex};
 
 use super::super::ws_client_internal::WSClientInternal;
-use super::super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
+use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 use super::utils::{
     channels_to_commands, on_misc_msg, to_candlestick_raw_channel_shared, to_raw_channel,
     CLIENT_PING_INTERVAL_AND_MSG, EXCHANGE_NAME,
@@ -69,6 +69,9 @@ fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
 
 impl_candlestick!(GateInverseFutureWSClient);
 impl_candlestick!(GateLinearFutureWSClient);
+
+panic_l3_orderbook!(GateInverseFutureWSClient);
+panic_l3_orderbook!(GateLinearFutureWSClient);
 
 define_client!(
     GateInverseFutureWSClient,

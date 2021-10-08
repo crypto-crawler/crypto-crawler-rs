@@ -24,6 +24,15 @@ pub(super) trait OrderBookTopK {
     fn subscribe_orderbook_topk(&self, pairs: &[String]);
 }
 
+/// Level3 orderbook data.
+pub(super) trait Level3OrderBook {
+    /// Subscribes to level3 orderebook channels.
+    ///
+    /// The level3 orderbook is the orginal orderbook of an exchange, it is
+    /// non-aggregated by price level and updated tick-by-tick.
+    fn subscribe_l3_orderbook(&self, symbols: &[String]);
+}
+
 pub(super) trait Candlestick {
     /// Subscribes to candlestick channels which send OHLCV messages.
     ///
@@ -56,6 +65,16 @@ macro_rules! impl_candlestick {
                     .map(|(symbol, interval)| to_candlestick_raw_channel(&symbol, *interval))
                     .collect();
                 self.client.subscribe(&raw_channels);
+            }
+        }
+    };
+}
+
+macro_rules! panic_l3_orderbook {
+    ($struct_name:ident) => {
+        impl<'a> Level3OrderBook for $struct_name<'a> {
+            fn subscribe_l3_orderbook(&self, _symbols: &[String]) {
+                panic!("{} does NOT have level3 websocket channel", EXCHANGE_NAME);
             }
         }
     };

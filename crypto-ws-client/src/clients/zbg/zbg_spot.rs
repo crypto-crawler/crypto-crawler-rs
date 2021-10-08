@@ -5,7 +5,7 @@ use std::{
 };
 
 use super::super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
+use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 use super::utils::fetch_symbol_id_map_spot;
 
 use lazy_static::lazy_static;
@@ -135,6 +135,8 @@ fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
 }
 
 impl_candlestick!(ZbgSpotWSClient);
+
+panic_l3_orderbook!(ZbgSpotWSClient);
 
 define_client!(
     ZbgSpotWSClient,

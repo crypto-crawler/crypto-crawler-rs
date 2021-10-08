@@ -1,4 +1,4 @@
-use crypto_ws_client::{BitstampWSClient, Level3OrderBook, WSClient};
+use crypto_ws_client::{BitstampWSClient, WSClient};
 use std::sync::{Arc, Mutex};
 
 #[macro_use]

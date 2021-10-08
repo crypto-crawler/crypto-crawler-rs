@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use super::super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
+use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 use crate::clients::utils::{ensure_frame_size, WS_FRAME_SIZE};
 
 use log::*;
@@ -109,6 +109,8 @@ fn to_candlestick_raw_channel(symbol: &str, interval: usize) -> String {
 }
 
 impl_candlestick!(BitgetSwapWSClient);
+
+panic_l3_orderbook!(BitgetSwapWSClient);
 
 define_client!(
     BitgetSwapWSClient,

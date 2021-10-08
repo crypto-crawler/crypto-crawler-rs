@@ -1,9 +1,9 @@
-use crate::{Level3OrderBook, WSClient};
+use crate::WSClient;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
+use super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 use log::*;
 use serde_json::Value;
 

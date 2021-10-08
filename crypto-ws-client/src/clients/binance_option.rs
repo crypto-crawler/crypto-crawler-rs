@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use super::{
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
+    Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
 };
 use log::*;
 use serde_json::Value;
@@ -120,3 +120,5 @@ fn to_candlestick_raw_channel(symbol: &str, interval: usize) -> String {
 }
 
 impl_candlestick!(BinanceOptionWSClient);
+
+panic_l3_orderbook!(BinanceOptionWSClient);

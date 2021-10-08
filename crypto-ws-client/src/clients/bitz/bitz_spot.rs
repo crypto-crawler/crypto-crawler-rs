@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use super::super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
+use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 
 use log::*;
 use serde_json::Value;
@@ -155,6 +155,8 @@ fn to_candlestick_raw_channel(symbol: &str, interval: usize) -> String {
 }
 
 impl_candlestick!(BitzSpotWSClient);
+
+panic_l3_orderbook!(BitzSpotWSClient);
 
 define_client!(
     BitzSpotWSClient,

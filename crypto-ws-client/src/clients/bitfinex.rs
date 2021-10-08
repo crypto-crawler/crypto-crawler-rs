@@ -1,4 +1,4 @@
-use crate::{Level3OrderBook, WSClient};
+use crate::WSClient;
 
 use std::sync::{
     atomic::{AtomicBool, Ordering},
@@ -11,7 +11,7 @@ use std::{
 
 use super::{
     utils::{connect_with_retry, CHANNEL_PAIR_DELIMITER},
-    Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
+    Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
 };
 
 use log::*;
@@ -414,6 +414,10 @@ impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
 
     fn subscribe_orderbook_topk(&self, channels: &[String]) {
         <Self as OrderBookTopK>::subscribe_orderbook_topk(self, channels);
+    }
+
+    fn subscribe_l3_orderbook(&self, channels: &[String]) {
+        <Self as Level3OrderBook>::subscribe_l3_orderbook(self, channels);
     }
 
     fn subscribe_ticker(&self, channels: &[String]) {
