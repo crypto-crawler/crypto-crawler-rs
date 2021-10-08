@@ -30,7 +30,7 @@ pub(super) struct WSClientInternal {
     pub(super) url: String, // Websocket base url
     ws_stream: Mutex<WebSocket<AutoStream>>,
     channels: Mutex<HashSet<String>>,     // subscribed channels
-    tx: Sender<String>,                   // The sending half of a channel
+    tx: Mutex<Sender<String>>,            // The sending half of a channel
     on_misc_msg: fn(&str) -> MiscMessage, // handle misc messages
     // converts raw channels to subscribe/unsubscribe commands
     channels_to_commands: fn(&[String], bool) -> Vec<String>,
@@ -70,7 +70,7 @@ impl WSClientInternal {
             exchange,
             url: url.to_string(),
             ws_stream: Mutex::new(stream),
-            tx,
+            tx: Mutex::new(tx),
             on_misc_msg,
             channels: Mutex::new(HashSet::new()),
             channels_to_commands,
@@ -196,14 +196,14 @@ impl WSClientInternal {
                 {
                     // special logic for MXC Spot
                     match txt.strip_prefix("42") {
-                        Some(msg) => self.tx.send(msg.to_string()).unwrap(),
+                        Some(msg) => self.tx.lock().unwrap().send(msg.to_string()).unwrap(),
                         None => error!(
                             "{}, Not possible, should be handled by {}.on_misc_msg() previously",
                             txt, self.exchange
                         ),
                     }
                 } else {
-                    self.tx.send(txt.to_string()).unwrap();
+                    self.tx.lock().unwrap().send(txt.to_string()).unwrap();
                 }
                 true
             }
