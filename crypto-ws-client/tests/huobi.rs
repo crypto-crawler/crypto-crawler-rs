@@ -4,7 +4,7 @@ mod utils;
 #[cfg(test)]
 mod huobi_spot {
     use crypto_ws_client::{HuobiSpotWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -53,15 +53,15 @@ mod huobi_spot {
 
     #[test]
     fn subscribe_orderbook() {
+        let (tx, rx): (Sender<String>, Receiver<String>) = std::sync::mpsc::channel();
         let mut messages = Vec::<String>::new();
         {
-            let on_msg = |msg: String| messages.push(msg);
-            let ws_client = HuobiSpotWSClient::new(
-                Arc::new(Mutex::new(on_msg)),
-                Some("wss://api.huobi.pro/feed"),
-            );
+            let ws_client = HuobiSpotWSClient::new(tx, Some("wss://api.huobi.pro/feed"));
             ws_client.subscribe_orderbook(&vec!["btcusdt".to_string()]);
             ws_client.run(Some(0)); // return immediately once after getting a normal message
+            for msg in rx {
+                messages.push(msg);
+            }
         }
         assert!(!messages.is_empty());
     }
@@ -85,7 +85,7 @@ mod huobi_spot {
 #[cfg(test)]
 mod huobi_inverse_future {
     use crypto_ws_client::{HuobiFutureWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -154,7 +154,7 @@ mod huobi_inverse_future {
 #[cfg(test)]
 mod huobi_linear_swap {
     use crypto_ws_client::{HuobiLinearSwapWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -224,11 +224,11 @@ mod huobi_linear_swap {
 
     #[test]
     fn subscribe_funding_rate() {
+        let (tx, rx): (Sender<String>, Receiver<String>) = std::sync::mpsc::channel();
         let mut messages = Vec::<String>::new();
         {
-            let on_msg = Arc::new(Mutex::new(|msg: String| messages.push(msg)));
             let ws_client = HuobiLinearSwapWSClient::new(
-                on_msg.clone(),
+                tx,
                 Some("wss://api.hbdm.com/linear-swap-notification"),
             );
             ws_client.subscribe(&vec![
@@ -236,17 +236,20 @@ mod huobi_linear_swap {
             ]);
             ws_client.run(Some(0)); // return immediately once after a normal message
             ws_client.close();
+            for msg in rx {
+                messages.push(msg);
+            }
         }
         assert!(!messages.is_empty());
     }
 
     #[test]
     fn subscribe_funding_rate_all() {
+        let (tx, rx): (Sender<String>, Receiver<String>) = std::sync::mpsc::channel();
         let mut messages = Vec::<String>::new();
         {
-            let on_msg = Arc::new(Mutex::new(|msg: String| messages.push(msg)));
             let ws_client = HuobiLinearSwapWSClient::new(
-                on_msg.clone(),
+                tx,
                 Some("wss://api.hbdm.com/linear-swap-notification"),
             );
             ws_client.subscribe(&vec![
@@ -254,6 +257,9 @@ mod huobi_linear_swap {
             ]);
             ws_client.run(Some(0)); // return immediately once after a normal message
             ws_client.close();
+            for msg in rx {
+                messages.push(msg);
+            }
         }
         assert!(!messages.is_empty());
     }
@@ -262,7 +268,7 @@ mod huobi_linear_swap {
 #[cfg(test)]
 mod huobi_inverse_swap {
     use crypto_ws_client::{HuobiInverseSwapWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -332,36 +338,38 @@ mod huobi_inverse_swap {
 
     #[test]
     fn subscribe_funding_rate() {
+        let (tx, rx): (Sender<String>, Receiver<String>) = std::sync::mpsc::channel();
         let mut messages = Vec::<String>::new();
         {
-            let on_msg = Arc::new(Mutex::new(|msg: String| messages.push(msg)));
-            let ws_client = HuobiInverseSwapWSClient::new(
-                on_msg.clone(),
-                Some("wss://api.hbdm.com/swap-notification"),
-            );
+            let ws_client =
+                HuobiInverseSwapWSClient::new(tx, Some("wss://api.hbdm.com/swap-notification"));
             ws_client.subscribe(&vec![
                 r#"{"topic":"public.BTC-USD.funding_rate","op":"sub"}"#.to_string(),
             ]);
             ws_client.run(Some(0)); // return immediately once after a normal message
             ws_client.close();
+            for msg in rx {
+                messages.push(msg);
+            }
         }
         assert!(!messages.is_empty());
     }
 
     #[test]
     fn subscribe_funding_rate_all() {
+        let (tx, rx): (Sender<String>, Receiver<String>) = std::sync::mpsc::channel();
         let mut messages = Vec::<String>::new();
         {
-            let on_msg = Arc::new(Mutex::new(|msg: String| messages.push(msg)));
-            let ws_client = HuobiInverseSwapWSClient::new(
-                on_msg.clone(),
-                Some("wss://api.hbdm.com/swap-notification"),
-            );
+            let ws_client =
+                HuobiInverseSwapWSClient::new(tx, Some("wss://api.hbdm.com/swap-notification"));
             ws_client.subscribe(&vec![
                 r#"{"topic":"public.*.funding_rate","op":"sub"}"#.to_string()
             ]);
             ws_client.run(Some(0)); // return immediately once after a normal message
             ws_client.close();
+            for msg in rx {
+                messages.push(msg);
+            }
         }
         assert!(!messages.is_empty());
     }
@@ -379,7 +387,7 @@ mod huobi_inverse_swap {
 #[cfg(test)]
 mod huobi_option {
     use crypto_ws_client::{HuobiOptionWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     #[ignore]

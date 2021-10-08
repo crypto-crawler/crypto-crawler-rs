@@ -1,6 +1,6 @@
 use crate::WSClient;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 use super::{
     ws_client_internal::{MiscMessage, WSClientInternal},
@@ -19,8 +19,8 @@ const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (240, r#"{"event":"ping"}"#);
 ///
 ///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/voptions/en/>
 ///   * Trading at: <https://voptions.binance.com/en>
-pub struct BinanceOptionWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct BinanceOptionWSClient {
+    client: WSClientInternal,
 }
 
 fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {

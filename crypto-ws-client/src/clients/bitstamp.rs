@@ -1,6 +1,6 @@
 use crate::WSClient;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
 use super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
@@ -20,8 +20,8 @@ const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (10, "");
 ///
 ///   * WebSocket API doc: <https://www.bitstamp.net/websocket/v2/>
 ///   * Trading at: <https://www.bitstamp.net/market/tradeview/>
-pub struct BitstampWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct BitstampWSClient {
+    client: WSClientInternal,
 }
 
 fn channel_to_command(channel: &str, subscribe: bool) -> String {
@@ -89,19 +89,19 @@ impl_trait!(OrderBookTopK, BitstampWSClient, subscribe_orderbook_topk, "order_bo
 #[rustfmt::skip]
 impl_trait!(Level3OrderBook, BitstampWSClient, subscribe_l3_orderbook, "live_orders", to_raw_channel);
 
-impl<'a> Ticker for BitstampWSClient<'a> {
+impl Ticker for BitstampWSClient {
     fn subscribe_ticker(&self, _pairs: &[String]) {
         panic!("Bitstamp WebSocket does NOT have ticker channel");
     }
 }
 
-impl<'a> BBO for BitstampWSClient<'a> {
+impl BBO for BitstampWSClient {
     fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("Bitstamp WebSocket does NOT have BBO channel");
     }
 }
 
-impl<'a> Candlestick for BitstampWSClient<'a> {
+impl Candlestick for BitstampWSClient {
     fn subscribe_candlestick(&self, _symbol_interval_list: &[(String, usize)]) {
         panic!("Bitstamp does NOT have candlestick channel");
     }

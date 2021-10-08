@@ -1,5 +1,5 @@
 use crate::WSClient;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 use super::super::ws_client_internal::WSClientInternal;
 use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
@@ -13,8 +13,8 @@ const WEBSOCKET_URL: &str = "wss://stream.bybit.com/realtime_public";
 ///
 /// * WebSocket API doc: <https://bybit-exchange.github.io/docs/inverse/#t-websocket>
 /// * Trading at: <https://www.bybit.com/trade/inverse/>
-pub struct BybitLinearSwapWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct BybitLinearSwapWSClient {
+    client: WSClientInternal,
 }
 
 #[rustfmt::skip]
@@ -26,7 +26,7 @@ impl_trait!(OrderBook, BybitLinearSwapWSClient, subscribe_orderbook, "orderBookL
 #[rustfmt::skip]
 impl_trait!(Ticker, BybitLinearSwapWSClient, subscribe_ticker, "instrument_info.100ms", to_raw_channel);
 
-impl<'a> BBO for BybitLinearSwapWSClient<'a> {
+impl BBO for BybitLinearSwapWSClient {
     fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("bybit does NOT have BBO channel");
     }

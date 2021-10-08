@@ -1,6 +1,6 @@
 use crate::WSClient;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
@@ -23,8 +23,8 @@ const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (15, r#"{"op":"ping"}"#);
 ///
 /// * WebSocket API doc: <https://docs.ftx.com/#websocket-api>
 /// * Trading at <https://ftx.com/markets>
-pub struct FtxWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct FtxWSClient {
+    client: WSClientInternal,
 }
 
 fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
@@ -87,19 +87,19 @@ impl_trait!(BBO, FtxWSClient, subscribe_bbo, "ticker", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, FtxWSClient, subscribe_orderbook, "orderbook", to_raw_channel);
 
-impl<'a> OrderBookTopK for FtxWSClient<'a> {
+impl OrderBookTopK for FtxWSClient {
     fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
         panic!("FTX does NOT have orderbook snapshot channel");
     }
 }
 
-impl<'a> Ticker for FtxWSClient<'a> {
+impl Ticker for FtxWSClient {
     fn subscribe_ticker(&self, _pairs: &[String]) {
         panic!("FTX does NOT have ticker channel");
     }
 }
 
-impl<'a> Candlestick for FtxWSClient<'a> {
+impl Candlestick for FtxWSClient {
     fn subscribe_candlestick(&self, _symbol_interval_list: &[(String, usize)]) {
         panic!("FTX does NOT have candlestick channel");
     }

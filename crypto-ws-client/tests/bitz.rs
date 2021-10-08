@@ -4,7 +4,7 @@ mod utils;
 #[cfg(test)]
 mod bitz_spot {
     use crypto_ws_client::{BitzSpotWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
     use std::time::{SystemTime, UNIX_EPOCH};
 
     #[test]

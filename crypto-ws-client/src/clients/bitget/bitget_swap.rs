@@ -1,6 +1,6 @@
 use crate::WSClient;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 use super::super::ws_client_internal::{MiscMessage, WSClientInternal};
 use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
@@ -24,8 +24,8 @@ const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (30, "ping");
 ///
 /// * WebSocket API doc: <https://bitgetlimited.github.io/apidoc/en/swap/#websocketapi>
 /// * Trading at: <https://www.bitget.com/en/swap/>
-pub struct BitgetSwapWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct BitgetSwapWSClient {
+    client: WSClientInternal,
 }
 
 fn topics_to_command(chunk: &[String], subscribe: bool) -> String {
@@ -88,7 +88,7 @@ impl_trait!(OrderBook, BitgetSwapWSClient, subscribe_orderbook, "depth", to_raw_
 #[rustfmt::skip]
 impl_trait!(Ticker, BitgetSwapWSClient, subscribe_ticker, "ticker", to_raw_channel);
 
-impl<'a> BBO for BitgetSwapWSClient<'a> {
+impl BBO for BitgetSwapWSClient {
     fn subscribe_bbo(&self, _symbols: &[String]) {
         panic!("Bitget does NOT have BBO channel");
     }

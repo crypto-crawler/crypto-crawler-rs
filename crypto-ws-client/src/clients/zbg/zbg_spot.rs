@@ -1,8 +1,5 @@
 use crate::WSClient;
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex, RwLock},
-};
+use std::{collections::HashMap, sync::mpsc::Sender, sync::RwLock};
 
 use super::super::ws_client_internal::{MiscMessage, WSClientInternal};
 use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
@@ -34,8 +31,8 @@ fn reload_symbol_ids() {
 ///
 /// * WebSocket API doc: <https://zbgapi.github.io/docs/spot/v1/en/#websocket-market-data>
 /// * Trading at: <https://www.zbg.com/trade/>
-pub struct ZbgSpotWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct ZbgSpotWSClient {
+    client: WSClientInternal,
 }
 
 fn channel_to_command(channel: &str, subscribe: bool) -> String {
@@ -90,13 +87,13 @@ impl_trait!(OrderBook, ZbgSpotWSClient, subscribe_orderbook, "ENTRUST_ADD", to_r
 #[rustfmt::skip]
 impl_trait!(Ticker, ZbgSpotWSClient, subscribe_ticker, "TRADE_STATISTIC_24H", to_raw_channel);
 
-impl<'a> BBO for ZbgSpotWSClient<'a> {
+impl BBO for ZbgSpotWSClient {
     fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("ZBG does NOT have BBO channel");
     }
 }
 
-impl<'a> OrderBookTopK for ZbgSpotWSClient<'a> {
+impl OrderBookTopK for ZbgSpotWSClient {
     fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
         panic!("Bitget does NOT have orderbook snapshot channel");
     }

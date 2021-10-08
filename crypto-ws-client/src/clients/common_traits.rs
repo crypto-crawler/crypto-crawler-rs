@@ -42,7 +42,7 @@ pub(super) trait Candlestick {
 
 macro_rules! impl_trait {
     ($trait_name:ident, $struct_name:ident, $method_name:ident, $channel_name:expr, $to_raw_channel: ident) => {
-        impl<'a> $trait_name for $struct_name<'a> {
+        impl $trait_name for $struct_name {
             fn $method_name(&self, pairs: &[String]) {
                 let pair_to_raw_channel = |pair: &String| $to_raw_channel($channel_name, pair);
 
@@ -58,7 +58,7 @@ macro_rules! impl_trait {
 
 macro_rules! impl_candlestick {
     ($struct_name:ident) => {
-        impl<'a> Candlestick for $struct_name<'a> {
+        impl Candlestick for $struct_name {
             fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
                 let raw_channels: Vec<String> = symbol_interval_list
                     .iter()
@@ -72,7 +72,7 @@ macro_rules! impl_candlestick {
 
 macro_rules! panic_l3_orderbook {
     ($struct_name:ident) => {
-        impl<'a> Level3OrderBook for $struct_name<'a> {
+        impl Level3OrderBook for $struct_name {
             fn subscribe_l3_orderbook(&self, _symbols: &[String]) {
                 panic!("{} does NOT have level3 websocket channel", EXCHANGE_NAME);
             }

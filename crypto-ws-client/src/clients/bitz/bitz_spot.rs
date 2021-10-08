@@ -1,6 +1,6 @@
 use crate::{clients::utils::CHANNEL_PAIR_DELIMITER, WSClient};
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use super::super::ws_client_internal::{MiscMessage, WSClientInternal};
@@ -20,8 +20,8 @@ const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (10, "ping");
 ///
 /// * WebSocket API doc: <https://apidocv2.bitz.plus/en/#websocket-url>
 /// * Trading at <https://www.bitz.plus/exchange>
-pub struct BitzSpotWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct BitzSpotWSClient {
+    client: WSClientInternal,
 }
 
 fn pair_channels_to_command(pair: &str, channels: &[String], subscribe: bool) -> String {
@@ -115,13 +115,13 @@ impl_trait!(OrderBook, BitzSpotWSClient, subscribe_orderbook, "depth", to_raw_ch
 #[rustfmt::skip]
 impl_trait!(Ticker, BitzSpotWSClient, subscribe_ticker, "market", to_raw_channel);
 
-impl<'a> BBO for BitzSpotWSClient<'a> {
+impl BBO for BitzSpotWSClient {
     fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("Bitz does NOT have BBO channel");
     }
 }
 
-impl<'a> OrderBookTopK for BitzSpotWSClient<'a> {
+impl OrderBookTopK for BitzSpotWSClient {
     fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
         panic!("Bitz does NOT have orderbook snapshot channel");
     }

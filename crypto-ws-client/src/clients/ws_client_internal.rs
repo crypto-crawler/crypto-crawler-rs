@@ -4,7 +4,8 @@ use std::{
     io::prelude::*,
     sync::{
         atomic::{AtomicBool, AtomicIsize, Ordering},
-        Arc, Mutex,
+        mpsc::Sender,
+        Mutex,
     },
     time::{Duration, Instant},
 };
@@ -24,12 +25,12 @@ pub(super) enum MiscMessage {
     Normal,             // Normal message will be passed to on_msg
 }
 
-pub(super) struct WSClientInternal<'a> {
+pub(super) struct WSClientInternal {
     exchange: &'static str, // Eexchange name
     pub(super) url: String, // Websocket base url
     ws_stream: Mutex<WebSocket<AutoStream>>,
-    channels: Mutex<HashSet<String>>, // subscribed channels
-    on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, // user defined message callback
+    channels: Mutex<HashSet<String>>,     // subscribed channels
+    tx: Sender<String>,                   // The sending half of a channel
     on_misc_msg: fn(&str) -> MiscMessage, // handle misc messages
     // converts raw channels to subscribe/unsubscribe commands
     channels_to_commands: fn(&[String], bool) -> Vec<String>,
@@ -45,11 +46,11 @@ pub(super) struct WSClientInternal<'a> {
     server_ping_interval: Option<u64>,
 }
 
-impl<'a> WSClientInternal<'a> {
+impl WSClientInternal {
     pub fn new(
         exchange: &'static str,
         url: &str,
-        on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>,
+        tx: Sender<String>,
         on_misc_msg: fn(&str) -> MiscMessage,
         channels_to_commands: fn(&[String], bool) -> Vec<String>,
         client_ping_interval_and_msg: Option<(u64, &'static str)>,
@@ -69,7 +70,7 @@ impl<'a> WSClientInternal<'a> {
             exchange,
             url: url.to_string(),
             ws_stream: Mutex::new(stream),
-            on_msg,
+            tx,
             on_misc_msg,
             channels: Mutex::new(HashSet::new()),
             channels_to_commands,
@@ -195,14 +196,14 @@ impl<'a> WSClientInternal<'a> {
                 {
                     // special logic for MXC Spot
                     match txt.strip_prefix("42") {
-                        Some(msg) => (self.on_msg.lock().unwrap())(msg.to_string()),
+                        Some(msg) => self.tx.send(msg.to_string()).unwrap(),
                         None => error!(
                             "{}, Not possible, should be handled by {}.on_misc_msg() previously",
                             txt, self.exchange
                         ),
                     }
                 } else {
-                    (self.on_msg.lock().unwrap())(txt.to_string());
+                    self.tx.send(txt.to_string()).unwrap();
                 }
                 true
             }
@@ -403,17 +404,14 @@ impl<'a> WSClientInternal<'a> {
 /// Define exchange specific client.
 macro_rules! define_client {
     ($struct_name:ident, $exchange:ident, $default_url:expr, $channels_to_commands:ident, $on_misc_msg:ident, $client_ping_interval_and_msg:expr, $server_ping_interval:expr) => {
-        impl<'a> $struct_name<'a> {
+        impl $struct_name {
             /// Creates a websocket client.
             ///
             /// # Arguments
             ///
-            /// * `on_msg` - A callback function to process websocket messages
+            /// * `tx` - The sending part of a channel
             /// * `url` - Optional server url, usually you don't need specify it
-            pub fn new(
-                on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>,
-                url: Option<&str>,
-            ) -> Self {
+            pub fn new(tx: Sender<String>, url: Option<&str>) -> Self {
                 let real_url = match url {
                     Some(endpoint) => endpoint,
                     None => $default_url,
@@ -422,7 +420,7 @@ macro_rules! define_client {
                     client: WSClientInternal::new(
                         $exchange,
                         real_url,
-                        on_msg,
+                        tx,
                         $on_misc_msg,
                         $channels_to_commands,
                         $client_ping_interval_and_msg,
@@ -432,7 +430,7 @@ macro_rules! define_client {
             }
         }
 
-        impl<'a> WSClient<'a> for $struct_name<'a> {
+        impl WSClient for $struct_name {
             fn subscribe_trade(&self, channels: &[String]) {
                 <$struct_name as Trade>::subscribe_trade(self, channels);
             }

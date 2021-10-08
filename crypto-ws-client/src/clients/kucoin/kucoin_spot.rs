@@ -1,5 +1,5 @@
 use crate::WSClient;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 use super::super::ws_client_internal::WSClientInternal;
 use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
@@ -19,8 +19,8 @@ lazy_static! {
 ///
 /// * WebSocket API doc: <https://docs.kucoin.com/#websocket-feed>
 /// * Trading at: <https://trade.kucoin.com/>
-pub struct KuCoinSpotWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct KuCoinSpotWSClient {
+    client: WSClientInternal,
 }
 
 #[rustfmt::skip]
@@ -61,7 +61,7 @@ fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
 
 impl_candlestick!(KuCoinSpotWSClient);
 
-impl<'a> Level3OrderBook for KuCoinSpotWSClient<'a> {
+impl Level3OrderBook for KuCoinSpotWSClient {
     fn subscribe_l3_orderbook(&self, symbols: &[String]) {
         let raw_channels: Vec<String> = symbols
             .iter()

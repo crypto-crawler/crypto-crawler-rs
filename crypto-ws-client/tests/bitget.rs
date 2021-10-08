@@ -4,7 +4,7 @@ mod utils;
 #[cfg(test)]
 mod bitget_inverse_swap {
     use crypto_ws_client::{BitgetSwapWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -80,7 +80,7 @@ mod bitget_inverse_swap {
 #[cfg(test)]
 mod bitget_linear_swap {
     use crypto_ws_client::{BitgetSwapWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe_trade() {

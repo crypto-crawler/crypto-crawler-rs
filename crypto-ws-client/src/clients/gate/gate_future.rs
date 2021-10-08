@@ -1,5 +1,5 @@
 use crate::WSClient;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 use super::super::ws_client_internal::WSClientInternal;
 use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
@@ -15,16 +15,16 @@ const LINEAR_FUTURE_WEBSOCKET_URL: &str = "wss://fx-ws.gateio.ws/v4/ws/delivery/
 ///
 /// * WebSocket API doc: <https://www.gate.io/docs/delivery/ws/en/index.html>
 /// * Trading at <https://www.gate.io/cn/futures-delivery/btc>
-pub struct GateInverseFutureWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct GateInverseFutureWSClient {
+    client: WSClientInternal,
 }
 
 /// The WebSocket client for Gate LinearFuture market.
 ///
 /// * WebSocket API doc: <https://www.gate.io/docs/delivery/ws/en/index.html>
 /// * Trading at <https://www.gate.io/cn/futures-delivery/usdt>
-pub struct GateLinearFutureWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct GateLinearFutureWSClient {
+    client: WSClientInternal,
 }
 
 #[rustfmt::skip]
@@ -34,12 +34,12 @@ impl_trait!(OrderBook, GateInverseFutureWSClient, subscribe_orderbook, "futures.
 #[rustfmt::skip]
 impl_trait!(Ticker, GateInverseFutureWSClient, subscribe_ticker, "futures.tickers", to_raw_channel);
 
-impl<'a> BBO for GateInverseFutureWSClient<'a> {
+impl BBO for GateInverseFutureWSClient {
     fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("Gate does NOT have BBO channel");
     }
 }
-impl<'a> OrderBookTopK for GateInverseFutureWSClient<'a> {
+impl OrderBookTopK for GateInverseFutureWSClient {
     fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
         panic!("Gate does NOT have orderbook snapshot channel");
     }
@@ -52,12 +52,12 @@ impl_trait!(OrderBook, GateLinearFutureWSClient, subscribe_orderbook, "futures.o
 #[rustfmt::skip]
 impl_trait!(Ticker, GateLinearFutureWSClient, subscribe_ticker, "futures.tickers", to_raw_channel);
 
-impl<'a> BBO for GateLinearFutureWSClient<'a> {
+impl BBO for GateLinearFutureWSClient {
     fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("Gate does NOT have BBO channel");
     }
 }
-impl<'a> OrderBookTopK for GateLinearFutureWSClient<'a> {
+impl OrderBookTopK for GateLinearFutureWSClient {
     fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
         panic!("Gate does NOT have orderbook snapshot channel");
     }

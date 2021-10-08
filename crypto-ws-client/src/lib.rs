@@ -83,7 +83,7 @@ pub use clients::okex::*;
 pub use clients::zbg::*;
 
 /// The public interface of every WebSocket client.
-pub trait WSClient<'a> {
+pub trait WSClient {
     /// Subscribes to trade channels.
     ///
     /// A trade channel sends tick-by-tick trade data,  which is the complete

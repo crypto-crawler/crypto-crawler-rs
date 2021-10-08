@@ -1,5 +1,5 @@
 use crypto_ws_client::{BitmexWSClient, WSClient};
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::{Receiver, Sender};
 
 #[macro_use]
 mod utils;
@@ -12,7 +12,7 @@ fn bitmex_instrument() {
 #[cfg(test)]
 mod bitmex_inverse_swap {
     use crypto_ws_client::{BitmexWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -89,7 +89,7 @@ mod bitmex_inverse_swap {
 #[cfg(test)]
 mod bitmex_inverse_future {
     use crypto_ws_client::{BitmexWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -152,7 +152,7 @@ mod bitmex_inverse_future {
 #[cfg(test)]
 mod bitmex_quanto_swap {
     use crypto_ws_client::{BitmexWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe_trade() {
