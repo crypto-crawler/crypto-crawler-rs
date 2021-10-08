@@ -11,7 +11,7 @@ pub(crate) fn crawl_trade(
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) -> Option<std::thread::JoinHandle<()>> {
+) {
     if symbols.is_none() || symbols.unwrap().is_empty() {
         let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
             let message = Message::new(
@@ -37,7 +37,6 @@ pub(crate) fn crawl_trade(
         let ws_client = DeribitWSClient::new(on_msg_ext, None);
         ws_client.subscribe(&channels);
         ws_client.run(duration);
-        None
     } else {
         crawl_event(
             EXCHANGE_NAME,
@@ -46,6 +45,6 @@ pub(crate) fn crawl_trade(
             symbols,
             on_msg,
             duration,
-        )
+        );
     }
 }

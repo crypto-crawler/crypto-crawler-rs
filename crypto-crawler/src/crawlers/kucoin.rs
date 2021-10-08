@@ -12,7 +12,7 @@ pub(crate) fn crawl_bbo(
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) -> Option<std::thread::JoinHandle<()>> {
+) {
     if market_type == MarketType::Spot && (symbols.is_none() || symbols.unwrap().is_empty()) {
         let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
             let message = Message::new(
@@ -30,7 +30,6 @@ pub(crate) fn crawl_bbo(
         let ws_client = KuCoinSpotWSClient::new(on_msg_ext, None);
         ws_client.subscribe(&channels);
         ws_client.run(duration);
-        None
     } else {
         crawl_event(
             EXCHANGE_NAME,
@@ -39,6 +38,6 @@ pub(crate) fn crawl_bbo(
             symbols,
             on_msg,
             duration,
-        )
+        );
     }
 }

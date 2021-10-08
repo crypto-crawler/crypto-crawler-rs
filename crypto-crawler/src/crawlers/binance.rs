@@ -13,7 +13,7 @@ pub(crate) fn crawl_trade(
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) -> Option<std::thread::JoinHandle<()>> {
+) {
     // All symbols for websocket are lowercase while for REST they are uppercase
     let symbols = symbols
         .unwrap_or_default()
@@ -46,7 +46,6 @@ pub(crate) fn crawl_trade(
         let ws_client = BinanceOptionWSClient::new(on_msg_ext, None);
         ws_client.subscribe(&channels);
         ws_client.run(duration);
-        None
     } else {
         crawl_event(
             EXCHANGE_NAME,
@@ -64,7 +63,7 @@ pub(crate) fn crawl_l2_event(
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) -> Option<std::thread::JoinHandle<()>> {
+) {
     // All symbols for websocket are lowercase while for REST they are uppercase
     let symbols = symbols
         .unwrap_or_default()
@@ -83,7 +82,7 @@ pub(crate) fn crawl_l2_event(
         symbols,
         on_msg,
         duration,
-    )
+    );
 }
 
 pub(crate) fn crawl_bbo(
@@ -91,7 +90,7 @@ pub(crate) fn crawl_bbo(
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) -> Option<std::thread::JoinHandle<()>> {
+) {
     // All symbols for websocket are lowercase while for REST they are uppercase
     let symbols = symbols
         .unwrap_or_default()
@@ -135,7 +134,6 @@ pub(crate) fn crawl_bbo(
                 market_type
             ),
         }
-        None
     } else {
         crawl_event(
             EXCHANGE_NAME,
@@ -144,7 +142,7 @@ pub(crate) fn crawl_bbo(
             symbols,
             on_msg,
             duration,
-        )
+        );
     }
 }
 
@@ -153,7 +151,7 @@ pub(crate) fn crawl_l2_topk(
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) -> Option<std::thread::JoinHandle<()>> {
+) {
     // All symbols for websocket are lowercase while for REST they are uppercase
     let symbols = symbols
         .unwrap_or_default()
@@ -172,7 +170,7 @@ pub(crate) fn crawl_l2_topk(
         symbols,
         on_msg,
         duration,
-    )
+    );
 }
 
 pub(crate) fn crawl_ticker(
@@ -180,7 +178,7 @@ pub(crate) fn crawl_ticker(
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) -> Option<std::thread::JoinHandle<()>> {
+) {
     // All symbols for websocket are lowercase while for REST they are uppercase
     let symbols = symbols
         .unwrap_or_default()
@@ -227,7 +225,6 @@ pub(crate) fn crawl_ticker(
                 market_type
             ),
         }
-        None
     } else {
         crawl_event(
             EXCHANGE_NAME,
@@ -236,7 +233,7 @@ pub(crate) fn crawl_ticker(
             symbols,
             on_msg,
             duration,
-        )
+        );
     }
 }
 
@@ -298,7 +295,7 @@ pub(crate) fn crawl_candlestick(
     symbol_interval_list: Option<&[(String, usize)]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) -> Option<std::thread::JoinHandle<()>> {
+) {
     // All symbols for websocket are lowercase while for REST they are uppercase
     let symbol_interval_list = symbol_interval_list
         .unwrap_or_default()
@@ -316,5 +313,5 @@ pub(crate) fn crawl_candlestick(
         symbol_interval_list,
         on_msg,
         duration,
-    )
+    );
 }

@@ -13,7 +13,7 @@ pub(crate) fn crawl_l2_event(
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) -> Option<std::thread::JoinHandle<()>> {
+) {
     match market_type {
         MarketType::Spot => {
             let on_msg_ext = |msg: String| {
@@ -38,7 +38,6 @@ pub(crate) fn crawl_l2_event(
             );
             ws_client.subscribe_orderbook(&symbols);
             ws_client.run(duration);
-            None
         }
         MarketType::InverseFuture
         | MarketType::LinearSwap

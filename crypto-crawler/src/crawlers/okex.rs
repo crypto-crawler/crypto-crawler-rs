@@ -12,7 +12,7 @@ pub(crate) fn crawl_trade(
     symbols: Option<&[String]>,
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
-) -> Option<std::thread::JoinHandle<()>> {
+) {
     if market_type == MarketType::EuropeanOption
         && (symbols.is_none() || symbols.unwrap().is_empty())
     {
@@ -36,7 +36,6 @@ pub(crate) fn crawl_trade(
         let ws_client = OkexWSClient::new(on_msg_ext, None);
         ws_client.subscribe(&channels);
         ws_client.run(duration);
-        None
     } else {
         crawl_event(
             EXCHANGE_NAME,
@@ -45,7 +44,7 @@ pub(crate) fn crawl_trade(
             symbols,
             on_msg,
             duration,
-        )
+        );
     }
 }
 
