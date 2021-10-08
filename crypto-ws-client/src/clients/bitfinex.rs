@@ -36,7 +36,7 @@ const SERVER_PING_INTERVAL: u64 = 15;
 pub struct BitfinexWSClient {
     ws_stream: Mutex<WebSocket<AutoStream>>,
     channels: Mutex<HashSet<String>>, // subscribed channels
-    tx: Sender<String>,
+    tx: Mutex<Sender<String>>,
     channel_id_meta: Mutex<HashMap<i64, String>>, // CHANNEL_ID information
     should_stop: AtomicBool,                      // used by close() and run()
 }
@@ -53,7 +53,7 @@ impl BitfinexWSClient {
         BitfinexWSClient {
             ws_stream: Mutex::new(stream),
             channels: Mutex::new(HashSet::new()),
-            tx,
+            tx: Mutex::new(tx),
             channel_id_meta: Mutex::new(HashMap::new()),
             should_stop: AtomicBool::new(false),
         }
@@ -396,7 +396,7 @@ impl BitfinexWSClient {
                     .clone();
                 let new_txt = format!("[{}{}", channel_info, &txt[i..]);
 
-                self.tx.send(new_txt).unwrap();
+                self.tx.lock().unwrap().send(new_txt).unwrap();
 
                 true
             }
