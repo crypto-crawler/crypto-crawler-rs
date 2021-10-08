@@ -4,7 +4,7 @@ mod utils;
 #[cfg(test)]
 mod bitfinex_spot {
     use crypto_ws_client::{BitfinexWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -80,7 +80,7 @@ mod bitfinex_spot {
 #[cfg(test)]
 mod bitfinex_swap {
     use crypto_ws_client::{BitfinexWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {

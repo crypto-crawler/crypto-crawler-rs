@@ -4,7 +4,7 @@ mod utils;
 #[cfg(test)]
 mod ftx_spot {
     use crypto_ws_client::{FtxWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -43,7 +43,7 @@ mod ftx_spot {
 #[cfg(test)]
 mod ftx_linear_swap {
     use crypto_ws_client::{FtxWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe_trade() {
@@ -68,7 +68,7 @@ mod ftx_linear_swap {
 #[cfg(test)]
 mod ftx_linear_future {
     use crypto_ws_client::{FtxWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe_trade() {
@@ -93,7 +93,7 @@ mod ftx_linear_future {
 #[cfg(test)]
 mod ftx_move {
     use crypto_ws_client::{FtxWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     #[ignore]
@@ -127,7 +127,7 @@ mod ftx_move {
 #[cfg(test)]
 mod ftx_bvol {
     use crypto_ws_client::{FtxWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     #[ignore]

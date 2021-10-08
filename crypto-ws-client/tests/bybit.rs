@@ -4,7 +4,7 @@ mod utils;
 #[cfg(test)]
 mod bybit_inverse_future {
     use crypto_ws_client::{BybitInverseFutureWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -76,7 +76,7 @@ mod bybit_inverse_future {
 #[cfg(test)]
 mod bybit_inverse_swap {
     use crypto_ws_client::{BybitInverseSwapWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -148,7 +148,7 @@ mod bybit_inverse_swap {
 #[cfg(test)]
 mod bybit_linear_swap {
     use crypto_ws_client::{BybitLinearSwapWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe_trade() {

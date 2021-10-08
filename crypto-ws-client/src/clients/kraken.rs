@@ -1,6 +1,6 @@
 use crate::WSClient;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
@@ -27,8 +27,8 @@ const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (10, r#"{"event":"ping"}"#);
 ///   * WebSocket API doc: <https://docs.kraken.com/websockets/>
 ///   * Trading at: <https://trade.kraken.com/>
 
-pub struct KrakenWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct KrakenWSClient {
+    client: WSClientInternal,
 }
 
 fn name_pairs_to_command(name: &str, pairs: &[String], subscribe: bool) -> String {
@@ -148,7 +148,7 @@ impl_trait!(Ticker, KrakenWSClient, subscribe_ticker, "ticker", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(BBO, KrakenWSClient, subscribe_bbo, "spread", to_raw_channel);
 
-impl<'a> OrderBook for KrakenWSClient<'a> {
+impl OrderBook for KrakenWSClient {
     fn subscribe_orderbook(&self, pairs: &[String]) {
         let command = format!(
             r#"{{"event":"subscribe","pair":{},"subscription":{{"name":"book", "depth":25}}}}"#,
@@ -160,7 +160,7 @@ impl<'a> OrderBook for KrakenWSClient<'a> {
     }
 }
 
-impl<'a> OrderBookTopK for KrakenWSClient<'a> {
+impl OrderBookTopK for KrakenWSClient {
     fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
         panic!("Kraken does NOT have orderbook snapshot channel");
     }
@@ -181,7 +181,7 @@ fn convert_symbol_interval_list(
     result
 }
 
-impl<'a> Candlestick for KrakenWSClient<'a> {
+impl Candlestick for KrakenWSClient {
     fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
         let valid_set: Vec<usize> = vec![1, 5, 15, 30, 60, 240, 1440, 10080, 21600]
             .into_iter()

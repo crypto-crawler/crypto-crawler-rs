@@ -1,8 +1,5 @@
 use crate::WSClient;
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex, RwLock},
-};
+use std::{collections::HashMap, sync::mpsc::Sender, sync::RwLock};
 
 use super::super::ws_client_internal::{MiscMessage, WSClientInternal};
 use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
@@ -26,8 +23,8 @@ lazy_static! {
 ///
 /// * WebSocket API doc: <https://www.zbgpro.com/docs/future/v1/cn/#300f34d976>, there is no English doc
 /// * Trading at: <https://futures.zbg.com/>
-pub struct ZbgSwapWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct ZbgSwapWSClient {
+    client: WSClientInternal,
 }
 
 fn reload_contract_ids() {
@@ -90,13 +87,13 @@ impl_trait!(OrderBook, ZbgSwapWSClient, subscribe_orderbook, "future_snapshot_de
 #[rustfmt::skip]
 impl_trait!(Ticker, ZbgSwapWSClient, subscribe_ticker, "future_snapshot_indicator", to_raw_channel);
 
-impl<'a> BBO for ZbgSwapWSClient<'a> {
+impl BBO for ZbgSwapWSClient {
     fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("ZBG does NOT have BBO channel");
     }
 }
 
-impl<'a> OrderBookTopK for ZbgSwapWSClient<'a> {
+impl OrderBookTopK for ZbgSwapWSClient {
     fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
         panic!("Bitget does NOT have orderbook snapshot channel");
     }

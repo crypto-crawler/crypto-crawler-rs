@@ -4,7 +4,7 @@ mod utils;
 #[cfg(test)]
 mod mxc_spot {
     use crypto_ws_client::{MxcSpotWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     #[ignore]
@@ -99,7 +99,7 @@ mod mxc_spot {
 #[cfg(test)]
 mod mxc_linear_swap {
     use crypto_ws_client::{MxcSwapWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -165,7 +165,7 @@ mod mxc_linear_swap {
 #[cfg(test)]
 mod mxc_inverse_swap {
     use crypto_ws_client::{MxcSwapWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe_trade() {

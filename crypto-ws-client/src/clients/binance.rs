@@ -1,6 +1,6 @@
 use crate::WSClient;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 use super::utils::{ensure_frame_size, WS_FRAME_SIZE};
 use super::{
@@ -24,41 +24,41 @@ const MAX_NUM_CHANNELS: usize = 200;
 const SERVER_PING_INTERVAL: u64 = 300;
 
 // Internal unified client
-struct BinanceWSClient<'a> {
-    client: WSClientInternal<'a>,
+struct BinanceWSClient {
+    client: WSClientInternal,
 }
 
 /// Binance Spot market.
 ///
 ///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/spot/en/>
 ///   * Trading at: <https://www.binance.com/en/trade/BTC_USDT>
-pub struct BinanceSpotWSClient<'a> {
-    client: BinanceWSClient<'a>,
+pub struct BinanceSpotWSClient {
+    client: BinanceWSClient,
 }
 
 /// Binance Coin-margined Future and Swap markets.
 ///
 ///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/delivery/en/>
 ///   * Trading at: <https://www.binance.com/en/delivery/btcusd_quarter>
-pub struct BinanceInverseWSClient<'a> {
-    client: BinanceWSClient<'a>,
+pub struct BinanceInverseWSClient {
+    client: BinanceWSClient,
 }
 
 /// Binance USDT-margined Future and Swap markets.
 ///
 ///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/futures/en/>
 ///   * Trading at: <https://www.binance.com/en/futures/BTC_USDT>
-pub struct BinanceLinearWSClient<'a> {
-    client: BinanceWSClient<'a>,
+pub struct BinanceLinearWSClient {
+    client: BinanceWSClient,
 }
 
-impl<'a> BinanceWSClient<'a> {
-    fn new(url: &str, on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>) -> Self {
+impl BinanceWSClient {
+    fn new(url: &str, tx: Sender<String>) -> Self {
         BinanceWSClient {
             client: WSClientInternal::new(
                 EXCHANGE_NAME,
                 url,
-                on_msg,
+                tx,
                 Self::on_misc_msg,
                 Self::channels_to_commands,
                 None,
@@ -158,28 +158,25 @@ impl_candlestick!(BinanceWSClient);
 /// Define market specific client.
 macro_rules! define_market_client {
     ($struct_name:ident, $default_url:ident) => {
-        impl<'a> $struct_name<'a> {
+        impl $struct_name {
             /// Creates a Binance websocket client.
             ///
             /// # Arguments
             ///
             /// * `on_msg` - A callback function to process websocket messages
             /// * `url` - Optional server url, usually you don't need specify it
-            pub fn new(
-                on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>,
-                url: Option<&str>,
-            ) -> Self {
+            pub fn new(tx: Sender<String>, url: Option<&str>) -> Self {
                 let real_url = match url {
                     Some(endpoint) => endpoint,
                     None => $default_url,
                 };
                 $struct_name {
-                    client: BinanceWSClient::new(real_url, on_msg),
+                    client: BinanceWSClient::new(real_url, tx),
                 }
             }
         }
 
-        impl<'a> WSClient<'a> for $struct_name<'a> {
+        impl WSClient for $struct_name {
             fn subscribe_trade(&self, channels: &[String]) {
                 <$struct_name as Trade>::subscribe_trade(self, channels);
             }
@@ -233,7 +230,7 @@ define_market_client!(BinanceLinearWSClient, LINEAR_WEBSOCKET_URL);
 
 macro_rules! impl_trade {
     ($struct_name:ident) => {
-        impl<'a> Trade for $struct_name<'a> {
+        impl Trade for $struct_name {
             fn subscribe_trade(&self, pairs: &[String]) {
                 self.client.subscribe_trade(pairs);
             }
@@ -247,7 +244,7 @@ impl_trade!(BinanceLinearWSClient);
 
 macro_rules! impl_ticker {
     ($struct_name:ident) => {
-        impl<'a> Ticker for $struct_name<'a> {
+        impl Ticker for $struct_name {
             fn subscribe_ticker(&self, pairs: &[String]) {
                 self.client.subscribe_ticker(pairs);
             }
@@ -261,7 +258,7 @@ impl_ticker!(BinanceLinearWSClient);
 
 macro_rules! impl_bbo {
     ($struct_name:ident) => {
-        impl<'a> BBO for $struct_name<'a> {
+        impl BBO for $struct_name {
             fn subscribe_bbo(&self, pairs: &[String]) {
                 self.client.subscribe_bbo(pairs);
             }
@@ -275,7 +272,7 @@ impl_bbo!(BinanceLinearWSClient);
 
 macro_rules! impl_orderbook {
     ($struct_name:ident) => {
-        impl<'a> OrderBook for $struct_name<'a> {
+        impl OrderBook for $struct_name {
             fn subscribe_orderbook(&self, pairs: &[String]) {
                 self.client.subscribe_orderbook(pairs);
             }
@@ -289,7 +286,7 @@ impl_orderbook!(BinanceLinearWSClient);
 
 macro_rules! impl_orderbook_snapshot {
     ($struct_name:ident) => {
-        impl<'a> OrderBookTopK for $struct_name<'a> {
+        impl OrderBookTopK for $struct_name {
             fn subscribe_orderbook_topk(&self, pairs: &[String]) {
                 self.client.subscribe_orderbook_topk(pairs);
             }
@@ -303,7 +300,7 @@ impl_orderbook_snapshot!(BinanceLinearWSClient);
 
 macro_rules! impl_candlestick {
     ($struct_name:ident) => {
-        impl<'a> Candlestick for $struct_name<'a> {
+        impl Candlestick for $struct_name {
             fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
                 self.client.subscribe_candlestick(symbol_interval_list);
             }

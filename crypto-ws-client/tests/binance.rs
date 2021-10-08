@@ -4,7 +4,7 @@ mod utils;
 #[cfg(test)]
 mod binance_spot {
     use crypto_ws_client::{BinanceSpotWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -106,7 +106,7 @@ mod binance_spot {
 #[cfg(test)]
 mod binance_inverse_future {
     use crypto_ws_client::{BinanceInverseWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -202,7 +202,7 @@ mod binance_inverse_future {
 #[cfg(test)]
 mod binance_linear_future {
     use crypto_ws_client::{BinanceLinearWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -298,7 +298,7 @@ mod binance_linear_future {
 #[cfg(test)]
 mod binance_inverse_swap {
     use crypto_ws_client::{BinanceInverseWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -412,7 +412,7 @@ mod binance_inverse_swap {
 #[cfg(test)]
 mod binance_linear_swap {
     use crypto_ws_client::{BinanceLinearWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {

@@ -1,6 +1,6 @@
 use crate::WSClient;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 use log::*;
 use serde_json::Value;
@@ -25,24 +25,24 @@ const OPTION_WEBSOCKET_URL: &str = "wss://futures.huobi.com/option-ws";
 const SERVER_PING_INTERVAL: u64 = 5;
 
 // Internal unified client
-struct HuobiWSClient<'a> {
-    client: WSClientInternal<'a>,
+struct HuobiWSClient {
+    client: WSClientInternal,
 }
 
 /// Huobi Spot market.
 ///
 /// * WebSocket API doc: <https://huobiapi.github.io/docs/spot/v1/en/>
 /// * Trading at: <https://www.huobi.com/en-us/exchange/>
-pub struct HuobiSpotWSClient<'a> {
-    client: HuobiWSClient<'a>,
+pub struct HuobiSpotWSClient {
+    client: HuobiWSClient,
 }
 
 /// Huobi Future market.
 ///
 /// * WebSocket API doc: <https://huobiapi.github.io/docs/dm/v1/en/>
 /// * Trading at: <https://futures.huobi.com/en-us/contract/exchange/>
-pub struct HuobiFutureWSClient<'a> {
-    client: HuobiWSClient<'a>,
+pub struct HuobiFutureWSClient {
+    client: HuobiWSClient,
 }
 
 /// Huobi Inverse Swap market.
@@ -51,8 +51,8 @@ pub struct HuobiFutureWSClient<'a> {
 ///
 /// * WebSocket API doc: <https://huobiapi.github.io/docs/coin_margined_swap/v1/en/>
 /// * Trading at: <https://futures.huobi.com/en-us/swap/exchange/>
-pub struct HuobiInverseSwapWSClient<'a> {
-    client: HuobiWSClient<'a>,
+pub struct HuobiInverseSwapWSClient {
+    client: HuobiWSClient,
 }
 
 /// Huobi Linear Swap market.
@@ -61,25 +61,25 @@ pub struct HuobiInverseSwapWSClient<'a> {
 ///
 /// * WebSocket API doc: <https://huobiapi.github.io/docs/usdt_swap/v1/en/>
 /// * Trading at: <https://futures.huobi.com/en-us/linear_swap/exchange/>
-pub struct HuobiLinearSwapWSClient<'a> {
-    client: HuobiWSClient<'a>,
+pub struct HuobiLinearSwapWSClient {
+    client: HuobiWSClient,
 }
 /// Huobi Option market.
 ///
 ///
 /// * WebSocket API doc: <https://huobiapi.github.io/docs/option/v1/en/>
 /// * Trading at: <https://futures.huobi.com/en-us/option/exchange/>
-pub struct HuobiOptionWSClient<'a> {
-    client: HuobiWSClient<'a>,
+pub struct HuobiOptionWSClient {
+    client: HuobiWSClient,
 }
 
-impl<'a> HuobiWSClient<'a> {
-    fn new(url: &str, on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>) -> Self {
+impl HuobiWSClient {
+    fn new(url: &str, tx: Sender<String>) -> Self {
         HuobiWSClient {
             client: WSClientInternal::new(
                 EXCHANGE_NAME,
                 url,
-                on_msg,
+                tx,
                 Self::on_misc_msg,
                 Self::channels_to_commands,
                 None,
@@ -192,7 +192,7 @@ impl_trait!(BBO, HuobiWSClient, subscribe_bbo, "bbo", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBookTopK, HuobiWSClient, subscribe_orderbook_topk, "depth.step7", to_raw_channel);
 
-impl<'a> OrderBook for HuobiWSClient<'a> {
+impl OrderBook for HuobiWSClient {
     fn subscribe_orderbook(&self, pairs: &[String]) {
         let pair_to_raw_channel = |pair: &String| {
             format!(
@@ -230,28 +230,25 @@ impl_candlestick!(HuobiWSClient);
 /// Define market specific client.
 macro_rules! define_market_client {
     ($struct_name:ident, $default_url:ident) => {
-        impl<'a> $struct_name<'a> {
+        impl $struct_name {
             /// Creates a Huobi websocket client.
             ///
             /// # Arguments
             ///
             /// * `on_msg` - A callback function to process websocket messages
             /// * `url` - Optional server url, usually you don't need specify it
-            pub fn new(
-                on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>,
-                url: Option<&str>,
-            ) -> Self {
+            pub fn new(tx: Sender<String>, url: Option<&str>) -> Self {
                 let real_url = match url {
                     Some(endpoint) => endpoint,
                     None => $default_url,
                 };
                 $struct_name {
-                    client: HuobiWSClient::new(real_url, on_msg),
+                    client: HuobiWSClient::new(real_url, tx),
                 }
             }
         }
 
-        impl<'a> WSClient<'a> for $struct_name<'a> {
+        impl WSClient for $struct_name {
             fn subscribe_trade(&self, channels: &[String]) {
                 <$struct_name as Trade>::subscribe_trade(self, channels);
             }
@@ -307,7 +304,7 @@ define_market_client!(HuobiOptionWSClient, OPTION_WEBSOCKET_URL);
 
 macro_rules! impl_trade {
     ($struct_name:ident) => {
-        impl<'a> Trade for $struct_name<'a> {
+        impl Trade for $struct_name {
             fn subscribe_trade(&self, pairs: &[String]) {
                 self.client.subscribe_trade(pairs);
             }
@@ -323,7 +320,7 @@ impl_trade!(HuobiOptionWSClient);
 
 macro_rules! impl_ticker {
     ($struct_name:ident) => {
-        impl<'a> Ticker for $struct_name<'a> {
+        impl Ticker for $struct_name {
             fn subscribe_ticker(&self, pairs: &[String]) {
                 self.client.subscribe_ticker(pairs);
             }
@@ -339,7 +336,7 @@ impl_ticker!(HuobiOptionWSClient);
 
 macro_rules! impl_bbo {
     ($struct_name:ident) => {
-        impl<'a> BBO for $struct_name<'a> {
+        impl BBO for $struct_name {
             fn subscribe_bbo(&self, pairs: &[String]) {
                 self.client.subscribe_bbo(pairs);
             }
@@ -355,7 +352,7 @@ impl_bbo!(HuobiOptionWSClient);
 
 macro_rules! impl_orderbook {
     ($struct_name:ident) => {
-        impl<'a> OrderBook for $struct_name<'a> {
+        impl OrderBook for $struct_name {
             fn subscribe_orderbook(&self, pairs: &[String]) {
                 self.client.subscribe_orderbook(pairs);
             }
@@ -367,7 +364,7 @@ impl_orderbook!(HuobiFutureWSClient);
 impl_orderbook!(HuobiInverseSwapWSClient);
 impl_orderbook!(HuobiLinearSwapWSClient);
 impl_orderbook!(HuobiOptionWSClient);
-impl<'a> OrderBook for HuobiSpotWSClient<'a> {
+impl OrderBook for HuobiSpotWSClient {
     fn subscribe_orderbook(&self, pairs: &[String]) {
         if self.client.client.url.as_str() == "wss://api.huobi.pro/feed"
             || self.client.client.url.as_str() == "wss://api-aws.huobi.pro/feed"
@@ -393,7 +390,7 @@ impl_candlestick!(HuobiOptionWSClient);
 
 macro_rules! impl_orderbook_snapshot {
     ($struct_name:ident) => {
-        impl<'a> OrderBookTopK for $struct_name<'a> {
+        impl OrderBookTopK for $struct_name {
             fn subscribe_orderbook_topk(&self, pairs: &[String]) {
                 self.client.subscribe_orderbook_topk(pairs);
             }

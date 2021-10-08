@@ -1,5 +1,5 @@
 use crypto_ws_client::{CoinbaseProWSClient, WSClient};
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::{Receiver, Sender};
 
 #[macro_use]
 mod utils;

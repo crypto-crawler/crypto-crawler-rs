@@ -4,7 +4,7 @@ mod utils;
 #[cfg(test)]
 mod kucoin_spot {
     use crypto_ws_client::{KuCoinSpotWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -100,7 +100,7 @@ mod kucoin_spot {
 #[cfg(test)]
 mod kucoin_inverse_swap {
     use crypto_ws_client::{KuCoinSwapWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -194,7 +194,7 @@ mod kucoin_inverse_swap {
 #[cfg(test)]
 mod kucoin_linear_swap {
     use crypto_ws_client::{KuCoinSwapWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -288,7 +288,7 @@ mod kucoin_linear_swap {
 #[cfg(test)]
 mod kucoin_inverse_future {
     use crypto_ws_client::{KuCoinSwapWSClient, WSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     #[ignore]

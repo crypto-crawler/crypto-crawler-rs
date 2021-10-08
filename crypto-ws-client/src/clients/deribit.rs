@@ -1,6 +1,6 @@
 use crate::WSClient;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 use super::utils::ensure_frame_size;
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
@@ -26,8 +26,8 @@ const WS_FRAME_SIZE: usize = 32 * 1024;
 /// * Trading at:
 ///     * Future <https://www.deribit.com/main#/futures>
 ///     * Option <https://www.deribit.com/main#/options>
-pub struct DeribitWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct DeribitWSClient {
+    client: WSClientInternal,
 }
 
 fn topics_to_command(chunk: &[String], subscribe: bool) -> String {

@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 use crate::WSClient;
 
@@ -27,16 +27,16 @@ const SWAP_CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (60, r#"{"method":"ping"}
 ///
 ///   * WebSocket API doc: <https://github.com/mxcdevelop/APIDoc/blob/master/websocket/spot/websocket-api.md>
 ///   * Trading at: <https://www.mxc.com/trade/pro>
-pub struct MxcSpotWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct MxcSpotWSClient {
+    client: WSClientInternal,
 }
 
 /// MXC Swap market.
 ///
 ///   * WebSocket API doc: <https://mxcdevelop.github.io/APIDoc/contract.api.en.html#websocket-api>
 ///   * Trading at: <https://contract.mxc.com/exchange>
-pub struct MxcSwapWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct MxcSwapWSClient {
+    client: WSClientInternal,
 }
 
 // Example: symbol:BTC_USDT -> 42["sub.symbol",{"symbol":"BTC_USDT"}]
@@ -157,7 +157,7 @@ impl_trait!(Trade, MxcSpotWSClient, subscribe_trade, "symbol", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(Trade, MxcSwapWSClient, subscribe_trade, "deal", to_raw_channel);
 
-impl<'a> Ticker for MxcSpotWSClient<'a> {
+impl Ticker for MxcSpotWSClient {
     fn subscribe_ticker(&self, _pairs: &[String]) {
         panic!("MXC Spot WebSocket does NOT have ticker channel");
     }
@@ -174,12 +174,12 @@ impl_trait!(OrderBookTopK, MxcSpotWSClient, subscribe_orderbook_topk, "get.depth
 #[rustfmt::skip]
 impl_trait!(OrderBookTopK, MxcSwapWSClient, subscribe_orderbook_topk, "depth.full", to_raw_channel);
 
-impl<'a> BBO for MxcSpotWSClient<'a> {
+impl BBO for MxcSpotWSClient {
     fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("MXC Spot WebSocket does NOT have BBO channel");
     }
 }
-impl<'a> BBO for MxcSwapWSClient<'a> {
+impl BBO for MxcSwapWSClient {
     fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("MXC Swap WebSocket does NOT have BBO channel");
     }
@@ -202,7 +202,7 @@ fn interval_to_string(interval: usize) -> String {
     tmp.to_string()
 }
 
-impl<'a> Candlestick for MxcSpotWSClient<'a> {
+impl Candlestick for MxcSpotWSClient {
     fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
         let channels = symbol_interval_list
             .iter()
@@ -219,7 +219,7 @@ impl<'a> Candlestick for MxcSpotWSClient<'a> {
     }
 }
 
-impl<'a> Candlestick for MxcSwapWSClient<'a> {
+impl Candlestick for MxcSwapWSClient {
     fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
         let channels = symbol_interval_list
             .iter()

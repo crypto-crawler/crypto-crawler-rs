@@ -4,7 +4,7 @@ mod utils;
 #[cfg(test)]
 mod zbg_spot {
     use crypto_ws_client::{WSClient, ZbgSpotWSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
@@ -61,7 +61,7 @@ mod zbg_spot {
 #[cfg(test)]
 mod zbg_inverse_swap {
     use crypto_ws_client::{WSClient, ZbgSwapWSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     #[ignore]
@@ -139,7 +139,7 @@ mod zbg_inverse_swap {
 #[cfg(test)]
 mod zbg_linear_swap {
     use crypto_ws_client::{WSClient, ZbgSwapWSClient};
-    use std::sync::{Arc, Mutex};
+    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     #[ignore]

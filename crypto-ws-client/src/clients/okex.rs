@@ -1,7 +1,8 @@
 use crate::WSClient;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
+use super::utils::{ensure_frame_size, WS_FRAME_SIZE};
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
 use super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 
@@ -24,31 +25,27 @@ const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (30, "ping");
 ///     * Future <https://www.okex.com/derivatives/futures>
 ///     * Swap <https://www.okex.com/derivatives/swap>
 ///     * Option <https://www.okex.com/derivatives/options>
-pub struct OkexWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct OkexWSClient {
+    client: WSClientInternal,
 }
 
+fn topics_to_command(chunk: &[String], subscribe: bool) -> String {
+    format!(
+        r#"{{"op":"{}","args":{}}}"#,
+        if subscribe {
+            "subscribe"
+        } else {
+            "unsubscribe"
+        },
+        serde_json::to_string(chunk).unwrap()
+    )
+}
+
+// https://www.okex.com/docs/zh/#question-public
+// How many subscriptions per websocket connection?
+// The total size of subscription command should not exceed 4096 bytes.
 fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-    let mut all_commands: Vec<String> = channels
-        .iter()
-        .filter(|ch| ch.starts_with('{'))
-        .map(|s| s.to_string())
-        .collect();
-
-    let raw_channels: Vec<&String> = channels.iter().filter(|ch| !ch.starts_with('{')).collect();
-    if !raw_channels.is_empty() {
-        all_commands.append(&mut vec![format!(
-            r#"{{"op":"{}","args":{}}}"#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
-            serde_json::to_string(&raw_channels).unwrap()
-        )])
-    };
-
-    all_commands
+    ensure_frame_size(channels, subscribe, topics_to_command, WS_FRAME_SIZE, None)
 }
 
 fn on_misc_msg(msg: &str) -> MiscMessage {

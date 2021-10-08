@@ -1,5 +1,5 @@
 use crate::WSClient;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 use super::super::ws_client_internal::WSClientInternal;
 use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
@@ -15,16 +15,16 @@ const LINEAR_SWAP_WEBSOCKET_URL: &str = "wss://fx-ws.gateio.ws/v4/ws/usdt";
 ///
 /// * WebSocket API doc: <https://www.gate.io/docs/futures/ws/en/index.html>
 /// * Trading at <https://www.gate.io/cn/futures_trade/BTC/BTC_USD>
-pub struct GateInverseSwapWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct GateInverseSwapWSClient {
+    client: WSClientInternal,
 }
 
 /// The WebSocket client for Gate LinearSwap market.
 ///
 /// * WebSocket API doc: <https://www.gate.io/docs/futures/ws/en/index.html>
 /// * Trading at <https://www.gate.io/cn/futures_trade/USDT/BTC_USDT>
-pub struct GateLinearSwapWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct GateLinearSwapWSClient {
+    client: WSClientInternal,
 }
 
 #[rustfmt::skip]

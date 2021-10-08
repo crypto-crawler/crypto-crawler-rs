@@ -1,5 +1,5 @@
 use crate::WSClient;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 use std::{collections::HashMap, time::Duration};
 
 use super::{
@@ -25,8 +25,8 @@ const MAX_CHANNELS_PER_COMMAND: usize = 20;
 ///
 ///   * WebSocket API doc: <https://www.bitmex.com/app/wsAPI>
 ///   * Trading at: <https://www.bitmex.com/app/trade/>
-pub struct BitmexWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct BitmexWSClient {
+    client: WSClientInternal,
 }
 
 fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
@@ -115,7 +115,7 @@ impl_trait!(OrderBook, BitmexWSClient, subscribe_orderbook, "orderBookL2_25", to
 #[rustfmt::skip]
 impl_trait!(OrderBookTopK, BitmexWSClient, subscribe_orderbook_topk, "orderBook10", to_raw_channel);
 
-impl<'a> Ticker for BitmexWSClient<'a> {
+impl Ticker for BitmexWSClient {
     fn subscribe_ticker(&self, _pairs: &[String]) {
         panic!("BitMEX WebSocket does NOT have ticker channel");
     }

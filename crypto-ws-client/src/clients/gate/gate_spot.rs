@@ -1,5 +1,5 @@
 use crate::WSClient;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 use super::super::ws_client_internal::WSClientInternal;
 use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
@@ -17,8 +17,8 @@ const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (60, r#"{"channel":"spot.ping"
 ///
 /// * WebSocket API doc: <https://www.gate.io/docs/apiv4/ws/en/index.html>
 /// * Trading at <https://www.gate.io/en/trade/BTC_USDT>
-pub struct GateSpotWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct GateSpotWSClient {
+    client: WSClientInternal,
 }
 
 #[rustfmt::skip]

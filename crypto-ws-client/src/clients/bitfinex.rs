@@ -2,7 +2,8 @@ use crate::WSClient;
 
 use std::sync::{
     atomic::{AtomicBool, Ordering},
-    Arc, Mutex,
+    mpsc::Sender,
+    Mutex,
 };
 use std::{
     collections::{HashMap, HashSet},
@@ -32,27 +33,27 @@ const SERVER_PING_INTERVAL: u64 = 15;
 /// * Spot: <https://trading.bitfinex.com/trading>
 /// * Swap: <https://trading.bitfinex.com/t/BTCF0:USTF0>
 /// * Funding: <https://trading.bitfinex.com/funding>
-pub struct BitfinexWSClient<'a> {
+pub struct BitfinexWSClient {
     ws_stream: Mutex<WebSocket<AutoStream>>,
     channels: Mutex<HashSet<String>>, // subscribed channels
-    on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, // user defined message callback
+    tx: Sender<String>,
     channel_id_meta: Mutex<HashMap<i64, String>>, // CHANNEL_ID information
-    should_stop: AtomicBool,          // used by close() and run()
+    should_stop: AtomicBool,                      // used by close() and run()
 }
 
-impl<'a> BitfinexWSClient<'a> {
+impl BitfinexWSClient {
     /// Creates a Bitfinex websocket client.
     ///
     /// # Arguments
     ///
     /// * `on_msg` - A callback function to process websocket messages
     /// * `url` - Optional server url, usually you don't need specify it
-    pub fn new(on_msg: Arc<Mutex<dyn FnMut(String) + 'a + Send>>, _url: Option<&str>) -> Self {
+    pub fn new(tx: Sender<String>, _url: Option<&str>) -> Self {
         let stream = connect_with_retry(WEBSOCKET_URL, Some(SERVER_PING_INTERVAL));
         BitfinexWSClient {
             ws_stream: Mutex::new(stream),
             channels: Mutex::new(HashSet::new()),
-            on_msg,
+            tx,
             channel_id_meta: Mutex::new(HashMap::new()),
             should_stop: AtomicBool::new(false),
         }
@@ -88,7 +89,7 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
 
 macro_rules! impl_trait_for_bitfinex {
     ($trait_name:ident, $method_name:ident, $channel_name:expr) => {
-        impl<'a> $trait_name for BitfinexWSClient<'a> {
+        impl $trait_name for BitfinexWSClient {
             fn $method_name(&self, symbols: &[String]) {
                 let symbol_to_raw_channel =
                     |symbol: &String| format!("{}:{}", $channel_name, symbol);
@@ -106,7 +107,7 @@ macro_rules! impl_trait_for_bitfinex {
 impl_trait_for_bitfinex!(Trade, subscribe_trade, "trades");
 impl_trait_for_bitfinex!(Ticker, subscribe_ticker, "ticker");
 
-impl<'a> BBO for BitfinexWSClient<'a> {
+impl BBO for BitfinexWSClient {
     fn subscribe_bbo(&self, symbols: &[String]) {
         let raw_channels = symbols
             .iter()
@@ -128,7 +129,7 @@ impl<'a> BBO for BitfinexWSClient<'a> {
     }
 }
 
-impl<'a> OrderBook for BitfinexWSClient<'a> {
+impl OrderBook for BitfinexWSClient {
     fn subscribe_orderbook(&self, symbols: &[String]) {
         let raw_channels = symbols
             .iter()
@@ -151,13 +152,13 @@ impl<'a> OrderBook for BitfinexWSClient<'a> {
     }
 }
 
-impl<'a> OrderBookTopK for BitfinexWSClient<'a> {
+impl OrderBookTopK for BitfinexWSClient {
     fn subscribe_orderbook_topk(&self, _symbols: &[String]) {
         panic!("Bitfinex does NOT have orderbook snapshot channel");
     }
 }
 
-impl<'a> Level3OrderBook for BitfinexWSClient<'a> {
+impl Level3OrderBook for BitfinexWSClient {
     fn subscribe_l3_orderbook(&self, symbols: &[String]) {
         let raw_channels = symbols
             .iter()
@@ -206,7 +207,7 @@ fn to_candlestick_raw_channel(symbol: &str, interval: usize) -> String {
     )
 }
 
-impl<'a> Candlestick for BitfinexWSClient<'a> {
+impl Candlestick for BitfinexWSClient {
     fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
         let raw_channels: Vec<String> = symbol_interval_list
             .iter()
@@ -216,7 +217,7 @@ impl<'a> Candlestick for BitfinexWSClient<'a> {
     }
 }
 
-impl<'a> BitfinexWSClient<'a> {
+impl BitfinexWSClient {
     fn subscribe_or_unsubscribe(&self, channels: &[String], subscribe: bool) {
         let mut diff = Vec::<String>::new();
         {
@@ -395,7 +396,7 @@ impl<'a> BitfinexWSClient<'a> {
                     .clone();
                 let new_txt = format!("[{}{}", channel_info, &txt[i..]);
 
-                (self.on_msg.lock().unwrap())(new_txt);
+                self.tx.send(new_txt).unwrap();
 
                 true
             }
@@ -403,7 +404,7 @@ impl<'a> BitfinexWSClient<'a> {
     }
 }
 
-impl<'a> WSClient<'a> for BitfinexWSClient<'a> {
+impl WSClient for BitfinexWSClient {
     fn subscribe_trade(&self, channels: &[String]) {
         <Self as Trade>::subscribe_trade(self, channels);
     }

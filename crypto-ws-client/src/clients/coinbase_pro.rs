@@ -1,6 +1,6 @@
 use crate::WSClient;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
@@ -21,8 +21,8 @@ const WEBSOCKET_URL: &str = "wss://ws-feed.pro.coinbase.com";
 ///
 ///   * WebSocket API doc: <https://docs.pro.coinbase.com/#websocket-feed>
 ///   * Trading at: <https://pro.coinbase.com/>
-pub struct CoinbaseProWSClient<'a> {
-    client: WSClientInternal<'a>,
+pub struct CoinbaseProWSClient {
+    client: WSClientInternal,
 }
 
 fn channel_pairs_to_command(channel: &str, pairs: &[String]) -> String {
@@ -126,25 +126,25 @@ impl_trait!(Ticker, CoinbaseProWSClient, subscribe_ticker, "ticker", to_raw_chan
 #[rustfmt::skip]
 impl_trait!(OrderBook, CoinbaseProWSClient, subscribe_orderbook, "level2", to_raw_channel);
 
-impl<'a> BBO for CoinbaseProWSClient<'a> {
+impl BBO for CoinbaseProWSClient {
     fn subscribe_bbo(&self, _pairs: &[String]) {
         panic!("CoinbasePro WebSocket does NOT have BBO channel");
     }
 }
 
-impl<'a> OrderBookTopK for CoinbaseProWSClient<'a> {
+impl OrderBookTopK for CoinbaseProWSClient {
     fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
         panic!("CoinbasePro does NOT have orderbook snapshot channel");
     }
 }
 
-impl<'a> Candlestick for CoinbaseProWSClient<'a> {
+impl Candlestick for CoinbaseProWSClient {
     fn subscribe_candlestick(&self, _symbol_interval_list: &[(String, usize)]) {
         panic!("CoinbasePro does NOT have candlestick channel");
     }
 }
 
-impl<'a> Level3OrderBook for CoinbaseProWSClient<'a> {
+impl Level3OrderBook for CoinbaseProWSClient {
     fn subscribe_l3_orderbook(&self, symbols: &[String]) {
         let raw_channels: Vec<String> = symbols
             .iter()
