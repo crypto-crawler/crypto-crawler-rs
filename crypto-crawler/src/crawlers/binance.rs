@@ -1,77 +1,12 @@
 use core::panic;
-use std::{
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        Arc, Mutex,
-    },
-    time::Duration,
-};
+use std::sync::{Arc, Mutex};
 
-use super::utils::{
-    check_args, fetch_symbols_retry, get_candlestick_intervals, get_connection_interval_ms,
-    get_send_interval_ms,
-};
-use crate::utils::WS_LOCKS;
+use crate::crawlers::utils::{crawl_candlestick_ext, crawl_event};
 use crate::{msg::Message, MessageType};
 use crypto_markets::MarketType;
 use crypto_ws_client::*;
-use log::*;
 
 const EXCHANGE_NAME: &str = "binance";
-
-// A single connection can listen to a maximum of 200 streams.
-// see <https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams>
-const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = 200;
-
-#[rustfmt::skip]
-gen_crawl_event!(crawl_trade_spot, BinanceSpotWSClient, MessageType::Trade, subscribe_trade);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_trade_inverse, BinanceInverseWSClient, MessageType::Trade, subscribe_trade);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_trade_linear, BinanceLinearWSClient, MessageType::Trade, subscribe_trade);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_trade_linear_option, BinanceOptionWSClient, MessageType::Trade, subscribe_trade);
-
-#[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_spot, BinanceSpotWSClient, MessageType::L2Event, subscribe_orderbook);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_inverse, BinanceInverseWSClient, MessageType::L2Event, subscribe_orderbook);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_linear, BinanceLinearWSClient, MessageType::L2Event, subscribe_orderbook);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_linear_option, BinanceOptionWSClient, MessageType::L2Event, subscribe_orderbook);
-
-#[rustfmt::skip]
-gen_crawl_event!(crawl_bbo_spot, BinanceSpotWSClient, MessageType::BBO, subscribe_bbo);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_bbo_inverse, BinanceInverseWSClient, MessageType::BBO, subscribe_bbo);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_bbo_linear, BinanceLinearWSClient, MessageType::BBO, subscribe_bbo);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_bbo_linear_option, BinanceOptionWSClient, MessageType::BBO, subscribe_bbo);
-
-#[rustfmt::skip]
-gen_crawl_event!(crawl_l2_topk_spot, BinanceSpotWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_l2_topk_inverse, BinanceInverseWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_l2_topk_linear, BinanceLinearWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_l2_topk_linear_option, BinanceOptionWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
-
-#[rustfmt::skip]
-gen_crawl_event!(crawl_ticker_spot, BinanceSpotWSClient, MessageType::Ticker, subscribe_ticker);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_ticker_inverse, BinanceInverseWSClient, MessageType::Ticker, subscribe_ticker);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_ticker_linear, BinanceLinearWSClient, MessageType::Ticker, subscribe_ticker);
-
-#[rustfmt::skip]
-gen_crawl_candlestick!(crawl_candlestick_spot, BinanceSpotWSClient);
-#[rustfmt::skip]
-gen_crawl_candlestick!(crawl_candlestick_inverse, BinanceInverseWSClient);
-#[rustfmt::skip]
-gen_crawl_candlestick!(crawl_candlestick_linear, BinanceLinearWSClient);
 
 pub(crate) fn crawl_trade(
     market_type: MarketType,
@@ -90,40 +25,37 @@ pub(crate) fn crawl_trade(
     } else {
         Some(symbols.as_slice())
     };
-    match market_type {
-        MarketType::Spot => crawl_trade_spot(market_type, symbols, on_msg, duration),
-        MarketType::InverseFuture | MarketType::InverseSwap => {
-            crawl_trade_inverse(market_type, symbols, on_msg, duration)
-        }
-        MarketType::LinearFuture | MarketType::LinearSwap => {
-            crawl_trade_linear(market_type, symbols, on_msg, duration)
-        }
-        MarketType::EuropeanOption => {
-            if symbols.is_none() || symbols.unwrap().is_empty() {
-                let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
-                    let message = Message::new(
-                        EXCHANGE_NAME.to_string(),
-                        market_type,
-                        MessageType::Trade,
-                        msg,
-                    );
-                    (on_msg.lock().unwrap())(message);
-                }));
+    if market_type == MarketType::EuropeanOption
+        && (symbols.is_none() || symbols.unwrap().is_empty())
+    {
+        let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
+            let message = Message::new(
+                EXCHANGE_NAME.to_string(),
+                market_type,
+                MessageType::Trade,
+                msg,
+            );
+            (on_msg.lock().unwrap())(message);
+        }));
 
-                let channels: Vec<String> = vec![
-                    "BTCUSDT_C@TRADE_ALL".to_string(),
-                    "BTCUSDT_P@TRADE_ALL".to_string(),
-                ];
+        let channels: Vec<String> = vec![
+            "BTCUSDT_C@TRADE_ALL".to_string(),
+            "BTCUSDT_P@TRADE_ALL".to_string(),
+        ];
 
-                let ws_client = BinanceOptionWSClient::new(on_msg_ext, None);
-                ws_client.subscribe(&channels);
-                ws_client.run(duration);
-                None
-            } else {
-                crawl_trade_linear_option(market_type, symbols, on_msg, duration)
-            }
-        }
-        _ => panic!("Binance does NOT have the {} market type", market_type),
+        let ws_client = BinanceOptionWSClient::new(on_msg_ext, None);
+        ws_client.subscribe(&channels);
+        ws_client.run(duration);
+        None
+    } else {
+        crawl_event(
+            EXCHANGE_NAME,
+            MessageType::Trade,
+            market_type,
+            symbols,
+            on_msg,
+            duration,
+        )
     }
 }
 
@@ -144,19 +76,14 @@ pub(crate) fn crawl_l2_event(
     } else {
         Some(symbols.as_slice())
     };
-    match market_type {
-        MarketType::Spot => crawl_l2_event_spot(market_type, symbols, on_msg, duration),
-        MarketType::InverseFuture | MarketType::InverseSwap => {
-            crawl_l2_event_inverse(market_type, symbols, on_msg, duration)
-        }
-        MarketType::LinearFuture | MarketType::LinearSwap => {
-            crawl_l2_event_linear(market_type, symbols, on_msg, duration)
-        }
-        MarketType::EuropeanOption => {
-            crawl_l2_event_linear_option(market_type, symbols, on_msg, duration)
-        }
-        _ => panic!("Binance does NOT have the {} market type", market_type),
-    }
+    crawl_event(
+        EXCHANGE_NAME,
+        MessageType::L2Event,
+        market_type,
+        symbols,
+        on_msg,
+        duration,
+    )
 }
 
 pub(crate) fn crawl_bbo(
@@ -210,22 +137,14 @@ pub(crate) fn crawl_bbo(
         }
         None
     } else {
-        match market_type {
-            MarketType::Spot => crawl_bbo_spot(market_type, symbols, on_msg, duration),
-            MarketType::InverseFuture | MarketType::InverseSwap => {
-                crawl_bbo_inverse(market_type, symbols, on_msg, duration)
-            }
-            MarketType::LinearFuture | MarketType::LinearSwap => {
-                crawl_bbo_linear(market_type, symbols, on_msg, duration)
-            }
-            MarketType::EuropeanOption => {
-                crawl_bbo_linear_option(market_type, symbols, on_msg, duration)
-            }
-            _ => panic!(
-                "Binance {} market does NOT have the BBO channel",
-                market_type
-            ),
-        }
+        crawl_event(
+            EXCHANGE_NAME,
+            MessageType::BBO,
+            market_type,
+            symbols,
+            on_msg,
+            duration,
+        )
     }
 }
 
@@ -246,19 +165,14 @@ pub(crate) fn crawl_l2_topk(
     } else {
         Some(symbols.as_slice())
     };
-    match market_type {
-        MarketType::Spot => crawl_l2_topk_spot(market_type, symbols, on_msg, duration),
-        MarketType::InverseFuture | MarketType::InverseSwap => {
-            crawl_l2_topk_inverse(market_type, symbols, on_msg, duration)
-        }
-        MarketType::LinearFuture | MarketType::LinearSwap => {
-            crawl_l2_topk_linear(market_type, symbols, on_msg, duration)
-        }
-        MarketType::EuropeanOption => {
-            crawl_l2_topk_linear_option(market_type, symbols, on_msg, duration)
-        }
-        _ => panic!("Binance does NOT have the {} market type", market_type),
-    }
+    crawl_event(
+        EXCHANGE_NAME,
+        MessageType::L2TopK,
+        market_type,
+        symbols,
+        on_msg,
+        duration,
+    )
 }
 
 pub(crate) fn crawl_ticker(
@@ -315,19 +229,14 @@ pub(crate) fn crawl_ticker(
         }
         None
     } else {
-        match market_type {
-            MarketType::Spot => crawl_ticker_spot(market_type, symbols, on_msg, duration),
-            MarketType::InverseFuture | MarketType::InverseSwap => {
-                crawl_ticker_inverse(market_type, symbols, on_msg, duration)
-            }
-            MarketType::LinearFuture | MarketType::LinearSwap => {
-                crawl_ticker_linear(market_type, symbols, on_msg, duration)
-            }
-            _ => panic!(
-                "Binance {} market does NOT have the ticker channel",
-                market_type
-            ),
-        }
+        crawl_event(
+            EXCHANGE_NAME,
+            MessageType::Ticker,
+            market_type,
+            symbols,
+            on_msg,
+            duration,
+        )
     }
 }
 
@@ -401,16 +310,11 @@ pub(crate) fn crawl_candlestick(
     } else {
         Some(symbol_interval_list.as_slice())
     };
-    match market_type {
-        MarketType::Spot => {
-            crawl_candlestick_spot(market_type, symbol_interval_list, on_msg, duration)
-        }
-        MarketType::InverseFuture | MarketType::InverseSwap => {
-            crawl_candlestick_inverse(market_type, symbol_interval_list, on_msg, duration)
-        }
-        MarketType::LinearFuture | MarketType::LinearSwap => {
-            crawl_candlestick_linear(market_type, symbol_interval_list, on_msg, duration)
-        }
-        _ => panic!("Binance {} does NOT have candlestick", market_type),
-    }
+    crawl_candlestick_ext(
+        EXCHANGE_NAME,
+        market_type,
+        symbol_interval_list,
+        on_msg,
+        duration,
+    )
 }

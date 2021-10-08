@@ -91,28 +91,22 @@ pub fn crawl_trade(
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
 ) {
-    let func = match exchange {
-        "binance" => crawlers::binance::crawl_trade,
-        "bitfinex" => crawlers::bitfinex::crawl_trade,
-        "bitget" => crawlers::bitget::crawl_trade,
-        "bithumb" => crawlers::bithumb::crawl_trade,
-        "bitmex" => crawlers::bitmex::crawl_trade,
-        "bitstamp" => crawlers::bitstamp::crawl_trade,
-        "bitz" => crawlers::bitz::crawl_trade,
-        "bybit" => crawlers::bybit::crawl_trade,
-        "coinbase_pro" => crawlers::coinbase_pro::crawl_trade,
-        "deribit" => crawlers::deribit::crawl_trade,
-        "ftx" => crawlers::ftx::crawl_trade,
-        "gate" => crawlers::gate::crawl_trade,
-        "huobi" => crawlers::huobi::crawl_trade,
-        "kraken" => crawlers::kraken::crawl_trade,
-        "kucoin" => crawlers::kucoin::crawl_trade,
-        "mxc" => crawlers::mxc::crawl_trade,
-        "okex" => crawlers::okex::crawl_trade,
-        "zbg" => crawlers::zbg::crawl_trade,
-        _ => panic!("Unknown exchange {}", exchange),
+    let handle = match exchange {
+        "binance" => crawlers::binance::crawl_trade(market_type, symbols, on_msg, duration),
+        "bitmex" => crawlers::bitmex::crawl_trade(market_type, symbols, on_msg, duration),
+        "deribit" => crawlers::deribit::crawl_trade(market_type, symbols, on_msg, duration),
+        "okex" => crawlers::okex::crawl_trade(market_type, symbols, on_msg, duration),
+        "bitfinex" | "bitget" | "bithumb" | "bitstamp" | "bitz" | "bybit" | "coinbase_pro"
+        | "ftx" | "gate" | "huobi" | "kraken" | "kucoin" | "mxc" | "zbg" => crawlers::crawl_event(
+            exchange,
+            MessageType::Trade,
+            market_type,
+            symbols,
+            on_msg,
+            duration,
+        ),
+        _ => panic!("{} does NOT have the trade websocket channel", exchange),
     };
-    let handle = func(market_type, symbols, on_msg, duration);
     if let Some(h) = handle {
         h.join().expect("The thread panicked");
     }
@@ -126,28 +120,26 @@ pub fn crawl_l2_event(
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
 ) {
-    let func = match exchange {
-        "binance" => crawlers::binance::crawl_l2_event,
-        "bitfinex" => crawlers::bitfinex::crawl_l2_event,
-        "bitget" => crawlers::bitget::crawl_l2_event,
-        "bithumb" => crawlers::bithumb::crawl_l2_event,
-        "bitmex" => crawlers::bitmex::crawl_l2_event,
-        "bitstamp" => crawlers::bitstamp::crawl_l2_event,
-        "bitz" => crawlers::bitz::crawl_l2_event,
-        "bybit" => crawlers::bybit::crawl_l2_event,
-        "coinbase_pro" => crawlers::coinbase_pro::crawl_l2_event,
-        "deribit" => crawlers::deribit::crawl_l2_event,
-        "ftx" => crawlers::ftx::crawl_l2_event,
-        "gate" => crawlers::gate::crawl_l2_event,
-        "huobi" => crawlers::huobi::crawl_l2_event,
-        "kraken" => crawlers::kraken::crawl_l2_event,
-        "kucoin" => crawlers::kucoin::crawl_l2_event,
-        "mxc" => crawlers::mxc::crawl_l2_event,
-        "okex" => crawlers::okex::crawl_l2_event,
-        "zbg" => crawlers::zbg::crawl_l2_event,
-        _ => panic!("Unknown exchange {}", exchange),
+    let handle = match exchange {
+        "binance" => crawlers::binance::crawl_l2_event(market_type, symbols, on_msg, duration),
+        "bitmex" => crawlers::bitmex::crawl_l2_event(market_type, symbols, on_msg, duration),
+        "huobi" => crawlers::huobi::crawl_l2_event(market_type, symbols, on_msg, duration),
+        "bitfinex" | "bitget" | "bithumb" | "bitstamp" | "bitz" | "bybit" | "coinbase_pro"
+        | "deribit" | "ftx" | "gate" | "kraken" | "kucoin" | "mxc" | "okex" | "zbg" => {
+            crawlers::crawl_event(
+                exchange,
+                MessageType::L2Event,
+                market_type,
+                symbols,
+                on_msg,
+                duration,
+            )
+        }
+        _ => panic!(
+            "{} does NOT have the incremental level2 websocket channel",
+            exchange
+        ),
     };
-    let handle = func(market_type, symbols, on_msg, duration);
     if let Some(h) = handle {
         h.join().expect("The thread panicked");
     }
@@ -161,14 +153,20 @@ pub fn crawl_l3_event(
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
 ) {
-    let func = match exchange {
-        "bitfinex" => crawlers::bitfinex::crawl_l3_event,
-        "bitstamp" => crawlers::bitstamp::crawl_l3_event,
-        "coinbase_pro" => crawlers::coinbase_pro::crawl_l3_event,
-        "kucoin" => crawlers::kucoin::crawl_l3_event,
-        _ => panic!("{} does NOT have level3 orderbook data", exchange),
+    let handle = match exchange {
+        "bitfinex" | "bitstamp" | "coinbase_pro" | "kucoin" => crawlers::crawl_event(
+            exchange,
+            MessageType::L3Event,
+            market_type,
+            symbols,
+            on_msg,
+            duration,
+        ),
+        _ => panic!(
+            "{} does NOT have the incremental level3 websocket channel",
+            exchange
+        ),
     };
-    let handle = func(market_type, symbols, on_msg, duration);
     if let Some(h) = handle {
         h.join().expect("The thread panicked");
     }
@@ -200,20 +198,22 @@ pub fn crawl_bbo(
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
 ) {
-    let func = match exchange {
-        "binance" => crawlers::binance::crawl_bbo,
-        "bitfinex" => crawlers::bitfinex::crawl_bbo,
-        "bitmex" => crawlers::bitmex::crawl_bbo,
-        "deribit" => crawlers::deribit::crawl_bbo,
-        "ftx" => crawlers::ftx::crawl_bbo,
-        "gate" => crawlers::gate::crawl_bbo,
-        "huobi" => crawlers::huobi::crawl_bbo,
-        "kraken" => crawlers::kraken::crawl_bbo,
-        "kucoin" => crawlers::kucoin::crawl_bbo,
-        "okex" => crawlers::okex::crawl_bbo,
-        _ => panic!("Unknown exchange {}", exchange),
+    let handle = match exchange {
+        "binance" => crawlers::binance::crawl_bbo(market_type, symbols, on_msg, duration),
+        "bitmex" => crawlers::bitmex::crawl_bbo(market_type, symbols, on_msg, duration),
+        "kucoin" => crawlers::kucoin::crawl_bbo(market_type, symbols, on_msg, duration),
+        "bitfinex" | "deribit" | "ftx" | "gate" | "huobi" | "kraken" | "okex" => {
+            crawlers::crawl_event(
+                exchange,
+                MessageType::BBO,
+                market_type,
+                symbols,
+                on_msg,
+                duration,
+            )
+        }
+        _ => panic!("{} does NOT have BBO websocket channel", exchange),
     };
-    let handle = func(market_type, symbols, on_msg, duration);
     if let Some(h) = handle {
         h.join().expect("The thread panicked");
     }
@@ -227,20 +227,24 @@ pub fn crawl_l2_topk(
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
 ) {
-    let func = match exchange {
-        "binance" => crawlers::binance::crawl_l2_topk,
-        "bitget" => crawlers::bitget::crawl_l2_topk,
-        "bitmex" => crawlers::bitmex::crawl_l2_topk,
-        "bitstamp" => crawlers::bitstamp::crawl_l2_topk,
-        "bybit" => crawlers::bybit::crawl_l2_topk,
-        "deribit" => crawlers::deribit::crawl_l2_topk,
-        "huobi" => crawlers::huobi::crawl_l2_topk,
-        "kucoin" => crawlers::kucoin::crawl_l2_topk,
-        "mxc" => crawlers::mxc::crawl_l2_topk,
-        "okex" => crawlers::okex::crawl_l2_topk,
-        _ => panic!("Unknown exchange {}", exchange),
+    let handle = match exchange {
+        "binance" => crawlers::binance::crawl_l2_topk(market_type, symbols, on_msg, duration),
+        "bitmex" => crawlers::bitmex::crawl_l2_topk(market_type, symbols, on_msg, duration),
+        "bitget" | "bybit" | "bitstamp" | "deribit" | "huobi" | "kucoin" | "mxc" | "okex" => {
+            crawlers::crawl_event(
+                exchange,
+                MessageType::L2TopK,
+                market_type,
+                symbols,
+                on_msg,
+                duration,
+            )
+        }
+        _ => panic!(
+            "{} does NOT have the level2 top-k snapshot websocket channel",
+            exchange
+        ),
     };
-    let handle = func(market_type, symbols, on_msg, duration);
     if let Some(h) = handle {
         h.join().expect("The thread panicked");
     }
@@ -275,25 +279,19 @@ pub fn crawl_ticker(
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
 ) {
-    let func = match exchange {
-        "binance" => crawlers::binance::crawl_ticker,
-        "bitfinex" => crawlers::bitfinex::crawl_ticker,
-        "bitget" => crawlers::bitget::crawl_ticker,
-        "bithumb" => crawlers::bithumb::crawl_ticker,
-        "bitz" => crawlers::bitz::crawl_ticker,
-        "bybit" => crawlers::bybit::crawl_ticker,
-        "coinbase_pro" => crawlers::coinbase_pro::crawl_ticker,
-        "deribit" => crawlers::deribit::crawl_ticker,
-        "gate" => crawlers::gate::crawl_ticker,
-        "huobi" => crawlers::huobi::crawl_ticker,
-        "kraken" => crawlers::kraken::crawl_ticker,
-        "kucoin" => crawlers::kucoin::crawl_ticker,
-        "mxc" => crawlers::mxc::crawl_ticker,
-        "okex" => crawlers::okex::crawl_ticker,
-        "zbg" => crawlers::zbg::crawl_ticker,
-        _ => panic!("Unknown exchange {}", exchange),
+    let handle = match exchange {
+        "binance" => crawlers::binance::crawl_ticker(market_type, symbols, on_msg, duration),
+        "bitfinex" | "bitget" | "bithumb" | "bitz" | "bybit" | "coinbase_pro" | "deribit"
+        | "gate" | "huobi" | "kraken" | "kucoin" | "mxc" | "okex" | "zbg" => crawlers::crawl_event(
+            exchange,
+            MessageType::Ticker,
+            market_type,
+            symbols,
+            on_msg,
+            duration,
+        ),
+        _ => panic!("{} does NOT have the ticker websocket channel", exchange),
     };
-    let handle = func(market_type, symbols, on_msg, duration);
     if let Some(h) = handle {
         h.join().expect("The thread panicked");
     }
@@ -326,24 +324,29 @@ pub fn crawl_candlestick(
     on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
     duration: Option<u64>,
 ) {
-    let func = match exchange {
-        "binance" => crawlers::binance::crawl_candlestick,
-        "bitfinex" => crawlers::bitfinex::crawl_candlestick,
-        "bitget" => crawlers::bitget::crawl_candlestick,
-        "bitmex" => crawlers::bitmex::crawl_candlestick,
-        "bitz" => crawlers::bitz::crawl_candlestick,
-        "bybit" => crawlers::bybit::crawl_candlestick,
-        "deribit" => crawlers::deribit::crawl_candlestick,
-        "gate" => crawlers::gate::crawl_candlestick,
-        "huobi" => crawlers::huobi::crawl_candlestick,
-        "kraken" => crawlers::kraken::crawl_candlestick,
-        "kucoin" => crawlers::kucoin::crawl_candlestick,
-        "mxc" => crawlers::mxc::crawl_candlestick,
-        "okex" => crawlers::okex::crawl_candlestick,
-        "zbg" => crawlers::zbg::crawl_candlestick,
-        _ => panic!("Unknown exchange {}", exchange),
+    let handle = match exchange {
+        "binance" => crawlers::binance::crawl_candlestick(
+            market_type,
+            symbol_interval_list,
+            on_msg,
+            duration,
+        ),
+        "bitmex" => {
+            crawlers::bitmex::crawl_candlestick(market_type, symbol_interval_list, on_msg, duration)
+        }
+        "bitfinex" | "bitget" | "bitz" | "bybit" | "deribit" | "gate" | "huobi" | "kraken"
+        | "kucoin" | "mxc" | "okex" | "zbg" => crawlers::crawl_candlestick_ext(
+            exchange,
+            market_type,
+            symbol_interval_list,
+            on_msg,
+            duration,
+        ),
+        _ => panic!(
+            "{} does NOT have the candlestick websocket channel",
+            exchange
+        ),
     };
-    let handle = func(market_type, symbol_interval_list, on_msg, duration);
     if let Some(h) = handle {
         h.join().expect("The thread panicked");
     }
