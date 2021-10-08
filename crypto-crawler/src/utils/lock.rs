@@ -115,7 +115,10 @@ fn create_all_lock_files(
         let m = result
             .entry(exchange.to_string())
             .or_insert_with(HashMap::new);
-        let market_types = crypto_market_type::get_market_types(exchange);
+        let mut market_types = crypto_market_type::get_market_types(exchange);
+        if *exchange == "bitmex" {
+            market_types.push(MarketType::Unknown);
+        }
         for market_type in market_types {
             let filename = get_lock_file_name(exchange, market_type, prefix);
             let lock_file = cache

@@ -1,26 +1,10 @@
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc, Mutex,
-};
-
-use std::time::Duration;
-
-use super::utils::{
-    check_args, fetch_symbols_retry, get_candlestick_intervals, get_connection_interval_ms,
-    get_send_interval_ms,
-};
-use crate::utils::WS_LOCKS;
+use super::crawl_event;
 use crate::{msg::Message, MessageType};
 use crypto_markets::MarketType;
 use crypto_ws_client::*;
-use log::*;
+use std::sync::{Arc, Mutex};
 
 const EXCHANGE_NAME: &str = "deribit";
-// usize::MAX means unlimited
-const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = usize::MAX;
-
-#[rustfmt::skip]
-gen_crawl_event!(crawl_trade_internal, DeribitWSClient, MessageType::Trade, subscribe_trade);
 
 pub(crate) fn crawl_trade(
     market_type: MarketType,
@@ -55,17 +39,13 @@ pub(crate) fn crawl_trade(
         ws_client.run(duration);
         None
     } else {
-        crawl_trade_internal(market_type, symbols, on_msg, duration)
+        crawl_event(
+            EXCHANGE_NAME,
+            MessageType::Trade,
+            market_type,
+            symbols,
+            on_msg,
+            duration,
+        )
     }
 }
-
-#[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event, DeribitWSClient, MessageType::L2Event, subscribe_orderbook);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_bbo, DeribitWSClient, MessageType::BBO, subscribe_bbo);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_l2_topk, DeribitWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_ticker, DeribitWSClient, MessageType::Ticker, subscribe_ticker);
-#[rustfmt::skip]
-gen_crawl_candlestick!(crawl_candlestick, DeribitWSClient);

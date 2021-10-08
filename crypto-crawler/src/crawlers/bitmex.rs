@@ -1,34 +1,13 @@
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc, Mutex,
+use super::{
+    crawl_candlestick_ext, crawl_event,
+    utils::{check_args, fetch_symbols_retry},
 };
-use std::time::Duration;
-
-use super::utils::{
-    check_args, fetch_symbols_retry, get_candlestick_intervals, get_connection_interval_ms,
-    get_send_interval_ms,
-};
-use crate::utils::WS_LOCKS;
 use crate::{msg::Message, MessageType};
 use crypto_markets::MarketType;
 use crypto_ws_client::*;
-use log::*;
+use std::sync::{Arc, Mutex};
 
 const EXCHANGE_NAME: &str = "bitmex";
-
-// see <https://www.bitmex.com/app/wsAPI#Rate-Limits>
-const MAX_SUBSCRIPTIONS_PER_CONNECTION: usize = 40;
-
-#[rustfmt::skip]
-gen_crawl_event!(crawl_trade_internal, BitmexWSClient, MessageType::Trade, subscribe_trade);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_l2_event_internal, BitmexWSClient, MessageType::L2Event, subscribe_orderbook);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_bbo_internal, BitmexWSClient, MessageType::BBO, subscribe_bbo);
-#[rustfmt::skip]
-gen_crawl_event!(crawl_l2_topk_internal, BitmexWSClient, MessageType::L2TopK, subscribe_orderbook_topk);
-#[rustfmt::skip]
-gen_crawl_candlestick!(crawl_candlestick_internal, BitmexWSClient);
 
 fn crawl_all(
     msg_type: MessageType,
@@ -72,7 +51,14 @@ pub(crate) fn crawl_trade(
         // crawl all symbols
         crawl_all(MessageType::Trade, on_msg, duration)
     } else {
-        crawl_trade_internal(market_type, symbols, on_msg, duration)
+        crawl_event(
+            EXCHANGE_NAME,
+            MessageType::Trade,
+            market_type,
+            symbols,
+            on_msg,
+            duration,
+        )
     }
 }
 
@@ -86,7 +72,14 @@ pub(crate) fn crawl_l2_event(
         // crawl all symbols
         crawl_all(MessageType::L2Event, on_msg, duration)
     } else {
-        crawl_l2_event_internal(market_type, symbols, on_msg, duration)
+        crawl_event(
+            EXCHANGE_NAME,
+            MessageType::L2Event,
+            market_type,
+            symbols,
+            on_msg,
+            duration,
+        )
     }
 }
 
@@ -100,7 +93,14 @@ pub(crate) fn crawl_bbo(
         // crawl all symbols
         crawl_all(MessageType::BBO, on_msg, duration)
     } else {
-        crawl_bbo_internal(market_type, symbols, on_msg, duration)
+        crawl_event(
+            EXCHANGE_NAME,
+            MessageType::BBO,
+            market_type,
+            symbols,
+            on_msg,
+            duration,
+        )
     }
 }
 
@@ -114,7 +114,14 @@ pub(crate) fn crawl_l2_topk(
         // crawl all symbols
         crawl_all(MessageType::L2TopK, on_msg, duration)
     } else {
-        crawl_l2_topk_internal(market_type, symbols, on_msg, duration)
+        crawl_event(
+            EXCHANGE_NAME,
+            MessageType::L2TopK,
+            market_type,
+            symbols,
+            on_msg,
+            duration,
+        )
     }
 }
 
@@ -199,6 +206,12 @@ pub(crate) fn crawl_candlestick(
         ws_client.run(duration);
         None
     } else {
-        crawl_candlestick_internal(market_type, symbol_interval_list, on_msg, duration)
+        crawl_candlestick_ext(
+            EXCHANGE_NAME,
+            market_type,
+            symbol_interval_list,
+            on_msg,
+            duration,
+        )
     }
 }
