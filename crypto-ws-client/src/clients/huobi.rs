@@ -7,7 +7,7 @@ use serde_json::Value;
 use tungstenite::Message;
 
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
+use super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 
 pub(super) const EXCHANGE_NAME: &str = "huobi";
 
@@ -264,6 +264,10 @@ macro_rules! define_market_client {
                 <$struct_name as OrderBookTopK>::subscribe_orderbook_topk(self, channels);
             }
 
+            fn subscribe_l3_orderbook(&self, channels: &[String]) {
+                <$struct_name as Level3OrderBook>::subscribe_l3_orderbook(self, channels);
+            }
+
             fn subscribe_ticker(&self, channels: &[String]) {
                 <$struct_name as Ticker>::subscribe_ticker(self, channels);
             }
@@ -403,6 +407,12 @@ impl_orderbook_snapshot!(HuobiFutureWSClient);
 impl_orderbook_snapshot!(HuobiInverseSwapWSClient);
 impl_orderbook_snapshot!(HuobiLinearSwapWSClient);
 impl_orderbook_snapshot!(HuobiOptionWSClient);
+
+panic_l3_orderbook!(HuobiSpotWSClient);
+panic_l3_orderbook!(HuobiFutureWSClient);
+panic_l3_orderbook!(HuobiInverseSwapWSClient);
+panic_l3_orderbook!(HuobiLinearSwapWSClient);
+panic_l3_orderbook!(HuobiOptionWSClient);
 
 #[cfg(test)]
 mod tests {

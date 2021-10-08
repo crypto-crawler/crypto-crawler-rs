@@ -1,4 +1,4 @@
-use crypto_ws_client::{CoinbaseProWSClient, Level3OrderBook, WSClient};
+use crypto_ws_client::{CoinbaseProWSClient, WSClient};
 use std::sync::{Arc, Mutex};
 
 #[macro_use]

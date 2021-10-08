@@ -1,8 +1,8 @@
-use crate::{Level3OrderBook, WSClient};
+use crate::WSClient;
 use std::sync::{Arc, Mutex};
 
 use super::super::ws_client_internal::WSClientInternal;
-use super::super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
+use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 use super::utils::{
     channels_to_commands, fetch_ws_token, on_misc_msg, to_raw_channel, WebsocketToken,
     CLIENT_PING_INTERVAL_AND_MSG, EXCHANGE_NAME,

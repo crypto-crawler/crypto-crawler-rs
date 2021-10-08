@@ -6,7 +6,7 @@ use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
 };
-use super::{Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
+use super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 
 use log::*;
 use serde_json::Value;
@@ -104,6 +104,8 @@ impl<'a> Candlestick for FtxWSClient<'a> {
         panic!("FTX does NOT have candlestick channel");
     }
 }
+
+panic_l3_orderbook!(FtxWSClient);
 
 define_client!(
     FtxWSClient,

@@ -1,11 +1,11 @@
-use crate::{Level3OrderBook, WSClient};
+use crate::WSClient;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
+    Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
 };
 
 use log::*;

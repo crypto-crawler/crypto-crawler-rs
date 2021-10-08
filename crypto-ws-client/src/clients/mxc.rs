@@ -6,7 +6,7 @@ use crate::WSClient;
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
+    Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
 };
 
 use log::*;
@@ -235,6 +235,9 @@ impl<'a> Candlestick for MxcSwapWSClient<'a> {
         self.client.subscribe(&channels);
     }
 }
+
+panic_l3_orderbook!(MxcSpotWSClient);
+panic_l3_orderbook!(MxcSwapWSClient);
 
 define_client!(
     MxcSpotWSClient,

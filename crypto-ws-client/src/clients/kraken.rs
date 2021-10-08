@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 use super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
-    Candlestick, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
+    Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
 };
 
 use log::*;
@@ -218,6 +218,8 @@ impl<'a> Candlestick for KrakenWSClient<'a> {
         self.client.subscribe(&commands);
     }
 }
+
+panic_l3_orderbook!(KrakenWSClient);
 
 define_client!(
     KrakenWSClient,

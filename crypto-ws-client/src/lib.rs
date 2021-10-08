@@ -147,6 +147,14 @@ pub trait WSClient<'a> {
     /// * OKEx `depth5`, top 5, every 100ms
     fn subscribe_orderbook_topk(&self, pairs: &[String]);
 
+    /// Subscribes to level3 orderebook channels.
+    ///
+    /// **Only bitfinex, bitstamp, coinbase_pro and kucoin have level3 orderbook channels.**
+    ///
+    /// The level3 orderbook is the orginal orderbook of an exchange, it is
+    /// non-aggregated by price level and updated tick-by-tick.
+    fn subscribe_l3_orderbook(&self, symbols: &[String]);
+
     /// Subscribes to ticker channels.
     ///
     /// A ticker channel pushes realtime 24hr rolling window ticker messages,
@@ -196,13 +204,4 @@ pub trait WSClient<'a> {
 
     /// Breaks the loop and closes the connection.
     fn close(&self);
-}
-
-/// Level3 orderbook data.
-pub trait Level3OrderBook {
-    /// Subscribes to level3 orderebook channels.
-    ///
-    /// The level3 orderbook is the orginal orderbook of an exchange, it is
-    /// non-aggregated by price level and updated tick-by-tick.
-    fn subscribe_l3_orderbook(&self, symbols: &[String]);
 }
