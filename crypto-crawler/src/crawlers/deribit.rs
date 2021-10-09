@@ -1,27 +1,24 @@
 use super::crawl_event;
-use crate::{msg::Message, MessageType};
+use crate::{crawlers::utils::create_conversion_thread, msg::Message, MessageType};
 use crypto_markets::MarketType;
 use crypto_ws_client::*;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 const EXCHANGE_NAME: &str = "deribit";
 
 pub(crate) fn crawl_trade(
     market_type: MarketType,
     symbols: Option<&[String]>,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    tx: Sender<Message>,
     duration: Option<u64>,
 ) {
     if symbols.is_none() || symbols.unwrap().is_empty() {
-        let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
-            let message = Message::new(
-                EXCHANGE_NAME.to_string(),
-                market_type,
-                MessageType::Trade,
-                msg,
-            );
-            (on_msg.lock().unwrap())(message);
-        }));
+        let tx = create_conversion_thread(
+            EXCHANGE_NAME.to_string(),
+            MessageType::Trade,
+            market_type,
+            tx,
+        );
 
         // "any" menas all, see https://docs.deribit.com/?javascript#trades-kind-currency-interval
         let channels: Vec<String> = match market_type {
@@ -34,7 +31,7 @@ pub(crate) fn crawl_trade(
         .map(|x| x.to_string())
         .collect();
 
-        let ws_client = DeribitWSClient::new(on_msg_ext, None);
+        let ws_client = DeribitWSClient::new(tx, None);
         ws_client.subscribe(&channels);
         ws_client.run(duration);
     } else {
@@ -43,7 +40,7 @@ pub(crate) fn crawl_trade(
             MessageType::Trade,
             market_type,
             symbols,
-            on_msg,
+            tx,
             duration,
         );
     }

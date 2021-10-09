@@ -1,17 +1,19 @@
 use core::panic;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 use crate::crawlers::utils::{crawl_candlestick_ext, crawl_event};
 use crate::{msg::Message, MessageType};
 use crypto_markets::MarketType;
 use crypto_ws_client::*;
 
+use super::utils::create_conversion_thread;
+
 const EXCHANGE_NAME: &str = "binance";
 
 pub(crate) fn crawl_trade(
     market_type: MarketType,
     symbols: Option<&[String]>,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    tx: Sender<Message>,
     duration: Option<u64>,
 ) {
     // All symbols for websocket are lowercase while for REST they are uppercase
@@ -28,22 +30,18 @@ pub(crate) fn crawl_trade(
     if market_type == MarketType::EuropeanOption
         && (symbols.is_none() || symbols.unwrap().is_empty())
     {
-        let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
-            let message = Message::new(
-                EXCHANGE_NAME.to_string(),
-                market_type,
-                MessageType::Trade,
-                msg,
-            );
-            (on_msg.lock().unwrap())(message);
-        }));
-
+        let tx = create_conversion_thread(
+            EXCHANGE_NAME.to_string(),
+            MessageType::Trade,
+            market_type,
+            tx,
+        );
         let channels: Vec<String> = vec![
             "BTCUSDT_C@TRADE_ALL".to_string(),
             "BTCUSDT_P@TRADE_ALL".to_string(),
         ];
 
-        let ws_client = BinanceOptionWSClient::new(on_msg_ext, None);
+        let ws_client = BinanceOptionWSClient::new(tx, None);
         ws_client.subscribe(&channels);
         ws_client.run(duration);
     } else {
@@ -52,7 +50,7 @@ pub(crate) fn crawl_trade(
             MessageType::Trade,
             market_type,
             symbols,
-            on_msg,
+            tx,
             duration,
         )
     }
@@ -61,7 +59,7 @@ pub(crate) fn crawl_trade(
 pub(crate) fn crawl_l2_event(
     market_type: MarketType,
     symbols: Option<&[String]>,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    tx: Sender<Message>,
     duration: Option<u64>,
 ) {
     // All symbols for websocket are lowercase while for REST they are uppercase
@@ -80,7 +78,7 @@ pub(crate) fn crawl_l2_event(
         MessageType::L2Event,
         market_type,
         symbols,
-        on_msg,
+        tx,
         duration,
     );
 }
@@ -88,7 +86,7 @@ pub(crate) fn crawl_l2_event(
 pub(crate) fn crawl_bbo(
     market_type: MarketType,
     symbols: Option<&[String]>,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    tx: Sender<Message>,
     duration: Option<u64>,
 ) {
     // All symbols for websocket are lowercase while for REST they are uppercase
@@ -103,29 +101,22 @@ pub(crate) fn crawl_bbo(
         Some(symbols.as_slice())
     };
     if symbols.is_none() || symbols.unwrap().is_empty() {
+        let tx =
+            create_conversion_thread(EXCHANGE_NAME.to_string(), MessageType::BBO, market_type, tx);
         let channels = vec!["!bookTicker".to_string()]; // All Book Tickers Stream
-        let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
-            let message = Message::new(
-                EXCHANGE_NAME.to_string(),
-                market_type,
-                MessageType::BBO,
-                msg,
-            );
-            (on_msg.lock().unwrap())(message);
-        }));
         match market_type {
             MarketType::Spot => {
-                let ws_client = BinanceSpotWSClient::new(on_msg_ext, None);
+                let ws_client = BinanceSpotWSClient::new(tx, None);
                 ws_client.subscribe(&channels);
                 ws_client.run(duration);
             }
             MarketType::InverseFuture | MarketType::InverseSwap => {
-                let ws_client = BinanceInverseWSClient::new(on_msg_ext, None);
+                let ws_client = BinanceInverseWSClient::new(tx, None);
                 ws_client.subscribe(&channels);
                 ws_client.run(duration);
             }
             MarketType::LinearFuture | MarketType::LinearSwap => {
-                let ws_client = BinanceLinearWSClient::new(on_msg_ext, None);
+                let ws_client = BinanceLinearWSClient::new(tx, None);
                 ws_client.subscribe(&channels);
                 ws_client.run(duration);
             }
@@ -140,7 +131,7 @@ pub(crate) fn crawl_bbo(
             MessageType::BBO,
             market_type,
             symbols,
-            on_msg,
+            tx,
             duration,
         );
     }
@@ -149,7 +140,7 @@ pub(crate) fn crawl_bbo(
 pub(crate) fn crawl_l2_topk(
     market_type: MarketType,
     symbols: Option<&[String]>,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    tx: Sender<Message>,
     duration: Option<u64>,
 ) {
     // All symbols for websocket are lowercase while for REST they are uppercase
@@ -168,7 +159,7 @@ pub(crate) fn crawl_l2_topk(
         MessageType::L2TopK,
         market_type,
         symbols,
-        on_msg,
+        tx,
         duration,
     );
 }
@@ -176,7 +167,7 @@ pub(crate) fn crawl_l2_topk(
 pub(crate) fn crawl_ticker(
     market_type: MarketType,
     symbols: Option<&[String]>,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    tx: Sender<Message>,
     duration: Option<u64>,
 ) {
     // All symbols for websocket are lowercase while for REST they are uppercase
@@ -190,33 +181,29 @@ pub(crate) fn crawl_ticker(
     } else {
         Some(symbols.as_slice())
     };
-    let on_msg_clone = on_msg.clone();
-    let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
-        let message = Message::new(
-            EXCHANGE_NAME.to_string(),
-            market_type,
-            MessageType::Ticker,
-            msg,
-        );
-        (on_msg_clone.lock().unwrap())(message);
-    }));
 
     if symbols.is_none() || symbols.unwrap().is_empty() {
+        let tx = create_conversion_thread(
+            EXCHANGE_NAME.to_string(),
+            MessageType::Ticker,
+            market_type,
+            tx,
+        );
         let channels: Vec<String> = vec!["!ticker@arr".to_string()];
 
         match market_type {
             MarketType::Spot => {
-                let ws_client = BinanceSpotWSClient::new(on_msg_ext, None);
+                let ws_client = BinanceSpotWSClient::new(tx, None);
                 ws_client.subscribe(&channels);
                 ws_client.run(duration);
             }
             MarketType::InverseFuture | MarketType::InverseSwap => {
-                let ws_client = BinanceInverseWSClient::new(on_msg_ext, None);
+                let ws_client = BinanceInverseWSClient::new(tx, None);
                 ws_client.subscribe(&channels);
                 ws_client.run(duration);
             }
             MarketType::LinearFuture | MarketType::LinearSwap => {
-                let ws_client = BinanceLinearWSClient::new(on_msg_ext, None);
+                let ws_client = BinanceLinearWSClient::new(tx, None);
                 ws_client.subscribe(&channels);
                 ws_client.run(duration);
             }
@@ -231,7 +218,7 @@ pub(crate) fn crawl_ticker(
             MessageType::Ticker,
             market_type,
             symbols,
-            on_msg,
+            tx,
             duration,
         );
     }
@@ -241,7 +228,7 @@ pub(crate) fn crawl_ticker(
 pub(crate) fn crawl_funding_rate(
     market_type: MarketType,
     symbols: Option<&[String]>,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    tx: Sender<Message>,
     duration: Option<u64>,
 ) {
     // All symbols for websocket are lowercase while for REST they are uppercase
@@ -255,15 +242,6 @@ pub(crate) fn crawl_funding_rate(
     } else {
         Some(symbols.as_slice())
     };
-    let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
-        let message = Message::new(
-            EXCHANGE_NAME.to_string(),
-            market_type,
-            MessageType::FundingRate,
-            msg,
-        );
-        (on_msg.lock().unwrap())(message);
-    }));
 
     let channels: Vec<String> = if symbols.is_none() || symbols.unwrap().is_empty() {
         vec!["!markPrice@arr".to_string()]
@@ -275,14 +253,21 @@ pub(crate) fn crawl_funding_rate(
             .collect()
     };
 
+    let tx = create_conversion_thread(
+        EXCHANGE_NAME.to_string(),
+        MessageType::FundingRate,
+        market_type,
+        tx,
+    );
+
     match market_type {
         MarketType::InverseSwap => {
-            let ws_client = BinanceInverseWSClient::new(on_msg_ext, None);
+            let ws_client = BinanceInverseWSClient::new(tx, None);
             ws_client.subscribe(&channels);
             ws_client.run(duration);
         }
         MarketType::LinearSwap => {
-            let ws_client = BinanceLinearWSClient::new(on_msg_ext, None);
+            let ws_client = BinanceLinearWSClient::new(tx, None);
             ws_client.subscribe(&channels);
             ws_client.run(duration);
         }
@@ -293,7 +278,7 @@ pub(crate) fn crawl_funding_rate(
 pub(crate) fn crawl_candlestick(
     market_type: MarketType,
     symbol_interval_list: Option<&[(String, usize)]>,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    tx: Sender<Message>,
     duration: Option<u64>,
 ) {
     // All symbols for websocket are lowercase while for REST they are uppercase
@@ -311,7 +296,7 @@ pub(crate) fn crawl_candlestick(
         EXCHANGE_NAME,
         market_type,
         symbol_interval_list,
-        on_msg,
+        tx,
         duration,
     );
 }

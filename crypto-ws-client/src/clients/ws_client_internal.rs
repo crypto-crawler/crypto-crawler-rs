@@ -278,9 +278,12 @@ impl WSClientInternal {
                                         && frame.code != CloseCode::Away
                                     {
                                         error!(
-                                            "Received a CloseFrame: code: {}, reason: {} from {}",
-                                            frame.code, frame.reason, self.url
+                                            "Received a CloseFrame: code: {}, reason: {}, {}",
+                                            frame.code,
+                                            frame.reason,
+                                            self.get_error_msg(),
                                         );
+                                        std::thread::sleep(Duration::from_secs(5));
                                         std::process::exit(1); // fail fast, pm2 will restart
                                     } else {
                                         warn!(
@@ -299,7 +302,6 @@ impl WSClientInternal {
                     match err {
                         Error::ConnectionClosed => {
                             error!("Server closed connection, exiting now...");
-                            // self.reconnect();
                             std::thread::sleep(Duration::from_secs(5));
                             std::process::exit(1); // fail fast, pm2 will restart
                         }
@@ -308,32 +310,45 @@ impl WSClientInternal {
                             panic!("Impossible to happen, fix the bug in the code");
                         }
                         Error::Io(io_err) => {
-                            if io_err.kind() == std::io::ErrorKind::WouldBlock {
-                                num_read_timeout += 1;
-                                debug!(
-                                    "read_message() timeout, increased num_read_timeout to {}",
-                                    num_read_timeout
-                                );
-                            } else if io_err.kind() == std::io::ErrorKind::Interrupted {
-                                // ignore SIGHUP, which will be handled by reopen
-                                info!("Ignoring SIGHUP");
-                            } else {
-                                error!(
-                                    "I/O error thrown from read_message(): {}, {:?} {} {}",
-                                    io_err,
-                                    io_err.kind(),
-                                    self.exchange,
-                                    self.url
-                                );
-                                // self.reconnect();
-                                std::thread::sleep(Duration::from_secs(5));
-                                std::process::exit(1); // fail fast, pm2 will restart
+                            match io_err.kind() {
+                                std::io::ErrorKind::WouldBlock => {
+                                    num_read_timeout += 1;
+                                    debug!(
+                                        "read_message() timeout, increased num_read_timeout to {}",
+                                        num_read_timeout
+                                    );
+                                }
+                                std::io::ErrorKind::Interrupted => {
+                                    // ignore SIGHUP, which will be handled by reopen
+                                    info!("Ignoring SIGHUP");
+                                }
+                                std::io::ErrorKind::BrokenPipe => {
+                                    error!(
+                                        "I/O error thrown from read_message(): {}, {:?} {} {}",
+                                        io_err,
+                                        io_err.kind(),
+                                        self.exchange,
+                                        self.url
+                                    );
+                                    std::thread::sleep(Duration::from_secs(5));
+                                    std::process::exit(1); // fail fast, pm2 will restart
+                                }
+                                _ => {
+                                    error!(
+                                        "I/O error thrown from read_message(): {}, {:?} {} {}",
+                                        io_err,
+                                        io_err.kind(),
+                                        self.exchange,
+                                        self.url
+                                    );
+                                    std::thread::sleep(Duration::from_secs(5));
+                                    std::process::exit(1); // fail fast, pm2 will restart
+                                }
                             }
                         }
                         Error::Protocol(protocol_err) => {
                             if protocol_err == ProtocolError::ResetWithoutClosingHandshake {
                                 error!("ResetWithoutClosingHandshake");
-                                // self.reconnect();
                                 std::thread::sleep(Duration::from_secs(5));
                                 std::process::exit(1); // fail fast, pm2 will restart
                             } else {
@@ -361,6 +376,7 @@ impl WSClientInternal {
                         num_unanswered_ping,
                         start_timstamp.elapsed().as_secs()
                     );
+                    std::thread::sleep(Duration::from_secs(5));
                     std::process::exit(1); // fail fast, pm2 will restart
                 }
                 if last_ping_timestamp.elapsed() >= Duration::from_secs(interval_and_msg.0 / 2) {
@@ -382,6 +398,7 @@ impl WSClientInternal {
                     num_read_timeout,
                     start_timstamp.elapsed().as_secs()
                 );
+                std::thread::sleep(Duration::from_secs(5));
                 std::process::exit(1); // fail fast, pm2 will restart
             }
 
@@ -394,11 +411,27 @@ impl WSClientInternal {
     }
 
     pub fn close(&self) {
+        // break the while loop in run()
         self.should_stop.store(true, Ordering::Release);
         let ret = self.ws_stream.lock().unwrap().close(None);
         if let Err(err) = ret {
             error!("{}", err);
         }
+    }
+
+    fn get_error_msg(&self) -> String {
+        format!(
+            "{}, {}\n{}",
+            self.exchange,
+            self.url,
+            self.channels
+                .lock()
+                .unwrap()
+                .iter()
+                .map(|ch| ch.to_string())
+                .collect::<Vec<String>>()
+                .join("\n")
+        )
     }
 }
 

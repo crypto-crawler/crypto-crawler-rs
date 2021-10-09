@@ -60,7 +60,16 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
             MiscMessage::Misc
         }
     } else if obj.contains_key("table") && obj.contains_key("data") {
-        MiscMessage::Normal
+        if let Some(arr) = obj.get("data").unwrap().as_array() {
+            if arr.is_empty() {
+                warn!("data field is empty {} from {}", msg, EXCHANGE_NAME);
+                MiscMessage::Misc
+            } else {
+                MiscMessage::Normal
+            }
+        } else {
+            MiscMessage::Normal
+        }
     } else if obj.contains_key("action") {
         let action = obj.get("action").unwrap().as_str().unwrap();
         if action == "ping" {
