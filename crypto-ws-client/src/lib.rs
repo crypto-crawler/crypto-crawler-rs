@@ -3,13 +3,22 @@
 //! ## Example
 //!
 //! ```
-//! use std::sync::{Arc, Mutex};
 //! use crypto_ws_client::{BinanceSpotWSClient, WSClient};
 //!
-//! let mut ws_client = BinanceSpotWSClient::new(Arc::new(Mutex::new(|msg| println!("{}", msg))), None);
+//! let (tx, rx) = std::sync::mpsc::channel();
+//! let thread = std::thread::spawn(move || {
+//!     for msg in rx {
+//!         println!("{}", msg);
+//!     }
+//! });
+//!
+//! let mut ws_client = BinanceSpotWSClient::new(tx, None);
 //! let channels = vec!["btcusdt@aggTrade".to_string(), "btcusdt@depth".to_string(),];
 //! ws_client.subscribe(&channels);
 //! ws_client.run(Some(2)); // run for 2 seconds
+//! ws_client.close();
+//! drop(ws_client);
+//! thread.join().unwrap();
 //! ```
 //! ## High Level APIs
 //!

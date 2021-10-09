@@ -221,7 +221,7 @@ impl Candlestick for KrakenWSClient {
 
 panic_l3_orderbook!(KrakenWSClient);
 
-define_client!(
+impl_new_constructor!(
     KrakenWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
@@ -230,6 +230,7 @@ define_client!(
     Some(CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
+impl_ws_client_trait!(KrakenWSClient);
 
 #[cfg(test)]
 mod tests {

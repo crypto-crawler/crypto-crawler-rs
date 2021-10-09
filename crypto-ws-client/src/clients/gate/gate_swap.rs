@@ -59,7 +59,7 @@ impl_candlestick!(GateLinearSwapWSClient);
 panic_l3_orderbook!(GateInverseSwapWSClient);
 panic_l3_orderbook!(GateLinearSwapWSClient);
 
-define_client!(
+impl_new_constructor!(
     GateInverseSwapWSClient,
     EXCHANGE_NAME,
     INVERSE_SWAP_WEBSOCKET_URL,
@@ -68,8 +68,9 @@ define_client!(
     Some(CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
+impl_ws_client_trait!(GateInverseSwapWSClient);
 
-define_client!(
+impl_new_constructor!(
     GateLinearSwapWSClient,
     EXCHANGE_NAME,
     LINEAR_SWAP_WEBSOCKET_URL,
@@ -78,3 +79,4 @@ define_client!(
     Some(CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
+impl_ws_client_trait!(GateLinearSwapWSClient);

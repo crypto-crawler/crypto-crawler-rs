@@ -154,7 +154,7 @@ impl Level3OrderBook for CoinbaseProWSClient {
     }
 }
 
-define_client!(
+impl_new_constructor!(
     CoinbaseProWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
@@ -163,6 +163,7 @@ define_client!(
     None,
     None
 );
+impl_ws_client_trait!(CoinbaseProWSClient);
 
 #[cfg(test)]
 mod tests {

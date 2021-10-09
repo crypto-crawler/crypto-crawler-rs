@@ -135,7 +135,7 @@ impl_candlestick!(ZbgSpotWSClient);
 
 panic_l3_orderbook!(ZbgSpotWSClient);
 
-define_client!(
+impl_new_constructor!(
     ZbgSpotWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
@@ -144,3 +144,4 @@ define_client!(
     Some(CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
+impl_ws_client_trait!(ZbgSpotWSClient);

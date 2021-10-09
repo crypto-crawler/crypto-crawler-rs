@@ -239,7 +239,7 @@ impl Candlestick for MxcSwapWSClient {
 panic_l3_orderbook!(MxcSpotWSClient);
 panic_l3_orderbook!(MxcSwapWSClient);
 
-define_client!(
+impl_new_constructor!(
     MxcSpotWSClient,
     EXCHANGE_NAME,
     SPOT_WEBSOCKET_URL,
@@ -248,7 +248,9 @@ define_client!(
     Some(SPOT_CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
-define_client!(
+impl_ws_client_trait!(MxcSpotWSClient);
+
+impl_new_constructor!(
     MxcSwapWSClient,
     EXCHANGE_NAME,
     SWAP_WEBSOCKET_URL,
@@ -257,6 +259,7 @@ define_client!(
     Some(SWAP_CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
+impl_ws_client_trait!(MxcSwapWSClient);
 
 #[cfg(test)]
 mod tests {

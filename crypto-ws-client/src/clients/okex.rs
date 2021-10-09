@@ -137,7 +137,7 @@ impl_candlestick!(OkexWSClient);
 
 panic_l3_orderbook!(OkexWSClient);
 
-define_client!(
+impl_new_constructor!(
     OkexWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
@@ -146,6 +146,7 @@ define_client!(
     Some(CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
+impl_ws_client_trait!(OkexWSClient);
 
 #[cfg(test)]
 mod tests {

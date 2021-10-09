@@ -122,7 +122,7 @@ impl_candlestick!(BitgetSwapWSClient);
 
 panic_l3_orderbook!(BitgetSwapWSClient);
 
-define_client!(
+impl_new_constructor!(
     BitgetSwapWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
@@ -131,3 +131,4 @@ define_client!(
     Some(CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
+impl_ws_client_trait!(BitgetSwapWSClient);

@@ -65,7 +65,7 @@ impl Level3OrderBook for KuCoinSwapWSClient {
     }
 }
 
-define_client!(
+impl_new_constructor!(
     KuCoinSwapWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL.as_str(),
@@ -74,3 +74,4 @@ define_client!(
     Some(CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
+impl_ws_client_trait!(KuCoinSwapWSClient);
