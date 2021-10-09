@@ -2,7 +2,7 @@ use crate::WSClient;
 use std::collections::HashMap;
 use std::sync::mpsc::Sender;
 
-use super::utils::{ensure_frame_size, WS_FRAME_SIZE};
+use super::utils::ensure_frame_size;
 use super::{
     ws_client_internal::{MiscMessage, WSClientInternal},
     Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
@@ -22,6 +22,10 @@ const MAX_NUM_CHANNELS: usize = 200;
 
 // The websocket server will send a ping frame every 5 minutes
 const SERVER_PING_INTERVAL: u64 = 300;
+
+// the websocket message size should not exceed 4096 bytes, otherwise
+// you'll get `code: 3001, reason: illegal request`
+const WS_FRAME_SIZE: usize = 4096;
 
 // Internal unified client
 struct BinanceWSClient {

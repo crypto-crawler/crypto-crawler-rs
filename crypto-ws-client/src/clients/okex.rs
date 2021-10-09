@@ -2,7 +2,7 @@ use crate::WSClient;
 use std::collections::HashMap;
 use std::sync::mpsc::Sender;
 
-use super::utils::{ensure_frame_size, WS_FRAME_SIZE};
+use super::utils::ensure_frame_size;
 use super::ws_client_internal::{MiscMessage, WSClientInternal};
 use super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 
@@ -14,6 +14,9 @@ pub(super) const EXCHANGE_NAME: &str = "okex";
 const WEBSOCKET_URL: &str = "wss://real.okex.com:8443/ws/v3";
 
 const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (30, "ping");
+
+/// CloseFrame: code: 1009, reason: Max frame length of 65536 has been exceeded
+const WS_FRAME_SIZE: usize = 65536;
 
 /// The WebSocket client for OKEx.
 ///
@@ -41,9 +44,6 @@ fn topics_to_command(chunk: &[String], subscribe: bool) -> String {
     )
 }
 
-// https://www.okex.com/docs/zh/#question-public
-// How many subscriptions per websocket connection?
-// The total size of subscription command should not exceed 4096 bytes.
 fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
     ensure_frame_size(channels, subscribe, topics_to_command, WS_FRAME_SIZE, None)
 }
@@ -62,16 +62,13 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     if let Some(event) = obj.get("event") {
         match event.as_str().unwrap() {
             "error" => {
-                error!("Received {} from {}", msg, EXCHANGE_NAME);
-                if let Some(error_code) = obj.get("errorCode") {
-                    #[allow(clippy::single_match)]
-                    match error_code.as_i64().unwrap() {
-                        30040 => {
-                            // channel doesn't exist
-                            panic!("Received {} from {}", msg, EXCHANGE_NAME);
-                        }
-                        _ => (),
+                let error_code = obj.get("errorCode").unwrap().as_i64().unwrap();
+                match error_code {
+                    30040 => {
+                        // channel doesn't exist, ignore because some symbols don't exist in websocket while they exist in `/v3/instruments`
+                        error!("Received {} from {}", msg, EXCHANGE_NAME);
                     }
+                    _ => warn!("Received {} from {}", msg, EXCHANGE_NAME),
                 }
             }
             "subscribe" => info!("Received {} from {}", msg, EXCHANGE_NAME),
