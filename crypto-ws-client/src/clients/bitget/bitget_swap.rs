@@ -4,7 +4,7 @@ use std::sync::mpsc::Sender;
 
 use super::super::ws_client_internal::{MiscMessage, WSClientInternal};
 use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
-use crate::clients::utils::{ensure_frame_size, WS_FRAME_SIZE};
+use crate::clients::utils::ensure_frame_size;
 
 use log::*;
 use serde_json::Value;
@@ -18,9 +18,10 @@ const WEBSOCKET_URL: &str = "wss://csocketapi.bitget.com/ws/v1";
 // or no ping command sent by user after 30sec after ws is connected
 const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (30, "ping");
 
+// User has the opinion to subscribe 1 or more channels, total length of multiple channel can not exceeds 4096 bytes.
+const WS_FRAME_SIZE: usize = 4096;
+
 /// The WebSocket client for Bitget swap markets.
-///
-/// User has the opinion to subscribe 1 or more channels, total length of multiple channel can not exceeds 4096 bytes.
 ///
 /// * WebSocket API doc: <https://bitgetlimited.github.io/apidoc/en/swap/#websocketapi>
 /// * Trading at: <https://www.bitget.com/en/swap/>

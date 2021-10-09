@@ -11,6 +11,8 @@ pub(super) const EXCHANGE_NAME: &str = "kucoin";
 /// See:
 /// - https://docs.kucoin.com/#ping
 /// - https://docs.kucoin.cc/futures/#ping
+///
+/// If the server has not received the ping from the client for 60 seconds , the connection will be disconnected.
 pub(super) const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) =
     (60, r#"{"type":"ping", "id": "crypto-ws-client"}"#);
 
