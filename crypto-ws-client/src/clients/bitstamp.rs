@@ -107,7 +107,7 @@ impl Candlestick for BitstampWSClient {
     }
 }
 
-define_client!(
+impl_new_constructor!(
     BitstampWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
@@ -116,6 +116,7 @@ define_client!(
     Some(CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
+impl_ws_client_trait!(BitstampWSClient);
 
 #[cfg(test)]
 mod tests {

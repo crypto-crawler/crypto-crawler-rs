@@ -73,7 +73,7 @@ impl_candlestick!(GateLinearFutureWSClient);
 panic_l3_orderbook!(GateInverseFutureWSClient);
 panic_l3_orderbook!(GateLinearFutureWSClient);
 
-define_client!(
+impl_new_constructor!(
     GateInverseFutureWSClient,
     EXCHANGE_NAME,
     INVERSE_FUTURE_WEBSOCKET_URL,
@@ -82,8 +82,9 @@ define_client!(
     Some(CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
+impl_ws_client_trait!(GateInverseFutureWSClient);
 
-define_client!(
+impl_new_constructor!(
     GateLinearFutureWSClient,
     EXCHANGE_NAME,
     LINEAR_FUTURE_WEBSOCKET_URL,
@@ -92,3 +93,4 @@ define_client!(
     Some(CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
+impl_ws_client_trait!(GateLinearFutureWSClient);

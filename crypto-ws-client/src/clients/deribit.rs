@@ -137,7 +137,7 @@ impl_candlestick!(DeribitWSClient);
 
 panic_l3_orderbook!(DeribitWSClient);
 
-define_client!(
+impl_new_constructor!(
     DeribitWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
@@ -146,6 +146,7 @@ define_client!(
     None,
     None
 );
+impl_ws_client_trait!(DeribitWSClient);
 
 #[cfg(test)]
 mod tests {

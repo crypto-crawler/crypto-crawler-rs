@@ -435,8 +435,8 @@ impl WSClientInternal {
     }
 }
 
-/// Define exchange specific client.
-macro_rules! define_client {
+/// Define the new() constructor.
+macro_rules! impl_new_constructor {
     ($struct_name:ident, $exchange:ident, $default_url:expr, $channels_to_commands:ident, $on_misc_msg:ident, $client_ping_interval_and_msg:expr, $server_ping_interval:expr) => {
         impl $struct_name {
             /// Creates a websocket client.
@@ -463,7 +463,12 @@ macro_rules! define_client {
                 }
             }
         }
+    };
+}
 
+/// Implement the WSClient trait.
+macro_rules! impl_ws_client_trait {
+    ($struct_name:ident) => {
         impl WSClient for $struct_name {
             fn subscribe_trade(&self, channels: &[String]) {
                 <$struct_name as Trade>::subscribe_trade(self, channels);

@@ -55,7 +55,7 @@ impl_candlestick!(BybitLinearSwapWSClient);
 
 panic_l3_orderbook!(BybitLinearSwapWSClient);
 
-define_client!(
+impl_new_constructor!(
     BybitLinearSwapWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
@@ -64,3 +64,4 @@ define_client!(
     Some(CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
+impl_ws_client_trait!(BybitLinearSwapWSClient);

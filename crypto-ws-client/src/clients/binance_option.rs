@@ -79,7 +79,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     MiscMessage::Normal
 }
 
-define_client!(
+impl_new_constructor!(
     BinanceOptionWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
@@ -88,6 +88,7 @@ define_client!(
     Some(CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
+impl_ws_client_trait!(BinanceOptionWSClient);
 
 fn to_raw_channel(channel: &str, pair: &str) -> String {
     format!("{}@{}", pair, channel)

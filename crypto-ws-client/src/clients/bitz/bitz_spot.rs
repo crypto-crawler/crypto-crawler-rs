@@ -158,7 +158,7 @@ impl_candlestick!(BitzSpotWSClient);
 
 panic_l3_orderbook!(BitzSpotWSClient);
 
-define_client!(
+impl_new_constructor!(
     BitzSpotWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
@@ -167,3 +167,4 @@ define_client!(
     Some(CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
+impl_ws_client_trait!(BitzSpotWSClient);
