@@ -1,18 +1,64 @@
-use std::{
-    collections::HashMap,
-    path::Path,
-    sync::{Arc, Mutex},
-};
+use std::{collections::HashMap, path::Path, sync::mpsc::Receiver, thread::JoinHandle};
 
 use carbonbot::{
     utils::connect_redis,
     writers::{FileWriter, Writer},
 };
 use crypto_ws_client::{BitmexWSClient, WSClient};
-use dashmap::DashMap;
 use log::*;
 use redis::{self, Commands};
 use serde_json::Value;
+
+fn create_writer_thread(
+    rx: Receiver<String>,
+    data_dir: Option<String>,
+    redis_url: Option<String>,
+) -> JoinHandle<()> {
+    std::thread::spawn(move || {
+        let mut writers: HashMap<String, FileWriter> = HashMap::new();
+        let mut redis_conn = if let Some(url) = redis_url {
+            match connect_redis(&url) {
+                Ok(conn) => Some(conn),
+                Err(_) => None,
+            }
+        } else {
+            None
+        };
+        for msg in rx {
+            let obj = serde_json::from_str::<HashMap<String, Value>>(&msg).unwrap();
+            let table = obj.get("table").unwrap().as_str().unwrap();
+            let file_name = format!("bitmex.misc.{}", table);
+            if let Some(ref data_dir) = data_dir {
+                if !writers.contains_key(&file_name) {
+                    let data_dir = Path::new(data_dir)
+                        .join("misc")
+                        .join("bitmex")
+                        .join(table)
+                        .into_os_string();
+                    std::fs::create_dir_all(data_dir.as_os_str()).unwrap();
+
+                    let file_path = Path::new(data_dir.as_os_str())
+                        .join(file_name.clone())
+                        .into_os_string();
+                    writers.insert(
+                        file_name.clone(),
+                        FileWriter::new(file_path.as_os_str().to_str().unwrap()),
+                    );
+                }
+            }
+
+            if let Some(writer) = writers.get(&file_name) {
+                writer.write(&msg);
+            }
+
+            if let Some(ref mut conn) = redis_conn {
+                if let Err(err) = conn.publish::<&str, String, i64>("carbonbot:misc:bitmex", msg) {
+                    error!("{}", err);
+                }
+            }
+        }
+    })
+}
 
 fn main() {
     env_logger::init();
@@ -37,57 +83,10 @@ fn main() {
         panic!("The environment variable DATA_DIR and REDIS_URL are not set, at least one of them should be set");
     }
 
-    let data_dir_clone = Arc::new(data_dir);
+    let (tx, rx) = std::sync::mpsc::channel();
+    let writer_thread = create_writer_thread(rx, data_dir, redis_url);
 
-    let writers_map: Arc<DashMap<String, FileWriter>> = Arc::new(DashMap::new());
-
-    let redis_conn = if let Some(url) = redis_url {
-        let conn = match connect_redis(&url) {
-            Ok(conn) => Some(conn),
-            Err(_) => None,
-        };
-        Arc::new(Mutex::new(conn))
-    } else {
-        Arc::new(Mutex::new(None))
-    };
-
-    let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
-        let obj = serde_json::from_str::<HashMap<String, Value>>(&msg).unwrap();
-        let table = obj.get("table").unwrap().as_str().unwrap();
-        let key = format!("bitmex-{}", table);
-        if let Some(ref data_dir) = *data_dir_clone {
-            if !writers_map.contains_key(&key) {
-                let data_dir = Path::new(data_dir)
-                    .join("misc")
-                    .join("bitmex")
-                    .join(table)
-                    .into_os_string();
-                std::fs::create_dir_all(data_dir.as_os_str()).unwrap();
-
-                let file_name = format!("bitmex.misc.{}", table);
-                let file_path = Path::new(data_dir.as_os_str())
-                    .join(file_name)
-                    .into_os_string();
-                writers_map.insert(
-                    key.clone(),
-                    FileWriter::new(file_path.as_os_str().to_str().unwrap()),
-                );
-            }
-        }
-
-        if let Some(writer) = writers_map.get(&key) {
-            writer.write(&msg);
-        }
-
-        let mut guard = redis_conn.lock().unwrap();
-        if let Some(ref mut conn) = *guard {
-            if let Err(err) = conn.publish::<&str, String, i64>("carbonbot:misc:bitmex", msg) {
-                error!("{}", err);
-            }
-        }
-    }));
-
-    let ws_client = BitmexWSClient::new(on_msg_ext, None);
+    let ws_client = BitmexWSClient::new(tx, None);
     let channels: Vec<String> = vec![
         "announcement",
         "connected",
@@ -100,4 +99,6 @@ fn main() {
     .collect();
     ws_client.subscribe(&channels);
     ws_client.run(None);
+    ws_client.close();
+    writer_thread.join().unwrap();
 }

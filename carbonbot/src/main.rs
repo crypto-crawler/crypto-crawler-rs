@@ -1,15 +1,11 @@
 use carbonbot::utils::connect_redis;
 use carbonbot::writers::{FileWriter, Writer};
 use crypto_crawler::*;
-use dashmap::DashMap;
 use log::*;
 use redis::{self, Commands};
-use std::{
-    env,
-    path::Path,
-    str::FromStr,
-    sync::{Arc, Mutex},
-};
+use std::collections::HashMap;
+use std::thread::JoinHandle;
+use std::{env, path::Path, str::FromStr, sync::mpsc::Receiver};
 
 fn to_string(msg: Message) -> Vec<String> {
     if std::env::var("PARSER").is_ok() && std::env::var("PARSER").unwrap() == "true" {
@@ -55,6 +51,59 @@ fn to_string(msg: Message) -> Vec<String> {
     }
 }
 
+fn create_writer_thread(
+    rx: Receiver<Message>,
+    data_dir: Option<String>,
+    redis_url: Option<String>,
+) -> JoinHandle<()> {
+    std::thread::spawn(move || {
+        let mut writers: HashMap<String, FileWriter> = HashMap::new();
+        let mut redis_conn = if let Some(url) = redis_url {
+            match connect_redis(&url) {
+                Ok(conn) => Some(conn),
+                Err(_) => None,
+            }
+        } else {
+            None
+        };
+        for msg in rx {
+            let file_name = format!("{}.{}.{}", msg.exchange, msg.market_type, msg.msg_type);
+            if let Some(ref data_dir) = data_dir {
+                if !writers.contains_key(&file_name) {
+                    let data_dir = Path::new(data_dir)
+                        .join(msg.msg_type.to_string())
+                        .join(&msg.exchange)
+                        .join(msg.market_type.to_string())
+                        .into_os_string();
+                    std::fs::create_dir_all(data_dir.as_os_str()).unwrap();
+                    let file_path = Path::new(data_dir.as_os_str())
+                        .join(file_name.clone())
+                        .into_os_string();
+                    writers.insert(
+                        file_name.clone(),
+                        FileWriter::new(file_path.as_os_str().to_str().unwrap()),
+                    );
+                }
+            }
+
+            let msg_type = msg.msg_type;
+            let string_arr = to_string(msg);
+            for s in string_arr {
+                if let Some(writer) = writers.get(&file_name) {
+                    writer.write(&s);
+                }
+
+                if let Some(ref mut conn) = redis_conn {
+                    let topic = format!("carbonbot:{}", msg_type);
+                    if let Err(err) = conn.publish::<&str, String, i64>(&topic, s) {
+                        error!("{}", err);
+                    }
+                }
+            }
+        }
+    })
+}
+
 pub fn crawl(
     exchange: &'static str,
     market_type: MarketType,
@@ -62,61 +111,11 @@ pub fn crawl(
     data_dir: Option<String>,
     redis_url: Option<String>,
 ) {
-    let data_dir_clone = Arc::new(data_dir);
-    let writers_map: Arc<DashMap<String, FileWriter>> = Arc::new(DashMap::new());
-    let writers_map_clone = writers_map.clone();
-
-    let redis_conn = if let Some(url) = redis_url {
-        let conn = match connect_redis(&url) {
-            Ok(conn) => Some(conn),
-            Err(_) => None,
-        };
-        Arc::new(Mutex::new(conn))
-    } else {
-        Arc::new(Mutex::new(None))
-    };
-    let redis_conn_clone = redis_conn;
-
-    let on_msg_ext = Arc::new(Mutex::new(move |msg: Message| {
-        let key = format!("{}-{}-{}", msg_type, exchange, market_type);
-        if let Some(ref data_dir) = *data_dir_clone {
-            if !writers_map.contains_key(&key) {
-                let data_dir = Path::new(data_dir)
-                    .join(msg_type.to_string())
-                    .join(exchange)
-                    .join(market_type.to_string())
-                    .into_os_string();
-                std::fs::create_dir_all(data_dir.as_os_str()).unwrap();
-
-                let file_name = format!("{}.{}.{}", exchange, market_type, msg_type);
-                let file_path = Path::new(data_dir.as_os_str())
-                    .join(file_name)
-                    .into_os_string();
-                writers_map.insert(
-                    key.clone(),
-                    FileWriter::new(file_path.as_os_str().to_str().unwrap()),
-                );
-            }
-        }
-
-        let string_arr = to_string(msg);
-        for s in string_arr.into_iter() {
-            if let Some(writer) = writers_map.get(&key) {
-                writer.write(&s);
-            }
-
-            let mut guard = redis_conn_clone.lock().unwrap();
-            if let Some(ref mut conn) = *guard {
-                let topic = format!("carbonbot:{}", serde_json::to_string(&msg_type).unwrap());
-                if let Err(err) = conn.publish::<&str, String, i64>(&topic, s) {
-                    error!("{}", err);
-                }
-            }
-        }
-    }));
+    let (tx, rx) = std::sync::mpsc::channel();
+    let writer_thread = create_writer_thread(rx, data_dir, redis_url);
 
     if msg_type == MessageType::Candlestick {
-        crawl_candlestick(exchange, market_type, None, on_msg_ext, None);
+        crawl_candlestick(exchange, market_type, None, tx, None);
     } else {
         let crawl_func = match msg_type {
             MessageType::BBO => crawl_bbo,
@@ -130,13 +129,9 @@ pub fn crawl(
             MessageType::FundingRate => crawl_funding_rate,
             _ => panic!("Not implemented"),
         };
-        crawl_func(exchange, market_type, None, on_msg_ext, None);
+        crawl_func(exchange, market_type, None, tx, None);
     }
-
-    for kv in writers_map_clone.iter() {
-        let writer = kv.value();
-        writer.close();
-    }
+    writer_thread.join().unwrap();
 }
 
 fn main() {
