@@ -32,7 +32,6 @@ impl KuCoinSwapWSClient {
                 ws_url
             }
         };
-        println!("{}", real_url);
         KuCoinSwapWSClient {
             client: WSClientInternal::new(
                 EXCHANGE_NAME,
