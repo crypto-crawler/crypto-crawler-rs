@@ -701,7 +701,7 @@ fn get_candlestick_intervals(exchange: &str, market_type: MarketType) -> Vec<usi
         "deribit" => vec![60, 180, 300],
         "gate" => vec![10, 60, 300],
         "kucoin" => match market_type {
-            MarketType::Spot => vec![60, 180, 300],
+            MarketType::Spot => vec![60, 300], // Reduced to avoid Broken pipe (os error 32)
             _ => vec![60, 300],
         },
         "okex" => vec![60, 180, 300],
