@@ -5,22 +5,12 @@ use test_case::test_case;
 
 use crypto_crawler::*;
 use crypto_markets::MarketType;
-use std::thread_local;
-use std::{
-    cell::RefCell,
-    sync::{Arc, Mutex},
-};
 
 const EXCHANGE_NAME: &str = "bitmex";
 
 fn crawl_all(msg_type: MessageType) {
-    thread_local! {
-        static MESSAGES: RefCell<Vec<Message>> = RefCell::new(Vec::new());
-    }
-
-    let on_msg = Arc::new(Mutex::new(|msg: Message| {
-        MESSAGES.with(|messages| messages.borrow_mut().push(msg))
-    }));
+    let (tx, rx) = std::sync::mpsc::channel();
+    let mut messages = Vec::new();
     let crawl_func = match msg_type {
         MessageType::Trade => crawl_trade,
         MessageType::L2Event => crawl_l2_event,
@@ -30,16 +20,16 @@ fn crawl_all(msg_type: MessageType) {
         MessageType::FundingRate => crawl_funding_rate,
         _ => panic!("unsupported message type {}", msg_type),
     };
-    crawl_func(EXCHANGE_NAME, MarketType::Unknown, None, on_msg, Some(0));
+    crawl_func(EXCHANGE_NAME, MarketType::Unknown, None, tx, Some(0));
 
-    MESSAGES.with(|slf| {
-        let messages = slf.borrow();
+    for msg in rx {
+        messages.push(msg);
+    }
 
-        assert!(!messages.is_empty());
-        assert_eq!(messages[0].exchange, EXCHANGE_NAME.to_string());
-        assert_eq!(messages[0].market_type, MarketType::Unknown);
-        assert_eq!(messages[0].msg_type, msg_type);
-    });
+    assert!(!messages.is_empty());
+    assert_eq!(messages[0].exchange, EXCHANGE_NAME.to_string());
+    assert_eq!(messages[0].market_type, MarketType::Unknown);
+    assert_eq!(messages[0].msg_type, msg_type);
 }
 
 #[test]
@@ -74,29 +64,24 @@ fn test_crawl_funding_rate_all() {
 
 #[test]
 fn test_crawl_candlestick_rate_all() {
-    thread_local! {
-        static MESSAGES: RefCell<Vec<Message>> = RefCell::new(Vec::new());
+    let (tx, rx) = std::sync::mpsc::channel();
+    let mut messages = Vec::new();
+    crawl_candlestick(EXCHANGE_NAME, MarketType::Unknown, None, tx, Some(0));
+
+    for msg in rx {
+        messages.push(msg);
     }
 
-    let on_msg = Arc::new(Mutex::new(|msg: Message| {
-        MESSAGES.with(|messages| messages.borrow_mut().push(msg))
-    }));
-    crawl_candlestick(EXCHANGE_NAME, MarketType::Unknown, None, on_msg, Some(0));
-
-    MESSAGES.with(|slf| {
-        let messages = slf.borrow();
-
-        assert!(!messages.is_empty());
-        assert_eq!(messages[0].exchange, EXCHANGE_NAME.to_string());
-        assert_eq!(messages[0].market_type, MarketType::Unknown);
-        assert_eq!(messages[0].msg_type, MessageType::Candlestick);
-    });
+    assert!(!messages.is_empty());
+    assert_eq!(messages[0].exchange, EXCHANGE_NAME.to_string());
+    assert_eq!(messages[0].market_type, MarketType::Unknown);
+    assert_eq!(messages[0].msg_type, MessageType::Candlestick);
 }
 
 #[test_case(MarketType::InverseSwap, "XBTUSD")]
 #[test_case(MarketType::QuantoSwap, "ETHUSD")]
 fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
-    gen_test_code!(
+    test_one_symbol!(
         crawl_l2_event,
         EXCHANGE_NAME,
         market_type,

@@ -1,8 +1,8 @@
 use super::utils::fetch_symbols_retry;
-use crate::{msg::Message, MessageType};
+use crate::{crawlers::utils::create_conversion_thread, msg::Message, MessageType};
 use crypto_markets::MarketType;
 use crypto_ws_client::*;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 const EXCHANGE_NAME: &str = "bitget";
 
@@ -10,18 +10,15 @@ const EXCHANGE_NAME: &str = "bitget";
 pub(crate) fn crawl_funding_rate(
     market_type: MarketType,
     symbols: Option<&[String]>,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    tx: Sender<Message>,
     duration: Option<u64>,
 ) {
-    let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
-        let message = Message::new(
-            EXCHANGE_NAME.to_string(),
-            market_type,
-            MessageType::FundingRate,
-            msg,
-        );
-        (on_msg.lock().unwrap())(message);
-    }));
+    let tx = create_conversion_thread(
+        EXCHANGE_NAME.to_string(),
+        MessageType::FundingRate,
+        market_type,
+        tx,
+    );
 
     let symbols: Vec<String> = if symbols.is_none() || symbols.unwrap().is_empty() {
         fetch_symbols_retry(EXCHANGE_NAME, market_type)
@@ -39,7 +36,7 @@ pub(crate) fn crawl_funding_rate(
 
     match market_type {
         MarketType::InverseSwap | MarketType::LinearSwap => {
-            let ws_client = BitgetSwapWSClient::new(on_msg_ext, None);
+            let ws_client = BitgetSwapWSClient::new(tx, None);
             ws_client.subscribe(&channels);
             ws_client.run(duration);
         }

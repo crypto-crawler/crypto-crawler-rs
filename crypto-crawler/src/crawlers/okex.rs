@@ -1,30 +1,27 @@
 use super::{crawl_event, utils::fetch_symbols_retry};
-use crate::{msg::Message, MessageType};
+use crate::{crawlers::utils::create_conversion_thread, msg::Message, MessageType};
 use crypto_markets::MarketType;
 use crypto_rest_client::*;
 use crypto_ws_client::*;
-use std::sync::{Arc, Mutex};
+use std::sync::mpsc::Sender;
 
 const EXCHANGE_NAME: &str = "okex";
 
 pub(crate) fn crawl_trade(
     market_type: MarketType,
     symbols: Option<&[String]>,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    tx: Sender<Message>,
     duration: Option<u64>,
 ) {
     if market_type == MarketType::EuropeanOption
         && (symbols.is_none() || symbols.unwrap().is_empty())
     {
-        let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
-            let message = Message::new(
-                EXCHANGE_NAME.to_string(),
-                market_type,
-                MessageType::Trade,
-                msg,
-            );
-            (on_msg.lock().unwrap())(message);
-        }));
+        let tx = create_conversion_thread(
+            EXCHANGE_NAME.to_string(),
+            MessageType::Trade,
+            market_type,
+            tx,
+        );
 
         let underlying = OkexRestClient::fetch_option_underlying()
             .unwrap_or_else(|_| vec!["BTC-USD".to_string(), "ETH-USD".to_string()]);
@@ -33,7 +30,7 @@ pub(crate) fn crawl_trade(
             .map(|x| format!("option/trades:{}", x))
             .collect();
 
-        let ws_client = OkexWSClient::new(on_msg_ext, None);
+        let ws_client = OkexWSClient::new(tx, None);
         ws_client.subscribe(&channels);
         ws_client.run(duration);
     } else {
@@ -42,7 +39,7 @@ pub(crate) fn crawl_trade(
             MessageType::Trade,
             market_type,
             symbols,
-            on_msg,
+            tx,
             duration,
         );
     }
@@ -52,18 +49,15 @@ pub(crate) fn crawl_trade(
 pub(crate) fn crawl_funding_rate(
     market_type: MarketType,
     symbols: Option<&[String]>,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    tx: Sender<Message>,
     duration: Option<u64>,
 ) {
-    let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
-        let message = Message::new(
-            EXCHANGE_NAME.to_string(),
-            market_type,
-            MessageType::FundingRate,
-            msg,
-        );
-        (on_msg.lock().unwrap())(message);
-    }));
+    let tx = create_conversion_thread(
+        EXCHANGE_NAME.to_string(),
+        MessageType::FundingRate,
+        market_type,
+        tx,
+    );
 
     let symbols: Vec<String> = if symbols.is_none() || symbols.unwrap().is_empty() {
         fetch_symbols_retry(EXCHANGE_NAME, market_type)
@@ -77,7 +71,7 @@ pub(crate) fn crawl_funding_rate(
 
     match market_type {
         MarketType::InverseSwap | MarketType::LinearSwap => {
-            let ws_client = OkexWSClient::new(on_msg_ext, None);
+            let ws_client = OkexWSClient::new(tx, None);
             ws_client.subscribe(&channels);
             ws_client.run(duration);
         }

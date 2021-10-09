@@ -4,7 +4,7 @@ use std::{
         mpsc::{
             self, {Receiver, Sender},
         },
-        Arc, Mutex,
+        Arc,
     },
     thread::JoinHandle,
     time::{Duration, Instant, SystemTime},
@@ -125,7 +125,7 @@ pub(crate) fn crawl_snapshot(
     market_type: MarketType,
     msg_type: MessageType, // L2Snapshot or L3Snapshot
     symbols: Option<&[String]>,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    tx: Sender<Message>,
     duration: Option<u64>,
 ) {
     let now = Instant::now();
@@ -188,7 +188,7 @@ pub(crate) fn crawl_snapshot(
                     success_count += 1;
                     backoff_factor = 1;
                     let message = Message::new(exchange.to_string(), market_type, msg_type, msg);
-                    (on_msg.lock().unwrap())(message);
+                    tx.send(message).unwrap();
                 }
                 Err(err) => {
                     let current_timestamp = SystemTime::now()
@@ -226,7 +226,7 @@ pub(crate) fn crawl_snapshot(
     }
 }
 
-pub(crate) fn subscribe_with_lock(
+fn subscribe_with_lock(
     exchange: &str,
     market_type: MarketType,
     msg_type: MessageType,
@@ -264,7 +264,7 @@ pub(crate) fn subscribe_with_lock(
     }
 }
 
-pub(crate) fn subscribe_candlestick_with_lock(
+fn subscribe_candlestick_with_lock(
     exchange: &str,
     market_type: MarketType,
     symbol_interval_list: &[(String, usize)],
@@ -307,8 +307,8 @@ fn create_ws_client(
     exchange: &str,
     market_type: MarketType,
     msg_type: MessageType,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
-) -> Arc<dyn WSClient<'static> + Send + Sync> {
+    tx: Sender<Message>,
+) -> Arc<dyn WSClient + Send + Sync> {
     let lock = WS_LOCKS
         .get(exchange)
         .unwrap()
@@ -317,97 +317,90 @@ fn create_ws_client(
         .clone();
     let mut lock = lock.lock().unwrap();
     let interval = get_connection_interval_ms(exchange, market_type);
-    if interval.is_some() && !lock.owns_lock() {
-        lock.lock().unwrap();
+    if let Some(interval) = interval {
+        if !lock.owns_lock() {
+            lock.lock().unwrap();
+            std::thread::sleep(Duration::from_millis(interval));
+        }
     }
-    let exchange_clone = exchange.to_string();
-    let on_msg_ext = Arc::new(Mutex::new(move |msg: String| {
-        let message = Message::new(exchange_clone.clone(), market_type, msg_type, msg);
-        (on_msg.lock().unwrap())(message);
-    }));
-
-    let ws_client: Arc<dyn WSClient<'static> + Send + Sync> = match exchange {
+    let tx = create_conversion_thread(exchange.to_string(), msg_type, market_type, tx);
+    let ws_client: Arc<dyn WSClient + Send + Sync> = match exchange {
         "binance" => match market_type {
-            MarketType::Spot => Arc::new(BinanceSpotWSClient::new(on_msg_ext, None)),
+            MarketType::Spot => Arc::new(BinanceSpotWSClient::new(tx, None)),
             MarketType::InverseFuture | MarketType::InverseSwap => {
-                Arc::new(BinanceInverseWSClient::new(on_msg_ext, None))
+                Arc::new(BinanceInverseWSClient::new(tx, None))
             }
             MarketType::LinearFuture | MarketType::LinearSwap => {
-                Arc::new(BinanceLinearWSClient::new(on_msg_ext, None))
+                Arc::new(BinanceLinearWSClient::new(tx, None))
             }
-            MarketType::EuropeanOption => Arc::new(BinanceOptionWSClient::new(on_msg_ext, None)),
+            MarketType::EuropeanOption => Arc::new(BinanceOptionWSClient::new(tx, None)),
             _ => panic!("Binance does NOT have the {} market type", market_type),
         },
-        "bitfinex" => Arc::new(BitfinexWSClient::new(on_msg_ext, None)),
+        "bitfinex" => Arc::new(BitfinexWSClient::new(tx, None)),
         "bitget" => match market_type {
             MarketType::InverseSwap | MarketType::LinearSwap => {
-                Arc::new(BitgetSwapWSClient::new(on_msg_ext, None))
+                Arc::new(BitgetSwapWSClient::new(tx, None))
             }
             _ => panic!("Bitget does NOT have the {} market type", market_type),
         },
-        "bithumb" => Arc::new(BithumbWSClient::new(on_msg_ext, None)),
-        "bitmex" => Arc::new(BitmexWSClient::new(on_msg_ext, None)),
-        "bitstamp" => Arc::new(BitstampWSClient::new(on_msg_ext, None)),
+        "bithumb" => Arc::new(BithumbWSClient::new(tx, None)),
+        "bitmex" => Arc::new(BitmexWSClient::new(tx, None)),
+        "bitstamp" => Arc::new(BitstampWSClient::new(tx, None)),
         "bitz" => match market_type {
-            MarketType::Spot => Arc::new(BitzSpotWSClient::new(on_msg_ext, None)),
+            MarketType::Spot => Arc::new(BitzSpotWSClient::new(tx, None)),
             _ => panic!("Bitz does NOT have the {} market type", market_type),
         },
         "bybit" => match market_type {
-            MarketType::InverseFuture => {
-                Arc::new(BybitInverseFutureWSClient::new(on_msg_ext, None))
-            }
-            MarketType::InverseSwap => Arc::new(BybitInverseSwapWSClient::new(on_msg_ext, None)),
-            MarketType::LinearSwap => Arc::new(BybitLinearSwapWSClient::new(on_msg_ext, None)),
+            MarketType::InverseFuture => Arc::new(BybitInverseFutureWSClient::new(tx, None)),
+            MarketType::InverseSwap => Arc::new(BybitInverseSwapWSClient::new(tx, None)),
+            MarketType::LinearSwap => Arc::new(BybitLinearSwapWSClient::new(tx, None)),
             _ => panic!("Bybit does NOT have the {} market type", market_type),
         },
-        "coinbase_pro" => Arc::new(CoinbaseProWSClient::new(on_msg_ext, None)),
-        "deribit" => Arc::new(DeribitWSClient::new(on_msg_ext, None)),
-        "ftx" => Arc::new(FtxWSClient::new(on_msg_ext, None)),
+        "coinbase_pro" => Arc::new(CoinbaseProWSClient::new(tx, None)),
+        "deribit" => Arc::new(DeribitWSClient::new(tx, None)),
+        "ftx" => Arc::new(FtxWSClient::new(tx, None)),
         "gate" => match market_type {
-            MarketType::Spot => Arc::new(GateSpotWSClient::new(on_msg_ext, None)),
-            MarketType::InverseSwap => Arc::new(GateInverseSwapWSClient::new(on_msg_ext, None)),
-            MarketType::LinearSwap => Arc::new(GateLinearSwapWSClient::new(on_msg_ext, None)),
-            MarketType::LinearFuture => Arc::new(GateLinearFutureWSClient::new(on_msg_ext, None)),
+            MarketType::Spot => Arc::new(GateSpotWSClient::new(tx, None)),
+            MarketType::InverseSwap => Arc::new(GateInverseSwapWSClient::new(tx, None)),
+            MarketType::LinearSwap => Arc::new(GateLinearSwapWSClient::new(tx, None)),
+            MarketType::LinearFuture => Arc::new(GateLinearFutureWSClient::new(tx, None)),
             _ => panic!("Gate does NOT have the {} market type", market_type),
         },
         "huobi" => match market_type {
-            MarketType::Spot => Arc::new(HuobiSpotWSClient::new(on_msg_ext, None)),
-            MarketType::InverseFuture => Arc::new(HuobiFutureWSClient::new(on_msg_ext, None)),
-            MarketType::LinearSwap => Arc::new(HuobiLinearSwapWSClient::new(on_msg_ext, None)),
-            MarketType::InverseSwap => Arc::new(HuobiInverseSwapWSClient::new(on_msg_ext, None)),
-            MarketType::EuropeanOption => Arc::new(HuobiOptionWSClient::new(on_msg_ext, None)),
+            MarketType::Spot => Arc::new(HuobiSpotWSClient::new(tx, None)),
+            MarketType::InverseFuture => Arc::new(HuobiFutureWSClient::new(tx, None)),
+            MarketType::LinearSwap => Arc::new(HuobiLinearSwapWSClient::new(tx, None)),
+            MarketType::InverseSwap => Arc::new(HuobiInverseSwapWSClient::new(tx, None)),
+            MarketType::EuropeanOption => Arc::new(HuobiOptionWSClient::new(tx, None)),
             _ => panic!("Huobi does NOT have the {} market type", market_type),
         },
-        "kraken" => Arc::new(KrakenWSClient::new(on_msg_ext, None)),
+        "kraken" => Arc::new(KrakenWSClient::new(tx, None)),
         "kucoin" => match market_type {
-            MarketType::Spot => Arc::new(KuCoinSpotWSClient::new(on_msg_ext, None)),
+            MarketType::Spot => Arc::new(KuCoinSpotWSClient::new(tx, None)),
             MarketType::InverseSwap | MarketType::LinearSwap | MarketType::InverseFuture => {
-                Arc::new(KuCoinSwapWSClient::new(on_msg_ext, None))
+                Arc::new(KuCoinSwapWSClient::new(tx, None))
             }
             _ => panic!("KuCoin does NOT have the {} market type", market_type),
         },
         "mxc" => match market_type {
-            MarketType::Spot => Arc::new(MxcSpotWSClient::new(on_msg_ext, None)),
+            MarketType::Spot => Arc::new(MxcSpotWSClient::new(tx, None)),
             MarketType::LinearSwap | MarketType::InverseSwap => {
-                Arc::new(MxcSwapWSClient::new(on_msg_ext, None))
+                Arc::new(MxcSwapWSClient::new(tx, None))
             }
             _ => panic!("MXC does NOT have the {} market type", market_type),
         },
-        "okex" => Arc::new(OkexWSClient::new(on_msg_ext, None)),
+        "okex" => Arc::new(OkexWSClient::new(tx, None)),
         "zbg" => match market_type {
-            MarketType::Spot => Arc::new(ZbgSpotWSClient::new(on_msg_ext, None)),
+            MarketType::Spot => Arc::new(ZbgSpotWSClient::new(tx, None)),
             MarketType::InverseSwap | MarketType::LinearSwap => {
-                Arc::new(ZbgSwapWSClient::new(on_msg_ext, None))
+                Arc::new(ZbgSwapWSClient::new(tx, None))
             }
             _ => panic!("ZBG does NOT have the {} market type", market_type),
         },
         _ => panic!("Unknown exchange {}", exchange),
     };
-    if let Some(interval) = interval {
-        std::thread::sleep(Duration::from_millis(interval));
-        if lock.owns_lock() {
-            lock.unlock().unwrap();
-        }
+    if interval.is_some() && lock.owns_lock() {
+        lock.unlock().unwrap();
     }
     ws_client
 }
@@ -466,7 +459,7 @@ fn create_new_symbol_receiver_thread(
     msg_type: MessageType,
     market_type: MarketType,
     rx: Receiver<Vec<String>>,
-    ws_client: Arc<dyn WSClient<'static> + Send + Sync>,
+    ws_client: Arc<dyn WSClient + Send + Sync>,
 ) -> JoinHandle<()> {
     std::thread::spawn(move || {
         for new_symbols in rx {
@@ -486,7 +479,7 @@ fn create_new_symbol_receiver_thread_candlestick(
     market_type: MarketType,
     intervals: Vec<usize>,
     rx: Receiver<Vec<String>>,
-    ws_client: Arc<dyn WSClient<'static> + Send + Sync>,
+    ws_client: Arc<dyn WSClient + Send + Sync>,
 ) -> JoinHandle<()> {
     std::thread::spawn(move || {
         for new_symbols in rx {
@@ -510,12 +503,29 @@ fn create_new_symbol_receiver_thread_candlestick(
     })
 }
 
+// create a thread to convert Sender<Message> Sender<String>
+pub(crate) fn create_conversion_thread(
+    exchange: String,
+    msg_type: MessageType,
+    market_type: MarketType,
+    tx: Sender<Message>,
+) -> Sender<String> {
+    let (tx_raw, rx_raw) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        for json in rx_raw {
+            let msg = Message::new(exchange.clone(), market_type, msg_type, json);
+            tx.send(msg).unwrap();
+        }
+    });
+    tx_raw
+}
+
 pub(crate) fn crawl_event(
     exchange: &str,
     msg_type: MessageType,
     market_type: MarketType,
     symbols: Option<&[String]>,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    tx: Sender<Message>,
     duration: Option<u64>,
 ) {
     let num_topics_per_connection = get_num_subscriptions_per_connection(exchange);
@@ -549,7 +559,7 @@ pub(crate) fn crawl_event(
     }
 
     // create a thread to discover new symbols
-    let (tx, rx): (Sender<Vec<String>>, Receiver<Vec<String>>) = mpsc::channel();
+    let (tx_symbols, rx_symbols): (Sender<Vec<String>>, Receiver<Vec<String>>) = mpsc::channel();
     let symbol_discovery_thread_stop = Arc::new(AtomicBool::new(false));
     let symbol_discovery_thread = if automatic_symbol_discovery {
         let thread = create_symbol_discovery_thread(
@@ -557,15 +567,17 @@ pub(crate) fn crawl_event(
             market_type,
             symbol_discovery_thread_stop.clone(),
             real_symbols.clone(),
-            tx,
+            tx_symbols,
         );
         Some(thread)
     } else {
         None
     };
 
+    // create a thread to convert Sender<String> to Sender<Message>
+
     let new_symbol_receiver_thread = if real_symbols.len() <= num_topics_per_connection {
-        let ws_client = create_ws_client(exchange, market_type, msg_type, on_msg);
+        let ws_client = create_ws_client(exchange, market_type, msg_type, tx);
         subscribe_with_lock(
             exchange,
             market_type,
@@ -578,7 +590,7 @@ pub(crate) fn crawl_event(
                 exchange.to_string(),
                 msg_type,
                 market_type,
-                rx,
+                rx_symbols,
                 ws_client.clone(),
             );
             Some(thread)
@@ -600,11 +612,11 @@ pub(crate) fn crawl_event(
         assert!(chunks.len() > 1);
         let n = chunks.len();
 
-        let last_ws_client = create_ws_client(exchange, market_type, msg_type, on_msg.clone());
+        let last_ws_client = create_ws_client(exchange, market_type, msg_type, tx.clone());
         let mut join_handles: Vec<std::thread::JoinHandle<()>> = Vec::new();
         for (index, chunk) in chunks.into_iter().enumerate() {
             let exchange_clone = exchange.to_string();
-            let on_msg_clone = on_msg.clone();
+            let tx_clone = tx.clone();
             let last_ws_client_clone = last_ws_client.clone();
             let handle = std::thread::spawn(move || {
                 let exchange: &str = exchange_clone.as_str();
@@ -619,7 +631,7 @@ pub(crate) fn crawl_event(
                     last_ws_client_clone.run(duration);
                     last_ws_client_clone.close();
                 } else {
-                    let ws_client = create_ws_client(exchange, market_type, msg_type, on_msg_clone);
+                    let ws_client = create_ws_client(exchange, market_type, msg_type, tx_clone);
                     subscribe_with_lock(exchange, market_type, msg_type, &chunk, ws_client.clone());
                     ws_client.run(duration);
                     ws_client.close();
@@ -627,12 +639,13 @@ pub(crate) fn crawl_event(
             });
             join_handles.push(handle);
         }
+        drop(tx);
         let new_symbol_receiver_thread = if automatic_symbol_discovery {
             let thread = create_new_symbol_receiver_thread(
                 exchange.to_string(),
                 msg_type,
                 market_type,
-                rx,
+                rx_symbols,
                 last_ws_client,
             );
             Some(thread)
@@ -652,7 +665,7 @@ pub(crate) fn crawl_event(
 }
 
 // from 1m to 5m
-pub(crate) fn get_candlestick_intervals(exchange: &str, market_type: MarketType) -> Vec<usize> {
+fn get_candlestick_intervals(exchange: &str, market_type: MarketType) -> Vec<usize> {
     match exchange {
         "binance" => vec![60, 180, 300],
         "bybit" => vec![60, 180, 300],
@@ -671,7 +684,7 @@ pub(crate) fn get_candlestick_intervals(exchange: &str, market_type: MarketType)
     }
 }
 
-pub(crate) fn get_connection_interval_ms(exchange: &str, _market_type: MarketType) -> Option<u64> {
+fn get_connection_interval_ms(exchange: &str, _market_type: MarketType) -> Option<u64> {
     match exchange {
         // "bitmex" => Some(9000), // 40 per hour
         "kucoin" => Some(2000), //  Connection Limit: 30 per minute
@@ -680,7 +693,7 @@ pub(crate) fn get_connection_interval_ms(exchange: &str, _market_type: MarketTyp
     }
 }
 
-pub(crate) fn get_send_interval_ms(exchange: &str, _market_type: MarketType) -> Option<u64> {
+fn get_send_interval_ms(exchange: &str, _market_type: MarketType) -> Option<u64> {
     match exchange {
         "binance" => Some(100), // WebSocket connections have a limit of 10 incoming messages per second
         "kucoin" => Some(100),  //  Message limit sent to the server: 100 per 10 seconds
@@ -693,7 +706,7 @@ pub(crate) fn crawl_candlestick_ext(
     exchange: &str,
     market_type: MarketType,
     symbol_interval_list: Option<&[(String, usize)]>,
-    on_msg: Arc<Mutex<dyn FnMut(Message) + 'static + Send>>,
+    tx: Sender<Message>,
     duration: Option<u64>,
 ) {
     let num_topics_per_connection = get_num_subscriptions_per_connection(exchange);
@@ -740,7 +753,7 @@ pub(crate) fn crawl_candlestick_ext(
     let real_intervals: Vec<usize> = symbol_interval_list.iter().map(|t| t.1).collect();
 
     // create a thread to discover new symbols
-    let (tx, rx): (Sender<Vec<String>>, Receiver<Vec<String>>) = mpsc::channel();
+    let (tx_symbols, rx_symbols): (Sender<Vec<String>>, Receiver<Vec<String>>) = mpsc::channel();
     let symbol_discovery_thread_stop = Arc::new(AtomicBool::new(false));
     let symbol_discovery_thread = if automatic_symbol_discovery {
         let thread = create_symbol_discovery_thread(
@@ -748,7 +761,7 @@ pub(crate) fn crawl_candlestick_ext(
             market_type,
             symbol_discovery_thread_stop.clone(),
             real_symbols,
-            tx,
+            tx_symbols,
         );
         Some(thread)
     } else {
@@ -756,7 +769,7 @@ pub(crate) fn crawl_candlestick_ext(
     };
 
     let new_symbol_receiver_thread = if symbol_interval_list.len() <= num_topics_per_connection {
-        let ws_client = create_ws_client(exchange, market_type, MessageType::Candlestick, on_msg);
+        let ws_client = create_ws_client(exchange, market_type, MessageType::Candlestick, tx);
         subscribe_candlestick_with_lock(
             exchange,
             market_type,
@@ -768,7 +781,7 @@ pub(crate) fn crawl_candlestick_ext(
                 exchange.to_string(),
                 market_type,
                 real_intervals,
-                rx,
+                rx_symbols,
                 ws_client.clone(),
             );
             Some(thread)
@@ -790,16 +803,12 @@ pub(crate) fn crawl_candlestick_ext(
         assert!(chunks.len() > 1);
         let n = chunks.len();
 
-        let last_ws_client = create_ws_client(
-            exchange,
-            market_type,
-            MessageType::Candlestick,
-            on_msg.clone(),
-        );
+        let last_ws_client =
+            create_ws_client(exchange, market_type, MessageType::Candlestick, tx.clone());
         let mut join_handles: Vec<std::thread::JoinHandle<()>> = Vec::new();
         for (index, chunk) in chunks.into_iter().enumerate() {
             let exchange_clone = exchange.to_string();
-            let on_msg_clone = on_msg.clone();
+            let tx_clone = tx.clone();
             let last_ws_client_clone = last_ws_client.clone();
             let handle = std::thread::spawn(move || {
                 let exchange: &str = exchange_clone.as_str();
@@ -813,12 +822,8 @@ pub(crate) fn crawl_candlestick_ext(
                     last_ws_client_clone.run(duration);
                     last_ws_client_clone.close();
                 } else {
-                    let ws_client = create_ws_client(
-                        exchange,
-                        market_type,
-                        MessageType::Candlestick,
-                        on_msg_clone,
-                    );
+                    let ws_client =
+                        create_ws_client(exchange, market_type, MessageType::Candlestick, tx_clone);
                     subscribe_candlestick_with_lock(
                         exchange,
                         market_type,
@@ -831,12 +836,13 @@ pub(crate) fn crawl_candlestick_ext(
             });
             join_handles.push(handle);
         }
+        drop(tx);
         let new_symbol_receiver_thread = if automatic_symbol_discovery {
             let thread = create_new_symbol_receiver_thread_candlestick(
                 exchange.to_string(),
                 market_type,
                 real_intervals,
-                rx,
+                rx_symbols,
                 last_ws_client,
             );
             Some(thread)

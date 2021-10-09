@@ -5,11 +5,6 @@ use test_case::test_case;
 
 use crypto_crawler::*;
 use crypto_markets::MarketType;
-use std::thread_local;
-use std::{
-    cell::RefCell,
-    sync::{Arc, Mutex},
-};
 
 const EXCHANGE_NAME: &str = "mxc";
 
@@ -17,7 +12,7 @@ const EXCHANGE_NAME: &str = "mxc";
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
 #[test_case(MarketType::InverseSwap, "BTC_USD")]
 fn test_crawl_trade(market_type: MarketType, symbol: &str) {
-    gen_test_code!(
+    test_one_symbol!(
         crawl_trade,
         EXCHANGE_NAME,
         market_type,
@@ -30,7 +25,7 @@ fn test_crawl_trade(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
 #[test_case(MarketType::InverseSwap, "BTC_USD")]
 fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
-    gen_test_code!(
+    test_one_symbol!(
         crawl_l2_event,
         EXCHANGE_NAME,
         market_type,
@@ -42,7 +37,7 @@ fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
 #[test_case(MarketType::InverseSwap, "BTC_USD")]
 fn test_crawl_l2_topk(market_type: MarketType, symbol: &str) {
-    gen_test_code!(
+    test_one_symbol!(
         crawl_l2_topk,
         EXCHANGE_NAME,
         market_type,
@@ -55,7 +50,7 @@ fn test_crawl_l2_topk(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
 #[test_case(MarketType::InverseSwap, "BTC_USD")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
-    gen_test_snapshot_code!(
+    test_one_symbol!(
         crawl_l2_snapshot,
         EXCHANGE_NAME,
         market_type,
@@ -68,7 +63,7 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::LinearSwap)]
 #[test_case(MarketType::InverseSwap)]
 fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
-    gen_test_snapshot_without_symbol_code!(
+    test_all_symbols!(
         crawl_l2_snapshot,
         EXCHANGE_NAME,
         market_type,
@@ -79,7 +74,7 @@ fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
 #[test_case(MarketType::InverseSwap, "BTC_USD")]
 fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
-    gen_test_code!(
+    test_one_symbol!(
         crawl_ticker,
         EXCHANGE_NAME,
         market_type,
