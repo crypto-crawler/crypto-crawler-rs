@@ -290,15 +290,32 @@ fn subscribe_candlestick_with_lock(
     }
 }
 
+fn get_connection_interval_ms(exchange: &str, _market_type: MarketType) -> Option<u64> {
+    match exchange {
+        // "bitmex" => Some(9000), // 40 per hour
+        "kucoin" => Some(2000), //  Connection Limit: 30 per minute
+        "okex" => Some(1000), //  Connection limit：1 times/s, https://www.okex.com/docs/en/#spot_ws-limit
+        _ => None,
+    }
+}
+
+fn get_send_interval_ms(exchange: &str, _market_type: MarketType) -> Option<u64> {
+    match exchange {
+        "binance" => Some(100), // WebSocket connections have a limit of 10 incoming messages per second
+        "kucoin" => Some(100),  //  Message limit sent to the server: 100 per 10 seconds
+        // "okex" => Some(15000), // 240 times/hour, https://www.okex.com/docs/en/#spot_ws-limit
+        _ => None,
+    }
+}
+
 fn get_num_subscriptions_per_connection(exchange: &str) -> usize {
     match exchange {
-        "binance" => 200, // https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
         // A single connection can listen to a maximum of 200 streams
-        "bitfinex" => 30, // https://docs.bitfinex.com/docs/ws-general#subscribe-to-channels
+        "binance" => 200, // https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
         // All websocket connections have a limit of 30 subscriptions to public market data feed channels
-        "kucoin" => 300, // https://docs.kucoin.cc/#request-rate-limit
+        "bitfinex" => 30, // https://docs.bitfinex.com/docs/ws-general#subscribe-to-channels
         // Subscription limit for each connection: 300 topics
-        "okex" => 256,   // https://www.okex.com/docs/zh/#question-public
+        "kucoin" => 300, // https://docs.kucoin.cc/#request-rate-limit
         _ => usize::MAX, // usize::MAX means unlimited
     }
 }
@@ -618,25 +635,37 @@ pub(crate) fn crawl_event(
             let exchange_clone = exchange.to_string();
             let tx_clone = tx.clone();
             let last_ws_client_clone = last_ws_client.clone();
-            let handle = std::thread::spawn(move || {
-                let exchange: &str = exchange_clone.as_str();
-                if index == n - 1 {
-                    subscribe_with_lock(
-                        exchange,
-                        market_type,
-                        msg_type,
-                        &chunk,
-                        last_ws_client_clone.clone(),
-                    );
-                    last_ws_client_clone.run(duration);
-                    last_ws_client_clone.close();
-                } else {
-                    let ws_client = create_ws_client(exchange, market_type, msg_type, tx_clone);
-                    subscribe_with_lock(exchange, market_type, msg_type, &chunk, ws_client.clone());
-                    ws_client.run(duration);
-                    ws_client.close();
-                }
-            });
+            let handle = std::thread::Builder::new()
+                .name(format!(
+                    "websocket.{}.{}.{}.{}",
+                    exchange, msg_type, market_type, index
+                ))
+                .spawn(move || {
+                    let exchange: &str = exchange_clone.as_str();
+                    if index == n - 1 {
+                        subscribe_with_lock(
+                            exchange,
+                            market_type,
+                            msg_type,
+                            &chunk,
+                            last_ws_client_clone.clone(),
+                        );
+                        last_ws_client_clone.run(duration);
+                        last_ws_client_clone.close();
+                    } else {
+                        let ws_client = create_ws_client(exchange, market_type, msg_type, tx_clone);
+                        subscribe_with_lock(
+                            exchange,
+                            market_type,
+                            msg_type,
+                            &chunk,
+                            ws_client.clone(),
+                        );
+                        ws_client.run(duration);
+                        ws_client.close();
+                    }
+                })
+                .unwrap();
             join_handles.push(handle);
         }
         drop(tx);
@@ -681,24 +710,6 @@ fn get_candlestick_intervals(exchange: &str, market_type: MarketType) -> Vec<usi
             _ => vec![60, 180, 300],
         },
         _ => vec![60, 300],
-    }
-}
-
-fn get_connection_interval_ms(exchange: &str, _market_type: MarketType) -> Option<u64> {
-    match exchange {
-        // "bitmex" => Some(9000), // 40 per hour
-        "kucoin" => Some(2000), //  Connection Limit: 30 per minute
-        "okex" => Some(1000), //  Connection limit：1 times/s, https://www.okex.com/docs/en/#spot_ws-limit
-        _ => None,
-    }
-}
-
-fn get_send_interval_ms(exchange: &str, _market_type: MarketType) -> Option<u64> {
-    match exchange {
-        "binance" => Some(100), // WebSocket connections have a limit of 10 incoming messages per second
-        "kucoin" => Some(100),  //  Message limit sent to the server: 100 per 10 seconds
-        // "okex" => Some(15000), // 240 times/hour, https://www.okex.com/docs/en/#spot_ws-limit
-        _ => None,
     }
 }
 
