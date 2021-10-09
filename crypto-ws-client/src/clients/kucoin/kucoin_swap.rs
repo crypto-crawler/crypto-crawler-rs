@@ -4,16 +4,9 @@ use std::sync::mpsc::Sender;
 use super::super::ws_client_internal::WSClientInternal;
 use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 use super::utils::{
-    channels_to_commands, fetch_ws_token, on_misc_msg, to_raw_channel, WebsocketToken,
+    channels_to_commands, fetch_ws_token, on_misc_msg, to_raw_channel,
     CLIENT_PING_INTERVAL_AND_MSG, EXCHANGE_NAME,
 };
-
-use lazy_static::lazy_static;
-
-lazy_static! {
-    static ref WS_TOKEN: WebsocketToken = fetch_ws_token();
-    static ref WEBSOCKET_URL: String = format!("{}?token={}", WS_TOKEN.endpoint, WS_TOKEN.token);
-}
 
 /// The WebSocket client for KuCoin Swap markets.
 ///
@@ -21,6 +14,37 @@ lazy_static! {
 /// * Trading at: <https://futures.kucoin.com/>
 pub struct KuCoinSwapWSClient {
     client: WSClientInternal,
+}
+
+impl KuCoinSwapWSClient {
+    /// Creates a KuCoinSwapWSClient websocket client.
+    ///
+    /// # Arguments
+    ///
+    /// * `tx` - The sending part of a channel
+    /// * `url` - Optional server url, usually you don't need specify it
+    pub fn new(tx: Sender<String>, url: Option<&str>) -> Self {
+        let real_url = match url {
+            Some(endpoint) => endpoint.to_string(),
+            None => {
+                let ws_token = fetch_ws_token();
+                let ws_url = format!("{}?token={}", ws_token.endpoint, ws_token.token);
+                ws_url
+            }
+        };
+        println!("{}", real_url);
+        KuCoinSwapWSClient {
+            client: WSClientInternal::new(
+                EXCHANGE_NAME,
+                &real_url,
+                tx,
+                on_misc_msg,
+                channels_to_commands,
+                Some(CLIENT_PING_INTERVAL_AND_MSG),
+                None,
+            ),
+        }
+    }
 }
 
 #[rustfmt::skip]
@@ -65,13 +89,4 @@ impl Level3OrderBook for KuCoinSwapWSClient {
     }
 }
 
-impl_new_constructor!(
-    KuCoinSwapWSClient,
-    EXCHANGE_NAME,
-    WEBSOCKET_URL.as_str(),
-    channels_to_commands,
-    on_misc_msg,
-    Some(CLIENT_PING_INTERVAL_AND_MSG),
-    None
-);
 impl_ws_client_trait!(KuCoinSwapWSClient);
