@@ -63,7 +63,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     } else if obj.contains_key("table") && obj.contains_key("data") {
         if let Some(arr) = obj.get("data").unwrap().as_array() {
             if arr.is_empty() {
-                warn!("data field is empty {} from {}", msg, EXCHANGE_NAME);
+                info!("data field is empty {} from {}", msg, EXCHANGE_NAME);
                 MiscMessage::Misc
             } else {
                 MiscMessage::Normal
