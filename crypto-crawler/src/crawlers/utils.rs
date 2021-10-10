@@ -572,7 +572,8 @@ pub(crate) fn crawl_event(
         symbols.unwrap().to_vec()
     };
     if real_symbols.is_empty() {
-        panic!("real_symbols is empty");
+        error!("real_symbols is empty due to fetch_symbols_retry() failure");
+        return;
     }
 
     // create a thread to discover new symbols
@@ -758,7 +759,8 @@ pub(crate) fn crawl_candlestick_ext(
         symbol_interval_list.unwrap().to_vec()
     };
     if symbol_interval_list.is_empty() {
-        panic!("symbol_interval_list is empty");
+        error!("symbol_interval_list is empty due to fetch_symbols_retry() failure");
+        return;
     }
     let real_symbols: Vec<String> = symbol_interval_list.iter().map(|t| t.0.clone()).collect();
     let real_intervals: Vec<usize> = symbol_interval_list.iter().map(|t| t.1).collect();
