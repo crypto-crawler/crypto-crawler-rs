@@ -41,8 +41,8 @@ pub fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<Strin
         match fetch_symbols(exchange, market_type) {
             Ok(list) => {
                 symbols = list;
-                if !lock_.owns_lock() {
-                    lock_.lock().unwrap();
+                if lock_.owns_lock() {
+                    lock_.unlock().unwrap();
                 }
                 break;
             }
