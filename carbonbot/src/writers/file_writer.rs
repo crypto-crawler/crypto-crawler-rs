@@ -15,6 +15,7 @@ use signal_hook::consts::signal::SIGHUP;
 use signal_hook::consts::signal::SIGINT as SIGHUP;
 
 fn open<P: AsRef<Path>>(p: P) -> Result<fs::File, Error> {
+    info!("reopn {}", p.as_ref().display());
     fs::OpenOptions::new()
         .create(true)
         .write(true)
