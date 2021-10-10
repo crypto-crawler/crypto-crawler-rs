@@ -109,7 +109,7 @@ fn get_cooldown_time_per_request(exchange: &str, market_type: MarketType) -> Dur
         "gate" => 4,        // 300 read operations per IP per second
         "huobi" => 2,       // 800 times/second for one IP
         "kucoin" => match market_type {
-            MarketType::Spot => 200, // 2x to avoid 429
+            MarketType::Spot => 300, // 3x to avoid 429
             _ => 100,                // 30 times/3s
         },
         "mxc" => 100,  // 20 times per 2 seconds
