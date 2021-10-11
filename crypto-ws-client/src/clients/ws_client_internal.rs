@@ -115,7 +115,9 @@ impl WSClientInternal {
             commands.into_iter().for_each(|command| {
                 let ret = ws_stream.write_message(Message::Text(command));
                 if let Err(err) = ret {
-                    error!("{}", err);
+                    error!("Failed to send commands due to {}, exiting", err);
+                    std::thread::sleep(Duration::from_secs(5));
+                    std::process::exit(1); // fail fast, pm2 will restart
                 }
                 if let Some(interval) = self.get_send_interval_ms() {
                     std::thread::sleep(Duration::from_millis(interval));
@@ -217,11 +219,12 @@ impl WSClientInternal {
         let mut num_read_timeout = 0;
         while !self.should_stop.load(Ordering::Acquire) {
             let resp = self.ws_stream.lock().unwrap().read_message();
-            let normal = match resp {
+            let mut succeeded = false;
+            match resp {
                 Ok(msg) => {
                     num_read_timeout = 0;
                     match msg {
-                        Message::Text(txt) => self.handle_msg(&txt),
+                        Message::Text(txt) => succeeded = self.handle_msg(&txt),
                         Message::Binary(binary) => {
                             let mut txt = String::new();
                             let resp = match self.exchange {
@@ -243,11 +246,8 @@ impl WSClientInternal {
                             };
 
                             match resp {
-                                Ok(_) => self.handle_msg(&txt),
-                                Err(err) => {
-                                    error!("Decompression failed, {}", err);
-                                    false
-                                }
+                                Ok(_) => succeeded = self.handle_msg(&txt),
+                                Err(err) => error!("Decompression failed, {}", err),
                             }
                         }
                         Message::Ping(resp) => {
@@ -263,13 +263,11 @@ impl WSClientInternal {
                             if let Err(err) = ret {
                                 error!("{}", err);
                             }
-                            false
                         }
                         Message::Pong(resp) => {
                             let tmp = std::str::from_utf8(&resp);
                             self.num_unanswered_ping.store(0, Ordering::Release);
                             debug!("Received a pong frame: {} from {}, reset num_unanswered_ping to {}", tmp.unwrap(), self.exchange, self.num_unanswered_ping.load(Ordering::Acquire));
-                            false
                         }
                         Message::Close(resp) => {
                             match resp {
@@ -294,7 +292,6 @@ impl WSClientInternal {
                                 }
                                 None => warn!("Received a close message without CloseFrame"),
                             }
-                            false
                         }
                     }
                 }
@@ -363,8 +360,6 @@ impl WSClientInternal {
                             panic!("Error thrown from read_message(): {}", err);
                         }
                     }
-
-                    false
                 }
             };
 
@@ -403,7 +398,7 @@ impl WSClientInternal {
             }
 
             if let Some(seconds) = duration {
-                if start_timstamp.elapsed() > Duration::from_secs(seconds) && normal {
+                if start_timstamp.elapsed() > Duration::from_secs(seconds) && succeeded {
                     break;
                 }
             }

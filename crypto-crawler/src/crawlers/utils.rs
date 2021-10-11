@@ -318,6 +318,7 @@ fn get_num_subscriptions_per_connection(exchange: &str) -> usize {
         "bitfinex" => 30, // https://docs.bitfinex.com/docs/ws-general#subscribe-to-channels
         // Subscription limit for each connection: 300 topics
         "kucoin" => 300, // https://docs.kucoin.cc/#request-rate-limit
+        "okex" => 256,   // okex spot l2_event throws many ResetWithoutClosingHandshake errors
         _ => usize::MAX, // usize::MAX means unlimited
     }
 }
@@ -506,7 +507,6 @@ fn create_new_symbol_receiver_thread_candlestick(
 ) -> JoinHandle<()> {
     std::thread::spawn(move || {
         for new_symbols in rx {
-            warn!("Found new symbols: {}", new_symbols.join(", "));
             let new_symbol_interval_list = new_symbols
                 .iter()
                 .flat_map(|symbol| {

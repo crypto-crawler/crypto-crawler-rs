@@ -442,7 +442,7 @@ impl WSClient for BitfinexWSClient {
     }
 
     fn run(&self, duration: Option<u64>) {
-        let now = Instant::now();
+        let start_timstamp = Instant::now();
         let mut num_read_timeout = 0;
         while !self.should_stop.load(Ordering::Acquire) {
             let resp = self.ws_stream.lock().unwrap().read_message();
@@ -525,13 +525,18 @@ impl WSClient for BitfinexWSClient {
                 }
             };
 
-            if num_read_timeout > 3 {
-                error!("num_read_timeout: {}", num_read_timeout);
+            if num_read_timeout > 5 {
+                error!(
+                    "Exiting due to num_read_timeout: {}, duration: {} seconds",
+                    num_read_timeout,
+                    start_timstamp.elapsed().as_secs()
+                );
+                std::thread::sleep(Duration::from_secs(5));
                 std::process::exit(1); // fail fast, pm2 will restart
             }
 
             if let Some(seconds) = duration {
-                if now.elapsed() > Duration::from_secs(seconds) && succeeded {
+                if start_timstamp.elapsed() > Duration::from_secs(seconds) && succeeded {
                     break;
                 }
             }
