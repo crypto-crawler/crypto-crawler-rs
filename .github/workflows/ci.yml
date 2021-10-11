@@ -28,6 +28,7 @@ jobs:
             - uses: actions-rs/cargo@v1
               with:
                   command: test
+                  args: -- --skip bitz
     fmt:
         name: Cargo fmt
         runs-on: ubuntu-latest
