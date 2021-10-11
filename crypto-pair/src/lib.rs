@@ -47,6 +47,7 @@ pub fn normalize_pair(symbol: &str, exchange: &str) -> Option<String> {
         "bybit" => exchanges::bybit::normalize_pair(symbol),
         "coinbase_pro" => Some(symbol.replace("-", "/")),
         "deribit" => exchanges::deribit::normalize_pair(symbol),
+        "dydx" => exchanges::dydx::normalize_pair(symbol),
         "ftx" => exchanges::ftx::normalize_pair(symbol),
         "gate" => {
             let (base, quote) = {

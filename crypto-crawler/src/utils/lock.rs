@@ -19,6 +19,7 @@ lazy_static! {
         "bybit",
         "coinbase_pro",
         "deribit",
+        "dydx",
         "ftx",
         "gate",
         "huobi",

@@ -19,6 +19,7 @@ pub(super) mod bitz;
 pub(super) mod bybit;
 pub(super) mod coinbase_pro;
 pub(super) mod deribit;
+pub(super) mod dydx;
 pub(super) mod ftx;
 pub(super) mod gate;
 pub(super) mod huobi;
