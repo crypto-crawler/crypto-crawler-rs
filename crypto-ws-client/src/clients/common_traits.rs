@@ -70,11 +70,63 @@ macro_rules! impl_candlestick {
     };
 }
 
+macro_rules! panic_ticker {
+    ($struct_name:ident) => {
+        impl Ticker for $struct_name {
+            fn subscribe_ticker(&self, _symbols: &[String]) {
+                panic!(
+                    "{} does NOT have the ticker websocket channel",
+                    EXCHANGE_NAME
+                );
+            }
+        }
+    };
+}
+
+macro_rules! panic_bbo {
+    ($struct_name:ident) => {
+        impl BBO for $struct_name {
+            fn subscribe_bbo(&self, _symbols: &[String]) {
+                panic!("{} does NOT have the BBO websocket channel", EXCHANGE_NAME);
+            }
+        }
+    };
+}
+
+macro_rules! panic_l2_topk {
+    ($struct_name:ident) => {
+        impl OrderBookTopK for $struct_name {
+            fn subscribe_orderbook_topk(&self, _symbols: &[String]) {
+                panic!(
+                    "{} does NOT have the level2 top-k snapshot websocket channel",
+                    EXCHANGE_NAME
+                );
+            }
+        }
+    };
+}
+
 macro_rules! panic_l3_orderbook {
     ($struct_name:ident) => {
         impl Level3OrderBook for $struct_name {
             fn subscribe_l3_orderbook(&self, _symbols: &[String]) {
-                panic!("{} does NOT have level3 websocket channel", EXCHANGE_NAME);
+                panic!(
+                    "{} does NOT have the level3 websocket channel",
+                    EXCHANGE_NAME
+                );
+            }
+        }
+    };
+}
+
+macro_rules! panic_candlestick {
+    ($struct_name:ident) => {
+        impl Candlestick for $struct_name {
+            fn subscribe_candlestick(&self, _symbol_interval_list: &[(String, usize)]) {
+                panic!(
+                    "{} does NOT have the candlestick websocket channel",
+                    EXCHANGE_NAME
+                );
             }
         }
     };

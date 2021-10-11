@@ -15,6 +15,7 @@ pub use exchanges::bitz::*;
 pub use exchanges::bybit::BybitRestClient;
 pub use exchanges::coinbase_pro::CoinbaseProRestClient;
 pub use exchanges::deribit::DeribitRestClient;
+pub use exchanges::dydx::dydx_swap::DydxSwapRestClient;
 pub use exchanges::ftx::FtxRestClient;
 pub use exchanges::gate::*;
 pub use exchanges::huobi::huobi_future::HuobiFutureRestClient;
@@ -50,6 +51,7 @@ fn fetch_l2_snapshot_internal(
         "bybit" => exchanges::bybit::BybitRestClient::fetch_l2_snapshot(symbol),
         "coinbase_pro" => exchanges::coinbase_pro::CoinbaseProRestClient::fetch_l2_snapshot(symbol),
         "deribit" => exchanges::deribit::DeribitRestClient::fetch_l2_snapshot(symbol),
+        "dydx" => exchanges::dydx::fetch_l2_snapshot(market_type, symbol),
         "ftx" => exchanges::ftx::FtxRestClient::fetch_l2_snapshot(symbol),
         "gate" => exchanges::gate::fetch_l2_snapshot(market_type, symbol),
         "huobi" => exchanges::huobi::fetch_l2_snapshot(market_type, symbol),

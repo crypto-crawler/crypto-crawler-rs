@@ -106,6 +106,7 @@ fn get_cooldown_time_per_request(exchange: &str, market_type: MarketType) -> Dur
         "bybit" => 20 * 10, // 50 requests per second continuously for 2 minutes, multiplied by 10 to reduce its frequency
         "coinbase_pro" => 100, //  10 requests per second
         "deribit" => 50,    // 20 requests per second
+        "dydx" => 100,      // 100 requests per 10 seconds
         "gate" => 4,        // 300 read operations per IP per second
         "huobi" => 2,       // 800 times/second for one IP
         "kucoin" => match market_type {
@@ -376,6 +377,10 @@ fn create_ws_client(
         },
         "coinbase_pro" => Arc::new(CoinbaseProWSClient::new(tx, None)),
         "deribit" => Arc::new(DeribitWSClient::new(tx, None)),
+        "dydx" => match market_type {
+            MarketType::LinearSwap => Arc::new(DydxSwapWSClient::new(tx, None)),
+            _ => panic!("dYdX does NOT have the {} market type", market_type),
+        },
         "ftx" => Arc::new(FtxWSClient::new(tx, None)),
         "gate" => match market_type {
             MarketType::Spot => Arc::new(GateSpotWSClient::new(tx, None)),

@@ -82,6 +82,7 @@ pub use clients::bitz::*;
 pub use clients::bybit::*;
 pub use clients::coinbase_pro::*;
 pub use clients::deribit::*;
+pub use clients::dydx::*;
 pub use clients::ftx::*;
 pub use clients::gate::*;
 pub use clients::huobi::*;

@@ -187,14 +187,16 @@ pub fn crawl_trade(
         "deribit" => crawlers::deribit::crawl_trade(market_type, symbols, tx, duration),
         "okex" => crawlers::okex::crawl_trade(market_type, symbols, tx, duration),
         "bitfinex" | "bitget" | "bithumb" | "bitstamp" | "bitz" | "bybit" | "coinbase_pro"
-        | "ftx" | "gate" | "huobi" | "kraken" | "kucoin" | "mxc" | "zbg" => crawlers::crawl_event(
-            exchange,
-            MessageType::Trade,
-            market_type,
-            symbols,
-            tx,
-            duration,
-        ),
+        | "dydx" | "ftx" | "gate" | "huobi" | "kraken" | "kucoin" | "mxc" | "zbg" => {
+            crawlers::crawl_event(
+                exchange,
+                MessageType::Trade,
+                market_type,
+                symbols,
+                tx,
+                duration,
+            )
+        }
         _ => panic!("{} does NOT have the trade websocket channel", exchange),
     }
 }
@@ -212,7 +214,7 @@ pub fn crawl_l2_event(
         "bitmex" => crawlers::bitmex::crawl_l2_event(market_type, symbols, tx, duration),
         "huobi" => crawlers::huobi::crawl_l2_event(market_type, symbols, tx, duration),
         "bitfinex" | "bitget" | "bithumb" | "bitstamp" | "bitz" | "bybit" | "coinbase_pro"
-        | "deribit" | "ftx" | "gate" | "kraken" | "kucoin" | "mxc" | "okex" | "zbg" => {
+        | "deribit" | "dydx" | "ftx" | "gate" | "kraken" | "kucoin" | "mxc" | "okex" | "zbg" => {
             crawlers::crawl_event(
                 exchange,
                 MessageType::L2Event,
