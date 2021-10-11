@@ -59,9 +59,9 @@ mod huobi_spot {
             let ws_client = HuobiSpotWSClient::new(tx, Some("wss://api.huobi.pro/feed"));
             ws_client.subscribe_orderbook(&vec!["btcusdt".to_string()]);
             ws_client.run(Some(0)); // return immediately once after getting a normal message
-            for msg in rx {
-                messages.push(msg);
-            }
+        }
+        for msg in rx {
+            messages.push(msg);
         }
         assert!(!messages.is_empty());
     }
@@ -236,9 +236,9 @@ mod huobi_linear_swap {
             ]);
             ws_client.run(Some(0)); // return immediately once after a normal message
             ws_client.close();
-            for msg in rx {
-                messages.push(msg);
-            }
+        }
+        for msg in rx {
+            messages.push(msg);
         }
         assert!(!messages.is_empty());
     }
@@ -257,9 +257,9 @@ mod huobi_linear_swap {
             ]);
             ws_client.run(Some(0)); // return immediately once after a normal message
             ws_client.close();
-            for msg in rx {
-                messages.push(msg);
-            }
+        }
+        for msg in rx {
+            messages.push(msg);
         }
         assert!(!messages.is_empty());
     }
@@ -348,9 +348,9 @@ mod huobi_inverse_swap {
             ]);
             ws_client.run(Some(0)); // return immediately once after a normal message
             ws_client.close();
-            for msg in rx {
-                messages.push(msg);
-            }
+        }
+        for msg in rx {
+            messages.push(msg);
         }
         assert!(!messages.is_empty());
     }
@@ -367,9 +367,9 @@ mod huobi_inverse_swap {
             ]);
             ws_client.run(Some(0)); // return immediately once after a normal message
             ws_client.close();
-            for msg in rx {
-                messages.push(msg);
-            }
+        }
+        for msg in rx {
+            messages.push(msg);
         }
         assert!(!messages.is_empty());
     }
