@@ -11,8 +11,8 @@ pub(super) const EXCHANGE_NAME: &str = "bitstamp";
 
 const WEBSOCKET_URL: &str = "wss://ws.bitstamp.net";
 
-// Empty string means an empty ping frame
-const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (10, "");
+// See "Heartbeat" at https://www.bitstamp.net/websocket/v2/
+const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (10, r#"{"event": "bts:heartbeat"}"#);
 
 /// The WebSocket client for Bitstamp Spot market.
 ///
@@ -56,7 +56,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
 
     let event = obj.get("event").unwrap().as_str().unwrap();
     match event {
-        "bts:subscription_succeeded" | "bts:unsubscription_succeeded" => {
+        "bts:subscription_succeeded" | "bts:unsubscription_succeeded" | "bts:heartbeat" => {
             debug!("Received {} from {}", msg, EXCHANGE_NAME);
             MiscMessage::Misc
         }
