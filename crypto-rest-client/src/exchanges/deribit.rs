@@ -50,4 +50,22 @@ impl DeribitRestClient {
             symbol,
         ))
     }
+
+    /// Get open interest.
+    ///
+    /// For example:
+    /// - <https://www.deribit.com/api/v2/public/get_book_summary_by_currency?currency=BTC>
+    /// - <https://www.deribit.com/api/v2/public/get_book_summary_by_instrument?instrument_name=BTC-PERPETUAL>
+    pub fn fetch_open_interest(symbol: Option<&str>) -> Result<String> {
+        if let Some(symbol) = symbol {
+            gen_api!(format!(
+                "/public/get_book_summary_by_instrument?instrument_name={}",
+                symbol
+            ))
+        } else {
+            let btc = gen_api!("/public/get_book_summary_by_currency?currency=BTC")?;
+            let eth = gen_api!("/public/get_book_summary_by_currency?currency=ETH")?;
+            Ok(format!("{}\n{}", btc, eth))
+        }
+    }
 }

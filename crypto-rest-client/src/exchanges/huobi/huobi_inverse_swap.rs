@@ -2,7 +2,7 @@ use super::super::utils::http_get;
 use crate::error::Result;
 use std::collections::BTreeMap;
 
-const BASE_URL: &str = "https://api.hbdm.com/swap-ex";
+const BASE_URL: &str = "https://api.hbdm.com";
 
 /// Huobi Inverse Swap market.
 ///
@@ -26,6 +26,23 @@ impl HuobiInverseSwapRestClient {
     ///
     /// For example: <https://api.hbdm.com/swap-ex/market/depth?contract_code=BTC-USD&type=step0>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/market/depth?contract_code={}&type=step0", symbol))
+        gen_api!(format!(
+            "/swap-ex/market/depth?contract_code={}&type=step0",
+            symbol
+        ))
+    }
+
+    /// Get open interest.
+    ///
+    /// For example: <https://api.hbdm.com/swap-api/v1/swap_open_interest?contract_code=BTC-USD>
+    pub fn fetch_open_interest(symbol: Option<&str>) -> Result<String> {
+        if let Some(symbol) = symbol {
+            gen_api!(format!(
+                "/swap-api/v1/swap_open_interest?contract_code={}",
+                symbol
+            ))
+        } else {
+            gen_api!("/swap-api/v1/swap_open_interest")
+        }
     }
 }

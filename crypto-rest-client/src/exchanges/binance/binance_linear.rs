@@ -58,11 +58,23 @@ impl BinanceLinearRestClient {
     /// For example:
     ///
     /// - <https://fapi.binance.com/fapi/v1/depth?symbol=BTCUSDT&limit=1000>
-    /// - <https://fapi.binance.com/fapi/v1/depth?symbol=BTCUSDT_210625&limit=1000>
+    /// - <https://fapi.binance.com/fapi/v1/depth?symbol=BTCUSDT_211231&limit=1000>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         check_symbol(symbol);
         let symbol = Some(symbol);
         let limit = Some(1000);
         gen_api_binance!("/fapi/v1/depth", symbol, limit)
+    }
+
+    /// Get open interest.
+    ///
+    /// For example:
+    ///
+    /// - <https://fapi.binance.com/fapi/v1/openInterest?symbol=BTCUSDT>
+    /// - <https://fapi.binance.com/fapi/v1/openInterest?symbol=BTCUSDT_211231>
+    pub fn fetch_open_interest(symbol: &str) -> Result<String> {
+        check_symbol(symbol);
+        let symbol = Some(symbol);
+        gen_api_binance!("/fapi/v1/openInterest", symbol)
     }
 }

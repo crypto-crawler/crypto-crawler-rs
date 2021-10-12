@@ -29,4 +29,13 @@ impl BitgetSwapRestClient {
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         gen_api!(format!("/v3/market/depth?symbol={}&limit=1000", symbol))
     }
+
+    /// Get open interest.
+    ///
+    /// For example:
+    ///
+    /// - <https://capi.bitget.com/api/swap/v3/market/open_interest?symbol=btcusd>
+    pub fn fetch_open_interest(symbol: &str) -> Result<String> {
+        gen_api!(format!("/v3/market/open_interest?symbol={}", symbol))
+    }
 }

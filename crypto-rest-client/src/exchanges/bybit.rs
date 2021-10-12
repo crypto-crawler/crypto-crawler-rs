@@ -40,4 +40,18 @@ impl BybitRestClient {
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         gen_api!(format!("/public/orderBook/L2?symbol={}", symbol))
     }
+
+    /// Get open interest.
+    ///
+    /// For example:
+    ///
+    /// - <https://api.bybit.com/v2/public/open-interest?symbol=BTCUSD&period=5min>
+    /// - <https://api.bybit.com/v2/public/open-interest?symbol=BTCUSDT&period=5min>
+    /// - <https://api.bybit.com/v2/public/open-interest?symbol=BTCUSDZ21&period=5min>
+    pub fn fetch_open_interest(symbol: &str) -> Result<String> {
+        gen_api!(format!(
+            "/public/open-interest?symbol={}&period=5min",
+            symbol
+        ))
+    }
 }

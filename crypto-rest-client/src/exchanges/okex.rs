@@ -71,6 +71,18 @@ impl OkexRestClient {
         let underlying_indexes = serde_json::from_str::<Vec<String>>(&txt)?;
         Ok(underlying_indexes)
     }
+
+    /// Get open interest.
+    ///
+    /// For example:
+    /// - <https://www.okex.com/api/futures/v3/instruments/BTC-USD-211231/open_interest>
+    pub fn fetch_open_interest(symbol: &str) -> Result<String> {
+        gen_api!(format!(
+            "/{}/v3/instruments/{}/open_interest",
+            pair_to_market_type(symbol),
+            symbol
+        ))
+    }
 }
 
 fn pair_to_market_type(pair: &str) -> &'static str {

@@ -32,4 +32,16 @@ impl ZbgSwapRestClient {
             symbol
         ))
     }
+
+    /// Get open interest.
+    ///
+    /// For example:
+    ///
+    /// - <https://www.zbg.com/exchange/api/v1/future/market/ticker?symbol=BTC_USD-R>
+    pub fn fetch_open_interest(symbol: &str) -> Result<String> {
+        gen_api!(format!(
+            "/exchange/api/v1/future/market/ticker?symbol={}",
+            symbol
+        ))
+    }
 }

@@ -75,6 +75,7 @@ fn get_lock_file_name(exchange: &str, market_type: MarketType, prefix: &str) -> 
                     | MarketType::LinearSwap
                     | MarketType::InverseFuture => "kucoin_swap.lock".to_string(),
                     MarketType::Spot => "kucoin_spot.lock".to_string(),
+                    MarketType::Unknown => "kucoin_unknown.lock".to_string(), // for OpenInterest
                     _ => panic!("Unknown market_type {} of {}", market_type, exchange),
                 }
             }
@@ -117,8 +118,14 @@ fn create_all_lock_files(
             .entry(exchange.to_string())
             .or_insert_with(HashMap::new);
         let mut market_types = crypto_market_type::get_market_types(exchange);
-        if *exchange == "bitmex" {
-            market_types.push(MarketType::Unknown);
+        if prefix == "ws" {
+            if *exchange == "bitmex" {
+                market_types.push(MarketType::Unknown);
+            }
+        } else {
+            if *exchange == "ftx" || *exchange == "kucoin" {
+                market_types.push(MarketType::Unknown); // for OpenInterest
+            }
         }
         for market_type in market_types {
             let filename = get_lock_file_name(exchange, market_type, prefix);

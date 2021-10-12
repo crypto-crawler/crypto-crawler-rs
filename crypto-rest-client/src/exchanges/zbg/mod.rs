@@ -18,3 +18,14 @@ pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result
 
     func(symbol)
 }
+
+pub(crate) fn fetch_open_interest(market_type: MarketType, symbol: &str) -> Result<String> {
+    let func = match market_type {
+        MarketType::InverseSwap | MarketType::LinearSwap => {
+            zbg_swap::ZbgSwapRestClient::fetch_open_interest
+        }
+        _ => panic!("ZBG {} does NOT have open interest data", market_type),
+    };
+
+    func(symbol)
+}

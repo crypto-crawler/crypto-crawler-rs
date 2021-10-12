@@ -24,3 +24,16 @@ pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result
 
     func(symbol)
 }
+
+pub(crate) fn fetch_open_interest(market_type: MarketType, symbol: &str) -> Result<String> {
+    let func = match market_type {
+        MarketType::InverseFuture | MarketType::InverseSwap => {
+            binance_inverse::BinanceInverseRestClient::fetch_open_interest
+        }
+        MarketType::LinearFuture | MarketType::LinearSwap => {
+            binance_linear::BinanceLinearRestClient::fetch_open_interest
+        }
+        _ => panic!("Binance {} does not have open interest data", market_type),
+    };
+    func(symbol)
+}

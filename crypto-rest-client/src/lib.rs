@@ -81,6 +81,31 @@ pub fn fetch_l3_snapshot_internal(
     }
 }
 
+/// Fetch open interest.
+///
+/// `symbol` None means fetch all symbols.
+pub fn fetch_open_interest(
+    exchange: &str,
+    market_type: MarketType,
+    symbol: Option<&str>,
+) -> Result<String> {
+    match exchange {
+        "binance" => exchanges::binance::fetch_open_interest(market_type, symbol.unwrap()),
+        "bitget" => exchanges::bitget::fetch_open_interest(market_type, symbol.unwrap()),
+        "bybit" => exchanges::bybit::BybitRestClient::fetch_open_interest(symbol.unwrap()),
+        "bitz" => exchanges::bitz::fetch_open_interest(market_type, symbol),
+        "deribit" => exchanges::deribit::DeribitRestClient::fetch_open_interest(symbol),
+        "dydx" => exchanges::dydx::fetch_open_interest(market_type),
+        "ftx" => exchanges::ftx::FtxRestClient::fetch_open_interest(),
+        "gate" => exchanges::gate::fetch_open_interest(market_type, symbol.unwrap()),
+        "huobi" => exchanges::huobi::fetch_open_interest(market_type, symbol),
+        "kucoin" => exchanges::kucoin::fetch_open_interest(market_type),
+        "okex" => exchanges::okex::OkexRestClient::fetch_open_interest(symbol.unwrap()),
+        "zbg" => exchanges::zbg::fetch_open_interest(market_type, symbol.unwrap()),
+        _ => panic!("{} does NOT have open interest RESTful API", exchange),
+    }
+}
+
 /// Fetch level2 orderbook snapshot.
 ///
 /// `retry` None means no retry; Some(0) means retry unlimited times; Some(n) means retry n times.

@@ -10,4 +10,4 @@ pub(super) mod kucoin;
 pub(super) mod okex;
 
 pub use utils::fetch_symbols_retry;
-pub(super) use utils::{crawl_candlestick_ext, crawl_event, crawl_snapshot};
+pub(super) use utils::{crawl_candlestick_ext, crawl_event, crawl_open_interest, crawl_snapshot};

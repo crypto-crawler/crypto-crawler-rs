@@ -58,11 +58,23 @@ impl BinanceInverseRestClient {
     /// For example:
     ///
     /// - <https://dapi.binance.com/dapi/v1/depth?symbol=BTCUSD_PERP&limit=1000>
-    /// - <https://dapi.binance.com/dapi/v1/depth?symbol=BTCUSD_210625&limit=1000>
+    /// - <https://dapi.binance.com/dapi/v1/depth?symbol=BTCUSD_211231&limit=1000>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         check_symbol(symbol);
         let symbol = Some(symbol);
         let limit = Some(1000);
         gen_api_binance!("/dapi/v1/depth", symbol, limit)
+    }
+
+    /// Get open interest.
+    ///
+    /// For example:
+    ///
+    /// - <https://dapi.binance.com/dapi/v1/openInterest?symbol=BTCUSD_PERP>
+    /// - <https://dapi.binance.com/dapi/v1/openInterest?symbol=BTCUSD_211231>
+    pub fn fetch_open_interest(symbol: &str) -> Result<String> {
+        check_symbol(symbol);
+        let symbol = Some(symbol);
+        gen_api_binance!("/dapi/v1/openInterest", symbol)
     }
 }

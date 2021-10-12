@@ -422,3 +422,13 @@ pub fn crawl_candlestick(
         ),
     };
 }
+
+/// Crawl all open interest.
+pub fn crawl_open_interest(
+    exchange: &str,
+    market_type: MarketType,
+    tx: Sender<Message>,
+    duration: Option<u64>,
+) {
+    crawlers::crawl_open_interest(exchange, market_type, tx, duration)
+}
