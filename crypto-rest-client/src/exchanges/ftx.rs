@@ -35,4 +35,12 @@ impl FtxRestClient {
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         gen_api!(format!("/markets/{}/orderbook?depth=100", symbol))
     }
+
+    /// Get open interest.
+    ///
+    /// For example:
+    /// - <https://ftx.com/api/futures>
+    pub fn fetch_open_interest() -> Result<String> {
+        gen_api!("/futures")
+    }
 }

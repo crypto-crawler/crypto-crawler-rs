@@ -39,6 +39,7 @@ The `soulmachine/carbonbot` container writes data to local path first, and then 
 ## Build
 
 ```bash
+docker pull ghcr.io/rust-lang/rust:nightly-buster-slim && docker pull node:buster-slim
 docker build -t soulmachine/carbonbot:debian -f Dockerfile.debian .
 docker push soulmachine/carbonbot:debian
 

@@ -30,3 +30,12 @@ pub(crate) fn fetch_l3_snapshot(market_type: MarketType, symbol: &str) -> Result
 
     func(symbol)
 }
+
+pub(crate) fn fetch_open_interest(market_type: MarketType) -> Result<String> {
+    match market_type {
+        MarketType::InverseSwap | MarketType::LinearSwap | MarketType::Unknown => {
+            kucoin_swap::KuCoinSwapRestClient::fetch_open_interest()
+        }
+        _ => panic!("kucoin {} does not have open interest", market_type),
+    }
+}

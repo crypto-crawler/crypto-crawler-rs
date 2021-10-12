@@ -12,7 +12,7 @@ use std::{
 
 use crate::utils::{REST_LOCKS, WS_LOCKS};
 use crypto_markets::{fetch_symbols, get_market_types, MarketType};
-use crypto_rest_client::{fetch_l2_snapshot, fetch_l3_snapshot};
+use crypto_rest_client::{fetch_l2_snapshot, fetch_l3_snapshot, fetch_open_interest};
 use crypto_ws_client::*;
 use log::*;
 use rand::Rng;
@@ -217,6 +217,118 @@ pub(crate) fn crawl_snapshot(
                     }
                 }
             }
+        }
+        if let Some(seconds) = duration {
+            if now.elapsed() > Duration::from_secs(seconds) {
+                break;
+            }
+        }
+        std::thread::sleep(cooldown_time * 2); // if real_symbols is empty, CPU will be 100% without this line
+    }
+}
+
+/// Crawl open interests of all trading symbols.
+pub(crate) fn crawl_open_interest(
+    exchange: &str,
+    market_type: MarketType,
+    tx: Sender<Message>,
+    duration: Option<u64>,
+) {
+    let now = Instant::now();
+    let cooldown_time = get_cooldown_time_per_request(exchange, market_type);
+
+    let lock = REST_LOCKS
+        .get(exchange)
+        .unwrap()
+        .get(&market_type)
+        .unwrap()
+        .clone();
+    loop {
+        match exchange {
+            "bitz" | "deribit" | "dydx" | "ftx" | "huobi" | "kucoin" => {
+                let mut lock_ = lock.lock().unwrap();
+                if !lock_.owns_lock() {
+                    lock_.lock().unwrap();
+                }
+                let resp = fetch_open_interest(exchange, market_type, None);
+                if let Ok(json) = resp {
+                    let message = Message::new(
+                        exchange.to_string(),
+                        market_type,
+                        MessageType::OpenInterest,
+                        json,
+                    );
+                    tx.send(message).unwrap();
+                }
+                // Cooldown after each request, and make all other processes wait
+                // on the lock to avoid parallel requests, thus avoid 429 error
+                std::thread::sleep(cooldown_time);
+                if lock_.owns_lock() {
+                    lock_.unlock().unwrap();
+                }
+            }
+            "binance" | "bitget" | "bybit" | "gate" | "okex" | "zbg" => {
+                let real_symbols = fetch_symbols_retry(exchange, market_type);
+
+                let mut index = 0_usize;
+                let mut success_count = 0_u64;
+                let mut backoff_factor = 1;
+                while index < real_symbols.len() {
+                    let symbol = &real_symbols[index];
+                    let mut lock_ = lock.lock().unwrap();
+                    if !lock_.owns_lock() {
+                        lock_.lock().unwrap();
+                    }
+                    let resp = fetch_open_interest(exchange, market_type, Some(symbol));
+                    // Cooldown after each request, and make all other processes wait
+                    // on the lock to avoid parallel requests, thus avoid 429 error
+                    std::thread::sleep(cooldown_time);
+                    if lock_.owns_lock() {
+                        lock_.unlock().unwrap();
+                    }
+                    match resp {
+                        Ok(msg) => {
+                            index += 1;
+                            success_count += 1;
+                            backoff_factor = 1;
+                            let message = Message::new(
+                                exchange.to_string(),
+                                market_type,
+                                MessageType::OpenInterest,
+                                msg,
+                            );
+                            tx.send(message).unwrap();
+                        }
+                        Err(err) => {
+                            let current_timestamp = SystemTime::now()
+                                .duration_since(SystemTime::UNIX_EPOCH)
+                                .unwrap()
+                                .as_millis()
+                                as u64;
+                            warn!(
+                                "{} {} {} {} {} {}, error: {}, back off for {} milliseconds",
+                                current_timestamp,
+                                success_count,
+                                backoff_factor,
+                                exchange,
+                                market_type,
+                                symbol,
+                                err,
+                                (backoff_factor * cooldown_time).as_millis()
+                            );
+                            std::thread::sleep(backoff_factor * cooldown_time);
+                            success_count = 0;
+                            if err.0.contains("429") || err.0.contains("509") {
+                                backoff_factor += 1;
+                            } else {
+                                // Handle 403, 418, etc.
+                                backoff_factor *= 2;
+                            }
+                        }
+                    }
+                }
+            }
+            _ => panic!("{} does NOT have open interest RESTful API", exchange),
         }
         if let Some(seconds) = duration {
             if now.elapsed() > Duration::from_secs(seconds) {

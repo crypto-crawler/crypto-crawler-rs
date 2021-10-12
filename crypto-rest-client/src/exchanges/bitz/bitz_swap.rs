@@ -45,6 +45,28 @@ impl BitzSwapRestClient {
             contract_id
         ))
     }
+
+    /// Get open interest.
+    ///
+    /// For example: <https://apiv2.bitz.com/V2/Market/getContractTickers>
+    pub fn fetch_open_interest(symbol: Option<&str>) -> Result<String> {
+        if let Some(symbol) = symbol {
+            let symbol_id_map = get_symbol_id_map()?;
+            if !symbol_id_map.contains_key(symbol) {
+                return Err(Error(format!(
+                    "Can NOT find contractId for the pair {}",
+                    symbol
+                )));
+            }
+            let contract_id = symbol_id_map.get(symbol).unwrap();
+            gen_api!(format!(
+                "/V2/Market/getContractTickers?contractId={}",
+                contract_id
+            ))
+        } else {
+            gen_api!("/V2/Market/getContractTickers")
+        }
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize)]

@@ -41,6 +41,7 @@ COPY --chown=node:node ./conf/pm2/pm2.l2_topk.config.js /home/node/pm2.l2_topk.c
 COPY --chown=node:node ./conf/pm2/pm2.l3_event.config.js /home/node/pm2.l3_event.config.js
 COPY --chown=node:node ./conf/pm2/pm2.funding_rate.config.js /home/node/pm2.funding_rate.config.js
 COPY --chown=node:node ./conf/pm2/pm2.misc.config.js /home/node/pm2.misc.config.js
+COPY --chown=node:node ./conf/pm2/pm2.open_interest.config.js /home/node/pm2.open_interest.config.js
 
 COPY ./conf/logrotate/logrotate.bbo.conf /usr/local/etc/logrotate.bbo.conf
 COPY ./conf/logrotate/logrotate.candlestick.conf /usr/local/etc/logrotate.candlestick.conf
@@ -52,6 +53,7 @@ COPY ./conf/logrotate/logrotate.l2_topk.conf /usr/local/etc/logrotate.l2_topk.co
 COPY ./conf/logrotate/logrotate.l3_event.conf /usr/local/etc/logrotate.l3_event.conf
 COPY ./conf/logrotate/logrotate.funding_rate.conf /usr/local/etc/logrotate.funding_rate.conf
 COPY ./conf/logrotate/logrotate.misc.conf /usr/local/etc/logrotate.misc.conf
+COPY ./conf/logrotate/logrotate.open_interest.conf /usr/local/etc/logrotate.open_interest.conf
 
 COPY --chown=node:node ./conf/rclone.conf /home/node/.config/rclone/rclone.conf
 COPY ./conf/upload.sh /usr/local/bin/upload.sh

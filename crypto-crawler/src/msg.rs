@@ -35,6 +35,8 @@ pub enum MessageType {
     Candlestick,
     /// Funding rate
     FundingRate,
+    // Open interest
+    OpenInterest,
 }
 
 /// Message represents messages received by crawlers.

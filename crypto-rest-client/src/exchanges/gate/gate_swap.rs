@@ -44,4 +44,23 @@ impl GateSwapRestClient {
             settle, symbol
         ))
     }
+
+    /// Get open interest.
+    ///
+    /// For example:
+    /// - <https://api.gateio.ws/api/v4/futures/btc/contract_stats?contract=BTC_USD&interval=5m>
+    /// - <https://api.gateio.ws/api/v4/futures/usdt/contract_stats?contract=BTC_USDT&interval=5m>
+    pub fn fetch_open_interest(symbol: &str) -> Result<String> {
+        let settle = if symbol.ends_with("_USD") {
+            "btc"
+        } else if symbol.ends_with("_USDT") {
+            "usdt"
+        } else {
+            panic!("Unknown symbol {}", symbol);
+        };
+        gen_api!(format!(
+            "/futures/{}/contract_stats?contract={}&interval=5m",
+            settle, symbol
+        ))
+    }
 }

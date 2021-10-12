@@ -116,6 +116,8 @@ pub fn crawl(
 
     if msg_type == MessageType::Candlestick {
         crawl_candlestick(exchange, market_type, None, tx, None);
+    } else if msg_type == MessageType::OpenInterest {
+        crawl_open_interest(exchange, market_type, tx, None);
     } else {
         let crawl_func = match msg_type {
             MessageType::BBO => crawl_bbo,

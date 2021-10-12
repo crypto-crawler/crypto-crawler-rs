@@ -1,5 +1,5 @@
 use crypto_market_type::MarketType;
-use crypto_rest_client::fetch_l2_snapshot;
+use crypto_rest_client::{fetch_l2_snapshot, fetch_open_interest};
 use serde_json::Value;
 use std::collections::HashMap;
 use test_case::test_case;
@@ -45,6 +45,16 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     } else {
         assert_eq!(150, asks.len());
     }
+}
+
+#[test_case(MarketType::InverseFuture)]
+#[test_case(MarketType::InverseSwap)]
+#[test_case(MarketType::LinearSwap)]
+fn test_open_interest(market_type: MarketType) {
+    let text = fetch_open_interest("huobi", market_type, None).unwrap();
+    let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
+    let arr = obj.get("data").unwrap().as_array().unwrap();
+    assert!(!arr.is_empty());
 }
 
 #[cfg(test)]

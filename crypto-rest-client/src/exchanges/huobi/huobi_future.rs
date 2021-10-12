@@ -26,4 +26,18 @@ impl HuobiFutureRestClient {
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         gen_api!(format!("/market/depth?symbol={}&type=step0", symbol))
     }
+
+    /// Get open interest.
+    ///
+    /// For example: <https://api.hbdm.com/api/v1/contract_open_interest?contract_code=BTC211231>
+    pub fn fetch_open_interest(symbol: Option<&str>) -> Result<String> {
+        if let Some(symbol) = symbol {
+            gen_api!(format!(
+                "/api/v1/contract_open_interest?contract_code={}",
+                symbol
+            ))
+        } else {
+            gen_api!("/api/v1/contract_open_interest")
+        }
+    }
 }

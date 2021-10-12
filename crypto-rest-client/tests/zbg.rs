@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crypto_market_type::MarketType;
-use crypto_rest_client::fetch_l2_snapshot;
+use crypto_rest_client::{fetch_l2_snapshot, fetch_open_interest};
 use serde_json::Value;
 use test_case::test_case;
 
@@ -27,4 +27,12 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     let data = obj.get("datas").unwrap().as_object().unwrap();
     assert!(data.get("asks").unwrap().as_array().unwrap().len() > 0);
     assert!(data.get("bids").unwrap().as_array().unwrap().len() > 0);
+}
+
+#[test_case(MarketType::InverseSwap, "BTC_USD-R")]
+#[test_case(MarketType::LinearSwap, "BTC_USDT")]
+fn test_open_interest(market_type: MarketType, symbol: &str) {
+    let text = fetch_open_interest("zbg", market_type, Some(symbol)).unwrap();
+    let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
+    assert!(obj.contains_key("datas"));
 }

@@ -31,4 +31,11 @@ impl DydxSwapRestClient {
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         gen_api!(format!("/v3/orderbook/{}", symbol))
     }
+
+    /// Get open interest.
+    ///
+    /// For example: <https://api.dydx.exchange/v3/markets>
+    pub fn fetch_open_interest() -> Result<String> {
+        gen_api!("/v3/markets")
+    }
 }

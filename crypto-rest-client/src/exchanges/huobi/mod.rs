@@ -24,3 +24,16 @@ pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result
 
     func(symbol)
 }
+
+pub(crate) fn fetch_open_interest(market_type: MarketType, symbol: Option<&str>) -> Result<String> {
+    let func = match market_type {
+        MarketType::InverseFuture => huobi_future::HuobiFutureRestClient::fetch_open_interest,
+        MarketType::LinearSwap => huobi_linear_swap::HuobiLinearSwapRestClient::fetch_open_interest,
+        MarketType::InverseSwap => {
+            huobi_inverse_swap::HuobiInverseSwapRestClient::fetch_open_interest
+        }
+        _ => panic!("Huobi {} does not have open interest", market_type),
+    };
+
+    func(symbol)
+}

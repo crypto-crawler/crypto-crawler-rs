@@ -40,4 +40,12 @@ impl KuCoinSwapRestClient {
     pub fn fetch_l3_snapshot(symbol: &str) -> Result<String> {
         gen_api!(format!("/api/v2/level3/snapshot?symbol={}", symbol))
     }
+
+    /// Get open interest.
+    ///
+    /// For example:
+    /// - <https://ftx.com/api/futures>
+    pub fn fetch_open_interest() -> Result<String> {
+        gen_api!("/api/v1/contracts/active")
+    }
 }
