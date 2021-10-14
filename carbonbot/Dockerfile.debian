@@ -1,4 +1,4 @@
-FROM ghcr.io/rust-lang/rust:nightly-buster-slim AS builder
+FROM ghcr.io/rust-lang/rust:nightly-bullseye-slim AS builder
 
 RUN mkdir /project
 WORKDIR /project
@@ -10,7 +10,7 @@ RUN apt -qy update && apt -qy install pkg-config libssl-dev \
  && RUSTFLAGS="-C target-cpu=x86-64-v3" cargo build --release
 
 
-FROM node:buster-slim
+FROM node:bullseye-slim
 
 COPY --from=builder /project/target/release/carbonbot /usr/local/bin/
 COPY --from=builder /project/target/release/bitmex_misc /usr/local/bin/
@@ -25,7 +25,8 @@ RUN apt-get -qy update && apt-get -qy --no-install-recommends install \
  && apt-get -qy autoremove && apt-get clean && rm -rf /var/lib/apt/lists/* && rm -rf /tmp/*
 
 # Install fixuid
-RUN curl -SsL https://github.com/boxboat/fixuid/releases/download/v0.5/fixuid-0.5-linux-amd64.tar.gz | tar -C /usr/local/bin -xzf - && \
+RUN ARCH="$(dpkg --print-architecture)" && \
+    curl -SsL https://github.com/boxboat/fixuid/releases/download/v0.5.1/fixuid-0.5.1-linux-amd64.tar.gz | tar -C /usr/local/bin -xzf - && \
     chown root:root /usr/local/bin/fixuid && \
     chmod 4755 /usr/local/bin/fixuid && \
     mkdir -p /etc/fixuid && \
@@ -69,4 +70,4 @@ USER node:node
 ENV USER node
 WORKDIR /home/node
 
-ENTRYPOINT ["fixuid"]
+ENTRYPOINT ["fixuid", "-q"]
