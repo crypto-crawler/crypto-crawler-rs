@@ -7,50 +7,6 @@ use std::collections::HashMap;
 use std::thread::JoinHandle;
 use std::{env, path::Path, str::FromStr, sync::mpsc::Receiver};
 
-fn to_string(msg: Message) -> Vec<String> {
-    if std::env::var("PARSER").is_ok() && std::env::var("PARSER").unwrap() == "true" {
-        match msg.msg_type {
-            MessageType::Trade => {
-                let trades =
-                    crypto_msg_parser::parse_trade(&msg.exchange, msg.market_type, &msg.json)
-                        .unwrap();
-                trades
-                    .iter()
-                    .map(|x| serde_json::to_string(x).unwrap())
-                    .collect()
-            }
-            MessageType::L2Event => {
-                let orderbooks = crypto_msg_parser::parse_l2(
-                    &msg.exchange,
-                    msg.market_type,
-                    &msg.json,
-                    Some(msg.received_at as i64),
-                )
-                .unwrap();
-                orderbooks
-                    .iter()
-                    .map(|x| serde_json::to_string(x).unwrap())
-                    .collect()
-            }
-            MessageType::FundingRate => {
-                let rates = crypto_msg_parser::parse_funding_rate(
-                    &msg.exchange,
-                    msg.market_type,
-                    &msg.json,
-                )
-                .unwrap();
-                rates
-                    .iter()
-                    .map(|x| serde_json::to_string(x).unwrap())
-                    .collect()
-            }
-            _ => panic!("Parser does NOT support {} yet", msg.msg_type),
-        }
-    } else {
-        vec![serde_json::to_string(&msg).unwrap()]
-    }
-}
-
 fn create_writer_thread(
     rx: Receiver<Message>,
     data_dir: Option<String>,
@@ -87,17 +43,16 @@ fn create_writer_thread(
             }
 
             let msg_type = msg.msg_type;
-            let string_arr = to_string(msg);
-            for s in string_arr {
-                if let Some(writer) = writers.get(&file_name) {
-                    writer.write(&s);
-                }
+            let s = serde_json::to_string(&msg).unwrap();
 
-                if let Some(ref mut conn) = redis_conn {
-                    let topic = format!("carbonbot:{}", msg_type);
-                    if let Err(err) = conn.publish::<&str, String, i64>(&topic, s) {
-                        error!("{}", err);
-                    }
+            if let Some(writer) = writers.get(&file_name) {
+                writer.write(&s);
+            }
+
+            if let Some(ref mut conn) = redis_conn {
+                let topic = format!("carbonbot:{}", msg_type);
+                if let Err(err) = conn.publish::<&str, String, i64>(&topic, s) {
+                    error!("{}", err);
                 }
             }
         }
