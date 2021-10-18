@@ -6,7 +6,6 @@ use std::{
     fs,
     io::{Error, Write},
     path::Path,
-    sync::Mutex,
 };
 
 #[cfg(not(windows))]
@@ -24,7 +23,7 @@ fn open<P: AsRef<Path>>(p: P) -> Result<fs::File, Error> {
 }
 
 pub struct FileWriter {
-    file: Mutex<Reopen<fs::File>>,
+    file: Reopen<fs::File>,
     path: String,
 }
 
@@ -36,22 +35,21 @@ impl FileWriter {
         file.handle().register_signal(SIGHUP).unwrap();
 
         FileWriter {
-            file: Mutex::new(file),
+            file,
             path: path.to_string(),
         }
     }
 }
 
 impl Writer for FileWriter {
-    fn write(&self, s: &str) {
-        if let Err(e) = writeln!(self.file.lock().unwrap(), "{}", s) {
+    fn write(&mut self, s: &str) {
+        if let Err(e) = writeln!(self.file, "{}", s) {
             error!("{}, {}", self.path, e);
         }
     }
 
-    fn close(&self) {
-        let mut file = self.file.lock().unwrap();
-        if let Err(e) = file.flush() {
+    fn close(&mut self) {
+        if let Err(e) = self.file.flush() {
             error!("{}, {}", self.path, e);
         }
     }

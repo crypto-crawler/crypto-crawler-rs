@@ -52,7 +52,7 @@ fn create_writer_thread(
                 }
             }
 
-            if let Some(writer) = writers.get(&file_name) {
+            if let Some(writer) = writers.get_mut(&file_name) {
                 writer.write(&msg);
             }
 
