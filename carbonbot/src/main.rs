@@ -1,63 +1,7 @@
-use carbonbot::utils::connect_redis;
-use carbonbot::writers::{FileWriter, Writer};
+use carbonbot::writers::create_writer_threads;
 use crypto_crawler::*;
 use log::*;
-use redis::{self, Commands};
-use std::collections::HashMap;
-use std::thread::JoinHandle;
-use std::{env, path::Path, str::FromStr, sync::mpsc::Receiver};
-
-fn create_writer_thread(
-    rx: Receiver<Message>,
-    data_dir: Option<String>,
-    redis_url: Option<String>,
-) -> JoinHandle<()> {
-    std::thread::spawn(move || {
-        let mut writers: HashMap<String, FileWriter> = HashMap::new();
-        let mut redis_conn = if let Some(url) = redis_url {
-            match connect_redis(&url) {
-                Ok(conn) => Some(conn),
-                Err(_) => None,
-            }
-        } else {
-            None
-        };
-        for msg in rx {
-            let file_name = format!("{}.{}.{}", msg.exchange, msg.market_type, msg.msg_type);
-            if let Some(ref data_dir) = data_dir {
-                if !writers.contains_key(&file_name) {
-                    let data_dir = Path::new(data_dir)
-                        .join(msg.msg_type.to_string())
-                        .join(&msg.exchange)
-                        .join(msg.market_type.to_string())
-                        .into_os_string();
-                    std::fs::create_dir_all(data_dir.as_os_str()).unwrap();
-                    let file_path = Path::new(data_dir.as_os_str())
-                        .join(file_name.clone())
-                        .into_os_string();
-                    writers.insert(
-                        file_name.clone(),
-                        FileWriter::new(file_path.as_os_str().to_str().unwrap()),
-                    );
-                }
-            }
-
-            let msg_type = msg.msg_type;
-            let s = serde_json::to_string(&msg).unwrap();
-
-            if let Some(writer) = writers.get_mut(&file_name) {
-                writer.write(&s);
-            }
-
-            if let Some(ref mut conn) = redis_conn {
-                let topic = format!("carbonbot:{}", msg_type);
-                if let Err(err) = conn.publish::<&str, String, i64>(&topic, s) {
-                    error!("{}", err);
-                }
-            }
-        }
-    })
-}
+use std::{env, str::FromStr};
 
 pub fn crawl(
     exchange: &'static str,
@@ -66,8 +10,8 @@ pub fn crawl(
     data_dir: Option<String>,
     redis_url: Option<String>,
 ) {
-    let (tx, rx) = std::sync::mpsc::channel();
-    let writer_thread = create_writer_thread(rx, data_dir, redis_url);
+    let (tx, rx) = std::sync::mpsc::channel::<Message>();
+    let writer_threads = create_writer_threads(rx, data_dir, redis_url);
 
     if msg_type == MessageType::Candlestick {
         crawl_candlestick(exchange, market_type, None, tx, None);
@@ -88,7 +32,9 @@ pub fn crawl(
         };
         crawl_func(exchange, market_type, None, tx, None);
     }
-    writer_thread.join().unwrap();
+    for thread in writer_threads {
+        thread.join().unwrap();
+    }
 }
 
 fn main() {
