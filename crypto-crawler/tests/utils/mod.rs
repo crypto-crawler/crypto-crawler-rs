@@ -1,3 +1,30 @@
+use crypto_crawler::{MarketType, Message, MessageType};
+
+pub(crate) fn parse(msg: Message) -> bool {
+    match msg.msg_type {
+        MessageType::Trade => {
+            crypto_msg_parser::parse_trade(&msg.exchange, msg.market_type, &msg.json).is_ok()
+        }
+        MessageType::L2Event => {
+            match msg.market_type {
+                // crypto-msg-parser doesn't support quanto contracts
+                MarketType::QuantoSwap | MarketType::QuantoFuture => true,
+                _ => crypto_msg_parser::parse_l2(
+                    &msg.exchange,
+                    msg.market_type,
+                    &msg.json,
+                    Some(msg.received_at as i64),
+                )
+                .is_ok(),
+            }
+        }
+        MessageType::FundingRate => {
+            crypto_msg_parser::parse_funding_rate(&msg.exchange, msg.market_type, &msg.json).is_ok()
+        }
+        _ => true,
+    }
+}
+
 #[allow(unused_macros)]
 macro_rules! test_one_symbol {
     ($crawl_func:ident, $exchange:expr, $market_type:expr, $symbol:expr, $msg_type:expr) => {{
@@ -14,6 +41,9 @@ macro_rules! test_one_symbol {
         assert_eq!(messages[0].exchange, $exchange.to_string());
         assert_eq!(messages[0].market_type, $market_type);
         assert_eq!(messages[0].msg_type, $msg_type);
+        for msg in messages {
+            assert!(parse(msg));
+        }
     }};
 }
 
@@ -38,6 +68,9 @@ macro_rules! test_all_symbols {
         assert_eq!(messages[0].exchange, $exchange.to_string());
         assert_eq!(messages[0].market_type, $market_type);
         assert_eq!(messages[0].msg_type, $msg_type);
+        for msg in messages {
+            assert!(parse(msg));
+        }
     }};
 }
 
@@ -54,5 +87,8 @@ macro_rules! gen_test_crawl_candlestick {
         assert_eq!(messages[0].exchange, EXCHANGE_NAME.to_string());
         assert_eq!(messages[0].market_type, $market_type);
         assert_eq!(messages[0].msg_type, MessageType::Candlestick);
+        for msg in messages {
+            assert!(parse(msg));
+        }
     }};
 }
