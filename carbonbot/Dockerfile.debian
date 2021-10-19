@@ -12,9 +12,7 @@ RUN apt -qy update && apt -qy install pkg-config libssl-dev \
 
 FROM node:bullseye-slim
 
-COPY --from=builder /project/target/release/carbonbot /usr/local/bin/
-COPY --from=builder /project/target/release/bitmex_misc /usr/local/bin/
-COPY --from=builder /project/target/release/huobi_misc /usr/local/bin/
+COPY --from=builder /project/target/release/carbonbot /usr/local/bin/carbonbot
 
 # procps provides the ps command, which is needed by pm2
 RUN apt-get -qy update && apt-get -qy --no-install-recommends install \
@@ -41,7 +39,7 @@ COPY --chown=node:node ./conf/pm2/pm2.l2_snapshot.config.js /home/node/pm2.l2_sn
 COPY --chown=node:node ./conf/pm2/pm2.l2_topk.config.js /home/node/pm2.l2_topk.config.js
 COPY --chown=node:node ./conf/pm2/pm2.l3_event.config.js /home/node/pm2.l3_event.config.js
 COPY --chown=node:node ./conf/pm2/pm2.funding_rate.config.js /home/node/pm2.funding_rate.config.js
-COPY --chown=node:node ./conf/pm2/pm2.misc.config.js /home/node/pm2.misc.config.js
+COPY --chown=node:node ./conf/pm2/pm2.other.config.js /home/node/pm2.other.config.js
 COPY --chown=node:node ./conf/pm2/pm2.open_interest.config.js /home/node/pm2.open_interest.config.js
 
 COPY ./conf/logrotate/logrotate.bbo.conf /usr/local/etc/logrotate.bbo.conf
@@ -53,7 +51,7 @@ COPY ./conf/logrotate/logrotate.l2_snapshot.conf /usr/local/etc/logrotate.l2_sna
 COPY ./conf/logrotate/logrotate.l2_topk.conf /usr/local/etc/logrotate.l2_topk.conf
 COPY ./conf/logrotate/logrotate.l3_event.conf /usr/local/etc/logrotate.l3_event.conf
 COPY ./conf/logrotate/logrotate.funding_rate.conf /usr/local/etc/logrotate.funding_rate.conf
-COPY ./conf/logrotate/logrotate.misc.conf /usr/local/etc/logrotate.misc.conf
+COPY ./conf/logrotate/logrotate.other.conf /usr/local/etc/logrotate.other.conf
 COPY ./conf/logrotate/logrotate.open_interest.conf /usr/local/etc/logrotate.open_interest.conf
 
 COPY --chown=node:node ./conf/rclone.conf /home/node/.config/rclone/rclone.conf

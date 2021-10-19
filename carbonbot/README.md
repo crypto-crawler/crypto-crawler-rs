@@ -20,8 +20,8 @@ docker run -d --name carbonbot-ticker --restart always -v $YOUR_LOCAL_PATH:/data
 # funding_rate
 docker run -d --name carbonbot-funding_rate --restart always -v $YOUR_LOCAL_PATH:/data -e AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY" -e AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY" -e AWS_S3_DIR="s3://YOUR_BUCKET/path" -u "$(id -u):$(id -g)" soulmachine/carbonbot pm2-runtime start pm2.funding_rate.config.js
 
-# misc
-docker run -d --name carbonbot-misc --restart always -v $YOUR_LOCAL_PATH:/data -e AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY" -e AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY" -e AWS_S3_DIR="s3://YOUR_BUCKET/path" -u "$(id -u):$(id -g)" soulmachine/carbonbot pm2-runtime start pm2.misc.config.js
+# other
+docker run -d --name carbonbot-other --restart always -v $YOUR_LOCAL_PATH:/data -e AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY" -e AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY" -e AWS_S3_DIR="s3://YOUR_BUCKET/path" -u "$(id -u):$(id -g)" soulmachine/carbonbot pm2-runtime start pm2.other.config.js
 ```
 
 **Environment Variables**:

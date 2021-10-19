@@ -1,4 +1,4 @@
-use carbonbot::writers::create_writer_threads;
+use carbonbot::{crawl_other, create_writer_threads};
 use crypto_crawler::*;
 use log::*;
 use std::{env, str::FromStr};
@@ -17,6 +17,8 @@ pub fn crawl(
         crawl_candlestick(exchange, market_type, None, tx, None);
     } else if msg_type == MessageType::OpenInterest {
         crawl_open_interest(exchange, market_type, tx, None);
+    } else if msg_type == MessageType::Other {
+        crawl_other(exchange, market_type, tx, None);
     } else {
         let crawl_func = match msg_type {
             MessageType::BBO => crawl_bbo,

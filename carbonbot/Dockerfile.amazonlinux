@@ -14,8 +14,6 @@ RUN yum update -y && yum install -y pkgconfig openssl-devel \
 FROM amazonlinux:latest
 
 COPY --from=builder /project/target/release/carbonbot /usr/local/bin/
-COPY --from=builder /project/target/release/bitmex_misc /usr/local/bin/
-COPY --from=builder /project/target/release/huobi_misc /usr/local/bin/
 
 RUN curl -sL https://rpm.nodesource.com/setup_lts.x | bash - && yum install -y nodejs \
  && npm install pm2 -g --production \
@@ -26,7 +24,7 @@ COPY ./pm2.trade.config.js /root/pm2.trade.config.js
 COPY ./pm2.ticker.config.js /root/pm2.ticker.config.js
 COPY ./pm2.l2_event.config.js /root/pm2.l2_event.config.js
 COPY ./pm2.funding_rate.config.js /root/pm2.funding_rate.config.js
-COPY ./pm2.misc.config.js /root/pm2.misc.config.js
+COPY ./pm2.other.config.js /root/pm2.other.config.js
 
 COPY ./conf/rclone.conf /root/.config/rclone/rclone.conf
 
@@ -34,7 +32,7 @@ COPY ./conf/logrotate.trade.conf /usr/local/etc/logrotate.trade.conf
 COPY ./conf/logrotate.ticker.conf /usr/local/etc/logrotate.ticker.conf
 COPY ./conf/logrotate.l2_event.conf /usr/local/etc/logrotate.l2_event.conf
 COPY ./conf/logrotate.funding_rate.conf /usr/local/etc/logrotate.funding_rate.conf
-COPY ./conf/logrotate.misc.conf /usr/local/etc/logrotate.misc.conf
+COPY ./conf/logrotate.other.conf /usr/local/etc/logrotate.other.conf
 
 ENV RUST_LOG "warn"
 ENV RUST_BACKTRACE 1
