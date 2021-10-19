@@ -11,6 +11,8 @@ use strum_macros::{Display, EnumString};
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
 pub enum MessageType {
+    /// All other messages
+    Other,
     /// tick-by-tick trade messages
     Trade,
     /// Incremental level2 orderbook updates
