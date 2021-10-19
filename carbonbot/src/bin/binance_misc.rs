@@ -30,13 +30,21 @@ fn create_writer_thread(
         };
         for msg in rx {
             let obj = serde_json::from_str::<HashMap<String, Value>>(&msg).unwrap();
-            let ch = obj.get("ch").unwrap().as_str().unwrap();
-            let file_name = format!("huobi.{}.{}", market_type, ch);
+            let ch = obj
+                .get("data")
+                .unwrap()
+                .as_object()
+                .unwrap()
+                .get("e")
+                .unwrap()
+                .as_str()
+                .unwrap();
+            let file_name = format!("binance.{}.{}", market_type, ch);
             if let Some(ref data_dir) = data_dir {
                 if !writers.contains_key(&file_name) {
                     let data_dir = Path::new(data_dir)
                         .join("misc")
-                        .join("huobi")
+                        .join("binance")
                         .join(market_type.to_string())
                         .join(ch)
                         .into_os_string();
@@ -57,7 +65,7 @@ fn create_writer_thread(
             }
 
             if let Some(ref mut conn) = redis_conn {
-                if let Err(err) = conn.publish::<&str, String, i64>("carbonbot:misc:huobi", msg) {
+                if let Err(err) = conn.publish::<&str, String, i64>("carbonbot:misc:binance", msg) {
                     error!("{}", err);
                 }
             }
@@ -70,7 +78,7 @@ fn main() {
 
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
-        println!("Usage: huobi_misc <market_type>");
+        println!("Usage: binance_misc <market_type>");
         return;
     }
     let market_type = MarketType::from_str(&args[1]);
@@ -103,35 +111,20 @@ fn main() {
     let (tx, rx) = std::sync::mpsc::channel();
     let writer_thread = create_writer_thread(market_type, rx, data_dir, redis_url);
 
-    let channels: Vec<String> = vec!["market.overview".to_string()];
+    let channels: Vec<String> = vec!["!forceOrder@arr".to_string()];
 
     match market_type {
-        MarketType::Spot => {
-            let ws_client = HuobiSpotWSClient::new(tx, None);
-            ws_client.subscribe(&channels);
-            ws_client.run(None);
-        }
-        MarketType::InverseFuture => {
-            let ws_client = HuobiFutureWSClient::new(tx, None);
+        MarketType::InverseSwap => {
+            let ws_client = BinanceInverseWSClient::new(tx, None);
             ws_client.subscribe(&channels);
             ws_client.run(None);
         }
         MarketType::LinearSwap => {
-            let ws_client = HuobiLinearSwapWSClient::new(tx, None);
-            ws_client.subscribe(&channels);
-            ws_client.run(None);
-        }
-        MarketType::InverseSwap => {
-            let ws_client = HuobiInverseSwapWSClient::new(tx, None);
-            ws_client.subscribe(&channels);
-            ws_client.run(None);
-        }
-        MarketType::EuropeanOption => {
-            let ws_client = HuobiOptionWSClient::new(tx, None);
+            let ws_client = BinanceLinearWSClient::new(tx, None);
             ws_client.subscribe(&channels);
             ws_client.run(None);
         }
         _ => panic!("Unknown market_type {}", market_type),
-    };
+    }
     writer_thread.join().unwrap();
 }

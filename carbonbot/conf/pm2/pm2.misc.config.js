@@ -1,6 +1,23 @@
 const apps = [];
 
 apps.push({
+    name: "crawler-binance-misc-inverse",
+    script: "binance_misc inverse_swap",
+    exec_interpreter: "none",
+    exec_mode: "fork",
+    instances: 1,
+    restart_delay: 5000, // 5 seconds
+});
+apps.push({
+    name: "crawler-binance-misc-linear",
+    script: "binance_misc linear_swap",
+    exec_interpreter: "none",
+    exec_mode: "fork",
+    instances: 1,
+    restart_delay: 5000, // 5 seconds
+});
+
+apps.push({
     name: "crawler-bitmex-misc",
     script: "bitmex_misc",
     exec_interpreter: "none",
