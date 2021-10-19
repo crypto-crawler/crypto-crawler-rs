@@ -5,6 +5,7 @@ use test_case::test_case;
 
 use crypto_crawler::*;
 use crypto_markets::MarketType;
+use utils::parse;
 
 const EXCHANGE_NAME: &str = "gate";
 
@@ -60,7 +61,7 @@ fn test_crawl_bbo(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::Spot, "BTC_USDT")]
 #[test_case(MarketType::InverseSwap, "BTC_USD")]
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
-#[test_case(MarketType::LinearFuture, "BTC_USDT_20211015")]
+#[test_case(MarketType::LinearFuture, "BTC_USDT_20211015"; "inconclusive")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
         crawl_l2_snapshot,
@@ -87,7 +88,7 @@ fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
 #[test_case(MarketType::Spot, "BTC_USDT")]
 #[test_case(MarketType::InverseSwap, "BTC_USD")]
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
-#[test_case(MarketType::LinearFuture, "BTC_USDT_20211015")]
+#[test_case(MarketType::LinearFuture, "BTC_USDT_20211015"; "inconclusive")]
 fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
         crawl_ticker,

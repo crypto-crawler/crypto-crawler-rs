@@ -17,7 +17,7 @@ pub(super) const SOCKETIO_PREFIX: &str = "42";
 
 pub(super) const SPOT_WEBSOCKET_URL: &str =
     "wss://wbs.mxc.com/socket.io/?EIO=3&transport=websocket";
-pub(super) const SWAP_WEBSOCKET_URL: &str = "wss://contract.mxc.com/ws";
+pub(super) const SWAP_WEBSOCKET_URL: &str = "wss://contract.mexc.com/ws";
 
 const SPOT_CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (5, "2");
 // more than 60 seconds no response, close the channel

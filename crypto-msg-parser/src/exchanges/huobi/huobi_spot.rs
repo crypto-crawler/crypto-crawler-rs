@@ -29,8 +29,8 @@ struct SpotTradeMsg {
 struct SpotOrderbookMsg {
     seqNum: i64,
     prevSeqNum: i64,
-    asks: Vec<[f64; 2]>,
-    bids: Vec<[f64; 2]>,
+    asks: Option<Vec<[f64; 2]>>,
+    bids: Option<Vec<[f64; 2]>>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -110,8 +110,20 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
         pair,
         msg_type: MessageType::L2Event,
         timestamp,
-        asks: ws_msg.tick.asks.iter().map(|x| parse_order(x)).collect(),
-        bids: ws_msg.tick.bids.iter().map(|x| parse_order(x)).collect(),
+        asks: ws_msg
+            .tick
+            .asks
+            .into_iter()
+            .flat_map(|x| x)
+            .map(|x| parse_order(&x))
+            .collect(),
+        bids: ws_msg
+            .tick
+            .bids
+            .into_iter()
+            .flat_map(|x| x)
+            .map(|x| parse_order(&x))
+            .collect(),
         snapshot: false,
         json: msg.to_string(),
     };

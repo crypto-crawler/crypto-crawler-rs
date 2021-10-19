@@ -60,7 +60,13 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         .into_iter()
         .map(|raw_trade| {
             let timestamp = DateTime::parse_from_rfc3339(&raw_trade.time).unwrap();
-
+            let (quantity_base, quantity_quote, quantity_contract) = calc_quantity_and_volume(
+                EXCHANGE_NAME,
+                market_type,
+                &pair,
+                raw_trade.price,
+                raw_trade.size,
+            );
             TradeMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type,
@@ -69,13 +75,9 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 msg_type: MessageType::Trade,
                 timestamp: timestamp.timestamp_millis(),
                 price: raw_trade.price,
-                quantity_base: raw_trade.size,
-                quantity_quote: raw_trade.price * raw_trade.size,
-                quantity_contract: if market_type == MarketType::Spot {
-                    None
-                } else {
-                    Some(raw_trade.size)
-                },
+                quantity_base,
+                quantity_quote,
+                quantity_contract,
                 side: if raw_trade.side == "sell" {
                     TradeSide::Sell
                 } else {

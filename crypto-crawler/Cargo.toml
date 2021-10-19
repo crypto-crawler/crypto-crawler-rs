@@ -1,6 +1,6 @@
 [package]
 name = "crypto-crawler"
-version = "3.1.3"
+version = "3.1.4"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "A rock-solid cryprocurrency crawler."
@@ -13,7 +13,7 @@ crypto-markets = "0.7.7"
 crypto-market-type = "0.1.8"
 crypto-pair = "2.0.7"
 crypto-rest-client = "0.7.6"
-crypto-ws-client = "3.0.9"
+crypto-ws-client = "3.1.0"
 fslock = "0.1.8"
 lazy_static = "1"
 log = "0.4"
@@ -27,3 +27,4 @@ strum_macros = "0.20"
 [dev_dependencies]
 test-case = "1"
 env_logger = "0.8"
+crypto-msg-parser = "1.6.0"

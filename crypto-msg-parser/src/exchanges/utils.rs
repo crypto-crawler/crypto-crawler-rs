@@ -41,7 +41,7 @@ pub(super) fn calc_quantity_and_volume(
             let quantity_quote = quantity * contract_value;
             (quantity_quote / price, quantity_quote, Some(quantity))
         }
-        MarketType::LinearSwap | MarketType::LinearFuture => {
+        MarketType::LinearSwap | MarketType::LinearFuture | MarketType::Move | MarketType::BVOL => {
             let quantity_base = quantity * contract_value;
             (quantity_base, quantity_base * price, Some(quantity))
         }

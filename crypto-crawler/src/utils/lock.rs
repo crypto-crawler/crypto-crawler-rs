@@ -118,11 +118,10 @@ fn create_all_lock_files(
             .entry(exchange.to_string())
             .or_insert_with(HashMap::new);
         let mut market_types = crypto_market_type::get_market_types(exchange);
-        if prefix == "ws" {
-            if *exchange == "bitmex" {
-                market_types.push(MarketType::Unknown);
-            }
-        } else {
+        if *exchange == "bitmex" {
+            market_types.push(MarketType::Unknown);
+        }
+        if prefix == "rest" {
             if *exchange == "ftx" || *exchange == "kucoin" {
                 market_types.push(MarketType::Unknown); // for OpenInterest
             }
