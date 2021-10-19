@@ -11,8 +11,10 @@ pub(super) fn crawl_other(market_type: MarketType, tx: Sender<Message>, duration
         "announcement",
         "connected",
         "instrument",
+        "insurance",
         "liquidation",
         "publicNotifications",
+        "settlement",
     ]
     .into_iter()
     .map(|x| x.to_string())
