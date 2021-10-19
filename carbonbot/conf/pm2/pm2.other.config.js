@@ -2,6 +2,8 @@
 const market_types = {
     binance: ["inverse_swap", "linear_swap"],
     bitmex: ["unknown"],
+    bybit: ["inverse_future", "inverse_swap"],
+    coinbase_pro: ["spot"],
     huobi: ["spot", "inverse_future", "linear_swap", "inverse_swap"],
 };
 
