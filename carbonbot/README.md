@@ -40,11 +40,8 @@ The `soulmachine/carbonbot` container writes data to local path first, and then 
 
 ```bash
 docker pull ghcr.io/rust-lang/rust:nightly-bullseye-slim && docker pull node:bullseye-slim
-docker build -t soulmachine/carbonbot:debian -f Dockerfile.debian .
-docker push soulmachine/carbonbot:debian
-
-docker build -t soulmachine/carbonbot:amazonlinux -f Dockerfile.amazonlinux .
-docker push soulmachine/carbonbot:amazonlinux
+docker build -t soulmachine/carbonbot .
+docker push soulmachine/carbonbot
 ```
 
 ## Download
