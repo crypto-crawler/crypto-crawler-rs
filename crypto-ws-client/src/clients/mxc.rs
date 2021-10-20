@@ -26,7 +26,7 @@ const SWAP_CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (60, r#"{"method":"ping"}
 /// MXC Spot market.
 ///
 ///   * WebSocket API doc: <https://github.com/mxcdevelop/APIDoc/blob/master/websocket/spot/websocket-api.md>
-///   * Trading at: <https://www.mxc.com/trade/pro>
+///   * Trading at: <https://www.mexc.com/exchange/BTC_USDT>
 pub struct MxcSpotWSClient {
     client: WSClientInternal,
 }
@@ -34,7 +34,7 @@ pub struct MxcSpotWSClient {
 /// MXC Swap market.
 ///
 ///   * WebSocket API doc: <https://mxcdevelop.github.io/APIDoc/contract.api.en.html#websocket-api>
-///   * Trading at: <https://contract.mxc.com/exchange>
+///   * Trading at: <https://contract.mexc.com/exchange>
 pub struct MxcSwapWSClient {
     client: WSClientInternal,
 }
