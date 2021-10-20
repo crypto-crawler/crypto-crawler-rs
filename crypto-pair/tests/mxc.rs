@@ -36,7 +36,7 @@ struct Response {
 
 // see <https://github.com/mxcdevelop/APIDoc/blob/master/contract/contract-api.md#contract-interface-public>
 fn fetch_swap_markets_raw() -> Vec<SwapMarket> {
-    let txt = http_get("https://contract.mxc.com/api/v1/contract/detail").unwrap();
+    let txt = http_get("https://contract.mexc.com/api/v1/contract/detail").unwrap();
     let resp = serde_json::from_str::<Response>(&txt).unwrap();
     resp.data
 }
