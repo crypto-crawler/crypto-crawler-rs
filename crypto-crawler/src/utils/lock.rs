@@ -102,7 +102,7 @@ fn create_lock_file(filename: &str) -> Arc<Mutex<LockFile>> {
     } else {
         std::env::temp_dir().join("locks")
     };
-    std::fs::create_dir_all(&dir).unwrap();
+    let _ = std::fs::create_dir_all(&dir);
     dir.push(filename);
     Arc::new(Mutex::new(LockFile::open(dir.as_path()).unwrap()))
 }
