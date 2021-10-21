@@ -6,6 +6,10 @@
 
 market_type=$1
 
+if [[ -z "${DATA_DIR}"  ||  -z "${AWS_S3_DIR}"  ||  -z "${AWS_ACCESS_KEY_ID}"  ||  -z "${AWS_SECRET_ACCESS_KEY}" ]]; then
+  sleep infinity
+fi
+
 # Infinite while loop
 while :
 do
