@@ -97,25 +97,31 @@ fn create_redis_writer_thread(rx: Receiver<Message>, redis_url: String) -> JoinH
     })
 }
 
+#[allow(clippy::unnecessary_unwrap)]
 pub fn create_writer_threads(
     rx: Receiver<Message>,
     data_dir: Option<String>,
     redis_url: Option<String>,
 ) -> Vec<JoinHandle<()>> {
     let mut threads = Vec::new();
-    // channel for Redis
-    let (tx_redis, rx_redis) = std::sync::mpsc::channel::<Message>();
-    if let Some(data_dir) = data_dir {
-        let thread = if redis_url.is_none() {
-            create_file_writer_thread(rx, data_dir, None)
-        } else {
-            create_file_writer_thread(rx, data_dir, Some(tx_redis))
-        };
-        threads.push(thread);
+    if data_dir.is_none() && redis_url.is_none() {
+        error!("Both DATA_DIR and REDIS_URL are not set");
+        return threads;
     }
-    if let Some(redis_url) = redis_url {
-        let thread = create_redis_writer_thread(rx_redis, redis_url);
-        threads.push(thread);
+
+    if data_dir.is_some() && redis_url.is_some() {
+        // channel for Redis
+        let (tx_redis, rx_redis) = std::sync::mpsc::channel::<Message>();
+        threads.push(create_file_writer_thread(
+            rx,
+            data_dir.unwrap(),
+            Some(tx_redis),
+        ));
+        threads.push(create_redis_writer_thread(rx_redis, redis_url.unwrap()));
+    } else if data_dir.is_some() {
+        threads.push(create_file_writer_thread(rx, data_dir.unwrap(), None))
+    } else {
+        threads.push(create_redis_writer_thread(rx, redis_url.unwrap()));
     }
     threads
 }

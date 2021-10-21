@@ -10,6 +10,10 @@ pub fn crawl(
     data_dir: Option<String>,
     redis_url: Option<String>,
 ) {
+    if data_dir.is_none() && redis_url.is_none() {
+        error!("Both DATA_DIR and REDIS_URL are not set");
+        return;
+    }
     let (tx, rx) = std::sync::mpsc::channel::<Message>();
     let writer_threads = create_writer_threads(rx, data_dir, redis_url);
 
