@@ -2,7 +2,6 @@
 const market_types = {
     binance: ["linear_future", "inverse_future", "linear_swap", "inverse_swap"],
     bitget: ["inverse_swap", "linear_swap"],
-    bitz: ["linear_swap", "inverse_swap"],
     bybit: ["inverse_future", "inverse_swap", "linear_swap"],
     deribit: ["inverse_future", "european_option"], // inverse_swap is included in inverse_future
     dydx: ["linear_swap"],

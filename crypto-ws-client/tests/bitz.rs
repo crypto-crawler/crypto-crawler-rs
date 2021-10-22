@@ -8,6 +8,7 @@ mod bitz_spot {
     use std::time::{SystemTime, UNIX_EPOCH};
 
     #[test]
+    #[ignore = "bitz.com has shutdown since October 2021"]
     fn subscribe() {
         gen_test_code!(
             BitzSpotWSClient,
@@ -21,6 +22,7 @@ mod bitz_spot {
     }
 
     #[test]
+    #[ignore = "bitz.com has shutdown since October 2021"]
     fn subscribe_raw_json() {
         gen_test_code!(
             BitzSpotWSClient,
@@ -36,6 +38,7 @@ mod bitz_spot {
     }
 
     #[test]
+    #[ignore = "bitz.com has shutdown since October 2021"]
     fn subscribe_trade() {
         gen_test_code!(
             BitzSpotWSClient,
@@ -45,6 +48,7 @@ mod bitz_spot {
     }
 
     #[test]
+    #[ignore = "bitz.com has shutdown since October 2021"]
     fn subscribe_orderbook() {
         gen_test_code!(
             BitzSpotWSClient,
@@ -54,6 +58,7 @@ mod bitz_spot {
     }
 
     #[test]
+    #[ignore = "bitz.com has shutdown since October 2021"]
     fn subscribe_ticker() {
         gen_test_code!(
             BitzSpotWSClient,
@@ -63,7 +68,7 @@ mod bitz_spot {
     }
 
     #[test]
-    #[ignore]
+    #[ignore = "bitz.com has shutdown since October 2021"]
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(BitzSpotWSClient, &vec![("btc_usdt".to_string(), 60)]);
         gen_test_subscribe_candlestick!(BitzSpotWSClient, &vec![("btc_usdt".to_string(), 2592000)]);

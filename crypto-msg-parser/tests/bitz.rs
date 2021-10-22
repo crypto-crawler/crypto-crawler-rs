@@ -3,6 +3,7 @@ mod utils;
 use crypto_msg_parser::{extract_symbol, parse_l2, parse_trade, MarketType, TradeSide};
 
 #[test]
+#[ignore = "bitz.com has shutdown since October 2021"]
 fn trade() {
     let raw_msg = r#"{"msgId":0,"params":{"symbol":"btc_usdt"},"action":"Pushdata.order","data":[{"id":"1616486110508","t":"15:55:10","T":1616486110,"p":"53874.97","n":"0.1310","s":"sell"},{"id":"1616486110006","t":"15:55:10","T":1616486110,"p":"53875.82","n":"0.1144","s":"buy"}],"time":1616486110921,"source":"sub-api"}"#;
     let trades = &parse_trade("bitz", MarketType::Spot, raw_msg).unwrap();
@@ -27,6 +28,7 @@ fn trade() {
 }
 
 #[test]
+#[ignore = "bitz.com has shutdown since October 2021"]
 fn l2_orderbook_update() {
     let raw_msg = r#"{"msgId":0,"params":{"symbol":"btc_usdt"},"action":"Pushdata.depth","data":{"asks":[["37520.67","0.8396","31502.3545"]],"bids":[["37328.48","0.0050","186.6424"],["37322.18","0.2462","9188.7207"]],"depthSerialNumber":329},"time":1622527417489,"source":"sub-api"}"#;
     let orderbook = &parse_l2("bitz", MarketType::Spot, raw_msg, None).unwrap()[0];

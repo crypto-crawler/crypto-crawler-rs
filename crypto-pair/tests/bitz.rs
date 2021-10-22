@@ -66,6 +66,7 @@ fn fetch_swap_markets_raw() -> Vec<SwapMarket> {
 }
 
 #[test]
+#[ignore = "bitz.com has shutdown since October 2021"]
 fn verify_spot_symbols() {
     let markets = fetch_spot_markets_raw();
     for market in markets.iter() {
@@ -81,6 +82,7 @@ fn verify_spot_symbols() {
 }
 
 #[test]
+#[ignore = "bitz.com has shutdown since October 2021"]
 fn verify_swap_symbols() {
     let markets = fetch_swap_markets_raw();
     for market in markets.iter() {

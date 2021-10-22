@@ -10,7 +10,6 @@ const market_types = {
     bitfinex: ["spot", "linear_swap"],
     bitget: ["inverse_swap", "linear_swap"],
     bithumb: ["spot"],
-    bitz: ["spot"],
     bybit: ["inverse_future", "inverse_swap", "linear_swap"],
     coinbase_pro: ["spot"],
     deribit: ["inverse_future", "european_option"], // inverse_swap is included in inverse_future

@@ -10,7 +10,6 @@ const market_types = {
     bitfinex: ["spot", "linear_swap"],
     bitget: ["inverse_swap", "linear_swap"],
     bitmex: ["unknown"], // unknown means all
-    bitz: ["spot"],
     bybit: ["inverse_future", "inverse_swap", "linear_swap"],
     deribit: ["inverse_future", "european_option"], // inverse_swap is included in inverse_future
     gate: ["spot", "linear_future", "linear_swap", "inverse_swap"],
