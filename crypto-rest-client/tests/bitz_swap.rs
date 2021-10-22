@@ -5,7 +5,7 @@ use crypto_rest_client::{fetch_l2_snapshot, fetch_open_interest};
 use serde_json::Value;
 use test_case::test_case;
 
-#[test_case(MarketType::InverseSwap, "BTC_USD")]
+#[test_case(MarketType::InverseSwap, "BTC_USD"; "inclo")]
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     let text = fetch_l2_snapshot("bitz", market_type, symbol, Some(3)).unwrap();

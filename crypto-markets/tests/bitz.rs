@@ -6,11 +6,13 @@ mod utils;
 const EXCHANGE_NAME: &str = "bitz";
 
 #[test]
+#[ignore = "bitz.com has shutdown since October 2021"]
 fn fetch_all_symbols() {
     gen_all_symbols!();
 }
 
 #[test]
+#[ignore = "bitz.com has shutdown since October 2021"]
 fn fetch_spot_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::Spot).unwrap();
     assert!(!symbols.is_empty());
@@ -20,6 +22,7 @@ fn fetch_spot_symbols() {
 }
 
 #[test]
+#[ignore = "bitz.com has shutdown since October 2021"]
 fn fetch_inverse_swap_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
     assert!(!symbols.is_empty());
@@ -29,6 +32,7 @@ fn fetch_inverse_swap_symbols() {
 }
 
 #[test]
+#[ignore = "bitz.com has shutdown since October 2021"]
 fn fetch_linear_swap_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
     assert!(!symbols.is_empty());

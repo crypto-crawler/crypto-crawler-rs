@@ -5,6 +5,7 @@ use crypto_rest_client::fetch_l2_snapshot;
 use serde_json::Value;
 
 #[test]
+#[ignore = "bitz.com has shutdown since October 2021"]
 fn test_l2_snapshot() {
     let text = fetch_l2_snapshot("bitz", MarketType::Spot, "btc_usdt", Some(3)).unwrap();
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
