@@ -7,6 +7,7 @@ lazy_static! {
         // offline data, in case the network is down
         let mut set: HashMap<String, String> = vec![
             ("AAA", "TESTAAA"),
+            ("AIX", "AI"),
             ("ALG", "ALGO"),
             ("AMP", "AMPL"),
             ("AMPF0", "AMPLF0"),
