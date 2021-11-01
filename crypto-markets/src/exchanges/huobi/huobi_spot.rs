@@ -1,6 +1,11 @@
 use super::utils::huobi_http_get;
-use crate::error::Result;
+use crate::{
+    error::Result,
+    market::{Fees, Precision, QuantityLimit},
+    Market,
+};
 
+use crypto_market_type::MarketType;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -39,14 +44,64 @@ struct Response {
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
     let txt = huobi_http_get("https://api.huobi.pro/v1/common/symbols")?;
     let resp = serde_json::from_str::<Response>(&txt)?;
-    Ok(resp.data)
+    let result: Vec<SpotMarket> = resp
+        .data
+        .into_iter()
+        .filter(|m| m.state == "online")
+        .collect();
+    Ok(result)
 }
 
 pub(super) fn fetch_spot_symbols() -> Result<Vec<String>> {
     let symbols = fetch_spot_markets_raw()?
         .into_iter()
-        .filter(|m| m.state == "online")
         .map(|m| m.symbol)
         .collect::<Vec<String>>();
     Ok(symbols)
+}
+
+pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
+    let markets = fetch_spot_markets_raw()?
+        .into_iter()
+        .map(|m| {
+            let info = serde_json::to_value(&m)
+                .unwrap()
+                .as_object()
+                .unwrap()
+                .clone();
+            let pair = crypto_pair::normalize_pair(&m.symbol, "huobi").unwrap();
+            let (base, quote) = {
+                let v: Vec<&str> = pair.split('/').collect();
+                (v[0].to_string(), v[1].to_string())
+            };
+            Market {
+                exchange: "huobi".to_string(),
+                market_type: MarketType::Spot,
+                symbol: m.symbol,
+                base_id: m.base_currency.to_string(),
+                quote_id: m.quote_currency.to_string(),
+                base,
+                quote,
+                active: m.state == "online",
+                margin: true,
+                // see https://www.huobi.com/en-us/fee/
+                fees: Fees {
+                    maker: 0.002,
+                    taker: 0.002,
+                },
+                precision: Precision {
+                    tick_size: 1.0 / (10_i64.pow(m.price_precision as u32) as f64),
+                    lot_size: 1.0 / (10_i64.pow(m.amount_precision as u32) as f64),
+                },
+                quantity_limit: Some(QuantityLimit {
+                    min: m.limit_order_min_order_amt,
+                    max: m.limit_order_max_order_amt,
+                }),
+                contract_value: None,
+                delivery_date: None,
+                info,
+            }
+        })
+        .collect::<Vec<Market>>();
+    Ok(markets)
 }
