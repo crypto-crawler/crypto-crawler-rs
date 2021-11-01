@@ -15,7 +15,7 @@ fn fetch_spot_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::Spot).unwrap();
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
-        assert!(symbol.ends_with("_usdt") || symbol.ends_with("_btc"));
+        assert!(symbol.ends_with("_USDT") || symbol.ends_with("_BTC"));
     }
 }
 

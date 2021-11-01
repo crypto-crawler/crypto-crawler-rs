@@ -81,16 +81,14 @@ pub(super) fn fetch_option_markets() -> Result<Vec<Market>> {
                 fees: Fees {
                     maker: m.makerFeeRate.parse::<f64>().unwrap(),
                     taker: m.takerFeeRate.parse::<f64>().unwrap(),
-                    percentage: true,
                 },
                 precision: Precision {
                     price: m.priceScale,
-                    base: Some(m.quantityScale),
-                    quote: None,
+                    quantity: m.quantityScale,
                 },
-                min_quantity: MinQuantity {
-                    base: Some(m.minQty.parse::<f64>().unwrap()),
-                    quote: None,
+                quantity_limit: QuantityLimit {
+                    min: m.minQty.parse::<f64>().unwrap(),
+                    max: m.maxQty.parse::<f64>().unwrap(),
                 },
                 contract_value: Some(1.0),
                 delivery_date: Some(m.expiryDate),

@@ -13,7 +13,6 @@
 mod error;
 mod exchanges;
 mod market;
-mod utils;
 
 pub use crypto_market_type::{get_market_types, MarketType};
 pub use error::Error;

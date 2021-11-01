@@ -30,17 +30,15 @@ pub(super) fn binance_http_get(url: &str) -> Result<String> {
     }
 }
 
-pub(super) fn parse_filter(
-    filters: &[HashMap<String, Value>],
-    filter_type: &str,
-    field: &str,
-) -> f64 {
+pub(super) fn parse_filter<'a>(
+    filters: &'a [HashMap<String, Value>],
+    filter_type: &'a str,
+    field: &'static str,
+) -> &'a str {
     filters
         .iter()
         .find(|x| x["filterType"] == filter_type)
         .unwrap()[field]
         .as_str()
-        .unwrap()
-        .parse::<f64>()
         .unwrap()
 }
