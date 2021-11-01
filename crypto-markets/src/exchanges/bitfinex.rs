@@ -95,13 +95,13 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
                     }
                 },
                 precision: Precision {
-                    price: m.price_precision,
-                    quantity: 8,
+                    tick_size: 1.0 / (10_i64.pow(m.price_precision as u32) as f64),
+                    lot_size: 1.0 / (10_i64.pow(8_u32) as f64),
                 },
-                quantity_limit: QuantityLimit {
+                quantity_limit: Some(QuantityLimit {
                     min: m.minimum_order_size.parse::<f64>().unwrap(),
                     max: m.maximum_order_size.parse::<f64>().unwrap(),
-                },
+                }),
                 contract_value: if market_type == MarketType::Spot {
                     None
                 } else {
