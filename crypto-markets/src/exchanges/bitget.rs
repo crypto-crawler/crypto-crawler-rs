@@ -103,7 +103,7 @@ fn fetch_spot_symbols() -> Result<Vec<String>> {
     let markets = fetch_spot_markets_raw()?;
     let symbols: Vec<String> = markets
         .into_iter()
-        .filter(|m| m.status == "1")
+        .filter(|m| m.status == "online")
         .map(|m| m.symbol)
         .collect();
     Ok(symbols)

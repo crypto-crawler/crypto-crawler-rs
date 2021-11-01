@@ -37,6 +37,21 @@ pub(super) fn http_get(url: &str, params: Option<&HashMap<String, String>>) -> R
     }
 }
 
+pub(super) fn precision_from_string(s: &str) -> i64 {
+    if let Some(dot_pos) = s.find('.') {
+        let mut none_zero = 0;
+        for (i, ch) in s.chars().rev().enumerate() {
+            if ch != '0' {
+                none_zero = s.len() - 1 - i;
+                break;
+            }
+        }
+        (none_zero - dot_pos) as i64
+    } else {
+        0
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
@@ -60,5 +75,11 @@ mod tests {
         let text = super::http_get("https://check.torproject.org/api/ip", None).unwrap();
         let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
         assert!(obj.get("IsTor").unwrap().as_bool().unwrap());
+    }
+
+    #[test]
+    fn test_calc_precision() {
+        assert_eq!(4, super::precision_from_string("0.000100"));
+        assert_eq!(0, super::precision_from_string("10.00000000"));
     }
 }

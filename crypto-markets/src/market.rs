@@ -7,24 +7,19 @@ use serde_json::{Map, Value};
 pub struct Fees {
     pub maker: f64,
     pub taker: f64,
-    pub percentage: bool,
 }
 
+/// Number of decimal digits "after the dot"
 #[derive(Serialize, Deserialize)]
 pub struct Precision {
     pub price: i64,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub base: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub quote: Option<i64>,
+    pub quantity: i64,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct MinQuantity {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub base: Option<f64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub quote: Option<f64>,
+pub struct QuantityLimit {
+    pub min: f64,
+    pub max: f64,
 }
 
 /// Market contains all information about a market
@@ -54,8 +49,8 @@ pub struct Market {
     pub fees: Fees,
     /// number of decimal digits after the dot
     pub precision: Precision,
-    /// minimum quantity when placing orders
-    pub min_quantity: MinQuantity,
+    /// the min and max values of quantity
+    pub quantity_limit: QuantityLimit,
     // The value of one contract, not applicable to sport markets
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contract_value: Option<f64>,
