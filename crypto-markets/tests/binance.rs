@@ -83,10 +83,8 @@ fn fetch_spot_markets() {
     assert!(!markets.is_empty());
 
     let btc_usdt = markets.iter().find(|m| m.symbol == "BTCUSDT").unwrap();
-    assert_eq!(btc_usdt.precision.price, 2);
-    assert_eq!(btc_usdt.precision.quantity, 5);
-    assert_eq!(btc_usdt.quantity_limit.min, 0.00001);
-    assert_eq!(btc_usdt.quantity_limit.max, 9000.0);
+    assert_eq!(btc_usdt.precision.tick_size, 0.01);
+    assert_eq!(btc_usdt.precision.lot_size, 0.00001);
 }
 
 #[test]
@@ -101,10 +99,8 @@ fn fetch_inverse_swap_markets() {
     assert!(!markets.is_empty());
 
     let btcusd_perp = markets.iter().find(|m| m.symbol == "BTCUSD_PERP").unwrap();
-    assert_eq!(btcusd_perp.precision.price, 1);
-    assert_eq!(btcusd_perp.precision.quantity, 0);
-    assert_eq!(btcusd_perp.quantity_limit.min, 1.0);
-    assert_eq!(btcusd_perp.quantity_limit.max, 1000000.0);
+    assert_eq!(btcusd_perp.precision.tick_size, 0.1);
+    assert_eq!(btcusd_perp.precision.lot_size, 1.0);
 }
 
 #[test]

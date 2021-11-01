@@ -1,7 +1,5 @@
 use super::utils::{binance_http_get, parse_filter};
-use crate::{
-    error::Result, exchanges::utils::precision_from_string, market::*, Market, MarketType,
-};
+use crate::{error::Result, market::*, Market, MarketType};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -70,23 +68,21 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                     taker: 0.001,
                 },
                 precision: Precision {
-                    price: precision_from_string(parse_filter(
-                        &m.filters,
-                        "PRICE_FILTER",
-                        "tickSize",
-                    )),
-                    quantity: precision_from_string(parse_filter(
-                        &m.filters, "LOT_SIZE", "stepSize",
-                    )),
+                    tick_size: parse_filter(&m.filters, "PRICE_FILTER", "tickSize")
+                        .parse::<f64>()
+                        .unwrap(),
+                    lot_size: parse_filter(&m.filters, "LOT_SIZE", "stepSize")
+                        .parse::<f64>()
+                        .unwrap(),
                 },
-                quantity_limit: QuantityLimit {
+                quantity_limit: Some(QuantityLimit {
                     min: parse_filter(&m.filters, "LOT_SIZE", "minQty")
                         .parse::<f64>()
                         .unwrap(),
                     max: parse_filter(&m.filters, "LOT_SIZE", "maxQty")
                         .parse::<f64>()
                         .unwrap(),
-                },
+                }),
                 contract_value: None,
                 delivery_date: None,
                 info: serde_json::to_value(&m)

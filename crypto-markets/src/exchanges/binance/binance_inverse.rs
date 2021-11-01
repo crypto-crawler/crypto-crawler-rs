@@ -94,17 +94,17 @@ fn fetch_future_markets_internal() -> Result<Vec<Market>> {
                     taker: 0.0004,
                 },
                 precision: Precision {
-                    price: m.pricePrecision,
-                    quantity: m.quantityPrecision,
+                    tick_size: 1.0 / (10_i64.pow(m.pricePrecision as u32) as f64),
+                    lot_size: 1.0 / (10_i64.pow(m.quantityPrecision as u32) as f64),
                 },
-                quantity_limit: QuantityLimit {
+                quantity_limit: Some(QuantityLimit {
                     min: parse_filter(&m.filters, "LOT_SIZE", "minQty")
                         .parse::<f64>()
                         .unwrap(),
                     max: parse_filter(&m.filters, "LOT_SIZE", "maxQty")
                         .parse::<f64>()
                         .unwrap(),
-                },
+                }),
                 contract_value: Some(m.contractSize),
                 delivery_date: if m.contractType == "PERPETUAL" {
                     None

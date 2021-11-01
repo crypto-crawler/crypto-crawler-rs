@@ -9,14 +9,15 @@ pub struct Fees {
     pub taker: f64,
 }
 
-/// Number of decimal digits "after the dot"
 #[derive(Serialize, Deserialize)]
 pub struct Precision {
-    pub price: i64,
-    pub quantity: i64,
+    /// the minimum price change, see https://en.wikipedia.org/wiki/Tick_size
+    pub tick_size: f64,
+    /// the minimum quantity change
+    pub lot_size: f64,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq)]
 pub struct QuantityLimit {
     pub min: f64,
     pub max: f64,
@@ -50,7 +51,8 @@ pub struct Market {
     /// number of decimal digits after the dot
     pub precision: Precision,
     /// the min and max values of quantity
-    pub quantity_limit: QuantityLimit,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quantity_limit: Option<QuantityLimit>,
     // The value of one contract, not applicable to sport markets
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contract_value: Option<f64>,
