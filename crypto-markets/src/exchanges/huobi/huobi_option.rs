@@ -35,7 +35,12 @@ struct Response {
 fn fetch_option_markets_raw() -> Result<Vec<OptionMarket>> {
     let txt = huobi_http_get("https://api.hbdm.com/option-api/v1/option_contract_info")?;
     let resp = serde_json::from_str::<Response>(&txt)?;
-    Ok(resp.data)
+    let result: Vec<OptionMarket> = resp
+        .data
+        .into_iter()
+        .filter(|m| m.contract_status == 1)
+        .collect();
+    Ok(result)
 }
 
 pub(super) fn fetch_option_symbols() -> Result<Vec<String>> {
