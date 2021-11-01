@@ -83,13 +83,13 @@ pub(super) fn fetch_option_markets() -> Result<Vec<Market>> {
                     taker: m.takerFeeRate.parse::<f64>().unwrap(),
                 },
                 precision: Precision {
-                    price: m.priceScale,
-                    quantity: m.quantityScale,
+                    tick_size: 1.0 / (10_i64.pow(m.priceScale as u32) as f64),
+                    lot_size: 1.0 / (10_i64.pow(m.quantityScale as u32) as f64),
                 },
-                quantity_limit: QuantityLimit {
+                quantity_limit: Some(QuantityLimit {
                     min: m.minQty.parse::<f64>().unwrap(),
                     max: m.maxQty.parse::<f64>().unwrap(),
-                },
+                }),
                 contract_value: Some(1.0),
                 delivery_date: Some(m.expiryDate),
                 info: serde_json::to_value(&m)
