@@ -1,8 +1,13 @@
 use std::collections::HashMap;
 
 use super::utils::http_get;
-use crate::{error::Result, Market, MarketType};
+use crate::{
+    error::Result,
+    market::{Fees, Precision},
+    Market, MarketType,
+};
 
+use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -14,8 +19,55 @@ pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
         .collect::<Vec<String>>())
 }
 
-pub(crate) fn fetch_markets(_market_type: MarketType) -> Result<Vec<Market>> {
-    Ok(Vec::new())
+pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
+    let instruments = fetch_instruments(market_type)?;
+    let markets: Vec<Market> = instruments
+        .into_iter()
+        .map(|x| {
+            let info = serde_json::to_value(&x)
+                .unwrap()
+                .as_object()
+                .unwrap()
+                .clone();
+            let base_id = x.underlying;
+            let quote_id = x.quoteCurrency;
+            let pair = crypto_pair::normalize_pair(&x.symbol, "bitmex").unwrap();
+            let (base, quote) = {
+                let v: Vec<&str> = pair.split('/').collect();
+                (v[0].to_string(), v[1].to_string())
+            };
+
+            Market {
+                exchange: "bitmex".to_string(),
+                market_type,
+                symbol: x.symbol,
+                base_id,
+                quote_id,
+                base,
+                quote,
+                active: x.state == "Open",
+                margin: true,
+                fees: Fees {
+                    maker: x.makerFee,
+                    taker: x.takerFee,
+                },
+                precision: Precision {
+                    tick_size: x.tickSize,
+                    lot_size: x.lotSize,
+                },
+                quantity_limit: None,
+                contract_value: Some((x.multiplier.abs() as f64) / (10_i64.pow(8) as f64)),
+                delivery_date: if let Some(expiry) = x.expiry {
+                    let timestamp = DateTime::parse_from_rfc3339(&expiry).unwrap();
+                    Some(timestamp.timestamp_millis() as u64)
+                } else {
+                    None
+                },
+                info,
+            }
+        })
+        .collect();
+    Ok(markets)
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -49,7 +101,7 @@ struct Instrument {
     publishTime: Option<String>,
     maxOrderQty: i64,
     maxPrice: f64,
-    lotSize: i64,
+    lotSize: f64,
     tickSize: f64,
     multiplier: i64,
     settlCurrency: String,

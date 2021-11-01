@@ -1,4 +1,4 @@
-use crypto_markets::{fetch_symbols, get_market_types, MarketType};
+use crypto_markets::{fetch_markets, fetch_symbols, get_market_types, MarketType};
 
 #[macro_use]
 mod utils;
@@ -109,4 +109,15 @@ fn fetch_linear_future_symbols() {
             get_market_type_from_symbol(symbol)
         );
     }
+}
+
+#[test]
+fn fetch_inverse_swap_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
+    assert!(!markets.is_empty());
+
+    let xbtusd = markets.iter().find(|m| m.symbol == "XBTUSD").unwrap();
+    assert_eq!(xbtusd.precision.tick_size, 0.5);
+    assert_eq!(xbtusd.precision.lot_size, 100.0);
+    assert_eq!(xbtusd.contract_value, Some(1.0));
 }
