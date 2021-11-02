@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use super::utils::http_get;
 use crate::{
     error::{Error, Result},
-    Market, MarketType,
+    Fees, Market, MarketType, Precision, QuantityLimit,
 };
 
 use serde::{Deserialize, Serialize};
@@ -16,8 +16,11 @@ pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
     }
 }
 
-pub(crate) fn fetch_markets(_market_type: MarketType) -> Result<Vec<Market>> {
-    Ok(Vec::new())
+pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
+    match market_type {
+        MarketType::Spot => fetch_spot_markets(),
+        _ => panic!("Unsupported market_type: {}", market_type),
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -94,4 +97,51 @@ fn fetch_spot_symbols() -> Result<Vec<String>> {
         .filter_map(|m| m.wsname)
         .collect::<Vec<String>>();
     Ok(symbols)
+}
+
+fn fetch_spot_markets() -> Result<Vec<Market>> {
+    let markets = fetch_spot_markets_raw()?
+        .into_iter()
+        .map(|m| {
+            let info = serde_json::to_value(&m)
+                .unwrap()
+                .as_object()
+                .unwrap()
+                .clone();
+            let symbol = m.wsname.unwrap();
+            let pair = crypto_pair::normalize_pair(&symbol, "kraken").unwrap();
+            let (base, quote) = {
+                let v: Vec<&str> = pair.split('/').collect();
+                (v[0].to_string(), v[1].to_string())
+            };
+            Market {
+                exchange: "kraken".to_string(),
+                market_type: MarketType::Spot,
+                symbol,
+                base_id: m.base,
+                quote_id: m.quote,
+                base,
+                quote,
+                active: true,
+                margin: false,
+                // see https://support.kraken.com/hc/en-us/articles/360000526126-What-are-Maker-and-Taker-fees-
+                fees: Fees {
+                    maker: 0.0016,
+                    taker: 0.0026,
+                },
+                precision: Precision {
+                    tick_size: 1.0 / (10_i64.pow(m.pair_decimals as u32) as f64),
+                    lot_size: 1.0 / (10_i64.pow(m.lot_decimals as u32) as f64),
+                },
+                quantity_limit: Some(QuantityLimit {
+                    min: m.ordermin.parse::<f64>().unwrap(),
+                    max: None,
+                }),
+                contract_value: None,
+                delivery_date: None,
+                info,
+            }
+        })
+        .collect::<Vec<Market>>();
+    Ok(markets)
 }

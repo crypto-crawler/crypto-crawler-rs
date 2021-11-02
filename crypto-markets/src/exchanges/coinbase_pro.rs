@@ -69,7 +69,7 @@ fn fetch_spot_markets() -> Result<Vec<Market>> {
                 (v[0].to_string(), v[1].to_string())
             };
             Market {
-                exchange: "bitstamp".to_string(),
+                exchange: "coinbase_pro".to_string(),
                 market_type: MarketType::Spot,
                 symbol: m.id,
                 base_id: m.base_currency,
