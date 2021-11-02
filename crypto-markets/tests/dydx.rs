@@ -1,4 +1,4 @@
-use crypto_markets::{fetch_symbols, get_market_types, MarketType};
+use crypto_markets::{fetch_markets, fetch_symbols, get_market_types, MarketType};
 
 #[macro_use]
 mod utils;
@@ -18,4 +18,21 @@ fn fetch_linear_swap_symbols() {
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("-USD"));
     }
+}
+
+#[test]
+fn fetch_linear_swap_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
+    assert!(!markets.is_empty());
+
+    let btcusd = markets
+        .iter()
+        .find(|m| m.symbol == "BTC-USD")
+        .unwrap()
+        .clone();
+    assert_eq!(btcusd.precision.tick_size, 1.0);
+    assert_eq!(btcusd.precision.lot_size, 0.0001);
+    let quantity_limit = btcusd.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 0.001);
+    assert_eq!(quantity_limit.max, None);
 }

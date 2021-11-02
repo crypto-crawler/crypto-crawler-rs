@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
 use super::super::utils::http_get;
-use crate::error::Result;
+use crate::{error::Result, Fees, Market, Precision, QuantityLimit};
 
+use crypto_market_type::MarketType;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -49,4 +50,50 @@ pub(super) fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
         .map(|m| m.market)
         .collect::<Vec<String>>();
     Ok(symbols)
+}
+
+pub(super) fn fetch_linear_swap_markets() -> Result<Vec<Market>> {
+    let markets = fetch_markets_raw()?
+        .into_iter()
+        .map(|m| {
+            let info = serde_json::to_value(&m)
+                .unwrap()
+                .as_object()
+                .unwrap()
+                .clone();
+            let pair = crypto_pair::normalize_pair(&m.market, "dydx").unwrap();
+            let (base, quote) = {
+                let v: Vec<&str> = pair.split('/').collect();
+                (v[0].to_string(), v[1].to_string())
+            };
+            Market {
+                exchange: "dydx".to_string(),
+                market_type: MarketType::LinearSwap,
+                symbol: m.market,
+                base_id: m.baseAsset,
+                quote_id: m.quoteAsset,
+                base,
+                quote,
+                active: m.status == "ONLINE",
+                margin: true,
+                // see https://trade.dydx.exchange/portfolio/fees
+                fees: Fees {
+                    maker: 0.0005,
+                    taker: 0.0001,
+                },
+                precision: Precision {
+                    tick_size: m.tickSize.parse::<f64>().unwrap(),
+                    lot_size: m.stepSize.parse::<f64>().unwrap(),
+                },
+                quantity_limit: Some(QuantityLimit {
+                    min: m.minOrderSize.parse::<f64>().unwrap(),
+                    max: None,
+                }),
+                contract_value: Some(1.0),
+                delivery_date: None,
+                info,
+            }
+        })
+        .collect::<Vec<Market>>();
+    Ok(markets)
 }
