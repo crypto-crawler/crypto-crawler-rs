@@ -70,3 +70,33 @@ fn fetch_spot_markets() {
     assert_eq!(btc_usdt.precision.tick_size, 0.01);
     assert_eq!(btc_usdt.precision.lot_size, 0.000001);
 }
+
+#[test]
+fn fetch_inverse_future_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
+    assert!(!markets.is_empty());
+
+    let btc_usd = markets.iter().find(|m| m.symbol == "BTC_CW").unwrap();
+    assert_eq!(btc_usd.precision.tick_size, 0.01);
+    assert_eq!(btc_usd.precision.lot_size, 1.0);
+}
+
+#[test]
+fn fetch_inverse_swap_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
+    assert!(!markets.is_empty());
+
+    let btc_usd = markets.iter().find(|m| m.symbol == "BTC-USD").unwrap();
+    assert_eq!(btc_usd.precision.tick_size, 0.1);
+    assert_eq!(btc_usd.precision.lot_size, 1.0);
+}
+
+#[test]
+fn fetch_linear_swap_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
+    assert!(!markets.is_empty());
+
+    let btc_usdt = markets.iter().find(|m| m.symbol == "BTC-USDT").unwrap();
+    assert_eq!(btc_usdt.precision.tick_size, 0.1);
+    assert_eq!(btc_usdt.precision.lot_size, 1.0);
+}
