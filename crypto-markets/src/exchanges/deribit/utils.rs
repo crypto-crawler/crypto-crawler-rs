@@ -1,6 +1,11 @@
 use super::super::utils::http_get;
-use crate::error::{Error, Result};
+use crate::{
+    error::{Error, Result},
+    market::{Fees, Precision, QuantityLimit},
+    Market,
+};
 
+use crypto_market_type::MarketType;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -51,8 +56,8 @@ struct Instrument {
     kind: String,
     is_active: bool,
     instrument_name: String,
-    expiration_timestamp: i64,
-    creation_timestamp: i64,
+    expiration_timestamp: u64,
+    creation_timestamp: u64,
     contract_size: f64, // TODO: why i64 panic ?
     block_trade_commission: f64,
     base_currency: String,
@@ -80,15 +85,13 @@ fn fetch_instruments(currency: &str, kind: &str) -> Result<Vec<Instrument>> {
     Ok(resp.result)
 }
 
-fn fetch_symbols(kind: &str) -> Result<Vec<String>> {
-    let mut all_symbols: Vec<String> = Vec::new();
+fn fetch_raw_markets(kind: &str) -> Result<Vec<Instrument>> {
+    let mut all_markets: Vec<Instrument> = Vec::new();
 
     let result = fetch_instruments("BTC", kind);
     match result {
-        Ok(instruments) => {
-            let mut symbols: Vec<String> =
-                instruments.into_iter().map(|x| x.instrument_name).collect();
-            all_symbols.append(&mut symbols);
+        Ok(mut instruments) => {
+            all_markets.append(&mut instruments);
         }
         Err(error) => {
             return Err(error);
@@ -97,16 +100,20 @@ fn fetch_symbols(kind: &str) -> Result<Vec<String>> {
 
     let result = fetch_instruments("ETH", kind);
     match result {
-        Ok(instruments) => {
-            let mut symbols: Vec<String> =
-                instruments.into_iter().map(|x| x.instrument_name).collect();
-            all_symbols.append(&mut symbols);
+        Ok(mut instruments) => {
+            all_markets.append(&mut instruments);
         }
         Err(error) => {
             return Err(error);
         }
     }
 
+    Ok(all_markets.into_iter().filter(|x| x.is_active).collect())
+}
+
+fn fetch_symbols(kind: &str) -> Result<Vec<String>> {
+    let all_markets = fetch_raw_markets(kind)?;
+    let all_symbols: Vec<String> = all_markets.into_iter().map(|x| x.instrument_name).collect();
     Ok(all_symbols)
 }
 
@@ -134,4 +141,76 @@ pub(super) fn fetch_inverse_swap_symbols() -> Result<Vec<String>> {
 
 pub(super) fn fetch_option_symbols() -> Result<Vec<String>> {
     fetch_symbols("option")
+}
+
+fn to_market(raw_market: &Instrument) -> Market {
+    let pair = crypto_pair::normalize_pair(&raw_market.instrument_name, "deribit").unwrap();
+    let (base, quote) = {
+        let v: Vec<&str> = pair.split('/').collect();
+        (v[0].to_string(), v[1].to_string())
+    };
+    Market {
+        exchange: "okex".to_string(),
+        market_type: if raw_market.kind == "future" {
+            if raw_market.instrument_name.ends_with("-PERPETUAL") {
+                MarketType::InverseSwap
+            } else {
+                MarketType::InverseFuture
+            }
+        } else {
+            MarketType::EuropeanOption
+        },
+        symbol: raw_market.instrument_name.to_string(),
+        base_id: raw_market.base_currency.to_string(),
+        quote_id: raw_market.quote_currency.to_string(),
+        base,
+        quote,
+        active: raw_market.is_active,
+        margin: true,
+        fees: Fees {
+            maker: raw_market.maker_commission,
+            taker: raw_market.taker_commission,
+        },
+        precision: Precision {
+            tick_size: raw_market.tick_size,
+            lot_size: raw_market.min_trade_amount,
+        },
+        quantity_limit: Some(QuantityLimit {
+            min: raw_market.min_trade_amount,
+            max: None,
+        }),
+        contract_value: Some(raw_market.contract_size),
+        delivery_date: Some(raw_market.expiration_timestamp),
+        info: serde_json::to_value(raw_market)
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .clone(),
+    }
+}
+
+pub(super) fn fetch_inverse_future_markets() -> Result<Vec<Market>> {
+    let raw_markets = fetch_raw_markets("future")?;
+    let markets: Vec<Market> = raw_markets
+        .into_iter()
+        .filter(|x| !x.instrument_name.ends_with("-PERPETUAL"))
+        .map(|x| to_market(&x))
+        .collect();
+    Ok(markets)
+}
+
+pub(super) fn fetch_inverse_swap_markets() -> Result<Vec<Market>> {
+    let raw_markets = fetch_raw_markets("future")?;
+    let markets: Vec<Market> = raw_markets
+        .into_iter()
+        .filter(|x| x.instrument_name.ends_with("-PERPETUAL"))
+        .map(|x| to_market(&x))
+        .collect();
+    Ok(markets)
+}
+
+pub(super) fn fetch_option_markets() -> Result<Vec<Market>> {
+    let raw_markets = fetch_raw_markets("option")?;
+    let markets: Vec<Market> = raw_markets.into_iter().map(|x| to_market(&x)).collect();
+    Ok(markets)
 }
