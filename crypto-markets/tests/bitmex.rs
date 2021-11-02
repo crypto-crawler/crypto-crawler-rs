@@ -120,4 +120,5 @@ fn fetch_inverse_swap_markets() {
     assert_eq!(xbtusd.precision.tick_size, 0.5);
     assert_eq!(xbtusd.precision.lot_size, 100.0);
     assert_eq!(xbtusd.contract_value, Some(1.0));
+    assert!(xbtusd.quantity_limit.is_none());
 }
