@@ -1,5 +1,5 @@
 use super::utils::http_get;
-use crate::{error::Result, Market, MarketType};
+use crate::{error::Result, Fees, Market, MarketType, Precision, QuantityLimit};
 
 use serde::{Deserialize, Serialize};
 
@@ -10,8 +10,11 @@ pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
     }
 }
 
-pub(crate) fn fetch_markets(_market_type: MarketType) -> Result<Vec<Market>> {
-    Ok(Vec::new())
+pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
+    match market_type {
+        MarketType::Spot => fetch_spot_markets(),
+        _ => panic!("Unsupported market_type: {}", market_type),
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -49,4 +52,50 @@ fn fetch_spot_symbols() -> Result<Vec<String>> {
         .map(|m| m.id)
         .collect::<Vec<String>>();
     Ok(symbols)
+}
+
+fn fetch_spot_markets() -> Result<Vec<Market>> {
+    let markets = fetch_spot_markets_raw()?
+        .into_iter()
+        .map(|m| {
+            let info = serde_json::to_value(&m)
+                .unwrap()
+                .as_object()
+                .unwrap()
+                .clone();
+            let pair = crypto_pair::normalize_pair(&m.id, "coinbase_pro").unwrap();
+            let (base, quote) = {
+                let v: Vec<&str> = pair.split('/').collect();
+                (v[0].to_string(), v[1].to_string())
+            };
+            Market {
+                exchange: "bitstamp".to_string(),
+                market_type: MarketType::Spot,
+                symbol: m.id,
+                base_id: m.base_currency,
+                quote_id: m.quote_currency,
+                base,
+                quote,
+                active: !m.trading_disabled && m.status == "online" && !m.cancel_only,
+                margin: m.margin_enabled,
+                // // see https://pro.coinbase.com/fees, https://pro.coinbase.com/orders/fees
+                fees: Fees {
+                    maker: 0.005,
+                    taker: 0.005,
+                },
+                precision: Precision {
+                    tick_size: m.quote_increment.parse::<f64>().unwrap(),
+                    lot_size: m.base_increment.parse::<f64>().unwrap(),
+                },
+                quantity_limit: Some(QuantityLimit {
+                    min: m.base_min_size.parse::<f64>().unwrap(),
+                    max: Some(m.base_max_size.parse::<f64>().unwrap()),
+                }),
+                contract_value: None,
+                delivery_date: None,
+                info,
+            }
+        })
+        .collect::<Vec<Market>>();
+    Ok(markets)
 }
