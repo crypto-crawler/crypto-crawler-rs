@@ -87,6 +87,7 @@ fn fetch_spot_markets() {
         .find(|m| m.symbol == "BTCUSDT")
         .unwrap()
         .clone();
+    assert!(btc_usdt.contract_value.is_none());
     assert_eq!(btc_usdt.precision.tick_size, 0.01);
     assert_eq!(btc_usdt.precision.lot_size, 0.00001);
     let quantity_limit = btc_usdt.quantity_limit.unwrap();
@@ -104,6 +105,7 @@ fn fetch_inverse_future_markets() {
         .find(|m| m.symbol.starts_with("BTCUSD_"))
         .unwrap()
         .clone();
+    assert_eq!(btcusd.contract_value, Some(100.0));
     assert_eq!(btcusd.precision.tick_size, 0.1);
     assert_eq!(btcusd.precision.lot_size, 1.0);
     let quantity_limit = btcusd.quantity_limit.unwrap();
@@ -121,6 +123,7 @@ fn fetch_inverse_swap_markets() {
         .find(|m| m.symbol == "BTCUSD_PERP")
         .unwrap()
         .clone();
+    assert_eq!(btcusd_perp.contract_value, Some(100.0));
     assert_eq!(btcusd_perp.precision.tick_size, 0.1);
     assert_eq!(btcusd_perp.precision.lot_size, 1.0);
     let quantity_limit = btcusd_perp.quantity_limit.unwrap();
@@ -138,6 +141,7 @@ fn fetch_linear_swap_markets() {
         .find(|m| m.symbol == "BTCUSDT")
         .unwrap()
         .clone();
+    assert_eq!(btcusdt.contract_value, Some(1.0));
     assert_eq!(btcusdt.precision.tick_size, 0.01);
     assert_eq!(btcusdt.precision.lot_size, 0.001);
     let quantity_limit = btcusdt.quantity_limit.unwrap();
@@ -155,6 +159,7 @@ fn fetch_option_markets() {
         .find(|m| m.symbol.starts_with("BTC-"))
         .unwrap()
         .clone();
+    assert_eq!(btcusd.contract_value, Some(1.0));
     assert_eq!(btcusd.precision.tick_size, 0.01);
     assert_eq!(btcusd.precision.lot_size, 0.0001);
     let quantity_limit = btcusd.quantity_limit.unwrap();

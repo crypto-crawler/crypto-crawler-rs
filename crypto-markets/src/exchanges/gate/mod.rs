@@ -15,6 +15,13 @@ pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
     }
 }
 
-pub(crate) fn fetch_markets(_market_type: MarketType) -> Result<Vec<Market>> {
-    Ok(Vec::new())
+pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
+    match market_type {
+        MarketType::Spot => gate_spot::fetch_spot_markets(),
+        MarketType::InverseSwap => gate_swap::fetch_inverse_swap_markets(),
+        MarketType::LinearSwap => gate_swap::fetch_linear_swap_markets(),
+        MarketType::InverseFuture => gate_future::fetch_inverse_future_markets(),
+        MarketType::LinearFuture => gate_future::fetch_linear_future_markets(),
+        _ => panic!("Unsupported market_type: {}", market_type),
+    }
 }
