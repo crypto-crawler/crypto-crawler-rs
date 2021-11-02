@@ -3,13 +3,13 @@ use crate::MarketType;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Fees {
     pub maker: f64,
     pub taker: f64,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Precision {
     /// the minimum price change, see https://en.wikipedia.org/wiki/Tick_size
     pub tick_size: f64,
@@ -17,7 +17,7 @@ pub struct Precision {
     pub lot_size: f64,
 }
 
-#[derive(Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, PartialEq)]
 pub struct QuantityLimit {
     pub min: f64,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -25,7 +25,7 @@ pub struct QuantityLimit {
 }
 
 /// Market contains all information about a market
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Market {
     /// exchange name
     pub exchange: String,

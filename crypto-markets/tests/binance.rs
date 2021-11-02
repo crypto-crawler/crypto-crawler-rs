@@ -82,15 +82,33 @@ fn fetch_spot_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::Spot).unwrap();
     assert!(!markets.is_empty());
 
-    let btc_usdt = markets.iter().find(|m| m.symbol == "BTCUSDT").unwrap();
+    let btc_usdt = markets
+        .iter()
+        .find(|m| m.symbol == "BTCUSDT")
+        .unwrap()
+        .clone();
     assert_eq!(btc_usdt.precision.tick_size, 0.01);
     assert_eq!(btc_usdt.precision.lot_size, 0.00001);
+    let quantity_limit = btc_usdt.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 0.00001);
+    assert_eq!(quantity_limit.max, Some(9000.0));
 }
 
 #[test]
 fn fetch_inverse_future_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
     assert!(!markets.is_empty());
+
+    let btcusd = markets
+        .iter()
+        .find(|m| m.symbol.starts_with("BTCUSD_"))
+        .unwrap()
+        .clone();
+    assert_eq!(btcusd.precision.tick_size, 0.1);
+    assert_eq!(btcusd.precision.lot_size, 1.0);
+    let quantity_limit = btcusd.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.max, Some(1000000.0));
 }
 
 #[test]
@@ -98,19 +116,48 @@ fn fetch_inverse_swap_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
     assert!(!markets.is_empty());
 
-    let btcusd_perp = markets.iter().find(|m| m.symbol == "BTCUSD_PERP").unwrap();
+    let btcusd_perp = markets
+        .iter()
+        .find(|m| m.symbol == "BTCUSD_PERP")
+        .unwrap()
+        .clone();
     assert_eq!(btcusd_perp.precision.tick_size, 0.1);
     assert_eq!(btcusd_perp.precision.lot_size, 1.0);
+    let quantity_limit = btcusd_perp.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.max, Some(1000000.0));
 }
 
 #[test]
 fn fetch_linear_swap_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
     assert!(!markets.is_empty());
+
+    let btcusdt = markets
+        .iter()
+        .find(|m| m.symbol == "BTCUSDT")
+        .unwrap()
+        .clone();
+    assert_eq!(btcusdt.precision.tick_size, 0.01);
+    assert_eq!(btcusdt.precision.lot_size, 0.001);
+    let quantity_limit = btcusdt.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 0.001);
+    assert_eq!(quantity_limit.max, Some(1000.0));
 }
 
 #[test]
 fn fetch_option_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::EuropeanOption).unwrap();
     assert!(!markets.is_empty());
+
+    let btcusd = markets
+        .iter()
+        .find(|m| m.symbol.starts_with("BTC-"))
+        .unwrap()
+        .clone();
+    assert_eq!(btcusd.precision.tick_size, 0.01);
+    assert_eq!(btcusd.precision.lot_size, 0.0001);
+    let quantity_limit = btcusd.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 0.0002);
+    assert_eq!(quantity_limit.max, Some(10000.0));
 }
