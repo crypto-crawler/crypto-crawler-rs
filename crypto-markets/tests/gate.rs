@@ -1,4 +1,4 @@
-use crypto_markets::{fetch_symbols, get_market_types, MarketType};
+use crypto_markets::{fetch_markets, fetch_symbols, get_market_types, MarketType};
 
 #[macro_use]
 mod utils;
@@ -58,4 +58,101 @@ fn fetch_linear_future_symbols() {
         assert!(date.parse::<i64>().is_ok());
         assert!(symbol.contains("_USDT_"));
     }
+}
+
+#[test]
+fn fetch_spot_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::Spot).unwrap();
+    assert!(!markets.is_empty());
+
+    let btc_usdt = markets
+        .iter()
+        .find(|m| m.symbol == "BTC_USDT")
+        .unwrap()
+        .clone();
+    assert_eq!(btc_usdt.market_type, MarketType::Spot);
+    assert!(btc_usdt.contract_value.is_none());
+    assert_eq!(btc_usdt.precision.tick_size, 0.01);
+    assert_eq!(btc_usdt.precision.lot_size, 0.0001);
+    let quantity_limit = btc_usdt.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 0.0001);
+    assert!(quantity_limit.max.is_none());
+}
+
+#[test]
+fn fetch_inverse_swap_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
+    assert!(!markets.is_empty());
+
+    let btc_usd = markets
+        .iter()
+        .find(|m| m.symbol == "BTC_USD")
+        .unwrap()
+        .clone();
+    assert_eq!(btc_usd.market_type, MarketType::InverseSwap);
+    assert_eq!(btc_usd.contract_value, Some(1.0));
+    assert_eq!(btc_usd.precision.tick_size, 0.1);
+    assert_eq!(btc_usd.precision.lot_size, 1.0);
+    let quantity_limit = btc_usd.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.max, Some(1000000.0));
+}
+
+#[test]
+fn fetch_linear_swap_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
+    assert!(!markets.is_empty());
+
+    let btc_usdt = markets
+        .iter()
+        .find(|m| m.symbol == "BTC_USDT")
+        .unwrap()
+        .clone();
+    assert_eq!(btc_usdt.market_type, MarketType::LinearSwap);
+    assert_eq!(btc_usdt.contract_value, Some(0.0001));
+    assert_eq!(btc_usdt.precision.tick_size, 0.1);
+    assert_eq!(btc_usdt.precision.lot_size, 0.0001);
+    let quantity_limit = btc_usdt.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.max, Some(1000000.0));
+}
+
+#[test]
+fn fetch_inverse_future_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
+    assert!(!markets.is_empty());
+
+    let btc_usd = markets
+        .iter()
+        .find(|m| m.symbol.starts_with("BTC_USD_"))
+        .unwrap()
+        .clone();
+    assert_eq!(btc_usd.market_type, MarketType::InverseFuture);
+    assert_eq!(btc_usd.contract_value, Some(1.0));
+    assert!(btc_usd.delivery_date.is_some());
+    assert_eq!(btc_usd.precision.tick_size, 0.1);
+    assert_eq!(btc_usd.precision.lot_size, 1.0);
+    let quantity_limit = btc_usd.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.max, Some(1000000.0));
+}
+
+#[test]
+fn fetch_linear_future_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearFuture).unwrap();
+    assert!(!markets.is_empty());
+
+    let btc_usdt = markets
+        .iter()
+        .find(|m| m.symbol.starts_with("BTC_USDT_"))
+        .unwrap()
+        .clone();
+    assert_eq!(btc_usdt.market_type, MarketType::LinearFuture);
+    assert_eq!(btc_usdt.contract_value, Some(0.0001));
+    assert!(btc_usdt.delivery_date.is_some());
+    assert_eq!(btc_usdt.precision.tick_size, 0.1);
+    assert_eq!(btc_usdt.precision.lot_size, 0.0001);
+    let quantity_limit = btc_usdt.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.max, Some(1000000.0));
 }
