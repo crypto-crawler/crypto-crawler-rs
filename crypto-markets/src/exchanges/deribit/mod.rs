@@ -11,6 +11,11 @@ pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
     }
 }
 
-pub(crate) fn fetch_markets(_market_type: MarketType) -> Result<Vec<Market>> {
-    Ok(Vec::new())
+pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
+    match market_type {
+        MarketType::InverseFuture => utils::fetch_inverse_future_markets(),
+        MarketType::InverseSwap => utils::fetch_inverse_swap_markets(),
+        MarketType::EuropeanOption => utils::fetch_option_markets(),
+        _ => panic!("Unsupported market_type: {}", market_type),
+    }
 }

@@ -1,4 +1,4 @@
-use crypto_markets::{fetch_symbols, MarketType};
+use crypto_markets::{fetch_markets, fetch_symbols, MarketType};
 
 #[macro_use]
 mod utils;
@@ -48,4 +48,34 @@ fn fetch_option_symbols() {
         assert!(arr[2].parse::<i64>().is_ok());
         assert!(arr[3] == "C" || arr[3] == "P");
     }
+}
+
+#[test]
+fn fetch_inverse_future_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
+    assert!(!markets.is_empty());
+
+    let btcusd = markets.iter().find(|m| m.base_id == "BTC").unwrap();
+    assert_eq!(btcusd.precision.tick_size, 0.5);
+    assert_eq!(btcusd.precision.lot_size, 10.0);
+}
+
+#[test]
+fn fetch_inverse_swap_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
+    assert!(!markets.is_empty());
+
+    let btcusd = markets.iter().find(|m| m.base_id == "BTC").unwrap();
+    assert_eq!(btcusd.precision.tick_size, 0.5);
+    assert_eq!(btcusd.precision.lot_size, 10.0);
+}
+
+#[test]
+fn fetch_option_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::EuropeanOption).unwrap();
+    assert!(!markets.is_empty());
+
+    let btcusd = markets.iter().find(|m| m.base_id == "BTC").unwrap();
+    assert_eq!(btcusd.precision.tick_size, 0.0005);
+    assert_eq!(btcusd.precision.lot_size, 0.1);
 }
