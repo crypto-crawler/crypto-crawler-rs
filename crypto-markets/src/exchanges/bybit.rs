@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use super::utils::http_get;
 use crate::{error::Result, Fees, Market, MarketType, Precision, QuantityLimit};
 
+use chrono::prelude::*;
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -127,11 +128,22 @@ fn to_market(raw_market: &BybitMarket) -> Market {
         let s = raw_market.alias.as_str();
         let month = &s[(n - 4)..(n - 2)];
         let day = &s[(n - 2)..];
-        Some(
-            DateTime::parse_from_rfc3339(format!("2021-{}-{}T00:00:00+00:00", month, day).as_str())
-                .unwrap()
-                .timestamp_millis() as u64,
+        let now = Utc::now();
+        let year = Utc::now().year();
+        let delivery_time = DateTime::parse_from_rfc3339(
+            format!("{}-{}-{}T00:00:00+00:00", year, month, day).as_str(),
         )
+        .unwrap();
+        let delivery_time = if delivery_time > now {
+            delivery_time
+        } else {
+            DateTime::parse_from_rfc3339(
+                format!("{}-{}-{}T00:00:00+00:00", year + 1, month, day).as_str(),
+            )
+            .unwrap()
+        };
+        assert!(delivery_time > now);
+        Some(delivery_time.timestamp_millis() as u64)
     } else {
         None
     };
