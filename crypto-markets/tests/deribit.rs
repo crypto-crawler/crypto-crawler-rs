@@ -55,9 +55,13 @@ fn fetch_inverse_future_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
     assert!(!markets.is_empty());
 
-    let btcusd = markets.iter().find(|m| m.base_id == "BTC").unwrap();
+    let btcusd = markets.iter().find(|m| m.base_id == "BTC").unwrap().clone();
+    assert_eq!(btcusd.contract_value, Some(10.0));
     assert_eq!(btcusd.precision.tick_size, 0.5);
     assert_eq!(btcusd.precision.lot_size, 10.0);
+    let quantity_limit = btcusd.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 10.0);
+    assert_eq!(quantity_limit.max, None);
 }
 
 #[test]
@@ -65,9 +69,13 @@ fn fetch_inverse_swap_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
     assert!(!markets.is_empty());
 
-    let btcusd = markets.iter().find(|m| m.base_id == "BTC").unwrap();
+    let btcusd = markets.iter().find(|m| m.base_id == "BTC").unwrap().clone();
+    assert_eq!(btcusd.contract_value, Some(10.0));
     assert_eq!(btcusd.precision.tick_size, 0.5);
     assert_eq!(btcusd.precision.lot_size, 10.0);
+    let quantity_limit = btcusd.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 10.0);
+    assert_eq!(quantity_limit.max, None);
 }
 
 #[test]
@@ -75,7 +83,11 @@ fn fetch_option_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::EuropeanOption).unwrap();
     assert!(!markets.is_empty());
 
-    let btcusd = markets.iter().find(|m| m.base_id == "BTC").unwrap();
+    let btcusd = markets.iter().find(|m| m.base_id == "BTC").unwrap().clone();
+    assert_eq!(btcusd.contract_value, Some(1.0));
     assert_eq!(btcusd.precision.tick_size, 0.0005);
     assert_eq!(btcusd.precision.lot_size, 0.1);
+    let quantity_limit = btcusd.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 0.1);
+    assert_eq!(quantity_limit.max, None);
 }
