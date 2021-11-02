@@ -101,9 +101,11 @@ fn fetch_future_markets_internal() -> Result<Vec<Market>> {
                     min: parse_filter(&m.filters, "LOT_SIZE", "minQty")
                         .parse::<f64>()
                         .unwrap(),
-                    max: parse_filter(&m.filters, "LOT_SIZE", "maxQty")
-                        .parse::<f64>()
-                        .unwrap(),
+                    max: Some(
+                        parse_filter(&m.filters, "LOT_SIZE", "maxQty")
+                            .parse::<f64>()
+                            .unwrap(),
+                    ),
                 }),
                 contract_value: Some(m.contractSize),
                 delivery_date: if m.contractType == "PERPETUAL" {
