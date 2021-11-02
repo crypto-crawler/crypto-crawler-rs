@@ -124,7 +124,7 @@ fn fetch_spot_markets() -> Result<Vec<Market>> {
                 base,
                 quote,
                 active: true,
-                margin: true,
+                margin: false,
                 // see https://www.bitglobal.com/en-us/fee
                 fees: Fees {
                     maker: 0.001,
