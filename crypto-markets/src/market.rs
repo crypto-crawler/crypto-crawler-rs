@@ -20,7 +20,8 @@ pub struct Precision {
 #[derive(Serialize, Deserialize, PartialEq)]
 pub struct QuantityLimit {
     pub min: f64,
-    pub max: f64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max: Option<f64>,
 }
 
 /// Market contains all information about a market

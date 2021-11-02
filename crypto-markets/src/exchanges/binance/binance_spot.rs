@@ -79,9 +79,11 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                     min: parse_filter(&m.filters, "LOT_SIZE", "minQty")
                         .parse::<f64>()
                         .unwrap(),
-                    max: parse_filter(&m.filters, "LOT_SIZE", "maxQty")
-                        .parse::<f64>()
-                        .unwrap(),
+                    max: Some(
+                        parse_filter(&m.filters, "LOT_SIZE", "maxQty")
+                            .parse::<f64>()
+                            .unwrap(),
+                    ),
                 }),
                 contract_value: None,
                 delivery_date: None,

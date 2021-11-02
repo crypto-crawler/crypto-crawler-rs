@@ -1,4 +1,4 @@
-use crypto_markets::{fetch_symbols, get_market_types, MarketType};
+use crypto_markets::{fetch_markets, fetch_symbols, get_market_types, MarketType};
 
 #[macro_use]
 mod utils;
@@ -68,4 +68,76 @@ fn fetch_option_symbols() {
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("-C") || symbol.ends_with("-P"));
     }
+}
+
+#[test]
+fn fetch_spot_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::Spot).unwrap();
+    assert!(!markets.is_empty());
+
+    let btc_usdt = markets.iter().find(|m| m.symbol == "BTC-USDT").unwrap();
+    assert_eq!(btc_usdt.precision.tick_size, 0.1);
+    assert_eq!(btc_usdt.precision.lot_size, 0.00000001);
+}
+
+#[test]
+fn fetch_inverse_future_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
+    assert!(!markets.is_empty());
+
+    let btc_usd = markets
+        .iter()
+        .find(|m| m.symbol.starts_with("BTC-USD-"))
+        .unwrap();
+    assert_eq!(btc_usd.precision.tick_size, 0.1);
+    assert_eq!(btc_usd.precision.lot_size, 1.0);
+}
+
+#[test]
+fn fetch_linear_future_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearFuture).unwrap();
+    assert!(!markets.is_empty());
+
+    let btc_usdt = markets
+        .iter()
+        .find(|m| m.symbol.starts_with("BTC-USDT-"))
+        .unwrap();
+    assert_eq!(btc_usdt.precision.tick_size, 0.1);
+    assert_eq!(btc_usdt.precision.lot_size, 1.0);
+}
+
+#[test]
+fn fetch_inverse_swap_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
+    assert!(!markets.is_empty());
+
+    let btc_usd = markets.iter().find(|m| m.symbol == "BTC-USD-SWAP").unwrap();
+    assert_eq!(btc_usd.precision.tick_size, 0.1);
+    assert_eq!(btc_usd.precision.lot_size, 1.0);
+}
+
+#[test]
+fn fetch_linear_swap_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
+    assert!(!markets.is_empty());
+
+    let btc_usdt = markets
+        .iter()
+        .find(|m| m.symbol == "BTC-USDT-SWAP")
+        .unwrap();
+    assert_eq!(btc_usdt.precision.tick_size, 0.1);
+    assert_eq!(btc_usdt.precision.lot_size, 1.0);
+}
+
+#[test]
+fn fetch_option_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::EuropeanOption).unwrap();
+    assert!(!markets.is_empty());
+
+    let btc_usd = markets
+        .iter()
+        .find(|m| m.symbol.starts_with("BTC-USD-"))
+        .unwrap();
+    assert_eq!(btc_usd.precision.tick_size, 0.0005);
+    assert_eq!(btc_usd.precision.lot_size, 1.0);
 }

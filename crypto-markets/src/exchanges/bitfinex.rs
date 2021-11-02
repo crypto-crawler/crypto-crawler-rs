@@ -100,7 +100,7 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
                 },
                 quantity_limit: Some(QuantityLimit {
                     min: m.minimum_order_size.parse::<f64>().unwrap(),
-                    max: m.maximum_order_size.parse::<f64>().unwrap(),
+                    max: Some(m.maximum_order_size.parse::<f64>().unwrap()),
                 }),
                 contract_value: if market_type == MarketType::Spot {
                     None

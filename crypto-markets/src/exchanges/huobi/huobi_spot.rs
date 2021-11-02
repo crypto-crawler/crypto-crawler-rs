@@ -95,7 +95,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 },
                 quantity_limit: Some(QuantityLimit {
                     min: m.limit_order_min_order_amt,
-                    max: m.limit_order_max_order_amt,
+                    max: Some(m.limit_order_max_order_amt),
                 }),
                 contract_value: None,
                 delivery_date: None,
