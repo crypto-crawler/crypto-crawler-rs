@@ -83,6 +83,7 @@ fn fetch_quanto_future_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::QuantoFuture).unwrap();
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
+        assert!(!symbol.starts_with("XBT"));
         let date = &symbol[(symbol.len() - 2)..];
         assert!(date.parse::<i64>().is_ok());
 
