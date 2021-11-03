@@ -1,4 +1,4 @@
-mod exchanges;
+pub mod exchanges;
 mod msg;
 mod order;
 

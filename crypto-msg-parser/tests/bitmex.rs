@@ -157,6 +157,7 @@ mod funding_rate {
 #[cfg(test)]
 mod l2_orderbook {
     use chrono::prelude::*;
+    use crypto_msg_parser::exchanges::bitmex::price_to_id;
     use crypto_msg_parser::{extract_symbol, parse_l2, MarketType};
 
     #[test]
@@ -183,21 +184,25 @@ mod l2_orderbook {
         );
 
         assert_eq!(orderbook.bids[0].price, 36145.0);
+        assert_eq!(8796385500, price_to_id("XBTUSD", 36145.0));
         assert_eq!(orderbook.bids[0].quantity_base, 136.0 / 36145.0);
         assert_eq!(orderbook.bids[0].quantity_quote, 136.0);
         assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 136.0);
 
         assert_eq!(orderbook.bids[2].price, 36142.0);
+        assert_eq!(8796385800, price_to_id("XBTUSD", 36142.0));
         assert_eq!(orderbook.bids[2].quantity_base, 18067.0 / 36142.0);
         assert_eq!(orderbook.bids[2].quantity_quote, 18067.0);
         assert_eq!(orderbook.bids[2].quantity_contract.unwrap(), 18067.0);
 
         assert_eq!(orderbook.asks[2].price, 36190.0);
+        assert_eq!(8796381000, price_to_id("XBTUSD", 36190.0));
         assert_eq!(orderbook.asks[2].quantity_base, 49900.0 / 36190.0);
         assert_eq!(orderbook.asks[2].quantity_quote, 49900.0);
         assert_eq!(orderbook.asks[2].quantity_contract.unwrap(), 49900.0);
 
         assert_eq!(orderbook.asks[0].price, 36189.0);
+        assert_eq!(8796381100, price_to_id("XBTUSD", 36189.0));
         assert_eq!(orderbook.asks[0].quantity_base, 34600.0 / 36189.0);
         assert_eq!(orderbook.asks[0].quantity_quote, 34600.0);
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 34600.0);
