@@ -1,4 +1,5 @@
 use crypto_markets::{fetch_markets, fetch_symbols, get_market_types, MarketType};
+use test_case::test_case;
 
 #[macro_use]
 mod utils;
@@ -155,4 +156,13 @@ fn fetch_linear_future_markets() {
     let quantity_limit = btc_usdt.quantity_limit.unwrap();
     assert_eq!(quantity_limit.min, 1.0);
     assert_eq!(quantity_limit.max, Some(1000000.0));
+}
+
+#[test_case(MarketType::LinearFuture)]
+#[test_case(MarketType::LinearSwap)]
+// TODO: ETH_USD is actually a quanto swap contract
+// #[test_case(MarketType::InverseFuture)]
+// #[test_case(MarketType::InverseSwap)]
+fn test_contract_values(market_type: MarketType) {
+    check_contract_values!(EXCHANGE_NAME, market_type);
 }

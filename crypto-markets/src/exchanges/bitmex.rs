@@ -56,7 +56,7 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
                     lot_size: x.lotSize,
                 },
                 quantity_limit: None,
-                contract_value: Some((x.multiplier.abs() as f64) / (10_i64.pow(8) as f64)),
+                contract_value: Some((x.multiplier.abs() as f64) * 1e-8),
                 delivery_date: if let Some(expiry) = x.expiry {
                     let timestamp = DateTime::parse_from_rfc3339(&expiry).unwrap();
                     Some(timestamp.timestamp_millis() as u64)
@@ -189,6 +189,7 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
     }
     // Inverse
     for x in instruments.iter().filter(|x| x.isInverse) {
+        assert!(x.symbol.starts_with("XBT"));
         assert_eq!("XBT".to_string(), x.rootSymbol);
         // USD, EUR
         assert_eq!(x.quoteCurrency, x.positionCurrency);

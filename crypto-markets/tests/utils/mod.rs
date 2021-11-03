@@ -13,3 +13,18 @@ macro_rules! gen_all_symbols {
         }
     };
 }
+
+#[allow(unused_macros)]
+macro_rules! check_contract_values {
+    ($exchange:expr, $market_type:expr) => {{
+        let markets = fetch_markets($exchange, $market_type).unwrap();
+        for market in markets {
+            let contract_value = crypto_contract_value::get_contract_value(
+                &market.exchange,
+                $market_type,
+                format!("{}/{}", market.base, market.quote).as_str(),
+            );
+            assert_eq!(market.contract_value, contract_value);
+        }
+    }};
+}

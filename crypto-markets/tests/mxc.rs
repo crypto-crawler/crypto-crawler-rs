@@ -1,4 +1,8 @@
 use crypto_markets::{fetch_markets, fetch_symbols, MarketType};
+use test_case::test_case;
+
+#[macro_use]
+mod utils;
 
 const EXCHANGE_NAME: &str = "mxc";
 
@@ -86,4 +90,10 @@ fn fetch_linear_swap_markets() {
     let quantity_limit = btcusdt.quantity_limit.unwrap();
     assert_eq!(quantity_limit.min, 1.0);
     assert_eq!(quantity_limit.max, Some(1000000.0));
+}
+
+#[test_case(MarketType::InverseSwap)]
+#[test_case(MarketType::LinearSwap)]
+fn test_contract_values(market_type: MarketType) {
+    check_contract_values!(EXCHANGE_NAME, market_type);
 }

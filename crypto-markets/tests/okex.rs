@@ -1,4 +1,5 @@
 use crypto_markets::{fetch_markets, fetch_symbols, get_market_types, MarketType};
+use test_case::test_case;
 
 #[macro_use]
 mod utils;
@@ -152,4 +153,13 @@ fn fetch_option_markets() {
     assert_eq!(btc_usd.precision.tick_size, 0.0005);
     assert_eq!(btc_usd.precision.lot_size, 1.0);
     assert!(btc_usd.quantity_limit.is_none());
+}
+
+#[test_case(MarketType::InverseFuture)]
+#[test_case(MarketType::LinearFuture)]
+#[test_case(MarketType::InverseSwap)]
+#[test_case(MarketType::LinearSwap)]
+#[test_case(MarketType::EuropeanOption)]
+fn test_contract_values(market_type: MarketType) {
+    check_contract_values!(EXCHANGE_NAME, market_type);
 }
