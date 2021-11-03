@@ -14,7 +14,7 @@ const market_types = {
     bitstamp: ["spot"],
     bybit: ["inverse_future", "inverse_swap", "linear_swap"],
     coinbase_pro: ["spot"],
-    deribit: ["inverse_future", "european_option"], // inverse_swap is included in inverse_future
+    deribit: ["inverse_future", "inverse_swap", "european_option"],
     dydx: ["linear_swap"],
     ftx: ["spot", "linear_swap", "linear_future", "move", "bvol"],
     gate: ["spot", "linear_future", "linear_swap", "inverse_swap"],

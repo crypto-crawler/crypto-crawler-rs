@@ -12,7 +12,7 @@ const market_types = {
     bithumb: ["spot"],
     bybit: ["inverse_future", "inverse_swap", "linear_swap"],
     coinbase_pro: ["spot"],
-    deribit: ["inverse_future", "european_option"], // inverse_swap is included in inverse_future
+    deribit: ["inverse_future", "inverse_swap", "european_option"],
     gate: ["spot", "linear_future", "linear_swap", "inverse_swap"],
     huobi: ["spot", "inverse_future", "linear_swap", "inverse_swap"],
     kraken: ["spot"],

@@ -3,7 +3,7 @@ const market_types = {
     binance: ["linear_future", "inverse_future", "linear_swap", "inverse_swap"],
     bitget: ["inverse_swap", "linear_swap"],
     bybit: ["inverse_future", "inverse_swap", "linear_swap"],
-    deribit: ["inverse_future", "european_option"], // inverse_swap is included in inverse_future
+    deribit: ["inverse_future", "inverse_swap", "european_option"],
     dydx: ["linear_swap"],
     ftx: ["unknown"], // https://ftx.com/api/futures contains all open interests
     gate: ["linear_swap", "inverse_swap"],
