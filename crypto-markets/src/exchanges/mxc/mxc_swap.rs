@@ -1,6 +1,7 @@
 use super::utils::mxc_http_get;
-use crate::error::Result;
+use crate::{error::Result, Fees, Market, Precision, QuantityLimit};
 
+use crypto_market_type::MarketType;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -50,13 +51,16 @@ struct Response {
 fn fetch_swap_markets_raw() -> Result<Vec<SwapMarket>> {
     let txt = mxc_http_get("https://contract.mexc.com/api/v1/contract/detail")?;
     let resp = serde_json::from_str::<Response>(&txt)?;
-    Ok(resp.data)
+    Ok(resp
+        .data
+        .into_iter()
+        .filter(|m| m.state == 0 && !m.isHidden)
+        .collect())
 }
 
 pub(super) fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
     let symbols = fetch_swap_markets_raw()?
         .into_iter()
-        .filter(|m| m.state == 0 && !m.isHidden)
         .filter(|m| m.settleCoin == m.quoteCoin)
         .map(|m| m.symbol)
         .collect::<Vec<String>>();
@@ -66,9 +70,72 @@ pub(super) fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
 pub(super) fn fetch_inverse_swap_symbols() -> Result<Vec<String>> {
     let symbols = fetch_swap_markets_raw()?
         .into_iter()
-        .filter(|m| m.state == 0 && !m.isHidden)
         .filter(|m| m.settleCoin == m.baseCoin)
         .map(|m| m.symbol)
         .collect::<Vec<String>>();
     Ok(symbols)
+}
+
+fn to_market(raw_market: &SwapMarket) -> Market {
+    let pair = crypto_pair::normalize_pair(&raw_market.symbol, "mxc").unwrap();
+    let (base, quote) = {
+        let v: Vec<&str> = pair.split('/').collect();
+        (v[0].to_string(), v[1].to_string())
+    };
+    let market_type = if raw_market.settleCoin == raw_market.quoteCoin {
+        MarketType::LinearSwap
+    } else if raw_market.settleCoin == raw_market.baseCoin {
+        MarketType::InverseSwap
+    } else {
+        panic!("unexpected market type");
+    };
+
+    Market {
+        exchange: "mxc".to_string(),
+        market_type,
+        symbol: raw_market.symbol.to_string(),
+        base_id: raw_market.baseCoin.to_string(),
+        quote_id: raw_market.quoteCoin.to_string(),
+        base,
+        quote,
+        active: raw_market.state == 0 && !raw_market.isHidden,
+        margin: true,
+        fees: Fees {
+            maker: raw_market.makerFeeRate,
+            taker: raw_market.takerFeeRate,
+        },
+        precision: Precision {
+            tick_size: raw_market.priceUnit,
+            lot_size: raw_market.volUnit as f64,
+        },
+        quantity_limit: Some(QuantityLimit {
+            min: raw_market.minVol as f64,
+            max: Some(raw_market.maxVol as f64),
+        }),
+        contract_value: Some(raw_market.contractSize),
+        delivery_date: None,
+        info: serde_json::to_value(raw_market)
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .clone(),
+    }
+}
+
+pub(super) fn fetch_linear_swap_markets() -> Result<Vec<Market>> {
+    let markets = fetch_swap_markets_raw()?
+        .into_iter()
+        .filter(|m| m.settleCoin == m.quoteCoin)
+        .map(|m| to_market(&m))
+        .collect::<Vec<Market>>();
+    Ok(markets)
+}
+
+pub(super) fn fetch_inverse_swap_markets() -> Result<Vec<Market>> {
+    let markets = fetch_swap_markets_raw()?
+        .into_iter()
+        .filter(|m| m.settleCoin == m.baseCoin)
+        .map(|m| to_market(&m))
+        .collect::<Vec<Market>>();
+    Ok(markets)
 }
