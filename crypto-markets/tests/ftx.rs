@@ -1,4 +1,5 @@
 use crypto_markets::{fetch_markets, fetch_symbols, get_market_types, MarketType};
+use test_case::test_case;
 
 #[macro_use]
 mod utils;
@@ -139,4 +140,11 @@ fn fetch_bvol_markets() {
     assert_eq!(btcusd.precision.lot_size, 0.0001);
     assert!(btcusd.quantity_limit.is_none());
     assert!(btcusd.delivery_date.is_none());
+}
+
+#[test_case(MarketType::LinearSwap)]
+#[test_case(MarketType::LinearFuture)]
+#[test_case(MarketType::Move)]
+fn test_contract_values(market_type: MarketType) {
+    check_contract_values!(EXCHANGE_NAME, market_type);
 }

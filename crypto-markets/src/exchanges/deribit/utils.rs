@@ -150,7 +150,7 @@ fn to_market(raw_market: &Instrument) -> Market {
         (v[0].to_string(), v[1].to_string())
     };
     Market {
-        exchange: "okex".to_string(),
+        exchange: "deribit".to_string(),
         market_type: if raw_market.kind == "future" {
             if raw_market.instrument_name.ends_with("-PERPETUAL") {
                 MarketType::InverseSwap

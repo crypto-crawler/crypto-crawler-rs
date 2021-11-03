@@ -1,4 +1,5 @@
 use crypto_markets::{fetch_markets, fetch_symbols, get_market_types, MarketType};
+use test_case::test_case;
 
 #[macro_use]
 mod utils;
@@ -46,6 +47,7 @@ fn fetch_inverse_swap_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
+        assert!(symbol.starts_with("XBT"));
         assert!(symbol.ends_with("USD") || symbol.ends_with("EUR"));
         assert_eq!(MarketType::InverseSwap, get_market_type_from_symbol(symbol));
     }
@@ -102,6 +104,7 @@ fn fetch_linear_future_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::LinearFuture).unwrap();
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
+        println!("{}", symbol);
         let date = &symbol[(symbol.len() - 2)..];
         assert!(date.parse::<i64>().is_ok());
         assert_eq!(
@@ -121,4 +124,13 @@ fn fetch_inverse_swap_markets() {
     assert_eq!(xbtusd.precision.lot_size, 100.0);
     assert_eq!(xbtusd.contract_value, Some(1.0));
     assert!(xbtusd.quantity_limit.is_none());
+}
+
+#[test_case(MarketType::InverseSwap)]
+#[test_case(MarketType::QuantoSwap)]
+#[test_case(MarketType::InverseFuture)]
+#[test_case(MarketType::QuantoFuture)]
+#[test_case(MarketType::LinearFuture)]
+fn test_contract_values(market_type: MarketType) {
+    check_contract_values!(EXCHANGE_NAME, market_type);
 }

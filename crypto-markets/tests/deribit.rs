@@ -1,4 +1,5 @@
 use crypto_markets::{fetch_markets, fetch_symbols, MarketType};
+use test_case::test_case;
 
 #[macro_use]
 mod utils;
@@ -90,4 +91,11 @@ fn fetch_option_markets() {
     let quantity_limit = btcusd.quantity_limit.unwrap();
     assert_eq!(quantity_limit.min, 0.1);
     assert_eq!(quantity_limit.max, None);
+}
+
+#[test_case(MarketType::InverseFuture)]
+#[test_case(MarketType::InverseSwap)]
+#[test_case(MarketType::EuropeanOption)]
+fn test_contract_values(market_type: MarketType) {
+    check_contract_values!(EXCHANGE_NAME, market_type);
 }

@@ -1,4 +1,5 @@
 use crypto_markets::{fetch_markets, fetch_symbols, get_market_types, MarketType};
+use test_case::test_case;
 
 #[macro_use]
 mod utils;
@@ -35,4 +36,9 @@ fn fetch_linear_swap_markets() {
     let quantity_limit = btcusd.quantity_limit.unwrap();
     assert_eq!(quantity_limit.min, 0.001);
     assert_eq!(quantity_limit.max, None);
+}
+
+#[test_case(MarketType::LinearSwap)]
+fn test_contract_values(market_type: MarketType) {
+    check_contract_values!(EXCHANGE_NAME, market_type);
 }
