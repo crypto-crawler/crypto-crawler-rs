@@ -27,4 +27,4 @@ strum_macros = "0.20"
 [dev_dependencies]
 test-case = "1"
 env_logger = "0.8"
-crypto-msg-parser = "1.6.3"
+crypto-msg-parser = "1.6.4"
