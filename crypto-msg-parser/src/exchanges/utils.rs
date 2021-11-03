@@ -37,7 +37,7 @@ pub(super) fn calc_quantity_and_volume(
 
     match market_type {
         MarketType::Spot => (quantity, quantity * price, None),
-        MarketType::InverseSwap | MarketType::InverseFuture | MarketType::EuropeanOption => {
+        MarketType::InverseSwap | MarketType::InverseFuture => {
             let quantity_quote = quantity * contract_value;
             (quantity_quote / price, quantity_quote, Some(quantity))
         }
@@ -49,6 +49,10 @@ pub(super) fn calc_quantity_and_volume(
                 let quantity_base = quantity * contract_value;
                 (quantity_base, quantity_base * price, Some(quantity))
             }
+        }
+        MarketType::EuropeanOption => {
+            let quantity_base = quantity * contract_value;
+            (quantity_base, quantity_base * price, Some(quantity))
         }
         _ => panic!("Unknown market_type {}", market_type),
     }

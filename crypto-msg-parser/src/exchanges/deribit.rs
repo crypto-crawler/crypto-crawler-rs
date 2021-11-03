@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
 use std::collections::HashMap;
 
+use crate::exchanges::utils::calc_quantity_and_volume;
+
 const EXCHANGE_NAME: &str = "deribit";
 
 // see https://docs.deribit.com/?javascript#trades-kind-currency-interval
@@ -65,19 +67,6 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<Stri
     }
 }
 
-fn calc_quantity_and_volume(market_type: MarketType, price: f64, amount: f64) -> (f64, f64) {
-    match market_type {
-        MarketType::InverseSwap | MarketType::InverseFuture => {
-            // amount, Trade amount. For perpetual and futures - in USD units
-            // see https://docs.deribit.com/?javascript#trades-instrument_name-interval
-            let volume = amount;
-            (volume / price, volume)
-        }
-        MarketType::EuropeanOption => (amount, amount * price),
-        _ => panic!("Unknown market_type {}", market_type),
-    }
-}
-
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<Vec<RawTradeMsg>>>(msg)?;
     let mut trades: Vec<TradeMsg> = ws_msg
@@ -85,21 +74,27 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         .data
         .into_iter()
         .map(|raw_trade| {
-            let (quantity_base, quantity_quote) =
-                calc_quantity_and_volume(market_type, raw_trade.price, raw_trade.amount);
+            let pair =
+                crypto_pair::normalize_pair(&raw_trade.instrument_name, EXCHANGE_NAME).unwrap();
+            let (quantity_base, quantity_quote, quantity_contract) = calc_quantity_and_volume(
+                EXCHANGE_NAME,
+                market_type,
+                &pair,
+                raw_trade.price,
+                raw_trade.amount,
+            );
 
             TradeMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type,
                 symbol: raw_trade.instrument_name.clone(),
-                pair: crypto_pair::normalize_pair(&raw_trade.instrument_name, EXCHANGE_NAME)
-                    .unwrap(),
+                pair,
                 msg_type: MessageType::Trade,
                 timestamp: raw_trade.timestamp,
                 price: raw_trade.price,
                 quantity_base,
                 quantity_quote,
-                quantity_contract: Some(raw_trade.amount),
+                quantity_contract,
                 side: if raw_trade.direction == "sell" {
                     TradeSide::Sell
                 } else {
@@ -129,14 +124,14 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         let price = raw_order[1].as_f64().unwrap();
         let quantity = raw_order[2].as_f64().unwrap();
 
-        let (quantity_base, quantity_quote) =
-            calc_quantity_and_volume(market_type, price, quantity);
+        let (quantity_base, quantity_quote, quantity_contract) =
+            calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
 
         Order {
             price,
             quantity_base,
             quantity_quote,
-            quantity_contract: Some(quantity),
+            quantity_contract,
         }
     };
 
@@ -144,7 +139,7 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
         symbol,
-        pair,
+        pair: pair.clone(),
         msg_type: MessageType::L2Event,
         timestamp,
         asks: raw_orderbook.asks.iter().map(|x| parse_order(x)).collect(),
