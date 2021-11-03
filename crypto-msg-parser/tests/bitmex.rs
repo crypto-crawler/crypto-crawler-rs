@@ -159,6 +159,7 @@ mod l2_orderbook {
     use chrono::prelude::*;
     use crypto_msg_parser::exchanges::bitmex::price_to_id;
     use crypto_msg_parser::{extract_symbol, parse_l2, MarketType};
+    use float_cmp::approx_eq;
 
     #[test]
     fn inverse_swap_snapshot() {
@@ -312,5 +313,29 @@ mod l2_orderbook {
         assert_eq!(orderbook.asks[0].quantity_base, 20.3 / 0.07325);
         assert_eq!(orderbook.asks[0].quantity_quote, 20.3);
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 2030000000.0);
+    }
+
+    #[test]
+    fn linear_future_delete() {
+        let raw_msg = r#"{"table":"orderBookL2_25","action":"delete","data":[{"symbol":"ETHZ21","id":63399993018,"side":"Buy"}]}"#;
+        let orderbook =
+            &parse_l2("bitmex", MarketType::Unknown, raw_msg, Some(1635724802280)).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 0);
+        assert_eq!(orderbook.bids.len(), 1);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "bitmex",
+            MarketType::LinearFuture,
+            "ETH/BTC".to_string(),
+            extract_symbol("bitmex", MarketType::LinearFuture, raw_msg).unwrap(),
+            orderbook,
+        );
+
+        assert!(approx_eq!(f64, orderbook.bids[0].price, 0.06982, ulps = 12));
+        assert_eq!(orderbook.bids[0].quantity_base, 0.0);
+        assert_eq!(orderbook.bids[0].quantity_quote, 0.0);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 0.0);
     }
 }
