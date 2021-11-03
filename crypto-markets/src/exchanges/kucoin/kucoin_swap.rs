@@ -1,8 +1,12 @@
 use std::collections::HashMap;
 
 use super::super::utils::http_get;
-use crate::error::{Error, Result};
+use crate::{
+    error::{Error, Result},
+    Fees, Market, Precision,
+};
 
+use crypto_market_type::MarketType;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -13,6 +17,7 @@ struct SwapMarket {
     rootSymbol: String,
     #[serde(rename = "type")]
     type_: String,
+    expireDate: Option<u64>,
     baseCurrency: String,
     quoteCurrency: String,
     settleCurrency: String,
@@ -97,4 +102,79 @@ pub(super) fn fetch_inverse_future_symbols() -> Result<Vec<String>> {
         .map(|m| m.symbol)
         .collect();
     Ok(symbols)
+}
+
+fn to_market(raw_market: &SwapMarket) -> Market {
+    let pair = crypto_pair::normalize_pair(&raw_market.symbol, "kucoin").unwrap();
+    let (base, quote) = {
+        let v: Vec<&str> = pair.split('/').collect();
+        (v[0].to_string(), v[1].to_string())
+    };
+    let market_type = if raw_market.isInverse && raw_market.type_ == "FFWCSX" {
+        MarketType::InverseSwap
+    } else if !raw_market.isInverse && raw_market.type_ == "FFWCSX" {
+        MarketType::LinearSwap
+    } else if raw_market.isInverse && raw_market.type_ == "FFICSX" {
+        MarketType::InverseFuture
+    } else {
+        panic!(
+            "Failed to detect market_type {}",
+            serde_json::to_string_pretty(raw_market).unwrap()
+        );
+    };
+
+    Market {
+        exchange: "kucoin".to_string(),
+        market_type,
+        symbol: raw_market.symbol.to_string(),
+        base_id: raw_market.baseCurrency.to_string(),
+        quote_id: raw_market.quoteCurrency.to_string(),
+        base,
+        quote,
+        active: raw_market.status == "Open",
+        margin: true,
+        fees: Fees {
+            maker: raw_market.makerFeeRate,
+            taker: raw_market.takerFeeRate,
+        },
+        precision: Precision {
+            tick_size: raw_market.tickSize,
+            lot_size: raw_market.lotSize,
+        },
+        quantity_limit: None,
+        contract_value: Some(raw_market.multiplier.abs()),
+        delivery_date: raw_market.expireDate,
+        info: serde_json::to_value(raw_market)
+            .unwrap()
+            .as_object()
+            .unwrap()
+            .clone(),
+    }
+}
+
+pub(super) fn fetch_inverse_swap_markets() -> Result<Vec<Market>> {
+    let markets: Vec<Market> = fetch_swap_markets_raw()?
+        .into_iter()
+        .filter(|x| x.isInverse && x.type_ == "FFWCSX")
+        .map(|m| to_market(&m))
+        .collect();
+    Ok(markets)
+}
+
+pub(super) fn fetch_linear_swap_markets() -> Result<Vec<Market>> {
+    let markets: Vec<Market> = fetch_swap_markets_raw()?
+        .into_iter()
+        .filter(|x| !x.isInverse && x.type_ == "FFWCSX")
+        .map(|m| to_market(&m))
+        .collect();
+    Ok(markets)
+}
+
+pub(super) fn fetch_inverse_future_markets() -> Result<Vec<Market>> {
+    let markets: Vec<Market> = fetch_swap_markets_raw()?
+        .into_iter()
+        .filter(|x| x.isInverse && x.type_ == "FFICSX")
+        .map(|m| to_market(&m))
+        .collect();
+    Ok(markets)
 }

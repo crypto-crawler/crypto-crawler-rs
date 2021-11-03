@@ -1,8 +1,12 @@
 use std::collections::HashMap;
 
 use super::super::utils::http_get;
-use crate::error::{Error, Result};
+use crate::{
+    error::{Error, Result},
+    Fees, Market, Precision, QuantityLimit,
+};
 
+use crypto_market_type::MarketType;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -55,4 +59,50 @@ pub(super) fn fetch_spot_symbols() -> Result<Vec<String>> {
     let markets = fetch_spot_markets_raw()?;
     let symbols: Vec<String> = markets.into_iter().map(|m| m.symbol).collect();
     Ok(symbols)
+}
+
+pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
+    let markets: Vec<Market> = fetch_spot_markets_raw()?
+        .into_iter()
+        .map(|m| {
+            let info = serde_json::to_value(&m)
+                .unwrap()
+                .as_object()
+                .unwrap()
+                .clone();
+            let pair = crypto_pair::normalize_pair(&m.symbol, "kucoin").unwrap();
+            let (base, quote) = {
+                let v: Vec<&str> = pair.split('/').collect();
+                (v[0].to_string(), v[1].to_string())
+            };
+            Market {
+                exchange: "kucoin".to_string(),
+                market_type: MarketType::Spot,
+                symbol: m.symbol,
+                base_id: m.baseCurrency,
+                quote_id: m.quoteCurrency,
+                base,
+                quote,
+                active: m.enableTrading,
+                margin: m.isMarginEnabled,
+                // see https://www.bitstamp.net/fee-schedule/
+                fees: Fees {
+                    maker: 0.005,
+                    taker: 0.005,
+                },
+                precision: Precision {
+                    tick_size: m.priceIncrement.parse::<f64>().unwrap(),
+                    lot_size: m.baseIncrement.parse::<f64>().unwrap(),
+                },
+                quantity_limit: Some(QuantityLimit {
+                    min: m.baseMinSize.parse::<f64>().unwrap(),
+                    max: Some(m.baseMaxSize.parse::<f64>().unwrap()),
+                }),
+                contract_value: None,
+                delivery_date: None,
+                info,
+            }
+        })
+        .collect();
+    Ok(markets)
 }
