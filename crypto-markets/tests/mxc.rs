@@ -1,4 +1,4 @@
-use crypto_markets::{fetch_symbols, MarketType};
+use crypto_markets::{fetch_markets, fetch_symbols, MarketType};
 
 const EXCHANGE_NAME: &str = "mxc";
 
@@ -29,4 +29,61 @@ fn fetch_inverse_swap_symbols() {
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("_USD"));
     }
+}
+
+#[test]
+fn fetch_spot_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::Spot).unwrap();
+    assert!(!markets.is_empty());
+
+    let btc_usdt = markets
+        .iter()
+        .find(|m| m.symbol == "BTC_USDT")
+        .unwrap()
+        .clone();
+    assert_eq!(btc_usdt.market_type, MarketType::Spot);
+    assert!(btc_usdt.contract_value.is_none());
+    assert_eq!(btc_usdt.precision.tick_size, 0.01);
+    assert_eq!(btc_usdt.precision.lot_size, 0.000001);
+    let quantity_limit = btc_usdt.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 5.0);
+    assert_eq!(quantity_limit.max, Some(5000000.0));
+}
+
+#[test]
+fn fetch_inverse_swap_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
+    assert!(!markets.is_empty());
+
+    let btcusd_perp = markets
+        .iter()
+        .find(|m| m.symbol == "BTC_USD")
+        .unwrap()
+        .clone();
+    assert_eq!(btcusd_perp.market_type, MarketType::InverseSwap);
+    assert_eq!(btcusd_perp.contract_value, Some(100.0));
+    assert_eq!(btcusd_perp.precision.tick_size, 0.5);
+    assert_eq!(btcusd_perp.precision.lot_size, 1.0);
+    let quantity_limit = btcusd_perp.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.max, Some(10000.0));
+}
+
+#[test]
+fn fetch_linear_swap_markets() {
+    let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
+    assert!(!markets.is_empty());
+
+    let btcusdt = markets
+        .iter()
+        .find(|m| m.symbol == "BTC_USDT")
+        .unwrap()
+        .clone();
+    assert_eq!(btcusdt.market_type, MarketType::LinearSwap);
+    assert_eq!(btcusdt.contract_value, Some(0.0001));
+    assert_eq!(btcusdt.precision.tick_size, 0.5);
+    assert_eq!(btcusdt.precision.lot_size, 1.0);
+    let quantity_limit = btcusdt.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.max, Some(1000000.0));
 }

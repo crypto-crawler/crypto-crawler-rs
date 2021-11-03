@@ -1,6 +1,7 @@
 use super::utils::mxc_http_get;
-use crate::error::Result;
+use crate::{error::Result, Fees, Market, Precision, QuantityLimit};
 
+use crypto_market_type::MarketType;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -9,8 +10,8 @@ use std::collections::HashMap;
 struct SpotMarket {
     symbol: String,
     state: String,
-    price_scale: i64,
-    quantity_scale: i64,
+    price_scale: u32,
+    quantity_scale: u32,
     min_amount: String,
     max_amount: String,
     maker_fee_rate: String,
@@ -30,14 +31,66 @@ struct Response {
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
     let txt = mxc_http_get("https://www.mexc.com/open/api/v2/market/symbols")?;
     let resp = serde_json::from_str::<Response>(&txt)?;
-    Ok(resp.data)
+    Ok(resp
+        .data
+        .into_iter()
+        .filter(|m| m.state == "ENABLED" && !m.limited)
+        .collect())
 }
 
 pub(super) fn fetch_spot_symbols() -> Result<Vec<String>> {
     let symbols = fetch_spot_markets_raw()?
         .into_iter()
-        .filter(|m| m.state == "ENABLED")
         .map(|m| m.symbol)
         .collect::<Vec<String>>();
     Ok(symbols)
+}
+
+pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
+    let markets = fetch_spot_markets_raw()?
+        .into_iter()
+        .map(|m| {
+            let info = serde_json::to_value(&m)
+                .unwrap()
+                .as_object()
+                .unwrap()
+                .clone();
+            let pair = crypto_pair::normalize_pair(&m.symbol, "mxc").unwrap();
+            let (base, quote) = {
+                let v: Vec<&str> = pair.split('/').collect();
+                (v[0].to_string(), v[1].to_string())
+            };
+            let (base_id, quote_id) = {
+                let v: Vec<&str> = m.symbol.split('_').collect();
+                (v[0].to_string(), v[1].to_string())
+            };
+            Market {
+                exchange: "mxc".to_string(),
+                market_type: MarketType::Spot,
+                symbol: m.symbol,
+                base_id,
+                quote_id,
+                base,
+                quote,
+                active: m.state == "ENABLED" && !m.limited,
+                margin: false,
+                fees: Fees {
+                    maker: m.maker_fee_rate.parse::<f64>().unwrap(),
+                    taker: m.taker_fee_rate.parse::<f64>().unwrap(),
+                },
+                precision: Precision {
+                    tick_size: 1.0 / (10_i64.pow(m.price_scale) as f64),
+                    lot_size: 1.0 / (10_i64.pow(m.quantity_scale) as f64),
+                },
+                quantity_limit: Some(QuantityLimit {
+                    min: m.min_amount.parse::<f64>().unwrap(),
+                    max: Some(m.max_amount.parse::<f64>().unwrap()),
+                }),
+                contract_value: None,
+                delivery_date: None,
+                info,
+            }
+        })
+        .collect::<Vec<Market>>();
+    Ok(markets)
 }
