@@ -264,4 +264,48 @@ mod l2_orderbook {
         assert_eq!(orderbook.asks[0].quantity_quote, 0.0);
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 0.0);
     }
+
+    #[test]
+    fn linear_future_snapshot() {
+        let raw_msg = r#"{"table":"orderBookL2_25","action":"partial","data":[{"symbol":"ETHZ21","id":63399992668,"side":"Sell","size":7866000000,"price":0.07332},{"symbol":"ETHZ21","id":63399992675,"side":"Sell","size":2030000000,"price":0.07325},{"symbol":"ETHZ21","id":63399992763,"side":"Buy","size":100000000,"price":0.07237},{"symbol":"ETHZ21","id":63399992764,"side":"Buy","size":465000000,"price":0.07236}]}"#;
+        let orderbook = &parse_l2(
+            "bitmex",
+            MarketType::Unknown,
+            raw_msg,
+            Some(Utc::now().timestamp_millis()),
+        )
+        .unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 2);
+        assert_eq!(orderbook.bids.len(), 2);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "bitmex",
+            MarketType::LinearFuture,
+            "ETH/BTC".to_string(),
+            extract_symbol("bitmex", MarketType::LinearFuture, raw_msg).unwrap(),
+            orderbook,
+        );
+
+        assert_eq!(orderbook.bids[0].price, 0.07237);
+        assert_eq!(orderbook.bids[0].quantity_base, 1.0 / 0.07237);
+        assert_eq!(orderbook.bids[0].quantity_quote, 1.0);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 100000000.0);
+
+        assert_eq!(orderbook.bids[1].price, 0.07236);
+        assert_eq!(orderbook.bids[1].quantity_base, 4.65 / 0.07236);
+        assert_eq!(orderbook.bids[1].quantity_quote, 4.65);
+        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 465000000.0);
+
+        assert_eq!(orderbook.asks[1].price, 0.07332);
+        assert_eq!(orderbook.asks[1].quantity_base, 78.66 / 0.07332);
+        assert_eq!(orderbook.asks[1].quantity_quote, 78.66);
+        assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 7866000000.0);
+
+        assert_eq!(orderbook.asks[0].price, 0.07325);
+        assert_eq!(orderbook.asks[0].quantity_base, 20.3 / 0.07325);
+        assert_eq!(orderbook.asks[0].quantity_quote, 20.3);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 2030000000.0);
+    }
 }

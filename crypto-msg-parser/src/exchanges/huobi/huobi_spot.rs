@@ -114,14 +114,14 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
             .tick
             .asks
             .into_iter()
-            .flat_map(|x| x)
+            .flatten()
             .map(|x| parse_order(&x))
             .collect(),
         bids: ws_msg
             .tick
             .bids
             .into_iter()
-            .flat_map(|x| x)
+            .flatten()
             .map(|x| parse_order(&x))
             .collect(),
         snapshot: false,

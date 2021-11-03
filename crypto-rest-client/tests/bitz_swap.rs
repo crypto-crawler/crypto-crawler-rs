@@ -5,8 +5,8 @@ use crypto_rest_client::{fetch_l2_snapshot, fetch_open_interest};
 use serde_json::Value;
 use test_case::test_case;
 
-#[test_case(MarketType::InverseSwap, "BTC_USD"; "inclo")]
-#[test_case(MarketType::LinearSwap, "BTC_USDT")]
+#[test_case(MarketType::InverseSwap, "BTC_USD"; "inconclusive 1")]
+#[test_case(MarketType::LinearSwap, "BTC_USDT"; "inconclusive 2")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     let text = fetch_l2_snapshot("bitz", market_type, symbol, Some(3)).unwrap();
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
@@ -18,8 +18,8 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     assert!(data.get("bids").unwrap().as_array().unwrap().len() > 0);
 }
 
-#[test_case(MarketType::InverseSwap)]
-#[test_case(MarketType::LinearSwap)]
+#[test_case(MarketType::InverseSwap; "inconclusive 1")]
+#[test_case(MarketType::LinearSwap; "inconclusive 2")]
 fn test_open_interest(market_type: MarketType) {
     let text = fetch_open_interest("bitz", market_type, None).unwrap();
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();

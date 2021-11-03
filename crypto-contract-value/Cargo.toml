@@ -1,6 +1,6 @@
 [package]
 name = "crypto-contract-value"
-version = "1.1.1"
+version = "1.1.3"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "Get contract value."
@@ -11,7 +11,7 @@ keywords = ["cryptocurrency", "blockchain", "trading"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-crypto-market-type = "0.1.8"
+crypto-market-type = "1.0.3"
 crypto-pair = "2.0.7"
 lazy_static = "1"
 reqwest = { version = "0.11", features = ["blocking", "gzip"] }
