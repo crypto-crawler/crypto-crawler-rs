@@ -6,22 +6,66 @@ use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 const EXCHANGE_NAME: &str = "zbg";
 
 lazy_static! {
-    static ref SWAP_CONTRACT_MAP: HashMap<i64, SwapContractInfo> = fetch_swap_contracts();
+    static ref SWAP_CONTRACT_MAP: HashMap<i64, SwapContractInfo> = {
+        // offline data, in case the network is down
+        let mut m: HashMap<i64, SwapContractInfo> = vec![
+            (999999, "BTC_ZUSD", 0.01_f64),
+            (1000000, "BTC_USDT", 0.01_f64),
+            (1000001, "BTC_USD-R", 1_f64),
+            (1000002, "ETH_USDT", 0.1_f64),
+            (1000003, "ETH_USD-R", 1_f64),
+            (1000008, "LTC_USDT", 0.1_f64),
+            (1000009, "EOS_USDT", 1_f64),
+            (1000010, "XRP_USDT", 10_f64),
+            (1000011, "BCH_USDT", 0.1_f64),
+            (1000012, "ETC_USDT", 1_f64),
+            (1000013, "BSV_USDT", 0.1_f64),
+            (1000014, "RHI_ZUSD", 0.01_f64),
+            (1000015, "UNI_USDT", 0.1_f64),
+            (1000016, "DOT_USDT", 1_f64),
+            (1000017, "FIL_USDT", 0.1_f64),
+            (1000018, "SUSHI_USDT", 1_f64),
+            (1000019, "LINK_USDT", 1_f64),
+            (1000020, "DOGE_USDT", 100_f64),
+            (1000021, "AXS_USDT", 0.1_f64),
+            (1000022, "ICP_USDT", 0.1_f64),
+        ]
+        .into_iter()
+        .map(|x| (x.0, SwapContractInfo::new(x)))
+        .collect();
+
+        let from_online = fetch_swap_contracts();
+        for (pair, contract_value) in from_online {
+            m.insert(pair, contract_value);
+        }
+
+        m
+    };
 }
 
 struct SwapContractInfo {
-    symbol: String,
     contract_id: i64,
+    symbol: String,
     contract_unit: f64,
 }
 
+impl SwapContractInfo {
+    fn new(t: (i64, &str, f64)) -> Self {
+        Self {
+            contract_id: t.0,
+            symbol: t.1.to_string(),
+            contract_unit: t.2,
+        }
+    }
+}
+
 // See https://zbgapi.github.io/docs/future/v1/en/#public-get-contracts
-fn fetch_swap_contracts() -> HashMap<i64, SwapContractInfo> {
+fn fetch_swap_contracts() -> BTreeMap<i64, SwapContractInfo> {
     #[derive(Serialize, Deserialize)]
     #[allow(non_snake_case)]
     struct SwapMarket {
@@ -54,19 +98,21 @@ fn fetch_swap_contracts() -> HashMap<i64, SwapContractInfo> {
         resMsg: ResMsg,
     }
 
-    let txt = http_get("https://www.zbg.com/exchange/api/v1/future/common/contracts").unwrap();
-    let resp = serde_json::from_str::<Response>(&txt).unwrap();
-    let swap_markets = resp.datas;
+    let mut mapping = BTreeMap::<i64, SwapContractInfo>::new();
+    if let Ok(txt) = http_get("https://www.zbg.com/exchange/api/v1/future/common/contracts") {
+        let resp = serde_json::from_str::<Response>(&txt).unwrap();
+        let swap_markets = resp.datas;
 
-    let mut mapping = HashMap::<i64, SwapContractInfo>::new();
-    for swap_market in swap_markets.iter() {
-        let contract_info = SwapContractInfo {
-            symbol: swap_market.symbol.clone(),
-            contract_id: swap_market.contractId,
-            contract_unit: swap_market.contractUnit.parse::<f64>().unwrap(),
-        };
-        mapping.insert(contract_info.contract_id, contract_info);
+        for swap_market in swap_markets.iter() {
+            let contract_info = SwapContractInfo {
+                symbol: swap_market.symbol.clone(),
+                contract_id: swap_market.contractId,
+                contract_unit: swap_market.contractUnit.parse::<f64>().unwrap(),
+            };
+            mapping.insert(contract_info.contract_id, contract_info);
+        }
     }
+
     mapping
 }
 
@@ -216,4 +262,20 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
     };
 
     Ok(vec![orderbook])
+}
+
+#[cfg(test)]
+mod tests {
+    use super::fetch_swap_contracts;
+
+    #[test]
+    fn print_contract_values() {
+        let mapping = fetch_swap_contracts();
+        for (_, contract) in mapping {
+            println!(
+                "({}, \"{}\", {}_f64),",
+                contract.contract_id, contract.symbol, contract.contract_unit
+            );
+        }
+    }
 }
