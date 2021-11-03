@@ -14,12 +14,14 @@ pub fn get_contract_value(exchange: &str, market_type: MarketType, pair: &str) -
         "bitmex" => exchanges::bitmex::get_contract_value(market_type, pair),
         "bybit" => exchanges::bybit::get_contract_value(market_type, pair),
         "deribit" => exchanges::deribit::get_contract_value(market_type, pair),
-        "ftx" => exchanges::ftx::get_contract_value(market_type, pair),
+        "dydx" => Some(1.0),
+        "ftx" => Some(1.0),
         "gate" => exchanges::gate::get_contract_value(market_type, pair),
         "huobi" => exchanges::huobi::get_contract_value(market_type, pair),
         "kucoin" => exchanges::kucoin::get_contract_value(market_type, pair),
         "mxc" => exchanges::mxc::get_contract_value(market_type, pair),
         "okex" => exchanges::okex::get_contract_value(market_type, pair),
+        "zbg" => exchanges::zbg::get_contract_value(market_type, pair),
         _ => panic!("Unknown exchange {}", exchange),
     }
 }

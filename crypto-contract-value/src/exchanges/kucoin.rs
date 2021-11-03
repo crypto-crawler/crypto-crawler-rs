@@ -1,4 +1,4 @@
-pub use crypto_market_type::MarketType;
+use crypto_market_type::MarketType;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

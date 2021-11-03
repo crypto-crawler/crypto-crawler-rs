@@ -1,4 +1,4 @@
-pub use crypto_market_type::MarketType;
+use crypto_market_type::MarketType;
 
 pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<f64> {
     match market_type {

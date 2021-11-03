@@ -1,4 +1,4 @@
-pub use crypto_market_type::MarketType;
+use crypto_market_type::MarketType;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap};
@@ -7,6 +7,44 @@ use super::utils::http_get;
 
 lazy_static! {
     static ref CONTRACT_VALUES: HashMap<MarketType, HashMap<String, f64>> = {
+        let inverse_swap: HashMap<String, f64> = {
+            let mut m: HashMap<String, f64> = vec![
+                ("ADA/USD", 0.01_f64),
+                ("BCH/USD", 0.000001_f64),
+                ("BNB/USD", 0.0000001_f64),
+                ("BSV/USD", 0.000001_f64),
+                ("BTC/USD", 1_f64),
+                ("BTM/USD", 0.001_f64),
+                ("BTT/USD", 0.1_f64),
+                ("DASH/USD", 0.000001_f64),
+                ("EOS/USD", 0.0001_f64),
+                ("ETC/USD", 0.0001_f64),
+                ("ETH/USD", 0.000001_f64),
+                ("HT/USD", 0.0001_f64),
+                ("LTC/USD", 0.00001_f64),
+                ("MDA/USD", 0.0001_f64),
+                ("NEO/USD", 0.00001_f64),
+                ("ONT/USD", 0.001_f64),
+                ("TRX/USD", 0.01_f64),
+                ("WAVES/USD", 0.0001_f64),
+                ("XLM/USD", 0.001_f64),
+                ("XMR/USD", 0.00001_f64),
+                ("XRP/USD", 0.001_f64),
+                ("ZEC/USD", 0.000001_f64),
+                ("ZRX/USD", 0.001_f64),
+            ]
+            .into_iter()
+            .map(|x| (x.0.to_string(), x.1 as f64))
+            .collect();
+
+            let from_online = fetch_quanto_multipliers(INVERSE_SWAP_URL);
+            for (pair, contract_value) in &from_online {
+                m.insert(pair.clone(), *contract_value);
+            }
+
+            m
+        };
+
         let linear_swap: HashMap<String, f64> = {
             // offline data, in case the network is down
             let mut m: HashMap<String, f64> = vec![
@@ -198,12 +236,14 @@ lazy_static! {
         };
 
         let mut result = HashMap::<MarketType, HashMap<String, f64>>::new();
+        result.insert(MarketType::InverseSwap, inverse_swap);
         result.insert(MarketType::LinearSwap, linear_swap);
         result.insert(MarketType::LinearFuture, linear_future);
         result
     };
 }
 
+const INVERSE_SWAP_URL: &str = "https://api.gateio.ws/api/v4/futures/btc/contracts";
 const LINEAR_SWAP_URL: &str = "https://api.gateio.ws/api/v4/futures/usdt/contracts";
 const LINEAR_FUTURE_URL: &str = "https://api.gateio.ws/api/v4/delivery/usdt/contracts";
 
@@ -222,9 +262,14 @@ fn fetch_quanto_multipliers(url: &str) -> BTreeMap<String, f64> {
     if let Ok(txt) = http_get(url) {
         if let Ok(markets) = serde_json::from_str::<Vec<RawMarket>>(&txt) {
             for market in markets.iter() {
+                let mut contract_value = market.quanto_multiplier.parse::<f64>().unwrap();
+                if contract_value == 0.0 {
+                    contract_value = 1.0;
+                }
+                assert!(contract_value > 0.0);
                 mapping.insert(
                     crypto_pair::normalize_pair(&market.name, "gate").unwrap(),
-                    market.quanto_multiplier.parse::<f64>().unwrap(),
+                    contract_value,
                 );
             }
         }
@@ -245,7 +290,15 @@ pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<
 
 #[cfg(test)]
 mod tests {
-    use super::{fetch_quanto_multipliers, LINEAR_FUTURE_URL, LINEAR_SWAP_URL};
+    use super::{fetch_quanto_multipliers, INVERSE_SWAP_URL, LINEAR_FUTURE_URL, LINEAR_SWAP_URL};
+
+    #[test]
+    fn inverse_swap() {
+        let mapping = fetch_quanto_multipliers(INVERSE_SWAP_URL);
+        for (pair, contract_value) in &mapping {
+            println!("(\"{}\", {}_f64),", pair, contract_value);
+        }
+    }
 
     #[test]
     fn linear_swap() {
