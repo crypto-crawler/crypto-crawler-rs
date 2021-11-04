@@ -70,8 +70,10 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 symbol: m.symbol,
                 base_id,
                 quote_id,
+                settle_id: None,
                 base,
                 quote,
+                settle: None,
                 active: m.state == "ENABLED" && !m.limited,
                 margin: false,
                 fees: Fees {

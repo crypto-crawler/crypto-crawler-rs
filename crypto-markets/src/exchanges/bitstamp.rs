@@ -74,8 +74,10 @@ fn fetch_spot_markets() -> Result<Vec<Market>> {
                 symbol: m.url_symbol,
                 base_id,
                 quote_id,
+                settle_id: None,
                 base,
                 quote,
+                settle: None,
                 active: true,
                 margin: true,
                 // see https://www.bitstamp.net/fee-schedule/

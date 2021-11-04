@@ -182,8 +182,18 @@ fn to_market(raw_market: &FtxMarket) -> Market {
         } else {
             "USD".to_string()
         },
+        settle_id: if raw_market.type_ == "spot" {
+            None
+        } else {
+            Some("USD".to_string())
+        },
         base,
         quote,
+        settle: if raw_market.type_ == "spot" {
+            None
+        } else {
+            Some("USD".to_string())
+        },
         active: raw_market.enabled,
         margin: true,
         // see https://help.ftx.com/hc/en-us/articles/360024479432-Fees

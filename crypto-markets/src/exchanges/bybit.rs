@@ -159,8 +159,18 @@ fn to_market(raw_market: &BybitMarket) -> Market {
         symbol: raw_market.name.to_string(),
         base_id: raw_market.base_currency.to_string(),
         quote_id: raw_market.quote_currency.to_string(),
+        settle_id: if raw_market.quote_currency == "USDT" {
+            Some(raw_market.quote_currency.to_string())
+        } else {
+            Some(raw_market.base_currency.to_string())
+        },
         base,
         quote,
+        settle: if raw_market.quote_currency == "USDT" {
+            Some(raw_market.quote_currency.to_string())
+        } else {
+            Some(raw_market.base_currency.to_string())
+        },
         active: raw_market.status == "Trading",
         margin: true,
         fees: Fees {

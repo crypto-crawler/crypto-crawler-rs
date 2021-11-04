@@ -60,9 +60,11 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 market_type: MarketType::Spot,
                 symbol: raw_market.id.to_string(),
                 base_id: raw_market.base,
+                settle_id: None,
                 quote_id: raw_market.quote,
                 base,
                 quote,
+                settle: None,
                 active: raw_market.trade_status == "tradable",
                 margin: false,
                 fees: Fees {

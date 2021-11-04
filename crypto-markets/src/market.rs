@@ -37,10 +37,16 @@ pub struct Market {
     pub base_id: String,
     /// exchange-specific quote currency
     pub quote_id: String,
+    /// exchange-specific settlement currency, i.e., collateral currency, always None for spot markets
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub settle_id: Option<String>,
     /// unified uppercase string of base fiat or crypto currency
     pub base: String,
     /// unified uppercase string of quote fiat or crypto currency
     pub quote: String,
+    /// settlement currency, i.e., collateral currency, always None for spot markets
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub settle: Option<String>,
     /// market status
     pub active: bool,
     /// Margin enabled.

@@ -81,8 +81,10 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 symbol: m.symbol,
                 base_id: m.baseCurrency,
                 quote_id: m.quoteCurrency,
+                settle_id: None,
                 base,
                 quote,
+                settle: None,
                 active: m.enableTrading,
                 margin: m.isMarginEnabled,
                 // see https://www.bitstamp.net/fee-schedule/

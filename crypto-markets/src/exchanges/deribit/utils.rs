@@ -144,6 +144,15 @@ pub(super) fn fetch_option_symbols() -> Result<Vec<String>> {
 }
 
 fn to_market(raw_market: &Instrument) -> Market {
+    let market_type = if raw_market.kind == "future" {
+        if raw_market.instrument_name.ends_with("-PERPETUAL") {
+            MarketType::InverseSwap
+        } else {
+            MarketType::InverseFuture
+        }
+    } else {
+        MarketType::EuropeanOption
+    };
     let pair = crypto_pair::normalize_pair(&raw_market.instrument_name, "deribit").unwrap();
     let (base, quote) = {
         let v: Vec<&str> = pair.split('/').collect();
@@ -151,20 +160,14 @@ fn to_market(raw_market: &Instrument) -> Market {
     };
     Market {
         exchange: "deribit".to_string(),
-        market_type: if raw_market.kind == "future" {
-            if raw_market.instrument_name.ends_with("-PERPETUAL") {
-                MarketType::InverseSwap
-            } else {
-                MarketType::InverseFuture
-            }
-        } else {
-            MarketType::EuropeanOption
-        },
+        market_type,
         symbol: raw_market.instrument_name.to_string(),
         base_id: raw_market.base_currency.to_string(),
         quote_id: raw_market.quote_currency.to_string(),
-        base,
+        settle_id: Some(raw_market.base_currency.to_string()),
+        base: base.clone(),
         quote,
+        settle: Some(base),
         active: raw_market.is_active,
         margin: true,
         fees: Fees {
@@ -180,7 +183,11 @@ fn to_market(raw_market: &Instrument) -> Market {
             max: None,
         }),
         contract_value: Some(raw_market.contract_size),
-        delivery_date: Some(raw_market.expiration_timestamp),
+        delivery_date: if market_type == MarketType::InverseSwap {
+            None
+        } else {
+            Some(raw_market.expiration_timestamp)
+        },
         info: serde_json::to_value(raw_market)
             .unwrap()
             .as_object()

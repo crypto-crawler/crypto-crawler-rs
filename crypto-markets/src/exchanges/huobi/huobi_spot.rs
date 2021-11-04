@@ -80,8 +80,10 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 symbol: m.symbol,
                 base_id: m.base_currency.to_string(),
                 quote_id: m.quote_currency.to_string(),
+                settle_id: None,
                 base,
                 quote,
+                settle: None,
                 active: m.state == "online",
                 margin: true,
                 // see https://www.huobi.com/en-us/fee/

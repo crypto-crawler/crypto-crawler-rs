@@ -58,28 +58,39 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
     let markets: Vec<Market> = raw_markets
         .into_iter()
         .map(|m| {
-            let pair = crypto_pair::normalize_pair(&m.pair, "bitfinex").unwrap();
-            let (base_id, quote_id) = if m.pair.contains(':') {
-                let v: Vec<&str> = m.pair.split(':').collect();
-                (v[0].to_string(), v[1].to_string())
-            } else {
-                (
-                    m.pair[..(m.pair.len() - 3)].to_string(),
-                    m.pair[(m.pair.len() - 3)..].to_string(),
-                )
-            };
+            let symbol = m.pair.to_uppercase();
+            let pair = crypto_pair::normalize_pair(&symbol, "bitfinex").unwrap();
             let (base, quote) = {
                 let v: Vec<&str> = pair.split('/').collect();
                 (v[0].to_string(), v[1].to_string())
             };
+            let (base_id, quote_id) = if symbol.contains(':') {
+                let v: Vec<&str> = symbol.split(':').collect();
+                (v[0].to_string(), v[1].to_string())
+            } else {
+                (
+                    symbol[..(symbol.len() - 3)].to_string(),
+                    symbol[(symbol.len() - 3)..].to_string(),
+                )
+            };
             Market {
                 exchange: "bitfinex".to_string(),
                 market_type,
-                symbol: format!("t{}", m.pair.to_uppercase()),
+                symbol: format!("t{}", symbol),
                 base_id,
-                quote_id,
+                quote_id: quote_id.clone(),
+                settle_id: if market_type == MarketType::LinearSwap {
+                    Some(quote_id)
+                } else {
+                    None
+                },
                 base,
-                quote,
+                quote: quote.clone(),
+                settle: if market_type == MarketType::LinearSwap {
+                    Some(quote)
+                } else {
+                    None
+                },
                 active: true,
                 margin: m.margin,
                 // see https://www.bitfinex.com/fees

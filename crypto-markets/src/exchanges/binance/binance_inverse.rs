@@ -84,8 +84,10 @@ fn fetch_future_markets_internal() -> Result<Vec<Market>> {
                 symbol: m.symbol.clone(),
                 base_id: m.baseAsset.clone(),
                 quote_id: m.quoteAsset.clone(),
+                settle_id: Some(m.marginAsset.clone()),
                 base: m.baseAsset.clone(),
                 quote: m.quoteAsset.clone(),
+                settle: Some(m.marginAsset.clone()),
                 active: m.contractStatus == "TRADING",
                 margin: true,
                 // see https://www.binance.com/en/fee/futureFee

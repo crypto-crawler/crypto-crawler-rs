@@ -43,8 +43,13 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
                 symbol: x.symbol,
                 base_id,
                 quote_id,
+                settle_id: Some(x.settlCurrency.clone()),
                 base,
                 quote,
+                settle: Some(crypto_pair::normalize_currency(
+                    x.settlCurrency.as_str(),
+                    "bitmex",
+                )),
                 active: x.state == "Open",
                 margin: true,
                 fees: Fees {

@@ -71,8 +71,10 @@ pub(super) fn fetch_linear_swap_markets() -> Result<Vec<Market>> {
                 symbol: m.contract_code,
                 base_id: m.symbol.to_string(),
                 quote_id: "USDT".to_string(),
+                settle_id: Some("USDT".to_string()),
                 base,
-                quote,
+                quote: quote.clone(),
+                settle: Some(quote),
                 active: m.contract_status == 1,
                 margin: true,
                 // see https://futures.huobi.com/en-us/linear_swap/fee_rate/

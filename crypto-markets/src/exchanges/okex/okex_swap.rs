@@ -7,7 +7,7 @@ use crate::{
     Market,
 };
 
-use chrono::DateTime;
+// use chrono::DateTime;
 use crypto_market_type::MarketType;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -64,9 +64,9 @@ fn to_market(raw_market: &SwapMarket) -> Market {
         let v: Vec<&str> = pair.split('/').collect();
         (v[0].to_string(), v[1].to_string())
     };
-    let delivery_time = DateTime::parse_from_rfc3339(&raw_market.delivery)
-        .unwrap()
-        .timestamp_millis();
+    // let delivery_time = DateTime::parse_from_rfc3339(&raw_market.delivery)
+    //     .unwrap()
+    //     .timestamp_millis();
     Market {
         exchange: "okex".to_string(),
         market_type: if raw_market.is_inverse == "true" {
@@ -77,8 +77,10 @@ fn to_market(raw_market: &SwapMarket) -> Market {
         symbol: raw_market.instrument_id.to_string(),
         base_id: raw_market.base_currency.to_string(),
         quote_id: raw_market.quote_currency.to_string(),
+        settle_id: Some(raw_market.settlement_currency.to_string()),
         base,
         quote,
+        settle: Some(raw_market.settlement_currency.to_string()),
         active: true,
         margin: true,
         // see https://www.okex.com/fees.html
@@ -92,7 +94,7 @@ fn to_market(raw_market: &SwapMarket) -> Market {
         },
         quantity_limit: None,
         contract_value: Some(raw_market.contract_val.parse::<f64>().unwrap()),
-        delivery_date: Some(delivery_time as u64),
+        delivery_date: None,
         info: serde_json::to_value(raw_market)
             .unwrap()
             .as_object()
