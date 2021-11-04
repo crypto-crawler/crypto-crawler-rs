@@ -5,7 +5,7 @@
 [![](https://docs.rs/crypto-markets/badge.svg)](https://docs.rs/crypto-markets)
 ==========
 
-Get all trading pairs of a cryptocurrency exchange.
+Fetch trading markets from a cryptocurrency exchange.
 
 ## Example
 
