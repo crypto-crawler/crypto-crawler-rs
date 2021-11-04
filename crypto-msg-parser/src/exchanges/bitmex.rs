@@ -389,7 +389,11 @@ fn fetch_tick_sizes() -> BTreeMap<String, (usize, f64)> {
                 } else {
                     start += 500;
                 }
+            } else {
+                break;
             }
+        } else {
+            break;
         }
     }
     m
