@@ -82,7 +82,7 @@ mod trade {
             crate::utils::check_trade_fields(
                 "ftx",
                 MarketType::Move,
-                "BTC-MOVE/USD".to_string(),
+                "BTC/USD".to_string(),
                 extract_symbol("ftx", MarketType::Move, raw_msg).unwrap(),
                 trade,
             );

@@ -150,18 +150,8 @@ mod trade {
             trade,
         );
 
-        assert!(approx_eq!(
-            f64,
-            trade.quantity_base,
-            0.1 * 4.0 / 0.1545,
-            epsilon = 0.0000001
-        ));
-        assert!(approx_eq!(
-            f64,
-            trade.quantity_quote,
-            0.1 * 4.0,
-            epsilon = 0.00000001
-        ));
+        assert_eq!(trade.quantity_base, 0.1 * 4.0);
+        assert_eq!(trade.quantity_quote, 0.1 * 4.0 * 0.1545);
         assert_eq!(trade.quantity_contract, Some(4.0));
         assert_eq!(trade.side, TradeSide::Buy);
 
@@ -179,18 +169,8 @@ mod trade {
             trade,
         );
 
-        assert!(approx_eq!(
-            f64,
-            trade.quantity_base,
-            0.1 * 1.0 / 0.079,
-            epsilon = 0.0000001
-        ));
-        assert!(approx_eq!(
-            f64,
-            trade.quantity_quote,
-            0.1 * 1.0,
-            epsilon = 0.00000001
-        ));
+        assert_eq!(trade.quantity_base, 0.1 * 1.0);
+        assert_eq!(trade.quantity_quote, 0.1 * 1.0 * 0.079);
         assert_eq!(trade.quantity_contract, Some(1.0));
         assert_eq!(trade.side, TradeSide::Sell);
     }
@@ -238,7 +218,6 @@ mod funding_rate {
 #[cfg(test)]
 mod l2_orderbook {
     use crypto_msg_parser::{extract_symbol, parse_l2, MarketType};
-    use float_cmp::approx_eq;
 
     #[test]
     fn spot_snapshot() {
@@ -376,18 +355,8 @@ mod l2_orderbook {
         assert_eq!(orderbook.timestamp, 1622726335745);
 
         assert_eq!(orderbook.asks[0].price, 0.0015);
-        assert!(approx_eq!(
-            f64,
-            orderbook.asks[0].quantity_base,
-            90.6 / 0.0015,
-            epsilon = 0.0000000001
-        ));
-        assert!(approx_eq!(
-            f64,
-            orderbook.asks[0].quantity_quote,
-            90.6,
-            epsilon = 0.0000000000001
-        ));
+        assert_eq!(orderbook.asks[0].quantity_base, 0.1 * 906.0);
+        assert_eq!(orderbook.asks[0].quantity_quote, 0.1 * 906.0 * 0.0015);
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 906.0);
     }
 }

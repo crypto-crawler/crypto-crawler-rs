@@ -46,7 +46,7 @@ fn verify_all_symbols() {
             if market.name.ends_with("-PERP") {
                 format!("{}/USD", market.underlying.clone().unwrap())
             } else if market.name.contains("-MOVE-") {
-                format!("{}-MOVE/USD", market.underlying.clone().unwrap())
+                format!("{}/USD", market.underlying.clone().unwrap())
             } else if market.name.contains("BVOL/") {
                 format!(
                     "{}/{}",

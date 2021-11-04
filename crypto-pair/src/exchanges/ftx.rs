@@ -5,7 +5,7 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
         Some(format!("{}/USD", base))
     } else if symbol.contains("-MOVE-") {
         let v: Vec<&str> = symbol.split('-').collect();
-        Some(format!("{}-MOVE/USD", v[0]))
+        Some(format!("{}/USD", v[0]))
     } else if symbol.contains("BVOL/") || symbol.contains('/') {
         // BVOL and Spot
         Some(symbol.to_string())
