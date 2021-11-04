@@ -71,8 +71,10 @@ pub(super) fn fetch_inverse_swap_markets() -> Result<Vec<Market>> {
                 symbol: m.contract_code,
                 base_id: m.symbol.to_string(),
                 quote_id: "USD".to_string(),
-                base,
+                settle_id: Some(m.symbol.to_string()),
+                base: base.clone(),
                 quote,
+                settle: Some(base),
                 active: m.contract_status == 1,
                 margin: true,
                 // see https://futures.huobi.com/en-us/swap/fee_rate/

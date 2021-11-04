@@ -74,8 +74,10 @@ fn fetch_spot_markets() -> Result<Vec<Market>> {
                 symbol: m.id,
                 base_id: m.base_currency,
                 quote_id: m.quote_currency,
+                settle_id: None,
                 base,
                 quote,
+                settle: None,
                 active: !m.trading_disabled && m.status == "online" && !m.cancel_only,
                 margin: m.margin_enabled,
                 // // see https://pro.coinbase.com/fees, https://pro.coinbase.com/orders/fees

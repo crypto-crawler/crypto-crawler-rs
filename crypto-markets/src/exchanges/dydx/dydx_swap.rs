@@ -72,8 +72,10 @@ pub(super) fn fetch_linear_swap_markets() -> Result<Vec<Market>> {
                 symbol: m.market,
                 base_id: m.baseAsset,
                 quote_id: m.quoteAsset,
+                settle_id: Some(quote.clone()),
                 base,
-                quote,
+                quote: quote.clone(),
+                settle: Some(quote),
                 active: m.status == "ONLINE",
                 margin: true,
                 // see https://trade.dydx.exchange/portfolio/fees

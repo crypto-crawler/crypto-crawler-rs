@@ -54,7 +54,6 @@ fn fetch_bvol_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::BVOL).unwrap();
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
-        println!("{}", symbol);
         assert!(symbol.contains("BVOL/"));
     }
 }
@@ -144,7 +143,6 @@ fn fetch_bvol_markets() {
 
 #[test_case(MarketType::LinearSwap)]
 #[test_case(MarketType::LinearFuture)]
-#[test_case(MarketType::Move)]
 fn test_contract_values(market_type: MarketType) {
     check_contract_values!(EXCHANGE_NAME, market_type);
 }

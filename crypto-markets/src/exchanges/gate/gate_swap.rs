@@ -88,10 +88,20 @@ fn to_market(raw_market: &SwapMarket) -> Market {
         exchange: "gate".to_string(),
         market_type,
         symbol: raw_market.name.to_string(),
-        base_id,
-        quote_id,
-        base,
-        quote,
+        base_id: base_id.clone(),
+        quote_id: quote_id.clone(),
+        settle_id: if market_type == MarketType::InverseSwap {
+            Some(base_id)
+        } else {
+            Some(quote_id)
+        },
+        base: base.clone(),
+        quote: quote.clone(),
+        settle: if market_type == MarketType::InverseSwap {
+            Some(base)
+        } else {
+            Some(quote)
+        },
         active: !raw_market.in_delisting,
         margin: true,
         fees: Fees {

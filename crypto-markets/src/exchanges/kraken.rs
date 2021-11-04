@@ -120,8 +120,10 @@ fn fetch_spot_markets() -> Result<Vec<Market>> {
                 symbol,
                 base_id: m.base,
                 quote_id: m.quote,
+                settle_id: None,
                 base,
                 quote,
+                settle: None,
                 active: true,
                 margin: false,
                 // see https://support.kraken.com/hc/en-us/articles/360000526126-What-are-Maker-and-Taker-fees-

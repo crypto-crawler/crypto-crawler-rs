@@ -79,8 +79,10 @@ fn to_market(raw_market: &FutureMarket) -> Market {
         symbol: raw_market.instrument_id.to_string(),
         base_id: raw_market.base_currency.to_string(),
         quote_id: raw_market.quote_currency.to_string(),
+        settle_id: Some(raw_market.settlement_currency.to_string()),
         base,
         quote,
+        settle: Some(raw_market.settlement_currency.to_string()),
         active: true,
         margin: true,
         // see https://www.okex.com/fees.html

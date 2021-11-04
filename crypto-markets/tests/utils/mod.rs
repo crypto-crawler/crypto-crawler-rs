@@ -25,6 +25,31 @@ macro_rules! check_contract_values {
                 format!("{}/{}", market.base, market.quote).as_str(),
             );
             assert_eq!(market.contract_value, contract_value);
+            if market.base != crypto_pair::normalize_currency(market.base_id.as_str(), $exchange) {
+                println!("{}", serde_json::to_string(&market).unwrap());
+            }
+            assert_eq!(
+                market.base,
+                crypto_pair::normalize_currency(market.base_id.as_str(), $exchange)
+            );
+            assert_eq!(
+                market.quote,
+                crypto_pair::normalize_currency(market.quote_id.as_str(), $exchange)
+            );
+            assert_eq!(
+                market.settle.unwrap(),
+                crypto_pair::normalize_currency(market.settle_id.unwrap().as_str(), $exchange)
+            );
+            assert!(market.margin);
+            if $market_type == MarketType::InverseFuture
+                || $market_type == MarketType::LinearFuture
+                || $market_type == MarketType::QuantoFuture
+                || $market_type == MarketType::EuropeanOption
+            {
+                assert!(market.delivery_date.is_some());
+            } else {
+                assert!(market.delivery_date.is_none());
+            }
         }
     }};
 }

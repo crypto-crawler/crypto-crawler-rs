@@ -83,8 +83,10 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 symbol: m.symbol,
                 base_id: m.base_currency,
                 quote_id: m.quote_currency,
+                settle_id: None,
                 base,
                 quote,
+                settle: None,
                 active: m.state == "online",
                 margin: false,
                 // TODO: need to find zbg spot fees

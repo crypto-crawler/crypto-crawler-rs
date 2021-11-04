@@ -154,8 +154,10 @@ fn fetch_spot_markets() -> Result<Vec<Market>> {
                 symbol: m.symbol,
                 base_id: m.base_currency,
                 quote_id: m.quote_currency,
+                settle_id: None,
                 base,
                 quote,
+                settle: None,
                 active: true,
                 margin: false,
                 // see https://www.bitget.com/en/rate?tab=1
@@ -191,10 +193,12 @@ fn to_market(raw_market: &SwapMarket) -> Market {
             MarketType::InverseSwap
         },
         symbol: raw_market.symbol.to_string(),
-        base_id: raw_market.coin.to_string(),
+        base_id: raw_market.underlying_index.to_string(),
         quote_id: raw_market.quote_currency.to_string(),
+        settle_id: Some(raw_market.coin.to_string()),
         base,
         quote,
+        settle: Some(raw_market.coin.to_string()),
         active: true,
         margin: true,
         // see https://www.bitget.com/en/rate?tab=1

@@ -82,7 +82,14 @@ fn to_market(raw_market: &SwapMarket) -> Market {
     };
     let (base_id, quote_id) = {
         let v: Vec<&str> = raw_market.symbol.split('_').collect();
-        (v[0].to_string(), v[1].to_string())
+        (
+            v[0].to_string(),
+            if v[1].ends_with("-R") {
+                v[1].strip_suffix("-R").unwrap().to_string()
+            } else {
+                v[1].to_string()
+            },
+        )
     };
     let market_type = if raw_market.symbol.ends_with("_USD-R") {
         MarketType::InverseSwap
@@ -101,8 +108,10 @@ fn to_market(raw_market: &SwapMarket) -> Market {
         symbol: raw_market.symbol.to_string(),
         base_id,
         quote_id,
+        settle_id: Some(raw_market.currencyName.to_uppercase()),
         base,
         quote,
+        settle: Some(raw_market.currencyName.to_uppercase()),
         active: true,
         margin: true,
         fees: Fees {

@@ -129,8 +129,18 @@ fn to_market(raw_market: &SwapMarket) -> Market {
         symbol: raw_market.symbol.to_string(),
         base_id: raw_market.baseCurrency.to_string(),
         quote_id: raw_market.quoteCurrency.to_string(),
-        base,
-        quote,
+        settle_id: if raw_market.isInverse {
+            Some(raw_market.baseCurrency.to_string())
+        } else {
+            Some(raw_market.quoteCurrency.to_string())
+        },
+        base: base.clone(),
+        quote: quote.clone(),
+        settle: if raw_market.isInverse {
+            Some(base)
+        } else {
+            Some(quote)
+        },
         active: raw_market.status == "Open",
         margin: true,
         fees: Fees {

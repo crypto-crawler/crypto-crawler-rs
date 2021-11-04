@@ -80,10 +80,12 @@ fn fetch_linear_markets() -> Result<Vec<Market>> {
                     MarketType::LinearFuture
                 },
                 symbol: m.symbol.clone(),
-                base: m.baseAsset.clone(),
-                quote: m.quoteAsset.clone(),
                 base_id: m.baseAsset.clone(),
                 quote_id: m.quoteAsset.clone(),
+                settle_id: Some(m.marginAsset.clone()),
+                base: m.baseAsset.clone(),
+                quote: m.quoteAsset.clone(),
+                settle: Some(m.marginAsset.clone()),
                 active: m.status == "TRADING",
                 margin: true,
                 // see https://www.binance.com/en/fee/futureFee

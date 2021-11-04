@@ -96,8 +96,10 @@ fn to_market(raw_market: &SwapMarket) -> Market {
         symbol: raw_market.symbol.to_string(),
         base_id: raw_market.baseCoin.to_string(),
         quote_id: raw_market.quoteCoin.to_string(),
+        settle_id: Some(raw_market.settleCoin.to_string()),
         base,
         quote,
+        settle: Some(raw_market.settleCoin.to_string()),
         active: raw_market.state == 0 && !raw_market.isHidden,
         margin: true,
         fees: Fees {
