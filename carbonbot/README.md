@@ -4,23 +4,87 @@ A CLI tool to crawl trade, level2 orderbook updates and snapshots, ticker, fundi
 
 ## Run
 
+### Trade
+
+Crawl tick-by-tick trades:
+
 ```bash
-# trade
 docker run -d --name carbonbot-trade --restart always -v $YOUR_LOCAL_PATH:/data -e DATA_DIR=/data -e AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY" -e AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY" -e AWS_S3_DIR="s3://YOUR_BUCKET/path" -u "$(id -u):$(id -g)" soulmachine/carbonbot pm2-runtime start pm2.trade.config.js
+```
 
-# level2 orderbook updates
+### Level2 orderbook updates
+
+Crawl realtime level2 orderbook incremental updates:
+
+```bash
 docker run -d --name carbonbot-l2_event --restart always -v $YOUR_LOCAL_PATH:/data -e DATA_DIR=/data -e AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY" -e AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY" -e AWS_S3_DIR="s3://YOUR_BUCKET/path" -u "$(id -u):$(id -g)" soulmachine/carbonbot pm2-runtime start pm2.l2_event.config.js
+```
 
-# level2 orderbook snapshots
+### Level2 orderbook full snapshots from RESTful API
+
+Crawl level2 orderbook full snapshots from RESTful API:
+
+```bash
 docker run -d --name carbonbot-l2_snapshot --restart always -v $YOUR_LOCAL_PATH:/data -e DATA_DIR=/data -e AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY" -e AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY" -e AWS_S3_DIR="s3://YOUR_BUCKET/path" -u "$(id -u):$(id -g)" soulmachine/carbonbot pm2-runtime start pm2.l2_snapshot.config.js
+```
 
-# ticker
+### Level2 orderbook top-k snapshots
+
+Crawl realtime level2 orderbook top-K snapshots:
+
+```bash
+docker run -d --name carbonbot-l2_topk --restart always -v $YOUR_LOCAL_PATH:/data -e DATA_DIR=/data -e AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY" -e AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY" -e AWS_S3_DIR="s3://YOUR_BUCKET/path" -u "$(id -u):$(id -g)" soulmachine/carbonbot pm2-runtime start pm2.l2_topk.config.js
+```
+
+### Level3 orderbook updates
+
+Crawl realtime level3 orderbook incremental updates:
+
+```bash
+docker run -d --name carbonbot-l3_event --restart always -v $YOUR_LOCAL_PATH:/data -e DATA_DIR=/data -e AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY" -e AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY" -e AWS_S3_DIR="s3://YOUR_BUCKET/path" -u "$(id -u):$(id -g)" soulmachine/carbonbot pm2-runtime start pm2.l3_event.config.js
+```
+
+### BBO
+
+Crawl realtime BBO:
+
+```bash
+docker run -d --name carbonbot-bbo --restart always -v $YOUR_LOCAL_PATH:/data -e DATA_DIR=/data -e AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY" -e AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY" -e AWS_S3_DIR="s3://YOUR_BUCKET/path" -u "$(id -u):$(id -g)" soulmachine/carbonbot pm2-runtime start pm2.bbo.config.js
+```
+
+### Ticker
+
+Crawl 24hr rolling window tickers:
+
+```bash
 docker run -d --name carbonbot-ticker --restart always -v $YOUR_LOCAL_PATH:/data -e DATA_DIR=/data -e AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY" -e AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY" -e AWS_S3_DIR="s3://YOUR_BUCKET/path" -u "$(id -u):$(id -g)" soulmachine/carbonbot pm2-runtime start pm2.ticker.config.js
+```
 
-# funding_rate
+### Candlestick
+
+Crawl candlesticks(i.e., OHLCV)
+
+```bash
+docker run -d --name carbonbot-candlestick --restart always -v $YOUR_LOCAL_PATH:/data -e DATA_DIR=/data -e AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY" -e AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY" -e AWS_S3_DIR="s3://YOUR_BUCKET/path" -u "$(id -u):$(id -g)" soulmachine/carbonbot pm2-runtime start pm2.candlestick.config.js
+```
+
+### Funding rate
+
+Crawl funding rates
+
+```bash
 docker run -d --name carbonbot-funding_rate --restart always -v $YOUR_LOCAL_PATH:/data -e DATA_DIR=/data -e AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY" -e AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY" -e AWS_S3_DIR="s3://YOUR_BUCKET/path" -u "$(id -u):$(id -g)" soulmachine/carbonbot pm2-runtime start pm2.funding_rate.config.js
+```
 
-# other
+### Open interest
+
+```bash
+docker run -d --name carbonbot-open_interest --restart always -v $YOUR_LOCAL_PATH:/data -e DATA_DIR=/data -e AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY" -e AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY" -e AWS_S3_DIR="s3://YOUR_BUCKET/path" -u "$(id -u):$(id -g)" soulmachine/carbonbot pm2-runtime start pm2.open_interest.config.js
+```
+
+### Other
+
+```bash
 docker run -d --name carbonbot-other --restart always -v $YOUR_LOCAL_PATH:/data -e DATA_DIR=/data -e AWS_ACCESS_KEY_ID="YOUR_ACCESS_KEY" -e AWS_SECRET_ACCESS_KEY="YOUR_SECRET_KEY" -e AWS_S3_DIR="s3://YOUR_BUCKET/path" -u "$(id -u):$(id -g)" soulmachine/carbonbot pm2-runtime start pm2.other.config.js
 ```
 
