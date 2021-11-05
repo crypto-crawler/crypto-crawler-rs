@@ -28,7 +28,7 @@ RUN ARCH="$(dpkg --print-architecture)" && \
     chown root:root /usr/local/bin/fixuid && \
     chmod 4755 /usr/local/bin/fixuid && \
     mkdir -p /etc/fixuid && \
-    printf "user: node\ngroup: node\npaths:\n  - /home/node\n" > /etc/fixuid/config.yml
+    printf "user: node\ngroup: node\npaths:\n  - /home/node\n  - /var/lib/logrotate/\n" > /etc/fixuid/config.yml
 
 COPY --chown=node:node ./conf/pm2/pm2.bbo.config.js /home/node/pm2.bbo.config.js
 COPY --chown=node:node ./conf/pm2/pm2.candlestick.config.js /home/node/pm2.candlestick.config.js
