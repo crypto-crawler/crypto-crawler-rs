@@ -92,13 +92,13 @@ docker run -d --name carbonbot-other --restart always -v $YOUR_LOCAL_PATH:/data 
 
 | Name                  | Required | Meaning                                                       |
 | --------------------- | -------- | ------------------------------------------------------------- |
-| DATA_DIR              | true     | The local directory to store data ID                          |
+| DATA_DIR              | true     | The local directory to store data                             |
 | AWS_ACCESS_KEY_ID     | true     | AWS access key ID                                             |
 | AWS_SECRET_ACCESS_KEY | true     | AWS secret access key                                         |
 | AWS_S3_DIR            | true     | AWS S3 destination path                                       |
 | REDIS_URL             | false    | If set to non-empty, data will be published to redis channels |
 
-The `soulmachine/carbonbot` container writes data to local path first, and then uploads to AWS S3 every 15 minutes.
+The `soulmachine/carbonbot` container writes data to the local path temporarily, then moves data to AWS S3 every 15 minutes.
 
 ## Build
 

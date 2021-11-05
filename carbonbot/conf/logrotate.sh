@@ -17,11 +17,11 @@ if [ ! -f /tmp/logrotate.first.done ] ; then
     if [ $(( minute % 15 )) != 0 ]; then
       echo "Fist time run and timestamp is not 15 minutes, skipped"
     else
-      echo "Uploading"
+      echo "$(date --rfc-3339=seconds) rotating files"
       logrotate "$@"
     fi
     touch /tmp/logrotate.first.done
 else
-    echo "Uploading"
+    echo "$(date --rfc-3339=seconds) rotating files"
     logrotate "$@"
 fi
