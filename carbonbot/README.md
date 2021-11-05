@@ -4,6 +4,8 @@ A CLI tool to crawl trade, level2 orderbook updates and snapshots, ticker, fundi
 
 ## Run
 
+To quickly get started, copy `conf/run_crawlers.sh` to somewhere, fill in neccesary parameters and run it.
+
 ### Trade
 
 Crawl tick-by-tick trades:
