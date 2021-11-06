@@ -9,6 +9,8 @@ docker pull soulmachine/carbonbot
 docker stop $(docker ps -aq --filter "name=carbonbot")
 docker rm $(docker ps -aq --filter "name=carbonbot")
 
+mkdir -p $LOCAL_DATA_DIR
+
 # l2_snapshot and open_interest are not included, better deploy them in a different network
 msg_types=("trade" "l2_event" "l2_topk" "l3_event" "bbo" "ticker" "candlestick" "funding_rate" "other")
 
