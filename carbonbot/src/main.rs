@@ -48,8 +48,8 @@ fn main() {
     env_logger::init();
 
     let args: Vec<String> = env::args().collect();
-    if args.len() < 4 {
-        println!("Usage: carbonbot <exchange> <market_type> <msg_type> [comma seperated_symbols]");
+    if args.len() != 4 && args.len() != 5 {
+        println!("Usage: carbonbot <exchange> <market_type> <msg_type> [comma_seperated_symbols]");
         return;
     }
 
@@ -85,11 +85,18 @@ fn main() {
         Some(url)
     };
 
-    let mut symbols = fetch_symbols_retry(exchange, market_type);
-    if let Some(v) = args.get(4) {
-        symbols.retain(|symbol| v.split(',').any(|part| symbol.contains(part)));
-    }
-    info!("target symbols: {:?}", symbols);
+    let specified_symbols = if args.len() == 4 {
+        Vec::new()
+    } else {
+        let all_symbols = fetch_symbols_retry(exchange, market_type);
+        let specified_symbols: Vec<String> = args[4].split(",").map(|s| s.to_string()).collect();
+        let symbols: Vec<String> = specified_symbols
+            .into_iter()
+            .filter(|s| all_symbols.contains(s))
+            .collect();
+        info!("target symbols: {:?}", symbols);
+        symbols
+    };
 
     if data_dir.is_none() && redis_url.is_none() {
         panic!("The environment variable DATA_DIR and REDIS_URL are not set, at least one of them should be set");
@@ -101,6 +108,10 @@ fn main() {
         msg_type,
         data_dir,
         redis_url,
-        Some(&symbols),
+        if specified_symbols.is_empty() {
+            None
+        } else {
+            Some(&specified_symbols)
+        },
     );
 }
