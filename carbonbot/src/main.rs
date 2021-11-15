@@ -9,6 +9,7 @@ pub fn crawl(
     msg_type: MessageType,
     data_dir: Option<String>,
     redis_url: Option<String>,
+    symbols: Option<&[String]>,
 ) {
     if data_dir.is_none() && redis_url.is_none() {
         error!("Both DATA_DIR and REDIS_URL are not set");
@@ -36,7 +37,7 @@ pub fn crawl(
             MessageType::FundingRate => crawl_funding_rate,
             _ => panic!("Not implemented"),
         };
-        crawl_func(exchange, market_type, None, tx, None);
+        crawl_func(exchange, market_type, symbols, tx, None);
     }
     for thread in writer_threads {
         thread.join().unwrap();
@@ -47,8 +48,8 @@ fn main() {
     env_logger::init();
 
     let args: Vec<String> = env::args().collect();
-    if args.len() != 4 {
-        println!("Usage: carbonbot <exchange> <market_type> <msg_type>");
+    if args.len() < 4 {
+        println!("Usage: carbonbot <exchange> <market_type> <msg_type> [comma seperated_symbols]");
         return;
     }
 
@@ -84,9 +85,22 @@ fn main() {
         Some(url)
     };
 
+    let mut symbols = fetch_symbols_retry(exchange, market_type);
+    if let Some(v) = args.get(4) {
+        symbols.retain(|symbol| v.split(',').any(|part| symbol.contains(part)));
+    }
+    info!("target symbols: {:?}", symbols);
+
     if data_dir.is_none() && redis_url.is_none() {
         panic!("The environment variable DATA_DIR and REDIS_URL are not set, at least one of them should be set");
     }
 
-    crawl(exchange, market_type, msg_type, data_dir, redis_url);
+    crawl(
+        exchange,
+        market_type,
+        msg_type,
+        data_dir,
+        redis_url,
+        Some(&symbols),
+    );
 }
