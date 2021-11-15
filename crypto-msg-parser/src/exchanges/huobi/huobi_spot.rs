@@ -110,6 +110,8 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
         pair,
         msg_type: MessageType::L2Event,
         timestamp,
+        seq_first: Some(ws_msg.tick.seqNum as u64),
+        seq_last: None,
         asks: ws_msg
             .tick
             .asks

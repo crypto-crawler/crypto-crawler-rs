@@ -171,6 +171,8 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         } else {
             ws_msg.data.T.unwrap()
         },
+        seq_first: Some(ws_msg.data.U as u64),
+        seq_last: Some(ws_msg.data.u as u64),
         asks: ws_msg
             .data
             .a

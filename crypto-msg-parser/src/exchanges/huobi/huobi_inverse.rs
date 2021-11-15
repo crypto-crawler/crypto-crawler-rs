@@ -129,6 +129,8 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         pair: pair.to_string(),
         msg_type: MessageType::L2Event,
         timestamp,
+        seq_first: Some(ws_msg.tick.id as u64),
+        seq_last: None,
         asks: ws_msg.tick.asks.iter().map(|x| parse_order(x)).collect(),
         bids: ws_msg.tick.bids.iter().map(|x| parse_order(x)).collect(),
         snapshot,

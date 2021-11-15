@@ -33,6 +33,7 @@ struct RawOrderbookMsg {
     instrument_name: String,
     bids: Vec<[Value; 3]>,
     asks: Vec<[Value; 3]>,
+    change_id: u64,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -142,6 +143,8 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         pair: pair.clone(),
         msg_type: MessageType::L2Event,
         timestamp,
+        seq_first: Some(raw_orderbook.change_id),
+        seq_last: None,
         asks: raw_orderbook.asks.iter().map(|x| parse_order(x)).collect(),
         bids: raw_orderbook.bids.iter().map(|x| parse_order(x)).collect(),
         snapshot,

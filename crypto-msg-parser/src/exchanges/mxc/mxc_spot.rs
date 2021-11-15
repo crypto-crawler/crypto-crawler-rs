@@ -117,6 +117,8 @@ pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>> {
         pair,
         msg_type: MessageType::L2Event,
         timestamp,
+        seq_first: None,
+        seq_last: None,
         asks: if let Some(asks) = ws_msg.data.asks {
             asks.iter().map(parse_order).collect::<Vec<Order>>()
         } else {

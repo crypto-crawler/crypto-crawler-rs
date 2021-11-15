@@ -124,6 +124,8 @@ pub(crate) fn parse_l2(
         pair: pair.clone(),
         msg_type: MessageType::L2Event,
         timestamp,
+        seq_first: None,
+        seq_last: None,
         asks: Vec::new(),
         bids: Vec::new(),
         snapshot,
