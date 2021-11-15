@@ -1,6 +1,6 @@
 [package]
 name = "carbonbot"
-version = "1.9.1"
+version = "1.10.0"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 
