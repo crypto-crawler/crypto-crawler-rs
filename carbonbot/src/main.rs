@@ -88,12 +88,8 @@ fn main() {
     let specified_symbols = if args.len() == 4 {
         Vec::new()
     } else {
-        let all_symbols = fetch_symbols_retry(exchange, market_type);
-        let specified_symbols: Vec<String> = args[4].split(",").map(|s| s.to_string()).collect();
-        let symbols: Vec<String> = specified_symbols
-            .into_iter()
-            .filter(|s| all_symbols.contains(s))
-            .collect();
+        let mut symbols = fetch_symbols_retry(exchange, market_type);
+        symbols.retain(|symbol| args[4].split(',').any(|part| symbol.contains(part)));
         info!("target symbols: {:?}", symbols);
         symbols
     };

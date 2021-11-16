@@ -92,6 +92,7 @@ fn create_redis_writer_thread(rx: Receiver<Message>, redis_url: String) -> JoinH
             let topic = format!("carbonbot:{}", msg_type);
             if let Err(err) = redis_conn.publish::<&str, String, i64>(&topic, s) {
                 error!("{}", err);
+                return;
             }
         }
     })
