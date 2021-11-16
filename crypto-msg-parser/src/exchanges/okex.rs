@@ -202,8 +202,8 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
                 pair: pair.clone(),
                 msg_type: MessageType::L2Event,
                 timestamp: timestamp.timestamp_millis(),
-                seq_first: None,
-                seq_last: None,
+                seq_id: None,
+                prev_seq_id: None,
                 asks: raw_orderbook
                     .asks
                     .iter()

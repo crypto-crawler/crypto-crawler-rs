@@ -34,6 +34,7 @@ struct InverseTradeMsg {
 struct InverseOrderbookMsg {
     id: i64,
     ts: i64,
+    mrid: u64,
     event: String, // snapshot, update
     ch: String,
     bids: Vec<[f64; 2]>,
@@ -129,8 +130,8 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         pair: pair.to_string(),
         msg_type: MessageType::L2Event,
         timestamp,
-        seq_first: Some(ws_msg.tick.id as u64),
-        seq_last: None,
+        seq_id: Some(ws_msg.tick.mrid),
+        prev_seq_id: None,
         asks: ws_msg.tick.asks.iter().map(|x| parse_order(x)).collect(),
         bids: ws_msg.tick.bids.iter().map(|x| parse_order(x)).collect(),
         snapshot,

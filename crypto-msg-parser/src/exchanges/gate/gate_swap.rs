@@ -238,8 +238,8 @@ fn parse_l2_legacy(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMs
             timestamp,
             asks: raw_orderbook.asks.iter().map(|x| parse_order(x)).collect(),
             bids: raw_orderbook.bids.iter().map(|x| parse_order(x)).collect(),
-            seq_first: None,
-            seq_last: None,
+            seq_id: None,
+            prev_seq_id: None,
             snapshot,
             json: msg.to_string(),
         }
@@ -301,8 +301,8 @@ fn parse_l2_legacy(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMs
                 pair: pair.to_string(),
                 msg_type: MessageType::L2Event,
                 timestamp,
-                seq_first: None,
-                seq_last: None,
+                seq_id: None,
+                prev_seq_id: None,
                 asks,
                 bids,
                 snapshot,
@@ -361,8 +361,8 @@ fn parse_l2_update(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMs
         pair: pair.clone(),
         msg_type: MessageType::L2Event,
         timestamp: result.t,
-        seq_first: ws_msg.extra.get("U").and_then(|v| v.as_u64()),
-        seq_last: ws_msg.extra.get("u").and_then(|v| v.as_u64()),
+        seq_id: result.extra.get("u").and_then(|v| v.as_u64()),
+        prev_seq_id: None,
         asks: result
             .a
             .iter()

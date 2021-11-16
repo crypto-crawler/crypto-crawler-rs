@@ -27,8 +27,10 @@ struct SpotTradeMsg {
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct SpotOrderbookMsg {
-    seqNum: i64,
-    prevSeqNum: i64,
+    #[serde(rename = "seqNum")]
+    seq_num: u64,
+    #[serde(rename = "prevSeqNum")]
+    prev_seq_num: u64,
     asks: Option<Vec<[f64; 2]>>,
     bids: Option<Vec<[f64; 2]>>,
     #[serde(flatten)]
@@ -110,8 +112,8 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
         pair,
         msg_type: MessageType::L2Event,
         timestamp,
-        seq_first: Some(ws_msg.tick.seqNum as u64),
-        seq_last: None,
+        seq_id: Some(ws_msg.tick.seq_num),
+        prev_seq_id: Some(ws_msg.tick.prev_seq_num),
         asks: ws_msg
             .tick
             .asks

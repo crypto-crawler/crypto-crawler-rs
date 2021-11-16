@@ -27,6 +27,8 @@ fn trade() {
     assert_eq!(trades.len(), 1);
     let trade = &trades[0];
 
+    assert_eq!(&trade.trade_id, "15186035");
+
     crate::utils::check_trade_fields(
         "bithumb",
         MarketType::Spot,
@@ -93,6 +95,7 @@ fn l2_orderbook_update() {
     );
 
     assert_eq!(orderbook.timestamp, 1622446975394);
+    assert_eq!(orderbook.seq_id, Some(509670303));
 
     assert_eq!(orderbook.bids[0].price, 34613.44);
     assert_eq!(orderbook.bids[0].quantity_base, 0.015396);

@@ -53,12 +53,13 @@ pub type RawOrder = [String; 2];
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct RawOrderbookMsg {
-    e: String,      // Event type
-    E: i64,         // Event time
-    T: Option<i64>, // Transction time
-    s: String,      // Symbol
-    U: i64,         // First update ID in event
-    u: i64,         // // Final update ID in event
+    e: String,       // Event type
+    E: i64,          // Event time
+    T: Option<i64>,  // Transction time
+    s: String,       // Symbol
+    U: u64,          // First update ID in event
+    u: u64,          // Final update ID in event
+    pu: Option<u64>, // Previous event update sequense ("u" of previous message)
     b: Vec<RawOrder>,
     a: Vec<RawOrder>,
     #[serde(flatten)]
@@ -171,8 +172,8 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         } else {
             ws_msg.data.T.unwrap()
         },
-        seq_first: Some(ws_msg.data.U as u64),
-        seq_last: Some(ws_msg.data.u as u64),
+        seq_id: Some(ws_msg.data.u),
+        prev_seq_id: ws_msg.data.pu,
         asks: ws_msg
             .data
             .a

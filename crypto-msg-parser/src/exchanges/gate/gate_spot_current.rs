@@ -131,8 +131,8 @@ fn parse_l2_update(msg: &str) -> Result<Vec<OrderBookMsg>> {
         pair,
         msg_type: MessageType::L2Event,
         timestamp: result.t,
-        seq_first: ws_msg.extra.get("U").and_then(|v| v.as_u64()),
-        seq_last: ws_msg.extra.get("u").and_then(|v| v.as_u64()),
+        seq_id: Some(result.u as u64),
+        prev_seq_id: None,
         asks: if let Some(asks) = result.a {
             asks.iter().map(parse_order).collect()
         } else {
@@ -176,8 +176,8 @@ fn parse_l2_snapshot(msg: &str) -> Result<Vec<OrderBookMsg>> {
         pair,
         msg_type: MessageType::L2Event,
         timestamp: result.t,
-        seq_first: None,
-        seq_last: None,
+        seq_id: None,
+        prev_seq_id: None,
         asks: if let Some(asks) = result.asks {
             asks.iter().map(|x| parse_order(x)).collect()
         } else {

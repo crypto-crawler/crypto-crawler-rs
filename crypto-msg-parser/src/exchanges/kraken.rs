@@ -145,8 +145,8 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
                 pair,
                 msg_type: MessageType::L2Event,
                 timestamp,
-                seq_first: None,
-                seq_last: None,
+                seq_id: None,
+                prev_seq_id: None,
                 asks: orderbook_snapshot
                     .asks
                     .iter()
@@ -211,8 +211,8 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
                 pair,
                 msg_type: MessageType::L2Event,
                 timestamp,
-                seq_first: None,
-                seq_last: None,
+                seq_id: None,
+                prev_seq_id: None,
                 asks,
                 bids,
                 snapshot,

@@ -182,8 +182,8 @@ pub(crate) fn parse_l2(
         timestamp,
         asks,
         bids,
-        seq_first: None,
-        seq_last: None,
+        seq_id: None,
+        prev_seq_id: None,
         snapshot,
         json: msg.to_string(),
     };

@@ -16,6 +16,7 @@ struct SpotTradeMsg {
     symbol: String,
     t: String,
     v: String,
+    ver: String,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -90,7 +91,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 } else {
                     TradeSide::Buy
                 },
-                trade_id: timestamp.to_string(),
+                trade_id: raw_trade.ver.clone(),
                 json: serde_json::to_string(&raw_trade).unwrap(),
             }
         })
@@ -134,8 +135,8 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         pair,
         msg_type: MessageType::L2Event,
         timestamp,
-        seq_first: ws_msg.data.ver.parse().ok(),
-        seq_last: None,
+        seq_id: ws_msg.data.ver.parse().ok(),
+        prev_seq_id: None,
         asks: ws_msg.data.s.iter().map(|x| parse_order(x)).collect(),
         bids: ws_msg.data.b.iter().map(|x| parse_order(x)).collect(),
         snapshot,
