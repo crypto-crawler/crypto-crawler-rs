@@ -128,6 +128,8 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         pair,
         msg_type: MessageType::L2Event,
         timestamp: ws_msg.time,
+        seq_id: None,
+        prev_seq_id: None,
         asks: if let Some(asks) = ws_msg.data.asks {
             asks.iter().map(|x| parse_order(x)).collect()
         } else {

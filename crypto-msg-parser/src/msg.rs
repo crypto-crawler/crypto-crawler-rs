@@ -124,6 +124,10 @@ pub struct OrderBookMsg {
     pub msg_type: MessageType,
     /// Unix timestamp, in milliseconds
     pub timestamp: i64,
+    /// The sequence ID for this update (not all exchanges provide this information)
+    pub seq_id: Option<u64>,
+    /// The sequence ID for the previous update (not all exchanges provide this information)
+    pub prev_seq_id: Option<u64>,
 
     /// sorted in ascending order by price if snapshot=true, otherwise not sorted
     pub asks: Vec<Order>,

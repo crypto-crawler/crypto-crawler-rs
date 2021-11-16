@@ -97,6 +97,8 @@ pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>> {
         pair,
         msg_type: MessageType::L2Event,
         timestamp,
+        seq_id: Some(ws_msg.data.sequenceStart as u64),
+        prev_seq_id: None,
         asks: ws_msg
             .data
             .changes

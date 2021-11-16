@@ -117,6 +117,7 @@ mod l2_orderbook {
         assert_eq!(orderbook.bids.len(), 1);
         assert!(!orderbook.snapshot);
         assert_eq!(orderbook.timestamp, 1625097804231);
+        assert_eq!(orderbook.seq_id, Some(1617071937790));
 
         crate::utils::check_orderbook_fields(
             "kucoin",
@@ -149,6 +150,7 @@ mod l2_orderbook {
         );
 
         assert_eq!(orderbook.timestamp, 1622718985044);
+        assert_eq!(orderbook.seq_id, Some(1617852459594));
 
         assert_eq!(orderbook.bids[0].price, 39069.0);
         assert_eq!(orderbook.bids[0].quantity_base, 23960.0 / 39069.0);
@@ -174,6 +176,7 @@ mod l2_orderbook {
         );
 
         assert_eq!(orderbook.timestamp, 1622719195286);
+        assert_eq!(orderbook.seq_id, Some(1618232029293));
 
         assert_eq!(orderbook.bids[0].price, 38962.0);
         assert_eq!(orderbook.bids[0].quantity_base, 4.374);
@@ -199,6 +202,7 @@ mod l2_orderbook {
         );
 
         assert_eq!(orderbook.timestamp, 1622719594867);
+        assert_eq!(orderbook.seq_id, Some(1616827077941));
 
         assert_eq!(orderbook.asks[0].price, 39006.0);
         assert_eq!(orderbook.asks[0].quantity_base, 11450.0 / 39006.0);

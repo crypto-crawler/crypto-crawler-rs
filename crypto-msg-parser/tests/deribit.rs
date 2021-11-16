@@ -186,6 +186,8 @@ mod l2_orderbook {
         )
         .unwrap();
 
+        assert_eq!(orderbook.seq_id, Some(31479339507));
+        assert_eq!(orderbook.prev_seq_id, Some(31479339296));
         assert_eq!(orderbook.bids[0].price, 37392.5);
         assert_eq!(
             orderbook.bids[0].quantity_base,
@@ -193,7 +195,6 @@ mod l2_orderbook {
         );
         assert_eq!(orderbook.bids[0].quantity_quote, contract_value * 3000.0);
         assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 3000.0);
-
         assert_eq!(orderbook.bids[1].price, 37399.0);
         assert_eq!(
             orderbook.bids[1].quantity_base,

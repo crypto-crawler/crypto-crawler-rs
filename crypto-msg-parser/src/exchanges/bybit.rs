@@ -206,6 +206,8 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         pair: pair.to_string(),
         msg_type: MessageType::L2Event,
         timestamp,
+        seq_id: None,
+        prev_seq_id: None,
         asks: Vec::new(),
         bids: Vec::new(),
         snapshot,
