@@ -15,6 +15,8 @@ pub(super) const EXCHANGE_NAME: &str = "ftx";
 
 const WEBSOCKET_URL: &str = "wss://ftx.com/ws/";
 
+// Send pings at regular intervals (every 15 seconds): {'op': 'ping'}.
+// You will see an {'type': 'pong'} response.
 const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (15, r#"{"op":"ping"}"#);
 
 /// The WebSocket client for FTX.
