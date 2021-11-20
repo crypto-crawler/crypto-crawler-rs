@@ -45,7 +45,7 @@ fn test_crawl_l2_topk(market_type: MarketType, symbol: &str) {
     )
 }
 
-#[test_case(MarketType::Spot, "btc_usdt")]
+#[test_case(MarketType::Spot, "BTC_USDT")]
 #[test_case(MarketType::InverseSwap, "btcusd")]
 #[test_case(MarketType::LinearSwap, "cmt_btcusdt")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {

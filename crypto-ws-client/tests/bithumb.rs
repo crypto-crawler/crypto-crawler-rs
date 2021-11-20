@@ -51,6 +51,7 @@ fn subscribe_orderbook() {
 }
 
 #[test]
+#[ignore = "too slow"]
 fn subscribe_ticker() {
     gen_test_code!(
         BithumbWSClient,

@@ -2,6 +2,7 @@ use super::utils::connect_with_retry;
 use std::{
     collections::HashSet,
     io::prelude::*,
+    net::TcpStream,
     sync::{
         atomic::{AtomicBool, AtomicIsize, Ordering},
         mpsc::Sender,
@@ -13,8 +14,8 @@ use std::{
 use flate2::read::{DeflateDecoder, GzDecoder};
 use log::*;
 use tungstenite::{
-    client::AutoStream, error::ProtocolError, protocol::frame::coding::CloseCode, Error, Message,
-    WebSocket,
+    error::ProtocolError, protocol::frame::coding::CloseCode, stream::MaybeTlsStream, Error,
+    Message, WebSocket,
 };
 
 pub(super) enum MiscMessage {
@@ -29,7 +30,7 @@ pub(super) enum MiscMessage {
 pub(super) struct WSClientInternal {
     exchange: &'static str, // Eexchange name
     pub(super) url: String, // Websocket base url
-    ws_stream: Mutex<WebSocket<AutoStream>>,
+    ws_stream: Mutex<WebSocket<MaybeTlsStream<TcpStream>>>,
     channels: Mutex<HashSet<String>>,     // subscribed channels
     tx: Mutex<Sender<String>>,            // The sending half of a channel
     on_misc_msg: fn(&str) -> MiscMessage, // handle misc messages

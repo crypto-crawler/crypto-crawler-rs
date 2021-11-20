@@ -1,13 +1,16 @@
 use crate::WSClient;
 
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    mpsc::Sender,
-    Mutex,
-};
 use std::{
     collections::{HashMap, HashSet},
     time::{Duration, Instant},
+};
+use std::{
+    net::TcpStream,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        mpsc::Sender,
+        Mutex,
+    },
 };
 
 use super::{
@@ -17,7 +20,7 @@ use super::{
 
 use log::*;
 use serde_json::Value;
-use tungstenite::{client::AutoStream, error::ProtocolError, Error, Message, WebSocket};
+use tungstenite::{error::ProtocolError, stream::MaybeTlsStream, Error, Message, WebSocket};
 
 pub(super) const EXCHANGE_NAME: &str = "bitfinex";
 
@@ -34,7 +37,7 @@ const SERVER_PING_INTERVAL: u64 = 15;
 /// * Swap: <https://trading.bitfinex.com/t/BTCF0:USTF0>
 /// * Funding: <https://trading.bitfinex.com/funding>
 pub struct BitfinexWSClient {
-    ws_stream: Mutex<WebSocket<AutoStream>>,
+    ws_stream: Mutex<WebSocket<MaybeTlsStream<TcpStream>>>,
     channels: Mutex<HashSet<String>>, // subscribed channels
     tx: Mutex<Sender<String>>,
     channel_id_meta: Mutex<HashMap<i64, String>>, // CHANNEL_ID information
