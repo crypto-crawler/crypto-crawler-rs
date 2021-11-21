@@ -336,7 +336,7 @@ pub(crate) fn sort_by_cmc_rank(exchange: &str, symbols: &mut [String]) {
 
 #[cfg(test)]
 mod tests {
-    use crypto_markets::MarketType;
+    use crypto_market_type::MarketType;
 
     #[test]
     fn test_get_cmc_ranks() {

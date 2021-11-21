@@ -1,4 +1,5 @@
-use crypto_markets::{fetch_markets, fetch_symbols, get_market_types, MarketType};
+use crypto_market_type::{get_market_types, MarketType};
+use crypto_markets::{fetch_markets, fetch_symbols};
 
 #[macro_use]
 mod utils;

@@ -1,6 +1,6 @@
-mod exchanges;
+use crypto_market_type::MarketType;
 
-pub use crypto_market_type::MarketType;
+mod exchanges;
 
 pub fn get_contract_value(exchange: &str, market_type: MarketType, pair: &str) -> Option<f64> {
     if market_type == MarketType::Spot {

@@ -1,4 +1,5 @@
-use crypto_markets::{fetch_markets, MarketType};
+use crypto_market_type::MarketType;
+use crypto_markets::fetch_markets;
 use std::{env, str::FromStr};
 
 fn main() {

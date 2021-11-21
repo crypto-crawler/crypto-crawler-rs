@@ -1,4 +1,5 @@
-use crypto_markets::{fetch_markets, fetch_symbols, MarketType};
+use crypto_market_type::MarketType;
+use crypto_markets::{fetch_markets, fetch_symbols};
 use test_case::test_case;
 
 #[macro_use]

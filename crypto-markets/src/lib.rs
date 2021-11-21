@@ -14,7 +14,7 @@ mod error;
 mod exchanges;
 mod market;
 
-pub use crypto_market_type::{get_market_types, MarketType};
+use crypto_market_type::MarketType;
 pub use error::Error;
 pub use market::{Fees, Market, Precision, QuantityLimit};
 
