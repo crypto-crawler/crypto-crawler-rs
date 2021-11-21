@@ -23,6 +23,7 @@ use strum_macros::{Display, EnumString};
 /// * Spot market is always linear.
 ///
 /// **Margin and Inverse are orthogonal.**
+#[repr(C)]
 #[derive(Copy, Clone, Serialize, Deserialize, Display, Debug, EnumString, PartialEq, Hash, Eq)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]

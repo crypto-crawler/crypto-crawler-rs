@@ -71,6 +71,7 @@ lazy_static! {
             ("TRX/USDT", 100_f64),
             ("UNI/USDT", 1_f64),
             ("VET/USDT", 100_f64),
+            ("VRA/USDT", 10_f64),
             ("WAVES/USDT", 0.1_f64),
             ("XEM/USDT", 1_f64),
             ("XLM/USDT", 10_f64),

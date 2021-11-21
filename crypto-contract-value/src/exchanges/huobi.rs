@@ -37,6 +37,7 @@ lazy_static! {
                 ("BTS/USDT", 100_f64),
                 ("BTT/USDT", 1000_f64),
                 ("C98/USDT", 1_f64),
+                ("CELR/USDT", 10_f64),
                 ("CHR/USDT", 10_f64),
                 ("CHZ/USDT", 10_f64),
                 ("CLV/USDT", 1_f64),
@@ -65,6 +66,7 @@ lazy_static! {
                 ("GRT/USDT", 10_f64),
                 ("HBAR/USDT", 10_f64),
                 ("ICP/USDT", 0.01_f64),
+                ("IMX/USDT", 0.1_f64),
                 ("IOST/USDT", 100_f64),
                 ("IOTA/USDT", 10_f64),
                 ("IOTX/USDT", 10_f64),
@@ -82,6 +84,7 @@ lazy_static! {
                 ("MASS/USDT", 1_f64),
                 ("MATIC/USDT", 100_f64),
                 ("MDX/USDT", 1_f64),
+                ("MINA/USDT", 0.1_f64),
                 ("MIR/USDT", 1_f64),
                 ("MKR/USDT", 0.001_f64),
                 ("NEAR/USDT", 1_f64),
@@ -147,11 +150,13 @@ lazy_static! {
         };
 
         let linear_option: HashMap<String, f64> = {
-            let m: HashMap<String, f64> = vec![("BTC/USDT", 0.001),
-            ("ETH/USDT", 0.01),]
-                .into_iter()
-                .map(|x| (x.0.to_string(), x.1 as f64))
-                .collect();
+            let m: HashMap<String, f64> = vec![
+                ("BTC/USDT", 0.001),
+                ("ETH/USDT", 0.01),
+            ]
+            .into_iter()
+            .map(|x| (x.0.to_string(), x.1 as f64))
+            .collect();
 
             debug_assert!(!LINEAR_OPTION_URL.is_empty());
             // let from_online = fetch_contract_size(LINEAR_OPTION_URL);
