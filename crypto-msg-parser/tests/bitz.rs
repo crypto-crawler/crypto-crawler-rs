@@ -1,6 +1,7 @@
 mod utils;
 
-use crypto_msg_parser::{extract_symbol, parse_l2, parse_trade, MarketType, TradeSide};
+use crypto_market_type::MarketType;
+use crypto_msg_parser::{extract_symbol, parse_l2, parse_trade, TradeSide};
 
 #[test]
 #[ignore = "bitz.com has shutdown since October 2021"]

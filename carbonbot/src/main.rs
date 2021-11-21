@@ -1,5 +1,7 @@
 use carbonbot::{crawl_other, create_writer_threads};
 use crypto_crawler::*;
+use crypto_market_type::MarketType;
+use crypto_msg_type::MessageType;
 use log::*;
 use std::{env, str::FromStr};
 

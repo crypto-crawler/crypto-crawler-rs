@@ -1,6 +1,7 @@
 use std::sync::mpsc::Sender;
 
-use crypto_crawler::{MarketType, Message};
+use crypto_crawler::Message;
+use crypto_market_type::MarketType;
 
 mod binance;
 mod bitmex;

@@ -1,7 +1,8 @@
 use crypto_market_type::MarketType;
+use crypto_msg_type::MessageType;
 
 use super::super::utils::http_get;
-use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};

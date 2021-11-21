@@ -1,8 +1,9 @@
 use crypto_market_type::MarketType;
+use crypto_msg_type::MessageType;
 
 use crate::{
     exchanges::{kucoin::message::WebsocketMsg, utils::calc_quantity_and_volume},
-    MessageType, Order, OrderBookMsg, TradeMsg, TradeSide,
+    Order, OrderBookMsg, TradeMsg, TradeSide,
 };
 
 use serde::{Deserialize, Serialize};

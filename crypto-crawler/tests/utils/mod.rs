@@ -1,4 +1,6 @@
-use crypto_crawler::{MarketType, Message, MessageType};
+use crypto_crawler::Message;
+use crypto_market_type::MarketType;
+use crypto_msg_type::MessageType;
 
 pub(crate) fn parse(msg: Message) -> bool {
     match msg.msg_type {

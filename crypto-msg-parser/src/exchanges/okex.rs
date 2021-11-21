@@ -1,8 +1,8 @@
 use crypto_market_type::MarketType;
+use crypto_msg_type::MessageType;
 
 use super::utils::calc_quantity_and_volume;
-use crate::Order;
-use crate::{FundingRateMsg, MessageType, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use chrono::prelude::*;
 use chrono::DateTime;

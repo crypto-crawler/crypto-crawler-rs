@@ -1,28 +1,8 @@
 use crypto_market_type::MarketType;
+use crypto_msg_type::MessageType;
 use serde::{Deserialize, Serialize};
-use strum_macros::{Display, EnumString};
 
 use crate::order::Order;
-
-/// The type of a message
-///
-/// Copied from crypto_crawler::MessageType
-#[derive(Copy, Clone, PartialEq, Serialize, Deserialize, Display, Debug, EnumString)]
-#[serde(rename_all = "snake_case")]
-#[strum(serialize_all = "snake_case")]
-pub enum MessageType {
-    Trade,
-    L2Event,
-    L2Snapshot,
-    L3Event,
-    L3Snapshot,
-    #[serde(rename = "bbo")]
-    #[allow(clippy::upper_case_acronyms)]
-    BBO,
-    Ticker,
-    Candlestick,
-    FundingRate,
-}
 
 macro_rules! add_common_fields {
     (
@@ -66,9 +46,8 @@ add_common_fields!(
 );
 
 /// Which side is taker
-#[derive(Copy, Clone, PartialEq, Serialize, Deserialize, Display, Debug, EnumString)]
+#[derive(Copy, Clone, PartialEq, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
-#[strum(serialize_all = "snake_case")]
 pub enum TradeSide {
     /// Buyer is taker
     Buy,

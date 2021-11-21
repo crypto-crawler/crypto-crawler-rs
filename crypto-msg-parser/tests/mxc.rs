@@ -2,7 +2,8 @@ mod utils;
 
 #[cfg(test)]
 mod trade {
-    use crypto_msg_parser::{extract_symbol, parse_trade, MarketType, TradeSide};
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, parse_trade, TradeSide};
     use float_cmp::approx_eq;
 
     #[test]
@@ -88,7 +89,8 @@ mod trade {
 #[cfg(test)]
 mod l2_orderbook {
     use chrono::prelude::*;
-    use crypto_msg_parser::{extract_symbol, parse_l2, MarketType};
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, parse_l2};
 
     #[test]
     fn spot_update() {

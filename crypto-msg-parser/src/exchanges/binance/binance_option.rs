@@ -1,6 +1,7 @@
 use crypto_market_type::MarketType;
+use crypto_msg_type::MessageType;
 
-use crate::{MessageType, TradeMsg, TradeSide};
+use crate::{TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Result, Value};

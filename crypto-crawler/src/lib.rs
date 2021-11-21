@@ -166,7 +166,8 @@ mod utils;
 use std::sync::mpsc::Sender;
 
 pub use crawlers::fetch_symbols_retry;
-pub use crypto_market_type::MarketType;
+use crypto_market_type::MarketType;
+use crypto_msg_type::MessageType;
 pub use msg::*;
 pub use utils::get_hot_spot_symbols;
 

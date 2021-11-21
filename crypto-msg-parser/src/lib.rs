@@ -2,10 +2,9 @@ pub mod exchanges;
 mod msg;
 mod order;
 
+use crypto_market_type::MarketType;
 pub use msg::*;
 pub use order::Order;
-
-pub use crypto_market_type::MarketType;
 
 use serde_json::Result;
 

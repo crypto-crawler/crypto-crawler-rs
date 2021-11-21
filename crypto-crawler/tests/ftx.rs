@@ -4,7 +4,8 @@ mod utils;
 use test_case::test_case;
 
 use crypto_crawler::*;
-use crypto_markets::MarketType;
+use crypto_market_type::MarketType;
+use crypto_msg_type::MessageType;
 use utils::parse;
 
 const EXCHANGE_NAME: &str = "ftx";

@@ -1,6 +1,7 @@
 use super::crawl_event;
-use crate::{crawlers::utils::create_conversion_thread, msg::Message, MessageType};
-use crypto_markets::MarketType;
+use crate::{crawlers::utils::create_conversion_thread, msg::Message};
+use crypto_market_type::MarketType;
+use crypto_msg_type::MessageType;
 use crypto_ws_client::*;
 use std::sync::mpsc::Sender;
 

@@ -1,5 +1,7 @@
 use crypto_market_type::MarketType;
-use crypto_msg_parser::{FundingRateMsg, MessageType, OrderBookMsg, TradeMsg};
+use crypto_msg_type::MessageType;
+
+use crypto_msg_parser::{FundingRateMsg, OrderBookMsg, TradeMsg};
 use float_cmp::approx_eq;
 
 pub fn check_trade_fields(
