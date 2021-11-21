@@ -2,8 +2,9 @@ use core::panic;
 use std::sync::mpsc::Sender;
 
 use crate::crawlers::utils::{crawl_candlestick_ext, crawl_event};
-use crate::{msg::Message, MessageType};
-use crypto_markets::MarketType;
+use crate::msg::Message;
+use crypto_market_type::MarketType;
+use crypto_msg_type::MessageType;
 use crypto_ws_client::*;
 
 use super::utils::create_conversion_thread;
