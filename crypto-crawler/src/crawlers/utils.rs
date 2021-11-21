@@ -11,8 +11,9 @@ use std::{
 };
 
 use crate::utils::{REST_LOCKS, WS_LOCKS};
+use crypto_market_type::get_market_types;
 use crypto_market_type::MarketType;
-use crypto_markets::{fetch_symbols, get_market_types};
+use crypto_markets::fetch_symbols;
 use crypto_rest_client::{fetch_l2_snapshot, fetch_l3_snapshot, fetch_open_interest};
 use crypto_ws_client::*;
 use log::*;
