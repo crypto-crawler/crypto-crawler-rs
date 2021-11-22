@@ -1,3 +1,7 @@
+mod exchanges;
+
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 use strum_macros::{Display, EnumString};
 
@@ -38,4 +42,25 @@ pub enum MessageType {
     FundingRate,
     /// Open interest
     OpenInterest,
+}
+
+/// Translate to websocket subscribe/unsubscribe commands.
+///
+/// `configs` Some `msg_type` requires a config, for example,
+/// `Candlestick` requires a `interval`.
+pub fn get_ws_commands(
+    exchange: &str,
+    msg_types: &[MessageType],
+    symbols: &[String],
+    subscribe: bool,
+    configs: Option<&HashMap<String, String>>,
+) -> Vec<String> {
+    if msg_types.is_empty() || symbols.is_empty() {
+        return Vec::new();
+    }
+    match exchange {
+        "binance" => exchanges::binance::get_ws_commands(msg_types, symbols, subscribe, configs),
+        "bitfinex" => exchanges::bitfinex::get_ws_commands(msg_types, symbols, subscribe, configs),
+        _ => Vec::new(),
+    }
 }
