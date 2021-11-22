@@ -113,14 +113,18 @@ mod tests {
         configs.insert("interval".to_string(), "1m".to_string());
         let commands = get_ws_commands(
             &vec![MessageType::Candlestick],
-            &vec!["tBTCUST".to_string()],
+            &vec!["tBTCUST".to_string(), "tETHUST".to_string()],
             true,
             Some(&configs),
         );
-        assert_eq!(commands.len(), 1);
+        assert_eq!(commands.len(), 2);
         assert_eq!(
             r#"{"event":"subscribe", "channel":"candles", "key":"trade:1m:tBTCUST"}"#,
             commands[0]
+        );
+        assert_eq!(
+            r#"{"event":"subscribe", "channel":"candles", "key":"trade:1m:tETHUST"}"#,
+            commands[1]
         );
     }
 }

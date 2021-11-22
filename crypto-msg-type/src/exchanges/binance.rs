@@ -100,13 +100,13 @@ mod tests {
         configs.insert("interval".to_string(), "1m".to_string());
         let commands = get_ws_commands(
             &vec![MessageType::Candlestick],
-            &vec!["BTCUSDT".to_string()],
+            &vec!["BTCUSDT".to_string(), "ETHUSDT".to_string()],
             true,
             Some(&configs),
         );
         assert_eq!(commands.len(), 1);
         assert_eq!(
-            r#"{"method":"SUBSCRIBE","params":["btcusdt@kline_1m"]}"#,
+            r#"{"method":"SUBSCRIBE","params":["btcusdt@kline_1m","ethusdt@kline_1m"]}"#,
             commands[0]
         );
     }
