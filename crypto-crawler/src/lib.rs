@@ -433,3 +433,23 @@ pub fn crawl_open_interest(
 ) {
     crawlers::crawl_open_interest(exchange, market_type, tx, duration)
 }
+
+/// Subscribe to multiple message types of one symbol.
+///
+/// This API is suitable for client applications such as APP, website, etc.
+///
+/// String messages in `tx` are already parsed by `crypto-msg-parser`.
+pub fn subscribe_symbol(
+    exchange: &str,
+    market_type: MarketType,
+    symbol: &str,
+    msg_types: &[MessageType],
+    tx: Sender<String>,
+    duration: Option<u64>,
+) {
+    let ws_client = crawlers::create_ws_client_symbol(exchange, market_type, tx);
+    let symbols = vec![symbol.to_string()];
+    let commands = crypto_msg_type::get_ws_commands(exchange, msg_types, &symbols, true, None);
+    ws_client.subscribe(&commands);
+    ws_client.run(duration);
+}

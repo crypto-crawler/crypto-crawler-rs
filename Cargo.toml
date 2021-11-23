@@ -6,6 +6,7 @@ members = [
   "crypto-markets",
   "crypto-market-type",
   "crypto-msg-parser",
+  "crypto-msg-type",
   "crypto-rest-client",
   "crypto-ws-client",
   "crypto-crawler",

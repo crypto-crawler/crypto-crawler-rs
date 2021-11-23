@@ -7,7 +7,7 @@ use std::{
         Arc,
     },
     thread::JoinHandle,
-    time::{Duration, Instant, SystemTime},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
 use crate::utils::{REST_LOCKS, WS_LOCKS};
@@ -437,28 +437,12 @@ fn get_num_subscriptions_per_connection(exchange: &str) -> usize {
     }
 }
 
-fn create_ws_client(
+fn create_ws_client_internal(
     exchange: &str,
     market_type: MarketType,
-    msg_type: MessageType,
-    tx: Sender<Message>,
+    tx: Sender<String>,
 ) -> Arc<dyn WSClient + Send + Sync> {
-    let lock = WS_LOCKS
-        .get(exchange)
-        .unwrap()
-        .get(&market_type)
-        .unwrap()
-        .clone();
-    let mut lock = lock.lock().unwrap();
-    let interval = get_connection_interval_ms(exchange, market_type);
-    if let Some(interval) = interval {
-        if !lock.owns_lock() {
-            lock.lock().unwrap();
-            std::thread::sleep(Duration::from_millis(interval));
-        }
-    }
-    let tx = create_conversion_thread(exchange.to_string(), msg_type, market_type, tx);
-    let ws_client: Arc<dyn WSClient + Send + Sync> = match exchange {
+    match exchange {
         "binance" => match market_type {
             MarketType::Spot => Arc::new(BinanceSpotWSClient::new(tx, None)),
             MarketType::InverseFuture | MarketType::InverseSwap => {
@@ -536,11 +520,44 @@ fn create_ws_client(
             _ => panic!("ZBG does NOT have the {} market type", market_type),
         },
         _ => panic!("Unknown exchange {}", exchange),
-    };
+    }
+}
+
+fn create_ws_client(
+    exchange: &str,
+    market_type: MarketType,
+    msg_type: MessageType,
+    tx: Sender<Message>,
+) -> Arc<dyn WSClient + Send + Sync> {
+    let lock = WS_LOCKS
+        .get(exchange)
+        .unwrap()
+        .get(&market_type)
+        .unwrap()
+        .clone();
+    let mut lock = lock.lock().unwrap();
+    let interval = get_connection_interval_ms(exchange, market_type);
+    if let Some(interval) = interval {
+        if !lock.owns_lock() {
+            lock.lock().unwrap();
+            std::thread::sleep(Duration::from_millis(interval));
+        }
+    }
+    let tx = create_conversion_thread(exchange.to_string(), msg_type, market_type, tx);
+    let ws_client = create_ws_client_internal(exchange, market_type, tx);
     if interval.is_some() && lock.owns_lock() {
         lock.unlock().unwrap();
     }
     ws_client
+}
+
+pub(crate) fn create_ws_client_symbol(
+    exchange: &str,
+    market_type: MarketType,
+    tx: Sender<String>,
+) -> Arc<dyn WSClient + Send + Sync> {
+    let tx = create_parser_thread(exchange.to_string(), market_type, tx);
+    create_ws_client_internal(exchange, market_type, tx)
 }
 
 fn create_symbol_discovery_thread(
@@ -652,6 +669,47 @@ pub(crate) fn create_conversion_thread(
         for json in rx_raw {
             let msg = Message::new(exchange.clone(), market_type, msg_type, json);
             tx.send(msg).unwrap();
+        }
+    });
+    tx_raw
+}
+
+// create a thread to call `crypto-msg-parser`
+fn create_parser_thread(
+    exchange: String,
+    market_type: MarketType,
+    tx: Sender<String>,
+) -> Sender<String> {
+    let (tx_raw, rx_raw) = std::sync::mpsc::channel::<String>();
+    std::thread::spawn(move || {
+        for json in rx_raw {
+            let msg_type = crypto_msg_parser::get_msg_type(&exchange, &json);
+            let parsed = match msg_type {
+                MessageType::Trade => serde_json::to_string(
+                    &crypto_msg_parser::parse_trade(&exchange, market_type, &json).unwrap(),
+                )
+                .unwrap(),
+                MessageType::L2Event => {
+                    let received_at = SystemTime::now()
+                        .duration_since(UNIX_EPOCH)
+                        .unwrap()
+                        .as_millis()
+                        .try_into()
+                        .unwrap();
+                    serde_json::to_string(
+                        &crypto_msg_parser::parse_l2(
+                            &exchange,
+                            market_type,
+                            &json,
+                            Some(received_at),
+                        )
+                        .unwrap(),
+                    )
+                    .unwrap()
+                }
+                _ => panic!("unknown msg type {}", msg_type),
+            };
+            tx.send(parsed).unwrap();
         }
     });
     tx_raw

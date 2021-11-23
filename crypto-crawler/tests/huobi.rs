@@ -134,3 +134,11 @@ fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
 fn test_crawl_candlestick(market_type: MarketType) {
     gen_test_crawl_candlestick!(EXCHANGE_NAME, market_type)
 }
+
+#[test_case(MarketType::Spot, "btcusdt")]
+#[test_case(MarketType::InverseFuture, "BTC_CQ")]
+#[test_case(MarketType::InverseSwap, "BTC-USD")]
+#[test_case(MarketType::LinearSwap, "BTC-USDT")]
+fn test_subscribe_symbol(market_type: MarketType, symbol: &str) {
+    gen_test_subscribe_symbol!(EXCHANGE_NAME, market_type, symbol)
+}

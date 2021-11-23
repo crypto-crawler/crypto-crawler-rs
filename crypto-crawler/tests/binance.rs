@@ -141,3 +141,13 @@ fn test_crawl_funding_rate(market_type: MarketType, symbol: &str) {
 fn test_crawl_candlestick(market_type: MarketType) {
     gen_test_crawl_candlestick!(EXCHANGE_NAME, market_type)
 }
+
+#[test_case(MarketType::Spot, "BTCUSDT")]
+#[test_case(MarketType::InverseFuture, "BTCUSD_211231")]
+#[test_case(MarketType::LinearFuture, "BTCUSDT_211231")]
+#[test_case(MarketType::InverseSwap, "BTCUSD_PERP")]
+#[test_case(MarketType::LinearSwap, "BTCUSDT")]
+#[test_case(MarketType::EuropeanOption, "BTC-210129-40000-C"; "inconclusive")]
+fn test_subscribe_symbol(market_type: MarketType, symbol: &str) {
+    gen_test_subscribe_symbol!(EXCHANGE_NAME, market_type, symbol)
+}

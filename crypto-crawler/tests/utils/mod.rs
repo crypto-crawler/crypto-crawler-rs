@@ -94,3 +94,17 @@ macro_rules! gen_test_crawl_candlestick {
         }
     }};
 }
+
+#[allow(unused_macros)]
+macro_rules! gen_test_subscribe_symbol {
+    ($exchange:expr, $market_type:expr, $symbol:expr) => {{
+        let (tx, rx) = std::sync::mpsc::channel();
+        let mut messages = Vec::new();
+        let msg_types = vec![MessageType::Trade, MessageType::L2Event];
+        subscribe_symbol($exchange, $market_type, $symbol, &msg_types, tx, Some(0));
+        for msg in rx {
+            messages.push(msg);
+        }
+        assert!(!messages.is_empty());
+    }};
+}
