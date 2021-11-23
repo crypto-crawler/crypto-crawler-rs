@@ -17,6 +17,7 @@ fn trade() {
             "BTC/USDT".to_string(),
             extract_symbol("bithumb", MarketType::Spot, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.side, TradeSide::Sell);
@@ -36,6 +37,7 @@ fn trade() {
         "ETH/USDT".to_string(),
         extract_symbol("bithumb", MarketType::Spot, raw_msg).unwrap(),
         trade,
+        raw_msg,
     );
 
     assert_eq!(trade.quantity_base, 0.065614);
@@ -57,6 +59,7 @@ fn l2_orderbook_snapshot() {
         "BTC/USDT".to_string(),
         extract_symbol("bithumb", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
+        raw_msg,
     );
 
     assert_eq!(orderbook.timestamp, 1622446974153);
@@ -93,6 +96,7 @@ fn l2_orderbook_update() {
         "BTC/USDT".to_string(),
         extract_symbol("bithumb", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
+        raw_msg,
     );
 
     assert_eq!(orderbook.timestamp, 1622446975394);

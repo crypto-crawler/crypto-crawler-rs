@@ -17,6 +17,7 @@ mod trade {
             "BTC/USD".to_string(),
             extract_symbol("bitmex", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.015813);
@@ -36,6 +37,7 @@ mod trade {
             "ETH/USD".to_string(),
             extract_symbol("bitmex", MarketType::QuantoSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.058513750731421885);
@@ -60,6 +62,7 @@ mod trade {
             "BTC/USD".to_string(),
             extract_symbol("bitmex", MarketType::InverseFuture, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.1276);
@@ -79,6 +82,7 @@ mod trade {
             "ETH/BTC".to_string(),
             extract_symbol("bitmex", MarketType::LinearFuture, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 1.0);
@@ -98,6 +102,7 @@ mod trade {
             "ETH/USD".to_string(),
             extract_symbol("bitmex", MarketType::QuantoFuture, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.6814310051107325);
@@ -184,6 +189,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("bitmex", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.bids[0].price, 36145.0);
@@ -239,6 +245,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("bitmex", MarketType::InverseSwap, update_msg).unwrap(),
             orderbook,
+            update_msg,
         );
 
         assert_eq!(orderbook.asks[0].price, 36760.5);
@@ -265,6 +272,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("bitmex", MarketType::InverseSwap, delete_msg).unwrap(),
             orderbook,
+            delete_msg,
         );
 
         assert_eq!(orderbook.asks[0].price, 36760.5);
@@ -294,6 +302,7 @@ mod l2_orderbook {
             "ETH/BTC".to_string(),
             extract_symbol("bitmex", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.bids[0].price, 0.07237);
@@ -333,6 +342,7 @@ mod l2_orderbook {
             "ETH/BTC".to_string(),
             extract_symbol("bitmex", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert!(approx_eq!(f64, orderbook.bids[0].price, 0.06982, ulps = 12));

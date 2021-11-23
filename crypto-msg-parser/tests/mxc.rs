@@ -20,6 +20,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("mxc", MarketType::Spot, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.007811);
@@ -40,6 +41,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("mxc", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert!(approx_eq!(
@@ -72,6 +74,7 @@ mod trade {
             "BTC/USD".to_string(),
             extract_symbol("mxc", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert!(approx_eq!(
@@ -113,6 +116,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("mxc", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.bids[0].price, 38932.19);
@@ -135,6 +139,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("mxc", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622722473816);
@@ -160,6 +165,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("mxc", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622723010000);

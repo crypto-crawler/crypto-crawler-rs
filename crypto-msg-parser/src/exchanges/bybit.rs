@@ -90,6 +90,29 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<Stri
     Some(arr[1].to_string())
 }
 
+pub(crate) fn get_msg_type(msg: &str) -> MessageType {
+    if let Ok(ws_msg) = serde_json::from_str::<HashMap<String, Value>>(msg) {
+        let table = ws_msg.get("topic").unwrap().as_str().unwrap();
+        let channel = {
+            let arr = table.split('.').collect::<Vec<&str>>();
+            arr[0]
+        };
+        if channel == "trade" {
+            MessageType::Trade
+        } else if channel == "orderBookL2_25" {
+            MessageType::L2Event
+        } else if table == "instrument_info" {
+            MessageType::Ticker
+        } else if table == "klineV2" || table == "candle" {
+            MessageType::Candlestick
+        } else {
+            MessageType::Other
+        }
+    } else {
+        MessageType::Other
+    }
+}
+
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     match market_type {
         MarketType::InverseSwap | MarketType::InverseFuture => {

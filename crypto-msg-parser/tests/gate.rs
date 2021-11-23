@@ -20,6 +20,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::Spot, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trades[0].quantity_base, 0.0037);
@@ -42,6 +43,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::Spot, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trades[0].price, 47395.009);
@@ -65,6 +67,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::LinearFuture, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert!(approx_eq!(
@@ -97,6 +100,7 @@ mod trade {
             "BTC/USD".to_string(),
             extract_symbol("gate", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 7.0 / 56155.2);
@@ -119,6 +123,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert!(approx_eq!(
@@ -166,6 +171,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.asks[0].price, 37483.21);
@@ -206,6 +212,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.asks[0].price, 47815.98);
@@ -250,6 +257,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.asks[0].price, 37483.89);
@@ -286,6 +294,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.seq_id, Some(4622074364));
@@ -326,6 +335,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("gate", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1632793098358);
@@ -352,6 +362,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("gate", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622682306315);
@@ -392,6 +403,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1632799979523);
@@ -418,6 +430,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622689062072);
@@ -488,6 +501,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622697760000);
@@ -528,6 +542,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622769533000);

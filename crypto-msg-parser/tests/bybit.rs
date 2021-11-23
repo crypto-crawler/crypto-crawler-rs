@@ -19,6 +19,7 @@ mod trade {
                 "BTC/USD".to_string(),
                 extract_symbol("bybit", MarketType::InverseFuture, raw_msg).unwrap(),
                 trade,
+                raw_msg,
             );
         }
 
@@ -48,6 +49,7 @@ mod trade {
             "BTC/USD".to_string(),
             extract_symbol("bybit", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 237.0 / 57073.5);
@@ -71,6 +73,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("bybit", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.04);
@@ -100,6 +103,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("bybit", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622538339073);
@@ -140,6 +144,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("bybit", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622540847513);
@@ -175,6 +180,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("bybit", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622542809357);
@@ -215,6 +221,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("bybit", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622542809497);
@@ -250,6 +257,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("bybit", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622543529282);
@@ -290,6 +298,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("bybit", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622544088904);

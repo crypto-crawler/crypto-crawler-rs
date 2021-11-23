@@ -20,6 +20,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("kucoin", MarketType::Spot, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.00013064);
@@ -41,6 +42,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("kucoin", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert!(approx_eq!(
@@ -73,6 +75,7 @@ mod trade {
             "BTC/USD".to_string(),
             extract_symbol("kucoin", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 5000.0 / 57798.0);
@@ -95,6 +98,7 @@ mod trade {
             "BTC/USD".to_string(),
             extract_symbol("kucoin", MarketType::InverseFuture, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 1510.0 / 57963.0);
@@ -127,6 +131,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("kucoin", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.bids[0].price, 39272.0);
@@ -149,6 +154,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("kucoin", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622718985044);
@@ -175,6 +181,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("kucoin", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622719195286);
@@ -201,6 +208,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("kucoin", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622719594867);

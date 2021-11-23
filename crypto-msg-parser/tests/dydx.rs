@@ -16,6 +16,7 @@ mod trade {
             "BTC/USD".to_string(),
             extract_symbol("dydx", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.124);
@@ -47,6 +48,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("dydx", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1633951152106);
@@ -85,6 +87,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("dydx", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1633951152106);

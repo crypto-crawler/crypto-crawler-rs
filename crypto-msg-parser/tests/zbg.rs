@@ -19,6 +19,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("zbg", MarketType::Spot, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.048800);
@@ -36,6 +37,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("zbg", MarketType::Spot, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.654172);
@@ -57,6 +59,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("zbg", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.01 * 31.0);
@@ -79,6 +82,7 @@ mod trade {
             "BTC/USD".to_string(),
             extract_symbol("zbg", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 188.0 / 57370.0);
@@ -108,6 +112,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("zbg", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622729950000);
@@ -136,6 +141,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("zbg", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622729958000);
@@ -160,6 +166,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("zbg", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622733219128);
@@ -190,6 +197,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("zbg", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622734001831);

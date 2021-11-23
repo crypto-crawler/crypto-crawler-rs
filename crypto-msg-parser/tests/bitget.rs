@@ -20,6 +20,7 @@ mod trade {
                 "BTC/USD".to_string(),
                 extract_symbol("bitget", MarketType::InverseSwap, raw_msg).unwrap(),
                 trade,
+                raw_msg,
             );
             assert_eq!(trade.side, TradeSide::Sell);
         }
@@ -51,6 +52,7 @@ mod trade {
                 "BTC/USDT".to_string(),
                 extract_symbol("bitget", MarketType::LinearSwap, raw_msg).unwrap(),
                 trade,
+                raw_msg,
             );
 
             assert_eq!(trade.side, TradeSide::Sell);
@@ -136,6 +138,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("bitget", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622432420458);
@@ -216,6 +219,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("bitget", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622434075797);
@@ -281,6 +285,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("bitget", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622426574770);
@@ -321,6 +326,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("bitget", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622431636806);

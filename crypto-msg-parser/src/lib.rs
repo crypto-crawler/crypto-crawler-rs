@@ -3,6 +3,7 @@ mod msg;
 mod order;
 
 use crypto_market_type::MarketType;
+use crypto_msg_type::MessageType;
 pub use msg::*;
 pub use order::Order;
 
@@ -136,4 +137,18 @@ pub fn parse_funding_rate(
         _ => panic!("{} does NOT have perpetual swap market", exchange),
     };
     func(market_type, msg)
+}
+
+/// Infer the message type from the message.
+pub fn get_msg_type(exchange: &str, msg: &str) -> MessageType {
+    match exchange {
+        "binance" => exchanges::binance::get_msg_type(msg),
+        "bitmex" => exchanges::bitmex::get_msg_type(msg),
+        "bybit" => exchanges::bybit::get_msg_type(msg),
+        "deribit" => exchanges::deribit::get_msg_type(msg),
+        "ftx" => exchanges::ftx::get_msg_type(msg),
+        "huobi" => exchanges::huobi::get_msg_type(msg),
+        "okex" => exchanges::okex::get_msg_type(msg),
+        _ => MessageType::Other,
+    }
 }

@@ -15,6 +15,7 @@ fn trade() {
         "BTC/USD".to_string(),
         extract_symbol("kraken", MarketType::Spot, raw_msg).unwrap(),
         trade,
+        raw_msg,
     );
 
     assert_eq!(trade.quantity_base, 0.02063928);
@@ -40,6 +41,7 @@ fn l2_orderbook_snapshot() {
         "BTC/USD".to_string(),
         extract_symbol("kraken", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
+        raw_msg,
     );
 
     assert_eq!(orderbook.timestamp, 1622714255963);
@@ -76,6 +78,7 @@ fn l2_orderbook_update() {
         "BTC/USD".to_string(),
         extract_symbol("kraken", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
+        raw_msg,
     );
 
     assert_eq!(orderbook.timestamp, 1622714256068);
@@ -97,6 +100,7 @@ fn l2_orderbook_update() {
         "BTC/USD".to_string(),
         extract_symbol("kraken", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
+        raw_msg,
     );
 
     assert_eq!(orderbook.timestamp, 1622766170577);

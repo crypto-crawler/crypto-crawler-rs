@@ -15,6 +15,7 @@ fn trade() {
         "BTC/USD".to_string(),
         extract_symbol("coinbase_pro", MarketType::Spot, raw_msg).unwrap(),
         trade,
+        raw_msg,
     );
 
     assert_eq!(trade.quantity_base, 0.00031874);
@@ -42,6 +43,7 @@ fn l2_orderbook_snapshot() {
         "BTC/USD".to_string(),
         extract_symbol("coinbase_pro", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
+        raw_msg,
     );
 
     assert_eq!(orderbook.bids[0].price, 37209.96);
@@ -76,6 +78,7 @@ fn l2_orderbook_update() {
         "BTC/USD".to_string(),
         extract_symbol("coinbase_pro", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
+        raw_msg,
     );
 
     assert_eq!(orderbook.timestamp, 1622624529048);

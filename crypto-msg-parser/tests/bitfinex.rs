@@ -16,6 +16,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("bitfinex", MarketType::Spot, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.11546588);
@@ -36,6 +37,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("bitfinex", MarketType::Spot, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.11546588);
@@ -59,6 +61,7 @@ mod trade {
                 "BTC/USDT".to_string(),
                 extract_symbol("bitfinex", MarketType::Spot, raw_msg).unwrap(),
                 trade,
+                raw_msg,
             );
         }
     }
@@ -74,6 +77,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("bitfinex", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.00020449);
@@ -94,6 +98,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("bitfinex", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.00020449);
@@ -117,6 +122,7 @@ mod trade {
                 "BTC/USDT".to_string(),
                 extract_symbol("bitfinex", MarketType::LinearSwap, raw_msg).unwrap(),
                 trade,
+                raw_msg,
             );
         }
     }
@@ -149,6 +155,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("bitfinex", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.bids[0].price, 36167.0);
@@ -189,6 +196,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("bitfinex", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
         assert_eq!(orderbook.asks[0].price, 34668.0);
         assert_eq!(orderbook.asks[0].quantity_base, 0.00813136);
@@ -216,6 +224,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("bitfinex", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.bids[0].price, 34840.0);
@@ -260,6 +269,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("bitfinex", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.bids[0].price, 34442.0);

@@ -78,9 +78,33 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<Stri
     }
 }
 
+pub(crate) fn get_msg_type(msg: &str) -> MessageType {
+    if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
+        let table = ws_msg.table;
+        let channel = {
+            let arr = table.split('/').collect::<Vec<&str>>();
+            arr[1]
+        };
+        if channel == "trade" {
+            MessageType::Trade
+        } else if channel == "depth_l2_tbt" {
+            MessageType::L2Event
+        } else if channel == "depth5" {
+            MessageType::L2TopK
+        } else if table == "ticker" {
+            MessageType::BBO
+        } else if table == "candle" {
+            MessageType::Candlestick
+        } else {
+            MessageType::Other
+        }
+    } else {
+        MessageType::Other
+    }
+}
+
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradeMsg>>(msg)?;
-    let option_trades = ws_msg.table.as_str() == "option/trades";
     let mut trades: Vec<TradeMsg> = ws_msg
         .data
         .into_iter()
@@ -94,11 +118,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             } else {
                 panic!("qty and size are both missing");
             };
-            let side = if option_trades {
-                raw_trade.trade_side.clone().unwrap()
-            } else {
-                raw_trade.side.clone().unwrap()
-            };
+            let side = raw_trade.side.clone().unwrap();
             let pair =
                 crypto_pair::normalize_pair(&raw_trade.instrument_id, EXCHANGE_NAME).unwrap();
             let (quantity_base, quantity_quote, _) =

@@ -462,6 +462,27 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<Stri
     }
 }
 
+pub(crate) fn get_msg_type(msg: &str) -> MessageType {
+    if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
+        let table = ws_msg.table;
+        if table == "trade" {
+            MessageType::Trade
+        } else if table == "orderBookL2_25" {
+            MessageType::L2Event
+        } else if table == "orderBook10" {
+            MessageType::L2TopK
+        } else if table == "quote" {
+            MessageType::BBO
+        } else if table == "tradeBin" {
+            MessageType::Candlestick
+        } else {
+            MessageType::Other
+        }
+    } else {
+        MessageType::Other
+    }
+}
+
 // Copied from crypto-markets/tests/bitmex.rs
 fn get_market_type_from_symbol(symbol: &str) -> MarketType {
     let date = &symbol[(symbol.len() - 2)..];

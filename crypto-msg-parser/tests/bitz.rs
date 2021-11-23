@@ -18,6 +18,7 @@ fn trade() {
             "BTC/USDT".to_string(),
             extract_symbol("bitz", MarketType::Spot, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
     }
 
@@ -44,6 +45,7 @@ fn l2_orderbook_update() {
         "BTC/USDT".to_string(),
         extract_symbol("bitz", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
+        raw_msg,
     );
 
     assert_eq!(orderbook.timestamp, 1622527417489);

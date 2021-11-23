@@ -14,6 +14,7 @@ fn trade() {
         "BTC/USD".to_string(),
         extract_symbol("bitstamp", MarketType::Spot, raw_msg).unwrap(),
         trade,
+        raw_msg,
     );
 
     assert_eq!(trade.quantity_base, 1e-08);
@@ -35,6 +36,7 @@ fn l2_orderbook_update() {
         "BTC/USD".to_string(),
         extract_symbol("bitstamp", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
+        raw_msg,
     );
 
     assert_eq!(orderbook.timestamp, 1622520011989);

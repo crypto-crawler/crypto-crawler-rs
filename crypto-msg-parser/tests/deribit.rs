@@ -20,6 +20,7 @@ mod trade {
                 "BTC/USD".to_string(),
                 extract_symbol("deribit", MarketType::InverseFuture, raw_msg).unwrap(),
                 trade,
+                raw_msg,
             );
         }
 
@@ -50,6 +51,7 @@ mod trade {
                 "BTC/USD".to_string(),
                 extract_symbol("deribit", MarketType::InverseSwap, raw_msg).unwrap(),
                 trade,
+                raw_msg,
             );
 
             assert_eq!(trade.side, TradeSide::Buy);
@@ -91,6 +93,7 @@ mod trade {
                 "BTC/BTC".to_string(),
                 extract_symbol("deribit", MarketType::EuropeanOption, raw_msg).unwrap(),
                 trade,
+                raw_msg,
             );
 
             assert_eq!(trade.side, TradeSide::Buy);
@@ -122,6 +125,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("deribit", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         let contract_value = crypto_contract_value::get_contract_value(
@@ -179,6 +183,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("deribit", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         let contract_value = crypto_contract_value::get_contract_value(
@@ -234,6 +239,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("deribit", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         let contract_value = crypto_contract_value::get_contract_value(
@@ -291,6 +297,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("deribit", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         let contract_value = crypto_contract_value::get_contract_value(
@@ -342,6 +349,7 @@ mod l2_orderbook {
             "BTC/BTC".to_string(),
             extract_symbol("deribit", MarketType::EuropeanOption, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.bids[0].price, 0.005);

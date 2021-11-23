@@ -5,6 +5,7 @@ mod huobi_spot;
 mod message;
 
 use crypto_market_type::MarketType;
+use crypto_msg_type::MessageType;
 
 use crate::{FundingRateMsg, OrderBookMsg, TradeMsg};
 
@@ -16,6 +17,32 @@ pub(crate) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Option<Str
     let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
     let v = ws_msg.ch.split('.').collect::<Vec<&str>>();
     Some(v[1].to_string())
+}
+
+pub(crate) fn get_msg_type(msg: &str) -> MessageType {
+    if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
+        let channel = ws_msg.ch;
+        if channel.ends_with("trade.detail") {
+            MessageType::Trade
+        } else if channel.ends_with("depth.size_20.high_freq")
+            || channel.ends_with("depth.size_150.high_freq")
+            || channel.ends_with("mbp.20")
+        {
+            MessageType::L2Event
+        } else if channel.contains(".depth.step") {
+            MessageType::L2TopK
+        } else if channel.ends_with("bbo") {
+            MessageType::BBO
+        } else if channel.ends_with("detail") {
+            MessageType::Ticker
+        } else if channel.contains(".kline.") {
+            MessageType::Candlestick
+        } else {
+            MessageType::Other
+        }
+    } else {
+        MessageType::Other
+    }
 }
 
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {

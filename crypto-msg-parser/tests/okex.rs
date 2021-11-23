@@ -20,6 +20,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("okex", MarketType::Spot, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.00020621);
@@ -41,6 +42,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("okex", MarketType::LinearFuture, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert!(approx_eq!(
@@ -73,6 +75,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("okex", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert!(approx_eq!(
@@ -105,6 +108,7 @@ mod trade {
             "BTC/USD".to_string(),
             extract_symbol("okex", MarketType::InverseFuture, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 100.0 * 7.0 / 59999.7);
@@ -127,6 +131,7 @@ mod trade {
             "BTC/USD".to_string(),
             extract_symbol("okex", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 100.0 * 1.0 / 56535.9);
@@ -149,6 +154,7 @@ mod trade {
             "BTC/USD".to_string(),
             extract_symbol("okex", MarketType::EuropeanOption, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.1 * 4.0);
@@ -156,7 +162,7 @@ mod trade {
         assert_eq!(trade.quantity_contract, Some(4.0));
         assert_eq!(trade.side, TradeSide::Buy);
 
-        let raw_msg = r#"{"table":"option/trades","data":[{"instrument_id":"BTC-USD-210924-120000-C","trade_id":"22","price":"0.079","qty":"1","trade_side":"sell","timestamp":"2021-03-23T08:12:28.348Z"}]}"#;
+        let raw_msg = r#"{"table":"option/trade","data":[{"side":"sell","trade_id":"3","price":"0.0255","qty":"10","instrument_id":"BTC-USD-211124-55500-C","timestamp":"2021-11-23T10:55:56.522Z"}]}"#;
         let trades = &parse_trade("okex", MarketType::EuropeanOption, raw_msg).unwrap();
 
         assert_eq!(trades.len(), 1);
@@ -168,11 +174,12 @@ mod trade {
             "BTC/USD".to_string(),
             extract_symbol("okex", MarketType::EuropeanOption, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
-        assert_eq!(trade.quantity_base, 0.1 * 1.0);
-        assert_eq!(trade.quantity_quote, 0.1 * 1.0 * 0.079);
-        assert_eq!(trade.quantity_contract, Some(1.0));
+        assert_eq!(trade.quantity_base, 0.1 * 10.0);
+        assert_eq!(trade.quantity_quote, 0.1 * 10.0 * 0.0255);
+        assert_eq!(trade.quantity_contract, Some(10.0));
         assert_eq!(trade.side, TradeSide::Sell);
     }
 }
@@ -237,6 +244,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("okex", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622723951253);
@@ -265,6 +273,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("okex", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622724009962);
@@ -293,6 +302,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("okex", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622725774429);
@@ -323,6 +333,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("okex", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622726064831);
@@ -353,6 +364,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("okex", MarketType::EuropeanOption, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622726335745);

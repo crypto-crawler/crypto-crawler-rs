@@ -19,6 +19,7 @@ mod trade {
                 "BTC/USD".to_string(),
                 extract_symbol("ftx", MarketType::Spot, raw_msg).unwrap(),
                 trade,
+                raw_msg,
             );
 
             assert_eq!(trade.side, TradeSide::Buy);
@@ -40,6 +41,7 @@ mod trade {
                 "BTC/USD".to_string(),
                 extract_symbol("ftx", MarketType::LinearFuture, raw_msg).unwrap(),
                 trade,
+                raw_msg,
             );
         }
 
@@ -63,6 +65,7 @@ mod trade {
                 "BTC/USD".to_string(),
                 extract_symbol("ftx", MarketType::LinearSwap, raw_msg).unwrap(),
                 trade,
+                raw_msg,
             );
         }
 
@@ -86,6 +89,7 @@ mod trade {
                 "BTC/USD".to_string(),
                 extract_symbol("ftx", MarketType::Move, raw_msg).unwrap(),
                 trade,
+                raw_msg,
             );
         }
 
@@ -116,6 +120,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("ftx", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622668801966);
@@ -152,6 +157,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("ftx", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622668802026);
@@ -184,6 +190,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("ftx", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622669504820);
@@ -224,6 +231,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("ftx", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622669504843);
@@ -254,6 +262,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("ftx", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622660997436);
@@ -294,6 +303,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("ftx", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622660997459);

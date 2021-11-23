@@ -16,6 +16,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("binance", MarketType::Spot, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.00035600);
@@ -35,6 +36,7 @@ mod trade {
             "BTC/USD".to_string(),
             extract_symbol("binance", MarketType::InverseFuture, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 500.0 / 62838.0);
@@ -54,6 +56,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("binance", MarketType::LinearFuture, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.094);
@@ -74,6 +77,7 @@ mod trade {
             "BTC/USD".to_string(),
             extract_symbol("binance", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.price, 58570.1);
@@ -95,6 +99,7 @@ mod trade {
             "BTC/USDT".to_string(),
             extract_symbol("binance", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
+            raw_msg,
         );
 
         assert_eq!(trade.quantity_base, 0.043);
@@ -119,6 +124,7 @@ mod trade {
                 "BTC/USDT".to_string(),
                 extract_symbol("binance", MarketType::EuropeanOption, raw_msg).unwrap(),
                 trade,
+                raw_msg,
             );
         }
 
@@ -224,6 +230,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("binance", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622363903670);
@@ -261,6 +268,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("binance", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622368000234);
@@ -301,6 +309,7 @@ mod l2_orderbook {
             "ETH/USDT".to_string(),
             extract_symbol("binance", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622368962065);
@@ -341,6 +350,7 @@ mod l2_orderbook {
             "BTC/USDT".to_string(),
             extract_symbol("binance", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622371244687);
@@ -381,6 +391,7 @@ mod l2_orderbook {
             "BTC/USD".to_string(),
             extract_symbol("binance", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
+            raw_msg,
         );
 
         assert_eq!(orderbook.timestamp, 1622370862553);
