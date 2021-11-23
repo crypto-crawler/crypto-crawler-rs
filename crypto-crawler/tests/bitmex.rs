@@ -91,3 +91,8 @@ fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
         MessageType::L2Event
     )
 }
+
+#[test_case(MarketType::InverseSwap, "XBTUSD")]
+fn test_subscribe_symbol(market_type: MarketType, symbol: &str) {
+    gen_test_subscribe_symbol!(EXCHANGE_NAME, market_type, symbol)
+}

@@ -233,7 +233,7 @@ mod okex_option {
         gen_test_code!(
             OkexWSClient,
             subscribe_trade,
-            &vec!["BTC-USD-211231-18000-P".to_string()]
+            &vec!["BTC-USD-211124-55500-C".to_string()]
         );
     }
 
@@ -242,7 +242,7 @@ mod okex_option {
         gen_test_code!(
             OkexWSClient,
             subscribe_ticker,
-            &vec!["BTC-USD-211231-18000-P".to_string()]
+            &vec!["BTC-USD-211124-55500-C".to_string()]
         );
     }
 
@@ -251,7 +251,7 @@ mod okex_option {
         gen_test_code!(
             OkexWSClient,
             subscribe_orderbook,
-            &vec!["BTC-USD-211231-18000-P".to_string()]
+            &vec!["BTC-USD-211124-55500-C".to_string()]
         );
     }
 
@@ -260,7 +260,7 @@ mod okex_option {
         gen_test_code!(
             OkexWSClient,
             subscribe_orderbook_topk,
-            &vec!["BTC-USD-211231-18000-P".to_string()]
+            &vec!["BTC-USD-211124-55500-C".to_string()]
         );
     }
 
@@ -268,11 +268,11 @@ mod okex_option {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             OkexWSClient,
-            &vec![("BTC-USD-211231-18000-P".to_string(), 60)]
+            &vec![("BTC-USD-211124-55500-C".to_string(), 60)]
         );
         gen_test_subscribe_candlestick!(
             OkexWSClient,
-            &vec![("BTC-USD-211231-18000-P".to_string(), 604800)]
+            &vec![("BTC-USD-211124-55500-C".to_string(), 604800)]
         );
     }
 }

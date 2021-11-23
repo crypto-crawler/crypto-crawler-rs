@@ -31,8 +31,10 @@ fn channel_symbol_to_topic(
 }
 
 fn topics_to_command(topics: &[String], subscribe: bool) -> String {
+    // spot requires `id`, otherwise it returns the error:
+    // {"error":{"code":2,"msg":"Invalid request: request ID must be an unsigned integer"}}
     format!(
-        r#"{{"method":"{}","params":{}}}"#,
+        r#"{{"id":9527, "method":"{}","params":{}}}"#,
         if subscribe {
             "SUBSCRIBE"
         } else {
@@ -74,7 +76,7 @@ mod tests {
         );
         assert_eq!(commands.len(), 1);
         assert_eq!(
-            r#"{"method":"SUBSCRIBE","params":["btcusdt@aggTrade","ethusdt@aggTrade"]}"#,
+            r#"{"id":9527, "method":"SUBSCRIBE","params":["btcusdt@aggTrade","ethusdt@aggTrade"]}"#,
             commands[0]
         );
     }
@@ -89,7 +91,7 @@ mod tests {
         );
         assert_eq!(commands.len(), 1);
         assert_eq!(
-            r#"{"method":"SUBSCRIBE","params":["btcusdt@aggTrade","btcusdt@depth@100ms"]}"#,
+            r#"{"id":9527, "method":"SUBSCRIBE","params":["btcusdt@aggTrade","btcusdt@depth@100ms"]}"#,
             commands[0]
         );
     }
@@ -106,7 +108,7 @@ mod tests {
         );
         assert_eq!(commands.len(), 1);
         assert_eq!(
-            r#"{"method":"SUBSCRIBE","params":["btcusdt@kline_1m","ethusdt@kline_1m"]}"#,
+            r#"{"id":9527, "method":"SUBSCRIBE","params":["btcusdt@kline_1m","ethusdt@kline_1m"]}"#,
             commands[0]
         );
     }

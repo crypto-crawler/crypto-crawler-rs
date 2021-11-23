@@ -92,3 +92,10 @@ fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
         MessageType::L2Snapshot
     )
 }
+
+#[test_case(MarketType::Spot, "BTC/USD")]
+#[test_case(MarketType::LinearSwap, "BTC-PERP")]
+#[test_case(MarketType::LinearFuture, "BTC-1231")]
+fn test_subscribe_symbol(market_type: MarketType, symbol: &str) {
+    gen_test_subscribe_symbol!(EXCHANGE_NAME, market_type, symbol)
+}
