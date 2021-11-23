@@ -62,6 +62,7 @@ pub fn get_ws_commands(
         "binance" => exchanges::binance::get_ws_commands(msg_types, symbols, subscribe, configs),
         "bitfinex" => exchanges::bitfinex::get_ws_commands(msg_types, symbols, subscribe, configs),
         "bitmex" => exchanges::bitmex::get_ws_commands(msg_types, symbols, subscribe, configs),
+        "bybit" => exchanges::bybit::get_ws_commands(msg_types, symbols, subscribe, configs),
         "deribit" => exchanges::deribit::get_ws_commands(msg_types, symbols, subscribe, configs),
         "ftx" => exchanges::ftx::get_ws_commands(msg_types, symbols, subscribe, configs),
         "huobi" => exchanges::huobi::get_ws_commands(msg_types, symbols, subscribe, configs),
