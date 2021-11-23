@@ -47,7 +47,7 @@ pub enum MessageType {
 /// Translate to websocket subscribe/unsubscribe commands.
 ///
 /// `configs` Some `msg_type` requires a config, for example,
-/// `Candlestick` requires a `interval`.
+/// `Candlestick` requires an `interval` parameter.
 pub fn get_ws_commands(
     exchange: &str,
     msg_types: &[MessageType],
@@ -61,6 +61,11 @@ pub fn get_ws_commands(
     match exchange {
         "binance" => exchanges::binance::get_ws_commands(msg_types, symbols, subscribe, configs),
         "bitfinex" => exchanges::bitfinex::get_ws_commands(msg_types, symbols, subscribe, configs),
+        "bitmex" => exchanges::bitmex::get_ws_commands(msg_types, symbols, subscribe, configs),
+        "deribit" => exchanges::deribit::get_ws_commands(msg_types, symbols, subscribe, configs),
+        "ftx" => exchanges::ftx::get_ws_commands(msg_types, symbols, subscribe, configs),
+        "huobi" => exchanges::huobi::get_ws_commands(msg_types, symbols, subscribe, configs),
+        "okex" => exchanges::okex::get_ws_commands(msg_types, symbols, subscribe, configs),
         _ => Vec::new(),
     }
 }
