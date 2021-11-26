@@ -1,5 +1,4 @@
 /* Licensed under Apache-2.0 */
-
 #ifndef CRYPTO_MARKET_TYPE_H_
 #define CRYPTO_MARKET_TYPE_H_
 
@@ -29,19 +28,19 @@
  *
  * **Margin and Inverse are orthogonal.**
  */
-enum class MarketType {
-  kUnknown = 0,
-  kSpot,
-  kLinearFuture,
-  kInverseFuture,
-  kLinearSwap,
-  kInverseSwap,
-  kAmericanOption,
-  kEuropeanOption,
-  kQuantoFuture,
-  kQuantoSwap,
-  kMove,
-  kBVOL,
-};
+typedef enum MarketType {
+  Unknown,
+  Spot,
+  LinearFuture,
+  InverseFuture,
+  LinearSwap,
+  InverseSwap,
+  AmericanOption,
+  EuropeanOption,
+  QuantoFuture,
+  QuantoSwap,
+  Move,
+  BVOL,
+} MarketType;
 
 #endif /* CRYPTO_MARKET_TYPE_H_ */
