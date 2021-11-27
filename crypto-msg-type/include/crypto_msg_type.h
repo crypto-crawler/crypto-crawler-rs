@@ -8,7 +8,7 @@
  * L2Snapshot and L2TopK are very similar, the former is from RESTful API,
  * the latter is from websocket.
  */
-typedef enum MessageType {
+typedef enum {
   /**
    * All other messages
    */
