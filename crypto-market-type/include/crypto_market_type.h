@@ -28,7 +28,7 @@
  *
  * **Margin and Inverse are orthogonal.**
  */
-typedef enum MarketType {
+typedef enum {
   Unknown,
   Spot,
   LinearFuture,
