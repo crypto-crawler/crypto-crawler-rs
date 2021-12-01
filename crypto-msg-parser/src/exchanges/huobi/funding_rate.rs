@@ -22,14 +22,14 @@ struct RawFundingRateMsg {
 }
 
 #[derive(Serialize, Deserialize)]
-struct WebsocketMsg {
+pub(super) struct WebsocketMsg {
     op: String,
-    topic: String,
+    pub topic: String,
     ts: i64,
     data: Vec<RawFundingRateMsg>,
 }
 
-pub(crate) fn parse_funding_rate(
+pub(super) fn parse_funding_rate(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<FundingRateMsg>> {

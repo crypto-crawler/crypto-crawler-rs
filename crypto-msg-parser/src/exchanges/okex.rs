@@ -91,10 +91,12 @@ pub(crate) fn get_msg_type(msg: &str) -> MessageType {
             MessageType::L2Event
         } else if channel == "depth5" {
             MessageType::L2TopK
-        } else if table == "ticker" {
+        } else if channel == "ticker" {
             MessageType::BBO
-        } else if table == "candle" {
+        } else if channel == "candle" {
             MessageType::Candlestick
+        } else if channel == "funding_rate" {
+            MessageType::FundingRate
         } else {
             MessageType::Other
         }

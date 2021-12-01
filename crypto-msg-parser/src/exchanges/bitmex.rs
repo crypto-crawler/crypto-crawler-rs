@@ -475,6 +475,8 @@ pub(crate) fn get_msg_type(msg: &str) -> MessageType {
             MessageType::BBO
         } else if table == "tradeBin" {
             MessageType::Candlestick
+        } else if table == "funding" {
+            MessageType::FundingRate
         } else {
             MessageType::Other
         }

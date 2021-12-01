@@ -32,6 +32,8 @@ pub(crate) fn get_msg_type(msg: &str) -> MessageType {
                 MessageType::Ticker
             } else if stream.contains("@kline_") {
                 MessageType::Candlestick
+            } else if stream.contains("markPrice") {
+                MessageType::FundingRate
             } else {
                 MessageType::Other
             }

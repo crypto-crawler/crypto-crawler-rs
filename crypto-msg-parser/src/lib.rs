@@ -143,6 +143,7 @@ pub fn parse_funding_rate(
 pub fn get_msg_type(exchange: &str, msg: &str) -> MessageType {
     match exchange {
         "binance" => exchanges::binance::get_msg_type(msg),
+        "bitget" => exchanges::bitget::get_msg_type(msg),
         "bitmex" => exchanges::bitmex::get_msg_type(msg),
         "bybit" => exchanges::bybit::get_msg_type(msg),
         "deribit" => exchanges::deribit::get_msg_type(msg),

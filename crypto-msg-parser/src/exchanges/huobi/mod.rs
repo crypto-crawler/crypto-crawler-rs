@@ -37,6 +37,14 @@ pub(crate) fn get_msg_type(msg: &str) -> MessageType {
             MessageType::Ticker
         } else if channel.contains(".kline.") {
             MessageType::Candlestick
+        } else if channel.ends_with(".funding_rate") {
+            MessageType::FundingRate
+        } else {
+            MessageType::Other
+        }
+    } else if let Ok(ws_msg) = serde_json::from_str::<funding_rate::WebsocketMsg>(msg) {
+        if ws_msg.topic.ends_with(".funding_rate") {
+            MessageType::FundingRate
         } else {
             MessageType::Other
         }

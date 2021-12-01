@@ -18,7 +18,7 @@ pub fn check_trade_fields(
     assert_eq!(trade.symbol, symbol);
     assert_eq!(trade.msg_type, MessageType::Trade);
     if [
-        "binance", "bitmex", "bybit", "deribit", "ftx", "huobi", "okex",
+        "binance", "bitget", "bitmex", "bybit", "deribit", "ftx", "huobi", "okex",
     ]
     .contains(&exchange)
     {
@@ -55,7 +55,7 @@ pub fn check_orderbook_fields(
     assert_eq!(orderbook.symbol, symbol);
     assert_eq!(orderbook.msg_type, MessageType::L2Event);
     if [
-        "binance", "bitmex", "bybit", "deribit", "ftx", "huobi", "okex",
+        "binance", "bitget", "bitmex", "bybit", "deribit", "ftx", "huobi", "okex",
     ]
     .contains(&exchange)
     {
@@ -80,11 +80,13 @@ pub fn check_funding_rate_fields(
     exchange: &str,
     market_type: MarketType,
     funding_rate: &FundingRateMsg,
+    raw_msg: &str,
 ) {
     assert_eq!(funding_rate.exchange, exchange);
     assert_eq!(funding_rate.market_type, market_type);
     // assert_eq!(funding_rate.pair, pair);
     assert_eq!(funding_rate.msg_type, MessageType::FundingRate);
+    assert_eq!(MessageType::FundingRate, get_msg_type(exchange, raw_msg));
     assert!(funding_rate.funding_rate > -1.0);
     assert!(funding_rate.funding_rate < 1.0);
     if exchange == "bitmex" {

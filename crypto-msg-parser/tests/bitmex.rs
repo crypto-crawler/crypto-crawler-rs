@@ -136,7 +136,12 @@ mod funding_rate {
         assert_eq!(funding_rates.len(), 1);
 
         for rate in funding_rates.iter() {
-            crate::utils::check_funding_rate_fields("bitmex", MarketType::InverseSwap, rate);
+            crate::utils::check_funding_rate_fields(
+                "bitmex",
+                MarketType::InverseSwap,
+                rate,
+                raw_msg,
+            );
         }
 
         assert_eq!(funding_rates[0].pair, "BTC/USD".to_string());
@@ -152,7 +157,12 @@ mod funding_rate {
         assert_eq!(funding_rates.len(), 1);
 
         for rate in funding_rates.iter() {
-            crate::utils::check_funding_rate_fields("bitmex", MarketType::QuantoSwap, rate);
+            crate::utils::check_funding_rate_fields(
+                "bitmex",
+                MarketType::QuantoSwap,
+                rate,
+                raw_msg,
+            );
         }
 
         assert_eq!(funding_rates[0].pair, "ETH/USD".to_string());

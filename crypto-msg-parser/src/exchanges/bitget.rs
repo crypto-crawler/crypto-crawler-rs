@@ -55,6 +55,33 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<Stri
     }
 }
 
+pub(crate) fn get_msg_type(msg: &str) -> MessageType {
+    if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
+        let table = ws_msg.table;
+        let channel = {
+            let arr = table.split('/').collect::<Vec<&str>>();
+            arr[1]
+        };
+        if channel == "trade" {
+            MessageType::Trade
+        } else if channel == "depth" {
+            MessageType::L2Event
+        } else if channel == "depth5" {
+            MessageType::L2TopK
+        } else if channel == "ticker" {
+            MessageType::Ticker
+        } else if channel.starts_with("candle") {
+            MessageType::Candlestick
+        } else if channel == "funding_rate" {
+            MessageType::FundingRate
+        } else {
+            MessageType::Other
+        }
+    } else {
+        MessageType::Other
+    }
+}
+
 pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<SwapTradeMsg>>(msg)?;
     let mut trades: Vec<TradeMsg> = ws_msg
