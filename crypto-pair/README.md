@@ -5,7 +5,7 @@
 [![](https://docs.rs/crypto-pair/badge.svg)](https://docs.rs/crypto-pair)
 ==========
 
-Normalize cryptocurrency trading pairs.
+Parse exchange-specific symbols to unified format.
 
 ## Usage
 

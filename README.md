@@ -4,13 +4,15 @@
 
 This project contains a list of useful cryptocurrency librarys:
 
-- [carbonbot](./carbonbot) `carbonbot` is a CLI tool to run crawlers, which is composed of `crypto-crawler` and `crypto-msg-parser`.
-- [crypto-crawler](./crypto-crawler) is the crawler library to crawl trade and orderbook messages from exchanges
-- [crypto-msg-parser](./crypto-msg-parser) is the parser library to parse the output of `crypto-crawler`.
-- [crypto-crawler-py](https://github.com/soulmachine/crypto-crawler-py) is Python bindings for the `crypto-crawler` library.
-- [crypto-msg-parser-py](https://github.com/soulmachine/crypto-msg-parser-py) is Python bindings for the `crypto-msg-parser` library.
-
-Rust developers will mainly use `crypto-crawler` and `crypto-msg-parser`, and Python developers will use `crypto-crawler-py` and `crypto-msg-parser-py`.
+- [carbonbot](./carbonbot) is the main CLI tool to run crawlers.
+- [crypto-crawler](./crypto-crawler) is the crawler library to crawl websocket and restful messages from exchanges
+- [crypto-msg-parser](./crypto-msg-parser) is the parser library to parse messages from `crypto-crawler`.
+- [crypto-ws-client](./crypto-ws-client) is the underlying websocket client library, providing a set of universal APIs for different exchanges.
+- [crypto-rest-client](./crypto-rest-client) is the underlying RESTful client library, providing universal APIs for different exchanges.
+- [crypto-markets](./crypto-markets) is a RESTful library to retreive market meta data from cryptocurrency echanges.
+- [crypto-pair](./crypto-pair) is an offline utility library to parse exchange-specific symbols to unified format.
+- [crypto-contract-value](./crypto-pair) is an offline utility library that simply provides the contract values of a trading market.
+- Support multiple languages. Some libraries support multiple languages, which is achieved by first providing a FFI binding, then a languge specific wrapper. For example, `crypto-crawler` provides a C-style FFI binding first, and then provides a Python wrapper and a C++ wrapper based on the FFI binding.
 
 **Dependency Relationship**:
 
