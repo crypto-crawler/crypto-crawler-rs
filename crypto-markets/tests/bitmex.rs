@@ -8,60 +8,51 @@ mod utils;
 const EXCHANGE_NAME: &str = "bitmex";
 
 fn get_market_type_from_symbol(symbol: &str) -> MarketType {
-    let date = &symbol[(symbol.len() - 2)..];
-    if date.parse::<i64>().is_ok() {
-        // future
-        if symbol.starts_with("XBT") {
-            if symbol.len() == 6 {
+    let is_future = {
+        let date = &symbol[(symbol.len() - 2)..];
+        date.parse::<i64>().is_ok()
+    };
+    let real_symbol = if is_future {
+        &symbol[..(symbol.len() - 3)]
+    } else {
+        symbol
+    };
+    // 0, linear; 1, inverse; 2, quanto
+    let linear_inverse_quanto = if real_symbol.ends_with("USDT") {
+        0
+    } else if real_symbol.starts_with("XBT") {
+        1
+    } else if real_symbol.ends_with("USD") || real_symbol.ends_with("EUR") {
+        2
+    } else {
+        // Settled in XBT, quoted in XBT
+        debug_assert_eq!(symbol.len(), 6);
+        0
+    };
+
+    match linear_inverse_quanto {
+        0 => {
+            if is_future {
+                MarketType::LinearFuture
+            } else {
+                MarketType::LinearSwap
+            }
+        }
+        1 => {
+            if is_future {
                 MarketType::InverseFuture
             } else {
-                let symbol_without_date = &symbol[..(symbol.len() - 3)];
-                if symbol_without_date.ends_with("USD") || symbol_without_date.ends_with("EUR") {
-                    // Settled in XBT, quoted in USD or EUR
-                    MarketType::InverseFuture
-                } else if symbol_without_date.ends_with("USDT") {
-                    // Settled in USDT, quoted in USDT
-                    MarketType::LinearFuture
-                } else {
-                    panic!("Unknown symbol {}", symbol);
-                }
-            }
-        } else {
-            let symbol_without_date = &symbol[..(symbol.len() - 3)];
-            if symbol_without_date.ends_with("USD") || symbol_without_date.ends_with("EUR") {
-                // Settled in XBT, quoted in USD or EUR
-                MarketType::QuantoFuture
-            } else if symbol_without_date.ends_with("USDT") {
-                // Settled in USDT, quoted in USDT
-                MarketType::LinearFuture
-            } else {
-                // Settled in XBT, quoted in XBT
-                MarketType::LinearFuture
-            }
-        }
-    } else {
-        // swap
-        if symbol.starts_with("XBT") {
-            if symbol.ends_with("USD") || symbol.ends_with("EUR") {
-                // Settled in XBT, quoted in USD or EUR
                 MarketType::InverseSwap
-            } else if symbol.ends_with("USDT") {
-                // Settled in USDT, quoted in USDT
-                MarketType::LinearSwap
-            } else {
-                panic!("Unknown symbol {}", symbol);
-            }
-        } else {
-            if symbol.ends_with("USD") || symbol.ends_with("EUR") {
-                // Settled in XBT, quoted in USD or EUR
-                MarketType::QuantoSwap
-            } else if symbol.ends_with("USDT") {
-                // Settled in USDT, quoted in USDT
-                MarketType::LinearSwap
-            } else {
-                panic!("Unknown symbol {}", symbol);
             }
         }
+        2 => {
+            if is_future {
+                MarketType::QuantoFuture
+            } else {
+                MarketType::QuantoSwap
+            }
+        }
+        _ => panic!("Impossible {}", symbol),
     }
 }
 
