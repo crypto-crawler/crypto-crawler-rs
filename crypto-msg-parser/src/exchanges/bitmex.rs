@@ -486,28 +486,52 @@ pub(crate) fn get_msg_type(msg: &str) -> MessageType {
 }
 
 // Copied from crypto-markets/tests/bitmex.rs
-fn get_market_type_from_symbol(symbol: &str) -> MarketType {
-    let date = &symbol[(symbol.len() - 2)..];
-    if date.parse::<i64>().is_ok() {
-        // future
-        if symbol.starts_with("XBT") {
-            // Settled in XBT, quoted in USD
-            MarketType::InverseFuture
-        } else if (&symbol[..(symbol.len() - 3)]).ends_with("USD") {
-            // Settled in XBT, quoted in USD
-            MarketType::QuantoFuture
-        } else {
-            // Settled in XBT, quoted in XBT
-            MarketType::LinearFuture
-        }
+pub fn get_market_type_from_symbol(symbol: &str) -> MarketType {
+    let is_future = {
+        let date = &symbol[(symbol.len() - 2)..];
+        date.parse::<i64>().is_ok()
+    };
+    let real_symbol = if is_future {
+        &symbol[..(symbol.len() - 3)]
     } else {
-        // swap
-        if symbol.starts_with("XBT") {
-            // Settled in XBT, quoted in USD
-            MarketType::InverseSwap
-        } else {
-            MarketType::QuantoSwap
+        symbol
+    };
+    // 0, linear; 1, inverse; 2, quanto
+    let linear_inverse_quanto = if real_symbol.ends_with("USDT") {
+        0
+    } else if real_symbol.starts_with("XBT") {
+        1
+    } else if real_symbol.ends_with("USD") || real_symbol.ends_with("EUR") {
+        2
+    } else {
+        // Settled in XBT, quoted in XBT
+        debug_assert_eq!(symbol.len(), 6);
+        0
+    };
+
+    match linear_inverse_quanto {
+        0 => {
+            if is_future {
+                MarketType::LinearFuture
+            } else {
+                MarketType::LinearSwap
+            }
         }
+        1 => {
+            if is_future {
+                MarketType::InverseFuture
+            } else {
+                MarketType::InverseSwap
+            }
+        }
+        2 => {
+            if is_future {
+                MarketType::QuantoFuture
+            } else {
+                MarketType::QuantoSwap
+            }
+        }
+        _ => panic!("Impossible {}", symbol),
     }
 }
 
