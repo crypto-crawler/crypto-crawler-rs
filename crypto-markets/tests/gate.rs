@@ -17,6 +17,10 @@ fn fetch_spot_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::Spot).unwrap();
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
+        if symbol.ends_with("_USD") {
+            println!("{}", symbol);
+        }
+
         assert!(symbol.contains('_'));
         assert_eq!(symbol.to_string(), symbol.to_uppercase());
     }

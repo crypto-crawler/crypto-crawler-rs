@@ -66,7 +66,7 @@ fn fetch_spot_symbols() -> Result<Vec<String>> {
     let markets = fetch_markets_raw()?;
     let symbols: Vec<String> = markets
         .into_iter()
-        .filter(|x| x.type_ == "spot")
+        .filter(|x| x.type_ == "spot" && !x.name.contains("BVOL/"))
         .map(|x| x.name)
         .collect();
     Ok(symbols)

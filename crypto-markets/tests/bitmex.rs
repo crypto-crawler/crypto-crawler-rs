@@ -1,60 +1,12 @@
 use crypto_market_type::{get_market_types, MarketType};
 use crypto_markets::{fetch_markets, fetch_symbols};
+use crypto_pair::get_market_type;
 use test_case::test_case;
 
 #[macro_use]
 mod utils;
 
 const EXCHANGE_NAME: &str = "bitmex";
-
-fn get_market_type_from_symbol(symbol: &str) -> MarketType {
-    let is_future = {
-        let date = &symbol[(symbol.len() - 2)..];
-        date.parse::<i64>().is_ok()
-    };
-    let real_symbol = if is_future {
-        &symbol[..(symbol.len() - 3)]
-    } else {
-        symbol
-    };
-    // 0, linear; 1, inverse; 2, quanto
-    let linear_inverse_quanto = if real_symbol.ends_with("USDT") {
-        0
-    } else if real_symbol.starts_with("XBT") {
-        1
-    } else if real_symbol.ends_with("USD") || real_symbol.ends_with("EUR") {
-        2
-    } else {
-        // Settled in XBT, quoted in XBT
-        debug_assert_eq!(symbol.len(), 6);
-        0
-    };
-
-    match linear_inverse_quanto {
-        0 => {
-            if is_future {
-                MarketType::LinearFuture
-            } else {
-                MarketType::LinearSwap
-            }
-        }
-        1 => {
-            if is_future {
-                MarketType::InverseFuture
-            } else {
-                MarketType::InverseSwap
-            }
-        }
-        2 => {
-            if is_future {
-                MarketType::QuantoFuture
-            } else {
-                MarketType::QuantoSwap
-            }
-        }
-        _ => panic!("Impossible {}", symbol),
-    }
-}
 
 #[test]
 fn fetch_all_symbols() {
@@ -74,7 +26,10 @@ fn fetch_inverse_swap_symbols() {
     for symbol in symbols.iter() {
         assert!(symbol.starts_with("XBT"));
         assert!(symbol.ends_with("USD") || symbol.ends_with("EUR"));
-        assert_eq!(MarketType::InverseSwap, get_market_type_from_symbol(symbol));
+        assert_eq!(
+            MarketType::InverseSwap,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -84,7 +39,10 @@ fn fetch_linear_swap_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("USDT"));
-        assert_eq!(MarketType::LinearSwap, get_market_type_from_symbol(symbol));
+        assert_eq!(
+            MarketType::LinearSwap,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -94,7 +52,10 @@ fn fetch_quanto_swap_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("USD") || symbol.ends_with("USDT"));
-        assert_eq!(MarketType::QuantoSwap, get_market_type_from_symbol(symbol));
+        assert_eq!(
+            MarketType::QuantoSwap,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -108,7 +69,7 @@ fn fetch_inverse_future_symbols() {
         assert!(date.parse::<i64>().is_ok());
         assert_eq!(
             MarketType::InverseFuture,
-            get_market_type_from_symbol(symbol)
+            get_market_type(symbol, EXCHANGE_NAME, None)
         );
     }
 }
@@ -130,7 +91,7 @@ fn fetch_quanto_future_symbols() {
         assert!(quote == "USD" || quote == "USDT");
         assert_eq!(
             MarketType::QuantoFuture,
-            get_market_type_from_symbol(symbol)
+            get_market_type(symbol, EXCHANGE_NAME, None)
         );
     }
 }
@@ -144,7 +105,7 @@ fn fetch_linear_future_symbols() {
         assert!(date.parse::<i64>().is_ok());
         assert_eq!(
             MarketType::LinearFuture,
-            get_market_type_from_symbol(symbol)
+            get_market_type(symbol, EXCHANGE_NAME, None)
         );
     }
 }

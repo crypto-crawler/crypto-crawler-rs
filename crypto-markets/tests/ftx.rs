@@ -1,5 +1,6 @@
 use crypto_market_type::{get_market_types, MarketType};
 use crypto_markets::{fetch_markets, fetch_symbols};
+use crypto_pair::get_market_type;
 use test_case::test_case;
 
 #[macro_use]
@@ -19,6 +20,10 @@ fn fetch_spot_symbols() {
     for symbol in symbols.iter() {
         assert!(symbol.contains("/"));
         assert_eq!(*symbol, symbol.to_uppercase());
+        assert_eq!(
+            MarketType::Spot,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -28,6 +33,10 @@ fn fetch_linear_swap_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("-PERP"));
+        assert_eq!(
+            MarketType::LinearSwap,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -38,6 +47,10 @@ fn fetch_linear_future_symbols() {
     for symbol in symbols.iter() {
         let date = &symbol[(symbol.len() - 4)..];
         assert!(date.parse::<i64>().is_ok());
+        assert_eq!(
+            MarketType::LinearFuture,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -47,6 +60,10 @@ fn fetch_move_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.contains("-MOVE-"));
+        assert_eq!(
+            MarketType::Move,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -56,6 +73,10 @@ fn fetch_bvol_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.contains("BVOL/"));
+        assert_eq!(
+            MarketType::BVOL,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 

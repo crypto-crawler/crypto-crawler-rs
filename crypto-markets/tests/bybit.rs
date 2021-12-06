@@ -1,5 +1,6 @@
 use crypto_market_type::{get_market_types, MarketType};
 use crypto_markets::{fetch_markets, fetch_symbols};
+use crypto_pair::get_market_type;
 use test_case::test_case;
 
 #[macro_use]
@@ -18,6 +19,10 @@ fn fetch_inverse_swap_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("USD"));
+        assert_eq!(
+            MarketType::InverseSwap,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -27,6 +32,10 @@ fn fetch_linear_swap_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("USDT"));
+        assert_eq!(
+            MarketType::LinearSwap,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -37,6 +46,10 @@ fn fetch_inverse_future_symbols() {
     for symbol in symbols.iter() {
         let date = &symbol[(symbol.len() - 2)..];
         assert!(date.parse::<i64>().is_ok());
+        assert_eq!(
+            MarketType::InverseFuture,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 

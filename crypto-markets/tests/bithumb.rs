@@ -1,5 +1,6 @@
 use crypto_market_type::{get_market_types, MarketType};
 use crypto_markets::{fetch_markets, fetch_symbols};
+use crypto_pair::get_market_type;
 
 #[macro_use]
 mod utils;
@@ -19,6 +20,10 @@ fn fetch_spot_symbols() {
     for symbol in symbols.iter() {
         assert!(symbol.contains('-'));
         assert_eq!(symbol.to_string(), symbol.to_uppercase());
+        assert_eq!(
+            MarketType::Spot,
+            get_market_type(&symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 

@@ -4,7 +4,8 @@
 //! ## Example
 //!
 //! ```
-//! use crypto_markets::{fetch_markets, MarketType};
+//! use crypto_markets::fetch_markets;
+//! use crypto_market_type::MarketType;
 //!
 //! let markets = fetch_markets("binance", MarketType::Spot).unwrap();
 //! println!("{}", serde_json::to_string_pretty(&markets).unwrap())
@@ -56,7 +57,8 @@ pub fn fetch_symbols(exchange: &str, market_type: MarketType) -> Result<Vec<Stri
 /// # Example
 ///
 /// ```
-/// use crypto_markets::{fetch_markets, MarketType};
+/// use crypto_markets::fetch_markets;
+/// use crypto_market_type::MarketType;
 /// let markets = fetch_markets("binance", MarketType::Spot).unwrap();
 /// assert!(!markets.is_empty());
 /// println!("{}", serde_json::to_string_pretty(&markets).unwrap())

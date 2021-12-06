@@ -69,7 +69,7 @@ pub(super) fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
     let symbols = fetch_swap_markets_raw()?
         .into_iter()
         .map(|m| m.symbol)
-        .filter(|x| x.ends_with("_USDT"))
+        .filter(|x| x.ends_with("_USDT") || x.ends_with("_ZUSD"))
         .collect::<Vec<String>>();
     Ok(symbols)
 }

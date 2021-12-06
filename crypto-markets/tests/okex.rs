@@ -1,5 +1,6 @@
 use crypto_market_type::{get_market_types, MarketType};
 use crypto_markets::{fetch_markets, fetch_symbols};
+use crypto_pair::get_market_type;
 use test_case::test_case;
 
 #[macro_use]
@@ -18,6 +19,10 @@ fn fetch_spot_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.contains('-'));
+        assert_eq!(
+            MarketType::Spot,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -30,6 +35,10 @@ fn fetch_inverse_future_symbols() {
         assert!(date.parse::<i64>().is_ok());
 
         assert!(symbol.contains("-USD-"));
+        assert_eq!(
+            MarketType::InverseFuture,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -42,6 +51,10 @@ fn fetch_linear_future_symbols() {
         assert!(date.parse::<i64>().is_ok());
 
         assert!(symbol.contains("-USDT-"));
+        assert_eq!(
+            MarketType::LinearFuture,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -51,6 +64,10 @@ fn fetch_inverse_swap_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("-USD-SWAP"));
+        assert_eq!(
+            MarketType::InverseSwap,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -60,6 +77,10 @@ fn fetch_linear_swap_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("-USDT-SWAP"));
+        assert_eq!(
+            MarketType::LinearSwap,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -69,6 +90,10 @@ fn fetch_option_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("-C") || symbol.ends_with("-P"));
+        assert_eq!(
+            MarketType::EuropeanOption,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 

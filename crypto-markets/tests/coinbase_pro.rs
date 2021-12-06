@@ -1,5 +1,6 @@
 use crypto_market_type::{get_market_types, MarketType};
 use crypto_markets::{fetch_markets, fetch_symbols};
+use crypto_pair::get_market_type;
 
 #[macro_use]
 mod utils;
@@ -19,6 +20,10 @@ fn fetch_spot_symbols() {
     for symbol in symbols.iter() {
         assert!(symbol.contains("-"));
         assert_eq!(symbol.to_string(), symbol.to_uppercase());
+        assert_eq!(
+            MarketType::Spot,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -35,6 +40,6 @@ fn fetch_spot_markets() {
     assert_eq!(btcusd.precision.tick_size, 0.01);
     assert_eq!(btcusd.precision.lot_size, 0.00000001);
     let quantity_limit = btcusd.quantity_limit.unwrap();
-    assert_eq!(quantity_limit.min, 0.000021);
-    assert_eq!(quantity_limit.max, Some(280.0));
+    assert_eq!(quantity_limit.min, 0.000016);
+    assert_eq!(quantity_limit.max, Some(230.0));
 }
