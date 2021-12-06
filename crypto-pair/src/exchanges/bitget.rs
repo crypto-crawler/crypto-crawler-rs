@@ -1,3 +1,5 @@
+use crypto_market_type::MarketType;
+
 pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
     if symbol.starts_with("cmt_") {
         // linear swap
@@ -13,5 +15,17 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
         Some(format!("{}/usd", base).to_uppercase())
     } else {
         None
+    }
+}
+
+pub(crate) fn get_market_type(symbol: &str) -> MarketType {
+    if symbol.starts_with("cmt_") {
+        MarketType::LinearSwap
+    } else if symbol.contains('_') {
+        MarketType::Spot
+    } else if symbol.ends_with("usd") {
+        MarketType::InverseSwap
+    } else {
+        MarketType::Unknown
     }
 }

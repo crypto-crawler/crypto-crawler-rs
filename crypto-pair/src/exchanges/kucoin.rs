@@ -1,3 +1,5 @@
+use crypto_market_type::MarketType;
+
 pub(crate) fn normalize_currency(currency: &str) -> String {
     if currency == "XBT" {
         "BTC"
@@ -45,4 +47,18 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
         normalize_currency(&base),
         normalize_currency(&quote)
     ))
+}
+
+pub(crate) fn get_market_type(symbol: &str) -> MarketType {
+    if symbol.ends_with("USDM") {
+        MarketType::InverseSwap
+    } else if symbol.ends_with("USDTM") {
+        MarketType::LinearSwap
+    } else if (&symbol[(symbol.len() - 2)..]).parse::<i64>().is_ok() {
+        MarketType::InverseFuture
+    } else if symbol.contains('-') {
+        MarketType::Spot
+    } else {
+        MarketType::Unknown
+    }
 }

@@ -1,6 +1,7 @@
 mod utils;
 
-use crypto_pair::{normalize_currency, normalize_pair};
+use crypto_market_type::MarketType;
+use crypto_pair::{get_market_type, normalize_currency, normalize_pair};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -47,6 +48,11 @@ fn verify_spot_symbols() {
         );
 
         assert_eq!(pair.as_str(), pair_expected);
+
+        assert_eq!(
+            MarketType::Spot,
+            get_market_type(&market.instrument_id, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -62,6 +68,9 @@ fn verify_swap_symbols() {
         );
 
         assert_eq!(pair.as_str(), pair_expected);
+
+        let market_type = get_market_type(&market.instrument_id, EXCHANGE_NAME, None);
+        assert!(market_type == MarketType::LinearSwap || market_type == MarketType::InverseSwap);
     }
 }
 
@@ -77,6 +86,11 @@ fn verify_future_symbols() {
         );
 
         assert_eq!(pair.as_str(), pair_expected);
+
+        let market_type = get_market_type(&market.instrument_id, EXCHANGE_NAME, None);
+        assert!(
+            market_type == MarketType::LinearFuture || market_type == MarketType::InverseFuture
+        );
     }
 }
 
@@ -113,5 +127,9 @@ fn verify_option_symbols() {
         let pair_expected = market.underlying.replace("-", "/");
 
         assert_eq!(pair.as_str(), pair_expected);
+        assert_eq!(
+            MarketType::EuropeanOption,
+            get_market_type(&market.instrument_id, EXCHANGE_NAME, None)
+        );
     }
 }

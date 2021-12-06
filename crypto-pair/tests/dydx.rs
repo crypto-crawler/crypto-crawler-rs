@@ -1,6 +1,7 @@
 mod utils;
 
-use crypto_pair::{normalize_currency, normalize_pair};
+use crypto_market_type::MarketType;
+use crypto_pair::{get_market_type, normalize_currency, normalize_pair};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -50,5 +51,9 @@ fn verify_linear_swap_symbols() {
         );
 
         assert_eq!(pair, pair_expected);
+        assert_eq!(
+            MarketType::LinearSwap,
+            get_market_type(&market.market, EXCHANGE_NAME, None)
+        );
     }
 }

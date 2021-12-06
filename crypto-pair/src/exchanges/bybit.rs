@@ -1,3 +1,5 @@
+use crypto_market_type::MarketType;
+
 pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
     let (base, quote) = if symbol.ends_with("USDT") {
         // linear swap
@@ -15,4 +17,16 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
         panic!("Unknown symbol {}", symbol);
     };
     Some(format!("{}/{}", base, quote))
+}
+
+pub(crate) fn get_market_type(symbol: &str) -> MarketType {
+    if symbol.ends_with("USDT") {
+        MarketType::LinearSwap
+    } else if symbol.ends_with("USD") {
+        MarketType::InverseSwap
+    } else if (&symbol[symbol.len() - 2..]).parse::<i64>().is_ok() {
+        MarketType::InverseFuture
+    } else {
+        MarketType::Unknown
+    }
 }

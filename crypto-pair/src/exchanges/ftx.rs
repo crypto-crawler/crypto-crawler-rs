@@ -1,3 +1,5 @@
+use crypto_market_type::MarketType;
+
 pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
     if symbol.ends_with("-PERP") {
         // linear swap
@@ -16,5 +18,22 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
     } else {
         // prediction
         Some(format!("{}/USD", symbol))
+    }
+}
+
+pub(crate) fn get_market_type(symbol: &str) -> MarketType {
+    if symbol.ends_with("-PERP") {
+        MarketType::LinearSwap
+    } else if symbol.contains("-MOVE-") {
+        MarketType::Move
+    } else if symbol.contains("BVOL/") {
+        MarketType::BVOL
+    } else if symbol.contains('/') {
+        MarketType::Spot
+    } else if symbol.contains('-') {
+        MarketType::LinearFuture
+    } else {
+        // prediction
+        MarketType::Unknown
     }
 }

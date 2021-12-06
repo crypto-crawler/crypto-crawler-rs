@@ -1,4 +1,6 @@
 #![allow(clippy::unnecessary_wraps)]
+
+use crypto_market_type::MarketType;
 mod exchanges;
 
 /// Normalize a trading currency.
@@ -7,17 +9,17 @@ mod exchanges;
 ///
 /// * `currency` - The exchange-specific currency
 /// * `exchange` - The normalized symbol
-pub fn normalize_currency(symbol: &str, exchange: &str) -> String {
+pub fn normalize_currency(currency: &str, exchange: &str) -> String {
     match exchange {
-        "bitfinex" => exchanges::bitfinex::normalize_currency(symbol),
-        "bitmex" => exchanges::bitmex::normalize_currency(symbol),
-        "kraken" => exchanges::kraken::normalize_currency(symbol),
-        "kucoin" => exchanges::kucoin::normalize_currency(symbol),
-        _ => symbol.to_uppercase(),
+        "bitfinex" => exchanges::bitfinex::normalize_currency(currency),
+        "bitmex" => exchanges::bitmex::normalize_currency(currency),
+        "kraken" => exchanges::kraken::normalize_currency(currency),
+        "kucoin" => exchanges::kucoin::normalize_currency(currency),
+        _ => currency.to_uppercase(),
     }
 }
 
-/// Normalize a cryptocurrency trading pair.
+/// Normalize a cryptocurrency trading symbol.
 ///
 /// # Arguments
 ///
@@ -69,5 +71,37 @@ pub fn normalize_pair(symbol: &str, exchange: &str) -> Option<String> {
         "Upbit" => Some(symbol.replace("-", "/")),
         "zbg" => exchanges::zbg::normalize_pair(symbol),
         _ => panic!("Unknown exchange {}", exchange),
+    }
+}
+
+/// Infer out market type from the symbol.
+///
+/// The `is_spot` parameter is not needed in most cases, but at some exchanges
+///  (including binance, gate and mxc) a symbol might exist in both spot and
+/// contract markets, for example:
+/// * At binance `BTCUSDT` exists in both spot and linear_swap markets
+/// * At gate `BTC_USDT` exists in both spot and linear_swap markets,
+/// `BTC_USD` exists in both spot and inverse_swap markets
+pub fn get_market_type(symbol: &str, exchange: &str, is_spot: Option<bool>) -> MarketType {
+    match exchange {
+        "binance" => exchanges::binance::get_market_type(symbol, is_spot),
+        "bitfinex" => exchanges::bitfinex::get_market_type(symbol),
+        "bitget" => exchanges::bitget::get_market_type(symbol),
+        "bithumb" => MarketType::Spot,
+        "bitmex" => exchanges::bitmex::get_market_type(symbol),
+        "bitstamp" => MarketType::Spot,
+        "bybit" => exchanges::bybit::get_market_type(symbol),
+        "coinbase_pro" => MarketType::Spot,
+        "deribit" => exchanges::deribit::get_market_type(symbol),
+        "dydx" => MarketType::LinearSwap,
+        "ftx" => exchanges::ftx::get_market_type(symbol),
+        "gate" => exchanges::gate::get_market_type(symbol, is_spot),
+        "huobi" => exchanges::huobi::get_market_type(symbol),
+        "kraken" => MarketType::Spot,
+        "kucoin" => exchanges::kucoin::get_market_type(symbol),
+        "mxc" => exchanges::mxc::get_market_type(symbol, is_spot),
+        "okex" => exchanges::okex::get_market_type(symbol),
+        "zbg" => exchanges::zbg::get_market_type(symbol),
+        _ => MarketType::Unknown,
     }
 }

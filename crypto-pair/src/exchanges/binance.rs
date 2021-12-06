@@ -3,6 +3,7 @@ use std::collections::{BTreeSet, HashSet};
 use super::utils::{http_get, normalize_pair_with_quotes};
 use lazy_static::lazy_static;
 
+use crypto_market_type::MarketType;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -101,6 +102,32 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
     } else {
         let quotes = &(*SPOT_QUOTES);
         normalize_pair_with_quotes(symbol, quotes)
+    }
+}
+
+pub(crate) fn get_market_type(symbol: &str, is_spot: Option<bool>) -> MarketType {
+    if symbol.ends_with("USD_PERP") {
+        MarketType::InverseSwap
+    } else if symbol.ends_with("-P") || symbol.ends_with("-C") {
+        MarketType::EuropeanOption
+    } else if symbol.len() > 7 && (&symbol[(symbol.len() - 6)..]).parse::<i64>().is_ok() {
+        // linear and inverse future
+        let remove_date = &symbol[..symbol.len() - 7];
+        if remove_date.ends_with("USDT") {
+            MarketType::LinearFuture
+        } else if remove_date.ends_with("USD") {
+            MarketType::InverseFuture
+        } else {
+            MarketType::Unknown
+        }
+    } else if let Some(is_spot) = is_spot {
+        if is_spot {
+            MarketType::Spot
+        } else {
+            MarketType::LinearSwap
+        }
+    } else {
+        MarketType::LinearSwap
     }
 }
 

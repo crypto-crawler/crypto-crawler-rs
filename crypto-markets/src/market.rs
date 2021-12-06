@@ -1,5 +1,4 @@
-use crate::MarketType;
-
+use crypto_market_type::MarketType;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 

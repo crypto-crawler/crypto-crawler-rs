@@ -1,6 +1,7 @@
 mod utils;
 
-use crypto_pair::normalize_pair;
+use crypto_market_type::MarketType;
+use crypto_pair::{get_market_type, normalize_pair};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -31,5 +32,9 @@ fn verify_spot_symbols() {
         let pair_expected = market.name.as_str();
 
         assert_eq!(pair.as_str(), pair_expected);
+        assert_eq!(
+            MarketType::Spot,
+            get_market_type(&market.url_symbol, EXCHANGE_NAME, None)
+        );
     }
 }

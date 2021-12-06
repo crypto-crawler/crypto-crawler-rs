@@ -1,4 +1,5 @@
 use super::utils::http_get;
+use crypto_market_type::MarketType;
 use lazy_static::lazy_static;
 use std::collections::{BTreeMap, HashMap};
 
@@ -121,6 +122,14 @@ pub(crate) fn normalize_pair(mut symbol: &str) -> Option<String> {
         normalize_currency(&base),
         normalize_currency(&quote)
     ))
+}
+
+pub(crate) fn get_market_type(symbol: &str) -> MarketType {
+    if symbol.ends_with("F0") || symbol.ends_with("f0") {
+        MarketType::LinearSwap
+    } else {
+        MarketType::Spot
+    }
 }
 
 #[cfg(test)]

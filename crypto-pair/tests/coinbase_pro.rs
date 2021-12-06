@@ -1,6 +1,7 @@
 mod utils;
 
-use crypto_pair::{normalize_currency, normalize_pair};
+use crypto_market_type::MarketType;
+use crypto_pair::{get_market_type, normalize_currency, normalize_pair};
 use serde::{Deserialize, Serialize};
 use utils::http_get;
 
@@ -31,5 +32,9 @@ fn verify_spot_symbols() {
         );
 
         assert_eq!(pair.as_str(), pair_expected);
+        assert_eq!(
+            MarketType::Spot,
+            get_market_type(&market.id, EXCHANGE_NAME, None)
+        );
     }
 }

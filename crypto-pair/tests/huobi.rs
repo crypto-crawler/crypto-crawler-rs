@@ -1,6 +1,7 @@
 mod utils;
 
-use crypto_pair::{normalize_currency, normalize_pair};
+use crypto_market_type::MarketType;
+use crypto_pair::{get_market_type, normalize_currency, normalize_pair};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -43,6 +44,10 @@ fn verify_spot_symbols() {
         );
 
         assert_eq!(pair.as_str(), pair_expected);
+        assert_eq!(
+            MarketType::Spot,
+            get_market_type(&market.symbol, EXCHANGE_NAME, None)
+        );
     }
 }
 
@@ -56,6 +61,15 @@ fn verify_inverse_future_symbols() {
         "BTC/USD".to_string(),
         normalize_pair("BTC_CQ", EXCHANGE_NAME).unwrap()
     );
+
+    assert_eq!(
+        MarketType::InverseFuture,
+        get_market_type("BTC_CW", EXCHANGE_NAME, None)
+    );
+    assert_eq!(
+        MarketType::InverseFuture,
+        get_market_type("BTC_CQ", EXCHANGE_NAME, None)
+    );
 }
 
 #[test]
@@ -67,6 +81,15 @@ fn verify_swap_symbols() {
     assert_eq!(
         "BTC/USDT".to_string(),
         normalize_pair("BTC-USDT", EXCHANGE_NAME).unwrap()
+    );
+
+    assert_eq!(
+        MarketType::InverseSwap,
+        get_market_type("BTC-USD", EXCHANGE_NAME, None)
+    );
+    assert_eq!(
+        MarketType::LinearSwap,
+        get_market_type("BTC-USDT", EXCHANGE_NAME, None)
     );
 }
 
