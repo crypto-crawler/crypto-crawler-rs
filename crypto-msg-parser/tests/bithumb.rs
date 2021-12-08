@@ -63,6 +63,7 @@ fn l2_orderbook_snapshot() {
     );
 
     assert_eq!(orderbook.timestamp, 1622446974153);
+    assert_eq!(orderbook.seq_id, Some(509670288));
 
     assert_eq!(orderbook.bids[0].price, 35909.45);
     assert_eq!(orderbook.bids[0].quantity_base, 0.007308);

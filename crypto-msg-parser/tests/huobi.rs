@@ -441,6 +441,7 @@ mod l2_orderbook {
         );
 
         assert_eq!(orderbook.timestamp, 1622711946534);
+        assert_eq!(orderbook.seq_id, Some(39536665398));
 
         assert_eq!(orderbook.asks[0].price, 39055.0);
         assert_eq!(orderbook.asks[0].quantity_base, 19.345);
@@ -492,6 +493,7 @@ mod l2_orderbook {
         );
 
         assert_eq!(orderbook.timestamp, 1622711948514);
+        assert_eq!(orderbook.seq_id, Some(39536668357));
 
         assert_eq!(orderbook.asks[0].price, 39055.0);
         assert_eq!(orderbook.asks[0].quantity_base, 16.634);

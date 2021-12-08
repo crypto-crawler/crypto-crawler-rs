@@ -128,6 +128,10 @@ mod l2_orderbook {
             raw_msg,
         );
 
+        assert_eq!(orderbook.timestamp, 1622626472678);
+        assert_eq!(orderbook.seq_id, Some(31479219781));
+        assert_eq!(orderbook.prev_seq_id, None);
+
         let contract_value = crypto_contract_value::get_contract_value(
             "deribit",
             MarketType::InverseFuture,
@@ -193,6 +197,7 @@ mod l2_orderbook {
         )
         .unwrap();
 
+        assert_eq!(orderbook.timestamp, 1622626784890);
         assert_eq!(orderbook.seq_id, Some(31479339507));
         assert_eq!(orderbook.prev_seq_id, Some(31479339296));
         assert_eq!(orderbook.bids[0].price, 37392.5);
@@ -232,6 +237,10 @@ mod l2_orderbook {
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
         assert!(orderbook.snapshot);
+
+        assert_eq!(orderbook.timestamp, 1622627433440);
+        assert_eq!(orderbook.seq_id, Some(31479596557));
+        assert_eq!(orderbook.prev_seq_id, None);
 
         crate::utils::check_orderbook_fields(
             "deribit",
@@ -290,6 +299,10 @@ mod l2_orderbook {
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
         assert!(!orderbook.snapshot);
+
+        assert_eq!(orderbook.timestamp, 1622627435737);
+        assert_eq!(orderbook.seq_id, Some(31479598217));
+        assert_eq!(orderbook.prev_seq_id, Some(31479598064));
 
         crate::utils::check_orderbook_fields(
             "deribit",
@@ -351,6 +364,10 @@ mod l2_orderbook {
             orderbook,
             raw_msg,
         );
+
+        assert_eq!(orderbook.timestamp, 1622627851747);
+        assert_eq!(orderbook.seq_id, Some(31479771122));
+        assert_eq!(orderbook.prev_seq_id, None);
 
         assert_eq!(orderbook.bids[0].price, 0.005);
         assert_eq!(orderbook.bids[0].quantity_base, 13.7);
