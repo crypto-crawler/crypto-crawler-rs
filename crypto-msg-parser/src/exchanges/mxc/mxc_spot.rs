@@ -4,7 +4,8 @@ use crypto_msg_type::MessageType;
 use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "mxc";
@@ -41,17 +42,25 @@ struct WebsocketMsg<T: Sized> {
     data: T,
 }
 
-pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
-    let arr = serde_json::from_str::<Vec<Value>>(msg)?;
+pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
+    let arr = serde_json::from_str::<Vec<Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
     assert_eq!(arr.len(), 2);
-    let ws_msg: WebsocketMsg<PushSymbolData> = serde_json::from_value(arr[1].clone())?;
+    let ws_msg: WebsocketMsg<PushSymbolData> =
+        serde_json::from_value(arr[1].clone()).map_err(|_e| {
+            SimpleError::new(format!(
+                "Failed to deserialize {} to WebsocketMsg<PushSymbolData>",
+                arr[1]
+            ))
+        })?;
     if ws_msg.data.deals.is_none() {
         return Ok(Vec::new());
     }
 
     let raw_trades = ws_msg.data.deals.unwrap();
     let symbol = ws_msg.symbol.as_str();
-    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
 
     let mut trades: Vec<TradeMsg> = raw_trades
         .into_iter()
@@ -100,16 +109,24 @@ fn parse_order(raw_order: &RawOrder) -> Order {
     }
 }
 
-pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>> {
-    let arr = serde_json::from_str::<Vec<Value>>(msg)?;
+pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let arr = serde_json::from_str::<Vec<Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
     assert_eq!(arr.len(), 2);
-    let ws_msg: WebsocketMsg<PushSymbolData> = serde_json::from_value(arr[1].clone())?;
+    let ws_msg: WebsocketMsg<PushSymbolData> =
+        serde_json::from_value(arr[1].clone()).map_err(|_e| {
+            SimpleError::new(format!(
+                "Failed to deserialize {} to WebsocketMsg<PushSymbolData>",
+                arr[1]
+            ))
+        })?;
     if ws_msg.data.asks.is_none() && ws_msg.data.bids.is_none() {
         return Ok(Vec::new());
     }
 
     let symbol = ws_msg.symbol.as_str();
-    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
 
     let orderbook = OrderBookMsg {
         exchange: EXCHANGE_NAME.to_string(),

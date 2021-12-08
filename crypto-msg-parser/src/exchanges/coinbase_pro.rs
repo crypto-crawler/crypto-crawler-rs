@@ -5,7 +5,8 @@ use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "coinbase_pro";
@@ -52,14 +53,23 @@ struct OrderbookUpdateMsg {
     extra: HashMap<String, Value>,
 }
 
-pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
-    let ws_msg = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
+    let ws_msg = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to HashMap<String, Value>",
+            msg
+        ))
+    })?;
     let symbol = ws_msg.get("product_id").unwrap().as_str().unwrap();
-    Some(symbol.to_string())
+    Ok(symbol.to_string())
 }
 
-pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let raw_trade = serde_json::from_str::<SpotTradeMsg>(msg)?;
+pub(crate) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
+    let raw_trade = serde_json::from_str::<SpotTradeMsg>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to SpotTradeMsg", msg)))?;
     let timestamp = DateTime::parse_from_rfc3339(&raw_trade.time).unwrap();
     let price = raw_trade.price.parse::<f64>().unwrap();
     let quantity = raw_trade.size.parse::<f64>().unwrap();
@@ -68,7 +78,14 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
         symbol: raw_trade.product_id.clone(),
-        pair: crypto_pair::normalize_pair(&raw_trade.product_id, EXCHANGE_NAME).unwrap(),
+        pair: crypto_pair::normalize_pair(&raw_trade.product_id, EXCHANGE_NAME).ok_or_else(
+            || {
+                SimpleError::new(format!(
+                    "Failed to normalize {} from {}",
+                    raw_trade.product_id, msg
+                ))
+            },
+        )?,
         msg_type: MessageType::Trade,
         timestamp: timestamp.timestamp_millis(),
         price,
@@ -115,15 +132,28 @@ pub(crate) fn parse_l2(
     market_type: MarketType,
     msg: &str,
     timestamp: Option<i64>,
-) -> Result<Vec<OrderBookMsg>> {
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
     let snapshot = {
-        let obj = serde_json::from_str::<HashMap<String, Value>>(msg)?;
+        let obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
+            SimpleError::new(format!(
+                "Failed to deserialize {} to HashMap<String, Value>",
+                msg
+            ))
+        })?;
         obj.get("type").unwrap().as_str().unwrap() == "snapshot"
     };
     if snapshot {
-        let orderbook_snapshot = serde_json::from_str::<OrderbookSnapshotMsg>(msg)?;
+        let orderbook_snapshot =
+            serde_json::from_str::<OrderbookSnapshotMsg>(msg).map_err(|_e| {
+                SimpleError::new(format!(
+                    "Failed to deserialize {} to OrderbookSnapshotMsg",
+                    msg
+                ))
+            })?;
         let symbol = orderbook_snapshot.product_id;
-        let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+        let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).ok_or_else(|| {
+            SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg))
+        })?;
 
         let orderbook = OrderBookMsg {
             exchange: EXCHANGE_NAME.to_string(),
@@ -142,9 +172,16 @@ pub(crate) fn parse_l2(
 
         Ok(vec![orderbook])
     } else {
-        let orderbook_updates = serde_json::from_str::<OrderbookUpdateMsg>(msg)?;
+        let orderbook_updates = serde_json::from_str::<OrderbookUpdateMsg>(msg).map_err(|_e| {
+            SimpleError::new(format!(
+                "Failed to deserialize {} to OrderbookUpdateMsg",
+                msg
+            ))
+        })?;
         let symbol = orderbook_updates.product_id;
-        let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+        let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).ok_or_else(|| {
+            SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg))
+        })?;
         let timestamp = DateTime::parse_from_rfc3339(&orderbook_updates.time).unwrap();
 
         let orderbook = OrderBookMsg {

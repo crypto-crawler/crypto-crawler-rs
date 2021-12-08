@@ -8,13 +8,23 @@ use crypto_msg_type::MessageType;
 
 use crate::{FundingRateMsg, OrderBookMsg, TradeMsg};
 
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 
-pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
-    let data = obj.get("data").unwrap();
-    let symbol = data["s"].as_str().unwrap();
-    Some(symbol.to_string())
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to HashMap<String, Value>",
+            msg
+        ))
+    })?;
+    let data = obj
+        .get("data")
+        .ok_or_else(|| SimpleError::new(format!("There is no data field in {}", msg)))?;
+    let symbol = data["s"].as_str().ok_or_else(|| {
+        SimpleError::new(format!("There is no s field in the data field of {}", msg))
+    })?;
+    Ok(symbol.to_string())
 }
 
 pub(crate) fn get_msg_type(msg: &str) -> MessageType {
@@ -45,7 +55,10 @@ pub(crate) fn get_msg_type(msg: &str) -> MessageType {
     }
 }
 
-pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
+pub(crate) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
     if market_type == MarketType::EuropeanOption {
         binance_option::parse_trade(msg)
     } else {
@@ -56,15 +69,21 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
 pub(crate) fn parse_funding_rate(
     market_type: MarketType,
     msg: &str,
-) -> Result<Vec<FundingRateMsg>> {
+) -> Result<Vec<FundingRateMsg>, SimpleError> {
     if market_type == MarketType::InverseSwap || market_type == MarketType::LinearSwap {
         binance_all::parse_funding_rate(market_type, msg)
     } else {
-        panic!("Binance {} does NOT have funding rates", market_type);
+        Err(SimpleError::new(format!(
+            "Binance {} does NOT have funding rates",
+            market_type
+        )))
     }
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
     if market_type == MarketType::EuropeanOption {
         Ok(Vec::new())
     } else {

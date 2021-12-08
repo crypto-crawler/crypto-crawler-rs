@@ -6,11 +6,14 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 pub use msg::*;
 pub use order::Order;
-
-use serde_json::Result;
+use simple_error::SimpleError;
 
 /// Extract the symbol from the message.
-pub fn extract_symbol(exchange: &str, market_type: MarketType, msg: &str) -> Option<String> {
+pub fn extract_symbol(
+    exchange: &str,
+    market_type: MarketType,
+    msg: &str,
+) -> Result<String, SimpleError> {
     match exchange {
         "binance" => exchanges::binance::extract_symbol(market_type, msg),
         "bitfinex" => exchanges::bitfinex::extract_symbol(market_type, msg),
@@ -31,12 +34,16 @@ pub fn extract_symbol(exchange: &str, market_type: MarketType, msg: &str) -> Opt
         "mxc" => exchanges::mxc::extract_symbol(market_type, msg),
         "okex" => exchanges::okex::extract_symbol(market_type, msg),
         "zbg" => exchanges::zbg::extract_symbol(market_type, msg),
-        _ => panic!("Unknown exchange {}", exchange),
+        _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
 }
 
 /// Parse trade messages.
-pub fn parse_trade(exchange: &str, market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
+pub fn parse_trade(
+    exchange: &str,
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
     match exchange {
         "binance" => exchanges::binance::parse_trade(market_type, msg),
         "bitfinex" => exchanges::bitfinex::parse_trade(market_type, msg),
@@ -57,7 +64,7 @@ pub fn parse_trade(exchange: &str, market_type: MarketType, msg: &str) -> Result
         "mxc" => exchanges::mxc::parse_trade(market_type, msg),
         "okex" => exchanges::okex::parse_trade(market_type, msg),
         "zbg" => exchanges::zbg::parse_trade(market_type, msg),
-        _ => panic!("Unknown exchange {}", exchange),
+        _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
 }
 
@@ -67,7 +74,7 @@ pub fn parse_l2(
     market_type: MarketType,
     msg: &str,
     timestamp: Option<i64>,
-) -> Result<Vec<OrderBookMsg>> {
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
     let ret = match exchange {
         "binance" => exchanges::binance::parse_l2(market_type, msg),
         "bitfinex" => exchanges::bitfinex::parse_l2(
@@ -100,7 +107,7 @@ pub fn parse_l2(
         "mxc" => exchanges::mxc::parse_l2(market_type, msg, timestamp),
         "okex" => exchanges::okex::parse_l2(market_type, msg),
         "zbg" => exchanges::zbg::parse_l2(market_type, msg),
-        _ => panic!("Unknown exchange {}", exchange),
+        _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     };
     match ret {
         Ok(mut orderbooks) => {
@@ -127,14 +134,19 @@ pub fn parse_funding_rate(
     exchange: &str,
     market_type: MarketType,
     msg: &str,
-) -> Result<Vec<FundingRateMsg>> {
+) -> Result<Vec<FundingRateMsg>, SimpleError> {
     let func = match exchange {
         "binance" => exchanges::binance::parse_funding_rate,
         "bitget" => exchanges::bitget::parse_funding_rate,
         "bitmex" => exchanges::bitmex::parse_funding_rate,
         "huobi" => exchanges::huobi::parse_funding_rate,
         "okex" => exchanges::okex::parse_funding_rate,
-        _ => panic!("{} does NOT have perpetual swap market", exchange),
+        _ => {
+            return Err(SimpleError::new(format!(
+                "{} does NOT have perpetual swap market",
+                exchange
+            )))
+        }
     };
     func(market_type, msg)
 }

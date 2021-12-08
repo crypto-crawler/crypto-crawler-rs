@@ -9,7 +9,8 @@ use chrono::prelude::*;
 use chrono::DateTime;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::{BTreeMap, HashMap};
 
 const EXCHANGE_NAME: &str = "bitmex";
@@ -449,17 +450,22 @@ struct WebsocketMsg<T: Sized> {
     data: Vec<T>,
 }
 
-pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Value>",
+            msg
+        ))
+    })?;
     let symbols = ws_msg
         .data
         .iter()
         .map(|v| v["symbol"].as_str().unwrap())
         .collect::<Vec<&str>>();
     if symbols.is_empty() {
-        None
+        Err(SimpleError::new("data is empty array"))
     } else {
-        Some(symbols[0].to_string())
+        Ok(symbols[0].to_string())
     }
 }
 
@@ -486,8 +492,16 @@ pub(crate) fn get_msg_type(msg: &str) -> MessageType {
     }
 }
 
-pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradeMsg>>(msg)?;
+pub(crate) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradeMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<RawTradeMsg>",
+            msg
+        ))
+    })?;
     let raw_trades = ws_msg.data;
     let mut trades: Vec<TradeMsg> = raw_trades
         .into_iter()
@@ -529,8 +543,13 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
 pub(crate) fn parse_funding_rate(
     market_type: MarketType,
     msg: &str,
-) -> Result<Vec<FundingRateMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawFundingRateMsg>>(msg)?;
+) -> Result<Vec<FundingRateMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawFundingRateMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<RawFundingRateMsg>",
+            msg
+        ))
+    })?;
     let mut rates: Vec<FundingRateMsg> = ws_msg
         .data
         .into_iter()
@@ -584,14 +603,20 @@ pub(crate) fn parse_l2(
     market_type: MarketType,
     msg: &str,
     timestamp: i64,
-) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrder>>(msg)?;
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrder>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<RawOrder>",
+            msg
+        ))
+    })?;
     let snapshot = ws_msg.action == "partial";
     if ws_msg.data.is_empty() {
         return Ok(Vec::new());
     }
     let symbol = ws_msg.data[0].symbol.clone();
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
     let market_type = if market_type == MarketType::Unknown {
         get_market_type(&symbol, EXCHANGE_NAME, None)
     } else {

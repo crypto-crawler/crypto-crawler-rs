@@ -5,7 +5,8 @@ use super::super::utils::calc_quantity_and_volume;
 use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "mxc";
@@ -40,10 +41,19 @@ struct WebsocketMsg<T: Sized> {
     data: T,
 }
 
-pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradeMsg>>(msg)?;
+pub(super) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradeMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<RawTradeMsg>",
+            msg
+        ))
+    })?;
     let symbol = ws_msg.symbol.as_str();
-    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
     let raw_trade = ws_msg.data;
 
     let (quantity_base, quantity_quote, _) =
@@ -72,10 +82,19 @@ pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     Ok(vec![trade])
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(msg)?;
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<RawOrderbookMsg>",
+            msg
+        ))
+    })?;
     let symbol = ws_msg.symbol.as_str();
-    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
 
     let parse_order = |raw_order: &[f64; 3]| -> Order {
         let price = raw_order[0];

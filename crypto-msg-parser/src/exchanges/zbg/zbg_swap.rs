@@ -6,7 +6,8 @@ use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::{BTreeMap, HashMap};
 
 const EXCHANGE_NAME: &str = "zbg";
@@ -139,12 +140,12 @@ struct RawOrderbookMsg {
     extra: HashMap<String, Value>,
 }
 
-pub(super) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
+pub(super) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
     let ws_msg = serde_json::from_str::<Vec<Value>>(msg).unwrap();
     let contract_id = ws_msg[1]["contractId"].as_i64().unwrap();
     let contract_info = SWAP_CONTRACT_MAP.get(&contract_id).unwrap();
     let symbol = contract_info.symbol.as_str();
-    Some(symbol.to_string())
+    Ok(symbol.to_string())
 }
 
 fn calc_quantity_and_volume(
@@ -170,10 +171,19 @@ fn calc_quantity_and_volume(
     }
 }
 
-pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let ws_msg = serde_json::from_str::<Vec<Value>>(msg)?;
+pub(super) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<Vec<Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
     assert_eq!(ws_msg[0].as_str().unwrap(), "future_tick");
-    let raw_trade: RawTradeMsg = serde_json::from_value(ws_msg[1].clone()).unwrap();
+    let raw_trade: RawTradeMsg = serde_json::from_value(ws_msg[1].clone()).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to RawTradeMsg",
+            ws_msg[1]
+        ))
+    })?;
 
     let contract_info = SWAP_CONTRACT_MAP.get(&raw_trade.contractId).unwrap();
     let symbol = contract_info.symbol.as_str();
@@ -218,10 +228,20 @@ pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     Ok(vec![trade])
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<Vec<Value>>(msg)?;
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<Vec<Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
     assert_eq!(ws_msg[0].as_str().unwrap(), "future_snapshot_depth");
-    let raw_orderbook: RawOrderbookMsg = serde_json::from_value(ws_msg[1].clone()).unwrap();
+    let raw_orderbook: RawOrderbookMsg =
+        serde_json::from_value(ws_msg[1].clone()).map_err(|_e| {
+            SimpleError::new(format!(
+                "Failed to deserialize {} to RawOrderbookMsg",
+                ws_msg[1]
+            ))
+        })?;
 
     let contract_info = SWAP_CONTRACT_MAP.get(&raw_orderbook.contractId).unwrap();
     let symbol = contract_info.symbol.as_str();

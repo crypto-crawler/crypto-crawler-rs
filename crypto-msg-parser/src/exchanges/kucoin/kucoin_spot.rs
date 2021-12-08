@@ -4,7 +4,8 @@ use crypto_msg_type::MessageType;
 use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::HashMap;
 
 use super::message::WebsocketMsg;
@@ -41,8 +42,13 @@ struct SpotOrderbookMsg {
     extra: HashMap<String, Value>,
 }
 
-pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<SpotTradeMsg>>(msg)?;
+pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<SpotTradeMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<SpotOrderbookMsg>",
+            msg
+        ))
+    })?;
     debug_assert_eq!(ws_msg.subject, "trade.l3match");
     debug_assert!(ws_msg.topic.starts_with("/market/match:"));
     let raw_trade = ws_msg.data;
@@ -53,7 +59,12 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
         exchange: EXCHANGE_NAME.to_string(),
         market_type: MarketType::Spot,
         symbol: raw_trade.symbol.clone(),
-        pair: crypto_pair::normalize_pair(&raw_trade.symbol, EXCHANGE_NAME).unwrap(),
+        pair: crypto_pair::normalize_pair(&raw_trade.symbol, EXCHANGE_NAME).ok_or_else(|| {
+            SimpleError::new(format!(
+                "Failed to normalize {} from {}",
+                raw_trade.symbol, msg
+            ))
+        })?,
         msg_type: MessageType::Trade,
         timestamp: raw_trade.time.parse::<i64>().unwrap() / 1000000,
         price,
@@ -72,12 +83,18 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
     Ok(vec![trade])
 }
 
-pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<SpotOrderbookMsg>>(msg)?;
+pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<SpotOrderbookMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<SpotOrderbookMsg>",
+            msg
+        ))
+    })?;
     debug_assert_eq!(ws_msg.subject, "trade.l2update");
     debug_assert!(ws_msg.topic.starts_with("/market/level2:"));
     let symbol = ws_msg.data.symbol;
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
 
     let parse_order = |raw_order: &[String; 3]| -> Order {
         let price = raw_order[0].parse::<f64>().unwrap();

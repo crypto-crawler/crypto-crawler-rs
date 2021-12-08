@@ -9,14 +9,15 @@ use crypto_msg_type::MessageType;
 
 use crate::{FundingRateMsg, OrderBookMsg, TradeMsg};
 
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 
 use message::WebsocketMsg;
 
-pub(crate) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Option<String> {
+pub(crate) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Result<String, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
     let v = ws_msg.ch.split('.').collect::<Vec<&str>>();
-    Some(v[1].to_string())
+    Ok(v[1].to_string())
 }
 
 pub(crate) fn get_msg_type(msg: &str) -> MessageType {
@@ -53,7 +54,10 @@ pub(crate) fn get_msg_type(msg: &str) -> MessageType {
     }
 }
 
-pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
+pub(crate) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
     match market_type {
         MarketType::Spot => huobi_spot::parse_trade(msg),
         MarketType::InverseFuture | MarketType::InverseSwap => {
@@ -62,22 +66,31 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
         MarketType::LinearFuture | MarketType::LinearSwap | MarketType::EuropeanOption => {
             huobi_linear::parse_trade(market_type, msg)
         }
-        _ => panic!("Unknown market type {}", market_type),
+        _ => Err(SimpleError::new(format!(
+            "Unknown huobi market type {}",
+            market_type
+        ))),
     }
 }
 
 pub(crate) fn parse_funding_rate(
     market_type: MarketType,
     msg: &str,
-) -> Result<Vec<FundingRateMsg>> {
+) -> Result<Vec<FundingRateMsg>, SimpleError> {
     if market_type == MarketType::InverseSwap || market_type == MarketType::LinearSwap {
         funding_rate::parse_funding_rate(market_type, msg)
     } else {
-        panic!("Huobi {} does NOT have funding rates", market_type);
+        Err(SimpleError::new(format!(
+            "Huobi {} does NOT have funding rates",
+            market_type
+        )))
     }
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
     match market_type {
         MarketType::Spot => huobi_spot::parse_l2(msg),
         MarketType::InverseFuture | MarketType::InverseSwap => {
@@ -86,6 +99,9 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         MarketType::LinearFuture | MarketType::LinearSwap | MarketType::EuropeanOption => {
             huobi_inverse::parse_l2(market_type, msg)
         }
-        _ => panic!("Unknown market type {}", market_type),
+        _ => Err(SimpleError::new(format!(
+            "Unknown huobi market type {}",
+            market_type
+        ))),
     }
 }

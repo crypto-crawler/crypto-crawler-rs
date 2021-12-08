@@ -5,7 +5,8 @@ use crypto_msg_type::MessageType;
 use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::HashMap;
 
 use super::message::WebsocketMsg;
@@ -59,10 +60,19 @@ struct RawOrderBookUpdateMsg {
     extra: HashMap<String, Value>,
 }
 
-pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradesMsg>>(msg)?;
+pub(crate) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradesMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<RawTradesMsg>",
+            msg
+        ))
+    })?;
     let symbol = ws_msg.id;
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
     debug_assert_eq!("v3_trades", ws_msg.channel);
 
     let mut trades: Vec<TradeMsg> = ws_msg
@@ -131,15 +141,23 @@ pub(crate) fn parse_l2(
     market_type: MarketType,
     msg: &str,
     timestamp: i64,
-) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg)?;
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to WebsocketMsg", msg)))?;
     let symbol = ws_msg.id;
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
     let snapshot = ws_msg.type_ == "subscribed";
     debug_assert_eq!("v3_orderbook", ws_msg.channel);
 
     let (asks, bids) = if snapshot {
-        let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderBookSnapshotMsg>>(msg)?;
+        let ws_msg =
+            serde_json::from_str::<WebsocketMsg<RawOrderBookSnapshotMsg>>(msg).map_err(|_e| {
+                SimpleError::new(format!(
+                    "Failed to deserialize {} to WebsocketMsg<RawOrderBookSnapshotMsg>",
+                    msg
+                ))
+            })?;
         (
             ws_msg
                 .contents
@@ -155,7 +173,13 @@ pub(crate) fn parse_l2(
                 .collect(),
         )
     } else {
-        let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderBookUpdateMsg>>(msg)?;
+        let ws_msg =
+            serde_json::from_str::<WebsocketMsg<RawOrderBookUpdateMsg>>(msg).map_err(|_e| {
+                SimpleError::new(format!(
+                    "Failed to deserialize {} to WebsocketMsg<RawOrderBookUpdateMsg>",
+                    msg
+                ))
+            })?;
         (
             ws_msg
                 .contents

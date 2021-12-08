@@ -4,7 +4,8 @@ use crypto_msg_type::MessageType;
 use super::messages::WebsocketMsg;
 use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "gate";
@@ -52,24 +53,35 @@ struct SpotOrderbookSnapshotMsg {
     extra: HashMap<String, Value>,
 }
 
-pub(super) fn extract_symbol(msg: &str) -> Option<String> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
+pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Value>",
+            msg
+        ))
+    })?;
     if ws_msg.channel == "spot.trades" {
-        Some(ws_msg.result["currency_pair"].as_str().unwrap().to_string())
+        Ok(ws_msg.result["currency_pair"].as_str().unwrap().to_string())
     } else if ws_msg.channel.starts_with("spot.order_book") {
-        Some(ws_msg.result["s"].as_str().unwrap().to_string())
+        Ok(ws_msg.result["s"].as_str().unwrap().to_string())
     } else {
-        panic!("Unsupported message format: {}", msg);
+        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
     }
 }
 
-pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<SpotTradeMsg>>(msg)?;
+pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<SpotTradeMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<SpotTradeMsg>",
+            msg
+        ))
+    })?;
     debug_assert_eq!(ws_msg.channel, "spot.trades");
     debug_assert_eq!(ws_msg.event, "update");
     let result = ws_msg.result;
     let symbol = result.currency_pair;
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
     let price = result.price.parse::<f64>().unwrap();
     let quantity_base = result.amount.parse::<f64>().unwrap();
 
@@ -107,23 +119,35 @@ fn parse_order(raw_order: &[String; 2]) -> Order {
     }
 }
 
-pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg)?;
+pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Value>",
+            msg
+        ))
+    })?;
     if ws_msg.channel == "spot.order_book_update" {
         parse_l2_update(msg)
     } else if ws_msg.channel == "spot.order_book" {
         parse_l2_snapshot(msg)
     } else {
-        panic!("Unknown message format: {}", msg);
+        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
     }
 }
 
-fn parse_l2_update(msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<SpotOrderbookUpdateMsg>>(msg)?;
+fn parse_l2_update(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg =
+        serde_json::from_str::<WebsocketMsg<SpotOrderbookUpdateMsg>>(msg).map_err(|_e| {
+            SimpleError::new(format!(
+                "Failed to deserialize {} to WebsocketMsg<SpotOrderbookUpdateMsg>",
+                msg
+            ))
+        })?;
     debug_assert_eq!(ws_msg.channel, "spot.order_book_update");
     let result = ws_msg.result;
     let symbol = result.s;
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
 
     let orderbook = OrderBookMsg {
         exchange: EXCHANGE_NAME.to_string(),
@@ -151,13 +175,20 @@ fn parse_l2_update(msg: &str) -> Result<Vec<OrderBookMsg>> {
     Ok(vec![orderbook])
 }
 
-fn parse_l2_snapshot(msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<SpotOrderbookSnapshotMsg>>(msg)?;
+fn parse_l2_snapshot(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg =
+        serde_json::from_str::<WebsocketMsg<SpotOrderbookSnapshotMsg>>(msg).map_err(|_e| {
+            SimpleError::new(format!(
+                "Failed to deserialize {} to WebsocketMsg<SpotOrderbookSnapshotMsg>",
+                msg
+            ))
+        })?;
     debug_assert_eq!(ws_msg.channel, "spot.order_book");
     debug_assert_eq!(ws_msg.event, "update");
     let result = ws_msg.result;
     let symbol = result.s;
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
 
     let parse_order = |raw_order: &[String; 2]| -> Order {
         let price = raw_order[0].parse::<f64>().unwrap();

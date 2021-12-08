@@ -7,7 +7,8 @@ use crate::{
 };
 
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "kucoin";
@@ -52,8 +53,16 @@ struct ContractOrderbookMsg {
     extra: HashMap<String, Value>,
 }
 
-pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<ContractTradeMsg>>(msg)?;
+pub(crate) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<ContractTradeMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<ContractTradeMsg>",
+            msg
+        ))
+    })?;
     debug_assert_eq!(ws_msg.subject, "match");
     debug_assert!(ws_msg.topic.starts_with("/contractMarket/execution:"));
     let raw_trade = ws_msg.data;
@@ -89,8 +98,16 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     Ok(vec![trade])
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<ContractOrderbookMsg>>(msg)?;
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<ContractOrderbookMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<ContractOrderbookMsg>",
+            msg
+        ))
+    })?;
     debug_assert_eq!(ws_msg.subject, "level2");
     debug_assert!(ws_msg.topic.starts_with("/contractMarket/level2:"));
     let symbol = ws_msg

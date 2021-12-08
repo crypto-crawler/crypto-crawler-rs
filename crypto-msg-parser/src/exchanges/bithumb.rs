@@ -4,7 +4,8 @@ use crypto_msg_type::MessageType;
 use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "bithumb";
@@ -41,34 +42,58 @@ struct WebsocketMsg<T: Sized> {
     topic: String,
 }
 
-pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Value>",
+            msg
+        ))
+    })?;
     if ws_msg.data.is_object() {
-        Some(ws_msg.data["symbol"].as_str().unwrap().to_string())
+        Ok(ws_msg.data["symbol"].as_str().unwrap().to_string())
     } else if ws_msg.data.is_array() {
         let arr = ws_msg.data.as_array().unwrap();
         let symbols = arr
             .iter()
             .map(|v| v["symbol"].as_str().unwrap())
             .collect::<Vec<&str>>();
-        Some(symbols[0].to_string())
+        Ok(symbols[0].to_string())
     } else {
-        panic!("Unknown message format: {}", msg);
+        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
     }
 }
 
-pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg)?;
+pub(crate) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Value>",
+            msg
+        ))
+    })?;
     let raw_trades = if ws_msg.code == "00006" {
         // snapshot
-        let ws_msg = serde_json::from_str::<WebsocketMsg<Vec<SpotTradeMsg>>>(msg)?;
+        let ws_msg =
+            serde_json::from_str::<WebsocketMsg<Vec<SpotTradeMsg>>>(msg).map_err(|_e| {
+                SimpleError::new(format!(
+                    "Failed to deserialize {} to WebsocketMsg<Vec<SpotTradeMsg>>",
+                    msg
+                ))
+            })?;
         ws_msg.data
     } else if ws_msg.code == "00007" {
         // updates
-        let ws_msg = serde_json::from_str::<WebsocketMsg<SpotTradeMsg>>(msg)?;
+        let ws_msg = serde_json::from_str::<WebsocketMsg<SpotTradeMsg>>(msg).map_err(|_e| {
+            SimpleError::new(format!(
+                "Failed to deserialize {} to WebsocketMsg<SpotTradeMsg>",
+                msg
+            ))
+        })?;
         vec![ws_msg.data]
     } else {
-        panic!("Invalid trade msg {}", msg);
+        return Err(SimpleError::new(format!("Invalid trade msg {}", msg)));
     };
     let mut trades: Vec<TradeMsg> = raw_trades
         .into_iter()
@@ -103,18 +128,27 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     Ok(trades)
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<SpotOrderbookMsg>>(msg)?;
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<SpotOrderbookMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<SpotOrderbookMsg>",
+            msg
+        ))
+    })?;
     debug_assert_eq!(ws_msg.topic, "ORDERBOOK");
     let snapshot = if ws_msg.code == "00006" {
         true
     } else if ws_msg.code == "00007" {
         false
     } else {
-        panic!("Unknown code {}", ws_msg.code);
+        return Err(SimpleError::new(format!("Unknown code {}", ws_msg.code)));
     };
     let symbol = ws_msg.data.symbol;
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
     let timestamp = ws_msg.timestamp;
 
     let parse_order = |raw_order: &[String; 2]| -> Order {

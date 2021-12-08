@@ -4,7 +4,8 @@ use crypto_msg_type::MessageType;
 use crate::{TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "binance";
@@ -39,14 +40,24 @@ struct WebsocketMsg<T: Sized> {
     data: T,
 }
 
-pub(crate) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(msg)?;
-    let data = obj.get("data").unwrap();
-    let event_type = data.get("e").unwrap().as_str().unwrap();
+pub(crate) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("{} is not a JSON object", msg)))?;
+    let data = obj
+        .get("data")
+        .ok_or_else(|| SimpleError::new(format!("There is no data field in {}", msg)))?;
+    let event_type = data["e"].as_str().ok_or_else(|| {
+        SimpleError::new(format!("There is no e field in the data field of {}", msg))
+    })?;
 
     assert_eq!(event_type, "trade_all");
 
-    let all_trades: OptionTradeAllMsg = serde_json::from_value(data.clone()).unwrap();
+    let all_trades: OptionTradeAllMsg = serde_json::from_value(data.clone()).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to OptionTradeAllMsg",
+            data
+        ))
+    })?;
     let trades: Vec<TradeMsg> = all_trades
         .t
         .into_iter()

@@ -7,7 +7,8 @@ use super::messages::WebsocketMsg;
 use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::{cell::RefCell, collections::HashMap};
 
 const EXCHANGE_NAME: &str = "gate";
@@ -61,8 +62,13 @@ struct SwapTradeMsg {
     extra: HashMap<String, Value>,
 }
 
-pub(super) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Option<String> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
+pub(super) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Result<String, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Value>",
+            msg
+        ))
+    })?;
     let result = ws_msg.result;
     if ws_msg.channel == "futures.trades" {
         let symbols = result
@@ -71,10 +77,10 @@ pub(super) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Option<Str
             .iter()
             .map(|trade_msg| trade_msg["contract"].as_str().unwrap())
             .collect::<Vec<&str>>();
-        Some(symbols[0].to_string())
+        Ok(symbols[0].to_string())
     } else if ws_msg.channel == "futures.order_book" {
         if ws_msg.event == "all" {
-            Some(result["contract"].as_str().unwrap().to_string())
+            Ok(result["contract"].as_str().unwrap().to_string())
         } else {
             debug_assert_eq!(ws_msg.event, "update");
             let arr = result.as_array().unwrap();
@@ -89,19 +95,28 @@ pub(super) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Option<Str
                     }
                 })
                 .collect::<Vec<&str>>();
-            Some(symbols[0].to_string())
+            Ok(symbols[0].to_string())
         }
     } else if ws_msg.channel == "futures.order_book_update" {
-        Some(result["s"].as_str().unwrap().to_string())
+        Ok(result["s"].as_str().unwrap().to_string())
     } else {
-        panic!("Unknown message format: {}", msg);
+        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
     }
 }
 
-pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
+pub(super) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
     match market_type {
         MarketType::LinearFuture => {
-            let ws_msg = serde_json::from_str::<WebsocketMsg<Vec<FutureTradeMsg>>>(msg)?;
+            let ws_msg =
+                serde_json::from_str::<WebsocketMsg<Vec<FutureTradeMsg>>>(msg).map_err(|_e| {
+                    SimpleError::new(format!(
+                        "Failed to deserialize {} to WebsocketMsg<Vec<FutureTradeMsg>>",
+                        msg
+                    ))
+                })?;
 
             let mut trades: Vec<TradeMsg> = ws_msg
                 .result
@@ -147,7 +162,13 @@ pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             Ok(trades)
         }
         MarketType::InverseSwap | MarketType::LinearSwap => {
-            let ws_msg = serde_json::from_str::<WebsocketMsg<Vec<SwapTradeMsg>>>(msg)?;
+            let ws_msg =
+                serde_json::from_str::<WebsocketMsg<Vec<SwapTradeMsg>>>(msg).map_err(|_e| {
+                    SimpleError::new(format!(
+                        "Failed to deserialize {} to WebsocketMsg<Vec<SwapTradeMsg>>",
+                        msg
+                    ))
+                })?;
 
             let mut trades: Vec<TradeMsg> = ws_msg
                 .result
@@ -192,7 +213,10 @@ pub(super) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             }
             Ok(trades)
         }
-        _ => panic!("Unknown market type {}", market_type),
+        _ => Err(SimpleError::new(format!(
+            "Unknown gate market type {}",
+            market_type
+        ))),
     }
 }
 
@@ -201,15 +225,28 @@ thread_local! {
     static PRICE_HASHMAP: RefCell<HashMap<String,HashMap<String, bool>>> = RefCell::new(HashMap::new());
 }
 
-fn parse_l2_legacy(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg)?;
+fn parse_l2_legacy(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Value>",
+            msg
+        ))
+    })?;
     debug_assert_eq!(ws_msg.channel, "futures.order_book");
     let snapshot = ws_msg.event == "all";
 
     let orderbook = if snapshot {
-        let raw_orderbook = serde_json::from_value::<RawOrderbookSnapshot>(ws_msg.result).unwrap();
+        let raw_orderbook = serde_json::from_value::<RawOrderbookSnapshot>(ws_msg.result.clone())
+            .map_err(|_e| {
+            SimpleError::new(format!(
+                "Failed to deserialize {} to RawOrderbookSnapshot",
+                ws_msg.result
+            ))
+        })?;
         let symbol = raw_orderbook.contract;
-        let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+        let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).ok_or_else(|| {
+            SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg))
+        })?;
         let timestamp = if market_type != MarketType::LinearFuture {
             raw_orderbook.t.unwrap()
         } else {
@@ -245,13 +282,21 @@ fn parse_l2_legacy(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMs
             json: msg.to_string(),
         }
     } else {
-        let raw_orderbook = serde_json::from_value::<Vec<RawOrderLegacy>>(ws_msg.result).unwrap();
+        let raw_orderbook = serde_json::from_value::<Vec<RawOrderLegacy>>(ws_msg.result.clone())
+            .map_err(|_e| {
+                SimpleError::new(format!(
+                    "Failed to deserialize {} to Vec<RawOrderLegacy>",
+                    ws_msg.result
+                ))
+            })?;
         let symbol = if market_type == MarketType::LinearFuture {
             raw_orderbook[0].c.clone().unwrap()
         } else {
             raw_orderbook[0].contract.clone().unwrap()
         };
-        let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+        let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).ok_or_else(|| {
+            SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg))
+        })?;
         let timestamp = ws_msg.time * 1000;
 
         let parse_order = |raw_order: &RawOrderLegacy| -> Order {
@@ -348,12 +393,18 @@ fn parse_order(market_type: MarketType, raw_order: &RawOrderNew, pair: &str) -> 
     }
 }
 
-fn parse_l2_update(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<OrderbookUpdateMsg>>(msg)?;
+fn parse_l2_update(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<OrderbookUpdateMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<OrderbookUpdateMsg>",
+            msg
+        ))
+    })?;
     debug_assert_eq!(ws_msg.channel, "futures.order_book_update");
     let result = ws_msg.result;
     let symbol = result.s;
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
 
     let orderbook = OrderBookMsg {
         exchange: EXCHANGE_NAME.to_string(),
@@ -381,13 +432,24 @@ fn parse_l2_update(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMs
     Ok(vec![orderbook])
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg)?;
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Value>",
+            msg
+        ))
+    })?;
     if ws_msg.channel == "futures.order_book" {
         parse_l2_legacy(market_type, msg)
     } else if ws_msg.channel == "futures.order_book_update" {
         parse_l2_update(market_type, msg)
     } else {
-        panic!("Unknown channel {}", ws_msg.channel);
+        Err(SimpleError::new(format!(
+            "Unknown channel {} of gate {}",
+            ws_msg.channel, market_type
+        )))
     }
 }

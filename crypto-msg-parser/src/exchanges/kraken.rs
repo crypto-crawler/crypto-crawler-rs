@@ -4,7 +4,8 @@ use crypto_msg_type::MessageType;
 use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "kraken";
@@ -47,19 +48,30 @@ struct OrderbookUpdate {
     extra: HashMap<String, Value>,
 }
 
-pub(crate) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Option<String> {
-    let arr = serde_json::from_str::<Vec<Value>>(msg).unwrap();
+pub(crate) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Result<String, SimpleError> {
+    let arr = serde_json::from_str::<Vec<Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
     let symbol = arr[arr.len() - 1].as_str().unwrap();
-    Some(symbol.to_string())
+    Ok(symbol.to_string())
 }
 
-pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let arr = serde_json::from_str::<Vec<Value>>(msg)?;
+pub(crate) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
+    let arr = serde_json::from_str::<Vec<Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
     debug_assert_eq!(arr[2].as_str().unwrap(), "trade");
     debug_assert_eq!(arr.len(), 4);
     let symbol = arr[arr.len() - 1].as_str().unwrap();
-    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
-    let raw_trades: Vec<Vec<String>> = serde_json::from_value(arr[1].clone()).unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
+    let raw_trades: Vec<Vec<String>> = serde_json::from_value(arr[1].clone()).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to Vec<Vec<String>>",
+            arr[1]
+        ))
+    })?;
 
     // trade format https://docs.kraken.com/websockets/#message-trade
     let mut trades: Vec<TradeMsg> = raw_trades
@@ -97,12 +109,17 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     Ok(trades)
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
     debug_assert_eq!(market_type, MarketType::Spot);
-    let arr = serde_json::from_str::<Vec<Value>>(msg)?;
+    let arr = serde_json::from_str::<Vec<Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
     debug_assert_eq!(arr[arr.len() - 2].as_str().unwrap(), "book-25");
     let symbol = arr[arr.len() - 1].as_str().unwrap().to_string();
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
     let snapshot = arr[1].as_object().unwrap().contains_key("as");
 
     let parse_order = |raw_order: &[String]| -> Order {
@@ -118,7 +135,13 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
     };
 
     let orderbooks = if snapshot {
-        let orderbook_snapshot = serde_json::from_value::<OrderbookSnapshot>(arr[1].clone())?;
+        let orderbook_snapshot = serde_json::from_value::<OrderbookSnapshot>(arr[1].clone())
+            .map_err(|_e| {
+                SimpleError::new(format!(
+                    "Failed to deserialize {} to OrderbookSnapshot",
+                    arr[1]
+                ))
+            })?;
 
         let timestamp = {
             let mut timestamps: Vec<i64> = Vec::new();
@@ -187,15 +210,33 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
             }
         };
         if arr.len() == 4 {
-            let update = serde_json::from_value::<OrderbookUpdate>(arr[1].clone())?;
+            let update =
+                serde_json::from_value::<OrderbookUpdate>(arr[1].clone()).map_err(|_e| {
+                    SimpleError::new(format!(
+                        "Failed to deserialize {} to OrderbookUpdate",
+                        arr[1]
+                    ))
+                })?;
             process_update(update);
         } else if arr.len() == 5 {
-            let update = serde_json::from_value::<OrderbookUpdate>(arr[1].clone())?;
+            let update =
+                serde_json::from_value::<OrderbookUpdate>(arr[1].clone()).map_err(|_e| {
+                    SimpleError::new(format!(
+                        "Failed to deserialize {} to OrderbookUpdate",
+                        arr[1]
+                    ))
+                })?;
             process_update(update);
-            let update = serde_json::from_value::<OrderbookUpdate>(arr[2].clone())?;
+            let update =
+                serde_json::from_value::<OrderbookUpdate>(arr[2].clone()).map_err(|_e| {
+                    SimpleError::new(format!(
+                        "Failed to deserialize {} to OrderbookUpdate",
+                        arr[2]
+                    ))
+                })?;
             process_update(update);
         } else {
-            panic!("Unknown message format {}", msg);
+            return Err(SimpleError::new(format!("Unknown message format {}", msg)));
         };
 
         let timestamp = if timestamps.is_empty() {

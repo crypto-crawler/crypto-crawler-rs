@@ -4,7 +4,8 @@ use crypto_msg_type::MessageType;
 use crate::FundingRateMsg;
 
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize)]
@@ -32,8 +33,9 @@ pub(super) struct WebsocketMsg {
 pub(super) fn parse_funding_rate(
     market_type: MarketType,
     msg: &str,
-) -> Result<Vec<FundingRateMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg>(msg)?;
+) -> Result<Vec<FundingRateMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to WebsocketMsg", msg)))?;
     let mut funding_rates: Vec<FundingRateMsg> = ws_msg
         .data
         .into_iter()

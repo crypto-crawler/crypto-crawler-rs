@@ -5,9 +5,9 @@ use crypto_market_type::MarketType;
 
 use crate::{OrderBookMsg, TradeMsg};
 
-use serde_json::Result;
+use simple_error::SimpleError;
 
-pub(crate) fn extract_symbol(market_type: MarketType, msg: &str) -> Option<String> {
+pub(crate) fn extract_symbol(market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
     if market_type == MarketType::Spot {
         zbg_spot::extract_symbol(msg)
     } else {
@@ -15,7 +15,10 @@ pub(crate) fn extract_symbol(market_type: MarketType, msg: &str) -> Option<Strin
     }
 }
 
-pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
+pub(crate) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
     if market_type == MarketType::Spot {
         zbg_spot::parse_trade(msg)
     } else {
@@ -23,7 +26,10 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     }
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
     if market_type == MarketType::Spot {
         zbg_spot::parse_l2(msg)
     } else {

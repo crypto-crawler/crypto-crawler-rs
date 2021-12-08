@@ -4,7 +4,8 @@ use crypto_msg_type::MessageType;
 use crate::{exchanges::utils::calc_quantity_and_volume, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "bybit";
@@ -78,8 +79,13 @@ struct RawOrderbookMsg {
     timestamp_e6: Value, // i64 or String
 }
 
-pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
-    let ws_msg = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
+    let ws_msg = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to HashMap<String, Value>",
+            msg
+        ))
+    })?;
     let arr = ws_msg
         .get("topic")
         .unwrap()
@@ -87,7 +93,7 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<Stri
         .unwrap()
         .split('.')
         .collect::<Vec<&str>>();
-    Some(arr[1].to_string())
+    Ok(arr[1].to_string())
 }
 
 pub(crate) fn get_msg_type(msg: &str) -> MessageType {
@@ -113,10 +119,19 @@ pub(crate) fn get_msg_type(msg: &str) -> MessageType {
     }
 }
 
-pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
+pub(crate) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
     match market_type {
         MarketType::InverseSwap | MarketType::InverseFuture => {
-            let ws_msg = serde_json::from_str::<WebsocketMsg<InverseTradeMsg>>(msg)?;
+            let ws_msg =
+                serde_json::from_str::<WebsocketMsg<InverseTradeMsg>>(msg).map_err(|_e| {
+                    SimpleError::new(format!(
+                        "Failed to deserialize {} to WebsocketMsg<InverseTradeMsg>",
+                        msg
+                    ))
+                })?;
 
             let mut trades: Vec<TradeMsg> = ws_msg
                 .data
@@ -150,7 +165,13 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             Ok(trades)
         }
         MarketType::LinearSwap => {
-            let ws_msg = serde_json::from_str::<WebsocketMsg<LinearTradeMsg>>(msg)?;
+            let ws_msg =
+                serde_json::from_str::<WebsocketMsg<LinearTradeMsg>>(msg).map_err(|_e| {
+                    SimpleError::new(format!(
+                        "Failed to deserialize {} to WebsocketMsg<LinearTradeMsg>",
+                        msg
+                    ))
+                })?;
 
             let mut trades: Vec<TradeMsg> = ws_msg
                 .data
@@ -186,14 +207,25 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             }
             Ok(trades)
         }
-        _ => panic!("Unknown market_type {}", market_type),
+        _ => {
+            return Err(SimpleError::new(format!(
+                "Unknown market_type {}",
+                market_type
+            )))
+        }
     }
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<RawOrderbookMsg>(msg)?;
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<RawOrderbookMsg>(msg).map_err(|_e| {
+        SimpleError::new(format!("Failed to deserialize {} to RawOrderbookMsg", msg))
+    })?;
     let symbol = ws_msg.topic.strip_prefix("orderBookL2_25.").unwrap();
-    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
     let snapshot = ws_msg.type_ == "snapshot";
     let timestamp = if ws_msg.timestamp_e6.is_i64() {
         ws_msg.timestamp_e6.as_i64().unwrap()
@@ -238,9 +270,21 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
     let raw_orders = match market_type {
         MarketType::InverseSwap | MarketType::InverseFuture => {
             if snapshot {
-                serde_json::from_value::<Vec<RawOrder>>(ws_msg.data).unwrap()
+                serde_json::from_value::<Vec<RawOrder>>(ws_msg.data.clone()).map_err(|_e| {
+                    SimpleError::new(format!(
+                        "Failed to deserialize {} to Vec<RawOrder>",
+                        ws_msg.data
+                    ))
+                })?
             } else {
-                let tmp = serde_json::from_value::<OrderbookDelta>(ws_msg.data).unwrap();
+                let tmp = serde_json::from_value::<OrderbookDelta>(ws_msg.data.clone()).map_err(
+                    |_e| {
+                        SimpleError::new(format!(
+                            "Failed to deserialize {} to OrderbookDelta",
+                            ws_msg.data
+                        ))
+                    },
+                )?;
                 let mut v = Vec::<RawOrder>::new();
                 v.extend(tmp.delete);
                 v.extend(tmp.update);
@@ -250,10 +294,23 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
         }
         MarketType::LinearSwap => {
             if snapshot {
-                let tmp = serde_json::from_value::<LinearOrderbookSnapshot>(ws_msg.data).unwrap();
+                let tmp = serde_json::from_value::<LinearOrderbookSnapshot>(ws_msg.data.clone())
+                    .map_err(|_e| {
+                        SimpleError::new(format!(
+                            "Failed to deserialize {} to LinearOrderbookSnapshot",
+                            ws_msg.data
+                        ))
+                    })?;
                 tmp.order_book
             } else {
-                let tmp = serde_json::from_value::<OrderbookDelta>(ws_msg.data).unwrap();
+                let tmp = serde_json::from_value::<OrderbookDelta>(ws_msg.data.clone()).map_err(
+                    |_e| {
+                        SimpleError::new(format!(
+                            "Failed to deserialize {} to OrderbookDelta",
+                            ws_msg.data
+                        ))
+                    },
+                )?;
                 let mut v = Vec::<RawOrder>::new();
                 v.extend(tmp.delete);
                 v.extend(tmp.update);
@@ -261,7 +318,12 @@ pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBo
                 v
             }
         }
-        _ => panic!("Unknown market_type {}", market_type),
+        _ => {
+            return Err(SimpleError::new(format!(
+                "Unknown market_type {}",
+                market_type
+            )))
+        }
     };
 
     for raw_order in raw_orders.iter() {

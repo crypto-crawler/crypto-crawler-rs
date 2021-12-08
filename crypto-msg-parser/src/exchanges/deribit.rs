@@ -4,7 +4,8 @@ use crypto_msg_type::MessageType;
 use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::HashMap;
 
 use crate::exchanges::utils::calc_quantity_and_volume;
@@ -53,20 +54,25 @@ struct WebsocketMsg<T: Sized> {
     params: Params<T>,
 }
 
-pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Value>",
+            msg
+        ))
+    })?;
     let data = ws_msg.params.data;
     if data.is_object() {
-        Some(data["instrument_name"].as_str().unwrap().to_string())
+        Ok(data["instrument_name"].as_str().unwrap().to_string())
     } else if data.is_array() {
         let arr = data.as_array().unwrap();
         let symbols = arr
             .iter()
             .map(|v| v["instrument_name"].as_str().unwrap())
             .collect::<Vec<&str>>();
-        Some(symbols[0].to_string())
+        Ok(symbols[0].to_string())
     } else {
-        panic!("Unknown message format: {}", msg);
+        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
     }
 }
 
@@ -98,8 +104,16 @@ pub(crate) fn get_msg_type(msg: &str) -> MessageType {
     }
 }
 
-pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Vec<RawTradeMsg>>>(msg)?;
+pub(crate) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Vec<RawTradeMsg>>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Vec<RawTradeMsg>>",
+            msg
+        ))
+    })?;
     let mut trades: Vec<TradeMsg> = ws_msg
         .params
         .data
@@ -143,13 +157,22 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
     Ok(trades)
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(msg)?;
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<RawOrderbookMsg>",
+            msg
+        ))
+    })?;
     let raw_orderbook = ws_msg.params.data;
     let snapshot = raw_orderbook.type_ == "snapshot";
     let timestamp = raw_orderbook.timestamp;
     let symbol = raw_orderbook.instrument_name;
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
 
     let parse_order = |raw_order: &[Value; 3]| -> Order {
         let price = raw_order[1].as_f64().unwrap();

@@ -4,7 +4,8 @@ use crypto_msg_type::MessageType;
 use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::HashMap;
 
 use super::message::WebsocketMsg;
@@ -45,14 +46,20 @@ struct TradeTick {
     data: Vec<SpotTradeMsg>,
 }
 
-pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<TradeTick>>(msg)?;
+pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<TradeTick>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<TradeTick>",
+            msg
+        ))
+    })?;
 
     let symbol = {
         let v: Vec<&str> = ws_msg.ch.split('.').collect();
         v[1]
     };
-    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
 
     let mut trades: Vec<TradeMsg> = ws_msg
         .tick
@@ -85,13 +92,19 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
     Ok(trades)
 }
 
-pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<SpotOrderbookMsg>>(msg)?;
+pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<SpotOrderbookMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<SpotOrderbookMsg>",
+            msg
+        ))
+    })?;
     let symbol = {
         let v: Vec<&str> = ws_msg.ch.split('.').collect();
         v[1]
     };
-    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
     let timestamp = ws_msg.ts;
 
     let parse_order = |raw_order: &[f64; 2]| -> Order {

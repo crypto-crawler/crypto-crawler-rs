@@ -1,17 +1,26 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
+use if_chain::if_chain;
 
 use crate::{exchanges::utils::calc_quantity_and_volume, Order, OrderBookMsg, TradeMsg, TradeSide};
 
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 
 const EXCHANGE_NAME: &str = "bitfinex";
 
-pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
-    let arr = serde_json::from_str::<Vec<Value>>(msg).unwrap();
-
-    let symbol = arr[0].as_object().unwrap()["symbol"].as_str().unwrap();
-    Some(symbol.to_string())
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
+    let arr = serde_json::from_str::<Vec<Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
+    if_chain! {
+        if let Some(obj) = arr[0].as_object();
+        if let Some(symbol) = obj["symbol"].as_str();
+        then {
+            Ok(symbol.to_string())
+        } else {
+            Err(SimpleError::new(format!("Failed to extract symbol from {}", msg)))
+        }
+    }
 }
 
 fn parse_one_trade(market_type: MarketType, symbol: &str, nums: &[f64]) -> TradeMsg {
@@ -46,10 +55,21 @@ fn parse_one_trade(market_type: MarketType, symbol: &str, nums: &[f64]) -> Trade
     }
 }
 
-pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let arr = serde_json::from_str::<Vec<Value>>(msg)?;
-
-    let symbol = arr[0].as_object().unwrap()["symbol"].as_str().unwrap();
+pub(crate) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
+    let arr = serde_json::from_str::<Vec<Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
+    let symbol = if_chain! {
+        if let Some(obj) = arr[0].as_object();
+        if let Some(symbol) = obj["symbol"].as_str();
+        then {
+            symbol
+        } else {
+            return Err(SimpleError::new(format!("Failed to extract symbol from {}", msg)));
+        }
+    };
 
     // see https://docs.bitfinex.com/reference#ws-public-trades
     match arr[1].as_str() {
@@ -79,11 +99,13 @@ pub(crate) fn parse_l2(
     market_type: MarketType,
     msg: &str,
     timestamp: i64,
-) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<Vec<Value>>(msg)?;
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<Vec<Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
 
     let symbol = ws_msg[0].as_object().unwrap()["symbol"].as_str().unwrap();
-    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
 
     let data = ws_msg[1].clone();
     if data.as_array().unwrap().is_empty() {

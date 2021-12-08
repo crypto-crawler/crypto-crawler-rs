@@ -5,7 +5,8 @@ use crate::{FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use super::super::utils::calc_quantity_and_volume;
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "binance";
@@ -73,15 +74,28 @@ struct WebsocketMsg<T: Sized> {
     data: T,
 }
 
-pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(msg)?;
-    let data = obj.get("data").unwrap();
-    let event_type = data["e"].as_str().unwrap();
+pub(crate) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("{} is not a JSON object", msg)))?;
+    let data = obj
+        .get("data")
+        .ok_or_else(|| SimpleError::new(format!("There is no data field in {}", msg)))?;
+    let event_type = data["e"].as_str().ok_or_else(|| {
+        SimpleError::new(format!("There is no e field in the data field of {}", msg))
+    })?;
 
     match event_type {
         "aggTrade" => {
-            let agg_trade: AggTradeMsg = serde_json::from_value(data.clone()).unwrap();
-            let pair = crypto_pair::normalize_pair(&agg_trade.s, EXCHANGE_NAME).unwrap();
+            let agg_trade: AggTradeMsg = serde_json::from_value(data.clone()).map_err(|_e| {
+                SimpleError::new(format!("Failed to deserialize {} to AggTradeMsg", msg))
+            })?;
+            let pair =
+                crypto_pair::normalize_pair(&agg_trade.s, EXCHANGE_NAME).ok_or_else(|| {
+                    SimpleError::new(format!("Failed to normalize {} from {}", agg_trade.s, msg))
+                })?;
             let price = agg_trade.p.parse::<f64>().unwrap();
             let quantity = agg_trade.q.parse::<f64>().unwrap();
             let (quantity_base, quantity_quote, quantity_contract) =
@@ -109,8 +123,13 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             Ok(vec![trade])
         }
         "trade" => {
-            let raw_trade: RawTradeMsg = serde_json::from_value(data.clone()).unwrap();
-            let pair = crypto_pair::normalize_pair(&raw_trade.s, EXCHANGE_NAME).unwrap();
+            let raw_trade: RawTradeMsg = serde_json::from_value(data.clone()).map_err(|_e| {
+                SimpleError::new(format!("Failed to deserialize {} to RawTradeMsg", data))
+            })?;
+            let pair =
+                crypto_pair::normalize_pair(&raw_trade.s, EXCHANGE_NAME).ok_or_else(|| {
+                    SimpleError::new(format!("Failed to normalize {} from {}", raw_trade.s, msg))
+                })?;
             let price = raw_trade.p.parse::<f64>().unwrap();
             let quantity = raw_trade.q.parse::<f64>().unwrap();
             let (quantity_base, quantity_quote, quantity_contract) =
@@ -137,13 +156,29 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
 
             Ok(vec![trade])
         }
-        _ => panic!("Unsupported event type {}", event_type),
+        _ => Err(SimpleError::new(format!(
+            "Unsupported event type {}",
+            event_type
+        ))),
     }
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(msg)?;
-    let pair = crypto_pair::normalize_pair(&ws_msg.data.s, EXCHANGE_NAME).unwrap();
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<RawOrderbookMsg>",
+            msg
+        ))
+    })?;
+    let pair = crypto_pair::normalize_pair(&ws_msg.data.s, EXCHANGE_NAME).ok_or_else(|| {
+        SimpleError::new(format!(
+            "Failed to normalize {} from {}",
+            ws_msg.data.s, msg
+        ))
+    })?;
 
     let parse_order = |raw_order: &RawOrder| -> Order {
         let price = raw_order[0].parse::<f64>().unwrap();
@@ -211,8 +246,13 @@ struct RawFundingRateMsg {
 pub(crate) fn parse_funding_rate(
     market_type: MarketType,
     msg: &str,
-) -> Result<Vec<FundingRateMsg>> {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(msg)?;
+) -> Result<Vec<FundingRateMsg>, SimpleError> {
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to HashMap<String, Value>",
+            msg
+        ))
+    })?;
     let stream = obj.get("stream").unwrap().as_str().unwrap();
     let data = if stream == "!markPrice@arr" {
         obj.get("data")
@@ -225,7 +265,10 @@ pub(crate) fn parse_funding_rate(
     } else if stream.ends_with("@markPrice") {
         vec![serde_json::from_value::<RawFundingRateMsg>(obj.get("data").unwrap().clone()).unwrap()]
     } else {
-        panic!("Unknown funding rate messaeg {}", msg);
+        return Err(SimpleError::new(format!(
+            "Unknown funding rate messaeg {}",
+            msg
+        )));
     };
     let mut funding_rates: Vec<FundingRateMsg> = data
         .into_iter()

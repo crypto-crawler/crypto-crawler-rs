@@ -7,7 +7,8 @@ use crate::{FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 use chrono::prelude::*;
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "okex";
@@ -64,17 +65,22 @@ struct WebsocketMsg<T: Sized> {
     extra: HashMap<String, Value>,
 }
 
-pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Option<String> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Value>",
+            msg
+        ))
+    })?;
     let symbols = ws_msg
         .data
         .iter()
         .map(|v| v["instrument_id"].as_str().unwrap())
         .collect::<Vec<&str>>();
     if symbols.is_empty() {
-        None
+        Err(SimpleError::new("empty array"))
     } else {
-        Some(symbols[0].to_string())
+        Ok(symbols[0].to_string())
     }
 }
 
@@ -105,9 +111,17 @@ pub(crate) fn get_msg_type(msg: &str) -> MessageType {
     }
 }
 
-pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<TradeMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradeMsg>>(msg)?;
-    let mut trades: Vec<TradeMsg> = ws_msg
+pub(crate) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradeMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<RawTradeMsg>",
+            msg
+        ))
+    })?;
+    let mut trades: Vec<Result<TradeMsg, SimpleError>> = ws_msg
         .data
         .into_iter()
         .map(|raw_trade| {
@@ -118,7 +132,9 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             } else if raw_trade.size.is_some() {
                 raw_trade.size.clone().unwrap().parse::<f64>().unwrap()
             } else {
-                panic!("qty and size are both missing");
+                return Err(SimpleError::new(
+                    "qty and size are both missing".to_string(),
+                ));
             };
             let side = raw_trade.side.clone().unwrap();
             let pair =
@@ -126,7 +142,7 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
             let (quantity_base, quantity_quote, _) =
                 calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, size);
 
-            TradeMsg {
+            Ok(TradeMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type,
                 symbol: raw_trade.instrument_id.clone(),
@@ -148,21 +164,28 @@ pub(crate) fn parse_trade(market_type: MarketType, msg: &str) -> Result<Vec<Trad
                 },
                 trade_id: raw_trade.trade_id.to_string(),
                 json: serde_json::to_string(&raw_trade).unwrap(),
-            }
+            })
         })
         .collect();
 
     if trades.len() == 1 {
-        trades[0].json = msg.to_string();
+        if let Ok(v) = trades[0].as_mut() {
+            v.json = msg.to_string();
+        }
     }
-    Ok(trades)
+    trades.into_iter().collect()
 }
 
 pub(crate) fn parse_funding_rate(
     market_type: MarketType,
     msg: &str,
-) -> Result<Vec<FundingRateMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawFundingRateMsg>>(msg)?;
+) -> Result<Vec<FundingRateMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawFundingRateMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<RawFundingRateMsg>",
+            msg
+        ))
+    })?;
 
     let mut rates: Vec<FundingRateMsg> = ws_msg
         .data
@@ -190,8 +213,16 @@ pub(crate) fn parse_funding_rate(
     Ok(rates)
 }
 
-pub(crate) fn parse_l2(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(msg)?;
+pub(crate) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<RawOrderbookMsg>",
+            msg
+        ))
+    })?;
     let snapshot = ws_msg.action.unwrap() == "partial";
     debug_assert_eq!(ws_msg.data.len(), 1);
 

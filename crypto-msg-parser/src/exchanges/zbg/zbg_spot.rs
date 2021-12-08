@@ -4,34 +4,42 @@ use crypto_msg_type::MessageType;
 use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
-use serde_json::{Result, Value};
+use serde_json::Value;
+use simple_error::SimpleError;
 
 const EXCHANGE_NAME: &str = "zbg";
 
-pub(super) fn extract_symbol(msg: &str) -> Option<String> {
+pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     if let Ok(list) = serde_json::from_str::<Vec<Vec<Value>>>(msg) {
         if msg.starts_with(r#"[["T","#) || msg.starts_with(r#"["T","#) {
-            Some(list[0][3].as_str().unwrap().to_string())
+            Ok(list[0][3].as_str().unwrap().to_string())
         } else {
-            Some(list[0][2].as_str().unwrap().to_string())
+            Ok(list[0][2].as_str().unwrap().to_string())
         }
     } else if let Ok(list) = serde_json::from_str::<Vec<Value>>(msg) {
-        Some(list[3].as_str().unwrap().to_string())
+        Ok(list[3].as_str().unwrap().to_string())
     } else {
-        None
+        Err(SimpleError::new(format!(
+            "Failed to extract symbol from {}",
+            msg
+        )))
     }
 }
 
 // https://zbgapi.github.io/docs/spot/v1/en/#market-trade
 // [T, symbol-id, symbol, timestamp, ask/bid, price, quantity]
-pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>> {
+pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
     let arr = if msg.starts_with(r#"[["T","#) {
-        serde_json::from_str::<Vec<Vec<String>>>(msg)?
+        serde_json::from_str::<Vec<Vec<String>>>(msg).map_err(|_e| {
+            SimpleError::new(format!("Failed to deserialize {} to Vec<Vec<String>>", msg))
+        })?
     } else if msg.starts_with(r#"["T","#) {
-        let tmp = serde_json::from_str::<Vec<String>>(msg)?;
+        let tmp = serde_json::from_str::<Vec<String>>(msg).map_err(|_e| {
+            SimpleError::new(format!("Failed to deserialize {} to Vec<String>", msg))
+        })?;
         vec![tmp]
     } else {
-        panic!("Invalid trade msg {}", msg);
+        return Err(SimpleError::new(format!("Invalid trade msg {}", msg)));
     };
 
     let mut trades: Vec<TradeMsg> = arr
@@ -83,11 +91,13 @@ struct OrderbookSnapshot {
 // [AE, symbol-id, symbol, timestamp, asks:[[price, quantity]], bids[[price, quantity]]]
 // update:
 // [E, symbol-id, timestamp, symbol, ask/bid, price, quantity]
-pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
+pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
     let snapshot = msg.starts_with(r#"[["AE","#);
 
     let orderbooks = if snapshot {
-        let arr = serde_json::from_str::<Vec<Vec<Value>>>(msg)?;
+        let arr = serde_json::from_str::<Vec<Vec<Value>>>(msg).map_err(|_e| {
+            SimpleError::new(format!("Failed to deserialize {} to Vec<Vec<Value>>", msg))
+        })?;
 
         let parse_order = |raw_order: &[Value; 2]| -> Order {
             if raw_order[0].is_string() {
@@ -172,9 +182,13 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>> {
         }
         v
     } else {
-        let arr = serde_json::from_str::<Vec<String>>(msg)?;
+        let arr = serde_json::from_str::<Vec<String>>(msg).map_err(|_e| {
+            SimpleError::new(format!("Failed to deserialize {} to Vec<String>", msg))
+        })?;
         let symbol = arr[3].clone();
-        let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+        let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).ok_or_else(|| {
+            SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg))
+        })?;
         let timestamp = arr[2].parse::<i64>().unwrap() * 1000;
 
         let mut asks: Vec<Order> = Vec::new();
