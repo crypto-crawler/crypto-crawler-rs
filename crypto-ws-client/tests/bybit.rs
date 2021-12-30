@@ -34,15 +34,6 @@ mod bybit_inverse_future {
     }
 
     #[test]
-    fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            BybitInverseFutureWSClient,
-            subscribe_orderbook_topk,
-            &vec!["BTCUSDZ21".to_string()]
-        );
-    }
-
-    #[test]
     fn subscribe_orderbook() {
         gen_test_code!(
             BybitInverseFutureWSClient,
@@ -106,15 +97,6 @@ mod bybit_inverse_swap {
     }
 
     #[test]
-    fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            BybitInverseSwapWSClient,
-            subscribe_orderbook_topk,
-            &vec!["BTCUSD".to_string()]
-        );
-    }
-
-    #[test]
     fn subscribe_orderbook() {
         gen_test_code!(
             BybitInverseSwapWSClient,
@@ -155,15 +137,6 @@ mod bybit_linear_swap {
         gen_test_code!(
             BybitLinearSwapWSClient,
             subscribe_trade,
-            &vec!["BTCUSDT".to_string()]
-        );
-    }
-
-    #[test]
-    fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            BybitLinearSwapWSClient,
-            subscribe_orderbook_topk,
             &vec!["BTCUSDT".to_string()]
         );
     }
