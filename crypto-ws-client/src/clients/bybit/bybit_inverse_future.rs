@@ -20,17 +20,9 @@ pub struct BybitInverseFutureWSClient {
 #[rustfmt::skip]
 impl_trait!(Trade, BybitInverseFutureWSClient, subscribe_trade, "trade", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookTopK, BybitInverseFutureWSClient, subscribe_orderbook_topk, "orderBookL2_25", to_raw_channel);
-#[rustfmt::skip]
 impl_trait!(OrderBook, BybitInverseFutureWSClient, subscribe_orderbook, "orderBookL2_25", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(Ticker, BybitInverseFutureWSClient, subscribe_ticker, "instrument_info.100ms", to_raw_channel);
-
-impl BBO for BybitInverseFutureWSClient {
-    fn subscribe_bbo(&self, _pairs: &[String]) {
-        panic!("bybit does NOT have BBO channel");
-    }
-}
 
 fn to_candlestick_raw_channel(symbol: &str, interval: usize) -> String {
     let interval_str = match interval {
@@ -53,6 +45,8 @@ fn to_candlestick_raw_channel(symbol: &str, interval: usize) -> String {
 
 impl_candlestick!(BybitInverseFutureWSClient);
 
+panic_l2_topk!(BybitInverseFutureWSClient);
+panic_bbo!(BybitInverseFutureWSClient);
 panic_l3_orderbook!(BybitInverseFutureWSClient);
 
 impl_new_constructor!(

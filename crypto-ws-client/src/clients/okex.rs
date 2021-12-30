@@ -24,10 +24,10 @@ const WS_FRAME_SIZE: usize = 65536;
 ///
 /// * WebSocket API doc: <https://www.okex.com/docs/en/>
 /// * Trading at:
-///     * Spot <https://www.bitmex.com/app/trade/>
-///     * Future <https://www.okex.com/derivatives/futures>
-///     * Swap <https://www.okex.com/derivatives/swap>
-///     * Option <https://www.okex.com/derivatives/options>
+///     * Spot <https://www.okex.com/trade-spot>
+///     * Future <https://www.okex.com/trade-futures>
+///     * Swap <https://www.okex.com/trade-swap>
+///     * Option <https://www.okex.com/trade-option>
 pub struct OkexWSClient {
     client: WSClientInternal,
 }
