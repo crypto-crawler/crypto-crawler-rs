@@ -7,29 +7,27 @@ mod mxc_spot {
     use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
-    #[ignore]
     fn subscribe() {
         gen_test_code!(
             MxcSpotWSClient,
             subscribe,
             &vec![
-                "symbol:BTC_USDT".to_string(),
-                "symbol:ETH_USDT".to_string(),
-                "symbol:MX_USDT".to_string()
+                "deal:BTC_USDT".to_string(),
+                "deal:ETH_USDT".to_string(),
+                "deal:MX_USDT".to_string()
             ]
         );
     }
 
     #[test]
-    #[ignore]
     fn subscribe_raw_json() {
         gen_test_code!(
             MxcSpotWSClient,
             subscribe,
             &vec![
-                r#"["sub.symbol",{"symbol":"BTC_USDT"}]"#.to_string(),
-                r#"["sub.symbol",{"symbol":"ETH_USDT"}]"#.to_string(),
-                r#"["sub.symbol",{"symbol":"MX_USDT"}]"#.to_string()
+                r#"{"op":"sub.deal","symbol":"BTC_USDT"}"#.to_string(),
+                r#"{"op":"sub.deal","symbol":"ETH_USDT"}"#.to_string(),
+                r#"{"op":"sub.deal","symbol":"MX_USDT"}"#.to_string()
             ]
         );
     }
@@ -61,21 +59,6 @@ mod mxc_spot {
     }
 
     #[test]
-    #[ignore]
-    fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            MxcSpotWSClient,
-            subscribe_orderbook_topk,
-            &vec![
-                "BTC_USDT".to_string(),
-                "ETH_USDT".to_string(),
-                "MX_USDT".to_string()
-            ]
-        );
-    }
-
-    #[test]
-    #[ignore]
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             MxcSpotWSClient,
@@ -92,6 +75,15 @@ mod mxc_spot {
                 ("ETH_USDT".to_string(), 2592000),
                 ("MX_USDT".to_string(), 2592000)
             ]
+        );
+    }
+
+    #[test]
+    fn subscribe_overview() {
+        gen_test_code!(
+            MxcSpotWSClient,
+            subscribe,
+            &vec![r#"{"op":"sub.overview"}"#.to_string()]
         );
     }
 }
