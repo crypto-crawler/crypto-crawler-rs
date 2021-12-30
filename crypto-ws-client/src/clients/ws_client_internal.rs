@@ -195,20 +195,7 @@ impl WSClientInternal {
                 false
             }
             MiscMessage::Normal => {
-                if self.exchange == super::mxc::EXCHANGE_NAME
-                    && self.url.as_str() == super::mxc::SPOT_WEBSOCKET_URL
-                {
-                    // special logic for MXC Spot
-                    match txt.strip_prefix("42") {
-                        Some(msg) => self.tx.lock().unwrap().send(msg.to_string()).unwrap(),
-                        None => error!(
-                            "{}, Not possible, should be handled by {}.on_misc_msg() previously",
-                            txt, self.exchange
-                        ),
-                    }
-                } else {
-                    self.tx.lock().unwrap().send(txt.to_string()).unwrap();
-                }
+                self.tx.lock().unwrap().send(txt.to_string()).unwrap();
                 true
             }
         }
