@@ -414,7 +414,10 @@ fn parse_l2_update(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMs
         msg_type: MessageType::L2Event,
         timestamp: result.t,
         seq_id: result.extra.get("u").and_then(|v| v.as_u64()),
-        prev_seq_id: None,
+        prev_seq_id: result
+            .extra
+            .get("U")
+            .and_then(|v| v.as_u64().map(|v| v - 1)),
         asks: result
             .a
             .iter()

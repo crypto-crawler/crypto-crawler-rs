@@ -157,7 +157,7 @@ fn parse_l2_update(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
         msg_type: MessageType::L2Event,
         timestamp: result.t,
         seq_id: Some(result.u as u64),
-        prev_seq_id: None,
+        prev_seq_id: Some(result.U as u64 - 1),
         asks: if let Some(asks) = result.a {
             asks.iter().map(parse_order).collect()
         } else {
