@@ -24,6 +24,7 @@ lazy_static! {
         "gate",
         "huobi",
         "kraken",
+        "kraken_futures",
         "kucoin",
         "mxc",
         "okex",

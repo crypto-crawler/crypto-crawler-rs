@@ -24,6 +24,7 @@ pub(super) mod ftx;
 pub(super) mod gate;
 pub(super) mod huobi;
 pub(super) mod kraken;
+pub(super) mod kraken_futures;
 pub(super) mod kucoin;
 pub(super) mod mxc;
 pub(super) mod okex;

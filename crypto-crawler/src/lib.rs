@@ -215,16 +215,15 @@ pub fn crawl_l2_event(
         "bitmex" => crawlers::bitmex::crawl_l2_event(market_type, symbols, tx, duration),
         "huobi" => crawlers::huobi::crawl_l2_event(market_type, symbols, tx, duration),
         "bitfinex" | "bitget" | "bithumb" | "bitstamp" | "bitz" | "bybit" | "coinbase_pro"
-        | "deribit" | "dydx" | "ftx" | "gate" | "kraken" | "kucoin" | "mxc" | "okex" | "zbg" => {
-            crawlers::crawl_event(
-                exchange,
-                MessageType::L2Event,
-                market_type,
-                symbols,
-                tx,
-                duration,
-            )
-        }
+        | "deribit" | "dydx" | "ftx" | "gate" | "kraken" | "kraken_futures" | "kucoin" | "mxc"
+        | "okex" | "zbg" => crawlers::crawl_event(
+            exchange,
+            MessageType::L2Event,
+            market_type,
+            symbols,
+            tx,
+            duration,
+        ),
         _ => panic!(
             "{} does NOT have the incremental level2 websocket channel",
             exchange

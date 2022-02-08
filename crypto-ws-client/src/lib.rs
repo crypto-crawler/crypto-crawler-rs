@@ -87,6 +87,7 @@ pub use clients::ftx::*;
 pub use clients::gate::*;
 pub use clients::huobi::*;
 pub use clients::kraken::*;
+pub use clients::kraken_futures::*;
 pub use clients::kucoin::*;
 pub use clients::mxc::*;
 pub use clients::okex::*;

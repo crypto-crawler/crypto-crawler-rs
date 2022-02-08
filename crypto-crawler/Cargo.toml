@@ -9,13 +9,20 @@ repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-
 keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
-crypto-markets = "1.0.6"
-crypto-market-type = "1.0.5"
-crypto-msg-parser = "1.8.2"
-crypto-msg-type = "1.0.3"
-crypto-pair = "2.1.0"
-crypto-rest-client = "0.7.8"
-crypto-ws-client = "3.1.2"
+#crypto-markets = "1.0.6"
+#crypto-market-type = "1.0.5"
+#crypto-msg-parser = "1.8.2"
+#crypto-msg-type = "1.0.3"
+#crypto-pair = "2.1.0"
+#crypto-rest-client = "0.7.8"
+#crypto-ws-client = "3.1.2"
+crypto-market-type = { path = "../crypto-market-type" }
+crypto-markets = { path = "../crypto-markets" }
+crypto-msg-parser = { path = "../crypto-msg-parser" }
+crypto-msg-type = { path = "../crypto-msg-type" }
+crypto-ws-client = { path = "../crypto-ws-client" }
+crypto-rest-client = { path = "../crypto-rest-client" }
+crypto-pair = { path = "../crypto-pair" }
 fslock = "0.1.8"
 lazy_static = "1"
 log = "0.4"
@@ -27,3 +34,13 @@ serde_json = "1"
 [dev_dependencies]
 test-case = "1"
 env_logger = "0.8"
+
+[patch.crates-io]
+crypto-crawler = { path = "../crypto-crawler" }
+crypto-market-type = { path = "../crypto-market-type" }
+crypto-markets = { path = "../crypto-markets" }
+crypto-msg-parser = { path = "../crypto-msg-parser" }
+crypto-msg-type = { path = "../crypto-msg-type" }
+crypto-pair = { path = "../crypto-pair" }
+crypt-ws-client = { path = "../crypto-ws-client"}
+crypt-rest-client = { path = "../crypto-rest-client"}
