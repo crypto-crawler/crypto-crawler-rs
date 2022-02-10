@@ -42,7 +42,7 @@ struct PriceFilter {
 
 #[derive(Serialize, Deserialize)]
 struct LotSizeFilter {
-    max_trading_qty: i64,
+    max_trading_qty: f64,
     min_trading_qty: f64,
     qty_step: f64,
 }
@@ -183,7 +183,7 @@ fn to_market(raw_market: &BybitMarket) -> Market {
         },
         quantity_limit: Some(QuantityLimit {
             min: raw_market.lot_size_filter.min_trading_qty,
-            max: Some(raw_market.lot_size_filter.max_trading_qty as f64),
+            max: Some(raw_market.lot_size_filter.max_trading_qty),
         }),
         contract_value: Some(1.0),
         delivery_date,
