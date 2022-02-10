@@ -12,3 +12,8 @@ members = [
   "crypto-crawler",
   "carbonbot",
 ]
+
+
+[patch.crates-io]
+crypto-market-type = { version = "1.0.5", path = "crypto-market-type" }
+crypto-msg-type = { version = "1.0.3", path = "crypto-msg-type" }
