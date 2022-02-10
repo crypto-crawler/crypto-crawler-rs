@@ -57,6 +57,43 @@ struct OrderbookUpdate {
     timestamp: i64,
 }
 
+// Book Snapshot:
+// ```json5
+// {
+//     "feed": "book_snapshot",
+//     "product_id": "PI_XBTUSD",
+//     "timestamp": 1565342712774,
+//     "seq": 30007298,
+//     "bids": [
+//         {
+//             "price": 11735.0,
+//             "qty": 50000.0
+//         },
+//         ...
+//     ],
+//     "asks": [
+//         {
+//             "price": 11739.0,
+//             "qty": 47410.0
+//         },
+//         ...
+//     ],
+//     "tickSize": null
+// }
+// ```
+//
+// Book:
+// ```json5
+// {
+//     "feed": "book",
+//     "product_id": "PI_XBTUSD",
+//     "side": "sell",
+//     "seq": 30007489,
+//     "price": 11741.5,
+//     "qty": 10000.0,
+//     "timestamp": 1565342713929
+// }
+// ```
 pub(crate) fn parse_l2(
     market_type: MarketType,
     msg: &str,
