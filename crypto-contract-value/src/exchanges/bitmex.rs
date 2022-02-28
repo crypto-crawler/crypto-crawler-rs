@@ -7,36 +7,52 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 lazy_static! {
+    // key = market_type + pair
     static ref CONTRACT_VALUES: HashMap<String, i64> = {
         // offline data, in case the network is down
         let mut m: HashMap<String, i64> = vec![
-            ("ADA/USD", 10000),
-            ("ADA/USDT", 10000),
-            ("ALTMEX/USD", 100),
-            ("AVAX/USD", 1000),
-            ("AXS/USD", 100),
-            ("BCH/USD", 100),
-            ("BCH/USDT", 10),
-            ("BNB/USD", 100),
-            ("BNB/USDT", 100),
-            ("BTC/USDT", 1),
-            ("DEFIMEX/USD", 100),
-            ("DOGE/USD", 100000),
-            ("DOGE/USDT", 10000),
-            ("DOT/USD", 1000),
-            ("EOS/USD", 10000),
-            ("ETH/USD", 100),
-            ("ETH/USDT", 10),
-            ("FTM/USDT", 10000),
-            ("LINK/USD", 1000),
-            ("LTC/USD", 200),
-            ("LTC/USDT", 100),
-            ("LUNA/USD", 1000),
-            ("SHIB/USDT", 1000000),
-            ("SOL/USD", 100),
-            ("SOL/USDT", 100),
-            ("XRP/USD", 20000),
-            ("XRP/USDT", 10000),
+            ("linear_future.ADA/BTC", 1000000),
+            ("linear_future.BTC/USDT", 1),
+            ("linear_future.ETH/BTC", 1000),
+            ("linear_future.ETH/USDT", 10),
+            ("linear_future.XRP/BTC", 1000000),
+            ("linear_swap.ADA/USDT", 10000),
+            ("linear_swap.ALTMEXT/USDT", 100),
+            ("linear_swap.AVAX/USDT", 100),
+            ("linear_swap.BCH/USDT", 10),
+            ("linear_swap.BNB/USDT", 100),
+            ("linear_swap.BTC/USDT", 1),
+            ("linear_swap.DEFIMEXT/USDT", 100),
+            ("linear_swap.DOGE/USDT", 10000),
+            ("linear_swap.DOT/USDT", 1000),
+            ("linear_swap.EOS/USDT", 1000),
+            ("linear_swap.ETH/USDT", 10),
+            ("linear_swap.FTM/USDT", 10000),
+            ("linear_swap.LINK/USDT", 1000),
+            ("linear_swap.LTC/USDT", 100),
+            ("linear_swap.LUNA/USDT", 100),
+            ("linear_swap.MANA/USDT", 1000),
+            ("linear_swap.MATIC/USDT", 10000),
+            ("linear_swap.METAMEXT/USDT", 100),
+            ("linear_swap.SAND/USDT", 1000),
+            ("linear_swap.SHIB/USDT", 1000000),
+            ("linear_swap.SOL/USDT", 100),
+            ("linear_swap.XRP/USDT", 10000),
+            ("quanto_future.ETH/USD", 100),
+            ("quanto_swap.ADA/USD", 10000),
+            ("quanto_swap.AVAX/USD", 1000),
+            ("quanto_swap.AXS/USD", 100),
+            ("quanto_swap.BCH/USD", 100),
+            ("quanto_swap.BNB/USD", 100),
+            ("quanto_swap.DOGE/USD", 100000),
+            ("quanto_swap.DOT/USD", 1000),
+            ("quanto_swap.EOS/USD", 10000),
+            ("quanto_swap.ETH/USD", 100),
+            ("quanto_swap.LINK/USD", 1000),
+            ("quanto_swap.LTC/USD", 200),
+            ("quanto_swap.LUNA/USD", 1000),
+            ("quanto_swap.SOL/USD", 100),
+            ("quanto_swap.XRP/USD", 20000),
         ]
         .into_iter()
         .map(|x| (x.0.to_string(), x.1))
@@ -76,10 +92,12 @@ fn fetch_contract_values() -> BTreeMap<String, i64> {
             .collect();
 
         for instrument in instruments.iter().filter(|x| !x.isInverse) {
+            let market_type = crypto_pair::get_market_type(&instrument.symbol, "bitmex", None);
             let pair = crypto_pair::normalize_pair(&instrument.symbol, "bitmex").unwrap();
-            if !pair.ends_with("BTC") {
-                mapping.insert(pair, instrument.multiplier);
-            }
+            mapping.insert(
+                market_type.to_string() + "." + pair.as_str(),
+                instrument.multiplier,
+            );
         }
     }
 
@@ -87,17 +105,14 @@ fn fetch_contract_values() -> BTreeMap<String, i64> {
 }
 
 pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<f64> {
+    let key = market_type.to_string() + "." + pair;
     match market_type {
         MarketType::InverseSwap | MarketType::InverseFuture => Some(1.0),
         MarketType::LinearFuture | MarketType::LinearSwap => {
-            if pair.ends_with("BTC") {
-                Some(1e-8)
-            } else {
-                Some(CONTRACT_VALUES[pair] as f64 * 1e-8)
-            }
+            Some(CONTRACT_VALUES[&key] as f64 * 1e-8)
         }
         MarketType::QuantoSwap | MarketType::QuantoFuture => {
-            Some(CONTRACT_VALUES[pair] as f64 * 1e-8)
+            Some(CONTRACT_VALUES[&key] as f64 * 1e-8)
         }
         _ => None,
     }
