@@ -94,7 +94,7 @@ fn fetch_inverse_future_markets() {
 
     let btcusd = markets
         .iter()
-        .find(|m| m.symbol == "BTCUSDZ21")
+        .find(|m| m.symbol.starts_with("BTCUSD"))
         .unwrap()
         .clone();
     assert_eq!(btcusd.precision.tick_size, 0.5);
