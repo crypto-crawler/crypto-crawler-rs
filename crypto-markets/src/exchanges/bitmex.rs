@@ -75,32 +75,26 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
     Ok(markets)
 }
 
+// https://bitmex.freshdesk.com/en/support/solutions/articles/13000081130-instrument
 #[derive(Clone, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct Instrument {
-    symbol: String,
-    rootSymbol: String,
-    state: String,
-    typ: String,
+    symbol: String,     // The contract for this position.
+    rootSymbol: String, // Root symbol for the instrument, used for grouping on the frontend.
+    state: String,      // State of the instrument, it can be `Open`Closed`Unlisted`Expired`Cleared.
+    typ: String,        // Type of the instrument (e.g. Futures, Perpetual Contracts).
     listing: String,
     front: String,
     expiry: Option<String>,
     settle: Option<String>,
     listedSettle: Option<String>,
-    relistInterval: Option<String>,
-    inverseLeg: String,
-    sellLeg: String,
-    buyLeg: String,
-    optionStrikePcnt: Option<f64>,
-    optionStrikeRound: Option<f64>,
-    optionStrikePrice: Option<f64>,
-    optionMultiplier: Option<f64>,
-    positionCurrency: String,
-    underlying: String,
-    quoteCurrency: String,
-    underlyingSymbol: String,
-    reference: String,
-    referenceSymbol: String,
+    inverseLeg: Option<String>,
+    positionCurrency: String, // Currency for position of this contract. If not null, 1 contract = 1 positionCurrency.
+    underlying: String,       // Defines the underlying asset of the instrument (e.g.XBT).
+    quoteCurrency: String,    // Currency of the quote price.
+    underlyingSymbol: String, // Symbol of the underlying asset.
+    reference: String,        // Venue of the reference symbol.
+    referenceSymbol: String,  // Symbol of index being referenced (e.g. .BXBT).
     calcInterval: Option<String>,
     publishInterval: Option<String>,
     publishTime: Option<String>,
@@ -169,43 +163,50 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
 
     let swap: Vec<Instrument> = instruments
         .iter()
-        .filter(|x| (&x.symbol[x.symbol.len() - 1..]).parse::<i32>().is_err())
+        .filter(|x| x.typ == "FFWCSX")
         .cloned()
         .collect();
     let futures: Vec<Instrument> = instruments
         .iter()
-        .filter(|x| (&x.symbol[x.symbol.len() - 1..]).parse::<i32>().is_ok())
+        .filter(|x| x.typ == "FFCCSX")
         .cloned()
         .collect();
 
-    // Check
-    // for x in instruments.iter() {
-    //     assert_eq!(x.underlying, x.rootSymbol);
-    //     assert_eq!("XBt".to_string(), x.settlCurrency);
-    // }
     for x in swap.iter() {
         assert_eq!("FundingRate", x.fairMethod.as_str());
-        // assert!(x.expiry.is_none()); // TODO: BitMEX data is not correct, comment it for now
+        assert!(x.expiry.is_none()); // TODO: BitMEX data is not correct, comment it for now
+        assert!((&x.symbol[x.symbol.len() - 1..]).parse::<i32>().is_err());
         assert_eq!(x.symbol, format!("{}{}", x.underlying, x.quoteCurrency));
+        // println!("{}, {}, {}, {}, {}, {}", x.symbol, x.rootSymbol, x.quoteCurrency, x.settlCurrency, x.positionCurrency, x.underlying);
     }
     for x in futures.iter() {
         assert_eq!("ImpactMidPrice", x.fairMethod.as_str());
         assert!(x.expiry.is_some());
+        assert!((&x.symbol[x.symbol.len() - 1..]).parse::<i32>().is_ok());
     }
     // Inverse
     for x in instruments.iter().filter(|x| x.isInverse) {
         assert!(x.symbol.starts_with("XBT"));
-        assert_eq!("XBT".to_string(), x.rootSymbol);
-        // USD, EUR
+        assert_eq!("XBT".to_string(), x.underlying);
+        // settled in XBT, quoted in USD or EUR
+        assert_eq!(x.settlCurrency.to_uppercase(), "XBT");
+        assert!(x.quoteCurrency == "USD" || x.quoteCurrency == "EUR");
         assert_eq!(x.quoteCurrency, x.positionCurrency);
     }
     // Quanto
     for x in instruments.iter().filter(|x| x.isQuanto) {
         assert!(x.positionCurrency.is_empty());
+        // settled in XBT, quoted in USD
+        assert_eq!(x.settlCurrency.to_uppercase(), "XBT");
+        assert_eq!(x.quoteCurrency, "USD");
+    }
+    for x in instruments.iter().filter(|x| x.positionCurrency.is_empty()) {
+        assert!(x.isQuanto);
     }
     // Linear
     for x in instruments.iter().filter(|x| !x.isQuanto && !x.isInverse) {
-        assert_eq!(x.positionCurrency, x.rootSymbol);
+        // settled in XBT, qouted in XBT
+        // or settled in USDT, qouted in USDT
         assert_eq!(x.settlCurrency.to_uppercase(), x.quoteCurrency);
     }
 

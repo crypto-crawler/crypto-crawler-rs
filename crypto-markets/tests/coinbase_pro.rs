@@ -41,5 +41,5 @@ fn fetch_spot_markets() {
     assert_eq!(btcusd.precision.lot_size, 0.00000001);
     let quantity_limit = btcusd.quantity_limit.unwrap();
     assert_eq!(quantity_limit.min, 0.000016);
-    assert_eq!(quantity_limit.max, Some(230.0));
+    assert_eq!(quantity_limit.max, Some(1500.0));
 }
