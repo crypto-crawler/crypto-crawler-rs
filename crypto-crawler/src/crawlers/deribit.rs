@@ -23,9 +23,11 @@ pub(crate) fn crawl_trade(
 
         // "any" menas all, see https://docs.deribit.com/?javascript#trades-kind-currency-interval
         let channels: Vec<String> = match market_type {
-            MarketType::InverseFuture => vec!["trades.future.any.raw"],
-            MarketType::InverseSwap => vec!["trades.BTC-PERPETUAL.raw", "trades.ETH-PERPETUAL.raw"],
-            MarketType::EuropeanOption => vec!["trades.option.any.raw"],
+            MarketType::InverseFuture => vec!["trades.future.any.100ms"],
+            MarketType::InverseSwap => {
+                vec!["trades.BTC-PERPETUAL.100ms", "trades.ETH-PERPETUAL.100ms"]
+            }
+            MarketType::EuropeanOption => vec!["trades.option.any.100ms"],
             _ => panic!("Deribit does NOT have the {} market type", market_type),
         }
         .into_iter()
