@@ -121,10 +121,8 @@ fn create_all_lock_files(
         if *exchange == "bitmex" {
             market_types.push(MarketType::Unknown);
         }
-        if prefix == "rest" {
-            if *exchange == "ftx" || *exchange == "kucoin" {
-                market_types.push(MarketType::Unknown); // for OpenInterest
-            }
+        if prefix == "rest" && (*exchange == "ftx" || *exchange == "kucoin") {
+            market_types.push(MarketType::Unknown); // for OpenInterest
         }
         for market_type in market_types {
             let filename = get_lock_file_name(exchange, market_type, prefix);
