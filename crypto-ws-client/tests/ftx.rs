@@ -72,12 +72,12 @@ mod ftx_linear_future {
 
     #[test]
     fn subscribe_trade() {
-        gen_test_code!(FtxWSClient, subscribe_trade, &vec!["BTC-1231".to_string()]);
+        gen_test_code!(FtxWSClient, subscribe_trade, &vec!["BTC-0325".to_string()]);
     }
 
     #[test]
     fn subscribe_bbo() {
-        gen_test_code!(FtxWSClient, subscribe_bbo, &vec!["BTC-1231".to_string()]);
+        gen_test_code!(FtxWSClient, subscribe_bbo, &vec!["BTC-0325".to_string()]);
     }
 
     #[test]
@@ -85,7 +85,7 @@ mod ftx_linear_future {
         gen_test_code!(
             FtxWSClient,
             subscribe_orderbook,
-            &vec!["BTC-1231".to_string()]
+            &vec!["BTC-0325".to_string()]
         );
     }
 }
@@ -101,7 +101,7 @@ mod ftx_move {
         gen_test_code!(
             FtxWSClient,
             subscribe_trade,
-            &vec!["BTC-MOVE-2021Q2".to_string(), "BTC-MOVE-2021Q4".to_string()]
+            &vec!["BTC-MOVE-2022Q1".to_string()]
         );
     }
 
@@ -110,7 +110,7 @@ mod ftx_move {
         gen_test_code!(
             FtxWSClient,
             subscribe_bbo,
-            &vec!["BTC-MOVE-2021Q4".to_string()]
+            &vec!["BTC-MOVE-2022Q1".to_string()]
         );
     }
 
@@ -119,7 +119,7 @@ mod ftx_move {
         gen_test_code!(
             FtxWSClient,
             subscribe_orderbook,
-            &vec!["BTC-MOVE-2021Q4".to_string()]
+            &vec!["BTC-MOVE-2022Q1".to_string()]
         );
     }
 }
