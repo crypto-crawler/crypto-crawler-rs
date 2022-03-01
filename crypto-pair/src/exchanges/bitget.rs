@@ -8,7 +8,7 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
         Some(format!("{}/usdt", base).to_uppercase())
     } else if symbol.contains('_') {
         // spot
-        Some(symbol.replace("_", "/").to_uppercase())
+        Some(symbol.replace('_', "/").to_uppercase())
     } else if symbol.ends_with("usd") {
         // inverse swap
         let base = symbol.strip_suffix("usd").unwrap();

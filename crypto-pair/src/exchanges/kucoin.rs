@@ -11,6 +11,8 @@ pub(crate) fn normalize_currency(currency: &str) -> String {
         "WAXP"
     } else if currency == "LOKI" {
         "OXEN"
+    } else if currency == "GALAX" {
+        "GALA"
     } else {
         currency
     }

@@ -42,12 +42,12 @@ pub fn normalize_pair(symbol: &str, exchange: &str) -> Option<String> {
         "binance" => exchanges::binance::normalize_pair(symbol),
         "bitfinex" => exchanges::bitfinex::normalize_pair(symbol),
         "bitget" => exchanges::bitget::normalize_pair(symbol),
-        "bithumb" => Some(symbol.replace("-", "/")),
+        "bithumb" => Some(symbol.replace('-', "/")),
         "bitmex" => exchanges::bitmex::normalize_pair(symbol),
         "bitstamp" => exchanges::bitstamp::normalize_pair(symbol),
-        "bitz" => Some(symbol.replace("_", "/").to_uppercase()),
+        "bitz" => Some(symbol.replace('_', "/").to_uppercase()),
         "bybit" => exchanges::bybit::normalize_pair(symbol),
-        "coinbase_pro" => Some(symbol.replace("-", "/")),
+        "coinbase_pro" => Some(symbol.replace('-', "/")),
         "deribit" => exchanges::deribit::normalize_pair(symbol),
         "dydx" => exchanges::dydx::normalize_pair(symbol),
         "ftx" => exchanges::ftx::normalize_pair(symbol),
@@ -62,13 +62,13 @@ pub fn normalize_pair(symbol: &str, exchange: &str) -> Option<String> {
         "huobi" => exchanges::huobi::normalize_pair(symbol),
         "kraken" => exchanges::kraken::normalize_pair(symbol),
         "kucoin" => exchanges::kucoin::normalize_pair(symbol),
-        "mxc" => Some(symbol.replace("_", "/")),
+        "mxc" => Some(symbol.replace('_', "/")),
         "okex" => {
             let v: Vec<&str> = symbol.split('-').collect();
             Some(format!("{}/{}", v[0], v[1]))
         }
-        "Poloniex" => Some(symbol.replace("_", "/")),
-        "Upbit" => Some(symbol.replace("-", "/")),
+        "Poloniex" => Some(symbol.replace('_', "/")),
+        "Upbit" => Some(symbol.replace('-', "/")),
         "zbg" => exchanges::zbg::normalize_pair(symbol),
         _ => panic!("Unknown exchange {}", exchange),
     }

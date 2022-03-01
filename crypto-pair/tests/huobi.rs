@@ -15,6 +15,7 @@ struct SpotMarket {
     base_currency: String,
     quote_currency: String,
     symbol: String,
+    state: String,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -35,7 +36,7 @@ fn fetch_spot_markets_raw() -> Vec<SpotMarket> {
 #[test]
 fn verify_spot_symbols() {
     let markets = fetch_spot_markets_raw();
-    for market in markets.iter() {
+    for market in markets.iter().filter(|x| x.state == "online") {
         let pair = normalize_pair(&market.symbol, EXCHANGE_NAME).unwrap();
         let pair_expected = format!(
             "{}/{}",

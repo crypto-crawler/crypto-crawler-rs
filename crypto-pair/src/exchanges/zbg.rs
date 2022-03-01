@@ -5,7 +5,7 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
         let base = symbol.strip_suffix("_USD-R").unwrap();
         Some(format!("{}/USD", base))
     } else {
-        Some(symbol.replace("_", "/").to_uppercase())
+        Some(symbol.replace('_', "/").to_uppercase())
     }
 }
 
