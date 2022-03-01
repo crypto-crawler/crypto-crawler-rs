@@ -96,7 +96,7 @@ mod bitmex_inverse_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe,
-            &vec!["trade:XBTZ21".to_string(), "quote:XBTZ21".to_string()]
+            &vec!["trade:XBTM22".to_string(), "quote:XBTM22".to_string()]
         );
     }
 
@@ -105,7 +105,7 @@ mod bitmex_inverse_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe_trade,
-            &vec!["XBTZ21".to_string(), "XBTZ21".to_string()]
+            &vec!["XBTM22".to_string(), "XBTM22".to_string()]
         );
     }
 
@@ -114,7 +114,7 @@ mod bitmex_inverse_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe_bbo,
-            &vec!["XBTZ21".to_string(), "XBTZ21".to_string()]
+            &vec!["XBTM22".to_string(), "XBTM22".to_string()]
         );
     }
 
@@ -123,7 +123,7 @@ mod bitmex_inverse_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe_orderbook,
-            &vec!["XBTZ21".to_string(), "XBTZ21".to_string()]
+            &vec!["XBTM22".to_string(), "XBTM22".to_string()]
         );
     }
 
@@ -132,7 +132,7 @@ mod bitmex_inverse_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe_orderbook_topk,
-            &vec!["XBTZ21".to_string(), "XBTZ21".to_string()]
+            &vec!["XBTM22".to_string(), "XBTM22".to_string()]
         );
     }
 
@@ -140,11 +140,11 @@ mod bitmex_inverse_future {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BitmexWSClient,
-            &vec![("XBTZ21".to_string(), 60), ("XBTZ21".to_string(), 60)]
+            &vec![("XBTM22".to_string(), 60), ("XBTM22".to_string(), 60)]
         );
         gen_test_subscribe_candlestick!(
             BitmexWSClient,
-            &vec![("XBTZ21".to_string(), 86400), ("XBTZ21".to_string(), 86400)]
+            &vec![("XBTM22".to_string(), 86400), ("XBTM22".to_string(), 86400)]
         );
     }
 }
@@ -196,5 +196,53 @@ mod bitmex_quanto_swap {
             subscribe,
             &vec!["funding:ETHUSD".to_string()]
         );
+    }
+}
+
+#[cfg(test)]
+mod bitmex_linear_future {
+    use crypto_ws_client::{BitmexWSClient, WSClient};
+    use std::sync::mpsc::{Receiver, Sender};
+
+    #[test]
+    fn subscribe_trade() {
+        gen_test_code!(
+            BitmexWSClient,
+            subscribe_trade,
+            &vec![
+                "XBTUSDTH22".to_string(),
+                "ETHH22".to_string(),
+                "ETHUSDTH22".to_string()
+            ]
+        );
+    }
+
+    #[test]
+    fn subscribe_bbo() {
+        gen_test_code!(BitmexWSClient, subscribe_bbo, &vec!["ETHH22".to_string()]);
+    }
+
+    #[test]
+    fn subscribe_orderbook() {
+        gen_test_code!(
+            BitmexWSClient,
+            subscribe_orderbook,
+            &vec!["ETHH22".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_orderbook_topk() {
+        gen_test_code!(
+            BitmexWSClient,
+            subscribe_orderbook_topk,
+            &vec!["ETHH22".to_string()]
+        );
+    }
+
+    #[test]
+    fn subscribe_candlestick() {
+        gen_test_subscribe_candlestick!(BitmexWSClient, &vec![("ETHH22".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(BitmexWSClient, &vec![("ETHH22".to_string(), 86400)]);
     }
 }

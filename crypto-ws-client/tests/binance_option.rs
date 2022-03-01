@@ -24,8 +24,8 @@ fn subscribe_trade() {
         BinanceOptionWSClient,
         subscribe_trade,
         &vec![
-            "BTC-210430-64000-C".to_string(),
-            "BTC-210430-68000-C".to_string()
+            "BTC-220429-50000-C".to_string(),
+            "BTC-220429-25000-P".to_string()
         ]
     );
 }
@@ -37,8 +37,8 @@ fn subscribe_ticker() {
         BinanceOptionWSClient,
         subscribe_ticker,
         &vec![
-            "BTC-210430-64000-C".to_string(),
-            "BTC-210430-68000-C".to_string()
+            "BTC-220429-50000-C".to_string(),
+            "BTC-220429-25000-P".to_string()
         ]
     );
 }
@@ -50,8 +50,8 @@ fn subscribe_bbo() {
         BinanceOptionWSClient,
         subscribe_bbo,
         &vec![
-            "BTC-210430-64000-C".to_string(),
-            "BTC-210430-68000-C".to_string()
+            "BTC-220429-50000-C".to_string(),
+            "BTC-220429-25000-P".to_string()
         ]
     );
 }
@@ -63,8 +63,8 @@ fn subscribe_orderbook() {
         BinanceOptionWSClient,
         subscribe_orderbook,
         &vec![
-            "BTC-210430-64000-C".to_string(),
-            "BTC-210430-68000-C".to_string()
+            "BTC-220429-50000-C".to_string(),
+            "BTC-220429-25000-P".to_string()
         ]
     );
 }
@@ -76,8 +76,8 @@ fn subscribe_orderbook_topk() {
         BinanceOptionWSClient,
         subscribe_orderbook_topk,
         &vec![
-            "BTC-210430-64000-C".to_string(),
-            "BTC-210430-68000-C".to_string()
+            "BTC-220429-50000-C".to_string(),
+            "BTC-220429-25000-P".to_string()
         ]
     );
 }
@@ -88,15 +88,15 @@ fn subscribe_candlestick() {
     gen_test_subscribe_candlestick!(
         BinanceOptionWSClient,
         &vec![
-            ("BTC-210430-64000-C".to_string(), 60),
-            ("BTC-210430-68000-C".to_string(), 60),
+            ("BTC-220429-50000-C".to_string(), 60),
+            ("BTC-220429-25000-P".to_string(), 60),
         ]
     );
     gen_test_subscribe_candlestick!(
         BinanceOptionWSClient,
         &vec![
-            ("BTC-210430-64000-C".to_string(), 60),
-            ("BTC-210430-68000-C".to_string(), 60),
+            ("BTC-220429-50000-C".to_string(), 60),
+            ("BTC-220429-25000-P".to_string(), 60),
         ]
     );
 }
