@@ -94,7 +94,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
 
 fn to_raw_channel(channel: &str, pair: &str) -> String {
     match channel {
-        "trade" => format!("trades.{}.raw", pair),
+        "trade" => format!("trades.{}.100ms", pair),
         "ticker" => format!("ticker.{}.100ms", pair),
         "orderbook" => format!("book.{}.100ms", pair),
         "orderbook_snapshot" => format!("book.{}.5.10.100ms", pair),
@@ -153,10 +153,10 @@ mod tests {
     #[test]
     fn test_one_channel() {
         let commands =
-            super::channels_to_commands(&vec!["trades.BTC-26MAR21.raw".to_string()], true);
+            super::channels_to_commands(&vec!["trades.BTC-26MAR21.100ms".to_string()], true);
         assert_eq!(2, commands.len());
         assert_eq!(
-            r#"{"method": "public/subscribe", "params": {"channels": ["trades.BTC-26MAR21.raw"]}}"#,
+            r#"{"method": "public/subscribe", "params": {"channels": ["trades.BTC-26MAR21.100ms"]}}"#,
             commands[0]
         );
         assert_eq!(
@@ -169,14 +169,14 @@ mod tests {
     fn test_two_channel() {
         let commands = super::channels_to_commands(
             &vec![
-                "trades.BTC-26MAR21.raw".to_string(),
+                "trades.BTC-26MAR21.100ms".to_string(),
                 "ticker.BTC-26MAR21.100ms".to_string(),
             ],
             true,
         );
         assert_eq!(2, commands.len());
         assert_eq!(
-            r#"{"method": "public/subscribe", "params": {"channels": ["trades.BTC-26MAR21.raw","ticker.BTC-26MAR21.100ms"]}}"#,
+            r#"{"method": "public/subscribe", "params": {"channels": ["trades.BTC-26MAR21.100ms","ticker.BTC-26MAR21.100ms"]}}"#,
             commands[0]
         );
         assert_eq!(

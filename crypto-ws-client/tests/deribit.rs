@@ -11,8 +11,8 @@ fn deribit_all_trades() {
         subscribe,
         // https://docs.deribit.com/?javascript#trades-kind-currency-interval
         &vec![
-            "trades.future.any.raw".to_string(),
-            "trades.option.any.raw".to_string(),
+            "trades.future.any.100ms".to_string(),
+            "trades.option.any.100ms".to_string(),
         ]
     );
 }
@@ -27,7 +27,7 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe,
-            &vec!["trades.future.BTC.raw".to_string()]
+            &vec!["trades.future.BTC.100ms".to_string()]
         );
     }
 
@@ -36,7 +36,7 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_trade,
-            &vec!["BTC-27NOV21".to_string(), "BTC-31DEC21".to_string()]
+            &vec!["BTC-25MAR22".to_string(), "BTC-24JUN22".to_string()]
         );
     }
 
@@ -45,7 +45,7 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_ticker,
-            &vec!["BTC-31DEC21".to_string()]
+            &vec!["BTC-24JUN22".to_string()]
         );
     }
 
@@ -54,7 +54,7 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_orderbook,
-            &vec!["BTC-31DEC21".to_string()]
+            &vec!["BTC-24JUN22".to_string()]
         );
     }
 
@@ -63,14 +63,14 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_orderbook_topk,
-            &vec!["BTC-31DEC21".to_string()]
+            &vec!["BTC-24JUN22".to_string()]
         );
     }
 
     #[test]
     fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(DeribitWSClient, &vec![("BTC-31DEC21".to_string(), 60)]);
-        gen_test_subscribe_candlestick!(DeribitWSClient, &vec![("BTC-31DEC21".to_string(), 86400)]);
+        gen_test_subscribe_candlestick!(DeribitWSClient, &vec![("BTC-24JUN22".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(DeribitWSClient, &vec![("BTC-24JUN22".to_string(), 86400)]);
     }
 }
 
@@ -84,7 +84,7 @@ mod deribit_inverse_swap {
         gen_test_code!(
             DeribitWSClient,
             subscribe,
-            &vec!["trades.BTC-PERPETUAL.raw".to_string()]
+            &vec!["trades.BTC-PERPETUAL.100ms".to_string()]
         );
     }
 
@@ -140,10 +140,10 @@ mod deribit_option {
     use std::sync::mpsc::{Receiver, Sender};
 
     const SYMBOLS: &'static [&str] = &[
-        "BTC-26SEP21-40000-P",
-        "BTC-31DEC21-300000-C",
-        "BTC-1OCT21-40000-P",
-        "BTC-1OCT21-39000-P",
+        "BTC-25MAR22-50000-C",
+        "BTC-25MAR22-60000-C",
+        "BTC-24JUN22-40000-C",
+        "BTC-24JUN22-60000-C",
     ];
 
     #[test]
@@ -151,7 +151,7 @@ mod deribit_option {
         gen_test_code!(
             DeribitWSClient,
             subscribe,
-            &vec!["trades.option.any.raw".to_string()]
+            &vec!["trades.option.any.100ms".to_string()]
         );
     }
 
