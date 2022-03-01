@@ -293,7 +293,7 @@ mod l2_orderbook {
 
     #[test]
     fn linear_future_snapshot() {
-        let raw_msg = r#"{"table":"orderBookL2_25","action":"partial","data":[{"symbol":"ETHZ21","id":63399992668,"side":"Sell","size":7866000000,"price":0.07332},{"symbol":"ETHZ21","id":63399992675,"side":"Sell","size":2030000000,"price":0.07325},{"symbol":"ETHZ21","id":63399992763,"side":"Buy","size":100000000,"price":0.07237},{"symbol":"ETHZ21","id":63399992764,"side":"Buy","size":465000000,"price":0.07236}]}"#;
+        let raw_msg = r#"{"table":"orderBookL2_25","action":"partial","data":[{"symbol":"ETHH22","id":75899993108,"side":"Sell","size":50000,"price":0.06892,"timestamp":"2022-03-01T01:55:45.088Z"},{"symbol":"ETHH22","id":75899993113,"side":"Sell","size":125000,"price":0.06887,"timestamp":"2022-03-01T01:55:45.088Z"},{"symbol":"ETHH22","id":75899993250,"side":"Buy","size":3000,"price":0.0675,"timestamp":"2022-03-01T01:55:45.088Z"},{"symbol":"ETHH22","id":75899993260,"side":"Buy","size":117000,"price":0.0674,"timestamp":"2022-03-01T01:55:45.088Z"}]}"#;
         let orderbook = &parse_l2(
             "bitmex",
             MarketType::Unknown,
@@ -315,25 +315,45 @@ mod l2_orderbook {
             raw_msg,
         );
 
-        assert_eq!(orderbook.bids[0].price, 0.07237);
-        assert_eq!(orderbook.bids[0].quantity_base, 1.0 / 0.07237);
-        assert_eq!(orderbook.bids[0].quantity_quote, 1.0);
-        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 100000000.0);
+        assert_eq!(orderbook.bids[0].price, 0.0675);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 3000.0);
+        assert!(approx_eq!(
+            f64,
+            orderbook.bids[0].quantity_base,
+            0.03,
+            ulps = 17
+        ));
+        assert!(approx_eq!(
+            f64,
+            orderbook.bids[0].quantity_quote,
+            0.03 * 0.0675,
+            ulps = 18
+        ));
 
-        assert_eq!(orderbook.bids[1].price, 0.07236);
-        assert_eq!(orderbook.bids[1].quantity_base, 4.65 / 0.07236);
-        assert_eq!(orderbook.bids[1].quantity_quote, 4.65);
-        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 465000000.0);
+        assert_eq!(orderbook.bids[1].price, 0.0674);
+        assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 117000.0);
+        assert!(approx_eq!(
+            f64,
+            orderbook.bids[1].quantity_base,
+            1.170,
+            ulps = 15
+        ));
+        assert!(approx_eq!(
+            f64,
+            orderbook.bids[1].quantity_quote,
+            1.17 * 0.0674,
+            ulps = 16
+        ));
 
-        assert_eq!(orderbook.asks[1].price, 0.07332);
-        assert_eq!(orderbook.asks[1].quantity_base, 78.66 / 0.07332);
-        assert_eq!(orderbook.asks[1].quantity_quote, 78.66);
-        assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 7866000000.0);
+        assert_eq!(orderbook.asks[0].price, 0.06887);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 125000.0);
+        assert_eq!(orderbook.asks[0].quantity_base, 1.25);
+        assert_eq!(orderbook.asks[0].quantity_quote, 0.06887 * 1.25);
 
-        assert_eq!(orderbook.asks[0].price, 0.07325);
-        assert_eq!(orderbook.asks[0].quantity_base, 20.3 / 0.07325);
-        assert_eq!(orderbook.asks[0].quantity_quote, 20.3);
-        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 2030000000.0);
+        assert_eq!(orderbook.asks[1].price, 0.06892);
+        assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 50000.0);
+        assert_eq!(orderbook.asks[1].quantity_base, 0.5);
+        assert_eq!(orderbook.asks[1].quantity_quote, 0.06892 * 0.5);
     }
 
     #[test]
