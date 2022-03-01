@@ -3,18 +3,18 @@ use crypto_rest_client::{fetch_l2_snapshot, fetch_open_interest};
 use test_case::test_case;
 
 #[test_case(MarketType::Spot, "BTC-USDT")]
-#[test_case(MarketType::InverseFuture, "BTC-USD-211231")]
-#[test_case(MarketType::LinearFuture, "BTC-USDT-211231")]
+#[test_case(MarketType::InverseFuture, "BTC-USD-220325")]
+#[test_case(MarketType::LinearFuture, "BTC-USDT-220325")]
 #[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
 #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
-#[test_case(MarketType::EuropeanOption, "BTC-USD-211231-10000-P")]
+#[test_case(MarketType::EuropeanOption, "BTC-USD-220325-10000-P")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     let text = fetch_l2_snapshot("okex", market_type, symbol, Some(3)).unwrap();
     assert!(text.starts_with("{"));
 }
 
-#[test_case(MarketType::InverseFuture, "BTC-USD-211231")]
-#[test_case(MarketType::LinearFuture, "BTC-USDT-211231")]
+#[test_case(MarketType::InverseFuture, "BTC-USD-220325")]
+#[test_case(MarketType::LinearFuture, "BTC-USDT-220325")]
 #[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
 #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
 fn test_open_interest(market_type: MarketType, symbol: &str) {

@@ -25,11 +25,7 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
         .unwrap()
         .as_array()
         .unwrap();
-    if market_type == MarketType::EuropeanOption {
-        assert!(!bids.is_empty());
-    } else {
-        assert_eq!(150, bids.len());
-    }
+    assert!(!bids.is_empty());
 
     let asks = obj
         .get("tick")
@@ -40,11 +36,7 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
         .unwrap()
         .as_array()
         .unwrap();
-    if market_type == MarketType::EuropeanOption {
-        assert!(!asks.is_empty());
-    } else {
-        assert_eq!(150, asks.len());
-    }
+    assert!(!asks.is_empty());
 }
 
 #[test_case(MarketType::InverseFuture)]
