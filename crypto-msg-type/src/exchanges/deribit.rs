@@ -8,7 +8,7 @@ fn msg_type_symbol_to_topic(
     configs: Option<&HashMap<String, String>>,
 ) -> String {
     match msg_type {
-        MessageType::Trade => format!("trades.{}.raw", symbol),
+        MessageType::Trade => format!("trades.{}.100ms", symbol),
         MessageType::L2Event => format!("book.{}.100ms", symbol),
         MessageType::L2TopK => format!("book.{}.5.10.100ms", symbol),
         MessageType::BBO => format!("quote.{}", symbol),
@@ -65,7 +65,7 @@ mod tests {
         );
         assert_eq!(commands.len(), 1);
         assert_eq!(
-            r#"{"method":"public/subscribe", "params":{"channels":["trades.BTC-PERPETUAL.raw","trades.ETH-PERPETUAL.raw"]}}"#,
+            r#"{"method":"public/subscribe", "params":{"channels":["trades.BTC-PERPETUAL.100ms","trades.ETH-PERPETUAL.100ms"]}}"#,
             commands[0]
         );
     }
@@ -80,7 +80,7 @@ mod tests {
         );
         assert_eq!(commands.len(), 1);
         assert_eq!(
-            r#"{"method":"public/subscribe", "params":{"channels":["trades.BTC-PERPETUAL.raw","book.BTC-PERPETUAL.100ms"]}}"#,
+            r#"{"method":"public/subscribe", "params":{"channels":["trades.BTC-PERPETUAL.100ms","book.BTC-PERPETUAL.100ms"]}}"#,
             commands[0]
         );
     }

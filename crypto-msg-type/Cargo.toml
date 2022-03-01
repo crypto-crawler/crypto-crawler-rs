@@ -1,6 +1,6 @@
 [package]
 name = "crypto-msg-type"
-version = "1.0.3"
+version = "1.0.4"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description = "Cryptocurrenty message type"
