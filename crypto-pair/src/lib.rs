@@ -63,7 +63,7 @@ pub fn normalize_pair(symbol: &str, exchange: &str) -> Option<String> {
         "kraken" => exchanges::kraken::normalize_pair(symbol),
         "kucoin" => exchanges::kucoin::normalize_pair(symbol),
         "mxc" => Some(symbol.replace('_', "/")),
-        "okex" => {
+        "okex" | "okx" => {
             let v: Vec<&str> = symbol.split('-').collect();
             Some(format!("{}/{}", v[0], v[1]))
         }
@@ -100,7 +100,7 @@ pub fn get_market_type(symbol: &str, exchange: &str, is_spot: Option<bool>) -> M
         "kraken" => MarketType::Spot,
         "kucoin" => exchanges::kucoin::get_market_type(symbol),
         "mxc" => exchanges::mxc::get_market_type(symbol, is_spot),
-        "okex" => exchanges::okex::get_market_type(symbol),
+        "okex" | "okx" => exchanges::okx::get_market_type(symbol),
         "zbg" => exchanges::zbg::get_market_type(symbol),
         _ => MarketType::Unknown,
     }

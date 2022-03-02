@@ -22,6 +22,7 @@ fn main() {
         "MXC",
         "Newdex",
         "OKEx",
+        "OKX",
         "Poloniex",
         "Upbit",
         "WhaleEx",

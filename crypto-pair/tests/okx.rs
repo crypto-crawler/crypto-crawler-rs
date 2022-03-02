@@ -7,7 +7,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use utils::http_get;
 
-const EXCHANGE_NAME: &'static str = "okex";
+const EXCHANGE_NAME: &'static str = "okx";
 
 // see <https://www.okx.com/docs-v5/en/#rest-api-public-data-get-instruments>
 #[derive(Serialize, Deserialize)]
@@ -27,7 +27,7 @@ struct RawMarket {
 
 // Retrieve a list of instruments.
 //
-// see <https://www.okex.com/docs/en/#swap-swap---contract_information>
+// see <https://www.okx.com/docs-v5/en/#rest-api-public-data-get-instruments>
 // instType: SPOT, MARGIN, SWAP, FUTURES, OPTION
 fn fetch_raw_markets_raw(inst_type: &str) -> Vec<RawMarket> {
     if inst_type == "OPTION" {
