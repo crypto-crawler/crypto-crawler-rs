@@ -6,7 +6,7 @@ use test_case::test_case;
 #[macro_use]
 mod utils;
 
-const EXCHANGE_NAME: &str = "okex";
+const EXCHANGE_NAME: &str = "okx";
 
 #[test]
 fn fetch_all_symbols() {
@@ -122,10 +122,13 @@ fn fetch_inverse_future_markets() {
     let btc_usd = markets
         .iter()
         .find(|m| m.symbol.starts_with("BTC-USD-"))
-        .unwrap();
+        .unwrap()
+        .clone();
     assert_eq!(btc_usd.precision.tick_size, 0.1);
     assert_eq!(btc_usd.precision.lot_size, 1.0);
-    assert!(btc_usd.quantity_limit.is_none());
+    let quantity_limit = btc_usd.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.max, None);
 }
 
 #[test]
@@ -136,10 +139,13 @@ fn fetch_linear_future_markets() {
     let btc_usdt = markets
         .iter()
         .find(|m| m.symbol.starts_with("BTC-USDT-"))
-        .unwrap();
+        .unwrap()
+        .clone();
     assert_eq!(btc_usdt.precision.tick_size, 0.1);
     assert_eq!(btc_usdt.precision.lot_size, 1.0);
-    assert!(btc_usdt.quantity_limit.is_none());
+    let quantity_limit = btc_usdt.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.max, None);
 }
 
 #[test]
@@ -147,10 +153,16 @@ fn fetch_inverse_swap_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
     assert!(!markets.is_empty());
 
-    let btc_usd = markets.iter().find(|m| m.symbol == "BTC-USD-SWAP").unwrap();
+    let btc_usd = markets
+        .iter()
+        .find(|m| m.symbol == "BTC-USD-SWAP")
+        .unwrap()
+        .clone();
     assert_eq!(btc_usd.precision.tick_size, 0.1);
     assert_eq!(btc_usd.precision.lot_size, 1.0);
-    assert!(btc_usd.quantity_limit.is_none());
+    let quantity_limit = btc_usd.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.max, None);
 }
 
 #[test]
@@ -161,10 +173,13 @@ fn fetch_linear_swap_markets() {
     let btc_usdt = markets
         .iter()
         .find(|m| m.symbol == "BTC-USDT-SWAP")
-        .unwrap();
+        .unwrap()
+        .clone();
     assert_eq!(btc_usdt.precision.tick_size, 0.1);
     assert_eq!(btc_usdt.precision.lot_size, 1.0);
-    assert!(btc_usdt.quantity_limit.is_none());
+    let quantity_limit = btc_usdt.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.max, None);
 }
 
 #[test]
@@ -175,10 +190,13 @@ fn fetch_option_markets() {
     let btc_usd = markets
         .iter()
         .find(|m| m.symbol.starts_with("BTC-USD-"))
-        .unwrap();
+        .unwrap()
+        .clone();
     assert_eq!(btc_usd.precision.tick_size, 0.0005);
     assert_eq!(btc_usd.precision.lot_size, 1.0);
-    assert!(btc_usd.quantity_limit.is_none());
+    let quantity_limit = btc_usd.quantity_limit.unwrap();
+    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.max, None);
 }
 
 #[test_case(MarketType::InverseFuture)]

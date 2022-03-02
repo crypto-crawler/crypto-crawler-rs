@@ -40,7 +40,7 @@ macro_rules! check_contract_values {
                 market.settle.unwrap(),
                 crypto_pair::normalize_currency(market.settle_id.unwrap().as_str(), $exchange)
             );
-            assert!(market.margin);
+            // assert!(market.margin);
             if $market_type == MarketType::InverseFuture
                 || $market_type == MarketType::LinearFuture
                 || $market_type == MarketType::QuantoFuture
