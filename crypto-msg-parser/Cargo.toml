@@ -1,6 +1,6 @@
 [package]
 name = "crypto-msg-parser"
-version = "1.8.8"
+version = "1.8.9"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description = "Parse websocket messages from cryptocurreny exchanges"
@@ -10,7 +10,7 @@ keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
 chrono = "0.4"
-crypto-contract-value = "1.2.4"
+crypto-contract-value = "1.2.5"
 crypto-market-type = "1.0.5"
 crypto-msg-type = "1.0.4"
 crypto-pair = "2.1.2"
