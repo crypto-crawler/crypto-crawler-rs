@@ -9,127 +9,169 @@ use utils::http_get;
 
 const EXCHANGE_NAME: &'static str = "okex";
 
+// see <https://www.okx.com/docs-v5/en/#rest-api-public-data-get-instruments>
 #[derive(Serialize, Deserialize)]
-struct Market {
-    instrument_id: String,
-    base_currency: String,
-    quote_currency: String,
+#[allow(non_snake_case)]
+struct RawMarket {
+    instType: String,  // Instrument type
+    instId: String,    // Instrument ID, e.g. BTC-USD-SWAP
+    baseCcy: String,   // Base currency, e.g. BTC inBTC-USDT. Only applicable to SPOT
+    quoteCcy: String,  // Quote currency, e.g. USDT in BTC-USDT. Only applicable to SPOT
+    settleCcy: String, // Settlement and margin currency, e.g. BTC. Only applicable to FUTURES/SWAP/OPTION
+    ctValCcy: String,  // Contract value currency. Only applicable to FUTURES/SWAP/OPTION
+    ctType: String,    // Contract type, linear, inverse. Only applicable to FUTURES/SWAP
+    state: String,     // Instrument status, live, suspend, preopen, settlement
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
 
-// see <https://www.okex.com/docs/en/#spot-currency>
-fn fetch_spot_markets_raw() -> Vec<Market> {
-    let txt = http_get("https://www.okex.com/api/spot/v3/instruments").unwrap();
-    serde_json::from_str::<Vec<Market>>(&txt).unwrap()
-}
-
+// Retrieve a list of instruments.
+//
 // see <https://www.okex.com/docs/en/#swap-swap---contract_information>
-fn fetch_swap_markets_raw() -> Vec<Market> {
-    let txt = http_get("https://www.okex.com/api/swap/v3/instruments").unwrap();
-    serde_json::from_str::<Vec<Market>>(&txt).unwrap()
-}
+// instType: SPOT, MARGIN, SWAP, FUTURES, OPTION
+fn fetch_raw_markets_raw(inst_type: &str) -> Vec<RawMarket> {
+    if inst_type == "OPTION" {
+        let txt = http_get("https://www.okx.com/api/v5/public/underlying?instType=OPTION").unwrap();
+        let json_obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();
+        let data = json_obj.get("data").unwrap().as_array().unwrap()[0]
+            .as_array()
+            .unwrap();
+        let underlying_indexes = data
+            .into_iter()
+            .map(|x| x.as_str().unwrap().to_string())
+            .collect::<Vec<String>>();
 
-// see <https://www.okex.com/docs/en/#futures-contract_information>
-fn fetch_future_markets_raw() -> Vec<Market> {
-    let txt = http_get("https://www.okex.com/api/futures/v3/instruments").unwrap();
-    serde_json::from_str::<Vec<Market>>(&txt).unwrap()
+        let mut markets = Vec::<RawMarket>::new();
+        for underlying in underlying_indexes.iter() {
+            let url = format!(
+                "https://www.okx.com/api/v5/public/instruments?instType=OPTION&uly={}",
+                underlying
+            );
+            let txt = {
+                let txt = http_get(url.as_str()).unwrap();
+                let json_obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();
+                serde_json::to_string(json_obj.get("data").unwrap()).unwrap()
+            };
+            let mut arr = serde_json::from_str::<Vec<RawMarket>>(&txt).unwrap();
+            markets.append(&mut arr);
+        }
+
+        markets
+    } else {
+        let url = format!(
+            "https://www.okx.com/api/v5/public/instruments?instType={}",
+            inst_type
+        );
+        let txt = {
+            let txt = http_get(url.as_str()).unwrap();
+            let json_obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();
+            serde_json::to_string(json_obj.get("data").unwrap()).unwrap()
+        };
+        serde_json::from_str::<Vec<RawMarket>>(&txt).unwrap()
+    }
 }
 
 #[test]
 fn verify_spot_symbols() {
-    let markets = fetch_spot_markets_raw();
+    let markets = fetch_raw_markets_raw("SPOT");
     for market in markets.iter() {
-        let pair = normalize_pair(&market.instrument_id, EXCHANGE_NAME).unwrap();
+        assert_eq!("SPOT", market.instType);
+        let pair = normalize_pair(&market.instId, EXCHANGE_NAME).unwrap();
         let pair_expected = format!(
             "{}/{}",
-            normalize_currency(&market.base_currency, EXCHANGE_NAME),
-            normalize_currency(&market.quote_currency, EXCHANGE_NAME)
+            normalize_currency(&market.baseCcy, EXCHANGE_NAME),
+            normalize_currency(&market.quoteCcy, EXCHANGE_NAME)
         );
 
         assert_eq!(pair.as_str(), pair_expected);
 
         assert_eq!(
             MarketType::Spot,
-            get_market_type(&market.instrument_id, EXCHANGE_NAME, None)
+            get_market_type(&market.instId, EXCHANGE_NAME, None)
         );
     }
 }
 
 #[test]
 fn verify_swap_symbols() {
-    let markets = fetch_swap_markets_raw();
+    let markets = fetch_raw_markets_raw("SWAP");
     for market in markets.iter() {
-        let pair = normalize_pair(&market.instrument_id, EXCHANGE_NAME).unwrap();
-        let pair_expected = format!(
-            "{}/{}",
-            normalize_currency(&market.base_currency, EXCHANGE_NAME),
-            normalize_currency(&market.quote_currency, EXCHANGE_NAME)
-        );
-
-        assert_eq!(pair.as_str(), pair_expected);
-
-        let market_type = get_market_type(&market.instrument_id, EXCHANGE_NAME, None);
-        assert!(market_type == MarketType::LinearSwap || market_type == MarketType::InverseSwap);
+        assert_eq!("SWAP", market.instType);
+        let pair = normalize_pair(&market.instId, EXCHANGE_NAME).unwrap();
+        let market_type = get_market_type(&market.instId, EXCHANGE_NAME, None);
+        if market.ctType == "linear" {
+            // linear
+            assert_eq!(market.settleCcy, "USDT");
+            let pair_expected = format!(
+                "{}/{}",
+                normalize_currency(&market.ctValCcy, EXCHANGE_NAME),
+                normalize_currency(&market.settleCcy, EXCHANGE_NAME)
+            );
+            assert_eq!(pair.as_str(), pair_expected);
+            assert_eq!(MarketType::LinearSwap, market_type);
+        } else if market.ctType == "inverse" {
+            // linear
+            let pair_expected = format!(
+                "{}/{}",
+                normalize_currency(&market.settleCcy, EXCHANGE_NAME),
+                normalize_currency(&market.ctValCcy, EXCHANGE_NAME)
+            );
+            assert_eq!(pair.as_str(), pair_expected);
+            assert_eq!(MarketType::InverseSwap, market_type);
+        } else {
+            panic!("unknown ctType: {}", market.ctType);
+        }
     }
 }
 
 #[test]
 fn verify_future_symbols() {
-    let markets = fetch_future_markets_raw();
+    let markets = fetch_raw_markets_raw("FUTURES");
     for market in markets.iter() {
-        let pair = normalize_pair(&market.instrument_id, EXCHANGE_NAME).unwrap();
-        let pair_expected = format!(
-            "{}/{}",
-            normalize_currency(&market.base_currency, EXCHANGE_NAME),
-            normalize_currency(&market.quote_currency, EXCHANGE_NAME)
-        );
-
-        assert_eq!(pair.as_str(), pair_expected);
-
-        let market_type = get_market_type(&market.instrument_id, EXCHANGE_NAME, None);
-        assert!(
-            market_type == MarketType::LinearFuture || market_type == MarketType::InverseFuture
-        );
+        assert_eq!("FUTURES", market.instType);
+        let pair = normalize_pair(&market.instId, EXCHANGE_NAME).unwrap();
+        let market_type = get_market_type(&market.instId, EXCHANGE_NAME, None);
+        if market.ctType == "linear" {
+            // linear
+            assert_eq!(market.settleCcy, "USDT");
+            let pair_expected = format!(
+                "{}/{}",
+                normalize_currency(&market.ctValCcy, EXCHANGE_NAME),
+                normalize_currency(&market.settleCcy, EXCHANGE_NAME)
+            );
+            assert_eq!(pair.as_str(), pair_expected);
+            assert_eq!(MarketType::LinearFuture, market_type);
+        } else if market.ctType == "inverse" {
+            // linear
+            let pair_expected = format!(
+                "{}/{}",
+                normalize_currency(&market.settleCcy, EXCHANGE_NAME),
+                normalize_currency(&market.ctValCcy, EXCHANGE_NAME)
+            );
+            assert_eq!(pair.as_str(), pair_expected);
+            assert_eq!(MarketType::InverseFuture, market_type);
+        } else {
+            panic!("unknown ctType: {}", market.ctType);
+        }
     }
-}
-
-// see <https://www.okex.com/docs/en/#option-option---instrument>
-#[derive(Serialize, Deserialize)]
-struct OptionMarket {
-    instrument_id: String,
-    underlying: String,
-    #[serde(flatten)]
-    extra: HashMap<String, Value>,
-}
-
-// see <https://www.okex.com/docs/en/#option-option---instrument>
-fn fetch_option_markets_raw() -> Vec<OptionMarket> {
-    let txt = http_get("https://www.okex.com/api/option/v3/underlying").unwrap();
-    let underlying_indexes = serde_json::from_str::<Vec<String>>(&txt).unwrap();
-
-    let mut markets = Vec::<OptionMarket>::new();
-    for index in underlying_indexes.iter() {
-        let url = format!("https://www.okex.com/api/option/v3/instruments/{}", index);
-        let txt = http_get(url.as_str()).unwrap();
-        let mut arr = serde_json::from_str::<Vec<OptionMarket>>(&txt).unwrap();
-        markets.append(&mut arr);
-    }
-
-    markets
 }
 
 #[test]
 fn verify_option_symbols() {
-    let markets = fetch_option_markets_raw();
+    let markets = fetch_raw_markets_raw("OPTION");
     for market in markets.iter() {
-        let pair = normalize_pair(&market.instrument_id, EXCHANGE_NAME).unwrap();
-        let pair_expected = market.underlying.replace("-", "/");
+        assert_eq!("OPTION", market.instType);
+        let pair = normalize_pair(&market.instId, EXCHANGE_NAME).unwrap();
+        let pair_expected = format!(
+            "{}/USD",
+            normalize_currency(&market.settleCcy, EXCHANGE_NAME)
+        );
 
         assert_eq!(pair.as_str(), pair_expected);
+
         assert_eq!(
             MarketType::EuropeanOption,
-            get_market_type(&market.instrument_id, EXCHANGE_NAME, None)
+            get_market_type(&market.instId, EXCHANGE_NAME, None)
         );
     }
 }
