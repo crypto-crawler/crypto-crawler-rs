@@ -140,7 +140,7 @@ lazy_static! {
             .map(|x| (x.0.to_string(), x.1))
             .collect();
 
-            let from_online = fetch_contract_val("swap");
+            let from_online = fetch_contract_val("SWAP");
             for (pair, contract_value) in from_online {
                 m.insert(pair, contract_value);
             }
@@ -168,7 +168,7 @@ lazy_static! {
             .map(|x| (x.0.to_string(), x.1))
             .collect();
 
-            let from_online = fetch_contract_val("futures");
+            let from_online = fetch_contract_val("FUTURES");
             for (pair, contract_value) in &from_online {
                 m.insert(pair.clone(), *contract_value);
             }
@@ -218,10 +218,12 @@ fn fetch_contract_val(inst_type: &str) -> BTreeMap<String, f64> {
             "https://www.okx.com/api/v5/public/instruments?instType={}",
             inst_type
         );
-        let txt = {
-            let txt = http_get(url.as_str()).unwrap();
-            let json_obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();
-            serde_json::to_string(json_obj.get("data").unwrap()).unwrap()
+        let txt = match http_get(url.as_str()) {
+            Ok(txt) => {
+                let json_obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();
+                serde_json::to_string(json_obj.get("data").unwrap()).unwrap()
+            }
+            Err(_) => "[]".to_string(),
         };
         serde_json::from_str::<Vec<RawMarket>>(&txt).unwrap()
     };
