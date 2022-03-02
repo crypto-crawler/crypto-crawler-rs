@@ -20,7 +20,7 @@ pub fn get_contract_value(exchange: &str, market_type: MarketType, pair: &str) -
         "huobi" => exchanges::huobi::get_contract_value(market_type, pair),
         "kucoin" => exchanges::kucoin::get_contract_value(market_type, pair),
         "mxc" => exchanges::mxc::get_contract_value(market_type, pair),
-        "okex" => exchanges::okex::get_contract_value(market_type, pair),
+        "okex" | "okx" => exchanges::okx::get_contract_value(market_type, pair),
         "zbg" => exchanges::zbg::get_contract_value(market_type, pair),
         _ => panic!("Unknown exchange {}", exchange),
     }

@@ -31,15 +31,17 @@ struct RawMarket {
 // instType: SPOT, MARGIN, SWAP, FUTURES, OPTION
 fn fetch_raw_markets_raw(inst_type: &str) -> Vec<RawMarket> {
     if inst_type == "OPTION" {
-        let txt = http_get("https://www.okx.com/api/v5/public/underlying?instType=OPTION").unwrap();
-        let json_obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();
-        let data = json_obj.get("data").unwrap().as_array().unwrap()[0]
-            .as_array()
-            .unwrap();
-        let underlying_indexes = data
-            .into_iter()
-            .map(|x| x.as_str().unwrap().to_string())
-            .collect::<Vec<String>>();
+        let underlying_indexes = {
+            let txt =
+                http_get("https://www.okx.com/api/v5/public/underlying?instType=OPTION").unwrap();
+            let json_obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();
+            let data = json_obj.get("data").unwrap().as_array().unwrap()[0]
+                .as_array()
+                .unwrap();
+            data.into_iter()
+                .map(|x| x.as_str().unwrap().to_string())
+                .collect::<Vec<String>>()
+        };
 
         let mut markets = Vec::<RawMarket>::new();
         for underlying in underlying_indexes.iter() {

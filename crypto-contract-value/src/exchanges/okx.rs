@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap};
 
 use super::utils::http_get;
+use serde_json::Value;
 
 lazy_static! {
     static ref CONTRACT_VALUES: HashMap<MarketType, HashMap<String, f64>> = {
@@ -74,6 +75,7 @@ lazy_static! {
                 ("LAT/USDT", 10_f64),
                 ("LINK/USDT", 1_f64),
                 ("LON/USDT", 1_f64),
+                ("LOOKS/USDT", 1_f64),
                 ("LPT/USDT", 0.1_f64),
                 ("LRC/USDT", 10_f64),
                 ("LTC/USDT", 1_f64),
@@ -94,6 +96,7 @@ lazy_static! {
                 ("QTUM/USDT", 1_f64),
                 ("REN/USDT", 10_f64),
                 ("RSR/USDT", 100_f64),
+                ("RSS3/USDT", 10_f64),
                 ("RVN/USDT", 10_f64),
                 ("SAND/USDT", 10_f64),
                 ("SC/USDT", 100_f64),
@@ -114,6 +117,7 @@ lazy_static! {
                 ("TRB/USDT", 0.1_f64),
                 ("TRX/USDT", 1000_f64),
                 ("UMA/USDT", 0.1_f64),
+                ("UMEE/USDT", 10_f64),
                 ("UNI/USDT", 1_f64),
                 ("WAVES/USDT", 1_f64),
                 ("WNCG/USDT", 1_f64),
@@ -172,7 +176,8 @@ lazy_static! {
             m
         };
 
-        // see https://www.okex.com/docs/en/#option-option---instrument
+        // see https://www.okx.com/api/v5/public/instruments?instType=OPTION&uly=BTC-USD
+        // ctMult
         let option: HashMap<String, f64> = vec![
             ("BTC/USD",0.1),
             ("ETH/USD", 1.0),
@@ -190,28 +195,40 @@ lazy_static! {
     };
 }
 
-// get the contract_val field
-// market_type, futures, swap, option
-fn fetch_contract_val(market_type: &str) -> BTreeMap<String, f64> {
+// get the ctVal field
+// inst_type: FUTURES, SWAP
+fn fetch_contract_val(inst_type: &str) -> BTreeMap<String, f64> {
+    // see <https://www.okx.com/docs-v5/en/#rest-api-public-data-get-instruments>
     #[derive(Serialize, Deserialize)]
-    struct Instrument {
-        instrument_id: String,
-        underlying: String,
-        contract_val: String,
-        is_inverse: String,
+    #[allow(non_snake_case)]
+    struct RawMarket {
+        instType: String, // Instrument type
+        instId: String,   // Instrument ID, e.g. BTC-USD-SWAP
+        ctVal: String,    // Contract value. Only applicable to FUTURES/SWAP/OPTION
+        ctType: String,   // Contract type, linear, inverse. Only applicable to FUTURES/SWAP
+        #[serde(flatten)]
+        extra: HashMap<String, Value>,
     }
+
     let mut mapping: BTreeMap<String, f64> = BTreeMap::new();
 
-    if let Ok(txt) = http_get(&format!(
-        "https://www.okex.com/api/{}/v3/instruments",
-        market_type
-    )) {
-        if let Ok(instruments) = serde_json::from_str::<Vec<Instrument>>(&txt) {
-            for instrument in instruments.into_iter().filter(|x| x.is_inverse == "false") {
-                let pair = crypto_pair::normalize_pair(&instrument.instrument_id, "okex").unwrap();
-                mapping.insert(pair, instrument.contract_val.parse::<f64>().unwrap());
-            }
-        }
+    let markets = {
+        // doc: https://www.okx.com/docs-v5/en/#rest-api-public-data-get-instruments
+        let url = format!(
+            "https://www.okx.com/api/v5/public/instruments?instType={}",
+            inst_type
+        );
+        let txt = {
+            let txt = http_get(url.as_str()).unwrap();
+            let json_obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();
+            serde_json::to_string(json_obj.get("data").unwrap()).unwrap()
+        };
+        serde_json::from_str::<Vec<RawMarket>>(&txt).unwrap()
+    };
+
+    for market in markets.iter().filter(|x| x.ctType == "linear") {
+        let pair = crypto_pair::normalize_pair(&market.instId, "okx").unwrap();
+        mapping.insert(pair, market.ctVal.parse::<f64>().unwrap());
     }
 
     mapping
@@ -235,7 +252,7 @@ mod tests {
 
     #[test]
     fn linear_swap() {
-        let mapping = fetch_contract_val("swap");
+        let mapping = fetch_contract_val("SWAP");
         for (pair, contract_value) in &mapping {
             println!("(\"{}\", {}_f64),", pair, contract_value);
         }
@@ -243,7 +260,7 @@ mod tests {
 
     #[test]
     fn linear_future() {
-        let mapping = fetch_contract_val("futures");
+        let mapping = fetch_contract_val("FUTURES");
         for (pair, contract_value) in &mapping {
             println!("(\"{}\", {}_f64),", pair, contract_value);
         }
