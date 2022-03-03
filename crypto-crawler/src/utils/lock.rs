@@ -26,7 +26,7 @@ lazy_static! {
         "kraken",
         "kucoin",
         "mxc",
-        "okex",
+        "okx",
         "zbg",
     ];
     pub(crate) static ref REST_LOCKS: HashMap<String, HashMap<MarketType, Arc<Mutex<LockFile>>>> =
@@ -85,7 +85,7 @@ fn get_lock_file_name(exchange: &str, market_type: MarketType, prefix: &str) -> 
             MarketType::Spot => "mxc_spot.lock".to_string(),
             _ => panic!("Unknown market_type {} of {}", market_type, exchange),
         },
-        "okex" => "okex.lock".to_string(),
+        "okx" => "okx.lock".to_string(),
         "zbg" => match market_type {
             MarketType::InverseSwap | MarketType::LinearSwap => "zbg_swap.lock".to_string(),
             MarketType::Spot => "zbg_spot.lock".to_string(),

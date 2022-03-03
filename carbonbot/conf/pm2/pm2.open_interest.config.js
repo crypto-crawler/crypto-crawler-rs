@@ -9,7 +9,13 @@ const market_types = {
     gate: ["linear_swap", "inverse_swap"],
     huobi: ["inverse_future", "linear_swap", "inverse_swap"],
     kucoin: ["unknown"], // https://api-futures.kucoin.com/api/v1/contracts/active contains all open interests
-    okex: ["linear_future", "inverse_future", "linear_swap", "inverse_swap"],
+    okx: [
+        "linear_future",
+        "inverse_future",
+        "linear_swap",
+        "inverse_swap",
+        "european_option",
+    ],
     zbg: ["inverse_swap", "linear_swap"],
 };
 

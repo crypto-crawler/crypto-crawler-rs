@@ -33,6 +33,7 @@ pub fn extract_symbol(
         "kucoin" => exchanges::kucoin::extract_symbol(market_type, msg),
         "mxc" => exchanges::mxc::extract_symbol(market_type, msg),
         "okex" => exchanges::okex::extract_symbol(market_type, msg),
+        "okx" => exchanges::okx::extract_symbol(market_type, msg),
         "zbg" => exchanges::zbg::extract_symbol(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
@@ -63,6 +64,7 @@ pub fn parse_trade(
         "kucoin" => exchanges::kucoin::parse_trade(market_type, msg),
         "mxc" => exchanges::mxc::parse_trade(market_type, msg),
         "okex" => exchanges::okex::parse_trade(market_type, msg),
+        "okx" => exchanges::okx::parse_trade(market_type, msg),
         "zbg" => exchanges::zbg::parse_trade(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
@@ -106,6 +108,7 @@ pub fn parse_l2(
         "kucoin" => exchanges::kucoin::parse_l2(market_type, msg, timestamp),
         "mxc" => exchanges::mxc::parse_l2(market_type, msg, timestamp),
         "okex" => exchanges::okex::parse_l2(market_type, msg),
+        "okx" => exchanges::okx::parse_l2(market_type, msg),
         "zbg" => exchanges::zbg::parse_l2(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     };
@@ -141,6 +144,7 @@ pub fn parse_funding_rate(
         "bitmex" => exchanges::bitmex::parse_funding_rate,
         "huobi" => exchanges::huobi::parse_funding_rate,
         "okex" => exchanges::okex::parse_funding_rate,
+        "okx" => exchanges::okx::parse_funding_rate,
         _ => {
             return Err(SimpleError::new(format!(
                 "{} does NOT have perpetual swap market",
@@ -162,6 +166,7 @@ pub fn get_msg_type(exchange: &str, msg: &str) -> MessageType {
         "ftx" => exchanges::ftx::get_msg_type(msg),
         "huobi" => exchanges::huobi::get_msg_type(msg),
         "okex" => exchanges::okex::get_msg_type(msg),
+        "okx" => exchanges::okx::get_msg_type(msg),
         _ => MessageType::Other,
     }
 }

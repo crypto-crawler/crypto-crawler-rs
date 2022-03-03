@@ -18,7 +18,7 @@ const market_types = {
     kraken: ["spot"],
     kucoin: ["spot", "inverse_future", "linear_swap", "inverse_swap"],
     mxc: ["linear_swap", "inverse_swap"],
-    okex: [
+    okx: [
         "spot",
         "linear_future",
         "inverse_future",

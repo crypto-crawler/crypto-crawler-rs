@@ -223,7 +223,7 @@ impl WSClientInternal {
                                     let mut decoder = GzDecoder::new(&binary[..]);
                                     decoder.read_to_string(&mut txt)
                                 }
-                                super::okex::EXCHANGE_NAME => {
+                                super::okx::EXCHANGE_NAME => {
                                     let mut decoder = DeflateDecoder::new(&binary[..]);
                                     decoder.read_to_string(&mut txt)
                                 }

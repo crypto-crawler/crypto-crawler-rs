@@ -52,9 +52,9 @@ mod tests {
     }
 
     #[test]
-    fn test_okex() {
-        let spot_symbols = crypto_markets::fetch_symbols("okex", MarketType::Spot).unwrap();
-        let symbols = get_hot_spot_symbols("okex", &spot_symbols);
+    fn test_okx() {
+        let spot_symbols = crypto_markets::fetch_symbols("okx", MarketType::Spot).unwrap();
+        let symbols = get_hot_spot_symbols("okx", &spot_symbols);
         assert!(!symbols.is_empty());
     }
 }

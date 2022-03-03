@@ -4,7 +4,7 @@ const market_types = {
     bitget: ["inverse_swap", "linear_swap"],
     bitmex: ["unknown"], // unknown means all
     huobi: ["linear_swap", "inverse_swap"],
-    okex: ["linear_swap", "inverse_swap"],
+    okx: ["linear_swap", "inverse_swap"],
 };
 
 const apps = [];

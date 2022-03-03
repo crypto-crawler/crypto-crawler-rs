@@ -89,7 +89,7 @@ pub use clients::huobi::*;
 pub use clients::kraken::*;
 pub use clients::kucoin::*;
 pub use clients::mxc::*;
-pub use clients::okex::*;
+pub use clients::okx::*;
 pub use clients::zbg::*;
 
 /// The public interface of every WebSocket client.

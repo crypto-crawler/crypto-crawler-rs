@@ -15,14 +15,6 @@ const market_types = {
     huobi: ["spot", "inverse_future", "linear_swap", "inverse_swap"],
     kraken: ["spot"],
     kucoin: ["spot", "inverse_future", "linear_swap", "inverse_swap"],
-    okex: [
-        "spot",
-        "linear_future",
-        "inverse_future",
-        "linear_swap",
-        "inverse_swap",
-        "european_option",
-    ],
 };
 
 const apps = [];

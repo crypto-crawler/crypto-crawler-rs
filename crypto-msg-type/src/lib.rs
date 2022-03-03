@@ -67,6 +67,7 @@ pub fn get_ws_commands(
         "ftx" => exchanges::ftx::get_ws_commands(msg_types, symbols, subscribe, configs),
         "huobi" => exchanges::huobi::get_ws_commands(msg_types, symbols, subscribe, configs),
         "okex" => exchanges::okex::get_ws_commands(msg_types, symbols, subscribe, configs),
+        "okx" => exchanges::okx::get_ws_commands(msg_types, symbols, subscribe, configs),
         _ => Vec::new(),
     }
 }
