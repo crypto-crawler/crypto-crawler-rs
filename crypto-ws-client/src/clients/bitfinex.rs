@@ -475,6 +475,9 @@ impl WSClient for BitfinexWSClient {
                                 None => warn!("Received a close message without CloseFrame"),
                             }
                         }
+                        Message::Frame(_) => {
+                            error!("you're not going to get this value while reading the message")
+                        }
                     }
                 }
                 Err(err) => {
