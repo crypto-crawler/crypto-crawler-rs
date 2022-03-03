@@ -7,10 +7,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-crypto-crawler = "3.3.1"
+crypto-crawler = "3.3.2"
 crypto-market-type = "1.0.5"
 crypto-msg-type = "1.0.5"
-crypto-ws-client = "3.1.5"
+crypto-ws-client = "3.1.6"
 redis = "0.21"
 reopen = { version = "1", features = ["signals"] }
 serde_json = "1"
