@@ -14,8 +14,7 @@ use std::{
 use flate2::read::{DeflateDecoder, GzDecoder};
 use log::*;
 use tungstenite::{
-    error::ProtocolError, protocol::frame::coding::CloseCode, stream::MaybeTlsStream, Error,
-    Message, WebSocket,
+    protocol::frame::coding::CloseCode, stream::MaybeTlsStream, Error, Message, WebSocket,
 };
 
 pub(super) enum MiscMessage {
@@ -117,9 +116,8 @@ impl WSClientInternal {
                 debug!("{}", command);
                 let ret = ws_stream.write_message(Message::Text(command));
                 if let Err(err) = ret {
-                    error!("Failed to send commands due to {}, exiting", err);
                     std::thread::sleep(Duration::from_secs(5));
-                    std::process::exit(1); // fail fast, pm2 will restart
+                    panic!("Failed to send commands due to {}, exiting", err); // fail fast, pm2 will restart
                 }
                 if let Some(interval) = self.get_send_interval_ms() {
                     std::thread::sleep(Duration::from_millis(interval));
@@ -186,7 +184,7 @@ impl WSClientInternal {
             MiscMessage::Reconnect => {
                 // self.reconnect();
                 std::thread::sleep(Duration::from_secs(5));
-                std::process::exit(1); // fail fast, pm2 will restart
+                panic!("reconnect"); // fail fast, pm2 will restart
             }
             MiscMessage::WebSocket(ws_msg) => {
                 let ret = self.ws_stream.lock().unwrap().write_message(ws_msg);
@@ -264,14 +262,13 @@ impl WSClientInternal {
                                     if frame.code != CloseCode::Normal
                                         && frame.code != CloseCode::Away
                                     {
-                                        error!(
+                                        std::thread::sleep(Duration::from_secs(5));
+                                        panic!(
                                             "Received a CloseFrame: code: {}, reason: {}, {}",
                                             frame.code,
                                             frame.reason,
                                             self.get_error_msg(),
-                                        );
-                                        std::thread::sleep(Duration::from_secs(5));
-                                        std::process::exit(1); // fail fast, pm2 will restart
+                                        ); // fail fast, pm2 will restart
                                     } else {
                                         warn!(
                                             "Received a CloseFrame: code: {}, reason: {} from {}",
@@ -290,9 +287,8 @@ impl WSClientInternal {
                 Err(err) => {
                     match err {
                         Error::ConnectionClosed => {
-                            error!("Server closed connection, exiting now...");
                             std::thread::sleep(Duration::from_secs(5));
-                            std::process::exit(1); // fail fast, pm2 will restart
+                            panic!("Server closed connection, exiting now..."); // fail fast, pm2 will restart
                         }
                         Error::AlreadyClosed => {
                             error!("Impossible to happen, fix the bug in the code");
@@ -312,40 +308,33 @@ impl WSClientInternal {
                                     info!("Ignoring SIGHUP");
                                 }
                                 std::io::ErrorKind::BrokenPipe => {
-                                    error!(
+                                    std::thread::sleep(Duration::from_secs(5));
+                                    panic!(
                                         "I/O error thrown from read_message(): {}, {:?} {} {}",
                                         io_err,
                                         io_err.kind(),
                                         self.exchange,
                                         self.url
-                                    );
-                                    std::thread::sleep(Duration::from_secs(5));
-                                    std::process::exit(1); // fail fast, pm2 will restart
+                                    ); // fail fast, pm2 will restart
                                 }
                                 _ => {
-                                    error!(
+                                    std::thread::sleep(Duration::from_secs(5));
+                                    panic!(
                                         "I/O error thrown from read_message(): {}, {:?} {} {}",
                                         io_err,
                                         io_err.kind(),
                                         self.exchange,
                                         self.url
-                                    );
-                                    std::thread::sleep(Duration::from_secs(5));
-                                    std::process::exit(1); // fail fast, pm2 will restart
+                                    ); // fail fast, pm2 will restart
                                 }
                             }
                         }
                         Error::Protocol(protocol_err) => {
-                            if protocol_err == ProtocolError::ResetWithoutClosingHandshake {
-                                error!("ResetWithoutClosingHandshake");
-                                std::thread::sleep(Duration::from_secs(5));
-                                std::process::exit(1); // fail fast, pm2 will restart
-                            } else {
-                                error!(
-                                    "Protocol error thrown from read_message(): {}",
-                                    protocol_err
-                                );
-                            }
+                            std::thread::sleep(Duration::from_secs(5));
+                            panic!(
+                                "Protocol error thrown from read_message(): {}",
+                                protocol_err
+                            ); // fail fast, pm2 will restart
                         }
                         _ => {
                             error!("Error thrown from read_message(): {}", err);
@@ -358,13 +347,12 @@ impl WSClientInternal {
             if let Some(interval_and_msg) = self.client_ping_interval_and_msg {
                 let num_unanswered_ping = self.num_unanswered_ping.load(Ordering::Acquire);
                 if num_unanswered_ping > 5 {
-                    error!(
+                    std::thread::sleep(Duration::from_secs(5));
+                    panic!(
                         "Exiting due to num_unanswered_ping: {}, duration: {} seconds",
                         num_unanswered_ping,
                         start_timstamp.elapsed().as_secs()
-                    );
-                    std::thread::sleep(Duration::from_secs(5));
-                    std::process::exit(1); // fail fast, pm2 will restart
+                    ); // fail fast, pm2 will restart
                 }
                 if last_ping_timestamp.elapsed() >= Duration::from_secs(interval_and_msg.0 / 2) {
                     debug!("Sending ping: {}", interval_and_msg.1);
@@ -380,13 +368,12 @@ impl WSClientInternal {
                     }
                 }
             } else if num_read_timeout > 5 {
-                error!(
+                std::thread::sleep(Duration::from_secs(5));
+                panic!(
                     "Exiting due to num_read_timeout: {}, duration: {} seconds",
                     num_read_timeout,
                     start_timstamp.elapsed().as_secs()
-                );
-                std::thread::sleep(Duration::from_secs(5));
-                std::process::exit(1); // fail fast, pm2 will restart
+                ); // fail fast, pm2 will restart
             }
 
             if let Some(seconds) = duration {
