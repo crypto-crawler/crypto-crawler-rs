@@ -17,8 +17,9 @@ const WEBSOCKET_URL: &str = "wss://ws.okx.com:8443/ws/v5/public";
 // https://www.okx.com/docs-v5/en/#websocket-api-connect
 const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (30, "ping");
 
-/// CloseFrame: code: 1009, reason: Max frame length of 65536 has been exceeded
-const WS_FRAME_SIZE: usize = 65536;
+/// https://www.okx.com/docs-v5/en/#websocket-api-subscribe
+/// The total length of multiple channels cannot exceed 4096 bytes
+const WS_FRAME_SIZE: usize = 4096;
 
 /// The WebSocket client for OKX.
 ///
