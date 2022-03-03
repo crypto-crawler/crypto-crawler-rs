@@ -114,6 +114,7 @@ impl WSClientInternal {
             let commands = (self.channels_to_commands)(&diff, subscribe);
             let mut ws_stream = self.ws_stream.lock().unwrap();
             commands.into_iter().for_each(|command| {
+                debug!("{}", command);
                 let ret = ws_stream.write_message(Message::Text(command));
                 if let Err(err) = ret {
                     error!("Failed to send commands due to {}, exiting", err);
