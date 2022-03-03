@@ -58,7 +58,7 @@ fn fetch_l2_snapshot_internal(
         "kraken" => exchanges::kraken::KrakenRestClient::fetch_l2_snapshot(symbol),
         "kucoin" => exchanges::kucoin::fetch_l2_snapshot(market_type, symbol),
         "mxc" => exchanges::mxc::fetch_l2_snapshot(market_type, symbol),
-        "okex" => exchanges::okx::OkxRestClient::fetch_l2_snapshot(symbol),
+        "okx" => exchanges::okx::OkxRestClient::fetch_l2_snapshot(symbol),
         "zbg" => exchanges::zbg::fetch_l2_snapshot(market_type, symbol),
         _ => panic!("Unknown exchange {}", exchange),
     }
@@ -100,7 +100,7 @@ pub fn fetch_open_interest(
         "gate" => exchanges::gate::fetch_open_interest(market_type, symbol.unwrap()),
         "huobi" => exchanges::huobi::fetch_open_interest(market_type, symbol),
         "kucoin" => exchanges::kucoin::fetch_open_interest(market_type),
-        "okex" => exchanges::okx::OkxRestClient::fetch_open_interest(symbol.unwrap()),
+        "okx" => exchanges::okx::OkxRestClient::fetch_open_interest(symbol.unwrap()),
         "zbg" => exchanges::zbg::fetch_open_interest(market_type, symbol.unwrap()),
         _ => panic!("{} does NOT have open interest RESTful API", exchange),
     }

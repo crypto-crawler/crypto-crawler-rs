@@ -7,7 +7,7 @@ pub(super) mod bitmex;
 pub(super) mod deribit;
 pub(super) mod huobi;
 pub(super) mod kucoin;
-pub(super) mod okex;
+pub(super) mod okx;
 
 pub use utils::fetch_symbols_retry;
 pub(super) use utils::{

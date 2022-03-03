@@ -115,8 +115,8 @@ fn get_cooldown_time_per_request(exchange: &str, market_type: MarketType) -> Dur
             MarketType::Spot => 300, // 3x to avoid 429
             _ => 100,                // 30 times/3s
         },
-        "mxc" => 100,  // 20 times per 2 seconds
-        "okex" => 100, // 20 requests per 2 seconds
+        "mxc" => 100, // 20 times per 2 seconds
+        "okx" => 100, // 20 requests per 2 seconds
         _ => 100,
     };
     Duration::from_millis(millis)
@@ -236,6 +236,11 @@ pub(crate) fn crawl_open_interest(
     tx: Sender<Message>,
     duration: Option<u64>,
 ) {
+    if exchange == "okx" {
+        // use websocket instead of RESTful API
+        super::okx::crawl_open_interest(market_type, None, tx, duration);
+        return;
+    }
     let now = Instant::now();
     let cooldown_time = get_cooldown_time_per_request(exchange, market_type);
 
@@ -269,7 +274,7 @@ pub(crate) fn crawl_open_interest(
                     lock_.unlock().unwrap();
                 }
             }
-            "binance" | "bitget" | "bybit" | "gate" | "okex" | "zbg" => {
+            "binance" | "bitget" | "bybit" | "gate" | "zbg" => {
                 let real_symbols = fetch_symbols_retry(exchange, market_type);
 
                 let mut index = 0_usize;
@@ -410,7 +415,7 @@ fn get_connection_interval_ms(exchange: &str, _market_type: MarketType) -> Optio
         // "bitmex" => Some(9000), // 40 per hour
         "bitz" => Some(100), // `cat crawler-trade-bitz-spot-error-12.log` has many "429 Too Many Requests"
         "kucoin" => Some(2000), //  Connection Limit: 30 per minute
-        "okex" => Some(1000), //  Connection limit：1 times/s, https://www.okex.com/docs/en/#spot_ws-limit
+        "okx" => Some(1000), // Connection limit: 1 time per second, https://www.okx.com/docs-v5/en/#websocket-api-connect
         _ => None,
     }
 }
@@ -419,7 +424,7 @@ fn get_send_interval_ms(exchange: &str, _market_type: MarketType) -> Option<u64>
     match exchange {
         "binance" => Some(100), // WebSocket connections have a limit of 10 incoming messages per second
         "kucoin" => Some(100),  //  Message limit sent to the server: 100 per 10 seconds
-        // "okex" => Some(15000), // 240 times/hour, https://www.okex.com/docs/en/#spot_ws-limit
+        // "okx" => Some(15000), // 240 times per hour, https://www.okx.com/docs-v5/en/#websocket-api-connect
         _ => None,
     }
 }
@@ -432,7 +437,7 @@ fn get_num_subscriptions_per_connection(exchange: &str) -> usize {
         "bitfinex" => 30, // https://docs.bitfinex.com/docs/ws-general#subscribe-to-channels
         // Subscription limit for each connection: 300 topics
         "kucoin" => 300, // https://docs.kucoin.cc/#request-rate-limit
-        "okex" => 256,   // okex spot l2_event throws many ResetWithoutClosingHandshake errors
+        // "okx" => 256,   // okx spot l2_event throws many ResetWithoutClosingHandshake errors
         _ => usize::MAX, // usize::MAX means unlimited
     }
 }
@@ -511,7 +516,7 @@ fn create_ws_client_internal(
             }
             _ => panic!("MXC does NOT have the {} market type", market_type),
         },
-        "okex" => Arc::new(OkexWSClient::new(tx, None)),
+        "okx" => Arc::new(OkxWSClient::new(tx, None)),
         "zbg" => match market_type {
             MarketType::Spot => Arc::new(ZbgSpotWSClient::new(tx, None)),
             MarketType::InverseSwap | MarketType::LinearSwap => {
@@ -771,7 +776,6 @@ pub(crate) fn crawl_event(
     };
 
     // create a thread to convert Sender<String> to Sender<Message>
-
     let new_symbol_receiver_thread = if real_symbols.len() <= num_topics_per_connection {
         let ws_client = create_ws_client(exchange, market_type, msg_type, tx);
         subscribe_with_lock(
@@ -883,7 +887,7 @@ fn get_candlestick_intervals(exchange: &str, market_type: MarketType) -> Vec<usi
             MarketType::Spot => vec![60, 300], // Reduced to avoid Broken pipe (os error 32)
             _ => vec![60, 300],
         },
-        "okex" => vec![60, 180, 300],
+        "okx" => vec![60, 180, 300],
         "zbg" => match market_type {
             MarketType::Spot => vec![60, 300],
             _ => vec![60, 180, 300],
