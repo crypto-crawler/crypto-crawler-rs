@@ -48,17 +48,14 @@ struct OrderbookUpdate {
     extra: HashMap<String, Value>,
 }
 
-pub(crate) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Result<String, SimpleError> {
+pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     let arr = serde_json::from_str::<Vec<Value>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
     let symbol = arr[arr.len() - 1].as_str().unwrap();
     Ok(symbol.to_string())
 }
 
-pub(crate) fn parse_trade(
-    market_type: MarketType,
-    msg: &str,
-) -> Result<Vec<TradeMsg>, SimpleError> {
+pub(crate) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
     let arr = serde_json::from_str::<Vec<Value>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
     debug_assert_eq!(arr[2].as_str().unwrap(), "trade");
@@ -83,7 +80,7 @@ pub(crate) fn parse_trade(
 
             TradeMsg {
                 exchange: EXCHANGE_NAME.to_string(),
-                market_type,
+                market_type: MarketType::Spot,
                 symbol: symbol.to_string(),
                 pair: pair.clone(),
                 msg_type: MessageType::Trade,
@@ -109,11 +106,7 @@ pub(crate) fn parse_trade(
     Ok(trades)
 }
 
-pub(crate) fn parse_l2(
-    market_type: MarketType,
-    msg: &str,
-) -> Result<Vec<OrderBookMsg>, SimpleError> {
-    debug_assert_eq!(market_type, MarketType::Spot);
+pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
     let arr = serde_json::from_str::<Vec<Value>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
     debug_assert_eq!(arr[arr.len() - 2].as_str().unwrap(), "book-25");

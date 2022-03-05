@@ -501,7 +501,13 @@ fn create_ws_client_internal(
             MarketType::EuropeanOption => Arc::new(HuobiOptionWSClient::new(tx, None)),
             _ => panic!("Huobi does NOT have the {} market type", market_type),
         },
-        "kraken" => Arc::new(KrakenWSClient::new(tx, None)),
+        "kraken" => match market_type {
+            MarketType::Spot => Arc::new(KrakenSpotWSClient::new(tx, None)),
+            MarketType::InverseFuture | MarketType::InverseSwap => {
+                Arc::new(KrakenFuturesWSClient::new(tx, None))
+            }
+            _ => panic!("Kraken does NOT have the {} market type", market_type),
+        },
         "kucoin" => match market_type {
             MarketType::Spot => Arc::new(KuCoinSpotWSClient::new(tx, None)),
             MarketType::InverseSwap | MarketType::LinearSwap | MarketType::InverseFuture => {

@@ -97,7 +97,7 @@ pub fn get_market_type(symbol: &str, exchange: &str, is_spot: Option<bool>) -> M
         "ftx" => exchanges::ftx::get_market_type(symbol),
         "gate" => exchanges::gate::get_market_type(symbol, is_spot),
         "huobi" => exchanges::huobi::get_market_type(symbol),
-        "kraken" => MarketType::Spot,
+        "kraken" => exchanges::kraken::get_market_type(symbol),
         "kucoin" => exchanges::kucoin::get_market_type(symbol),
         "mxc" => exchanges::mxc::get_market_type(symbol, is_spot),
         "okex" | "okx" => exchanges::okx::get_market_type(symbol),

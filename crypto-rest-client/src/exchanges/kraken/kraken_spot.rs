@@ -1,4 +1,4 @@
-use super::utils::http_get;
+use super::super::utils::http_get;
 use crate::error::Result;
 use std::collections::BTreeMap;
 
@@ -12,14 +12,14 @@ const BASE_URL: &str = "https://api.kraken.com";
 /// * Trading at: <https://trade.kraken.com/>
 /// * Rate Limits: <https://docs.kraken.com/rest/#section/Rate-Limits/REST-API-Rate-Limits>
 ///   * 15 requests per 45 seconds
-pub struct KrakenRestClient {
+pub struct KrakenSpotRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
 }
 
-impl KrakenRestClient {
+impl KrakenSpotRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        KrakenRestClient {
+        KrakenSpotRestClient {
             _api_key: api_key,
             _api_secret: api_secret,
         }
@@ -32,7 +32,14 @@ impl KrakenRestClient {
     /// For example: <https://api.kraken.com/0/public/Trades?pair=XXBTZUSD&since=1609893937598797338>
     #[allow(non_snake_case)]
     pub fn fetch_trades(symbol: &str, since: Option<String>) -> Result<String> {
-        gen_api!(format!("/0/public/Trades?pair={}", symbol), since)
+        if symbol.contains('/') {
+            // websocket and RESTful API have different symbol format
+            // XBT/USD -> XBTUSD
+            let stripped = symbol.replace('/', "");
+            gen_api!(format!("/0/public/Trades?pair={}", &stripped), since)
+        } else {
+            gen_api!(format!("/0/public/Trades?pair={}", symbol), since)
+        }
     }
 
     /// Get a Level2 snapshot of orderbook.
@@ -41,6 +48,13 @@ impl KrakenRestClient {
     ///
     /// For example: <https://api.kraken.com/0/public/Depth?pair=XXBTZUSD&count=500>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/0/public/Depth?pair={}&count=500", symbol))
+        if symbol.contains('/') {
+            // websocket and RESTful API have different symbol format
+            // XBT/USD -> XBTUSD
+            let stripped = symbol.replace('/', "");
+            gen_api!(format!("/0/public/Depth?pair={}&count=500", stripped))
+        } else {
+            gen_api!(format!("/0/public/Depth?pair={}&count=500", symbol))
+        }
     }
 }

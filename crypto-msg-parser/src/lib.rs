@@ -165,6 +165,7 @@ pub fn get_msg_type(exchange: &str, msg: &str) -> MessageType {
         "deribit" => exchanges::deribit::get_msg_type(msg),
         "ftx" => exchanges::ftx::get_msg_type(msg),
         "huobi" => exchanges::huobi::get_msg_type(msg),
+        "kraken" => exchanges::kraken::get_msg_type(msg),
         "okex" => exchanges::okex::get_msg_type(msg),
         "okx" => exchanges::okx::get_msg_type(msg),
         _ => MessageType::Other,

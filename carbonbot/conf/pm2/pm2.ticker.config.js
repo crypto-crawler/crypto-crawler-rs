@@ -15,7 +15,7 @@ const market_types = {
     deribit: ["inverse_future", "inverse_swap", "european_option"],
     gate: ["spot", "linear_future", "linear_swap", "inverse_swap"],
     huobi: ["spot", "inverse_future", "linear_swap", "inverse_swap"],
-    kraken: ["spot"],
+    kraken: ["spot", "inverse_future", "inverse_swap"],
     kucoin: ["spot", "inverse_future", "linear_swap", "inverse_swap"],
     mxc: ["linear_swap", "inverse_swap"],
     okx: [

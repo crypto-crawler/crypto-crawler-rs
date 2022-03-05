@@ -18,6 +18,7 @@ pub fn get_contract_value(exchange: &str, market_type: MarketType, pair: &str) -
         "ftx" => Some(1.0),
         "gate" => exchanges::gate::get_contract_value(market_type, pair),
         "huobi" => exchanges::huobi::get_contract_value(market_type, pair),
+        "kraken" => exchanges::kraken::get_contract_value(market_type, pair),
         "kucoin" => exchanges::kucoin::get_contract_value(market_type, pair),
         "mxc" => exchanges::mxc::get_contract_value(market_type, pair),
         "okex" | "okx" => exchanges::okx::get_contract_value(market_type, pair),
