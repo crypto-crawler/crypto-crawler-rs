@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::utils::http_get;
+use super::super::utils::http_get;
 use crate::{
     error::{Error, Result},
     Fees, Market, MarketType, Precision, QuantityLimit,
@@ -8,20 +8,6 @@ use crate::{
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-
-pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
-    match market_type {
-        MarketType::Spot => fetch_spot_symbols(),
-        _ => panic!("Unsupported market_type: {}", market_type),
-    }
-}
-
-pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
-    match market_type {
-        MarketType::Spot => fetch_spot_markets(),
-        _ => panic!("Unsupported market_type: {}", market_type),
-    }
-}
 
 #[derive(Clone, Serialize, Deserialize)]
 struct SpotMarket {
@@ -51,7 +37,7 @@ struct Response {
 fn check_error_in_body(resp: String) -> Result<String> {
     let obj = serde_json::from_str::<HashMap<String, Value>>(&resp);
     if obj.is_err() {
-        return Ok(resp);
+        return Err(Error(resp));
     }
 
     match obj.unwrap().get("error") {
@@ -75,7 +61,7 @@ pub(super) fn kraken_http_get(url: &str) -> Result<String> {
     }
 }
 
-// see <https://www.kraken.com/features/api#get-tradable-pairs>
+// see <https://docs.kraken.com/rest/#operation/getTradableAssetPairs>
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
     let txt = kraken_http_get("https://api.kraken.com/0/public/AssetPairs")?;
     let obj = serde_json::from_str::<HashMap<String, Value>>(&txt)?;
@@ -91,7 +77,7 @@ fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
     Ok(markets)
 }
 
-fn fetch_spot_symbols() -> Result<Vec<String>> {
+pub(super) fn fetch_spot_symbols() -> Result<Vec<String>> {
     let symbols = fetch_spot_markets_raw()?
         .into_iter()
         .filter_map(|m| m.wsname)
@@ -99,7 +85,7 @@ fn fetch_spot_symbols() -> Result<Vec<String>> {
     Ok(symbols)
 }
 
-fn fetch_spot_markets() -> Result<Vec<Market>> {
+pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
     let markets = fetch_spot_markets_raw()?
         .into_iter()
         .map(|m| {

@@ -2,7 +2,7 @@ use crate::WSClient;
 use std::collections::HashMap;
 use std::sync::mpsc::Sender;
 
-use super::{
+use super::super::{
     utils::CHANNEL_PAIR_DELIMITER,
     ws_client_internal::{MiscMessage, WSClientInternal},
     Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
@@ -20,14 +20,13 @@ const WEBSOCKET_URL: &str = "wss://ws.kraken.com";
 // https://docs.kraken.com/websockets/#message-ping
 const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (10, r#"{"event":"ping"}"#);
 
-/// The WebSocket client for Kraken.
+/// The WebSocket client for Kraken Spot market.
 ///
-/// Kraken has only Spot market.
 ///
 ///   * WebSocket API doc: <https://docs.kraken.com/websockets/>
 ///   * Trading at: <https://trade.kraken.com/>
 
-pub struct KrakenWSClient {
+pub struct KrakenSpotWSClient {
     client: WSClientInternal,
 }
 
@@ -101,7 +100,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
                     "error" => {
                         error!("Received {} from {}", msg, EXCHANGE_NAME);
                         let error_msg = obj.get("errorMessage").unwrap().as_str().unwrap();
-                        if error_msg.starts_with("Currency pair not supported") {
+                        if error_msg.starts_with("Currency pair not") {
                             panic!("Received {} from {}", msg, EXCHANGE_NAME)
                         }
                     }
@@ -142,13 +141,13 @@ fn to_raw_channel(channel: &str, pair: &str) -> String {
 }
 
 #[rustfmt::skip]
-impl_trait!(Trade, KrakenWSClient, subscribe_trade, "trade", to_raw_channel);
+impl_trait!(Trade, KrakenSpotWSClient, subscribe_trade, "trade", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(Ticker, KrakenWSClient, subscribe_ticker, "ticker", to_raw_channel);
+impl_trait!(Ticker, KrakenSpotWSClient, subscribe_ticker, "ticker", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(BBO, KrakenWSClient, subscribe_bbo, "spread", to_raw_channel);
+impl_trait!(BBO, KrakenSpotWSClient, subscribe_bbo, "spread", to_raw_channel);
 
-impl OrderBook for KrakenWSClient {
+impl OrderBook for KrakenSpotWSClient {
     fn subscribe_orderbook(&self, pairs: &[String]) {
         let command = format!(
             r#"{{"event":"subscribe","pair":{},"subscription":{{"name":"book", "depth":25}}}}"#,
@@ -157,12 +156,6 @@ impl OrderBook for KrakenWSClient {
         let channels = vec![command];
 
         self.client.subscribe(&channels);
-    }
-}
-
-impl OrderBookTopK for KrakenWSClient {
-    fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
-        panic!("Kraken does NOT have orderbook snapshot channel");
     }
 }
 
@@ -181,7 +174,7 @@ fn convert_symbol_interval_list(
     result
 }
 
-impl Candlestick for KrakenWSClient {
+impl Candlestick for KrakenSpotWSClient {
     fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
         let valid_set: Vec<usize> = vec![1, 5, 15, 30, 60, 240, 1440, 10080, 21600]
             .into_iter()
@@ -219,10 +212,11 @@ impl Candlestick for KrakenWSClient {
     }
 }
 
-panic_l3_orderbook!(KrakenWSClient);
+panic_l2_topk!(KrakenSpotWSClient);
+panic_l3_orderbook!(KrakenSpotWSClient);
 
 impl_new_constructor!(
-    KrakenWSClient,
+    KrakenSpotWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
     channels_to_commands,
@@ -230,7 +224,7 @@ impl_new_constructor!(
     Some(CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
-impl_ws_client_trait!(KrakenWSClient);
+impl_ws_client_trait!(KrakenSpotWSClient);
 
 #[cfg(test)]
 mod tests {

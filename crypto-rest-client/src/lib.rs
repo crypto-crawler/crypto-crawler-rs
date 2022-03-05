@@ -23,7 +23,8 @@ pub use exchanges::huobi::huobi_inverse_swap::HuobiInverseSwapRestClient;
 pub use exchanges::huobi::huobi_linear_swap::HuobiLinearSwapRestClient;
 pub use exchanges::huobi::huobi_option::HuobiOptionRestClient;
 pub use exchanges::huobi::huobi_spot::HuobiSpotRestClient;
-pub use exchanges::kraken::KrakenRestClient;
+pub use exchanges::kraken::kraken_futures::KrakenFuturesRestClient;
+pub use exchanges::kraken::kraken_spot::KrakenSpotRestClient;
 pub use exchanges::kucoin::*;
 pub use exchanges::mxc::mxc_spot::MxcSpotRestClient;
 pub use exchanges::mxc::mxc_swap::MxcSwapRestClient;
@@ -55,7 +56,7 @@ fn fetch_l2_snapshot_internal(
         "ftx" => exchanges::ftx::FtxRestClient::fetch_l2_snapshot(symbol),
         "gate" => exchanges::gate::fetch_l2_snapshot(market_type, symbol),
         "huobi" => exchanges::huobi::fetch_l2_snapshot(market_type, symbol),
-        "kraken" => exchanges::kraken::KrakenRestClient::fetch_l2_snapshot(symbol),
+        "kraken" => exchanges::kraken::fetch_l2_snapshot(market_type, symbol),
         "kucoin" => exchanges::kucoin::fetch_l2_snapshot(market_type, symbol),
         "mxc" => exchanges::mxc::fetch_l2_snapshot(market_type, symbol),
         "okx" => exchanges::okx::OkxRestClient::fetch_l2_snapshot(symbol),
