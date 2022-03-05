@@ -437,7 +437,7 @@ fn get_num_subscriptions_per_connection(exchange: &str) -> usize {
         "bitfinex" => 30, // https://docs.bitfinex.com/docs/ws-general#subscribe-to-channels
         // Subscription limit for each connection: 300 topics
         "kucoin" => 300, // https://docs.kucoin.cc/#request-rate-limit
-        // "okx" => 256,   // okx spot l2_event throws many ResetWithoutClosingHandshake errors
+        "okx" => 256,    // okx spot l2_event throws many ResetWithoutClosingHandshake errors
         _ => usize::MAX, // usize::MAX means unlimited
     }
 }
