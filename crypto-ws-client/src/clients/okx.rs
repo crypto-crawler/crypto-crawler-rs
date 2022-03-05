@@ -114,7 +114,7 @@ impl_trait!(Trade, OkxWSClient, subscribe_trade, "trades", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(Ticker, OkxWSClient, subscribe_ticker, "tickers", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBook, OkxWSClient, subscribe_orderbook, "books-l2-tbt", to_raw_channel);
+impl_trait!(OrderBook, OkxWSClient, subscribe_orderbook, "books50-l2-tbt", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBookTopK, OkxWSClient, subscribe_orderbook_topk, "books5", to_raw_channel);
 
