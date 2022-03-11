@@ -8,8 +8,6 @@ use serde_json::Value;
 use simple_error::SimpleError;
 use std::collections::HashMap;
 
-const EXCHANGE_NAME: &str = "mxc";
-
 // https://github.com/mxcdevelop/APIDoc/blob/master/websocket/spot/websocket-api.md#成交记录
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
@@ -67,7 +65,7 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
 
     let raw_trades = ws_msg.data.deals.unwrap();
     let symbol = ws_msg.symbol.as_str();
-    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
+    let pair = crypto_pair::normalize_pair(symbol, super::EXCHANGE_NAME)
         .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
 
     let mut trades: Vec<TradeMsg> = raw_trades
@@ -77,7 +75,7 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
             let quantity = raw_trade.q.parse::<f64>().unwrap();
 
             TradeMsg {
-                exchange: EXCHANGE_NAME.to_string(),
+                exchange: super::EXCHANGE_NAME.to_string(),
                 market_type: MarketType::Spot,
                 symbol: symbol.to_string(),
                 pair: pair.clone(),
@@ -139,11 +137,11 @@ pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>, S
     }
 
     let symbol = ws_msg.symbol.as_str();
-    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
+    let pair = crypto_pair::normalize_pair(symbol, super::EXCHANGE_NAME)
         .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
 
     let orderbook = OrderBookMsg {
-        exchange: EXCHANGE_NAME.to_string(),
+        exchange: super::EXCHANGE_NAME.to_string(),
         market_type: MarketType::Spot,
         symbol: symbol.to_string(),
         pair,

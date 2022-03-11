@@ -25,7 +25,7 @@ lazy_static! {
         "huobi",
         "kraken",
         "kucoin",
-        "mxc",
+        "mexc",
         "okx",
         "zbg",
     ];
@@ -80,9 +80,9 @@ fn get_lock_file_name(exchange: &str, market_type: MarketType, prefix: &str) -> 
                 }
             }
         }
-        "mxc" => match market_type {
-            MarketType::InverseSwap | MarketType::LinearSwap => "mxc_swap.lock".to_string(),
-            MarketType::Spot => "mxc_spot.lock".to_string(),
+        "mexc" => match market_type {
+            MarketType::InverseSwap | MarketType::LinearSwap => "mexc_swap.lock".to_string(),
+            MarketType::Spot => "mexc_spot.lock".to_string(),
             _ => panic!("Unknown market_type {} of {}", market_type, exchange),
         },
         "okx" => "okx.lock".to_string(),

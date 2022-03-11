@@ -16,7 +16,7 @@ pub(super) mod gate;
 pub(super) mod huobi;
 pub(super) mod kraken;
 pub(super) mod kucoin;
-pub(super) mod mxc;
+pub(super) mod mexc;
 pub(super) mod okex;
 pub(super) mod okx;
 pub(super) mod zbg;

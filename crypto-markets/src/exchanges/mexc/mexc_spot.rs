@@ -1,4 +1,4 @@
-use super::utils::mxc_http_get;
+use super::utils::mexc_http_get;
 use crate::{error::Result, Fees, Market, Precision, QuantityLimit};
 
 use crypto_market_type::MarketType;
@@ -29,7 +29,7 @@ struct Response {
 
 // see <https://mxcdevelop.github.io/APIDoc/open.api.v2.en.html#all-symbols>
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
-    let txt = mxc_http_get("https://www.mexc.com/open/api/v2/market/symbols")?;
+    let txt = mexc_http_get("https://www.mexc.com/open/api/v2/market/symbols")?;
     let resp = serde_json::from_str::<Response>(&txt)?;
     Ok(resp
         .data
@@ -55,7 +55,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 .as_object()
                 .unwrap()
                 .clone();
-            let pair = crypto_pair::normalize_pair(&m.symbol, "mxc").unwrap();
+            let pair = crypto_pair::normalize_pair(&m.symbol, super::EXCHANGE_NAME).unwrap();
             let (base, quote) = {
                 let v: Vec<&str> = pair.split('/').collect();
                 (v[0].to_string(), v[1].to_string())
@@ -65,7 +65,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 (v[0].to_string(), v[1].to_string())
             };
             Market {
-                exchange: "mxc".to_string(),
+                exchange: super::EXCHANGE_NAME.to_string(),
                 market_type: MarketType::Spot,
                 symbol: m.symbol,
                 base_id,

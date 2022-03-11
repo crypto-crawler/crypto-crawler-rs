@@ -62,7 +62,7 @@ pub fn normalize_pair(symbol: &str, exchange: &str) -> Option<String> {
         "huobi" => exchanges::huobi::normalize_pair(symbol),
         "kraken" => exchanges::kraken::normalize_pair(symbol),
         "kucoin" => exchanges::kucoin::normalize_pair(symbol),
-        "mxc" => Some(symbol.replace('_', "/")),
+        "mxc" | "mexc" => Some(symbol.replace('_', "/")),
         "okex" | "okx" => {
             let v: Vec<&str> = symbol.split('-').collect();
             Some(format!("{}/{}", v[0], v[1]))
@@ -77,7 +77,7 @@ pub fn normalize_pair(symbol: &str, exchange: &str) -> Option<String> {
 /// Infer out market type from the symbol.
 ///
 /// The `is_spot` parameter is not needed in most cases, but at some exchanges
-///  (including binance, gate and mxc) a symbol might exist in both spot and
+///  (including binance, gate and mexc) a symbol might exist in both spot and
 /// contract markets, for example:
 /// * At binance `BTCUSDT` exists in both spot and linear_swap markets
 /// * At gate `BTC_USDT` exists in both spot and linear_swap markets,
@@ -99,7 +99,7 @@ pub fn get_market_type(symbol: &str, exchange: &str, is_spot: Option<bool>) -> M
         "huobi" => exchanges::huobi::get_market_type(symbol),
         "kraken" => exchanges::kraken::get_market_type(symbol),
         "kucoin" => exchanges::kucoin::get_market_type(symbol),
-        "mxc" => exchanges::mxc::get_market_type(symbol, is_spot),
+        "mxc" | "mexc" => exchanges::mexc::get_market_type(symbol, is_spot),
         "okex" | "okx" => exchanges::okx::get_market_type(symbol),
         "zbg" => exchanges::zbg::get_market_type(symbol),
         _ => MarketType::Unknown,

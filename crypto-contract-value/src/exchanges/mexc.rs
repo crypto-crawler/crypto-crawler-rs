@@ -254,7 +254,7 @@ fn fetch_linear_contract_sizes() -> BTreeMap<String, f64> {
         if let Ok(resp) = serde_json::from_str::<ResponseMsg>(&txt) {
             for linear_market in resp.data.iter().filter(|x| x.settleCoin == x.quoteCoin) {
                 mapping.insert(
-                    crypto_pair::normalize_pair(&linear_market.symbol, "mxc").unwrap(),
+                    crypto_pair::normalize_pair(&linear_market.symbol, "mexc").unwrap(),
                     linear_market.contractSize,
                 );
             }

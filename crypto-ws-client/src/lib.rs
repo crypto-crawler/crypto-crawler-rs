@@ -88,7 +88,7 @@ pub use clients::gate::*;
 pub use clients::huobi::*;
 pub use clients::kraken::*;
 pub use clients::kucoin::*;
-pub use clients::mxc::*;
+pub use clients::mexc::*;
 pub use clients::okx::*;
 pub use clients::zbg::*;
 
@@ -136,7 +136,7 @@ pub trait WSClient {
     /// * CoinbasePro `level2`
     /// * Huobi `depth.size_20.high_freq` with `data_type=incremental` for contracts, `mbp.20` for Spot
     /// * Kraken `book` with `depth=25`
-    /// * MXC `depth` for Swap, `symbol` for Spot
+    /// * MEXC `depth` for Swap, `symbol` for Spot
     /// * OKEx `depth_l2_tbt`, top 100
     fn subscribe_orderbook(&self, pairs: &[String]);
 
@@ -153,7 +153,7 @@ pub trait WSClient {
     /// * CoinbasePro has no snapshot channel
     /// * Huobi `depth.step1` and `depth.step7`, top 20, every 1s
     /// * Kraken has no snapshot channel
-    /// * MXC `depth.full` for Swap, top 20, every 100ms; `get.depth` for Spot, full, every 26s
+    /// * MEXC `depth.full` for Swap, top 20, every 100ms; `get.depth` for Spot, full, every 26s
     /// * OKEx `depth5`, top 5, every 100ms
     fn subscribe_orderbook_topk(&self, pairs: &[String]);
 
@@ -171,7 +171,7 @@ pub trait WSClient {
     /// which contains OHLCV information.
     ///
     /// Not all exchanges have the ticker channel, for example, BitMEX,
-    /// Bitstamp, MXC Spot, etc.
+    /// Bitstamp, MEXC Spot, etc.
     fn subscribe_ticker(&self, pairs: &[String]);
 
     /// Subscribes to candlestick channels.

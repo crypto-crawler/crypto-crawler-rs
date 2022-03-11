@@ -8,7 +8,7 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 use utils::parse;
 
-const EXCHANGE_NAME: &str = "mxc";
+const EXCHANGE_NAME: &str = "mexc";
 
 #[test_case(MarketType::Spot, "BTC_USDT")]
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
