@@ -6,7 +6,7 @@ use test_case::test_case;
 #[macro_use]
 mod utils;
 
-const EXCHANGE_NAME: &str = "mxc";
+const EXCHANGE_NAME: &str = "mexc";
 
 #[test]
 fn fetch_spot_symbols() {

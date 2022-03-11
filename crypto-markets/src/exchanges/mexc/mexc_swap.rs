@@ -1,4 +1,4 @@
-use super::utils::mxc_http_get;
+use super::utils::mexc_http_get;
 use crate::{error::Result, Fees, Market, Precision, QuantityLimit};
 
 use crypto_market_type::MarketType;
@@ -49,7 +49,7 @@ struct Response {
 
 // see <https://github.com/mxcdevelop/APIDoc/blob/master/contract/contract-api.md#contract-interface-public>
 fn fetch_swap_markets_raw() -> Result<Vec<SwapMarket>> {
-    let txt = mxc_http_get("https://contract.mexc.com/api/v1/contract/detail")?;
+    let txt = mexc_http_get("https://contract.mexc.com/api/v1/contract/detail")?;
     let resp = serde_json::from_str::<Response>(&txt)?;
     Ok(resp
         .data
@@ -77,7 +77,7 @@ pub(super) fn fetch_inverse_swap_symbols() -> Result<Vec<String>> {
 }
 
 fn to_market(raw_market: &SwapMarket) -> Market {
-    let pair = crypto_pair::normalize_pair(&raw_market.symbol, "mxc").unwrap();
+    let pair = crypto_pair::normalize_pair(&raw_market.symbol, super::EXCHANGE_NAME).unwrap();
     let (base, quote) = {
         let v: Vec<&str> = pair.split('/').collect();
         (v[0].to_string(), v[1].to_string())
@@ -91,7 +91,7 @@ fn to_market(raw_market: &SwapMarket) -> Market {
     };
 
     Market {
-        exchange: "mxc".to_string(),
+        exchange: super::EXCHANGE_NAME.to_string(),
         market_type,
         symbol: raw_market.symbol.to_string(),
         base_id: raw_market.baseCoin.to_string(),

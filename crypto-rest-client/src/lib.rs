@@ -26,8 +26,8 @@ pub use exchanges::huobi::huobi_spot::HuobiSpotRestClient;
 pub use exchanges::kraken::kraken_futures::KrakenFuturesRestClient;
 pub use exchanges::kraken::kraken_spot::KrakenSpotRestClient;
 pub use exchanges::kucoin::*;
-pub use exchanges::mxc::mxc_spot::MxcSpotRestClient;
-pub use exchanges::mxc::mxc_swap::MxcSwapRestClient;
+pub use exchanges::mexc::mexc_spot::MexcSpotRestClient;
+pub use exchanges::mexc::mexc_swap::MexcSwapRestClient;
 pub use exchanges::okx::OkxRestClient;
 pub use exchanges::zbg::*;
 
@@ -58,7 +58,7 @@ fn fetch_l2_snapshot_internal(
         "huobi" => exchanges::huobi::fetch_l2_snapshot(market_type, symbol),
         "kraken" => exchanges::kraken::fetch_l2_snapshot(market_type, symbol),
         "kucoin" => exchanges::kucoin::fetch_l2_snapshot(market_type, symbol),
-        "mxc" => exchanges::mxc::fetch_l2_snapshot(market_type, symbol),
+        "mexc" => exchanges::mexc::fetch_l2_snapshot(market_type, symbol),
         "okx" => exchanges::okx::OkxRestClient::fetch_l2_snapshot(symbol),
         "zbg" => exchanges::zbg::fetch_l2_snapshot(market_type, symbol),
         _ => panic!("Unknown exchange {}", exchange),

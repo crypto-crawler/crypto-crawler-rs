@@ -16,11 +16,11 @@ pub(super) const SPOT_WEBSOCKET_URL: &str = "wss://wbs.mexc.com/raw/ws";
 
 const SPOT_CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (5, "ping");
 
-/// MXC Spot market.
+/// MEXC Spot market.
 ///
 ///   * WebSocket API doc: <https://github.com/mxcdevelop/APIDoc/blob/master/websocket/spot/websocket-api.md>
 ///   * Trading at: <https://www.mexc.com/exchange/BTC_USDT>
-pub struct MxcSpotWSClient {
+pub struct MexcSpotWSClient {
     client: WSClientInternal,
 }
 
@@ -88,9 +88,9 @@ fn to_raw_channel(channel: &str, symbol: &str) -> String {
 }
 
 #[rustfmt::skip]
-impl_trait!(Trade, MxcSpotWSClient, subscribe_trade, "deal", to_raw_channel);
+impl_trait!(Trade, MexcSpotWSClient, subscribe_trade, "deal", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBook, MxcSpotWSClient, subscribe_orderbook, "depth", to_raw_channel);
+impl_trait!(OrderBook, MexcSpotWSClient, subscribe_orderbook, "depth", to_raw_channel);
 
 fn interval_to_string(interval: usize) -> String {
     let tmp = match interval {
@@ -104,12 +104,12 @@ fn interval_to_string(interval: usize) -> String {
         86400 => "Day1",
         604800 => "Week1",
         2592000 => "Month1",
-        _ => panic!("MXC has intervals Min1,Min5,Min15,Min30,Min60,Hour4,Hour8,Day1,Week1,Month1"),
+        _ => panic!("MEXC has intervals Min1,Min5,Min15,Min30,Min60,Hour4,Hour8,Day1,Week1,Month1"),
     };
     tmp.to_string()
 }
 
-impl Candlestick for MxcSpotWSClient {
+impl Candlestick for MexcSpotWSClient {
     fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
         let channels = symbol_interval_list
             .iter()
@@ -126,13 +126,13 @@ impl Candlestick for MxcSpotWSClient {
     }
 }
 
-panic_bbo!(MxcSpotWSClient);
-panic_ticker!(MxcSpotWSClient);
-panic_l2_topk!(MxcSpotWSClient);
-panic_l3_orderbook!(MxcSpotWSClient);
+panic_bbo!(MexcSpotWSClient);
+panic_ticker!(MexcSpotWSClient);
+panic_l2_topk!(MexcSpotWSClient);
+panic_l3_orderbook!(MexcSpotWSClient);
 
 impl_new_constructor!(
-    MxcSpotWSClient,
+    MexcSpotWSClient,
     EXCHANGE_NAME,
     SPOT_WEBSOCKET_URL,
     channels_to_commands,
@@ -140,7 +140,7 @@ impl_new_constructor!(
     Some(SPOT_CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
-impl_ws_client_trait!(MxcSpotWSClient);
+impl_ws_client_trait!(MexcSpotWSClient);
 
 #[cfg(test)]
 mod tests {

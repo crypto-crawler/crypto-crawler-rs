@@ -188,7 +188,7 @@ pub fn crawl_trade(
         "deribit" => crawlers::deribit::crawl_trade(market_type, symbols, tx, duration),
         // "okx" => crawlers::okx::crawl_trade(market_type, symbols, tx, duration),
         "bitfinex" | "bitget" | "bithumb" | "bitstamp" | "bitz" | "bybit" | "coinbase_pro"
-        | "dydx" | "ftx" | "gate" | "huobi" | "kraken" | "kucoin" | "mxc" | "okx" | "zbg" => {
+        | "dydx" | "ftx" | "gate" | "huobi" | "kraken" | "kucoin" | "mexc" | "okx" | "zbg" => {
             crawlers::crawl_event(
                 exchange,
                 MessageType::Trade,
@@ -215,7 +215,7 @@ pub fn crawl_l2_event(
         "bitmex" => crawlers::bitmex::crawl_l2_event(market_type, symbols, tx, duration),
         "huobi" => crawlers::huobi::crawl_l2_event(market_type, symbols, tx, duration),
         "bitfinex" | "bitget" | "bithumb" | "bitstamp" | "bitz" | "bybit" | "coinbase_pro"
-        | "deribit" | "dydx" | "ftx" | "gate" | "kraken" | "kucoin" | "mxc" | "okx" | "zbg" => {
+        | "deribit" | "dydx" | "ftx" | "gate" | "kraken" | "kucoin" | "mexc" | "okx" | "zbg" => {
             crawlers::crawl_event(
                 exchange,
                 MessageType::L2Event,
@@ -311,7 +311,7 @@ pub fn crawl_l2_topk(
     match exchange {
         "binance" => crawlers::binance::crawl_l2_topk(market_type, symbols, tx, duration),
         "bitmex" => crawlers::bitmex::crawl_l2_topk(market_type, symbols, tx, duration),
-        "bitget" | "bybit" | "bitstamp" | "deribit" | "huobi" | "kucoin" | "mxc" | "okx" => {
+        "bitget" | "bybit" | "bitstamp" | "deribit" | "huobi" | "kucoin" | "mexc" | "okx" => {
             crawlers::crawl_event(
                 exchange,
                 MessageType::L2TopK,
@@ -360,7 +360,7 @@ pub fn crawl_ticker(
     match exchange {
         "binance" => crawlers::binance::crawl_ticker(market_type, symbols, tx, duration),
         "bitfinex" | "bitget" | "bithumb" | "bitz" | "bybit" | "coinbase_pro" | "deribit"
-        | "gate" | "huobi" | "kraken" | "kucoin" | "mxc" | "okx" | "zbg" => crawlers::crawl_event(
+        | "gate" | "huobi" | "kraken" | "kucoin" | "mexc" | "okx" | "zbg" => crawlers::crawl_event(
             exchange,
             MessageType::Ticker,
             market_type,
@@ -410,7 +410,7 @@ pub fn crawl_candlestick(
             crawlers::bitmex::crawl_candlestick(market_type, symbol_interval_list, tx, duration)
         }
         "bitfinex" | "bitget" | "bitz" | "bybit" | "deribit" | "gate" | "huobi" | "kraken"
-        | "kucoin" | "mxc" | "okx" | "zbg" => crawlers::crawl_candlestick_ext(
+        | "kucoin" | "mexc" | "okx" | "zbg" => crawlers::crawl_candlestick_ext(
             exchange,
             market_type,
             symbol_interval_list,

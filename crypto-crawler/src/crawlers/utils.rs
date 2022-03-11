@@ -115,8 +115,8 @@ fn get_cooldown_time_per_request(exchange: &str, market_type: MarketType) -> Dur
             MarketType::Spot => 300, // 3x to avoid 429
             _ => 100,                // 30 times/3s
         },
-        "mxc" => 100, // 20 times per 2 seconds
-        "okx" => 100, // 20 requests per 2 seconds
+        "mexc" => 100, // 20 times per 2 seconds
+        "okx" => 100,  // 20 requests per 2 seconds
         _ => 100,
     };
     Duration::from_millis(millis)
@@ -515,12 +515,12 @@ fn create_ws_client_internal(
             }
             _ => panic!("KuCoin does NOT have the {} market type", market_type),
         },
-        "mxc" => match market_type {
-            MarketType::Spot => Arc::new(MxcSpotWSClient::new(tx, None)),
+        "mexc" => match market_type {
+            MarketType::Spot => Arc::new(MexcSpotWSClient::new(tx, None)),
             MarketType::LinearSwap | MarketType::InverseSwap => {
-                Arc::new(MxcSwapWSClient::new(tx, None))
+                Arc::new(MexcSwapWSClient::new(tx, None))
             }
-            _ => panic!("MXC does NOT have the {} market type", market_type),
+            _ => panic!("MEXC does NOT have the {} market type", market_type),
         },
         "okx" => Arc::new(OkxWSClient::new(tx, None)),
         "zbg" => match market_type {

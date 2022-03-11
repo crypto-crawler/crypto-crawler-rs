@@ -4,20 +4,20 @@ use std::collections::BTreeMap;
 
 const BASE_URL: &str = "https://www.mexc.com";
 
-/// MXC Spot market.
+/// MEXC Spot market.
 ///
 /// * REST API doc: <https://mxcdevelop.github.io/APIDoc/>
-/// * Trading at: <https://www.mxc.com/trade/pro>
+/// * Trading at: <https://www.mexc.com/exchange/BTC_USDT>
 /// * Rate Limits: <https://mxcdevelop.github.io/APIDoc/open.api.v2.en.html#rate-limit>
 ///   * The default rate limiting rule for an endpoint is 20 times per second.
-pub struct MxcSpotRestClient {
+pub struct MexcSpotRestClient {
     _access_key: String,
     _secret_key: Option<String>,
 }
 
-impl MxcSpotRestClient {
+impl MexcSpotRestClient {
     pub fn new(access_key: String, secret_key: Option<String>) -> Self {
-        MxcSpotRestClient {
+        MexcSpotRestClient {
             _access_key: access_key,
             _secret_key: secret_key,
         }
@@ -27,7 +27,7 @@ impl MxcSpotRestClient {
     ///
     /// 1000 trades are returned.
     ///
-    /// For example: <https://www.mxc.co/open/api/v2/market/deals?symbol=BTC_USDT&limit=1000>
+    /// For example: <https://www.mexc.com/open/api/v2/market/deals?symbol=BTC_USDT&limit=1000>
     #[allow(non_snake_case)]
     pub fn fetch_trades(symbol: &str) -> Result<String> {
         gen_api!(format!(
@@ -40,7 +40,7 @@ impl MxcSpotRestClient {
     ///
     /// Top 2000 bids and asks will be returned.
     ///
-    /// For example: <https://www.mxc.co/open/api/v2/market/depth?symbol=BTC_USDT&depth=2000>
+    /// For example: <https://www.mexc.com/open/api/v2/market/depth?symbol=BTC_USDT&depth=2000>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         gen_api!(format!(
             "/open/api/v2/market/depth?symbol={}&depth=2000",

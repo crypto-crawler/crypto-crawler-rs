@@ -18,11 +18,11 @@ pub(super) const SWAP_WEBSOCKET_URL: &str = "wss://contract.mexc.com/ws";
 // more than 60 seconds no response, close the channel
 const SWAP_CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (60, r#"{"method":"ping"}"#);
 
-/// MXC Swap market.
+/// MEXC Swap market.
 ///
 ///   * WebSocket API doc: <https://mxcdevelop.github.io/APIDoc/contract.api.en.html#websocket-api>
 ///   * Trading at: <https://contract.mexc.com/exchange>
-pub struct MxcSwapWSClient {
+pub struct MexcSwapWSClient {
     client: WSClientInternal,
 }
 
@@ -83,13 +83,13 @@ fn to_raw_channel(channel: &str, symbol: &str) -> String {
 }
 
 #[rustfmt::skip]
-impl_trait!(Trade, MxcSwapWSClient, subscribe_trade, "deal", to_raw_channel);
+impl_trait!(Trade, MexcSwapWSClient, subscribe_trade, "deal", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(Ticker, MxcSwapWSClient, subscribe_ticker, "ticker", to_raw_channel);
+impl_trait!(Ticker, MexcSwapWSClient, subscribe_ticker, "ticker", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBook, MxcSwapWSClient, subscribe_orderbook, "depth", to_raw_channel);
+impl_trait!(OrderBook, MexcSwapWSClient, subscribe_orderbook, "depth", to_raw_channel);
 #[rustfmt::skip]
-impl_trait!(OrderBookTopK, MxcSwapWSClient, subscribe_orderbook_topk, "depth.full", to_raw_channel);
+impl_trait!(OrderBookTopK, MexcSwapWSClient, subscribe_orderbook_topk, "depth.full", to_raw_channel);
 
 fn interval_to_string(interval: usize) -> String {
     let tmp = match interval {
@@ -103,12 +103,12 @@ fn interval_to_string(interval: usize) -> String {
         86400 => "Day1",
         604800 => "Week1",
         2592000 => "Month1",
-        _ => panic!("MXC has intervals Min1,Min5,Min15,Min30,Min60,Hour4,Hour8,Day1,Week1,Month1"),
+        _ => panic!("MEXC has intervals Min1,Min5,Min15,Min30,Min60,Hour4,Hour8,Day1,Week1,Month1"),
     };
     tmp.to_string()
 }
 
-impl Candlestick for MxcSwapWSClient {
+impl Candlestick for MexcSwapWSClient {
     fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
         let channels = symbol_interval_list
             .iter()
@@ -125,11 +125,11 @@ impl Candlestick for MxcSwapWSClient {
     }
 }
 
-panic_bbo!(MxcSwapWSClient);
-panic_l3_orderbook!(MxcSwapWSClient);
+panic_bbo!(MexcSwapWSClient);
+panic_l3_orderbook!(MexcSwapWSClient);
 
 impl_new_constructor!(
-    MxcSwapWSClient,
+    MexcSwapWSClient,
     EXCHANGE_NAME,
     SWAP_WEBSOCKET_URL,
     channels_to_commands,
@@ -137,7 +137,7 @@ impl_new_constructor!(
     Some(SWAP_CLIENT_PING_INTERVAL_AND_MSG),
     None
 );
-impl_ws_client_trait!(MxcSwapWSClient);
+impl_ws_client_trait!(MexcSwapWSClient);
 
 #[cfg(test)]
 mod tests {

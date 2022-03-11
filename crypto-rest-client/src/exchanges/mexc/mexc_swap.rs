@@ -4,18 +4,18 @@ use std::collections::BTreeMap;
 
 const BASE_URL: &str = "https://contract.mexc.com";
 
-/// MXC Swap market.
+/// MEXC Swap market.
 ///
 /// * REST API doc: <https://mxcdevelop.github.io/APIDoc/>
 /// * Trading at: <https://contract.mexc.com/exchange>
-pub struct MxcSwapRestClient {
+pub struct MexcSwapRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
 }
 
-impl MxcSwapRestClient {
+impl MexcSwapRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        MxcSwapRestClient {
+        MexcSwapRestClient {
             _api_key: api_key,
             _api_secret: api_secret,
         }

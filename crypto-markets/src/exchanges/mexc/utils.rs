@@ -23,7 +23,7 @@ fn check_code_in_body(resp: String) -> Result<String> {
     }
 }
 
-pub(super) fn mxc_http_get(url: &str) -> Result<String> {
+pub(super) fn mexc_http_get(url: &str) -> Result<String> {
     let ret = http_get(url, None);
     match ret {
         Ok(resp) => check_code_in_body(resp),
