@@ -25,13 +25,18 @@ struct RawOrder {
     p: String,
     q: String,
     a: String,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
 }
 
 #[derive(Serialize, Deserialize)]
 struct PushSymbolData {
+    version: Option<String>,
     deals: Option<Vec<RawTradeMsg>>,
     asks: Option<Vec<RawOrder>>,
     bids: Option<Vec<RawOrder>>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -43,22 +48,20 @@ struct WebsocketMsg<T: Sized> {
 }
 
 pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
-    let ws_msg: WebsocketMsg<PushSymbolData> = if let Ok(arr) =
-        serde_json::from_str::<Vec<Value>>(msg)
-            .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))
-    {
-        assert_eq!(arr.len(), 2);
-        serde_json::from_value(arr[1].clone()).map_err(|_e| {
-            SimpleError::new(format!(
-                "Failed to deserialize {} to WebsocketMsg<PushSymbolData>",
-                arr[1]
-            ))
-        })?
-    } else if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<PushSymbolData>>(msg) {
-        ws_msg
-    } else {
-        return Err(SimpleError::new(format!("Failed to parse {}", msg)));
-    };
+    let ws_msg: WebsocketMsg<PushSymbolData> =
+        if let Ok(arr) = serde_json::from_str::<Vec<Value>>(msg) {
+            assert_eq!(arr.len(), 2);
+            serde_json::from_value(arr[1].clone()).map_err(|_e| {
+                SimpleError::new(format!(
+                    "Failed to deserialize {} to WebsocketMsg<PushSymbolData>",
+                    arr[1]
+                ))
+            })?
+        } else if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<PushSymbolData>>(msg) {
+            ws_msg
+        } else {
+            return Err(SimpleError::new(format!("Failed to parse {}", msg)));
+        };
     if ws_msg.data.deals.is_none() {
         return Ok(Vec::new());
     }
@@ -116,22 +119,20 @@ fn parse_order(raw_order: &RawOrder) -> Order {
 }
 
 pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>, SimpleError> {
-    let ws_msg: WebsocketMsg<PushSymbolData> = if let Ok(arr) =
-        serde_json::from_str::<Vec<Value>>(msg)
-            .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))
-    {
-        assert_eq!(arr.len(), 2);
-        serde_json::from_value(arr[1].clone()).map_err(|_e| {
-            SimpleError::new(format!(
-                "Failed to deserialize {} to WebsocketMsg<PushSymbolData>",
-                arr[1]
-            ))
-        })?
-    } else if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<PushSymbolData>>(msg) {
-        ws_msg
-    } else {
-        return Err(SimpleError::new(format!("Failed to parse {}", msg)));
-    };
+    let ws_msg: WebsocketMsg<PushSymbolData> =
+        if let Ok(arr) = serde_json::from_str::<Vec<Value>>(msg) {
+            assert_eq!(arr.len(), 2);
+            serde_json::from_value(arr[1].clone()).map_err(|_e| {
+                SimpleError::new(format!(
+                    "Failed to deserialize {} to WebsocketMsg<PushSymbolData>",
+                    arr[1]
+                ))
+            })?
+        } else if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<PushSymbolData>>(msg) {
+            ws_msg
+        } else {
+            return Err(SimpleError::new(format!("Failed to parse {}", msg)));
+        };
     if ws_msg.data.asks.is_none() && ws_msg.data.bids.is_none() {
         return Ok(Vec::new());
     }
@@ -147,7 +148,7 @@ pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>, S
         pair,
         msg_type: MessageType::L2Event,
         timestamp,
-        seq_id: None,
+        seq_id: ws_msg.data.version.map(|v| v.parse::<u64>().unwrap()),
         prev_seq_id: None,
         asks: if let Some(asks) = ws_msg.data.asks {
             asks.iter().map(parse_order).collect::<Vec<Order>>()

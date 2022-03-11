@@ -12,25 +12,21 @@ use simple_error::SimpleError;
 
 pub(super) const EXCHANGE_NAME: &str = "mexc";
 
-pub(crate) fn extract_symbol(market_type_: MarketType, msg: &str) -> Result<String, SimpleError> {
-    if market_type_ == MarketType::Spot {
-        let arr = serde_json::from_str::<Vec<Value>>(msg).map_err(|_e| {
-            SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg))
-        })?;
+pub(crate) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Result<String, SimpleError> {
+    if let Ok(arr) = serde_json::from_str::<Vec<Value>>(msg) {
         Ok(arr[1]["symbol"].as_str().unwrap().to_string())
-    } else {
-        let json_obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
-            SimpleError::new(format!(
-                "Failed to deserialize {} to HashMap<String, Value>",
-                msg
-            ))
-        })?;
+    } else if let Ok(json_obj) = serde_json::from_str::<HashMap<String, Value>>(msg) {
         Ok(json_obj
             .get("symbol")
             .unwrap()
             .as_str()
             .unwrap()
             .to_string())
+    } else {
+        Err(SimpleError::new(format!(
+            "Failed to extract symbol from {}",
+            msg
+        )))
     }
 }
 

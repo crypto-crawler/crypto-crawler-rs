@@ -25,6 +25,7 @@ struct RawTradeMsg {
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct RawOrderbookMsg {
+    version: Option<u64>,
     asks: Vec<[f64; 3]>,
     bids: Vec<[f64; 3]>,
     #[serde(flatten)]
@@ -37,6 +38,8 @@ struct WebsocketMsg<T: Sized> {
     symbol: String,
     ts: i64,
     data: T,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
 }
 
 pub(super) fn parse_trade(
@@ -119,7 +122,7 @@ pub(crate) fn parse_l2(
         pair: pair.to_string(),
         msg_type: MessageType::L2Event,
         timestamp: ws_msg.ts,
-        seq_id: None,
+        seq_id: ws_msg.data.version,
         prev_seq_id: None,
         asks: ws_msg
             .data
