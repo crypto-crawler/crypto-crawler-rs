@@ -170,7 +170,7 @@ mod tests {
     fn linear() {
         let mapping = fetch_linear_multipliers();
         for (pair, contract_value) in &mapping {
-            println!("(\"{}\", {}_f64),", pair, contract_value);
+            println!("(\"{pair}\", {contract_value}_f64),");
         }
     }
 }

@@ -256,7 +256,7 @@ mod tests {
     fn linear_swap() {
         let mapping = fetch_contract_val("SWAP");
         for (pair, contract_value) in &mapping {
-            println!("(\"{}\", {}_f64),", pair, contract_value);
+            println!("(\"{pair}\", {contract_value}_f64),");
         }
     }
 
@@ -264,7 +264,7 @@ mod tests {
     fn linear_future() {
         let mapping = fetch_contract_val("FUTURES");
         for (pair, contract_value) in &mapping {
-            println!("(\"{}\", {}_f64),", pair, contract_value);
+            println!("(\"{pair}\", {contract_value}_f64),");
         }
     }
 }

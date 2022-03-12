@@ -126,7 +126,7 @@ mod tests {
     fn quanto() {
         let mapping = fetch_contract_values();
         for (pair, contract_value) in &mapping {
-            println!("(\"{}\", {}),", pair, contract_value);
+            println!("(\"{pair}\", {contract_value}),");
         }
     }
 }

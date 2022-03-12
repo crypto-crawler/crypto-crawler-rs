@@ -324,7 +324,7 @@ mod tests {
     fn inverse_swap() {
         let mapping = fetch_quanto_multipliers(INVERSE_SWAP_URL);
         for (pair, contract_value) in &mapping {
-            println!("(\"{}\", {}_f64),", pair, contract_value);
+            println!("(\"{pair}\", {contract_value}_f64),");
         }
     }
 
@@ -332,7 +332,7 @@ mod tests {
     fn linear_swap() {
         let mapping = fetch_quanto_multipliers(LINEAR_SWAP_URL);
         for (pair, contract_value) in &mapping {
-            println!("(\"{}\", {}_f64),", pair, contract_value);
+            println!("(\"{pair}\", {contract_value}_f64),");
         }
     }
 
@@ -340,7 +340,7 @@ mod tests {
     fn linear_future() {
         let mapping = fetch_quanto_multipliers(LINEAR_FUTURE_URL);
         for (pair, contract_value) in &mapping {
-            println!("(\"{}\", {}),", pair, contract_value);
+            println!("(\"{pair}\", {contract_value}_f64),");
         }
     }
 }

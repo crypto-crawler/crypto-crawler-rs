@@ -244,7 +244,7 @@ mod tests {
     fn linear_swap() {
         let mapping = fetch_contract_size(LINEAR_SWAP_URL);
         for (pair, contract_value) in &mapping {
-            println!("(\"{}\", {}_f64),", pair, contract_value);
+            println!("(\"{pair}\", {contract_value}_f64),");
         }
     }
 
@@ -253,7 +253,7 @@ mod tests {
     fn linear_option() {
         let mapping = fetch_contract_size(LINEAR_OPTION_URL);
         for (pair, contract_value) in mapping {
-            println!("(\"{}\", {}),", pair, contract_value);
+            println!("(\"{pair}\", {contract_value}_f64),");
         }
     }
 }

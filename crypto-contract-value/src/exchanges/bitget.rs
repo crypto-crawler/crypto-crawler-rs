@@ -89,7 +89,7 @@ mod tests {
     fn linear_swap() {
         let mapping = fetch_contract_val();
         for (pair, contract_value) in &mapping {
-            println!("(\"{}\", {}_f64),", pair, contract_value);
+            println!("(\"{pair}\", {contract_value}_f64),");
         }
     }
 }
