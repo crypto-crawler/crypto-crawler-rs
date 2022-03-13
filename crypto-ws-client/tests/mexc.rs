@@ -59,6 +59,15 @@ mod mexc_spot {
     }
 
     #[test]
+    fn subscribe_orderbook_topk() {
+        gen_test_code!(
+            MexcSpotWSClient,
+            subscribe_orderbook_topk,
+            &vec!["BTC_USDT".to_string()]
+        );
+    }
+
+    #[test]
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             MexcSpotWSClient,
