@@ -32,12 +32,22 @@ fn channel_to_command(raw_channel: &str, subscribe: bool) -> String {
     let v: Vec<&str> = raw_channel.split(CHANNEL_PAIR_DELIMITER).collect();
     let channel = v[0];
     let symbol = v[1];
-    format!(
-        r#"{{"op":"{}.{}","symbol":"{}"}}"#,
-        if subscribe { "sub" } else { "unsub" },
-        channel,
-        symbol
-    )
+
+    if channel == "limit.depth" {
+        format!(
+            r#"{{"op":"{}.{}","symbol":"{}","depth": 20}}"#,
+            if subscribe { "sub" } else { "unsub" },
+            channel,
+            symbol
+        )
+    } else {
+        format!(
+            r#"{{"op":"{}.{}","symbol":"{}"}}"#,
+            if subscribe { "sub" } else { "unsub" },
+            channel,
+            symbol
+        )
+    }
 }
 
 fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
@@ -59,7 +69,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
         if obj.contains_key("channel") && obj.contains_key("data") {
             let channel = obj.get("channel").unwrap().as_str().unwrap();
             match channel {
-                "push.deal" | "push.depth" | "push.kline" => {
+                "push.deal" | "push.depth" | "push.limit.depth" | "push.kline" => {
                     if obj.contains_key("symbol") {
                         MiscMessage::Normal
                     } else {
@@ -91,6 +101,8 @@ fn to_raw_channel(channel: &str, symbol: &str) -> String {
 impl_trait!(Trade, MexcSpotWSClient, subscribe_trade, "deal", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, MexcSpotWSClient, subscribe_orderbook, "depth", to_raw_channel);
+#[rustfmt::skip]
+impl_trait!(OrderBookTopK, MexcSpotWSClient, subscribe_orderbook_topk, "limit.depth", to_raw_channel);
 
 fn interval_to_string(interval: usize) -> String {
     let tmp = match interval {
@@ -128,7 +140,6 @@ impl Candlestick for MexcSpotWSClient {
 
 panic_bbo!(MexcSpotWSClient);
 panic_ticker!(MexcSpotWSClient);
-panic_l2_topk!(MexcSpotWSClient);
 panic_l3_orderbook!(MexcSpotWSClient);
 
 impl_new_constructor!(

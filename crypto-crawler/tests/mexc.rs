@@ -36,6 +36,7 @@ fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
     )
 }
 
+#[test_case(MarketType::Spot, "BTC_USDT")]
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
 #[test_case(MarketType::InverseSwap, "BTC_USD")]
 fn test_crawl_l2_topk(market_type: MarketType, symbol: &str) {

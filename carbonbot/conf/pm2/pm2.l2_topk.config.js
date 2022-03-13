@@ -13,7 +13,7 @@ const market_types = {
     deribit: ["inverse_future", "inverse_swap", "european_option"],
     huobi: ["spot", "inverse_future", "linear_swap", "inverse_swap"],
     kucoin: ["spot", "inverse_future", "linear_swap", "inverse_swap"],
-    mexc: ["linear_swap", "inverse_swap"],
+    mexc: ["spot", "linear_swap", "inverse_swap"],
     okx: [
         "spot",
         "linear_future",
