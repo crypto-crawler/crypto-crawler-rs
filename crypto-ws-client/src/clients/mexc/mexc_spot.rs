@@ -35,7 +35,7 @@ fn channel_to_command(raw_channel: &str, subscribe: bool) -> String {
 
     if channel == "limit.depth" {
         format!(
-            r#"{{"op":"{}.{}","symbol":"{}","depth": 20}}"#,
+            r#"{{"op":"{}.{}","symbol":"{}","depth": 5}}"#,
             if subscribe { "sub" } else { "unsub" },
             channel,
             symbol
