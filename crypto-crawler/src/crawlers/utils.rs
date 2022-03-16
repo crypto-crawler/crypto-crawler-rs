@@ -474,8 +474,9 @@ fn create_ws_client_internal(
             _ => panic!("Bitz does NOT have the {} market type", market_type),
         },
         "bybit" => match market_type {
-            MarketType::InverseFuture => Arc::new(BybitInverseFutureWSClient::new(tx, None)),
-            MarketType::InverseSwap => Arc::new(BybitInverseSwapWSClient::new(tx, None)),
+            MarketType::InverseFuture | MarketType::InverseSwap => {
+                Arc::new(BybitInverseWSClient::new(tx, None))
+            }
             MarketType::LinearSwap => Arc::new(BybitLinearSwapWSClient::new(tx, None)),
             _ => panic!("Bybit does NOT have the {} market type", market_type),
         },

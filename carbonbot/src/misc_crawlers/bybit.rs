@@ -11,13 +11,8 @@ pub(super) fn crawl_other(market_type: MarketType, tx: Sender<Message>, duration
     let channels: Vec<String> = vec!["insurance".to_string(), "liquidation".to_string()];
 
     match market_type {
-        MarketType::InverseFuture => {
-            let ws_client = BybitInverseFutureWSClient::new(tx, None);
-            ws_client.subscribe(&channels);
-            ws_client.run(duration);
-        }
-        MarketType::InverseSwap => {
-            let ws_client = BybitInverseSwapWSClient::new(tx, None);
+        MarketType::InverseFuture | MarketType::InverseSwap => {
+            let ws_client = BybitInverseWSClient::new(tx, None);
             ws_client.subscribe(&channels);
             ws_client.run(duration);
         }

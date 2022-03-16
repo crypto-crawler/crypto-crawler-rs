@@ -3,13 +3,13 @@ mod utils;
 
 #[cfg(test)]
 mod bybit_inverse_future {
-    use crypto_ws_client::{BybitInverseFutureWSClient, WSClient};
+    use crypto_ws_client::{BybitInverseWSClient, WSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
         gen_test_code!(
-            BybitInverseFutureWSClient,
+            BybitInverseWSClient,
             subscribe,
             &vec!["trade.BTCUSDM22".to_string()]
         );
@@ -18,7 +18,7 @@ mod bybit_inverse_future {
     #[test]
     fn subscribe_raw_json() {
         gen_test_code!(
-            BybitInverseFutureWSClient,
+            BybitInverseWSClient,
             subscribe,
             &vec![r#"{"op":"subscribe","args":["trade.BTCUSDM22"]}"#.to_string()]
         );
@@ -27,7 +27,7 @@ mod bybit_inverse_future {
     #[test]
     fn subscribe_trade() {
         gen_test_code!(
-            BybitInverseFutureWSClient,
+            BybitInverseWSClient,
             subscribe_trade,
             &vec!["BTCUSDM22".to_string()]
         );
@@ -36,7 +36,7 @@ mod bybit_inverse_future {
     #[test]
     fn subscribe_orderbook() {
         gen_test_code!(
-            BybitInverseFutureWSClient,
+            BybitInverseWSClient,
             subscribe_orderbook,
             &vec!["BTCUSDM22".to_string()]
         );
@@ -45,7 +45,7 @@ mod bybit_inverse_future {
     #[test]
     fn subscribe_ticker() {
         gen_test_code!(
-            BybitInverseFutureWSClient,
+            BybitInverseWSClient,
             subscribe_ticker,
             &vec!["BTCUSDM22".to_string()]
         );
@@ -53,12 +53,9 @@ mod bybit_inverse_future {
 
     #[test]
     fn subscribe_candlestick() {
+        gen_test_subscribe_candlestick!(BybitInverseWSClient, &vec![("BTCUSDM22".to_string(), 60)]);
         gen_test_subscribe_candlestick!(
-            BybitInverseFutureWSClient,
-            &vec![("BTCUSDM22".to_string(), 60)]
-        );
-        gen_test_subscribe_candlestick!(
-            BybitInverseFutureWSClient,
+            BybitInverseWSClient,
             &vec![("BTCUSDM22".to_string(), 2592000)]
         );
     }
@@ -66,13 +63,13 @@ mod bybit_inverse_future {
 
 #[cfg(test)]
 mod bybit_inverse_swap {
-    use crypto_ws_client::{BybitInverseSwapWSClient, WSClient};
+    use crypto_ws_client::{BybitInverseWSClient, WSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     fn subscribe() {
         gen_test_code!(
-            BybitInverseSwapWSClient,
+            BybitInverseWSClient,
             subscribe,
             &vec!["trade.BTCUSD".to_string()]
         );
@@ -81,7 +78,7 @@ mod bybit_inverse_swap {
     #[test]
     fn subscribe_raw_json() {
         gen_test_code!(
-            BybitInverseSwapWSClient,
+            BybitInverseWSClient,
             subscribe,
             &vec![r#"{"op":"subscribe","args":["trade.BTCUSD"]}"#.to_string()]
         );
@@ -90,7 +87,7 @@ mod bybit_inverse_swap {
     #[test]
     fn subscribe_trade() {
         gen_test_code!(
-            BybitInverseSwapWSClient,
+            BybitInverseWSClient,
             subscribe_trade,
             &vec!["BTCUSD".to_string()]
         );
@@ -99,7 +96,7 @@ mod bybit_inverse_swap {
     #[test]
     fn subscribe_orderbook() {
         gen_test_code!(
-            BybitInverseSwapWSClient,
+            BybitInverseWSClient,
             subscribe_orderbook,
             &vec!["BTCUSD".to_string()]
         );
@@ -108,7 +105,7 @@ mod bybit_inverse_swap {
     #[test]
     fn subscribe_ticker() {
         gen_test_code!(
-            BybitInverseSwapWSClient,
+            BybitInverseWSClient,
             subscribe_ticker,
             &vec!["BTCUSD".to_string()]
         );
@@ -116,12 +113,9 @@ mod bybit_inverse_swap {
 
     #[test]
     fn subscribe_candlestick() {
+        gen_test_subscribe_candlestick!(BybitInverseWSClient, &vec![("BTCUSD".to_string(), 60)]);
         gen_test_subscribe_candlestick!(
-            BybitInverseSwapWSClient,
-            &vec![("BTCUSD".to_string(), 60)]
-        );
-        gen_test_subscribe_candlestick!(
-            BybitInverseSwapWSClient,
+            BybitInverseWSClient,
             &vec![("BTCUSD".to_string(), 2592000)]
         );
     }
