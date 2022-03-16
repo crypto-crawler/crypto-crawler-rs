@@ -120,6 +120,12 @@ pub(crate) fn crawl_ticker(
                 ws_client.subscribe(&channels);
                 ws_client.run(duration);
             }
+            MarketType::EuropeanOption => {
+                let channels: Vec<String> = vec!["BTCUSDT@TICKER_ALL".to_string()];
+                let ws_client = BinanceLinearWSClient::new(tx, None);
+                ws_client.subscribe(&channels);
+                ws_client.run(duration);
+            }
             _ => panic!(
                 "Binance {} market does NOT have the ticker channel",
                 market_type
