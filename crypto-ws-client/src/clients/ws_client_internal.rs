@@ -356,6 +356,7 @@ impl WSClientInternal {
                 }
                 if last_ping_timestamp.elapsed() >= Duration::from_secs(interval_and_msg.0 / 2) {
                     debug!("Sending ping: {}", interval_and_msg.1);
+                    self.num_unanswered_ping.fetch_add(1, Ordering::SeqCst);
                     // send ping
                     let ping_msg = if interval_and_msg.1.is_empty() {
                         Message::Ping(Vec::new())

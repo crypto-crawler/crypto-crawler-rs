@@ -24,6 +24,7 @@ impl_trait!(OrderBook, BybitLinearSwapWSClient, subscribe_orderbook, "orderBookL
 #[rustfmt::skip]
 impl_trait!(Ticker, BybitLinearSwapWSClient, subscribe_ticker, "instrument_info.100ms", to_raw_channel);
 
+// https://bybit-exchange.github.io/docs/linear/#t-websocketkline
 fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
     let interval_str = match interval {
         60 => "1",
@@ -38,7 +39,9 @@ fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
         86400 => "D",
         604800 => "W",
         2592000 => "M",
-        _ => panic!("Huobi has intervals 1min,5min,15min,30min,60min,4hour,1day,1week,1mon"),
+        _ => panic!(
+            "Bybit LinearSwap has intervals 1min,5min,15min,30min,60min,4hour,1day,1week,1mon"
+        ),
     };
     format!("candle.{}.{}", interval_str, pair)
 }
