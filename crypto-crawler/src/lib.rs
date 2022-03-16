@@ -211,20 +211,18 @@ pub fn crawl_l2_event(
     duration: Option<u64>,
 ) {
     match exchange {
-        "binance" => crawlers::binance::crawl_l2_event(market_type, symbols, tx, duration),
         "bitmex" => crawlers::bitmex::crawl_l2_event(market_type, symbols, tx, duration),
         "huobi" => crawlers::huobi::crawl_l2_event(market_type, symbols, tx, duration),
-        "bitfinex" | "bitget" | "bithumb" | "bitstamp" | "bitz" | "bybit" | "coinbase_pro"
-        | "deribit" | "dydx" | "ftx" | "gate" | "kraken" | "kucoin" | "mexc" | "okx" | "zbg" => {
-            crawlers::crawl_event(
-                exchange,
-                MessageType::L2Event,
-                market_type,
-                symbols,
-                tx,
-                duration,
-            )
-        }
+        "binance" | "bitfinex" | "bitget" | "bithumb" | "bitstamp" | "bitz" | "bybit"
+        | "coinbase_pro" | "deribit" | "dydx" | "ftx" | "gate" | "kraken" | "kucoin" | "mexc"
+        | "okx" | "zbg" => crawlers::crawl_event(
+            exchange,
+            MessageType::L2Event,
+            market_type,
+            symbols,
+            tx,
+            duration,
+        ),
         _ => panic!(
             "{} does NOT have the incremental level2 websocket channel",
             exchange
@@ -309,18 +307,16 @@ pub fn crawl_l2_topk(
     duration: Option<u64>,
 ) {
     match exchange {
-        "binance" => crawlers::binance::crawl_l2_topk(market_type, symbols, tx, duration),
         "bitmex" => crawlers::bitmex::crawl_l2_topk(market_type, symbols, tx, duration),
-        "bitget" | "bybit" | "bitstamp" | "deribit" | "huobi" | "kucoin" | "mexc" | "okx" => {
-            crawlers::crawl_event(
-                exchange,
-                MessageType::L2TopK,
-                market_type,
-                symbols,
-                tx,
-                duration,
-            )
-        }
+        "binance" | "bitget" | "bybit" | "bitstamp" | "deribit" | "huobi" | "kucoin" | "mexc"
+        | "okx" => crawlers::crawl_event(
+            exchange,
+            MessageType::L2TopK,
+            market_type,
+            symbols,
+            tx,
+            duration,
+        ),
         _ => panic!(
             "{} does NOT have the level2 top-k snapshot websocket channel",
             exchange
@@ -403,14 +399,11 @@ pub fn crawl_candlestick(
     duration: Option<u64>,
 ) {
     match exchange {
-        "binance" => {
-            crawlers::binance::crawl_candlestick(market_type, symbol_interval_list, tx, duration)
-        }
         "bitmex" => {
             crawlers::bitmex::crawl_candlestick(market_type, symbol_interval_list, tx, duration)
         }
-        "bitfinex" | "bitget" | "bitz" | "bybit" | "deribit" | "gate" | "huobi" | "kraken"
-        | "kucoin" | "mexc" | "okx" | "zbg" => crawlers::crawl_candlestick_ext(
+        "binance" | "bitfinex" | "bitget" | "bitz" | "bybit" | "deribit" | "gate" | "huobi"
+        | "kraken" | "kucoin" | "mexc" | "okx" | "zbg" => crawlers::crawl_candlestick_ext(
             exchange,
             market_type,
             symbol_interval_list,

@@ -60,8 +60,7 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     }
     let obj = resp.unwrap();
 
-    if obj.contains_key("error") {
-        error!("Received {} from {}", msg, EXCHANGE_NAME);
+    if obj.contains_key("code") {
         panic!("Received {} from {}", msg, EXCHANGE_NAME);
     }
 

@@ -1,7 +1,7 @@
 use core::panic;
 use std::sync::mpsc::Sender;
 
-use crate::crawlers::utils::{crawl_candlestick_ext, crawl_event};
+use crate::crawlers::utils::crawl_event;
 use crate::msg::Message;
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
@@ -17,17 +17,6 @@ pub(crate) fn crawl_trade(
     tx: Sender<Message>,
     duration: Option<u64>,
 ) {
-    // All symbols for websocket are lowercase while for REST they are uppercase
-    let symbols = symbols
-        .unwrap_or_default()
-        .iter()
-        .map(|symbol| symbol.to_lowercase())
-        .collect::<Vec<String>>();
-    let symbols = if symbols.is_empty() {
-        None
-    } else {
-        Some(symbols.as_slice())
-    };
     if market_type == MarketType::EuropeanOption
         && (symbols.is_none() || symbols.unwrap().is_empty())
     {
@@ -57,50 +46,12 @@ pub(crate) fn crawl_trade(
     }
 }
 
-pub(crate) fn crawl_l2_event(
-    market_type: MarketType,
-    symbols: Option<&[String]>,
-    tx: Sender<Message>,
-    duration: Option<u64>,
-) {
-    // All symbols for websocket are lowercase while for REST they are uppercase
-    let symbols = symbols
-        .unwrap_or_default()
-        .iter()
-        .map(|symbol| symbol.to_lowercase())
-        .collect::<Vec<String>>();
-    let symbols = if symbols.is_empty() {
-        None
-    } else {
-        Some(symbols.as_slice())
-    };
-    crawl_event(
-        EXCHANGE_NAME,
-        MessageType::L2Event,
-        market_type,
-        symbols,
-        tx,
-        duration,
-    );
-}
-
 pub(crate) fn crawl_bbo(
     market_type: MarketType,
     symbols: Option<&[String]>,
     tx: Sender<Message>,
     duration: Option<u64>,
 ) {
-    // All symbols for websocket are lowercase while for REST they are uppercase
-    let symbols = symbols
-        .unwrap_or_default()
-        .iter()
-        .map(|symbol| symbol.to_lowercase())
-        .collect::<Vec<String>>();
-    let symbols = if symbols.is_empty() {
-        None
-    } else {
-        Some(symbols.as_slice())
-    };
     if symbols.is_none() || symbols.unwrap().is_empty() {
         let tx =
             create_conversion_thread(EXCHANGE_NAME.to_string(), MessageType::BBO, market_type, tx);
@@ -138,51 +89,12 @@ pub(crate) fn crawl_bbo(
     }
 }
 
-pub(crate) fn crawl_l2_topk(
-    market_type: MarketType,
-    symbols: Option<&[String]>,
-    tx: Sender<Message>,
-    duration: Option<u64>,
-) {
-    // All symbols for websocket are lowercase while for REST they are uppercase
-    let symbols = symbols
-        .unwrap_or_default()
-        .iter()
-        .map(|symbol| symbol.to_lowercase())
-        .collect::<Vec<String>>();
-    let symbols = if symbols.is_empty() {
-        None
-    } else {
-        Some(symbols.as_slice())
-    };
-    crawl_event(
-        EXCHANGE_NAME,
-        MessageType::L2TopK,
-        market_type,
-        symbols,
-        tx,
-        duration,
-    );
-}
-
 pub(crate) fn crawl_ticker(
     market_type: MarketType,
     symbols: Option<&[String]>,
     tx: Sender<Message>,
     duration: Option<u64>,
 ) {
-    // All symbols for websocket are lowercase while for REST they are uppercase
-    let symbols = symbols
-        .unwrap_or_default()
-        .iter()
-        .map(|symbol| symbol.to_lowercase())
-        .collect::<Vec<String>>();
-    let symbols = if symbols.is_empty() {
-        None
-    } else {
-        Some(symbols.as_slice())
-    };
-
     if symbols.is_none() || symbols.unwrap().is_empty() {
         let tx = create_conversion_thread(
             EXCHANGE_NAME.to_string(),
@@ -232,25 +144,13 @@ pub(crate) fn crawl_funding_rate(
     tx: Sender<Message>,
     duration: Option<u64>,
 ) {
-    // All symbols for websocket are lowercase while for REST they are uppercase
-    let symbols = symbols
-        .unwrap_or_default()
-        .iter()
-        .map(|symbol| symbol.to_lowercase())
-        .collect::<Vec<String>>();
-    let symbols = if symbols.is_empty() {
-        None
-    } else {
-        Some(symbols.as_slice())
-    };
-
     let channels: Vec<String> = if symbols.is_none() || symbols.unwrap().is_empty() {
         vec!["!markPrice@arr".to_string()]
     } else {
         symbols
             .unwrap()
             .iter()
-            .map(|symbol| format!("{}@markPrice", symbol))
+            .map(|symbol| format!("{}@markPrice", symbol.to_lowercase()))
             .collect()
     };
 
@@ -274,30 +174,4 @@ pub(crate) fn crawl_funding_rate(
         }
         _ => panic!("Binance {} does NOT have funding rates", market_type),
     }
-}
-
-pub(crate) fn crawl_candlestick(
-    market_type: MarketType,
-    symbol_interval_list: Option<&[(String, usize)]>,
-    tx: Sender<Message>,
-    duration: Option<u64>,
-) {
-    // All symbols for websocket are lowercase while for REST they are uppercase
-    let symbol_interval_list = symbol_interval_list
-        .unwrap_or_default()
-        .iter()
-        .map(|(symbol, interval)| (symbol.to_lowercase(), *interval))
-        .collect::<Vec<(String, usize)>>();
-    let symbol_interval_list = if symbol_interval_list.is_empty() {
-        None
-    } else {
-        Some(symbol_interval_list.as_slice())
-    };
-    crawl_candlestick_ext(
-        EXCHANGE_NAME,
-        market_type,
-        symbol_interval_list,
-        tx,
-        duration,
-    );
 }
