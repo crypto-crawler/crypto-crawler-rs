@@ -15,7 +15,6 @@ macro_rules! gen_test_code {
     };
 }
 
-// TODO: this macro is actually being used
 #[allow(unused_macros)]
 macro_rules! gen_test_subscribe_candlestick {
     ($client:ident, $symbol_interval_list:expr) => {

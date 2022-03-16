@@ -125,6 +125,8 @@ impl_trait!(Trade, CoinbaseProWSClient, subscribe_trade, "matches", to_raw_chann
 impl_trait!(Ticker, CoinbaseProWSClient, subscribe_ticker, "ticker", to_raw_channel);
 #[rustfmt::skip]
 impl_trait!(OrderBook, CoinbaseProWSClient, subscribe_orderbook, "level2", to_raw_channel);
+#[rustfmt::skip]
+impl_trait!(Level3OrderBook, CoinbaseProWSClient, subscribe_l3_orderbook, "full", to_raw_channel);
 
 impl BBO for CoinbaseProWSClient {
     fn subscribe_bbo(&self, _pairs: &[String]) {
@@ -141,16 +143,6 @@ impl OrderBookTopK for CoinbaseProWSClient {
 impl Candlestick for CoinbaseProWSClient {
     fn subscribe_candlestick(&self, _symbol_interval_list: &[(String, usize)]) {
         panic!("CoinbasePro does NOT have candlestick channel");
-    }
-}
-
-impl Level3OrderBook for CoinbaseProWSClient {
-    fn subscribe_l3_orderbook(&self, symbols: &[String]) {
-        let raw_channels: Vec<String> = symbols
-            .iter()
-            .map(|symbol| to_raw_channel("full", symbol))
-            .collect();
-        self.client.subscribe(&raw_channels);
     }
 }
 
