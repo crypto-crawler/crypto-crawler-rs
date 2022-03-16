@@ -30,7 +30,7 @@ pub struct KrakenSpotWSClient {
     client: WSClientInternal,
 }
 
-fn name_pairs_to_command(name: &str, pairs: &[String], subscribe: bool) -> String {
+fn name_symbols_to_command(name: &str, symbols: &[String], subscribe: bool) -> String {
     format!(
         r#"{{"event":"{}","pair":{},"subscription":{{"name":"{}"}}}}"#,
         if subscribe {
@@ -38,7 +38,7 @@ fn name_pairs_to_command(name: &str, pairs: &[String], subscribe: bool) -> Strin
         } else {
             "unsubscribe"
         },
-        serde_json::to_string(pairs).unwrap(),
+        serde_json::to_string(symbols).unwrap(),
         name
     )
 }
@@ -50,21 +50,21 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
         .map(|s| s.to_string())
         .collect();
 
-    let mut name_pairs = HashMap::<String, Vec<String>>::new();
+    let mut name_symbols = HashMap::<String, Vec<String>>::new();
     for s in channels.iter().filter(|ch| !ch.starts_with('{')) {
         let v: Vec<&str> = s.split(CHANNEL_PAIR_DELIMITER).collect();
         let name = v[0];
-        let pair = v[1];
-        match name_pairs.get_mut(name) {
-            Some(pairs) => pairs.push(pair.to_string()),
+        let symbol = v[1];
+        match name_symbols.get_mut(name) {
+            Some(symbols) => symbols.push(symbol.to_string()),
             None => {
-                name_pairs.insert(name.to_string(), vec![pair.to_string()]);
+                name_symbols.insert(name.to_string(), vec![symbol.to_string()]);
             }
         }
     }
 
-    for (name, pairs) in name_pairs.iter() {
-        all_commands.push(name_pairs_to_command(name, pairs, subscribe));
+    for (name, symbols) in name_symbols.iter() {
+        all_commands.push(name_symbols_to_command(name, symbols, subscribe));
     }
 
     all_commands
@@ -136,8 +136,8 @@ fn on_misc_msg(msg: &str) -> MiscMessage {
     }
 }
 
-fn to_raw_channel(channel: &str, pair: &str) -> String {
-    format!("{}{}{}", channel, CHANNEL_PAIR_DELIMITER, pair)
+fn to_raw_channel(channel: &str, symbol: &str) -> String {
+    format!("{}{}{}", channel, CHANNEL_PAIR_DELIMITER, symbol)
 }
 
 #[rustfmt::skip]
@@ -148,10 +148,10 @@ impl_trait!(Ticker, KrakenSpotWSClient, subscribe_ticker, "ticker", to_raw_chann
 impl_trait!(BBO, KrakenSpotWSClient, subscribe_bbo, "spread", to_raw_channel);
 
 impl OrderBook for KrakenSpotWSClient {
-    fn subscribe_orderbook(&self, pairs: &[String]) {
+    fn subscribe_orderbook(&self, symbols: &[String]) {
         let command = format!(
             r#"{{"event":"subscribe","pair":{},"subscription":{{"name":"book", "depth":25}}}}"#,
-            serde_json::to_string(pairs).unwrap(),
+            serde_json::to_string(symbols).unwrap(),
         );
         let channels = vec![command];
 
@@ -229,23 +229,23 @@ impl_ws_client_trait!(KrakenSpotWSClient);
 #[cfg(test)]
 mod tests {
     #[test]
-    fn test_one_pair() {
+    fn test_one_symbol() {
         assert_eq!(
             r#"{"event":"subscribe","pair":["XBT/USD"],"subscription":{"name":"trade"}}"#,
-            super::name_pairs_to_command("trade", &vec!["XBT/USD".to_string()], true)
+            super::name_symbols_to_command("trade", &vec!["XBT/USD".to_string()], true)
         );
 
         assert_eq!(
             r#"{"event":"unsubscribe","pair":["XBT/USD"],"subscription":{"name":"trade"}}"#,
-            super::name_pairs_to_command("trade", &vec!["XBT/USD".to_string()], false)
+            super::name_symbols_to_command("trade", &vec!["XBT/USD".to_string()], false)
         );
     }
 
     #[test]
-    fn test_two_pairs() {
+    fn test_two_symbols() {
         assert_eq!(
             r#"{"event":"subscribe","pair":["XBT/USD","ETH/USD"],"subscription":{"name":"trade"}}"#,
-            super::name_pairs_to_command(
+            super::name_symbols_to_command(
                 "trade",
                 &vec!["XBT/USD".to_string(), "ETH/USD".to_string()],
                 true
@@ -254,7 +254,7 @@ mod tests {
 
         assert_eq!(
             r#"{"event":"unsubscribe","pair":["XBT/USD","ETH/USD"],"subscription":{"name":"trade"}}"#,
-            super::name_pairs_to_command(
+            super::name_symbols_to_command(
                 "trade",
                 &vec!["XBT/USD".to_string(), "ETH/USD".to_string()],
                 false
