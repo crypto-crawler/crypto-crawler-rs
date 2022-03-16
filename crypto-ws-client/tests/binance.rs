@@ -38,7 +38,7 @@ mod binance_spot {
         gen_test_code!(
             BinanceSpotWSClient,
             subscribe_trade,
-            &vec!["btcusdt".to_string(), "ethusdt".to_string()]
+            &vec!["BTCUSDT".to_string(), "ETHUSDT".to_string()]
         );
     }
 
@@ -47,7 +47,7 @@ mod binance_spot {
         gen_test_code!(
             BinanceSpotWSClient,
             subscribe_ticker,
-            &vec!["btcusdt".to_string(), "ethusdt".to_string()]
+            &vec!["BTCUSDT".to_string(), "ETHUSDT".to_string()]
         );
     }
 
@@ -65,7 +65,7 @@ mod binance_spot {
         gen_test_code!(
             BinanceSpotWSClient,
             subscribe_bbo,
-            &vec!["btcusdt".to_string(), "ethusdt".to_string()]
+            &vec!["BTCUSDT".to_string(), "ETHUSDT".to_string()]
         );
     }
 
@@ -74,7 +74,7 @@ mod binance_spot {
         gen_test_code!(
             BinanceSpotWSClient,
             subscribe_orderbook,
-            &vec!["btcusdt".to_string(), "ethusdt".to_string()]
+            &vec!["BTCUSDT".to_string(), "ETHUSDT".to_string()]
         );
     }
 
@@ -83,7 +83,7 @@ mod binance_spot {
         gen_test_code!(
             BinanceSpotWSClient,
             subscribe_orderbook_topk,
-            &vec!["btcusdt".to_string(), "ethusdt".to_string()]
+            &vec!["BTCUSDT".to_string(), "ETHUSDT".to_string()]
         );
     }
 
@@ -91,13 +91,13 @@ mod binance_spot {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceSpotWSClient,
-            &vec![("btcusdt".to_string(), 60), ("ethusdt".to_string(), 60)]
+            &vec![("BTCUSDT".to_string(), 60), ("ETHUSDT".to_string(), 60)]
         );
         gen_test_subscribe_candlestick!(
             BinanceSpotWSClient,
             &vec![
-                ("btcusdt".to_string(), 2592000),
-                ("ethusdt".to_string(), 2592000)
+                ("BTCUSDT".to_string(), 2592000),
+                ("ETHUSDT".to_string(), 2592000)
             ]
         );
     }
@@ -131,7 +131,7 @@ mod binance_inverse_future {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_trade,
-            &vec!["btcusd_220325".to_string(), "ethusd_220325".to_string()]
+            &vec!["BTCUSD_220325".to_string(), "ETHUSD_220325".to_string()]
         );
     }
 
@@ -140,7 +140,7 @@ mod binance_inverse_future {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_ticker,
-            &vec!["btcusd_220325".to_string(), "ethusd_220325".to_string()]
+            &vec!["BTCUSD_220325".to_string(), "ETHUSD_220325".to_string()]
         );
     }
 
@@ -158,7 +158,7 @@ mod binance_inverse_future {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_bbo,
-            &vec!["btcusd_220325".to_string(), "ethusd_220325".to_string()]
+            &vec!["BTCUSD_220325".to_string(), "ETHUSD_220325".to_string()]
         );
     }
 
@@ -167,7 +167,7 @@ mod binance_inverse_future {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_orderbook,
-            &vec!["btcusd_220325".to_string(), "ethusd_220325".to_string()]
+            &vec!["BTCUSD_220325".to_string(), "ETHUSD_220325".to_string()]
         );
     }
 
@@ -176,7 +176,7 @@ mod binance_inverse_future {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_orderbook_topk,
-            &vec!["btcusd_220325".to_string(), "ethusd_220325".to_string()]
+            &vec!["BTCUSD_220325".to_string(), "ETHUSD_220325".to_string()]
         );
     }
 
@@ -185,15 +185,15 @@ mod binance_inverse_future {
         gen_test_subscribe_candlestick!(
             BinanceInverseWSClient,
             &vec![
-                ("btcusd_220325".to_string(), 60),
-                ("ethusd_220325".to_string(), 60)
+                ("BTCUSD_220325".to_string(), 60),
+                ("ETHUSD_220325".to_string(), 60)
             ]
         );
         gen_test_subscribe_candlestick!(
             BinanceInverseWSClient,
             &vec![
-                ("btcusd_220325".to_string(), 2592000),
-                ("ethusd_220325".to_string(), 2592000)
+                ("BTCUSD_220325".to_string(), 2592000),
+                ("ETHUSD_220325".to_string(), 2592000)
             ]
         );
     }
@@ -227,7 +227,7 @@ mod binance_linear_future {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_trade,
-            &vec!["btcusdt_220325".to_string(), "ethusdt_220325".to_string()]
+            &vec!["BTCUSDT_220325".to_string(), "ETHUSDT_220325".to_string()]
         );
     }
 
@@ -236,7 +236,7 @@ mod binance_linear_future {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_ticker,
-            &vec!["btcusdt_220325".to_string(), "ethusdt_220325".to_string()]
+            &vec!["BTCUSDT_220325".to_string(), "ETHUSDT_220325".to_string()]
         );
     }
 
@@ -254,7 +254,7 @@ mod binance_linear_future {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_bbo,
-            &vec!["btcusdt_220325".to_string(), "ethusdt_220325".to_string()]
+            &vec!["BTCUSDT_220325".to_string(), "ETHUSDT_220325".to_string()]
         );
     }
 
@@ -263,7 +263,7 @@ mod binance_linear_future {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_orderbook,
-            &vec!["btcusdt_220325".to_string(), "ethusdt_220325".to_string()]
+            &vec!["BTCUSDT_220325".to_string(), "ETHUSDT_220325".to_string()]
         );
     }
 
@@ -272,7 +272,7 @@ mod binance_linear_future {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_orderbook_topk,
-            &vec!["btcusdt_220325".to_string(), "ethusdt_220325".to_string()]
+            &vec!["BTCUSDT_220325".to_string(), "ETHUSDT_220325".to_string()]
         );
     }
 
@@ -281,15 +281,15 @@ mod binance_linear_future {
         gen_test_subscribe_candlestick!(
             BinanceLinearWSClient,
             &vec![
-                ("btcusdt_220325".to_string(), 60),
-                ("ethusdt_220325".to_string(), 60)
+                ("BTCUSDT_220325".to_string(), 60),
+                ("ETHUSDT_220325".to_string(), 60)
             ]
         );
         gen_test_subscribe_candlestick!(
             BinanceLinearWSClient,
             &vec![
-                ("btcusdt_220325".to_string(), 2592000),
-                ("ethusdt_220325".to_string(), 2592000)
+                ("BTCUSDT_220325".to_string(), 2592000),
+                ("ETHUSDT_220325".to_string(), 2592000)
             ]
         );
     }
@@ -323,7 +323,7 @@ mod binance_inverse_swap {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_trade,
-            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
+            &vec!["BTCUSD_PERP".to_string(), "ETHUSD_PERP".to_string()]
         );
     }
 
@@ -332,7 +332,7 @@ mod binance_inverse_swap {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_ticker,
-            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
+            &vec!["BTCUSD_PERP".to_string(), "ETHUSD_PERP".to_string()]
         );
     }
 
@@ -350,7 +350,7 @@ mod binance_inverse_swap {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_bbo,
-            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
+            &vec!["BTCUSD_PERP".to_string(), "ETHUSD_PERP".to_string()]
         );
     }
 
@@ -359,7 +359,7 @@ mod binance_inverse_swap {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_orderbook,
-            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
+            &vec!["BTCUSD_PERP".to_string(), "ETHUSD_PERP".to_string()]
         );
     }
 
@@ -368,7 +368,7 @@ mod binance_inverse_swap {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_orderbook_topk,
-            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
+            &vec!["BTCUSD_PERP".to_string(), "ETHUSD_PERP".to_string()]
         );
     }
 
@@ -377,15 +377,15 @@ mod binance_inverse_swap {
         gen_test_subscribe_candlestick!(
             BinanceInverseWSClient,
             &vec![
-                ("btcusd_perp".to_string(), 60),
-                ("ethusd_perp".to_string(), 60)
+                ("BTCUSD_PERP".to_string(), 60),
+                ("ETHUSD_PERP".to_string(), 60)
             ]
         );
         gen_test_subscribe_candlestick!(
             BinanceInverseWSClient,
             &vec![
-                ("btcusd_perp".to_string(), 2592000),
-                ("ethusd_perp".to_string(), 2592000)
+                ("BTCUSD_PERP".to_string(), 2592000),
+                ("ETHUSD_PERP".to_string(), 2592000)
             ]
         );
     }
@@ -437,7 +437,7 @@ mod binance_linear_swap {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_trade,
-            &vec!["btcusdt".to_string(), "ethusdt".to_string()]
+            &vec!["BTCUSDT".to_string(), "ETHUSDT".to_string()]
         );
     }
 
@@ -446,7 +446,7 @@ mod binance_linear_swap {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_ticker,
-            &vec!["btcusdt".to_string(), "ethusdt".to_string()]
+            &vec!["BTCUSDT".to_string(), "ETHUSDT".to_string()]
         );
     }
 
@@ -464,7 +464,7 @@ mod binance_linear_swap {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_bbo,
-            &vec!["btcusdt".to_string(), "ethusdt".to_string()]
+            &vec!["BTCUSDT".to_string(), "ETHUSDT".to_string()]
         );
     }
 
@@ -473,7 +473,7 @@ mod binance_linear_swap {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_orderbook,
-            &vec!["btcusdt".to_string(), "ethusdt".to_string()]
+            &vec!["BTCUSDT".to_string(), "ETHUSDT".to_string()]
         );
     }
 
@@ -482,7 +482,7 @@ mod binance_linear_swap {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_orderbook_topk,
-            &vec!["btcusdt".to_string(), "ethusdt".to_string()]
+            &vec!["BTCUSDT".to_string(), "ETHUSDT".to_string()]
         );
     }
 
@@ -490,13 +490,13 @@ mod binance_linear_swap {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceLinearWSClient,
-            &vec![("btcusdt".to_string(), 60), ("ethusdt".to_string(), 60)]
+            &vec![("BTCUSDT".to_string(), 60), ("ETHUSDT".to_string(), 60)]
         );
         gen_test_subscribe_candlestick!(
             BinanceLinearWSClient,
             &vec![
-                ("btcusdt".to_string(), 2592000),
-                ("ethusdt".to_string(), 2592000)
+                ("BTCUSDT".to_string(), 2592000),
+                ("ETHUSDT".to_string(), 2592000)
             ]
         );
     }
