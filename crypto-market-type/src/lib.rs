@@ -90,7 +90,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
         "deribit" => vec![
             MarketType::InverseFuture,
             MarketType::InverseSwap,
-            MarketType::EuropeanOption,
+            MarketType::EuropeanOption, // inverse
         ],
         "dydx" => vec![MarketType::LinearSwap],
         "ftx" => vec![
