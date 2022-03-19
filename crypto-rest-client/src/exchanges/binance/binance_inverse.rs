@@ -1,5 +1,4 @@
-use super::super::utils::http_get;
-use super::utils::*;
+use super::{super::utils::http_get, utils::*};
 use crate::error::Result;
 use std::collections::BTreeMap;
 

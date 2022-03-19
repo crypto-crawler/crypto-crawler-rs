@@ -9,7 +9,7 @@ use test_case::test_case;
 #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
 #[test_case(MarketType::EuropeanOption, "BTC-USD-220325-10000-P")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
-    let text = fetch_l2_snapshot("okex", market_type, symbol, Some(3)).unwrap();
+    let text = fetch_l2_snapshot("okx", market_type, symbol, Some(3)).unwrap();
     assert!(text.starts_with("{"));
 }
 
@@ -18,7 +18,7 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
 // #[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
 // #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
 // fn test_open_interest(market_type: MarketType, symbol: &str) {
-//     let text = fetch_open_interest("okex", market_type, Some(symbol)).unwrap();
+//     let text = fetch_open_interest("okx", market_type, Some(symbol)).unwrap();
 //     assert!(text.starts_with("{"));
 // }
 
