@@ -6,31 +6,31 @@ mod gate_spot {
     use crypto_ws_client::{GateSpotWSClient, WSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
-    #[test]
-    fn subscribe() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe() {
         gen_test_code!(
             GateSpotWSClient,
             subscribe,
             &vec![
-                "spot.trades:BTC_USDT".to_string(),
-                "spot.trades:ETH_USDT".to_string()
+                ("trades".to_string(), "BTC_USDT".to_string()),
+                ("trades".to_string(), "ETH_USDT".to_string())
             ]
         );
     }
 
-    #[test]
-    fn subscribe_raw_json() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_raw_json() {
         gen_test_code!(
             GateSpotWSClient,
-            subscribe,
+            send,
             &vec![
                 r#"{"channel":"spot.trades", "event":"subscribe", "payload":["BTC_USDT","ETH_USDT"]}"#.to_string()
             ]
         );
     }
 
-    #[test]
-    fn subscribe_trade() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
         gen_test_code!(
             GateSpotWSClient,
             subscribe_trade,
@@ -38,8 +38,8 @@ mod gate_spot {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             GateSpotWSClient,
             subscribe_orderbook,
@@ -47,8 +47,8 @@ mod gate_spot {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook_topk() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook_topk() {
         gen_test_code!(
             GateSpotWSClient,
             subscribe_orderbook_topk,
@@ -56,8 +56,8 @@ mod gate_spot {
         );
     }
 
-    #[test]
-    fn subscribe_bbo() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_bbo() {
         gen_test_code!(
             GateSpotWSClient,
             subscribe_bbo,
@@ -65,8 +65,8 @@ mod gate_spot {
         );
     }
 
-    #[test]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             GateSpotWSClient,
             subscribe_ticker,
@@ -87,23 +87,23 @@ mod gate_inverse_swap {
     use crypto_ws_client::{GateInverseSwapWSClient, WSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
-    #[test]
-    fn subscribe() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe() {
         gen_test_code!(
             GateInverseSwapWSClient,
             subscribe,
             &vec![
-                "futures.trades:BTC_USD".to_string(),
-                "futures.trades:ETH_USD".to_string()
+                ("trades".to_string(), "BTC_USD".to_string()),
+                ("trades".to_string(), "ETH_USD".to_string())
             ]
         );
     }
 
-    #[test]
-    fn subscribe_raw_json() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_raw_json() {
         gen_test_code!(
             GateInverseSwapWSClient,
-            subscribe,
+            send,
             &vec![
                 r#"{"channel":"futures.trades", "event":"subscribe", "payload":["BTC_USD","ETH_USD"]}"#
                     .to_string()
@@ -111,8 +111,8 @@ mod gate_inverse_swap {
         );
     }
 
-    #[test]
-    fn subscribe_trade() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
         gen_test_code!(
             GateInverseSwapWSClient,
             subscribe_trade,
@@ -120,8 +120,8 @@ mod gate_inverse_swap {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             GateInverseSwapWSClient,
             subscribe_orderbook,
@@ -129,8 +129,8 @@ mod gate_inverse_swap {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook_topk() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook_topk() {
         gen_test_code!(
             GateInverseSwapWSClient,
             subscribe_orderbook_topk,
@@ -138,8 +138,8 @@ mod gate_inverse_swap {
         );
     }
 
-    #[test]
-    fn subscribe_bbo() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_bbo() {
         gen_test_code!(
             GateInverseSwapWSClient,
             subscribe_bbo,
@@ -147,8 +147,8 @@ mod gate_inverse_swap {
         );
     }
 
-    #[test]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             GateInverseSwapWSClient,
             subscribe_ticker,
@@ -175,8 +175,8 @@ mod gate_linear_swap {
     use crypto_ws_client::{GateLinearSwapWSClient, WSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
-    #[test]
-    fn subscribe_trade() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
         gen_test_code!(
             GateLinearSwapWSClient,
             subscribe_trade,
@@ -184,8 +184,8 @@ mod gate_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             GateLinearSwapWSClient,
             subscribe_orderbook,
@@ -193,8 +193,8 @@ mod gate_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook_topk() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook_topk() {
         gen_test_code!(
             GateLinearSwapWSClient,
             subscribe_orderbook_topk,
@@ -202,8 +202,8 @@ mod gate_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_bbo() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_bbo() {
         gen_test_code!(
             GateLinearSwapWSClient,
             subscribe_bbo,
@@ -211,8 +211,8 @@ mod gate_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             GateLinearSwapWSClient,
             subscribe_ticker,
@@ -259,8 +259,8 @@ mod gate_inverse_future {
         );
     }
 
-    #[test]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             GateInverseFutureWSClient,
             subscribe_ticker,
@@ -307,8 +307,8 @@ mod gate_linear_future {
         );
     }
 
-    #[test]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             GateLinearFutureWSClient,
             subscribe_ticker,

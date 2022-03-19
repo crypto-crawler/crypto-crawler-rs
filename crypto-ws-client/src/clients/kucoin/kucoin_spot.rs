@@ -1,19 +1,21 @@
-use crate::WSClient;
-use std::sync::mpsc::Sender;
-
-use super::super::ws_client_internal::WSClientInternal;
-use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
-use super::utils::{
-    channels_to_commands, fetch_ws_token, on_misc_msg, to_raw_channel,
-    CLIENT_PING_INTERVAL_AND_MSG, EXCHANGE_NAME,
+use super::utils::{fetch_ws_token, KucoinMessageHandler, EXCHANGE_NAME};
+use crate::{
+    clients::common_traits::{
+        Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
+    },
+    common::{command_translator::CommandTranslator, ws_client_internal::WSClientInternal},
+    WSClient,
 };
+use async_trait::async_trait;
+use std::sync::mpsc::Sender;
 
 /// The WebSocket client for KuCoin Spot market.
 ///
 /// * WebSocket API doc: <https://docs.kucoin.com/#websocket-feed>
 /// * Trading at: <https://trade.kucoin.com/>
 pub struct KuCoinSpotWSClient {
-    client: WSClientInternal,
+    client: WSClientInternal<KucoinMessageHandler>,
+    translator: KucoinCommandTranslator,
 }
 
 impl KuCoinSpotWSClient {
@@ -23,42 +25,48 @@ impl KuCoinSpotWSClient {
     ///
     /// * `tx` - The sending part of a channel
     /// * `url` - Optional server url, usually you don't need specify it
-    pub fn new(tx: Sender<String>, url: Option<&str>) -> Self {
+    pub async fn new(tx: Sender<String>, url: Option<&str>) -> Self {
         let real_url = match url {
             Some(endpoint) => endpoint.to_string(),
             None => {
-                let ws_token = fetch_ws_token();
+                let ws_token = fetch_ws_token().await;
                 let ws_url = format!("{}?token={}", ws_token.endpoint, ws_token.token);
                 ws_url
             }
         };
         KuCoinSpotWSClient {
-            client: WSClientInternal::new(
+            client: WSClientInternal::connect(
                 EXCHANGE_NAME,
                 &real_url,
+                KucoinMessageHandler {},
                 tx,
-                on_misc_msg,
-                channels_to_commands,
-                Some(CLIENT_PING_INTERVAL_AND_MSG),
-                None,
-            ),
+            )
+            .await,
+            translator: KucoinCommandTranslator {},
         }
     }
 }
 
+impl_trait!(Trade, KuCoinSpotWSClient, subscribe_trade, "/market/match");
+impl_trait!(BBO, KuCoinSpotWSClient, subscribe_bbo, "/market/ticker");
 #[rustfmt::skip]
-impl_trait!(Trade, KuCoinSpotWSClient, subscribe_trade, "/market/match", to_raw_channel);
+impl_trait!(OrderBook, KuCoinSpotWSClient, subscribe_orderbook, "/market/level2");
 #[rustfmt::skip]
-impl_trait!(BBO, KuCoinSpotWSClient, subscribe_bbo, "/market/ticker", to_raw_channel);
+impl_trait!(OrderBookTopK, KuCoinSpotWSClient, subscribe_orderbook_topk, "/spotMarket/level2Depth5");
 #[rustfmt::skip]
-impl_trait!(OrderBook, KuCoinSpotWSClient, subscribe_orderbook, "/market/level2", to_raw_channel);
+impl_trait!(Ticker, KuCoinSpotWSClient, subscribe_ticker, "/market/snapshot");
 #[rustfmt::skip]
-impl_trait!(OrderBookTopK, KuCoinSpotWSClient, subscribe_orderbook_topk, "/spotMarket/level2Depth5", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(Ticker, KuCoinSpotWSClient, subscribe_ticker, "/market/snapshot", to_raw_channel);
+impl_trait!(Level3OrderBook, KuCoinSpotWSClient, subscribe_l3_orderbook, "/spotMarket/level3");
 
-fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
-    let interval_str = match interval {
+impl_candlestick!(KuCoinSpotWSClient);
+
+impl_ws_client_trait!(KuCoinSpotWSClient);
+
+struct KucoinCommandTranslator {}
+
+impl KucoinCommandTranslator {
+    fn to_candlestick_command(symbol: &str, interval: usize, subscribe: bool) -> String {
+        let interval_str = match interval {
         60 => "1min",
         180 => "3min",
         300 => "5min",
@@ -76,22 +84,127 @@ fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
             "KuCoin available intervals 1min,3min,5min,15min,30min,1hour,2hour,4hour,6hour,8hour,12hour,1day,1week"
         ),
     };
-    format!(
-        r#"{{"id":"crypto-ws-client","type":"subscribe","topic":"/market/candles:{}_{}","privateChannel":false,"response":true}}"#,
-        pair, interval_str,
-    )
-}
-
-impl_candlestick!(KuCoinSpotWSClient);
-
-impl Level3OrderBook for KuCoinSpotWSClient {
-    fn subscribe_l3_orderbook(&self, symbols: &[String]) {
-        let raw_channels: Vec<String> = symbols
-            .iter()
-            .map(|symbol| to_raw_channel("/spotMarket/level3", symbol))
-            .collect();
-        self.client.subscribe(&raw_channels);
+        format!(
+            r#"{{"id":"crypto-ws-client","type":"{}","topic":"/market/candles:{}_{}","privateChannel":false,"response":true}}"#,
+            if subscribe {
+                "subscribe"
+            } else {
+                "unsubscribe"
+            },
+            symbol,
+            interval_str,
+        )
     }
 }
 
-impl_ws_client_trait!(KuCoinSpotWSClient);
+impl CommandTranslator for KucoinCommandTranslator {
+    fn translate_to_commands(&self, subscribe: bool, topics: &[(String, String)]) -> Vec<String> {
+        super::utils::topics_to_commands(topics, subscribe)
+    }
+
+    fn translate_to_candlestick_commands(
+        &self,
+        subscribe: bool,
+        symbol_interval_list: &[(String, usize)],
+    ) -> Vec<String> {
+        symbol_interval_list
+            .iter()
+            .map(|(symbol, interval)| Self::to_candlestick_command(symbol, *interval, subscribe))
+            .collect::<Vec<String>>()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::common::command_translator::CommandTranslator;
+
+    #[test]
+    fn test_one_channel() {
+        let translator = super::KucoinCommandTranslator {};
+        let commands = translator.translate_to_commands(
+            true,
+            &vec![("/market/match".to_string(), "BTC-USDT".to_string())],
+        );
+
+        assert_eq!(1, commands.len());
+        assert_eq!(
+            r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/market/match:BTC-USDT","privateChannel":false,"response":true}"#,
+            commands[0]
+        );
+
+        let commands = translator.translate_to_commands(
+            true,
+            &vec![
+                ("/market/match".to_string(), "BTC-USDT".to_string()),
+                ("/market/match".to_string(), "ETH-USDT".to_string()),
+            ],
+        );
+
+        assert_eq!(1, commands.len());
+        assert_eq!(
+            r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/market/match:BTC-USDT,ETH-USDT","privateChannel":false,"response":true}"#,
+            commands[0]
+        );
+    }
+
+    #[test]
+    fn test_two_channels() {
+        let translator = super::KucoinCommandTranslator {};
+        let commands = translator.translate_to_commands(
+            true,
+            &vec![
+                ("/market/match".to_string(), "BTC-USDT".to_string()),
+                ("/market/level2".to_string(), "ETH-USDT".to_string()),
+            ],
+        );
+
+        assert_eq!(2, commands.len());
+        assert_eq!(
+            r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/market/level2:ETH-USDT","privateChannel":false,"response":true}"#,
+            commands[0]
+        );
+        assert_eq!(
+            r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/market/match:BTC-USDT","privateChannel":false,"response":true}"#,
+            commands[1]
+        );
+
+        let commands = translator.translate_to_commands(
+            true,
+            &vec![
+                ("/market/match".to_string(), "BTC-USDT".to_string()),
+                ("/market/match".to_string(), "ETH-USDT".to_string()),
+                ("/market/level2".to_string(), "BTC-USDT".to_string()),
+                ("/market/level2".to_string(), "ETH-USDT".to_string()),
+            ],
+        );
+
+        assert_eq!(2, commands.len());
+        assert_eq!(
+            r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/market/level2:BTC-USDT,ETH-USDT","privateChannel":false,"response":true}"#,
+            commands[0]
+        );
+        assert_eq!(
+            r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/market/match:BTC-USDT,ETH-USDT","privateChannel":false,"response":true}"#,
+            commands[1]
+        );
+    }
+
+    #[test]
+    fn test_candlestick() {
+        let translator = super::KucoinCommandTranslator {};
+        let commands = translator.translate_to_candlestick_commands(
+            true,
+            &vec![("BTC-USDT".to_string(), 60), ("BTC-USDT".to_string(), 180)],
+        );
+
+        assert_eq!(2, commands.len());
+        assert_eq!(
+            r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/market/candles:BTC-USDT_1min","privateChannel":false,"response":true}"#,
+            commands[0]
+        );
+        assert_eq!(
+            r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/market/candles:BTC-USDT_3min","privateChannel":false,"response":true}"#,
+            commands[1]
+        );
+    }
+}

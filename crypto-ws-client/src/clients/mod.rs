@@ -1,12 +1,5 @@
 #[macro_use]
-mod common_traits;
-
-#[macro_use]
-mod ws_client_internal;
-
-mod utils;
-
-use common_traits::*;
+pub(super) mod common_traits;
 
 pub(super) mod binance;
 pub(super) mod binance_option;

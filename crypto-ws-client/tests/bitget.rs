@@ -6,26 +6,26 @@ mod bitget_inverse_swap {
     use crypto_ws_client::{BitgetSwapWSClient, WSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
-    #[test]
-    fn subscribe() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe() {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe,
-            &vec!["swap/trade:btcusd".to_string()]
+            &vec![("trade".to_string(), "btcusd".to_string())]
         );
     }
 
-    #[test]
-    fn subscribe_raw_json() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_raw_json() {
         gen_test_code!(
             BitgetSwapWSClient,
-            subscribe,
+            send,
             &vec![r#"{"op":"subscribe","args":["swap/trade:btcusd"]}"#.to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_trade() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe_trade,
@@ -33,8 +33,8 @@ mod bitget_inverse_swap {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook_topk() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook_topk() {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe_orderbook_topk,
@@ -42,8 +42,8 @@ mod bitget_inverse_swap {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe_orderbook,
@@ -51,8 +51,8 @@ mod bitget_inverse_swap {
         );
     }
 
-    #[test]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe_ticker,
@@ -60,19 +60,19 @@ mod bitget_inverse_swap {
         );
     }
 
-    #[test]
-    fn subscribe_candlestick() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec![("btcusd".to_string(), 60)]);
         gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec![("btcusd".to_string(), 604800)]);
     }
 
     #[ignore]
-    #[test]
-    fn subscribe_funding_rate() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_funding_rate() {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe,
-            &vec!["swap/funding_rate:btcusd".to_string()]
+            &vec![("funding_rate".to_string(), "btcusd".to_string())]
         );
     }
 }
@@ -82,8 +82,8 @@ mod bitget_linear_swap {
     use crypto_ws_client::{BitgetSwapWSClient, WSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
-    #[test]
-    fn subscribe_trade() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe_trade,
@@ -91,8 +91,8 @@ mod bitget_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook_topk() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook_topk() {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe_orderbook_topk,
@@ -100,8 +100,8 @@ mod bitget_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe_orderbook,
@@ -109,8 +109,8 @@ mod bitget_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe_ticker,
@@ -118,8 +118,8 @@ mod bitget_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_candlestick() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec![("cmt_btcusdt".to_string(), 60)]);
         gen_test_subscribe_candlestick!(
             BitgetSwapWSClient,
@@ -128,12 +128,12 @@ mod bitget_linear_swap {
     }
 
     #[ignore]
-    #[test]
-    fn subscribe_funding_rate() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_funding_rate() {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe,
-            &vec!["swap/funding_rate:cmt_btcusdt".to_string()]
+            &vec![("funding_rate".to_string(), "cmt_btcusdt".to_string())]
         );
     }
 }

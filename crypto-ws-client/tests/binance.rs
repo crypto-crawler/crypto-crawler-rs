@@ -6,35 +6,38 @@ mod binance_spot {
     use crypto_ws_client::{BinanceSpotWSClient, WSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
-    #[test]
-    fn subscribe() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe() {
         gen_test_code!(
             BinanceSpotWSClient,
             subscribe,
-            &vec!["btcusdt@aggTrade".to_string(), "btcusdt@ticker".to_string()]
+            &vec![
+                ("aggTrade".to_string(), "BTCUSDT".to_string()),
+                ("ticker".to_string(), "BTCUSDT".to_string())
+            ]
         );
     }
 
-    #[test]
-    fn subscribe_all_bbo() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_all_bbo() {
         gen_test_code!(
             BinanceSpotWSClient,
-            subscribe,
-            &vec!["!bookTicker".to_string()]
+            send,
+            &vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!bookTicker"]}"#.to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_raw_json() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_raw_json() {
         gen_test_code!(
             BinanceSpotWSClient,
-            subscribe,
+            send,
             &vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["btcusdt@aggTrade","btcusdt@ticker"]}"#.to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_trade() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
         gen_test_code!(
             BinanceSpotWSClient,
             subscribe_trade,
@@ -42,8 +45,8 @@ mod binance_spot {
         );
     }
 
-    #[test]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             BinanceSpotWSClient,
             subscribe_ticker,
@@ -51,17 +54,17 @@ mod binance_spot {
         );
     }
 
-    #[test]
-    fn subscribe_tickers_all() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_tickers_all() {
         gen_test_code!(
             BinanceSpotWSClient,
-            subscribe,
-            &vec!["!ticker@arr".to_string()]
+            send,
+            &vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!ticker@arr"]}"#.to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_bbo() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_bbo() {
         gen_test_code!(
             BinanceSpotWSClient,
             subscribe_bbo,
@@ -69,8 +72,8 @@ mod binance_spot {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             BinanceSpotWSClient,
             subscribe_orderbook,
@@ -78,8 +81,8 @@ mod binance_spot {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook_topk() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook_topk() {
         gen_test_code!(
             BinanceSpotWSClient,
             subscribe_orderbook_topk,
@@ -87,8 +90,8 @@ mod binance_spot {
         );
     }
 
-    #[test]
-    fn subscribe_candlestick() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceSpotWSClient,
             &vec![("BTCUSDT".to_string(), 60), ("ETHUSDT".to_string(), 60)]
@@ -108,110 +111,110 @@ mod binance_inverse_future {
     use crypto_ws_client::{BinanceInverseWSClient, WSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
-    #[test]
-    fn subscribe() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe() {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe,
             &vec![
-                "btcusd_220624@aggTrade".to_string(),
-                "ethusd_220624@aggTrade".to_string(),
-                "bnbusd_220624@aggTrade".to_string(),
+                ("aggTrade".to_string(), "BTCUSD_220624".to_string()),
+                ("aggTrade".to_string(), "ETHUSD_220624".to_string()),
+                ("aggTrade".to_string(), "BNBUSD_220624".to_string())
             ]
         );
     }
 
-    #[test]
-    fn subscribe_all_bbo() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_all_bbo() {
         gen_test_code!(
             BinanceInverseWSClient,
-            subscribe,
-            &vec!["!bookTicker".to_string()]
+            send,
+            &vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!bookTicker"]}"#.to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_trade() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_trade,
             &vec![
                 "BTCUSD_220624".to_string(),
                 "ETHUSD_220624".to_string(),
-                "BNBUSD_220624".to_string()
+                "BNBUSD_220624".to_string(),
             ]
         );
     }
 
-    #[test]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_ticker,
             &vec![
                 "BTCUSD_220624".to_string(),
                 "ETHUSD_220624".to_string(),
-                "BNBUSD_220624".to_string()
+                "BNBUSD_220624".to_string(),
             ]
         );
     }
 
-    #[test]
-    fn subscribe_tickers_all() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_tickers_all() {
         gen_test_code!(
             BinanceInverseWSClient,
-            subscribe,
-            &vec!["!ticker@arr".to_string()]
+            send,
+            &vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!ticker@arr"]}"#.to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_bbo() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_bbo() {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_bbo,
             &vec![
                 "BTCUSD_220624".to_string(),
                 "ETHUSD_220624".to_string(),
-                "BNBUSD_220624".to_string()
+                "BNBUSD_220624".to_string(),
             ]
         );
     }
 
-    #[test]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_orderbook,
             &vec![
                 "BTCUSD_220624".to_string(),
                 "ETHUSD_220624".to_string(),
-                "BNBUSD_220624".to_string()
+                "BNBUSD_220624".to_string(),
             ]
         );
     }
 
-    #[test]
-    fn subscribe_orderbook_topk() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook_topk() {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_orderbook_topk,
             &vec![
                 "BTCUSD_220624".to_string(),
                 "ETHUSD_220624".to_string(),
-                "BNBUSD_220624".to_string()
+                "BNBUSD_220624".to_string(),
             ]
         );
     }
 
-    #[test]
-    fn subscribe_candlestick() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceInverseWSClient,
             &vec![
                 ("BTCUSD_220624".to_string(), 60),
                 ("ETHUSD_220624".to_string(), 60),
-                ("BNBUSD_220624".to_string(), 60),
+                ("BNBUSD_220624".to_string(), 60)
             ]
         );
         gen_test_subscribe_candlestick!(
@@ -219,7 +222,7 @@ mod binance_inverse_future {
             &vec![
                 ("BTCUSD_220624".to_string(), 2592000),
                 ("ETHUSD_220624".to_string(), 2592000),
-                ("BNBUSD_220624".to_string(), 2592000),
+                ("BNBUSD_220624".to_string(), 2592000)
             ]
         );
     }
@@ -230,26 +233,29 @@ mod binance_linear_future {
     use crypto_ws_client::{BinanceLinearWSClient, WSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
-    #[test]
-    fn subscribe() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe() {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe,
-            &vec!["btcusdt_220325@aggTrade".to_string()]
+            &vec![
+                ("aggTrade".to_string(), "BTCUSDT_220325".to_string()),
+                ("aggTrade".to_string(), "ETHUSDT_220325".to_string()),
+            ]
         );
     }
 
-    #[test]
-    fn subscribe_all_bbo() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_all_bbo() {
         gen_test_code!(
             BinanceLinearWSClient,
-            subscribe,
-            &vec!["!bookTicker".to_string()]
+            send,
+            &vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!bookTicker"]}"#.to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_trade() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_trade,
@@ -257,8 +263,8 @@ mod binance_linear_future {
         );
     }
 
-    #[test]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_ticker,
@@ -266,17 +272,17 @@ mod binance_linear_future {
         );
     }
 
-    #[test]
-    fn subscribe_tickers_all() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_tickers_all() {
         gen_test_code!(
             BinanceLinearWSClient,
-            subscribe,
-            &vec!["!ticker@arr".to_string()]
+            send,
+            &vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!ticker@arr"]}"#.to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_bbo() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_bbo() {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_bbo,
@@ -284,8 +290,8 @@ mod binance_linear_future {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_orderbook,
@@ -293,8 +299,8 @@ mod binance_linear_future {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook_topk() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook_topk() {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_orderbook_topk,
@@ -302,8 +308,8 @@ mod binance_linear_future {
         );
     }
 
-    #[test]
-    fn subscribe_candlestick() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceLinearWSClient,
             &vec![
@@ -326,111 +332,111 @@ mod binance_inverse_swap {
     use crypto_ws_client::{BinanceInverseWSClient, WSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
-    #[test]
-    fn subscribe() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe() {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe,
-            &vec!["btcusd_perp@aggTrade".to_string()]
+            &vec![("aggTrade".to_string(), "btcusd_perp".to_string())]
         );
     }
 
-    #[test]
-    fn subscribe_all_bbo() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_all_bbo() {
         gen_test_code!(
             BinanceInverseWSClient,
-            subscribe,
-            &vec!["!bookTicker".to_string()]
+            send,
+            &vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!bookTicker"]}"#.to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_trade() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_trade,
-            &vec!["BTCUSD_PERP".to_string(), "ETHUSD_PERP".to_string()]
+            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_ticker,
-            &vec!["BTCUSD_PERP".to_string(), "ETHUSD_PERP".to_string()]
+            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_tickers_all() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_tickers_all() {
         gen_test_code!(
             BinanceInverseWSClient,
-            subscribe,
-            &vec!["!ticker@arr".to_string()]
+            send,
+            &vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!ticker@arr"]}"#.to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_bbo() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_bbo() {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_bbo,
-            &vec!["BTCUSD_PERP".to_string(), "ETHUSD_PERP".to_string()]
+            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_orderbook,
-            &vec!["BTCUSD_PERP".to_string(), "ETHUSD_PERP".to_string()]
+            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_orderbook_topk() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook_topk() {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe_orderbook_topk,
-            &vec!["BTCUSD_PERP".to_string(), "ETHUSD_PERP".to_string()]
+            &vec!["btcusd_perp".to_string(), "ethusd_perp".to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_candlestick() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceInverseWSClient,
             &vec![
-                ("BTCUSD_PERP".to_string(), 60),
-                ("ETHUSD_PERP".to_string(), 60)
+                ("btcusd_perp".to_string(), 60),
+                ("ethusd_perp".to_string(), 60)
             ]
         );
         gen_test_subscribe_candlestick!(
             BinanceInverseWSClient,
             &vec![
-                ("BTCUSD_PERP".to_string(), 2592000),
-                ("ETHUSD_PERP".to_string(), 2592000)
+                ("btcusd_perp".to_string(), 2592000),
+                ("ethusd_perp".to_string(), 2592000)
             ]
         );
     }
 
-    #[test]
-    fn subscribe_funding_rate() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_funding_rate() {
         gen_test_code!(
             BinanceInverseWSClient,
             subscribe,
-            &vec!["btcusd_perp@markPrice".to_string()]
+            &vec![("markPrice".to_string(), "btcusd_perp".to_string())]
         );
     }
 
-    #[test]
-    fn subscribe_funding_rate_all() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_funding_rate_all() {
         gen_test_code!(
             BinanceInverseWSClient,
-            subscribe,
-            &vec!["!markPrice@arr".to_string()]
+            send,
+            &vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!markPrice@arr"]}"#.to_string()]
         );
     }
 }
@@ -440,26 +446,26 @@ mod binance_linear_swap {
     use crypto_ws_client::{BinanceLinearWSClient, WSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
-    #[test]
-    fn subscribe() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe() {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe,
-            &vec!["btcusdt@aggTrade".to_string()]
+            &vec![("aggTrade".to_string(), "BTCUSDT".to_string())]
         );
     }
 
-    #[test]
-    fn subscribe_all_bbo() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_all_bbo() {
         gen_test_code!(
             BinanceLinearWSClient,
-            subscribe,
-            &vec!["!bookTicker".to_string()]
+            send,
+            &vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!bookTicker"]}"#.to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_trade() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_trade,
@@ -467,8 +473,8 @@ mod binance_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_ticker,
@@ -476,17 +482,17 @@ mod binance_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_tickers_all() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_tickers_all() {
         gen_test_code!(
             BinanceLinearWSClient,
-            subscribe,
-            &vec!["!ticker@arr".to_string()]
+            send,
+            &vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!ticker@arr"]}"#.to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_bbo() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_bbo() {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_bbo,
@@ -494,8 +500,8 @@ mod binance_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_orderbook,
@@ -503,8 +509,8 @@ mod binance_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook_topk() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook_topk() {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_orderbook_topk,
@@ -512,8 +518,8 @@ mod binance_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_candlestick() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceLinearWSClient,
             &vec![("BTCUSDT".to_string(), 60), ("ETHUSDT".to_string(), 60)]
@@ -527,21 +533,21 @@ mod binance_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_funding_rate() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_funding_rate() {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe,
-            &vec!["btcusdt@markPrice".to_string()]
+            &vec![("markPrice".to_string(), "BTCUSDT".to_string())]
         );
     }
 
-    #[test]
-    fn subscribe_funding_rate_all() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_funding_rate_all() {
         gen_test_code!(
             BinanceLinearWSClient,
-            subscribe,
-            &vec!["!markPrice@arr".to_string()]
+            send,
+            &vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!markPrice@arr"]}"#.to_string()]
         );
     }
 }

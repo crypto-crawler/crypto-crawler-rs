@@ -4,29 +4,29 @@ use std::sync::mpsc::{Receiver, Sender};
 #[macro_use]
 mod utils;
 
-#[test]
-fn subscribe() {
+#[tokio::test(flavor = "multi_thread")]
+async fn subscribe() {
     gen_test_code!(
         BitstampWSClient,
         subscribe,
         &vec![
-            "live_trades_btcusd".to_string(),
-            "diff_order_book_btcusd".to_string()
+            ("live_trades".to_string(), "btcusd".to_string()),
+            ("diff_order_book".to_string(), "btcusd".to_string()),
         ]
     );
 }
 
-#[test]
-fn subscribe_raw_json() {
+#[tokio::test(flavor = "multi_thread")]
+async fn subscribe_raw_json() {
     gen_test_code!(
         BitstampWSClient,
-        subscribe,
+        send,
         &vec![r#"{"event":"bts:subscribe","data":{"channel":"live_trades_btcusd"}}"#.to_string()]
     );
 }
 
-#[test]
-fn subscribe_trade() {
+#[tokio::test(flavor = "multi_thread")]
+async fn subscribe_trade() {
     gen_test_code!(
         BitstampWSClient,
         subscribe_trade,
@@ -34,8 +34,8 @@ fn subscribe_trade() {
     );
 }
 
-#[test]
-fn subscribe_orderbook() {
+#[tokio::test(flavor = "multi_thread")]
+async fn subscribe_orderbook() {
     gen_test_code!(
         BitstampWSClient,
         subscribe_orderbook,
@@ -43,8 +43,8 @@ fn subscribe_orderbook() {
     );
 }
 
-#[test]
-fn subscribe_orderbook_topk() {
+#[tokio::test(flavor = "multi_thread")]
+async fn subscribe_orderbook_topk() {
     gen_test_code!(
         BitstampWSClient,
         subscribe_orderbook_topk,
@@ -52,8 +52,8 @@ fn subscribe_orderbook_topk() {
     );
 }
 
-#[test]
-fn subscribe_l3_orderbook() {
+#[tokio::test(flavor = "multi_thread")]
+async fn subscribe_l3_orderbook() {
     gen_test_code!(
         BitstampWSClient,
         subscribe_l3_orderbook,

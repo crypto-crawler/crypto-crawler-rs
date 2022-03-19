@@ -3,8 +3,6 @@ mod gate_spot;
 mod gate_swap;
 mod utils;
 
-pub use gate_future::GateInverseFutureWSClient;
-pub use gate_future::GateLinearFutureWSClient;
+pub use gate_future::{GateInverseFutureWSClient, GateLinearFutureWSClient};
 pub use gate_spot::GateSpotWSClient;
-pub use gate_swap::GateInverseSwapWSClient;
-pub use gate_swap::GateLinearSwapWSClient;
+pub use gate_swap::{GateInverseSwapWSClient, GateLinearSwapWSClient};

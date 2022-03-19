@@ -1,11 +1,12 @@
-use crate::WSClient;
-use std::sync::mpsc::Sender;
+use async_trait::async_trait;
 
-use super::super::ws_client_internal::WSClientInternal;
-use super::super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
-use super::utils::{
-    channels_to_commands, on_misc_msg, to_candlestick_raw_channel_shared, to_raw_channel,
-    CLIENT_PING_INTERVAL_AND_MSG, EXCHANGE_NAME,
+use super::utils::{GateCommandTranslator, GateMessageHandler, EXCHANGE_NAME};
+use crate::{
+    clients::common_traits::{
+        Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
+    },
+    common::{command_translator::CommandTranslator, ws_client_internal::WSClientInternal},
+    WSClient,
 };
 
 const INVERSE_FUTURE_WEBSOCKET_URL: &str = "wss://fx-ws.gateio.ws/v4/ws/delivery/btc";
@@ -16,7 +17,8 @@ const LINEAR_FUTURE_WEBSOCKET_URL: &str = "wss://fx-ws.gateio.ws/v4/ws/delivery/
 /// * WebSocket API doc: <https://www.gate.io/docs/delivery/ws/en/index.html>
 /// * Trading at <https://www.gate.io/cn/futures-delivery/btc>
 pub struct GateInverseFutureWSClient {
-    client: WSClientInternal,
+    client: WSClientInternal<GateMessageHandler<'F'>>,
+    translator: GateCommandTranslator<'F'>,
 }
 
 /// The WebSocket client for Gate LinearFuture market.
@@ -24,73 +26,48 @@ pub struct GateInverseFutureWSClient {
 /// * WebSocket API doc: <https://www.gate.io/docs/delivery/ws/en/index.html>
 /// * Trading at <https://www.gate.io/cn/futures-delivery/usdt>
 pub struct GateLinearFutureWSClient {
-    client: WSClientInternal,
+    client: WSClientInternal<GateMessageHandler<'F'>>,
+    translator: GateCommandTranslator<'F'>,
 }
-
-#[rustfmt::skip]
-impl_trait!(Trade, GateInverseFutureWSClient, subscribe_trade, "futures.trades", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(OrderBook, GateInverseFutureWSClient, subscribe_orderbook, "futures.order_book", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(Ticker, GateInverseFutureWSClient, subscribe_ticker, "futures.tickers", to_raw_channel);
-
-impl BBO for GateInverseFutureWSClient {
-    fn subscribe_bbo(&self, _pairs: &[String]) {
-        panic!("Gate does NOT have BBO channel");
-    }
-}
-impl OrderBookTopK for GateInverseFutureWSClient {
-    fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
-        panic!("Gate does NOT have orderbook snapshot channel");
-    }
-}
-
-#[rustfmt::skip]
-impl_trait!(Trade, GateLinearFutureWSClient, subscribe_trade, "futures.trades", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(OrderBook, GateLinearFutureWSClient, subscribe_orderbook, "futures.order_book", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(Ticker, GateLinearFutureWSClient, subscribe_ticker, "futures.tickers", to_raw_channel);
-
-impl BBO for GateLinearFutureWSClient {
-    fn subscribe_bbo(&self, _pairs: &[String]) {
-        panic!("Gate does NOT have BBO channel");
-    }
-}
-impl OrderBookTopK for GateLinearFutureWSClient {
-    fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
-        panic!("Gate does NOT have orderbook snapshot channel");
-    }
-}
-
-fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
-    to_candlestick_raw_channel_shared("futures", pair, interval)
-}
-
-impl_candlestick!(GateInverseFutureWSClient);
-impl_candlestick!(GateLinearFutureWSClient);
-
-panic_l3_orderbook!(GateInverseFutureWSClient);
-panic_l3_orderbook!(GateLinearFutureWSClient);
 
 impl_new_constructor!(
     GateInverseFutureWSClient,
     EXCHANGE_NAME,
     INVERSE_FUTURE_WEBSOCKET_URL,
-    channels_to_commands,
-    on_misc_msg,
-    Some(CLIENT_PING_INTERVAL_AND_MSG),
-    None
+    GateMessageHandler::<'F'> {},
+    GateCommandTranslator::<'F'> {}
 );
-impl_ws_client_trait!(GateInverseFutureWSClient);
 
 impl_new_constructor!(
     GateLinearFutureWSClient,
     EXCHANGE_NAME,
     LINEAR_FUTURE_WEBSOCKET_URL,
-    channels_to_commands,
-    on_misc_msg,
-    Some(CLIENT_PING_INTERVAL_AND_MSG),
-    None
+    GateMessageHandler::<'F'> {},
+    GateCommandTranslator::<'F'> {}
 );
+
+impl_trait!(Trade, GateInverseFutureWSClient, subscribe_trade, "trades");
+#[rustfmt::skip]
+impl_trait!(OrderBook, GateInverseFutureWSClient, subscribe_orderbook, "order_book");
+#[rustfmt::skip]
+impl_trait!(Ticker, GateInverseFutureWSClient, subscribe_ticker, "tickers");
+
+#[rustfmt::skip]
+impl_trait!(Trade, GateLinearFutureWSClient, subscribe_trade, "trades");
+#[rustfmt::skip]
+impl_trait!(OrderBook, GateLinearFutureWSClient, subscribe_orderbook, "order_book");
+#[rustfmt::skip]
+impl_trait!(Ticker, GateLinearFutureWSClient, subscribe_ticker, "tickers");
+
+impl_candlestick!(GateInverseFutureWSClient);
+impl_candlestick!(GateLinearFutureWSClient);
+
+panic_bbo!(GateInverseFutureWSClient);
+panic_bbo!(GateLinearFutureWSClient);
+panic_l2_topk!(GateInverseFutureWSClient);
+panic_l2_topk!(GateLinearFutureWSClient);
+panic_l3_orderbook!(GateInverseFutureWSClient);
+panic_l3_orderbook!(GateLinearFutureWSClient);
+
+impl_ws_client_trait!(GateInverseFutureWSClient);
 impl_ws_client_trait!(GateLinearFutureWSClient);

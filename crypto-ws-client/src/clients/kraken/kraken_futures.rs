@@ -1,26 +1,24 @@
-use crate::WSClient;
+use async_trait::async_trait;
 use std::collections::HashMap;
-use std::sync::mpsc::Sender;
+use tokio_tungstenite::tungstenite::Message;
 
-use super::super::{
-    utils::CHANNEL_PAIR_DELIMITER,
-    ws_client_internal::{MiscMessage, WSClientInternal},
-    Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
+use super::EXCHANGE_NAME;
+use crate::{
+    clients::common_traits::{
+        Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
+    },
+    common::{
+        command_translator::CommandTranslator,
+        message_handler::{MessageHandler, MiscMessage},
+        ws_client_internal::WSClientInternal,
+    },
+    WSClient,
 };
-
 use log::*;
 use serde_json::Value;
-use tungstenite::Message;
-
-pub(super) const EXCHANGE_NAME: &str = "kraken";
 
 // https://support.kraken.com/hc/en-us/articles/360022839491-API-URLs
 const WEBSOCKET_URL: &str = "wss://futures.kraken.com/ws/v1";
-
-// In order to keep the websocket connection alive, you will need to
-// make a ping request at least every 60 seconds.
-// https://support.kraken.com/hc/en-us/articles/360022635632-Subscriptions-WebSockets-API-
-// const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (60, r#"{"event":"ping"}"#);
 
 /// The WebSocket client for Kraken Futures market.
 ///
@@ -28,137 +26,154 @@ const WEBSOCKET_URL: &str = "wss://futures.kraken.com/ws/v1";
 ///   * WebSocket API doc: <https://support.kraken.com/hc/en-us/sections/360003562371-Websocket-API-Public>
 ///   * Trading at: <https://futures.kraken.com/>
 pub struct KrakenFuturesWSClient {
-    client: WSClientInternal,
+    client: WSClientInternal<KrakenMessageHandler>,
+    translator: KrakenCommandTranslator,
 }
 
-fn channel_symbols_to_command(channel: &str, symbols: &[String], subscribe: bool) -> String {
-    format!(
-        r#"{{"event":"{}","feed":"{}","product_ids":{}}}"#,
-        if subscribe {
-            "subscribe"
-        } else {
-            "unsubscribe"
-        },
-        channel,
-        serde_json::to_string(symbols).unwrap(),
-    )
-}
-
-fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-    let mut all_commands: Vec<String> = channels
-        .iter()
-        .filter(|ch| ch.starts_with('{'))
-        .map(|s| s.to_string())
-        .collect();
-
-    let mut channel_symbols = HashMap::<String, Vec<String>>::new();
-    for s in channels.iter().filter(|ch| !ch.starts_with('{')) {
-        let v: Vec<&str> = s.split(CHANNEL_PAIR_DELIMITER).collect();
-        let channel = v[0];
-        let symbol = v[1];
-        match channel_symbols.get_mut(channel) {
-            Some(symbols) => symbols.push(symbol.to_string()),
-            None => {
-                channel_symbols.insert(channel.to_string(), vec![symbol.to_string()]);
-            }
-        }
-    }
-
-    for (channel, symbols) in channel_symbols.iter() {
-        all_commands.push(channel_symbols_to_command(channel, symbols, subscribe));
-    }
-    all_commands.push(r#"{"event":"subscribe","feed":"heartbeat"}"#.to_string());
-
-    all_commands
-}
-
-fn on_misc_msg(msg: &str) -> MiscMessage {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
-
-    if obj.contains_key("event") {
-        let event = obj.get("event").unwrap().as_str().unwrap();
-        match event {
-            "error" => panic!("Received {} from {}", msg, EXCHANGE_NAME),
-            _ => {
-                warn!("Received {} from {}", msg, EXCHANGE_NAME);
-                MiscMessage::Misc
-            }
-        }
-    } else if obj.contains_key("feed") {
-        let feed = obj.get("feed").unwrap().as_str().unwrap();
-        if feed == "heartbeat" {
-            debug!("Received {} from {}", msg, EXCHANGE_NAME);
-            MiscMessage::WebSocket(Message::Ping(Vec::new()))
-        } else if obj.contains_key("product_id") {
-            MiscMessage::Normal
-        } else {
-            MiscMessage::Misc
-        }
-    } else {
-        MiscMessage::Misc
-    }
-}
-
-fn to_raw_channel(channel: &str, symbol: &str) -> String {
-    format!("{}{}{}", channel, CHANNEL_PAIR_DELIMITER, symbol)
-}
+impl_new_constructor!(
+    KrakenFuturesWSClient,
+    EXCHANGE_NAME,
+    WEBSOCKET_URL,
+    KrakenMessageHandler {},
+    KrakenCommandTranslator {}
+);
 
 #[rustfmt::skip]
-impl_trait!(Trade, KrakenFuturesWSClient, subscribe_trade, "trade", to_raw_channel);
+impl_trait!(Trade, KrakenFuturesWSClient, subscribe_trade, "trade");
 #[rustfmt::skip]
-impl_trait!(OrderBook, KrakenFuturesWSClient, subscribe_orderbook, "book", to_raw_channel);
+impl_trait!(OrderBook, KrakenFuturesWSClient, subscribe_orderbook, "book");
 #[rustfmt::skip]
-impl_trait!(Ticker, KrakenFuturesWSClient, subscribe_ticker, "ticker", to_raw_channel);
+impl_trait!(Ticker, KrakenFuturesWSClient, subscribe_ticker, "ticker");
 
 panic_bbo!(KrakenFuturesWSClient);
 panic_l2_topk!(KrakenFuturesWSClient);
 panic_l3_orderbook!(KrakenFuturesWSClient);
 panic_candlestick!(KrakenFuturesWSClient);
 
-impl_new_constructor!(
-    KrakenFuturesWSClient,
-    EXCHANGE_NAME,
-    WEBSOCKET_URL,
-    channels_to_commands,
-    on_misc_msg,
-    None, // Some(CLIENT_PING_INTERVAL_AND_MSG)
-    None
-);
 impl_ws_client_trait!(KrakenFuturesWSClient);
+
+struct KrakenMessageHandler {}
+struct KrakenCommandTranslator {}
+
+impl KrakenCommandTranslator {
+    fn channel_symbols_to_command(channel: &str, symbols: &[String], subscribe: bool) -> String {
+        format!(
+            r#"{{"event":"{}","feed":"{}","product_ids":{}}}"#,
+            if subscribe {
+                "subscribe"
+            } else {
+                "unsubscribe"
+            },
+            channel,
+            serde_json::to_string(symbols).unwrap(),
+        )
+    }
+}
+
+impl MessageHandler for KrakenMessageHandler {
+    fn handle_message(&mut self, msg: &str) -> MiscMessage {
+        let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
+
+        if obj.contains_key("event") {
+            let event = obj.get("event").unwrap().as_str().unwrap();
+            match event {
+                "error" => panic!("Received {} from {}", msg, EXCHANGE_NAME),
+                _ => {
+                    warn!("Received {} from {}", msg, EXCHANGE_NAME);
+                    MiscMessage::Other
+                }
+            }
+        } else if obj.contains_key("feed") {
+            let feed = obj.get("feed").unwrap().as_str().unwrap();
+            if feed == "heartbeat" {
+                debug!("Received {} from {}", msg, EXCHANGE_NAME);
+                MiscMessage::WebSocket(Message::Ping(Vec::new()))
+            } else if obj.contains_key("product_id") {
+                MiscMessage::Normal
+            } else {
+                MiscMessage::Other
+            }
+        } else {
+            MiscMessage::Other
+        }
+    }
+
+    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+        // In order to keep the websocket connection alive, you will need to
+        // make a ping request at least every 60 seconds.
+        // https://support.kraken.com/hc/en-us/articles/360022635632-Subscriptions-WebSockets-API-
+        None // TODO: lack of doc
+    }
+}
+
+impl CommandTranslator for KrakenCommandTranslator {
+    fn translate_to_commands(&self, subscribe: bool, topics: &[(String, String)]) -> Vec<String> {
+        let mut commands: Vec<String> = Vec::new();
+
+        let mut channel_symbols = HashMap::<String, Vec<String>>::new();
+        for (channel, symbol) in topics {
+            match channel_symbols.get_mut(channel) {
+                Some(symbols) => symbols.push(symbol.to_string()),
+                None => {
+                    channel_symbols.insert(channel.to_string(), vec![symbol.to_string()]);
+                }
+            }
+        }
+
+        for (channel, symbols) in channel_symbols.iter() {
+            commands.push(Self::channel_symbols_to_command(
+                channel, symbols, subscribe,
+            ));
+        }
+        commands.push(r#"{"event":"subscribe","feed":"heartbeat"}"#.to_string());
+
+        commands
+    }
+
+    fn translate_to_candlestick_commands(
+        &self,
+        _subscribe: bool,
+        _symbol_interval_list: &[(String, usize)],
+    ) -> Vec<String> {
+        panic!("Kraken Futures does NOT have candlestick channel");
+    }
+}
 
 #[cfg(test)]
 mod tests {
+    use crate::common::command_translator::CommandTranslator;
+
     #[test]
     fn test_one_symbol() {
+        let translator = super::KrakenCommandTranslator {};
+        let commands = translator
+            .translate_to_commands(true, &vec![("trade".to_string(), "PI_XBTUSD".to_string())]);
+
+        assert_eq!(2, commands.len());
         assert_eq!(
             r#"{"event":"subscribe","feed":"trade","product_ids":["PI_XBTUSD"]}"#,
-            super::channel_symbols_to_command("trade", &vec!["PI_XBTUSD".to_string()], true)
+            commands[0]
         );
-
-        assert_eq!(
-            r#"{"event":"unsubscribe","feed":"trade","product_ids":["PI_XBTUSD"]}"#,
-            super::channel_symbols_to_command("trade", &vec!["PI_XBTUSD".to_string()], false)
-        );
+        assert_eq!(r#"{"event":"subscribe","feed":"heartbeat"}"#, commands[1]);
     }
 
     #[test]
     fn test_two_symbols() {
-        assert_eq!(
-            r#"{"event":"subscribe","feed":"trade","product_ids":["PI_XBTUSD","PI_ETHUSD"]}"#,
-            super::channel_symbols_to_command(
-                "trade",
-                &vec!["PI_XBTUSD".to_string(), "PI_ETHUSD".to_string()],
-                true
-            )
+        let translator = super::KrakenCommandTranslator {};
+        let commands = translator.translate_to_commands(
+            true,
+            &vec![
+                ("trade".to_string(), "PI_XBTUSD".to_string()),
+                ("trade".to_string(), "PI_ETHUSD".to_string()),
+            ],
         );
 
+        assert_eq!(2, commands.len());
+
         assert_eq!(
-            r#"{"event":"unsubscribe","feed":"trade","product_ids":["PI_XBTUSD","PI_ETHUSD"]}"#,
-            super::channel_symbols_to_command(
-                "trade",
-                &vec!["PI_XBTUSD".to_string(), "PI_ETHUSD".to_string()],
-                false
-            )
+            r#"{"event":"subscribe","feed":"trade","product_ids":["PI_XBTUSD","PI_ETHUSD"]}"#,
+            commands[0]
         );
+        assert_eq!(r#"{"event":"subscribe","feed":"heartbeat"}"#, commands[1]);
     }
 }

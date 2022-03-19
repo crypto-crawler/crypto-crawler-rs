@@ -1,15 +1,18 @@
 macro_rules! gen_test_code {
-    ($client:ident, $func_name:ident, $pairs:expr) => {
+    ($client:ident, $func_name:ident, $symbols:expr) => {
         let (tx, rx): (Sender<String>, Receiver<String>) = std::sync::mpsc::channel();
-        let mut messages = Vec::<String>::new();
-        {
-            let ws_client = $client::new(tx, None);
-            ws_client.$func_name($pairs);
-            ws_client.run(Some(0)); // return immediately once after a normal message
+        tokio::task::spawn(async move {
+            let ws_client = $client::new(tx, None).await;
+            ws_client.$func_name($symbols).await;
+            // run for 60 seconds at most
+            let _ = tokio::time::timeout(std::time::Duration::from_secs(60), ws_client.run()).await;
             ws_client.close();
-        }
+        });
+
+        let mut messages = Vec::<String>::new();
         for msg in rx {
             messages.push(msg);
+            break;
         }
         assert!(!messages.is_empty());
     };
@@ -19,15 +22,18 @@ macro_rules! gen_test_code {
 macro_rules! gen_test_subscribe_candlestick {
     ($client:ident, $symbol_interval_list:expr) => {
         let (tx, rx): (Sender<String>, Receiver<String>) = std::sync::mpsc::channel();
-        let mut messages = Vec::<String>::new();
-        {
-            let ws_client = $client::new(tx, None);
-            ws_client.subscribe_candlestick($symbol_interval_list);
-            ws_client.run(Some(0)); // return immediately once after a normal message
+        tokio::task::spawn(async move {
+            let ws_client = $client::new(tx, None).await;
+            ws_client.subscribe_candlestick($symbol_interval_list).await;
+            // run for 60 seconds at most
+            let _ = tokio::time::timeout(std::time::Duration::from_secs(60), ws_client.run()).await;
             ws_client.close();
-        }
+        });
+
+        let mut messages = Vec::<String>::new();
         for msg in rx {
             messages.push(msg);
+            break;
         }
         assert!(!messages.is_empty());
     };

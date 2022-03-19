@@ -4,3 +4,5 @@ mod zbg_swap;
 
 pub use zbg_spot::ZbgSpotWSClient;
 pub use zbg_swap::ZbgSwapWSClient;
+
+const EXCHANGE_NAME: &str = "zbg";

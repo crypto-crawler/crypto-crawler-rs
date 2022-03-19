@@ -1,12 +1,17 @@
-use crate::WSClient;
+use async_trait::async_trait;
 use std::collections::HashMap;
-use std::sync::mpsc::Sender;
 
-use super::{
-    utils::CHANNEL_PAIR_DELIMITER,
-    ws_client_internal::{MiscMessage, WSClientInternal},
+use crate::{
+    clients::common_traits::{
+        Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
+    },
+    common::{
+        command_translator::CommandTranslator,
+        message_handler::{MessageHandler, MiscMessage},
+        ws_client_internal::WSClientInternal,
+    },
+    WSClient,
 };
-use super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
 
 use log::*;
 use serde_json::Value;
@@ -15,10 +20,6 @@ pub(super) const EXCHANGE_NAME: &str = "ftx";
 
 const WEBSOCKET_URL: &str = "wss://ftx.com/ws/";
 
-// Send pings at regular intervals (every 15 seconds): {'op': 'ping'}.
-// You will see an {'type': 'pong'} response.
-const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (15, r#"{"op":"ping"}"#);
-
 /// The WebSocket client for FTX.
 ///
 /// FTX has Spot, LinearFuture, LinearSwap, Option, Move and BVOL markets.
@@ -26,96 +27,127 @@ const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (15, r#"{"op":"ping"}"#);
 /// * WebSocket API doc: <https://docs.ftx.com/#websocket-api>
 /// * Trading at <https://ftx.com/markets>
 pub struct FtxWSClient {
-    client: WSClientInternal,
+    client: WSClientInternal<FtxMessageHandler>,
+    translator: FtxCommandTranslator,
 }
-
-fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-    let mut all_commands: Vec<String> = channels
-        .iter()
-        .filter(|ch| ch.starts_with('{'))
-        .map(|s| s.to_string())
-        .collect();
-
-    for s in channels.iter().filter(|ch| !ch.starts_with('{')) {
-        let v: Vec<&str> = s.split(CHANNEL_PAIR_DELIMITER).collect();
-        let channel = v[0];
-        let pair = v[1];
-        all_commands.append(&mut vec![format!(
-            r#"{{"op":"{}","channel":"{}","market":"{}"}}"#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
-            channel,
-            pair
-        )])
-    }
-
-    all_commands
-}
-
-fn on_misc_msg(msg: &str) -> MiscMessage {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
-    let msg_type = obj.get("type").unwrap().as_str().unwrap();
-
-    match msg_type {
-        // see https://docs.ftx.com/#response-format
-        "pong" => MiscMessage::Pong,
-        "subscribed" | "unsubscribed" | "info" => {
-            info!("Received {} from {}", msg, EXCHANGE_NAME);
-            MiscMessage::Misc
-        }
-        "partial" | "update" => MiscMessage::Normal,
-        "error" => {
-            error!("Received {} from {}", msg, EXCHANGE_NAME);
-            panic!("Received {} from {}", msg, EXCHANGE_NAME);
-        }
-        _ => {
-            warn!("Received {} from {}", msg, EXCHANGE_NAME);
-            MiscMessage::Misc
-        }
-    }
-}
-
-fn to_raw_channel(channel: &str, pair: &str) -> String {
-    format!("{}{}{}", channel, CHANNEL_PAIR_DELIMITER, pair)
-}
-
-#[rustfmt::skip]
-impl_trait!(Trade, FtxWSClient, subscribe_trade, "trades", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(BBO, FtxWSClient, subscribe_bbo, "ticker", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(OrderBook, FtxWSClient, subscribe_orderbook, "orderbook", to_raw_channel);
-
-impl OrderBookTopK for FtxWSClient {
-    fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
-        panic!("FTX does NOT have orderbook snapshot channel");
-    }
-}
-
-impl Ticker for FtxWSClient {
-    fn subscribe_ticker(&self, _pairs: &[String]) {
-        panic!("FTX does NOT have ticker channel");
-    }
-}
-
-impl Candlestick for FtxWSClient {
-    fn subscribe_candlestick(&self, _symbol_interval_list: &[(String, usize)]) {
-        panic!("FTX does NOT have candlestick channel");
-    }
-}
-
-panic_l3_orderbook!(FtxWSClient);
 
 impl_new_constructor!(
     FtxWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
-    channels_to_commands,
-    on_misc_msg,
-    Some(CLIENT_PING_INTERVAL_AND_MSG),
-    None
+    FtxMessageHandler {},
+    FtxCommandTranslator {}
 );
+
+impl_trait!(Trade, FtxWSClient, subscribe_trade, "trades");
+impl_trait!(BBO, FtxWSClient, subscribe_bbo, "ticker");
+#[rustfmt::skip]
+impl_trait!(OrderBook, FtxWSClient, subscribe_orderbook, "orderbook");
+panic_candlestick!(FtxWSClient);
+panic_l2_topk!(FtxWSClient);
+panic_l3_orderbook!(FtxWSClient);
+panic_ticker!(FtxWSClient);
+
 impl_ws_client_trait!(FtxWSClient);
+
+struct FtxMessageHandler {}
+struct FtxCommandTranslator {}
+
+impl MessageHandler for FtxMessageHandler {
+    fn handle_message(&mut self, msg: &str) -> MiscMessage {
+        let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
+        let msg_type = obj.get("type").unwrap().as_str().unwrap();
+
+        match msg_type {
+            // see https://docs.ftx.com/#response-format
+            "pong" => MiscMessage::Pong,
+            "subscribed" | "unsubscribed" | "info" => {
+                info!("Received {} from {}", msg, EXCHANGE_NAME);
+                MiscMessage::Other
+            }
+            "partial" | "update" => MiscMessage::Normal,
+            "error" => {
+                error!("Received {} from {}", msg, EXCHANGE_NAME);
+                panic!("Received {} from {}", msg, EXCHANGE_NAME);
+            }
+            _ => {
+                warn!("Received {} from {}", msg, EXCHANGE_NAME);
+                MiscMessage::Other
+            }
+        }
+    }
+
+    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+        // Send pings at regular intervals (every 15 seconds): {'op': 'ping'}.
+        // You will see an {'type': 'pong'} response.
+        Some((r#"{"op":"ping"}"#.to_string(), 15))
+    }
+}
+
+impl CommandTranslator for FtxCommandTranslator {
+    fn translate_to_commands(&self, subscribe: bool, topics: &[(String, String)]) -> Vec<String> {
+        topics
+            .iter()
+            .map(|(channel, symbol)| {
+                format!(
+                    r#"{{"op":"{}","channel":"{}","market":"{}"}}"#,
+                    if subscribe {
+                        "subscribe"
+                    } else {
+                        "unsubscribe"
+                    },
+                    channel,
+                    symbol
+                )
+            })
+            .collect()
+    }
+
+    fn translate_to_candlestick_commands(
+        &self,
+        _subscribe: bool,
+        _symbol_interval_list: &[(String, usize)],
+    ) -> Vec<String> {
+        panic!("FTX does NOT have candlestick channel");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::common::command_translator::CommandTranslator;
+
+    #[test]
+    fn test_one_topic() {
+        let translator = super::FtxCommandTranslator {};
+        let commands = translator
+            .translate_to_commands(true, &vec![("trades".to_string(), "BTC/USD".to_string())]);
+
+        assert_eq!(1, commands.len());
+        assert_eq!(
+            r#"{"op":"subscribe","channel":"trades","market":"BTC/USD"}"#,
+            commands[0]
+        );
+    }
+
+    #[test]
+    fn test_two_topic() {
+        let translator = super::FtxCommandTranslator {};
+        let commands = translator.translate_to_commands(
+            true,
+            &vec![
+                ("trades".to_string(), "BTC/USD".to_string()),
+                ("orderbook".to_string(), "BTC/USD".to_string()),
+            ],
+        );
+
+        assert_eq!(2, commands.len());
+        assert_eq!(
+            r#"{"op":"subscribe","channel":"trades","market":"BTC/USD"}"#,
+            commands[0]
+        );
+        assert_eq!(
+            r#"{"op":"subscribe","channel":"orderbook","market":"BTC/USD"}"#,
+            commands[1]
+        );
+    }
+}
