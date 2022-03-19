@@ -1,6 +1,6 @@
 macro_rules! gen_test_code {
     ($client:ident, $func_name:ident, $symbols:expr) => {
-        let (tx, rx): (Sender<String>, Receiver<String>) = std::sync::mpsc::channel();
+        let (tx, rx) = std::sync::mpsc::channel();
         tokio::task::spawn(async move {
             let ws_client = $client::new(tx, None).await;
             ws_client.$func_name($symbols).await;
@@ -21,7 +21,7 @@ macro_rules! gen_test_code {
 #[allow(unused_macros)]
 macro_rules! gen_test_subscribe_candlestick {
     ($client:ident, $symbol_interval_list:expr) => {
-        let (tx, rx): (Sender<String>, Receiver<String>) = std::sync::mpsc::channel();
+        let (tx, rx) = std::sync::mpsc::channel();
         tokio::task::spawn(async move {
             let ws_client = $client::new(tx, None).await;
             ws_client.subscribe_candlestick($symbol_interval_list).await;

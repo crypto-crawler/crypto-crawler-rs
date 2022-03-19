@@ -1,5 +1,4 @@
 use crypto_ws_client::{BithumbWSClient, WSClient};
-use std::sync::mpsc::{Receiver, Sender};
 
 #[macro_use]
 mod utils;

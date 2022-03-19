@@ -4,7 +4,6 @@ mod utils;
 #[cfg(test)]
 mod bybit_inverse_future {
     use crypto_ws_client::{BybitInverseWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -64,7 +63,6 @@ mod bybit_inverse_future {
 #[cfg(test)]
 mod bybit_inverse_swap {
     use crypto_ws_client::{BybitInverseWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -124,7 +122,6 @@ mod bybit_inverse_swap {
 #[cfg(test)]
 mod bybit_linear_swap {
     use crypto_ws_client::{BybitLinearSwapWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {

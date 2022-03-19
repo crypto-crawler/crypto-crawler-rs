@@ -4,7 +4,6 @@ mod utils;
 #[cfg(test)]
 mod bitget_inverse_swap {
     use crypto_ws_client::{BitgetSwapWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -80,7 +79,6 @@ mod bitget_inverse_swap {
 #[cfg(test)]
 mod bitget_linear_swap {
     use crypto_ws_client::{BitgetSwapWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {

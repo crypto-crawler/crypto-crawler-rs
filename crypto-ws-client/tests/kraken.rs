@@ -4,7 +4,6 @@ mod utils;
 #[cfg(test)]
 mod kraken_spot {
     use crypto_ws_client::{KrakenSpotWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -88,7 +87,6 @@ mod kraken_spot {
 #[cfg(test)]
 mod kraken_inverse_swap {
     use crypto_ws_client::{KrakenFuturesWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_raw_json() {
@@ -132,7 +130,6 @@ mod kraken_inverse_swap {
 #[cfg(test)]
 mod kraken_inverse_future {
     use crypto_ws_client::{KrakenFuturesWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_raw_json() {

@@ -4,7 +4,6 @@ mod utils;
 #[cfg(test)]
 mod dydx_linear_swap {
     use crypto_ws_client::{DydxSwapWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {

@@ -1,5 +1,4 @@
 use crypto_ws_client::{DeribitWSClient, WSClient};
-use std::sync::mpsc::{Receiver, Sender};
 
 #[macro_use]
 mod utils;
@@ -20,7 +19,6 @@ async fn deribit_all_trades() {
 #[cfg(test)]
 mod deribit_inverse_future {
     use crypto_ws_client::{DeribitWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -78,7 +76,6 @@ mod deribit_inverse_future {
 #[cfg(test)]
 mod deribit_inverse_swap {
     use crypto_ws_client::{DeribitWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -141,7 +138,6 @@ mod deribit_inverse_swap {
 #[cfg(test)]
 mod deribit_option {
     use crypto_ws_client::{DeribitWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     const SYMBOLS: &'static [&str] = &[
         "BTC-29APR22-50000-C",
