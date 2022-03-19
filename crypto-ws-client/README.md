@@ -12,37 +12,20 @@ A versatile websocket client that supports many cryptocurrency exchanges.
 ```rust
 use crypto_ws_client::{BinanceSpotWSClient, WSClient};
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let (tx, rx) = std::sync::mpsc::channel();
-    let thread = std::thread::spawn(move || {
-        for msg in rx {
-            println!("{}", msg);
-        }
+    tokio::task::spawn(async move {
+        let symbols = vec!["BTCUSDT".to_string(), "ETHUSDT".to_string()];
+        let ws_client = BinanceSpotWSClient::new(tx, None).await;
+        ws_client.subscribe_trade(&symbols).await;
+        // run for 5 seconds
+        let _ = tokio::time::timeout(std::time::Duration::from_secs(5), ws_client.run()).await;
+        ws_client.close();
     });
-    let mut ws_client = BinanceSpotWSClient::new(tx, None);
-    let channels = vec!["btcusdt@aggTrade".to_string(), "btcusdt@depth".to_string(),];
-    ws_client.subscribe(&channels);
-    ws_client.run(None);
-    wc_client.close();
-    drop(ws_client);
-    thread.join().unwrap();
+
+    for msg in rx {
+        println!("{}", msg);
+    }
 }
 ```
-
-## Contribution
-
-### How to add support for a new exchange
-
-#### 1. Add a new file under `src/clients/`
-
-Define a struct in the file, with the same name as the file.
-
-Define a `channels_to_commands()` function which can convert raw channels to subscribe/unsubscribe commands.
-
-Define a customized `on_misc_msg()` to handle misc messages.
-
-Use `define_client!` macro to implement the `WSClient` trait.
-
-#### 2. Add a new file under `tests/`
-
-Add a new file under `tests/` and put some integration tests in it.
