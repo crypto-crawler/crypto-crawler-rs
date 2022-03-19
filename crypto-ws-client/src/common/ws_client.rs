@@ -8,7 +8,7 @@ pub trait WSClient {
     /// A trade channel sends tick-by-tick trade data,  which is the complete
     /// copy of a market's trading information.
     ///
-    /// Each exchange has its own pair formats, for example:
+    /// Each exchange has its own symbol formats, for example:
     ///
     /// * BitMEX `XBTUSD`, `XBTM21`
     /// * Binance `btcusdt`, `btcusd_perp`
@@ -98,8 +98,16 @@ pub trait WSClient {
     /// topic = channel + symbol, a topic will be converted to an exchange-specific
     /// channel(called `raw channel`).
     ///
-    /// The topic string supports `SYMBOL` as a placeholder, for example,
-    /// `("market.SYMBOL.trade.detail", "btcusdt")` will be converted to `"market.btcusdt.trade.detail"`.
+    /// The channel string supports `SYMBOL` as a placeholder, for example,
+    /// `("market.SYMBOL.trade.detail", "btcusdt")` will be converted to a raw channel
+    /// `"market.btcusdt.trade.detail"`.
+    ///
+    /// Examples:
+    ///
+    /// * Binance: `vec![("aggTrade".to_string(), "BTCUSDT".to_string()),("ticker".to_string(), "BTCUSDT".to_string())]`
+    /// * Deribit: `vec![(trades.SYMBOL.100ms".to_string(),"BTC-PERPETUAL".to_string()),(trades.SYMBOL.100ms".to_string(),"ETH-PERPETUAL".to_string())]`
+    /// * Huobi: `vec![("trade.detail".to_string(), "btcusdt".to_string()),("trade.detail".to_string(), "ethusdt".to_string())]`
+    /// * OKX: `vec![("trades".to_string(), "BTC-USDT".to_string()),("trades".to_string(), "ETH-USDT".to_string())]`
     async fn subscribe(&self, topics: &[(String, String)]);
 
     /// Unsubscribes multiple topics.
