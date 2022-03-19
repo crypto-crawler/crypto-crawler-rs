@@ -1,124 +1,188 @@
-use crate::WSClient;
+use async_trait::async_trait;
 use std::collections::HashMap;
-use std::sync::mpsc::Sender;
 
-use super::{
-    ws_client_internal::{MiscMessage, WSClientInternal},
-    Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
+use crate::{
+    clients::common_traits::{
+        Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
+    },
+    common::{
+        command_translator::CommandTranslator,
+        message_handler::{MessageHandler, MiscMessage},
+        ws_client_internal::WSClientInternal,
+    },
+    WSClient,
 };
 use log::*;
 use serde_json::Value;
 
-pub(super) const EXCHANGE_NAME: &str = "binance";
+pub(crate) const EXCHANGE_NAME: &str = "binance";
 
 pub(super) const WEBSOCKET_URL: &str = "wss://stream.opsnest.com/stream";
-
-const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (240, r#"{"event":"ping"}"#);
 
 /// Binance Option market
 ///
 ///   * WebSocket API doc: <https://binance-docs.github.io/apidocs/voptions/en/>
 ///   * Trading at: <https://voptions.binance.com/en>
 pub struct BinanceOptionWSClient {
-    client: WSClientInternal,
-}
-
-fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-    let raw_channels: Vec<&String> = channels.iter().filter(|ch| !ch.starts_with('{')).collect();
-    let mut all_commands: Vec<String> = channels
-        .iter()
-        .filter(|ch| ch.starts_with('{'))
-        .map(|s| s.to_string())
-        .collect();
-
-    if !raw_channels.is_empty() {
-        all_commands.append(&mut vec![format!(
-            r#"{{"id":9527,"method":"{}","params":{}}}"#,
-            if subscribe {
-                "SUBSCRIBE"
-            } else {
-                "UNSUBSCRIBE"
-            },
-            serde_json::to_string(&raw_channels).unwrap()
-        )])
-    };
-
-    all_commands
-}
-
-fn on_misc_msg(msg: &str) -> MiscMessage {
-    if msg == r#"{"id":9527}"# {
-        return MiscMessage::Misc;
-    } else if msg == r#"{"event":"pong"}"# {
-        return MiscMessage::Pong;
-    }
-
-    let resp = serde_json::from_str::<HashMap<String, Value>>(msg);
-    if resp.is_err() {
-        error!("{} is not a JSON string, {}", msg, EXCHANGE_NAME);
-        return MiscMessage::Misc;
-    }
-    let obj = resp.unwrap();
-
-    if obj.contains_key("code") {
-        panic!("Received {} from {}", msg, EXCHANGE_NAME);
-    }
-
-    if let Some(result) = obj.get("result") {
-        if serde_json::Value::Null == *result {
-            return MiscMessage::Misc;
-        }
-    }
-
-    if !obj.contains_key("stream") || !obj.contains_key("data") {
-        warn!("Received {} from {}", msg, EXCHANGE_NAME);
-        return MiscMessage::Misc;
-    }
-
-    MiscMessage::Normal
+    client: WSClientInternal<BinanceOptionMessageHandler>,
+    translator: BinanceOptionCommandTranslator,
 }
 
 impl_new_constructor!(
     BinanceOptionWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
-    channels_to_commands,
-    on_misc_msg,
-    Some(CLIENT_PING_INTERVAL_AND_MSG),
-    None
+    BinanceOptionMessageHandler {},
+    BinanceOptionCommandTranslator {}
 );
+
+impl_trait!(Trade, BinanceOptionWSClient, subscribe_trade, "trade");
+impl_trait!(Ticker, BinanceOptionWSClient, subscribe_ticker, "ticker");
+impl_trait!(BBO, BinanceOptionWSClient, subscribe_bbo, "bookTicker");
+#[rustfmt::skip]
+impl_trait!(OrderBook, BinanceOptionWSClient, subscribe_orderbook, "depth@100ms");
+#[rustfmt::skip]
+impl_trait!(OrderBookTopK, BinanceOptionWSClient, subscribe_orderbook_topk, "depth10");
+impl_candlestick!(BinanceOptionWSClient);
+panic_l3_orderbook!(BinanceOptionWSClient);
+
 impl_ws_client_trait!(BinanceOptionWSClient);
 
-fn to_raw_channel(channel: &str, pair: &str) -> String {
-    format!("{}@{}", pair, channel)
+struct BinanceOptionMessageHandler {}
+struct BinanceOptionCommandTranslator {}
+
+impl BinanceOptionCommandTranslator {
+    fn topics_to_command(topics: &[(String, String)], subscribe: bool) -> String {
+        let raw_topics = topics
+            .iter()
+            .map(|(topic, symbol)| format!("{}@{}", symbol, topic))
+            .collect::<Vec<String>>();
+        format!(
+            r#"{{"id":9527,"method":"{}","params":{}}}"#,
+            if subscribe {
+                "SUBSCRIBE"
+            } else {
+                "UNSUBSCRIBE"
+            },
+            serde_json::to_string(&raw_topics).unwrap()
+        )
+    }
+
+    // see https://binance-docs.github.io/apidocs/voptions/en/#payload-candle
+    fn to_candlestick_raw_channel(interval: usize) -> String {
+        let interval_str = match interval {
+            60 => "1m",
+            300 => "5m",
+            900 => "15m",
+            1800 => "30m",
+            3600 => "1h",
+            14400 => "4h",
+            86400 => "1d",
+            604800 => "1w",
+            _ => panic!("Binance Option has intervals 1m,5m,15m,30m,1h4h,1d,1w"),
+        };
+        format!("kline_{}", interval_str)
+    }
 }
 
-#[rustfmt::skip]
-impl_trait!(Trade, BinanceOptionWSClient, subscribe_trade, "trade", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(Ticker, BinanceOptionWSClient, subscribe_ticker, "ticker", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(BBO, BinanceOptionWSClient, subscribe_bbo, "bookTicker", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(OrderBook, BinanceOptionWSClient, subscribe_orderbook, "depth@100ms", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(OrderBookTopK, BinanceOptionWSClient, subscribe_orderbook_topk, "depth10", to_raw_channel);
+impl MessageHandler for BinanceOptionMessageHandler {
+    fn handle_message(&mut self, msg: &str) -> MiscMessage {
+        if msg == r#"{"id":9527}"# {
+            return MiscMessage::Other;
+        } else if msg == r#"{"event":"pong"}"# {
+            return MiscMessage::Pong;
+        }
 
-fn to_candlestick_raw_channel(symbol: &str, interval: usize) -> String {
-    let interval_str = match interval {
-        60 => "1m",
-        300 => "5m",
-        900 => "15m",
-        1800 => "30m",
-        3600 => "1h",
-        14400 => "4h",
-        86400 => "1d",
-        604800 => "1w",
-        _ => panic!("Binance has intervals 1m,5m,15m,30m,1h4h,1d,1w"),
-    };
-    format!("{}@kline_{}", symbol, interval_str)
+        let resp = serde_json::from_str::<HashMap<String, Value>>(msg);
+        if resp.is_err() {
+            error!("{} is not a JSON string, {}", msg, EXCHANGE_NAME);
+            return MiscMessage::Other;
+        }
+        let obj = resp.unwrap();
+
+        if obj.contains_key("code") {
+            panic!("Received {} from {}", msg, EXCHANGE_NAME);
+        }
+
+        if let Some(result) = obj.get("result") {
+            if serde_json::Value::Null == *result {
+                return MiscMessage::Other;
+            }
+        }
+
+        if !obj.contains_key("stream") || !obj.contains_key("data") {
+            warn!("Received {} from {}", msg, EXCHANGE_NAME);
+            return MiscMessage::Other;
+        }
+
+        MiscMessage::Normal
+    }
+
+    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+        // https://binance-docs.github.io/apidocs/voptions/en/#push-websocket-account-info
+        // The client will send a ping frame every 2 minutes. If the websocket server does not
+        // receive a ping frame back from the connection within a 2 minute period, the
+        // connection will be disconnected. Unsolicited ping frames are allowed.
+        Some((r#"{"event":"ping"}"#.to_string(), 120))
+    }
 }
 
-impl_candlestick!(BinanceOptionWSClient);
+impl CommandTranslator for BinanceOptionCommandTranslator {
+    fn translate_to_commands(&self, subscribe: bool, topics: &[(String, String)]) -> Vec<String> {
+        let command = Self::topics_to_command(topics, subscribe);
+        vec![command]
+    }
 
-panic_l3_orderbook!(BinanceOptionWSClient);
+    fn translate_to_candlestick_commands(
+        &self,
+        subscribe: bool,
+        symbol_interval_list: &[(String, usize)],
+    ) -> Vec<String> {
+        let topics = symbol_interval_list
+            .iter()
+            .map(|(symbol, interval)| {
+                let channel = Self::to_candlestick_raw_channel(*interval);
+                (channel, symbol.to_string())
+            })
+            .collect::<Vec<(String, String)>>();
+        self.translate_to_commands(subscribe, &topics)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::common::command_translator::CommandTranslator;
+
+    #[test]
+    fn test_one_topic() {
+        let translator = super::BinanceOptionCommandTranslator {};
+        let commands = translator.translate_to_commands(
+            true,
+            &vec![("trade".to_string(), "BTC-220429-50000-C".to_string())],
+        );
+
+        assert_eq!(1, commands.len());
+        assert_eq!(
+            r#"{"id":9527,"method":"SUBSCRIBE","params":["BTC-220429-50000-C@trade"]}"#,
+            commands[0]
+        );
+    }
+
+    #[test]
+    fn test_two_topics() {
+        let translator = super::BinanceOptionCommandTranslator {};
+        let commands = translator.translate_to_commands(
+            true,
+            &vec![
+                ("trade".to_string(), "BTC-220429-50000-C".to_string()),
+                ("ticker".to_string(), "BTC-220429-50000-C".to_string()),
+            ],
+        );
+
+        assert_eq!(1, commands.len());
+        assert_eq!(
+            r#"{"id":9527,"method":"SUBSCRIBE","params":["BTC-220429-50000-C@trade","BTC-220429-50000-C@ticker"]}"#,
+            commands[0]
+        );
+    }
+}

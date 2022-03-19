@@ -1,11 +1,16 @@
-use crate::WSClient;
+use async_trait::async_trait;
 use std::collections::HashMap;
-use std::sync::mpsc::Sender;
 
-use super::{
-    utils::CHANNEL_PAIR_DELIMITER,
-    ws_client_internal::{MiscMessage, WSClientInternal},
-    Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
+use crate::{
+    clients::common_traits::{
+        Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
+    },
+    common::{
+        command_translator::CommandTranslator,
+        message_handler::{MessageHandler, MiscMessage},
+        ws_client_internal::WSClientInternal,
+    },
+    WSClient,
 };
 
 use log::*;
@@ -15,8 +20,6 @@ pub(super) const EXCHANGE_NAME: &str = "bithumb";
 
 const WEBSOCKET_URL: &str = "wss://global-api.bithumb.pro/message/realtime";
 
-const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (60, r#"{"cmd":"ping"}"#);
-
 /// The WebSocket client for Bithumb.
 ///
 /// Bithumb has only Spot market.
@@ -24,19 +27,75 @@ const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) = (60, r#"{"cmd":"ping"}"#);
 ///   * WebSocket API doc: <https://github.com/bithumb-pro/bithumb.pro-official-api-docs/blob/master/ws-api.md>
 ///   * Trading at: <https://en.bithumb.com/trade/order/BTC_KRW>
 pub struct BithumbWSClient {
-    client: WSClientInternal,
+    client: WSClientInternal<BithumbMessageHandler>,
+    translator: BithumbCommandTranslator,
 }
 
-fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-    let mut all_commands: Vec<String> = channels
-        .iter()
-        .filter(|ch| ch.starts_with('{'))
-        .map(|s| s.to_string())
-        .collect();
+impl_new_constructor!(
+    BithumbWSClient,
+    EXCHANGE_NAME,
+    WEBSOCKET_URL,
+    BithumbMessageHandler {},
+    BithumbCommandTranslator {}
+);
 
-    let raw_channels: Vec<&String> = channels.iter().filter(|ch| !ch.starts_with('{')).collect();
-    if !raw_channels.is_empty() {
-        all_commands.append(&mut vec![format!(
+#[rustfmt::skip]
+impl_trait!(Trade, BithumbWSClient, subscribe_trade, "TRADE");
+#[rustfmt::skip]
+impl_trait!(Ticker, BithumbWSClient, subscribe_ticker, "TICKER");
+#[rustfmt::skip]
+impl_trait!(OrderBook, BithumbWSClient, subscribe_orderbook, "ORDERBOOK");
+
+panic_bbo!(BithumbWSClient);
+panic_candlestick!(BithumbWSClient);
+panic_l2_topk!(BithumbWSClient);
+panic_l3_orderbook!(BithumbWSClient);
+
+impl_ws_client_trait!(BithumbWSClient);
+
+struct BithumbMessageHandler {}
+struct BithumbCommandTranslator {}
+
+impl MessageHandler for BithumbMessageHandler {
+    fn handle_message(&mut self, msg: &str) -> MiscMessage {
+        let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
+        let code = obj.get("code").unwrap().as_str().unwrap();
+        let code = code.parse::<i64>().unwrap();
+        if code < 10000 {
+            match code {
+                0 => MiscMessage::Pong,
+                6 => {
+                    let arr = obj.get("data").unwrap().as_array();
+                    if arr != None && arr.unwrap().is_empty() {
+                        // ignore empty data
+                        MiscMessage::Other
+                    } else {
+                        MiscMessage::Normal
+                    }
+                }
+                7 => MiscMessage::Normal,
+                _ => {
+                    debug!("Received {} from {}", msg, EXCHANGE_NAME);
+                    MiscMessage::Other
+                }
+            }
+        } else {
+            panic!("Received {} from {}", msg, EXCHANGE_NAME);
+        }
+    }
+
+    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+        Some((r#"{"cmd":"ping"}"#.to_string(), 60))
+    }
+}
+
+impl BithumbCommandTranslator {
+    fn topics_to_command(topics: &[(String, String)], subscribe: bool) -> String {
+        let raw_channels: Vec<String> = topics
+            .iter()
+            .map(|(channel, symbol)| format!("{}:{}", channel, symbol))
+            .collect();
+        format!(
             r#"{{"cmd":"{}","args":{}}}"#,
             if subscribe {
                 "subscribe"
@@ -44,78 +103,61 @@ fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
                 "unsubscribe"
             },
             serde_json::to_string(&raw_channels).unwrap()
-        )])
-    };
-
-    all_commands
-}
-
-fn on_misc_msg(msg: &str) -> MiscMessage {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
-    let code = obj.get("code").unwrap().as_str().unwrap();
-    let code = code.parse::<i64>().unwrap();
-    if code < 10000 {
-        match code {
-            0 => MiscMessage::Pong,
-            6 => {
-                let arr = obj.get("data").unwrap().as_array();
-                if arr != None && arr.unwrap().is_empty() {
-                    // ignore empty data
-                    MiscMessage::Misc
-                } else {
-                    MiscMessage::Normal
-                }
-            }
-            7 => MiscMessage::Normal,
-            _ => {
-                debug!("Received {} from {}", msg, EXCHANGE_NAME);
-                MiscMessage::Misc
-            }
-        }
-    } else {
-        error!("Received {} from {}", msg, EXCHANGE_NAME);
-        panic!("Received {} from {}", msg, EXCHANGE_NAME);
+        )
     }
 }
 
-fn to_raw_channel(channel: &str, pair: &str) -> String {
-    format!("{}{}{}", channel, CHANNEL_PAIR_DELIMITER, pair)
-}
+impl CommandTranslator for BithumbCommandTranslator {
+    fn translate_to_commands(&self, subscribe: bool, topics: &[(String, String)]) -> Vec<String> {
+        vec![Self::topics_to_command(topics, subscribe)]
+    }
 
-#[rustfmt::skip]
-impl_trait!(Trade, BithumbWSClient, subscribe_trade, "TRADE", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(Ticker, BithumbWSClient, subscribe_ticker, "TICKER", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(OrderBook, BithumbWSClient, subscribe_orderbook, "ORDERBOOK", to_raw_channel);
-
-impl BBO for BithumbWSClient {
-    fn subscribe_bbo(&self, _pairs: &[String]) {
-        panic!("bithumb WebSocket does NOT have BBO channel");
+    fn translate_to_candlestick_commands(
+        &self,
+        _subscribe: bool,
+        _symbol_interval_list: &[(String, usize)],
+    ) -> Vec<String> {
+        panic!("Bithumb does NOT have candlestick channel");
     }
 }
 
-impl OrderBookTopK for BithumbWSClient {
-    fn subscribe_orderbook_topk(&self, _pairs: &[String]) {
-        panic!("bithumb does NOT have orderbook snapshot channel");
+#[cfg(test)]
+mod tests {
+    use crate::common::command_translator::CommandTranslator;
+
+    #[test]
+    fn test_two_symbols() {
+        let translator = super::BithumbCommandTranslator {};
+        let commands = translator.translate_to_commands(
+            true,
+            &vec![
+                ("TRADE".to_string(), "BTC-USDT".to_string()),
+                ("TRADE".to_string(), "ETH-USDT".to_string()),
+            ],
+        );
+
+        assert_eq!(1, commands.len());
+        assert_eq!(
+            r#"{"cmd":"subscribe","args":["TRADE:BTC-USDT","TRADE:ETH-USDT"]}"#,
+            commands[0]
+        );
+    }
+
+    #[test]
+    fn test_two_channels() {
+        let translator = super::BithumbCommandTranslator {};
+        let commands = translator.translate_to_commands(
+            true,
+            &vec![
+                ("TRADE".to_string(), "BTC-USDT".to_string()),
+                ("ORDERBOOK".to_string(), "BTC-USDT".to_string()),
+            ],
+        );
+
+        assert_eq!(1, commands.len());
+        assert_eq!(
+            r#"{"cmd":"subscribe","args":["TRADE:BTC-USDT","ORDERBOOK:BTC-USDT"]}"#,
+            commands[0]
+        );
     }
 }
-
-impl Candlestick for BithumbWSClient {
-    fn subscribe_candlestick(&self, _symbol_interval_list: &[(String, usize)]) {
-        panic!("bithumb does NOT have candlestick channel");
-    }
-}
-
-panic_l3_orderbook!(BithumbWSClient);
-
-impl_new_constructor!(
-    BithumbWSClient,
-    EXCHANGE_NAME,
-    WEBSOCKET_URL,
-    channels_to_commands,
-    on_misc_msg,
-    Some(CLIENT_PING_INTERVAL_AND_MSG),
-    None
-);
-impl_ws_client_trait!(BithumbWSClient);

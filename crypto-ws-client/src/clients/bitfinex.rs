@@ -1,34 +1,25 @@
-use crate::WSClient;
+use async_trait::async_trait;
+use std::{collections::HashMap, time::Duration};
+use tokio_tungstenite::tungstenite::Message;
 
-use std::{
-    collections::{HashMap, HashSet},
-    time::{Duration, Instant},
-};
-use std::{
-    net::TcpStream,
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        mpsc::Sender,
-        Mutex,
+use crate::{
+    clients::common_traits::{
+        Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
     },
-};
-
-use super::{
-    utils::{connect_with_retry, CHANNEL_PAIR_DELIMITER},
-    Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
+    common::{
+        command_translator::CommandTranslator,
+        message_handler::{MessageHandler, MiscMessage},
+        ws_client_internal::WSClientInternal,
+    },
+    WSClient,
 };
 
 use log::*;
 use serde_json::Value;
-use tungstenite::{error::ProtocolError, stream::MaybeTlsStream, Error, Message, WebSocket};
 
 pub(super) const EXCHANGE_NAME: &str = "bitfinex";
 
 const WEBSOCKET_URL: &str = "wss://api-pub.bitfinex.com/ws/2";
-
-// If there is no activity in the channel for 15 seconds, the Websocket server will send you a heartbeat message
-// https://docs.bitfinex.com/docs/ws-general#heartbeating
-const SERVER_PING_INTERVAL: u64 = 15;
 
 /// The WebSocket client for Bitfinex, including all markets.
 ///
@@ -37,243 +28,127 @@ const SERVER_PING_INTERVAL: u64 = 15;
 /// * Swap: <https://trading.bitfinex.com/t/BTCF0:USTF0>
 /// * Funding: <https://trading.bitfinex.com/funding>
 pub struct BitfinexWSClient {
-    ws_stream: Mutex<WebSocket<MaybeTlsStream<TcpStream>>>,
-    channels: Mutex<HashSet<String>>, // subscribed channels
-    tx: Mutex<Sender<String>>,
-    channel_id_meta: Mutex<HashMap<i64, String>>, // CHANNEL_ID information
-    should_stop: AtomicBool,                      // used by close() and run()
+    client: WSClientInternal<BitfinexMessageHandler>,
+    translator: BitfinexCommandTranslator, // used by close() and run()
 }
 
-impl BitfinexWSClient {
-    /// Creates a Bitfinex websocket client.
-    ///
-    /// # Arguments
-    ///
-    /// * `on_msg` - A callback function to process websocket messages
-    /// * `url` - Optional server url, usually you don't need specify it
-    pub fn new(tx: Sender<String>, _url: Option<&str>) -> Self {
-        let stream = connect_with_retry(WEBSOCKET_URL, Some(SERVER_PING_INTERVAL));
-        BitfinexWSClient {
-            ws_stream: Mutex::new(stream),
-            channels: Mutex::new(HashSet::new()),
-            tx: Mutex::new(tx),
-            channel_id_meta: Mutex::new(HashMap::new()),
-            should_stop: AtomicBool::new(false),
-        }
-    }
-}
+impl_new_constructor!(
+    BitfinexWSClient,
+    EXCHANGE_NAME,
+    WEBSOCKET_URL,
+    BitfinexMessageHandler {
+        channel_id_meta: HashMap::new()
+    },
+    BitfinexCommandTranslator {}
+);
 
-fn channel_to_command(channel: &str, subscribe: bool) -> String {
-    if channel.starts_with('{') {
-        return channel.to_string();
-    }
-    let delim = channel.find(CHANNEL_PAIR_DELIMITER).unwrap();
-    let ch = &channel[..delim];
-    let symbol = &channel[(delim + 1)..];
+impl_trait!(Trade, BitfinexWSClient, subscribe_trade, "trades");
+impl_trait!(Ticker, BitfinexWSClient, subscribe_ticker, "ticker");
+impl_candlestick!(BitfinexWSClient);
 
-    format!(
-        r#"{{"event": "{}", "channel": "{}", "symbol": "{}"}}"#,
-        if subscribe {
-            "subscribe"
-        } else {
-            "unsubscribe"
-        },
-        ch,
-        symbol
-    )
-}
+panic_l2_topk!(BitfinexWSClient);
 
-fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-    channels
-        .iter()
-        .map(|s| channel_to_command(s, subscribe))
-        .collect()
-}
-
-macro_rules! impl_trait_for_bitfinex {
-    ($trait_name:ident, $method_name:ident, $channel_name:expr) => {
-        impl $trait_name for BitfinexWSClient {
-            fn $method_name(&self, symbols: &[String]) {
-                let symbol_to_raw_channel =
-                    |symbol: &String| format!("{}:{}", $channel_name, symbol);
-
-                let channels = symbols
-                    .iter()
-                    .map(symbol_to_raw_channel)
-                    .collect::<Vec<String>>();
-                self.subscribe(&channels);
-            }
-        }
-    };
-}
-
-impl_trait_for_bitfinex!(Trade, subscribe_trade, "trades");
-impl_trait_for_bitfinex!(Ticker, subscribe_ticker, "ticker");
-
-impl BBO for BitfinexWSClient {
-    fn subscribe_bbo(&self, symbols: &[String]) {
-        let raw_channels = symbols
-            .iter()
-            .map(|symbol| {
-                format!(
-                    r#"{{
-                "event": "subscribe",
-                "channel": "book",
-                "symbol": "{}",
-                "prec": "R0",
-                "len": 1
-              }}"#,
-                    symbol
-                )
-            })
-            .collect::<Vec<String>>();
-
-        self.subscribe(&raw_channels);
-    }
-}
-
+#[async_trait]
 impl OrderBook for BitfinexWSClient {
-    fn subscribe_orderbook(&self, symbols: &[String]) {
-        let raw_channels = symbols
+    async fn subscribe_orderbook(&self, symbols: &[String]) {
+        let commands = symbols
             .iter()
             .map(|symbol| {
-                format!(
-                    r#"{{
-                "event": "subscribe",
-                "channel": "book",
-                "symbol": "{}",
-                "prec": "P0",
-                "frec": "F0",
-                "len": 25
-              }}"#,
-                    symbol
+                format!(r#"{{"event": "subscribe","channel": "book","symbol": "{}","prec": "P0","frec": "F0","len":25}}"#,
+                    symbol,
                 )
             })
             .collect::<Vec<String>>();
 
-        self.subscribe(&raw_channels);
+        self.send(&commands).await;
     }
 }
 
-impl OrderBookTopK for BitfinexWSClient {
-    fn subscribe_orderbook_topk(&self, _symbols: &[String]) {
-        panic!("Bitfinex does NOT have orderbook snapshot channel");
+#[async_trait]
+impl BBO for BitfinexWSClient {
+    async fn subscribe_bbo(&self, symbols: &[String]) {
+        let commands = symbols
+            .iter()
+            .map(|symbol| {
+                format!(
+                    r#"{{"event": "subscribe","channel": "book","symbol": "{}","prec": "R0","len": 1}}"#,
+                    symbol,
+                )
+            })
+            .collect::<Vec<String>>();
+
+        self.send(&commands).await;
     }
 }
 
+#[async_trait]
 impl Level3OrderBook for BitfinexWSClient {
-    fn subscribe_l3_orderbook(&self, symbols: &[String]) {
-        let raw_channels = symbols
+    async fn subscribe_l3_orderbook(&self, symbols: &[String]) {
+        let commands = symbols
             .iter()
             .map(|symbol| {
-                format!(
-                    r#"{{
-                        "event": "subscribe",
-                        "channel": "book",
-                        "symbol": "{}",
-                        "prec": "R0",
-                        "len": 250
-                    }}"#,
-                    symbol
+                format!(r#"{{"event": "subscribe","channel": "book","symbol": "{}","prec": "R0","len": 250}}"#,
+                    symbol,
                 )
             })
             .collect::<Vec<String>>();
 
-        self.subscribe(&raw_channels);
+        self.send(&commands).await;
     }
 }
 
-fn to_candlestick_raw_channel(symbol: &str, interval: usize) -> String {
-    let interval_str = match interval {
-        60 => "1m",
-        300 => "5m",
-        900 => "15m",
-        1800 => "30m",
-        3600 => "1h",
-        10800 => "3h",
-        21600 => "6h",
-        43200 => "12h",
-        86400 => "1D",
-        604800 => "7D",
-        1209600 => "14D",
-        2592000 => "1M",
-        _ => panic!("Bitfinex has intervals 1m,5m,15m,30m,1h,3h,6h,12h,1D,7D,14D,1M"),
-    };
+impl_ws_client_trait!(BitfinexWSClient);
 
-    format!(
-        r#"{{
-            "event": "subscribe",
-            "channel": "candles",
-            "key": "trade:{}:{}"
-        }}"#,
-        interval_str, symbol
-    )
+struct BitfinexMessageHandler {
+    channel_id_meta: HashMap<i64, String>, // CHANNEL_ID information
+}
+struct BitfinexCommandTranslator {}
+
+impl BitfinexCommandTranslator {
+    fn topic_to_command(channel: &str, symbol: &str, subscribe: bool) -> String {
+        format!(
+            r#"{{"event": "{}", "channel": "{}", "symbol": "{}"}}"#,
+            if subscribe {
+                "subscribe"
+            } else {
+                "unsubscribe"
+            },
+            channel,
+            symbol
+        )
+    }
+    fn to_candlestick_command(symbol: &str, interval: usize, subscribe: bool) -> String {
+        let interval_str = match interval {
+            60 => "1m",
+            300 => "5m",
+            900 => "15m",
+            1800 => "30m",
+            3600 => "1h",
+            10800 => "3h",
+            21600 => "6h",
+            43200 => "12h",
+            86400 => "1D",
+            604800 => "7D",
+            1209600 => "14D",
+            2592000 => "1M",
+            _ => panic!("Bitfinex available intervals 1m,5m,15m,30m,1h,3h,6h,12h,1D,7D,14D,1M"),
+        };
+
+        format!(
+            r#"{{"event": "{}","channel": "candles","key": "trade:{}:{}"}}"#,
+            if subscribe {
+                "subscribe"
+            } else {
+                "unsubscribe"
+            },
+            interval_str,
+            symbol
+        )
+    }
 }
 
-impl Candlestick for BitfinexWSClient {
-    fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
-        let raw_channels: Vec<String> = symbol_interval_list
-            .iter()
-            .map(|(symbol, interval)| to_candlestick_raw_channel(symbol, *interval))
-            .collect();
-        self.subscribe(&raw_channels);
-    }
-}
-
-impl BitfinexWSClient {
-    fn subscribe_or_unsubscribe(&self, channels: &[String], subscribe: bool) {
-        let mut diff = Vec::<String>::new();
-        {
-            let mut guard = self.channels.lock().unwrap();
-            for ch in channels.iter() {
-                if guard.insert(ch.clone()) {
-                    diff.push(ch.clone());
-                }
-            }
-        }
-
-        if !diff.is_empty() {
-            let commands = channels_to_commands(&diff, subscribe);
-            let mut ws_stream = self.ws_stream.lock().unwrap();
-            commands.into_iter().for_each(|command| {
-                let ret = ws_stream.write_message(Message::Text(command));
-                if let Err(err) = ret {
-                    error!("{}", err);
-                }
-            });
-        }
-    }
-
-    // reconnect and subscribe all channels
-    fn _reconnect(&self) {
-        warn!("Reconnecting to {}", WEBSOCKET_URL);
-        {
-            let mut guard = self.ws_stream.lock().unwrap();
-            *guard = connect_with_retry(WEBSOCKET_URL, Some(SERVER_PING_INTERVAL));
-        }
-
-        let channels = self
-            .channels
-            .lock()
-            .unwrap()
-            .iter()
-            .map(|s| s.to_string())
-            .collect::<Vec<String>>();
-        if !channels.is_empty() {
-            let commands = channels_to_commands(&channels, true);
-            let mut ws_stream = self.ws_stream.lock().unwrap();
-            commands.into_iter().for_each(|command| {
-                let ret = ws_stream.write_message(Message::Text(command));
-                if let Err(err) = ret {
-                    error!("{}", err);
-                }
-            });
-        }
-    }
-
-    // Handle a text msg from Message::Text or Message::Binary
-    // Returns true if gets a normal message, otherwise false
-    fn handle_msg(&self, txt: &str) -> bool {
+impl MessageHandler for BitfinexMessageHandler {
+    fn handle_message(&mut self, txt: &str) -> MiscMessage {
         if txt.starts_with('{') {
             let mut obj = serde_json::from_str::<HashMap<String, Value>>(txt).unwrap();
             let event = obj.get("event").unwrap().as_str().unwrap();
@@ -297,6 +172,7 @@ impl BitfinexWSClient {
                         }
                         _ => warn!("{} from {}", txt, EXCHANGE_NAME),
                     }
+                    MiscMessage::Other
                 }
                 "info" => {
                     if obj.get("version").is_some() {
@@ -312,6 +188,9 @@ impl BitfinexWSClient {
                             .unwrap();
                         if status == 0 {
                             std::thread::sleep(Duration::from_secs(15));
+                            MiscMessage::Reconnect
+                        } else {
+                            MiscMessage::Other
                         }
                     } else {
                         let code = obj.get("code").unwrap().as_i64().unwrap();
@@ -320,56 +199,51 @@ impl BitfinexWSClient {
                                 // Stop/Restart Websocket Server (please reconnect)
                                 // self.reconnect();
                                 error!("Stop/Restart Websocket Server, exiting now...");
-                                std::process::exit(1); // fail fast, pm2 will restart
+                                MiscMessage::Reconnect // fail fast, pm2 will restart
                             }
                             20060 => {
                                 // Entering in Maintenance mode. Please pause any activity and resume
                                 // after receiving the info message 20061 (it should take 120 seconds
                                 // at most).
                                 std::thread::sleep(Duration::from_secs(15));
+                                MiscMessage::Other
                             }
                             20061 => {
                                 // Maintenance ended. You can resume normal activity. It is advised
                                 // to unsubscribe/subscribe again all channels.
-                                let channels = self
-                                    .channels
-                                    .lock()
-                                    .unwrap()
-                                    .iter()
-                                    .map(|s| s.to_string())
-                                    .collect::<Vec<String>>();
-                                let commands = channels_to_commands(&channels, true);
-                                let mut ws_stream = self.ws_stream.lock().unwrap();
-                                commands.into_iter().for_each(|command| {
-                                    let ret = ws_stream.write_message(Message::Text(command));
-                                    if let Err(err) = ret {
-                                        error!("{}", err);
-                                    }
-                                });
+                                MiscMessage::Reconnect
                             }
-                            _ => info!("{} from {}", txt, EXCHANGE_NAME),
+                            _ => {
+                                info!("{} from {}", txt, EXCHANGE_NAME);
+                                MiscMessage::Other
+                            }
                         }
                     }
                 }
-                "pong" => debug!("{} from {}", txt, EXCHANGE_NAME),
-                "conf" => warn!("{} from {}", txt, EXCHANGE_NAME),
+                "pong" => {
+                    debug!("{} from {}", txt, EXCHANGE_NAME);
+                    MiscMessage::Pong
+                }
+                "conf" => {
+                    warn!("{} from {}", txt, EXCHANGE_NAME);
+                    MiscMessage::Other
+                }
                 "subscribed" => {
                     let chan_id = obj.get("chanId").unwrap().as_i64().unwrap();
                     obj.remove("event");
                     obj.remove("chanId");
                     obj.remove("pair");
                     self.channel_id_meta
-                        .lock()
-                        .unwrap()
                         .insert(chan_id, serde_json::to_string(&obj).unwrap());
+                    MiscMessage::Other
                 }
                 "unsubscribed" => {
                     let chan_id = obj.get("chanId").unwrap().as_i64().unwrap();
-                    self.channel_id_meta.lock().unwrap().remove(&chan_id);
+                    self.channel_id_meta.remove(&chan_id);
+                    MiscMessage::Other
                 }
-                _ => (),
+                _ => MiscMessage::Other,
             }
-            false
         } else {
             debug_assert!(txt.starts_with('['));
             let arr = serde_json::from_str::<Vec<Value>>(txt).unwrap();
@@ -377,212 +251,77 @@ impl BitfinexWSClient {
                 // If there is no activity in the channel for 15 seconds, the Websocket server
                 // will send you a heartbeat message in this format.
                 // see <https://docs.bitfinex.com/docs/ws-general#heartbeating>
-                if let Err(err) = self
-                    .ws_stream
-                    .lock()
-                    .unwrap()
-                    .write_message(Message::Text(r#"{"event":"ping"}"#.to_string()))
-                {
-                    error!("{}", err);
-                }
-                false
+                MiscMessage::WebSocket(Message::Text(r#"{"event":"ping"}"#.to_string()))
             } else {
                 // replace CHANNEL_ID with meta info
                 let i = txt.find(',').unwrap(); // first comma, for example, te, tu, see https://blog.bitfinex.com/api/websocket-api-update/
                 let channel_id = (&txt[1..i]).parse::<i64>().unwrap();
-                let channel_info = self
-                    .channel_id_meta
-                    .lock()
-                    .unwrap()
-                    .get(&channel_id)
-                    .unwrap()
-                    .clone();
-                let new_txt = format!("[{}{}", channel_info, &txt[i..]);
-
-                self.tx.lock().unwrap().send(new_txt).unwrap();
-
-                true
+                if let Some(channel_info) = self.channel_id_meta.get(&channel_id) {
+                    let new_txt = format!("[{}{}", channel_info, &txt[i..]);
+                    MiscMessage::Mutated(new_txt)
+                } else {
+                    MiscMessage::Other
+                }
             }
         }
+    }
+
+    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+        // If there is no activity in the channel for 15 seconds, the Websocket server will send
+        // you a heartbeat message, see https://docs.bitfinex.com/docs/ws-general#heartbeating
+        None
     }
 }
 
-impl WSClient for BitfinexWSClient {
-    fn subscribe_trade(&self, channels: &[String]) {
-        <Self as Trade>::subscribe_trade(self, channels);
+impl CommandTranslator for BitfinexCommandTranslator {
+    fn translate_to_commands(&self, subscribe: bool, topics: &[(String, String)]) -> Vec<String> {
+        topics
+            .iter()
+            .map(|(channel, symbol)| Self::topic_to_command(channel, symbol, subscribe))
+            .collect()
     }
 
-    fn subscribe_orderbook(&self, channels: &[String]) {
-        <Self as OrderBook>::subscribe_orderbook(self, channels);
-    }
-
-    fn subscribe_orderbook_topk(&self, channels: &[String]) {
-        <Self as OrderBookTopK>::subscribe_orderbook_topk(self, channels);
-    }
-
-    fn subscribe_l3_orderbook(&self, channels: &[String]) {
-        <Self as Level3OrderBook>::subscribe_l3_orderbook(self, channels);
-    }
-
-    fn subscribe_ticker(&self, channels: &[String]) {
-        <Self as Ticker>::subscribe_ticker(self, channels);
-    }
-
-    fn subscribe_bbo(&self, channels: &[String]) {
-        <Self as BBO>::subscribe_bbo(self, channels);
-    }
-
-    fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
-        <Self as Candlestick>::subscribe_candlestick(self, symbol_interval_list);
-    }
-
-    fn subscribe(&self, channels: &[String]) {
-        self.subscribe_or_unsubscribe(channels, true);
-    }
-
-    fn unsubscribe(&self, channels: &[String]) {
-        self.subscribe_or_unsubscribe(channels, false);
-    }
-
-    fn run(&self, duration: Option<u64>) {
-        let start_timstamp = Instant::now();
-        let mut num_read_timeout = 0;
-        while !self.should_stop.load(Ordering::Acquire) {
-            let resp = self.ws_stream.lock().unwrap().read_message();
-            let mut succeeded = false;
-            match resp {
-                Ok(msg) => {
-                    num_read_timeout = 0;
-                    match msg {
-                        Message::Text(txt) => succeeded = self.handle_msg(&txt),
-                        Message::Binary(_) => panic!("Unknown binary format from Bitfinex"),
-                        Message::Ping(resp) => {
-                            info!(
-                                "Received a ping frame: {}",
-                                std::str::from_utf8(&resp).unwrap()
-                            );
-                            if let Err(err) = self.ws_stream.lock().unwrap().write_message(Message::Pong(resp)) {
-                                error!("{}", err);
-                            }
-                        }
-                        Message::Pong(resp) => {
-                            let tmp = std::str::from_utf8(&resp);
-                            warn!("Received a pong frame: {}", tmp.unwrap());
-                        }
-                        Message::Close(resp) => {
-                            match resp {
-                                Some(frame) => warn!("Received a Message::Close message with a CloseFrame: code: {}, reason: {}", frame.code, frame.reason),
-                                None => warn!("Received a close message without CloseFrame"),
-                            }
-                        }
-                        Message::Frame(_) => {
-                            error!("you're not going to get this value while reading the message")
-                        }
-                    }
-                }
-                Err(err) => {
-                    match err {
-                        Error::ConnectionClosed => {
-                            error!("Server closed connection, exiting now...");
-                            // self.reconnect();
-                            std::thread::sleep(Duration::from_secs(5));
-                            std::process::exit(1); // fail fast, pm2 will restart
-                        }
-                        Error::AlreadyClosed => {
-                            error!("Impossible to happen, fix the bug in the code");
-                            panic!("Impossible to happen, fix the bug in the code");
-                        }
-                        Error::Io(io_err) => {
-                            if io_err.kind() == std::io::ErrorKind::WouldBlock {
-                                info!("read_message() timeout");
-                                num_read_timeout += 1;
-                            } else if io_err.kind() == std::io::ErrorKind::Interrupted {
-                                // ignore SIGHUP, which will be handled by reopen
-                                info!("Ignoring SIGHUP");
-                            } else {
-                                error!(
-                                    "I/O error thrown from read_message(): {}, {:?}",
-                                    io_err,
-                                    io_err.kind()
-                                );
-                                // self.reconnect();
-                                std::thread::sleep(Duration::from_secs(5));
-                                std::process::exit(1); // fail fast, pm2 will restart
-                            }
-                        }
-                        Error::Protocol(protocol_err) => {
-                            if protocol_err == ProtocolError::ResetWithoutClosingHandshake {
-                                error!("ResetWithoutClosingHandshake");
-                                // self.reconnect();
-                                std::thread::sleep(Duration::from_secs(5));
-                                std::process::exit(1); // fail fast, pm2 will restart
-                            } else {
-                                error!(
-                                    "Protocol error thrown from read_message(): {}",
-                                    protocol_err
-                                );
-                            }
-                        }
-                        _ => {
-                            error!("Error thrown from read_message(): {}", err);
-                            panic!("Error thrown from read_message(): {}", err);
-                        }
-                    }
-                }
-            };
-
-            if num_read_timeout > 5 {
-                error!(
-                    "Exiting due to num_read_timeout: {}, duration: {} seconds",
-                    num_read_timeout,
-                    start_timstamp.elapsed().as_secs()
-                );
-                std::thread::sleep(Duration::from_secs(5));
-                std::process::exit(1); // fail fast, pm2 will restart
-            }
-
-            if let Some(seconds) = duration {
-                if start_timstamp.elapsed() > Duration::from_secs(seconds) && succeeded {
-                    break;
-                }
-            }
-        }
-    }
-
-    fn close(&self) {
-        self.should_stop.store(true, Ordering::Release);
-        let ret = self.ws_stream.lock().unwrap().close(None);
-        if let Err(err) = ret {
-            error!("{}", err);
-        }
+    fn translate_to_candlestick_commands(
+        &self,
+        subscribe: bool,
+        symbol_interval_list: &[(String, usize)],
+    ) -> Vec<String> {
+        symbol_interval_list
+            .iter()
+            .map(|(symbol, interval)| Self::to_candlestick_command(symbol, *interval, subscribe))
+            .collect::<Vec<String>>()
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::common::command_translator::CommandTranslator;
+
     #[test]
     fn test_spot_command() {
+        let translator = super::BitfinexCommandTranslator {};
+        let commands = translator
+            .translate_to_commands(true, &vec![("trades".to_string(), "tBTCUSD".to_string())]);
+
+        assert_eq!(1, commands.len());
         assert_eq!(
             r#"{"event": "subscribe", "channel": "trades", "symbol": "tBTCUSD"}"#,
-            super::channel_to_command("trades:tBTCUSD", true)
-        );
-
-        assert_eq!(
-            r#"{"event": "unsubscribe", "channel": "trades", "symbol": "tBTCUSD"}"#,
-            super::channel_to_command("trades:tBTCUSD", false)
+            commands[0]
         );
     }
 
     #[test]
     fn test_swap_command() {
-        assert_eq!(
-            r#"{"event": "subscribe", "channel": "trades", "symbol": "tBTCF0:USTF0"}"#,
-            super::channel_to_command("trades:tBTCF0:USTF0", true)
+        let translator = super::BitfinexCommandTranslator {};
+        let commands = translator.translate_to_commands(
+            true,
+            &vec![("trades".to_string(), "tBTCF0:USTF0".to_string())],
         );
 
+        assert_eq!(1, commands.len());
         assert_eq!(
-            r#"{"event": "unsubscribe", "channel": "trades", "symbol": "tBTCF0:USTF0"}"#,
-            super::channel_to_command("trades:tBTCF0:USTF0", false)
+            r#"{"event": "subscribe", "channel": "trades", "symbol": "tBTCF0:USTF0"}"#,
+            commands[0]
         );
     }
 }

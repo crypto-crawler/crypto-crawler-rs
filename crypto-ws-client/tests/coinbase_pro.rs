@@ -4,33 +4,33 @@ use std::sync::mpsc::{Receiver, Sender};
 #[macro_use]
 mod utils;
 
-#[test]
-fn subscribe() {
+#[tokio::test(flavor = "multi_thread")]
+async fn subscribe() {
     gen_test_code!(
         CoinbaseProWSClient,
         subscribe,
         &vec![
-            "matches:BTC-USD".to_string(),
-            "heartbeat:BTC-USD".to_string()
+            ("matches".to_string(), "BTC-USD".to_string()),
+            ("heartbeat".to_string(), "BTC-USD".to_string())
         ]
     );
 }
 
-#[test]
+#[tokio::test(flavor = "multi_thread")]
 #[should_panic]
-fn subscribe_illegal_symbol() {
+async fn subscribe_illegal_symbol() {
     gen_test_code!(
         CoinbaseProWSClient,
         subscribe,
-        &vec!["matches:XXX-YYY".to_string(),]
+        &vec![("matches".to_string(), "XXX-YYY".to_string())]
     );
 }
 
-#[test]
-fn subscribe_raw_json() {
+#[tokio::test(flavor = "multi_thread")]
+async fn subscribe_raw_json() {
     gen_test_code!(
         CoinbaseProWSClient,
-        subscribe,
+        send,
         &vec![r#"{
                 "type":"subscribe",
                 "channels":[
@@ -52,8 +52,8 @@ fn subscribe_raw_json() {
     );
 }
 
-#[test]
-fn subscribe_trade() {
+#[tokio::test(flavor = "multi_thread")]
+async fn subscribe_trade() {
     gen_test_code!(
         CoinbaseProWSClient,
         subscribe_trade,
@@ -61,8 +61,8 @@ fn subscribe_trade() {
     );
 }
 
-#[test]
-fn subscribe_ticker() {
+#[tokio::test(flavor = "multi_thread")]
+async fn subscribe_ticker() {
     gen_test_code!(
         CoinbaseProWSClient,
         subscribe_ticker,
@@ -70,8 +70,8 @@ fn subscribe_ticker() {
     );
 }
 
-#[test]
-fn subscribe_orderbook() {
+#[tokio::test(flavor = "multi_thread")]
+async fn subscribe_orderbook() {
     gen_test_code!(
         CoinbaseProWSClient,
         subscribe_orderbook,
@@ -79,8 +79,8 @@ fn subscribe_orderbook() {
     );
 }
 
-#[test]
-fn subscribe_l3_orderbook() {
+#[tokio::test(flavor = "multi_thread")]
+async fn subscribe_l3_orderbook() {
     gen_test_code!(
         CoinbaseProWSClient,
         subscribe_l3_orderbook,

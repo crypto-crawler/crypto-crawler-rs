@@ -6,24 +6,24 @@ mod mexc_spot {
     use crypto_ws_client::{MexcSpotWSClient, WSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
-    #[test]
-    fn subscribe() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe() {
         gen_test_code!(
             MexcSpotWSClient,
             subscribe,
             &vec![
-                "deal:BTC_USDT".to_string(),
-                "deal:ETH_USDT".to_string(),
-                "deal:MX_USDT".to_string()
+                ("deal".to_string(), "BTC_USDT".to_string()),
+                ("deal".to_string(), "ETH_USDT".to_string()),
+                ("deal".to_string(), "MX_USDT".to_string()),
             ]
         );
     }
 
-    #[test]
-    fn subscribe_raw_json() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_raw_json() {
         gen_test_code!(
             MexcSpotWSClient,
-            subscribe,
+            send,
             &vec![
                 r#"{"op":"sub.deal","symbol":"BTC_USDT"}"#.to_string(),
                 r#"{"op":"sub.deal","symbol":"ETH_USDT"}"#.to_string(),
@@ -32,8 +32,8 @@ mod mexc_spot {
         );
     }
 
-    #[test]
-    fn subscribe_trade() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
         gen_test_code!(
             MexcSpotWSClient,
             subscribe_trade,
@@ -45,8 +45,8 @@ mod mexc_spot {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             MexcSpotWSClient,
             subscribe_orderbook,
@@ -58,8 +58,8 @@ mod mexc_spot {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook_topk() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook_topk() {
         gen_test_code!(
             MexcSpotWSClient,
             subscribe_orderbook_topk,
@@ -67,8 +67,8 @@ mod mexc_spot {
         );
     }
 
-    #[test]
-    fn subscribe_candlestick() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             MexcSpotWSClient,
             &vec![
@@ -87,11 +87,11 @@ mod mexc_spot {
         );
     }
 
-    #[test]
-    fn subscribe_overview() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_overview() {
         gen_test_code!(
             MexcSpotWSClient,
-            subscribe,
+            send,
             &vec![r#"{"op":"sub.overview"}"#.to_string()]
         );
     }
@@ -102,26 +102,29 @@ mod mexc_linear_swap {
     use crypto_ws_client::{MexcSwapWSClient, WSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
-    #[test]
-    fn subscribe() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe() {
         gen_test_code!(
             MexcSwapWSClient,
             subscribe,
-            &vec!["deal:BTC_USDT".to_string()]
+            &vec![
+                ("deal".to_string(), "BTC_USDT".to_string()),
+                ("deal".to_string(), "ETH_USDT".to_string()),
+            ]
         );
     }
 
-    #[test]
-    fn subscribe_raw_json() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_raw_json() {
         gen_test_code!(
             MexcSwapWSClient,
-            subscribe,
+            send,
             &vec![r#"{"method":"sub.deal","param":{"symbol":"BTC_USDT"}}"#.to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_trade() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
         gen_test_code!(
             MexcSwapWSClient,
             subscribe_trade,
@@ -129,8 +132,8 @@ mod mexc_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             MexcSwapWSClient,
             subscribe_ticker,
@@ -138,8 +141,8 @@ mod mexc_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             MexcSwapWSClient,
             subscribe_orderbook,
@@ -147,8 +150,8 @@ mod mexc_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook_topk() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook_topk() {
         gen_test_code!(
             MexcSwapWSClient,
             subscribe_orderbook_topk,
@@ -156,8 +159,8 @@ mod mexc_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_candlestick() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(MexcSwapWSClient, &vec![("BTC_USDT".to_string(), 60)]);
         gen_test_subscribe_candlestick!(MexcSwapWSClient, &vec![("BTC_USDT".to_string(), 2592000)]);
     }
@@ -168,8 +171,8 @@ mod mexc_inverse_swap {
     use crypto_ws_client::{MexcSwapWSClient, WSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
-    #[test]
-    fn subscribe_trade() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
         gen_test_code!(
             MexcSwapWSClient,
             subscribe_trade,
@@ -177,8 +180,8 @@ mod mexc_inverse_swap {
         );
     }
 
-    #[test]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             MexcSwapWSClient,
             subscribe_ticker,
@@ -186,8 +189,8 @@ mod mexc_inverse_swap {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             MexcSwapWSClient,
             subscribe_orderbook,
@@ -195,8 +198,8 @@ mod mexc_inverse_swap {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook_topk() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook_topk() {
         gen_test_code!(
             MexcSwapWSClient,
             subscribe_orderbook_topk,
@@ -204,8 +207,8 @@ mod mexc_inverse_swap {
         );
     }
 
-    #[test]
-    fn subscribe_candlestick() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(MexcSwapWSClient, &vec![("BTC_USD".to_string(), 60)]);
         gen_test_subscribe_candlestick!(MexcSwapWSClient, &vec![("BTC_USD".to_string(), 2592000)]);
     }

@@ -6,11 +6,11 @@ mod dydx_linear_swap {
     use crypto_ws_client::{DydxSwapWSClient, WSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
-    #[test]
-    fn subscribe() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe() {
         gen_test_code!(
             DydxSwapWSClient,
-            subscribe,
+            send,
             &vec![
                 r#"{"type": "subscribe", "channel": "v3_trades", "id": "BTC-USD"}"#.to_string(),
                 r#"{"type": "subscribe", "channel": "v3_trades", "id": "ETH-USD"}"#.to_string()
@@ -18,8 +18,8 @@ mod dydx_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_trade() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
         gen_test_code!(
             DydxSwapWSClient,
             subscribe_trade,
@@ -27,8 +27,8 @@ mod dydx_linear_swap {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             DydxSwapWSClient,
             subscribe_orderbook,

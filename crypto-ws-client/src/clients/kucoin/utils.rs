@@ -1,20 +1,12 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use log::*;
 use reqwest::{header, Result};
 use serde_json::Value;
 
-use crate::clients::{utils::CHANNEL_PAIR_DELIMITER, ws_client_internal::MiscMessage};
+use crate::common::message_handler::{MessageHandler, MiscMessage};
 
 pub(super) const EXCHANGE_NAME: &str = "kucoin";
-
-/// See:
-/// - https://docs.kucoin.com/#ping
-/// - https://docs.kucoin.cc/futures/#ping
-///
-/// If the server has not received the ping from the client for 60 seconds , the connection will be disconnected.
-pub(super) const CLIENT_PING_INTERVAL_AND_MSG: (u64, &str) =
-    (60, r#"{"type":"ping", "id": "crypto-ws-client"}"#);
 
 // Maximum number of batch subscriptions at a time: 100 topics
 // See https://docs.kucoin.cc/#request-rate-limit
@@ -25,29 +17,31 @@ pub(super) struct WebsocketToken {
     pub endpoint: String,
 }
 
-fn http_post(url: &str) -> Result<String> {
+async fn http_post(url: &str) -> Result<String> {
     let mut headers = header::HeaderMap::new();
     headers.insert(
         header::CONTENT_TYPE,
         header::HeaderValue::from_static("application/json"),
     );
 
-    let client = reqwest::blocking::Client::builder()
+    let client = reqwest::Client::builder()
          .default_headers(headers)
          .user_agent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
          .gzip(true)
          .build()?;
-    let response = client.post(url).send()?;
+    let response = client.post(url).send().await?;
 
     match response.error_for_status() {
-        Ok(resp) => Ok(resp.text()?),
+        Ok(resp) => Ok(resp.text().await?),
         Err(error) => Err(error),
     }
 }
 
 // See <https://docs.kucoin.com/#apply-connect-token>
-pub(super) fn fetch_ws_token() -> WebsocketToken {
-    let txt = http_post("https://openapi-v2.kucoin.com/api/v1/bullet-public").unwrap();
+pub(super) async fn fetch_ws_token() -> WebsocketToken {
+    let txt = http_post("https://openapi-v2.kucoin.com/api/v1/bullet-public")
+        .await
+        .unwrap();
     let obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();
     let code = obj.get("code").unwrap().as_str().unwrap();
     if code != "200000" {
@@ -69,32 +63,7 @@ pub(super) fn fetch_ws_token() -> WebsocketToken {
     }
 }
 
-pub(super) fn on_misc_msg(msg: &str) -> MiscMessage {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
-    let msg_type = obj.get("type").unwrap().as_str().unwrap();
-    match msg_type {
-        "pong" => MiscMessage::Pong,
-        "welcome" | "ack" => {
-            debug!("Received {} from {}", msg, EXCHANGE_NAME);
-            MiscMessage::Misc
-        }
-        "notice" | "command" => {
-            info!("Received {} from {}", msg, EXCHANGE_NAME);
-            MiscMessage::Misc
-        }
-        "message" => MiscMessage::Normal,
-        "error" => {
-            error!("Received {} from {}", msg, EXCHANGE_NAME);
-            panic!("Received {} from {}", msg, EXCHANGE_NAME);
-        }
-        _ => {
-            error!("Received {} from {}", msg, EXCHANGE_NAME);
-            panic!("Received {} from {}", msg, EXCHANGE_NAME);
-        }
-    }
-}
-
-fn channel_pairs_to_command(channel: &str, pairs: &[String], subscribe: bool) -> String {
+fn channel_symbols_to_command(channel: &str, symbols: &[String], subscribe: bool) -> String {
     format!(
         r#"{{"id":"crypto-ws-client","type":"{}","topic":"{}:{}","privateChannel":false,"response":true}}"#,
         if subscribe {
@@ -103,56 +72,93 @@ fn channel_pairs_to_command(channel: &str, pairs: &[String], subscribe: bool) ->
             "unsubscribe"
         },
         channel,
-        pairs.join(",")
+        symbols.join(",")
     )
 }
 
-pub(super) fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-    let mut all_commands: Vec<String> = channels
-        .iter()
-        .filter(|ch| ch.starts_with('{'))
-        .map(|s| s.to_string())
-        .collect();
+pub(super) fn topics_to_commands(topics: &[(String, String)], subscribe: bool) -> Vec<String> {
+    let mut commands: Vec<String> = Vec::new();
 
-    let mut channel_pairs = HashMap::<String, Vec<String>>::new();
-    for s in channels.iter().filter(|ch| !ch.starts_with('{')) {
-        let v: Vec<&str> = s.split(CHANNEL_PAIR_DELIMITER).collect();
-        let channel = v[0];
-        let pair = v[1];
-        match channel_pairs.get_mut(channel) {
-            Some(pairs) => pairs.push(pair.to_string()),
+    let mut channel_symbols = BTreeMap::<String, Vec<String>>::new();
+    for (channel, symbol) in topics {
+        match channel_symbols.get_mut(channel) {
+            Some(symbols) => symbols.push(symbol.to_string()),
             None => {
-                channel_pairs.insert(channel.to_string(), vec![pair.to_string()]);
+                channel_symbols.insert(channel.to_string(), vec![symbol.to_string()]);
             }
         }
     }
 
-    for (channel, pairs) in channel_pairs.iter() {
+    for (channel, symbols) in channel_symbols.iter() {
         let mut chunk: Vec<String> = Vec::new();
-        for pair in pairs.iter() {
-            chunk.push(pair.clone());
+        for symbol in symbols.iter() {
+            chunk.push(symbol.clone());
             if chunk.len() >= MAX_TOPICS_PER_COMMAND {
-                all_commands.push(channel_pairs_to_command(channel, &chunk, subscribe));
+                commands.push(channel_symbols_to_command(channel, &chunk, subscribe));
                 chunk.clear();
             }
         }
         if !chunk.is_empty() {
-            all_commands.push(channel_pairs_to_command(channel, &chunk, subscribe));
+            commands.push(channel_symbols_to_command(channel, &chunk, subscribe));
         }
     }
 
-    all_commands
+    commands
 }
 
-pub(super) fn to_raw_channel(channel: &str, pair: &str) -> String {
-    format!("{}:{}", channel, pair)
+pub(super) struct KucoinMessageHandler {}
+
+impl MessageHandler for KucoinMessageHandler {
+    fn handle_message(&mut self, msg: &str) -> MiscMessage {
+        let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
+        let msg_type = obj.get("type").unwrap().as_str().unwrap();
+        match msg_type {
+            "pong" => MiscMessage::Pong,
+            "welcome" | "ack" => {
+                debug!("Received {} from {}", msg, EXCHANGE_NAME);
+                MiscMessage::Other
+            }
+            "notice" | "command" => {
+                info!("Received {} from {}", msg, EXCHANGE_NAME);
+                MiscMessage::Other
+            }
+            "message" => MiscMessage::Normal,
+            "error" => {
+                panic!("Received {} from {}", msg, EXCHANGE_NAME);
+            }
+            _ => {
+                panic!("Received {} from {}", msg, EXCHANGE_NAME);
+            }
+        }
+    }
+
+    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+        // See:
+        // - https://docs.kucoin.com/#ping
+        // - https://docs.kucoin.cc/futures/#ping
+        //
+        // If the server has not received the ping from the client for 60 seconds , the connection will be disconnected.
+        Some((
+            r#"{"type":"ping", "id": "crypto-ws-client"}"#.to_string(),
+            60,
+        ))
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn fetch_ws_token() {
-        let ws_token = super::fetch_ws_token();
+    #[tokio::test(flavor = "multi_thread")]
+    async fn fetch_ws_token() {
+        let ws_token = super::fetch_ws_token().await;
         assert!(!ws_token.token.is_empty())
+    }
+
+    #[test]
+    fn test_topics_to_commands() {
+        let commands = super::topics_to_commands(
+            &vec![("/market/match".to_string(), "BTC-USDT".to_string())],
+            true,
+        );
+        assert_eq!(1, commands.len());
     }
 }

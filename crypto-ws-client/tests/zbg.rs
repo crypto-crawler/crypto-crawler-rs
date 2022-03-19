@@ -6,26 +6,26 @@ mod zbg_spot {
     use crypto_ws_client::{WSClient, ZbgSpotWSClient};
     use std::sync::mpsc::{Receiver, Sender};
 
-    #[test]
-    fn subscribe() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe() {
         gen_test_code!(
             ZbgSpotWSClient,
             subscribe,
-            &vec!["329_TRADE_BTC_USDT".to_string()]
+            &vec![("TRADE".to_string(), "btc_usdt".to_string())]
         );
     }
 
-    #[test]
-    fn subscribe_raw_json() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_raw_json() {
         gen_test_code!(
             ZbgSpotWSClient,
-            subscribe,
+            send,
             &vec![r#"{"action":"ADD", "dataType":329_TRADE_BTC_USDT}"#.to_string()]
         );
     }
 
-    #[test]
-    fn subscribe_trade() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
         gen_test_code!(
             ZbgSpotWSClient,
             subscribe_trade,
@@ -33,8 +33,8 @@ mod zbg_spot {
         );
     }
 
-    #[test]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             ZbgSpotWSClient,
             subscribe_orderbook,
@@ -42,8 +42,8 @@ mod zbg_spot {
         );
     }
 
-    #[test]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             ZbgSpotWSClient,
             subscribe_ticker,
@@ -51,8 +51,8 @@ mod zbg_spot {
         );
     }
 
-    #[test]
-    fn subscribe_candlestick() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(ZbgSpotWSClient, &vec![("btc_usdt".to_string(), 60)]);
         gen_test_subscribe_candlestick!(ZbgSpotWSClient, &vec![("btc_usdt".to_string(), 604800)]);
     }
@@ -70,8 +70,8 @@ mod zbg_inverse_swap {
             ZbgSwapWSClient,
             subscribe,
             &vec![
-                "future_tick-1000001".to_string(),
-                "future_tick-1000003".to_string()
+                ("future_tick".to_string(), "1000001".to_string()),
+                ("future_tick".to_string(), "1000003".to_string()),
             ]
         );
     }
@@ -81,7 +81,7 @@ mod zbg_inverse_swap {
     fn subscribe_raw_json() {
         gen_test_code!(
             ZbgSwapWSClient,
-            subscribe,
+            send,
             &vec![
                 r#"{"action":"sub", "topic":"future_tick-1000001"}"#.to_string(),
                 r#"{"action":"sub", "topic":"future_tick-1000003"}"#.to_string()
@@ -148,8 +148,8 @@ mod zbg_linear_swap {
             ZbgSwapWSClient,
             subscribe,
             &vec![
-                "future_tick-1000000".to_string(),
-                "future_tick-1000002".to_string()
+                ("future_tick".to_string(), "1000000".to_string()),
+                ("future_tick".to_string(), "1000002".to_string()),
             ]
         );
     }
@@ -159,7 +159,7 @@ mod zbg_linear_swap {
     fn subscribe_raw_json() {
         gen_test_code!(
             ZbgSwapWSClient,
-            subscribe,
+            send,
             &vec![
                 r#"{"action":"sub", "topic":"future_tick-1000000"}"#.to_string(),
                 r#"{"action":"sub", "topic":"future_tick-1000002"}"#.to_string()

@@ -1,15 +1,20 @@
-use crate::WSClient;
+use async_trait::async_trait;
 use std::collections::HashMap;
-use std::sync::mpsc::Sender;
 
 use log::*;
 use serde_json::Value;
-use tungstenite::Message;
+use tokio_tungstenite::tungstenite::Message;
 
-use super::ws_client_internal::{MiscMessage, WSClientInternal};
-use super::{Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO};
+use crate::{
+    common::{
+        command_translator::CommandTranslator,
+        message_handler::{MessageHandler, MiscMessage},
+        ws_client_internal::WSClientInternal,
+    },
+    WSClient,
+};
 
-pub(super) const EXCHANGE_NAME: &str = "huobi";
+pub(crate) const EXCHANGE_NAME: &str = "huobi";
 
 const SPOT_WEBSOCKET_URL: &str = "wss://api.huobi.pro/ws";
 // const FUTURES_WEBSOCKET_URL: &str = "wss://www.hbdm.com/ws";
@@ -21,29 +26,23 @@ const COIN_SWAP_WEBSOCKET_URL: &str = "wss://futures.huobi.com/swap-ws";
 const USDT_SWAP_WEBSOCKET_URL: &str = "wss://futures.huobi.com/linear-swap-ws";
 const OPTION_WEBSOCKET_URL: &str = "wss://futures.huobi.com/option-ws";
 
-// The server will send a heartbeat every 5 seconds
-const SERVER_PING_INTERVAL: u64 = 5;
-
 // Internal unified client
-struct HuobiWSClient {
-    client: WSClientInternal,
+pub struct HuobiWSClient<const URL: char> {
+    client: WSClientInternal<HuobiMessageHandler>,
+    translator: HuobiCommandTranslator,
 }
 
 /// Huobi Spot market.
 ///
 /// * WebSocket API doc: <https://huobiapi.github.io/docs/spot/v1/en/>
 /// * Trading at: <https://www.huobi.com/en-us/exchange/>
-pub struct HuobiSpotWSClient {
-    client: HuobiWSClient,
-}
+pub type HuobiSpotWSClient = HuobiWSClient<'S'>;
 
 /// Huobi Future market.
 ///
 /// * WebSocket API doc: <https://huobiapi.github.io/docs/dm/v1/en/>
 /// * Trading at: <https://futures.huobi.com/en-us/contract/exchange/>
-pub struct HuobiFutureWSClient {
-    client: HuobiWSClient,
-}
+pub type HuobiFutureWSClient = HuobiWSClient<'F'>;
 
 /// Huobi Inverse Swap market.
 ///
@@ -51,9 +50,7 @@ pub struct HuobiFutureWSClient {
 ///
 /// * WebSocket API doc: <https://huobiapi.github.io/docs/coin_margined_swap/v1/en/>
 /// * Trading at: <https://futures.huobi.com/en-us/swap/exchange/>
-pub struct HuobiInverseSwapWSClient {
-    client: HuobiWSClient,
-}
+pub type HuobiInverseSwapWSClient = HuobiWSClient<'I'>;
 
 /// Huobi Linear Swap market.
 ///
@@ -61,72 +58,185 @@ pub struct HuobiInverseSwapWSClient {
 ///
 /// * WebSocket API doc: <https://huobiapi.github.io/docs/usdt_swap/v1/en/>
 /// * Trading at: <https://futures.huobi.com/en-us/linear_swap/exchange/>
-pub struct HuobiLinearSwapWSClient {
-    client: HuobiWSClient,
-}
+pub type HuobiLinearSwapWSClient = HuobiWSClient<'L'>;
+
 /// Huobi Option market.
 ///
 ///
 /// * WebSocket API doc: <https://huobiapi.github.io/docs/option/v1/en/>
 /// * Trading at: <https://futures.huobi.com/en-us/option/exchange/>
-pub struct HuobiOptionWSClient {
-    client: HuobiWSClient,
+pub type HuobiOptionWSClient = HuobiWSClient<'O'>;
+
+impl<const URL: char> HuobiWSClient<URL> {
+    pub async fn new(tx: std::sync::mpsc::Sender<String>, url: Option<&str>) -> Self {
+        let real_url = match url {
+            Some(endpoint) => endpoint,
+            None => {
+                if URL == 'S' {
+                    SPOT_WEBSOCKET_URL
+                } else if URL == 'F' {
+                    FUTURES_WEBSOCKET_URL
+                } else if URL == 'I' {
+                    COIN_SWAP_WEBSOCKET_URL
+                } else if URL == 'L' {
+                    USDT_SWAP_WEBSOCKET_URL
+                } else if URL == 'O' {
+                    OPTION_WEBSOCKET_URL
+                } else {
+                    panic!("Unknown URL {}", URL);
+                }
+            }
+        };
+        HuobiWSClient {
+            client: WSClientInternal::connect(EXCHANGE_NAME, real_url, HuobiMessageHandler {}, tx)
+                .await,
+            translator: HuobiCommandTranslator {},
+        }
+    }
 }
 
-impl HuobiWSClient {
-    fn new(url: &str, tx: Sender<String>) -> Self {
-        HuobiWSClient {
-            client: WSClientInternal::new(
-                EXCHANGE_NAME,
-                url,
-                tx,
-                Self::on_misc_msg,
-                Self::channels_to_commands,
-                None,
-                Some(SERVER_PING_INTERVAL),
-            ),
-        }
-    }
-
-    fn subscribe(&self, channels: &[String]) {
-        self.client.subscribe(channels);
-    }
-
-    fn channel_to_command(channel: &str, subscribe: bool) -> String {
-        if channel.starts_with('{') {
-            channel.to_string()
-        } else {
-            format!(
-                r#"{{"{}":"{}","id":"crypto-ws-client"}}"#,
-                if subscribe { "sub" } else { "unsub" },
-                channel
-            )
-        }
-    }
-
-    fn channels_to_commands(channels: &[String], subscribe: bool) -> Vec<String> {
-        channels
+#[async_trait]
+impl<const URL: char> WSClient for HuobiWSClient<URL> {
+    async fn subscribe_trade(&self, symbols: &[String]) {
+        let topics = symbols
             .iter()
-            .map(|ch| Self::channel_to_command(ch, subscribe))
-            .collect()
+            .map(|symbol| ("trade.detail".to_string(), symbol.to_string()))
+            .collect::<Vec<(String, String)>>();
+        self.subscribe(&topics).await;
     }
 
-    fn on_misc_msg(msg: &str) -> MiscMessage {
+    async fn subscribe_orderbook(&self, symbols: &[String]) {
+        if URL == 'S' {
+            if self.client.url == "wss://api.huobi.pro/feed"
+                || self.client.url == "wss://api-aws.huobi.pro/feed"
+            {
+                let topics = symbols
+                    .iter()
+                    .map(|symbol| ("mbp.20".to_string(), symbol.to_string()))
+                    .collect::<Vec<(String, String)>>();
+                self.subscribe(&topics).await;
+            } else {
+                panic!("Huobi Spot market.$symbol.mbp.$levels must use wss://api.huobi.pro/feed or wss://api-aws.huobi.pro/feed");
+            }
+        } else {
+            let commands = symbols
+                .iter()
+                .map(|symbol| format!(r#"{{"sub":"market.{}.depth.size_20.high_freq","data_type":"incremental","id": "crypto-ws-client"}}"#, symbol))
+                .collect::<Vec<String>>();
+            self.client.send(&commands).await;
+        }
+    }
+
+    async fn subscribe_orderbook_topk(&self, symbols: &[String]) {
+        let channel = if URL == 'S' {
+            "depth.step1"
+        } else {
+            "depth.step7"
+        };
+        let topics = symbols
+            .iter()
+            .map(|symbol| (channel.to_string(), symbol.to_string()))
+            .collect::<Vec<(String, String)>>();
+        self.subscribe(&topics).await;
+    }
+
+    async fn subscribe_l3_orderbook(&self, _symbols: &[String]) {
+        panic!(
+            "{} does NOT have the level3 websocket channel",
+            EXCHANGE_NAME
+        );
+    }
+
+    async fn subscribe_ticker(&self, symbols: &[String]) {
+        let topics = symbols
+            .iter()
+            .map(|symbol| ("detail".to_string(), symbol.to_string()))
+            .collect::<Vec<(String, String)>>();
+        self.subscribe(&topics).await;
+    }
+
+    async fn subscribe_bbo(&self, symbols: &[String]) {
+        let topics = symbols
+            .iter()
+            .map(|symbol| ("bbo".to_string(), symbol.to_string()))
+            .collect::<Vec<(String, String)>>();
+        self.subscribe(&topics).await;
+    }
+
+    async fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
+        let commands = self
+            .translator
+            .translate_to_candlestick_commands(true, symbol_interval_list);
+        self.client.send(&commands).await;
+    }
+
+    async fn subscribe(&self, topics: &[(String, String)]) {
+        let commands = self.translator.translate_to_commands(true, topics);
+        self.client.send(&commands).await;
+    }
+
+    async fn unsubscribe(&self, topics: &[(String, String)]) {
+        let commands = self.translator.translate_to_commands(false, topics);
+        self.client.send(&commands).await;
+    }
+
+    async fn send(&self, commands: &[String]) {
+        self.client.send(commands).await;
+    }
+
+    async fn run(&self) {
+        self.client.run().await;
+    }
+
+    fn close(&self) {
+        self.client.close();
+    }
+}
+
+struct HuobiMessageHandler {}
+struct HuobiCommandTranslator {}
+
+impl HuobiCommandTranslator {
+    fn topic_to_command(channel: &str, symbol: &str, subscribe: bool) -> String {
+        let raw_channel = format!("market.{}.{}", symbol, channel);
+        format!(
+            r#"{{"{}":"{}","id":"crypto-ws-client"}}"#,
+            if subscribe { "sub" } else { "unsub" },
+            raw_channel
+        )
+    }
+
+    // see https://huobiapi.github.io/docs/dm/v1/en/#subscribe-kline-data
+    fn to_candlestick_raw_channel(interval: usize) -> String {
+        let interval_str = match interval {
+            60 => "1min",
+            300 => "5min",
+            900 => "15min",
+            1800 => "30min",
+            3600 => "60min",
+            14400 => "4hour",
+            86400 => "1day",
+            604800 => "1week",
+            2592000 => "1mon",
+            _ => panic!("Huobi has intervals 1min,5min,15min,30min,60min,4hour,1day,1week,1mon"),
+        };
+        format!("kline.{}", interval_str)
+    }
+}
+
+impl MessageHandler for HuobiMessageHandler {
+    fn handle_message(&mut self, msg: &str) -> MiscMessage {
         let resp = serde_json::from_str::<HashMap<String, Value>>(msg);
         if resp.is_err() {
             error!("{} is not a JSON string, {}", msg, EXCHANGE_NAME);
-            return MiscMessage::Misc;
+            return MiscMessage::Other;
         }
         let obj = resp.unwrap();
 
         // Market Heartbeat
         if obj.contains_key("ping") {
-            // The server will send a heartbeat every 5 seconds,
-            // - Spot <https://huobiapi.github.io/docs/spot/v1/en/#introduction-11>
-            // - Future <https://huobiapi.github.io/docs/dm/v1/en/#websocket-heartbeat-and-authentication-interface>
-            // - InverseSwap <https://huobiapi.github.io/docs/coin_margined_swap/v1/en/#market-heartbeat>
-            // - LinearSwap <https://huobiapi.github.io/docs/usdt_swap/v1/en/#websocket-heartbeat-and-authentication-interface>
-            // - Option <https://huobiapi.github.io/docs/option/v1/en/#websocket-heartbeat-and-authentication-interface>
+            // The server will send a heartbeat every 5 seconds
+            // see links in get_ping_msg_and_interval()S
             debug!("Received {} from {}", msg, EXCHANGE_NAME);
             let timestamp = obj.get("ping").unwrap();
             let mut pong_msg = HashMap::<String, &Value>::new();
@@ -164,265 +274,95 @@ impl HuobiWSClient {
                 }
             } else if let Some(op) = obj.get("op") {
                 match op.as_str().unwrap() {
-                    "sub" | "unsub" => MiscMessage::Misc,
+                    "sub" | "unsub" => MiscMessage::Other,
                     "notify" => MiscMessage::Normal,
                     _ => {
                         warn!("Received {} from {}", msg, EXCHANGE_NAME);
-                        MiscMessage::Misc
+                        MiscMessage::Other
                     }
                 };
             } else {
                 warn!("Received {} from {}", msg, EXCHANGE_NAME);
             }
-            MiscMessage::Misc
+            MiscMessage::Other
         }
+    }
+
+    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+        // The server will send a heartbeat every 5 seconds,
+        // - Spot <https://huobiapi.github.io/docs/spot/v1/en/#heartbeat-and-connection>
+        // - Future <https://huobiapi.github.io/docs/dm/v1/en/#market-heartbeat>
+        // - InverseSwap <https://huobiapi.github.io/docs/coin_margined_swap/v1/en/#market-heartbeat>
+        // - LinearSwap <https://huobiapi.github.io/docs/usdt_swap/v1/en/#market-heartbeat>
+        // - Option <https://huobiapi.github.io/docs/option/v1/en/#market-heartbeat>
+        None
     }
 }
 
-fn to_raw_channel(channel: &str, pair: &str) -> String {
-    format!("market.{}.{}", pair, channel)
-}
-
-#[rustfmt::skip]
-impl_trait!(Trade, HuobiWSClient, subscribe_trade, "trade.detail", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(Ticker, HuobiWSClient, subscribe_ticker, "detail", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(BBO, HuobiWSClient, subscribe_bbo, "bbo", to_raw_channel);
-#[rustfmt::skip]
-impl_trait!(OrderBookTopK, HuobiWSClient, subscribe_orderbook_topk, "depth.step7", to_raw_channel);
-
-impl OrderBook for HuobiWSClient {
-    fn subscribe_orderbook(&self, pairs: &[String]) {
-        let pair_to_raw_channel = |pair: &String| {
-            format!(
-                r#"{{"sub": "market.{}.depth.size_20.high_freq","data_type":"incremental","id": "crypto-ws-client"}}"#,
-                pair
-            )
-        };
-
-        let channels = pairs
+impl CommandTranslator for HuobiCommandTranslator {
+    fn translate_to_commands(&self, subscribe: bool, topics: &[(String, String)]) -> Vec<String> {
+        topics
             .iter()
-            .map(pair_to_raw_channel)
-            .collect::<Vec<String>>();
-        self.client.subscribe(&channels);
+            .map(|(channel, symbol)| {
+                HuobiCommandTranslator::topic_to_command(channel, symbol, subscribe)
+            })
+            .collect()
+    }
+
+    fn translate_to_candlestick_commands(
+        &self,
+        subscribe: bool,
+        symbol_interval_list: &[(String, usize)],
+    ) -> Vec<String> {
+        let topics = symbol_interval_list
+            .iter()
+            .map(|(symbol, interval)| {
+                let channel = Self::to_candlestick_raw_channel(*interval);
+                (channel, symbol.to_string())
+            })
+            .collect::<Vec<(String, String)>>();
+        self.translate_to_commands(subscribe, &topics)
     }
 }
-
-fn to_candlestick_raw_channel(pair: &str, interval: usize) -> String {
-    let interval_str = match interval {
-        60 => "1min",
-        300 => "5min",
-        900 => "15min",
-        1800 => "30min",
-        3600 => "60min",
-        14400 => "4hour",
-        86400 => "1day",
-        604800 => "1week",
-        2592000 => "1mon",
-        _ => panic!("Huobi has intervals 1min,5min,15min,30min,60min,4hour,1day,1week,1mon"),
-    };
-    format!("market.{}.kline.{}", pair, interval_str)
-}
-
-impl_candlestick!(HuobiWSClient);
-
-/// Define market specific client.
-macro_rules! define_market_client {
-    ($struct_name:ident, $default_url:ident) => {
-        impl $struct_name {
-            /// Creates a Huobi websocket client.
-            ///
-            /// # Arguments
-            ///
-            /// * `on_msg` - A callback function to process websocket messages
-            /// * `url` - Optional server url, usually you don't need specify it
-            pub fn new(tx: Sender<String>, url: Option<&str>) -> Self {
-                let real_url = match url {
-                    Some(endpoint) => endpoint,
-                    None => $default_url,
-                };
-                $struct_name {
-                    client: HuobiWSClient::new(real_url, tx),
-                }
-            }
-        }
-
-        impl WSClient for $struct_name {
-            fn subscribe_trade(&self, channels: &[String]) {
-                <$struct_name as Trade>::subscribe_trade(self, channels);
-            }
-
-            fn subscribe_orderbook(&self, channels: &[String]) {
-                <$struct_name as OrderBook>::subscribe_orderbook(self, channels);
-            }
-
-            fn subscribe_orderbook_topk(&self, channels: &[String]) {
-                <$struct_name as OrderBookTopK>::subscribe_orderbook_topk(self, channels);
-            }
-
-            fn subscribe_l3_orderbook(&self, channels: &[String]) {
-                <$struct_name as Level3OrderBook>::subscribe_l3_orderbook(self, channels);
-            }
-
-            fn subscribe_ticker(&self, channels: &[String]) {
-                <$struct_name as Ticker>::subscribe_ticker(self, channels);
-            }
-
-            fn subscribe_bbo(&self, channels: &[String]) {
-                <$struct_name as BBO>::subscribe_bbo(self, channels);
-            }
-
-            fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
-                <$struct_name as Candlestick>::subscribe_candlestick(self, symbol_interval_list);
-            }
-
-            fn subscribe(&self, channels: &[String]) {
-                self.client.subscribe(channels);
-            }
-
-            fn unsubscribe(&self, channels: &[String]) {
-                self.client.client.unsubscribe(channels);
-            }
-
-            fn run(&self, duration: Option<u64>) {
-                self.client.client.run(duration);
-            }
-
-            fn close(&self) {
-                self.client.client.close();
-            }
-        }
-    };
-}
-
-define_market_client!(HuobiSpotWSClient, SPOT_WEBSOCKET_URL);
-define_market_client!(HuobiFutureWSClient, FUTURES_WEBSOCKET_URL);
-define_market_client!(HuobiInverseSwapWSClient, COIN_SWAP_WEBSOCKET_URL);
-define_market_client!(HuobiLinearSwapWSClient, USDT_SWAP_WEBSOCKET_URL);
-define_market_client!(HuobiOptionWSClient, OPTION_WEBSOCKET_URL);
-
-macro_rules! impl_trade {
-    ($struct_name:ident) => {
-        impl Trade for $struct_name {
-            fn subscribe_trade(&self, pairs: &[String]) {
-                self.client.subscribe_trade(pairs);
-            }
-        }
-    };
-}
-
-impl_trade!(HuobiSpotWSClient);
-impl_trade!(HuobiFutureWSClient);
-impl_trade!(HuobiInverseSwapWSClient);
-impl_trade!(HuobiLinearSwapWSClient);
-impl_trade!(HuobiOptionWSClient);
-
-macro_rules! impl_ticker {
-    ($struct_name:ident) => {
-        impl Ticker for $struct_name {
-            fn subscribe_ticker(&self, pairs: &[String]) {
-                self.client.subscribe_ticker(pairs);
-            }
-        }
-    };
-}
-
-impl_ticker!(HuobiSpotWSClient);
-impl_ticker!(HuobiFutureWSClient);
-impl_ticker!(HuobiInverseSwapWSClient);
-impl_ticker!(HuobiLinearSwapWSClient);
-impl_ticker!(HuobiOptionWSClient);
-
-macro_rules! impl_bbo {
-    ($struct_name:ident) => {
-        impl BBO for $struct_name {
-            fn subscribe_bbo(&self, pairs: &[String]) {
-                self.client.subscribe_bbo(pairs);
-            }
-        }
-    };
-}
-
-impl_bbo!(HuobiSpotWSClient);
-impl_bbo!(HuobiFutureWSClient);
-impl_bbo!(HuobiInverseSwapWSClient);
-impl_bbo!(HuobiLinearSwapWSClient);
-impl_bbo!(HuobiOptionWSClient);
-
-macro_rules! impl_orderbook {
-    ($struct_name:ident) => {
-        impl OrderBook for $struct_name {
-            fn subscribe_orderbook(&self, pairs: &[String]) {
-                self.client.subscribe_orderbook(pairs);
-            }
-        }
-    };
-}
-
-impl_orderbook!(HuobiFutureWSClient);
-impl_orderbook!(HuobiInverseSwapWSClient);
-impl_orderbook!(HuobiLinearSwapWSClient);
-impl_orderbook!(HuobiOptionWSClient);
-impl OrderBook for HuobiSpotWSClient {
-    fn subscribe_orderbook(&self, pairs: &[String]) {
-        if self.client.client.url.as_str() == "wss://api.huobi.pro/feed"
-            || self.client.client.url.as_str() == "wss://api-aws.huobi.pro/feed"
-        {
-            let pair_to_raw_channel = |pair: &String| to_raw_channel("mbp.20", pair);
-
-            let channels = pairs
-                .iter()
-                .map(pair_to_raw_channel)
-                .collect::<Vec<String>>();
-            self.client.client.subscribe(&channels);
-        } else {
-            panic!("Huobi Spot market.$symbol.mbp.$levels must use wss://api.huobi.pro/feed or wss://api-aws.huobi.pro/feed");
-        }
-    }
-}
-
-impl_candlestick!(HuobiSpotWSClient);
-impl_candlestick!(HuobiFutureWSClient);
-impl_candlestick!(HuobiInverseSwapWSClient);
-impl_candlestick!(HuobiLinearSwapWSClient);
-impl_candlestick!(HuobiOptionWSClient);
-
-macro_rules! impl_orderbook_snapshot {
-    ($struct_name:ident) => {
-        impl OrderBookTopK for $struct_name {
-            fn subscribe_orderbook_topk(&self, pairs: &[String]) {
-                self.client.subscribe_orderbook_topk(pairs);
-            }
-        }
-    };
-}
-
-#[rustfmt::skip]
-impl_trait!(OrderBookTopK, HuobiSpotWSClient, subscribe_orderbook_topk, "depth.step1", to_raw_channel);
-impl_orderbook_snapshot!(HuobiFutureWSClient);
-impl_orderbook_snapshot!(HuobiInverseSwapWSClient);
-impl_orderbook_snapshot!(HuobiLinearSwapWSClient);
-impl_orderbook_snapshot!(HuobiOptionWSClient);
-
-panic_l3_orderbook!(HuobiSpotWSClient);
-panic_l3_orderbook!(HuobiFutureWSClient);
-panic_l3_orderbook!(HuobiInverseSwapWSClient);
-panic_l3_orderbook!(HuobiLinearSwapWSClient);
-panic_l3_orderbook!(HuobiOptionWSClient);
 
 #[cfg(test)]
 mod tests {
+    use crate::common::command_translator::CommandTranslator;
+
     #[test]
-    fn test_channel_to_command() {
-        assert_eq!(
-            r#"{"sub":"market.btcusdt.trade.detail","id":"crypto-ws-client"}"#,
-            super::HuobiWSClient::channel_to_command("market.btcusdt.trade.detail", true)
+    fn test_one_topic() {
+        let translator = super::HuobiCommandTranslator {};
+        let commands = translator.translate_to_commands(
+            true,
+            &vec![("trade.detail".to_string(), "btcusdt".to_string())],
         );
 
+        assert_eq!(1, commands.len());
         assert_eq!(
-            r#"{"unsub":"market.btcusdt.trade.detail","id":"crypto-ws-client"}"#,
-            super::HuobiWSClient::channel_to_command("market.btcusdt.trade.detail", false)
+            r#"{"sub":"market.btcusdt.trade.detail","id":"crypto-ws-client"}"#,
+            commands[0]
+        );
+    }
+
+    #[test]
+    fn test_two_topics() {
+        let translator = super::HuobiCommandTranslator {};
+        let commands = translator.translate_to_commands(
+            true,
+            &vec![
+                ("trade.detail".to_string(), "btcusdt".to_string()),
+                ("bbo".to_string(), "btcusdt".to_string()),
+            ],
+        );
+
+        assert_eq!(2, commands.len());
+        assert_eq!(
+            r#"{"sub":"market.btcusdt.trade.detail","id":"crypto-ws-client"}"#,
+            commands[0]
+        );
+        assert_eq!(
+            r#"{"sub":"market.btcusdt.bbo","id":"crypto-ws-client"}"#,
+            commands[1]
         );
     }
 }
