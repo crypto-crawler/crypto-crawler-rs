@@ -2,37 +2,24 @@ use std::collections::{BTreeSet, HashMap, HashSet};
 
 use super::utils::http_get;
 use crypto_market_type::MarketType;
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-lazy_static! {
-    static ref SPOT_QUOTES: HashSet<String> = {
-        // offline data, in case the network is down
-        let mut set: HashSet<String> = vec![
-            "CHF",
-            "DAI",
-            "DOT",
-            "USD",
-            "XET",
-            "XXB",
-            "ZAU",
-            "ZCA",
-            "ZEU",
-            "ZGB",
-            "ZJP",
-            "ZUS",
-        ]
-        .into_iter()
-        .map(|x| x.to_string())
-        .collect();
+static SPOT_QUOTES: Lazy<HashSet<String>> = Lazy::new(|| {
+    // offline data, in case the network is down
+    let mut set: HashSet<String> = vec![
+        "CHF", "DAI", "DOT", "USD", "XET", "XXB", "ZAU", "ZCA", "ZEU", "ZGB", "ZJP", "ZUS",
+    ]
+    .into_iter()
+    .map(|x| x.to_string())
+    .collect();
 
-        let from_online = fetch_spot_quotes();
-        set.extend(from_online.into_iter());
+    let from_online = fetch_spot_quotes();
+    set.extend(from_online.into_iter());
 
-        set
-    };
-}
+    set
+});
 
 // see <https://docs.kraken.com/rest/#operation/getTradableAssetPairs>
 fn fetch_spot_quotes() -> BTreeSet<String> {

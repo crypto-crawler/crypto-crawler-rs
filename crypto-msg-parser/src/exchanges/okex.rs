@@ -4,8 +4,7 @@ use crypto_msg_type::MessageType;
 use super::utils::calc_quantity_and_volume;
 use crate::{FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
-use chrono::prelude::*;
-use chrono::DateTime;
+use chrono::{prelude::*, DateTime};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;

@@ -2,34 +2,34 @@ mod error;
 mod exchanges;
 
 pub use error::Error;
-pub use exchanges::binance::binance_inverse::BinanceInverseRestClient;
-pub use exchanges::binance::binance_linear::BinanceLinearRestClient;
-pub use exchanges::binance::binance_option::BinanceOptionRestClient;
-pub use exchanges::binance::binance_spot::BinanceSpotRestClient;
-pub use exchanges::bitfinex::BitfinexRestClient;
-pub use exchanges::bitget::*;
-pub use exchanges::bithumb::*;
-pub use exchanges::bitmex::BitmexRestClient;
-pub use exchanges::bitstamp::BitstampRestClient;
-pub use exchanges::bitz::*;
-pub use exchanges::bybit::BybitRestClient;
-pub use exchanges::coinbase_pro::CoinbaseProRestClient;
-pub use exchanges::deribit::DeribitRestClient;
-pub use exchanges::dydx::dydx_swap::DydxSwapRestClient;
-pub use exchanges::ftx::FtxRestClient;
-pub use exchanges::gate::*;
-pub use exchanges::huobi::huobi_future::HuobiFutureRestClient;
-pub use exchanges::huobi::huobi_inverse_swap::HuobiInverseSwapRestClient;
-pub use exchanges::huobi::huobi_linear_swap::HuobiLinearSwapRestClient;
-pub use exchanges::huobi::huobi_option::HuobiOptionRestClient;
-pub use exchanges::huobi::huobi_spot::HuobiSpotRestClient;
-pub use exchanges::kraken::kraken_futures::KrakenFuturesRestClient;
-pub use exchanges::kraken::kraken_spot::KrakenSpotRestClient;
-pub use exchanges::kucoin::*;
-pub use exchanges::mexc::mexc_spot::MexcSpotRestClient;
-pub use exchanges::mexc::mexc_swap::MexcSwapRestClient;
-pub use exchanges::okx::OkxRestClient;
-pub use exchanges::zbg::*;
+pub use exchanges::{
+    binance::{
+        binance_inverse::BinanceInverseRestClient, binance_linear::BinanceLinearRestClient,
+        binance_option::BinanceOptionRestClient, binance_spot::BinanceSpotRestClient,
+    },
+    bitfinex::BitfinexRestClient,
+    bitget::*,
+    bithumb::*,
+    bitmex::BitmexRestClient,
+    bitstamp::BitstampRestClient,
+    bitz::*,
+    bybit::BybitRestClient,
+    coinbase_pro::CoinbaseProRestClient,
+    deribit::DeribitRestClient,
+    dydx::dydx_swap::DydxSwapRestClient,
+    ftx::FtxRestClient,
+    gate::*,
+    huobi::{
+        huobi_future::HuobiFutureRestClient, huobi_inverse_swap::HuobiInverseSwapRestClient,
+        huobi_linear_swap::HuobiLinearSwapRestClient, huobi_option::HuobiOptionRestClient,
+        huobi_spot::HuobiSpotRestClient,
+    },
+    kraken::{kraken_futures::KrakenFuturesRestClient, kraken_spot::KrakenSpotRestClient},
+    kucoin::*,
+    mexc::{mexc_spot::MexcSpotRestClient, mexc_swap::MexcSwapRestClient},
+    okx::OkxRestClient,
+    zbg::*,
+};
 
 use crypto_market_type::MarketType;
 use error::Result;

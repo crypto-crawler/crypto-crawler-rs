@@ -4,7 +4,7 @@ use crypto_msg_type::MessageType;
 use super::super::utils::http_get;
 use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
@@ -12,43 +12,41 @@ use std::collections::{BTreeMap, HashMap};
 
 const EXCHANGE_NAME: &str = "zbg";
 
-lazy_static! {
-    static ref SWAP_CONTRACT_MAP: HashMap<i64, SwapContractInfo> = {
-        // offline data, in case the network is down
-        let mut m: HashMap<i64, SwapContractInfo> = vec![
-            (999999, "BTC_ZUSD", 0.01_f64),
-            (1000000, "BTC_USDT", 0.01_f64),
-            (1000001, "BTC_USD-R", 1_f64),
-            (1000002, "ETH_USDT", 0.1_f64),
-            (1000003, "ETH_USD-R", 1_f64),
-            (1000008, "LTC_USDT", 0.1_f64),
-            (1000009, "EOS_USDT", 1_f64),
-            (1000010, "XRP_USDT", 10_f64),
-            (1000011, "BCH_USDT", 0.1_f64),
-            (1000012, "ETC_USDT", 1_f64),
-            (1000013, "BSV_USDT", 0.1_f64),
-            (1000014, "RHI_ZUSD", 0.01_f64),
-            (1000015, "UNI_USDT", 0.1_f64),
-            (1000016, "DOT_USDT", 1_f64),
-            (1000017, "FIL_USDT", 0.1_f64),
-            (1000018, "SUSHI_USDT", 1_f64),
-            (1000019, "LINK_USDT", 1_f64),
-            (1000020, "DOGE_USDT", 100_f64),
-            (1000021, "AXS_USDT", 0.1_f64),
-            (1000022, "ICP_USDT", 0.1_f64),
-        ]
-        .into_iter()
-        .map(|x| (x.0, SwapContractInfo::new(x)))
-        .collect();
+static SWAP_CONTRACT_MAP: Lazy<HashMap<i64, SwapContractInfo>> = Lazy::new(|| {
+    // offline data, in case the network is down
+    let mut m: HashMap<i64, SwapContractInfo> = vec![
+        (999999, "BTC_ZUSD", 0.01_f64),
+        (1000000, "BTC_USDT", 0.01_f64),
+        (1000001, "BTC_USD-R", 1_f64),
+        (1000002, "ETH_USDT", 0.1_f64),
+        (1000003, "ETH_USD-R", 1_f64),
+        (1000008, "LTC_USDT", 0.1_f64),
+        (1000009, "EOS_USDT", 1_f64),
+        (1000010, "XRP_USDT", 10_f64),
+        (1000011, "BCH_USDT", 0.1_f64),
+        (1000012, "ETC_USDT", 1_f64),
+        (1000013, "BSV_USDT", 0.1_f64),
+        (1000014, "RHI_ZUSD", 0.01_f64),
+        (1000015, "UNI_USDT", 0.1_f64),
+        (1000016, "DOT_USDT", 1_f64),
+        (1000017, "FIL_USDT", 0.1_f64),
+        (1000018, "SUSHI_USDT", 1_f64),
+        (1000019, "LINK_USDT", 1_f64),
+        (1000020, "DOGE_USDT", 100_f64),
+        (1000021, "AXS_USDT", 0.1_f64),
+        (1000022, "ICP_USDT", 0.1_f64),
+    ]
+    .into_iter()
+    .map(|x| (x.0, SwapContractInfo::new(x)))
+    .collect();
 
-        let from_online = fetch_swap_contracts();
-        for (pair, contract_value) in from_online {
-            m.insert(pair, contract_value);
-        }
+    let from_online = fetch_swap_contracts();
+    for (pair, contract_value) in from_online {
+        m.insert(pair, contract_value);
+    }
 
-        m
-    };
-}
+    m
+});
 
 struct SwapContractInfo {
     contract_id: i64,

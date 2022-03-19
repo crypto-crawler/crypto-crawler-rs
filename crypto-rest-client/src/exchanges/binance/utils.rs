@@ -2,13 +2,11 @@ use std::collections::BTreeMap;
 
 use crate::error::{Error, Result};
 
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use regex::Regex;
 use serde_json::Value;
 
-lazy_static! {
-    static ref SYMBOL_PATTERN: Regex = Regex::new("^[A-Z0-9-_.]{1,20}$").unwrap();
-}
+static SYMBOL_PATTERN: Lazy<Regex> = Lazy::new(|| Regex::new("^[A-Z0-9-_.]{1,20}$").unwrap());
 
 pub(super) fn check_symbol(symbol: &str) {
     if !SYMBOL_PATTERN.is_match(symbol) {

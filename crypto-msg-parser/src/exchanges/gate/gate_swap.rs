@@ -1,8 +1,7 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use super::super::utils::calc_quantity_and_volume;
-use super::messages::WebsocketMsg;
+use super::{super::utils::calc_quantity_and_volume, messages::WebsocketMsg};
 
 use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 

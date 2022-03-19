@@ -1,56 +1,29 @@
 use std::collections::{BTreeSet, HashSet};
 
 use super::utils::{http_get, normalize_pair_with_quotes};
-use lazy_static::lazy_static;
 
 use crypto_market_type::MarketType;
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 
-lazy_static! {
-    static ref SPOT_QUOTES: HashSet<String> = {
-        // offline data, in case the network is down
-        let mut set: HashSet<String> = vec![
-            "AUD",
-            "BIDR",
-            "BKRW",
-            "BNB",
-            "BRL",
-            "BTC",
-            "BUSD",
-            "BVND",
-            "DAI",
-            "ETH",
-            "EUR",
-            "GBP",
-            "GYEN",
-            "IDRT",
-            "NGN",
-            "PAX",
-            "RUB",
-            "TRX",
-            "TRY",
-            "TUSD",
-            "UAH",
-            "USDC",
-            "USDP",
-            "USDS",
-            "USDT",
-            "VAI",
-            "XRP",
-            "ZAR",
-        ]
-        .into_iter()
-        .map(|x| x.to_string())
-        .collect();
+static SPOT_QUOTES: Lazy<HashSet<String>> = Lazy::new(|| {
+    // offline data, in case the network is down
+    let mut set: HashSet<String> = vec![
+        "AUD", "BIDR", "BKRW", "BNB", "BRL", "BTC", "BUSD", "BVND", "DAI", "ETH", "EUR", "GBP",
+        "GYEN", "IDRT", "NGN", "PAX", "RUB", "TRX", "TRY", "TUSD", "UAH", "USDC", "USDP", "USDS",
+        "USDT", "VAI", "XRP", "ZAR",
+    ]
+    .into_iter()
+    .map(|x| x.to_string())
+    .collect();
 
-        let from_online = fetch_spot_quotes();
-        set.extend(from_online.into_iter());
+    let from_online = fetch_spot_quotes();
+    set.extend(from_online.into_iter());
 
-        set
-    };
-}
+    set
+});
 
 #[derive(Serialize, Deserialize)]
 struct BinanceResponse {

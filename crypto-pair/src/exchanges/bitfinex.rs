@@ -1,73 +1,71 @@
 use super::utils::http_get;
 use crypto_market_type::MarketType;
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use std::collections::{BTreeMap, HashMap};
 
-lazy_static! {
-    static ref BITFINEX_MAPPING: HashMap<String, String> = {
-        // offline data, in case the network is down
-        let mut set: HashMap<String, String> = vec![
-            ("AAA", "TESTAAA"),
-            ("AIX", "AI"),
-            ("ALG", "ALGO"),
-            ("AMP", "AMPL"),
-            ("AMPF0", "AMPLF0"),
-            ("ATO", "ATOM"),
-            ("B21X", "B21"),
-            ("BBB", "TESTBBB"),
-            ("BCHABC", "XEC"),
-            ("BTCF0", "BTC"),
-            ("CNHT", "CNHt"),
-            ("DAT", "DATA"),
-            ("DOG", "MDOGE"),
-            ("DSH", "DASH"),
-            ("EDO", "PNT"),
-            ("ETH2P", "ETH2Pending"),
-            ("ETH2R", "ETH2Rewards"),
-            ("ETH2X", "ETH2"),
-            ("EUS", "EURS"),
-            ("EUT", "EURt"),
-            ("GNT", "GLM"),
-            ("IDX", "ID"),
-            ("IOT", "IOTA"),
-            ("LBT", "LBTC"),
-            ("LES", "LEO-EOS"),
-            ("LET", "LEO-ERC20"),
-            ("LNX", "LN-BTC"),
-            ("MNA", "MANA"),
-            ("OMN", "OMNI"),
-            ("PAS", "PASS"),
-            ("PBTCEOS", "pBTC-EOS"),
-            ("PBTCETH", "PBTC-ETH"),
-            ("PETHEOS", "pETH-EOS"),
-            ("PLTCEOS", "PLTC-EOS"),
-            ("PLTCETH", "PLTC-ETH"),
-            ("QSH", "QASH"),
-            ("QTM", "QTUM"),
-            ("RBT", "RBTC"),
-            ("REP", "REP2"),
-            ("SNG", "SNGLS"),
-            ("STJ", "STORJ"),
-            ("TSD", "TUSD"),
-            ("UDC", "USDC"),
-            ("UST", "USDt"),
-            ("USTF0", "USDt"),
-            ("VSY", "VSYS"),
-            ("WBT", "WBTC"),
-            ("XAUT", "XAUt"),
-            ("XCH", "XCHF"),
-            ("YGG", "MCS"),
-        ]
-        .into_iter()
-        .map(|x| (x.0.to_string(), x.1.to_string()))
-        .collect();
+static BITFINEX_MAPPING: Lazy<HashMap<String, String>> = Lazy::new(|| {
+    // offline data, in case the network is down
+    let mut set: HashMap<String, String> = vec![
+        ("AAA", "TESTAAA"),
+        ("AIX", "AI"),
+        ("ALG", "ALGO"),
+        ("AMP", "AMPL"),
+        ("AMPF0", "AMPLF0"),
+        ("ATO", "ATOM"),
+        ("B21X", "B21"),
+        ("BBB", "TESTBBB"),
+        ("BCHABC", "XEC"),
+        ("BTCF0", "BTC"),
+        ("CNHT", "CNHt"),
+        ("DAT", "DATA"),
+        ("DOG", "MDOGE"),
+        ("DSH", "DASH"),
+        ("EDO", "PNT"),
+        ("ETH2P", "ETH2Pending"),
+        ("ETH2R", "ETH2Rewards"),
+        ("ETH2X", "ETH2"),
+        ("EUS", "EURS"),
+        ("EUT", "EURt"),
+        ("GNT", "GLM"),
+        ("IDX", "ID"),
+        ("IOT", "IOTA"),
+        ("LBT", "LBTC"),
+        ("LES", "LEO-EOS"),
+        ("LET", "LEO-ERC20"),
+        ("LNX", "LN-BTC"),
+        ("MNA", "MANA"),
+        ("OMN", "OMNI"),
+        ("PAS", "PASS"),
+        ("PBTCEOS", "pBTC-EOS"),
+        ("PBTCETH", "PBTC-ETH"),
+        ("PETHEOS", "pETH-EOS"),
+        ("PLTCEOS", "PLTC-EOS"),
+        ("PLTCETH", "PLTC-ETH"),
+        ("QSH", "QASH"),
+        ("QTM", "QTUM"),
+        ("RBT", "RBTC"),
+        ("REP", "REP2"),
+        ("SNG", "SNGLS"),
+        ("STJ", "STORJ"),
+        ("TSD", "TUSD"),
+        ("UDC", "USDC"),
+        ("UST", "USDt"),
+        ("USTF0", "USDt"),
+        ("VSY", "VSYS"),
+        ("WBT", "WBTC"),
+        ("XAUT", "XAUt"),
+        ("XCH", "XCHF"),
+        ("YGG", "MCS"),
+    ]
+    .into_iter()
+    .map(|x| (x.0.to_string(), x.1.to_string()))
+    .collect();
 
-        let from_online = fetch_currency_mapping();
-        set.extend(from_online.into_iter());
+    let from_online = fetch_currency_mapping();
+    set.extend(from_online.into_iter());
 
-        set
-    };
-}
+    set
+});
 
 // see <https://api-pub.bitfinex.com/v2/conf/pub:map:currency:sym>
 fn fetch_currency_mapping() -> BTreeMap<String, String> {
