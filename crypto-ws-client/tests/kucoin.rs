@@ -4,7 +4,6 @@ mod utils;
 #[cfg(test)]
 mod kucoin_spot {
     use crypto_ws_client::{KuCoinSpotWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -100,7 +99,6 @@ mod kucoin_spot {
 #[cfg(test)]
 mod kucoin_inverse_swap {
     use crypto_ws_client::{KuCoinSwapWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -203,7 +201,6 @@ mod kucoin_inverse_swap {
 #[cfg(test)]
 mod kucoin_linear_swap {
     use crypto_ws_client::{KuCoinSwapWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -300,7 +297,6 @@ mod kucoin_linear_swap {
 #[cfg(test)]
 mod kucoin_inverse_future {
     use crypto_ws_client::{KuCoinSwapWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[ignore]
     #[tokio::test(flavor = "multi_thread")]

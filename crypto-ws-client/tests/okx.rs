@@ -1,5 +1,4 @@
 use crypto_ws_client::{OkxWSClient, WSClient};
-use std::sync::mpsc::{Receiver, Sender};
 
 #[macro_use]
 mod utils;
@@ -16,7 +15,6 @@ async fn okex_index() {
 #[cfg(test)]
 mod okex_spot {
     use crypto_ws_client::{OkxWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -77,7 +75,6 @@ mod okex_spot {
 #[cfg(test)]
 mod okex_future {
     use crypto_ws_client::{OkxWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -137,7 +134,6 @@ mod okex_future {
 #[cfg(test)]
 mod okex_swap {
     use crypto_ws_client::{OkxWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -203,7 +199,6 @@ mod okex_swap {
 #[cfg(test)]
 mod okex_option {
     use crypto_ws_client::{OkxWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     #[ignore]

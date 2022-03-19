@@ -4,7 +4,6 @@ mod utils;
 #[cfg(test)]
 mod huobi_spot {
     use crypto_ws_client::{HuobiSpotWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -53,7 +52,7 @@ mod huobi_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        let (tx, rx): (Sender<String>, Receiver<String>) = std::sync::mpsc::channel();
+        let (tx, rx) = std::sync::mpsc::channel();
         tokio::task::spawn(async move {
             let ws_client = HuobiSpotWSClient::new(tx, Some("wss://api.huobi.pro/feed")).await;
             ws_client
@@ -91,7 +90,6 @@ mod huobi_spot {
 #[cfg(test)]
 mod huobi_inverse_future {
     use crypto_ws_client::{HuobiFutureWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -160,7 +158,6 @@ mod huobi_inverse_future {
 #[cfg(test)]
 mod huobi_linear_swap {
     use crypto_ws_client::{HuobiLinearSwapWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -230,7 +227,7 @@ mod huobi_linear_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_funding_rate() {
-        let (tx, rx): (Sender<String>, Receiver<String>) = std::sync::mpsc::channel();
+        let (tx, rx) = std::sync::mpsc::channel();
         tokio::task::spawn(async move {
             let ws_client = HuobiLinearSwapWSClient::new(
                 tx,
@@ -257,7 +254,7 @@ mod huobi_linear_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_funding_rate_all() {
-        let (tx, rx): (Sender<String>, Receiver<String>) = std::sync::mpsc::channel();
+        let (tx, rx) = std::sync::mpsc::channel();
         tokio::task::spawn(async move {
             let ws_client = HuobiLinearSwapWSClient::new(
                 tx,
@@ -286,7 +283,6 @@ mod huobi_linear_swap {
 #[cfg(test)]
 mod huobi_inverse_swap {
     use crypto_ws_client::{HuobiInverseSwapWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -356,7 +352,7 @@ mod huobi_inverse_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_funding_rate() {
-        let (tx, rx): (Sender<String>, Receiver<String>) = std::sync::mpsc::channel();
+        let (tx, rx) = std::sync::mpsc::channel();
         tokio::task::spawn(async move {
             let ws_client =
                 HuobiInverseSwapWSClient::new(tx, Some("wss://api.hbdm.com/swap-notification"))
@@ -381,7 +377,7 @@ mod huobi_inverse_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_funding_rate_all() {
-        let (tx, rx): (Sender<String>, Receiver<String>) = std::sync::mpsc::channel();
+        let (tx, rx) = std::sync::mpsc::channel();
         tokio::task::spawn(async move {
             let ws_client =
                 HuobiInverseSwapWSClient::new(tx, Some("wss://api.hbdm.com/swap-notification"))
@@ -417,7 +413,6 @@ mod huobi_inverse_swap {
 #[cfg(test)]
 mod huobi_option {
     use crypto_ws_client::{HuobiOptionWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     #[ignore]

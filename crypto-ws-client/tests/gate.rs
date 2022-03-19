@@ -4,7 +4,6 @@ mod utils;
 #[cfg(test)]
 mod gate_spot {
     use crypto_ws_client::{GateSpotWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -85,7 +84,6 @@ mod gate_spot {
 #[cfg(test)]
 mod gate_inverse_swap {
     use crypto_ws_client::{GateInverseSwapWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -173,7 +171,6 @@ mod gate_inverse_swap {
 #[cfg(test)]
 mod gate_linear_swap {
     use crypto_ws_client::{GateLinearSwapWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
@@ -237,7 +234,6 @@ mod gate_linear_swap {
 #[cfg(test)]
 mod gate_inverse_future {
     use crypto_ws_client::{GateInverseFutureWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     #[ignore]
@@ -285,7 +281,6 @@ mod gate_inverse_future {
 #[cfg(test)]
 mod gate_linear_future {
     use crypto_ws_client::{GateLinearFutureWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[test]
     #[ignore]

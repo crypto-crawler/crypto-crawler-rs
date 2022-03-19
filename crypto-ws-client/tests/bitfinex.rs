@@ -4,7 +4,6 @@ mod utils;
 #[cfg(test)]
 mod bitfinex_spot {
     use crypto_ws_client::{BitfinexWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -83,7 +82,6 @@ mod bitfinex_spot {
 #[cfg(test)]
 mod bitfinex_swap {
     use crypto_ws_client::{BitfinexWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {

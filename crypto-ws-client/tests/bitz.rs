@@ -4,10 +4,7 @@ mod utils;
 #[cfg(test)]
 mod bitz_spot {
     use crypto_ws_client::{BitzSpotWSClient, WSClient};
-    use std::{
-        sync::mpsc::{Receiver, Sender},
-        time::{SystemTime, UNIX_EPOCH},
-    };
+    use std::time::{SystemTime, UNIX_EPOCH};
 
     #[tokio::test(flavor = "multi_thread")]
     #[ignore = "bitz.com has shutdown since October 2021"]

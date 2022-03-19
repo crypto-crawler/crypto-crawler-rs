@@ -4,7 +4,6 @@ mod utils;
 #[cfg(test)]
 mod mexc_spot {
     use crypto_ws_client::{MexcSpotWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -100,7 +99,6 @@ mod mexc_spot {
 #[cfg(test)]
 mod mexc_linear_swap {
     use crypto_ws_client::{MexcSwapWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -169,7 +167,6 @@ mod mexc_linear_swap {
 #[cfg(test)]
 mod mexc_inverse_swap {
     use crypto_ws_client::{MexcSwapWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {

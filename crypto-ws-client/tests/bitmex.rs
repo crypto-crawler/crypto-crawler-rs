@@ -1,5 +1,4 @@
 use crypto_ws_client::{BitmexWSClient, WSClient};
-use std::sync::mpsc::{Receiver, Sender};
 
 #[macro_use]
 mod utils;
@@ -16,7 +15,6 @@ async fn bitmex_instrument() {
 #[cfg(test)]
 mod bitmex_inverse_swap {
     use crypto_ws_client::{BitmexWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -96,7 +94,6 @@ mod bitmex_inverse_swap {
 #[cfg(test)]
 mod bitmex_inverse_future {
     use crypto_ws_client::{BitmexWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
@@ -162,7 +159,6 @@ mod bitmex_inverse_future {
 #[cfg(test)]
 mod bitmex_quanto_swap {
     use crypto_ws_client::{BitmexWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
@@ -212,7 +208,6 @@ mod bitmex_quanto_swap {
 #[cfg(test)]
 mod bitmex_linear_future {
     use crypto_ws_client::{BitmexWSClient, WSClient};
-    use std::sync::mpsc::{Receiver, Sender};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
