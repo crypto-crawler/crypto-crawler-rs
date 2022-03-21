@@ -19,10 +19,6 @@ const SPOT_WEBSOCKET_URL: &str = "wss://stream.binance.com:9443/stream";
 const LINEAR_WEBSOCKET_URL: &str = "wss://fstream.binance.com/stream";
 const INVERSE_WEBSOCKET_URL: &str = "wss://dstream.binance.com/stream";
 
-// https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
-// A single connection can listen to a maximum of 200 streams
-const MAX_NUM_CHANNELS: usize = 200;
-
 // the websocket message size should not exceed 4096 bytes, otherwise
 // you'll get `code: 3001, reason: illegal request`
 const WS_FRAME_SIZE: usize = 4096;
@@ -75,7 +71,9 @@ impl<const URL: char> BinanceWSClient<URL> {
                 tx,
             )
             .await,
-            translator: BinanceCommandTranslator {},
+            translator: BinanceCommandTranslator {
+                is_spot: URL == 'S',
+            },
         }
     }
 }
@@ -160,7 +158,9 @@ impl<const URL: char> WSClient for BinanceWSClient<URL> {
 }
 
 struct BinanceMessageHandler {}
-struct BinanceCommandTranslator {}
+struct BinanceCommandTranslator {
+    is_spot: bool,
+}
 
 impl BinanceCommandTranslator {
     fn topics_to_command(topics: &[(String, String)], subscribe: bool) -> String {
@@ -231,19 +231,32 @@ impl MessageHandler for BinanceMessageHandler {
     }
 
     fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
-        // The websocket server will send a ping frame every 5 minutes
+        // https://binance-docs.github.io/apidocs/spot/en/#websocket-market-streams
+        // https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
+        // https://binance-docs.github.io/apidocs/delivery/en/#websocket-market-streams
+        // The websocket server will send a ping frame every 3 minutes. If the websocket server
+        // does not receive a pong frame back from the connection within a 10 minute period, the
+        // connection will be disconnected. Unsolicited pong frames are allowed.
         None
     }
 }
 
 impl CommandTranslator for BinanceCommandTranslator {
     fn translate_to_commands(&self, subscribe: bool, topics: &[(String, String)]) -> Vec<String> {
+        let max_num_topics = if self.is_spot {
+            // https://binance-docs.github.io/apidocs/spot/en/#websocket-limits
+            1024
+        } else {
+            // https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
+            // https://binance-docs.github.io/apidocs/delivery/en/#websocket-market-streams
+            200
+        };
         ensure_frame_size(
             topics,
             subscribe,
             Self::topics_to_command,
             WS_FRAME_SIZE,
-            Some(MAX_NUM_CHANNELS),
+            Some(max_num_topics),
         )
     }
 
@@ -269,7 +282,7 @@ mod tests {
 
     #[test]
     fn test_one_topic() {
-        let translator = super::BinanceCommandTranslator {};
+        let translator = super::BinanceCommandTranslator { is_spot: true };
         let commands = translator
             .translate_to_commands(true, &vec![("aggTrade".to_string(), "BTCUSDT".to_string())]);
 
@@ -282,7 +295,7 @@ mod tests {
 
     #[test]
     fn test_two_topics() {
-        let translator = super::BinanceCommandTranslator {};
+        let translator = super::BinanceCommandTranslator { is_spot: true };
         let commands = translator.translate_to_commands(
             true,
             &vec![

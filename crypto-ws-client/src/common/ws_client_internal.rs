@@ -67,12 +67,13 @@ impl<H: MessageHandler> WSClientInternal<H> {
     pub async fn send(&self, commands: &[String]) {
         for command in commands {
             debug!("{}", command);
-            if let Err(err) = self
+            if self
                 .command_tx
                 .send(Message::Text(command.to_string()))
                 .await
+                .is_err()
             {
-                panic!("{}", err);
+                break; // break the loop if there is no receiver
             }
             if let Some(interval) = self.get_send_interval_ms() {
                 std::thread::sleep(Duration::from_millis(interval));
@@ -139,9 +140,11 @@ impl<H: MessageHandler> WSClientInternal<H> {
                     }
                 }
                 Message::Ping(resp) => {
-                    info!(
-                        "Received a ping frame: {}",
-                        std::str::from_utf8(&resp).unwrap()
+                    // binance server will send a ping frame every 3 or 5 minutes
+                    debug!(
+                        "Received a ping frame: {} from {}",
+                        std::str::from_utf8(&resp).unwrap(),
+                        self.url,
                     );
                     None
                 }
@@ -172,7 +175,12 @@ impl<H: MessageHandler> WSClientInternal<H> {
 
             if let Some(txt) = txt {
                 match handler.handle_message(&txt) {
-                    MiscMessage::Normal => _ = tx.send(txt), // the receiver might get dropped earlier than this loop
+                    MiscMessage::Normal => {
+                        // the receiver might get dropped earlier than this loop
+                        if tx.send(txt).is_err() {
+                            break; // break the loop if there is no receiver
+                        }
+                    }
                     MiscMessage::Mutated(txt) => _ = tx.send(txt),
                     MiscMessage::WebSocket(ws_msg) => _ = self.command_tx.send(ws_msg).await,
                     MiscMessage::Pong => {

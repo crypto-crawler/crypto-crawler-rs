@@ -1,5 +1,6 @@
 use tokio_tungstenite::tungstenite::Message;
 
+#[derive(Debug)]
 pub(crate) enum MiscMessage {
     Normal,             // A normal websocket message which contains a JSON string
     Mutated(String),    // A JSON string mutated by a handler, e.g., bitfinex
