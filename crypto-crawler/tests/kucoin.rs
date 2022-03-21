@@ -142,7 +142,7 @@ async fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
     )
 }
 
-// #[test_case(MarketType::Spot)] // TODO: Message limit sent to the server: 100 per 10 seconds
+#[test_case(MarketType::Spot)]
 #[test_case(MarketType::InverseSwap)]
 #[test_case(MarketType::LinearSwap)]
 #[test_case(MarketType::InverseFuture)]

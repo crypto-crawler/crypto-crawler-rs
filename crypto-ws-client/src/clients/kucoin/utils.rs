@@ -13,7 +13,7 @@ use crate::common::message_handler::{MessageHandler, MiscMessage};
 pub(super) const EXCHANGE_NAME: &str = "kucoin";
 
 // Maximum number of batch subscriptions at a time: 100 topics
-// See https://docs.kucoin.cc/#request-rate-limit
+// See https://docs.kucoin.com/#topic-subscription-limit
 const MAX_TOPICS_PER_COMMAND: usize = 100;
 
 // Message limit sent to the server: 100 per 10 seconds, see https://docs.kucoin.cc/#request-rate-limit
@@ -97,17 +97,17 @@ pub(super) fn topics_to_commands(topics: &[(String, String)], subscribe: bool) -
         }
     }
 
-    for (channel, symbols) in channel_symbols.iter() {
+    for (channel, symbols) in channel_symbols {
         let mut chunk: Vec<String> = Vec::new();
-        for symbol in symbols.iter() {
-            chunk.push(symbol.clone());
+        for symbol in symbols {
             if chunk.len() >= MAX_TOPICS_PER_COMMAND {
-                commands.push(channel_symbols_to_command(channel, &chunk, subscribe));
+                commands.push(channel_symbols_to_command(&channel, &chunk, subscribe));
                 chunk.clear();
             }
+            chunk.push(symbol);
         }
         if !chunk.is_empty() {
-            commands.push(channel_symbols_to_command(channel, &chunk, subscribe));
+            commands.push(channel_symbols_to_command(&channel, &chunk, subscribe));
         }
     }
 

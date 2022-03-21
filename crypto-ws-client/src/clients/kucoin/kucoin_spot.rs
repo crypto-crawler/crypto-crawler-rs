@@ -66,35 +66,26 @@ impl_ws_client_trait!(KuCoinSpotWSClient);
 struct KucoinCommandTranslator {}
 
 impl KucoinCommandTranslator {
-    fn to_candlestick_command(symbol: &str, interval: usize, subscribe: bool) -> String {
+    fn to_candlestick_channel(symbol: &str, interval: usize) -> String {
         let interval_str = match interval {
-        60 => "1min",
-        180 => "3min",
-        300 => "5min",
-        900 => "15min",
-        1800 => "30min",
-        3600 => "1hour",
-        7200 => "2hour",
-        14400 => "4hour",
-        21600 => "6hour",
-        28800 => "8hour",
-        43200 => "12hour",
-        86400 => "1day",
-        604800 => "1week",
-        _ => panic!(
-            "KuCoin available intervals 1min,3min,5min,15min,30min,1hour,2hour,4hour,6hour,8hour,12hour,1day,1week"
-        ),
-    };
-        format!(
-            r#"{{"id":"crypto-ws-client","type":"{}","topic":"/market/candles:{}_{}","privateChannel":false,"response":true}}"#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
-            symbol,
-            interval_str,
-        )
+            60 => "1min",
+            180 => "3min",
+            300 => "5min",
+            900 => "15min",
+            1800 => "30min",
+            3600 => "1hour",
+            7200 => "2hour",
+            14400 => "4hour",
+            21600 => "6hour",
+            28800 => "8hour",
+            43200 => "12hour",
+            86400 => "1day",
+            604800 => "1week",
+            _ => panic!(
+                "KuCoin available intervals 1min,3min,5min,15min,30min,1hour,2hour,4hour,6hour,8hour,12hour,1day,1week"
+            ),
+        };
+        format!("{}_{}", symbol, interval_str)
     }
 }
 
@@ -108,10 +99,16 @@ impl CommandTranslator for KucoinCommandTranslator {
         subscribe: bool,
         symbol_interval_list: &[(String, usize)],
     ) -> Vec<String> {
-        symbol_interval_list
+        let topics = symbol_interval_list
             .iter()
-            .map(|(symbol, interval)| Self::to_candlestick_command(symbol, *interval, subscribe))
-            .collect::<Vec<String>>()
+            .map(|(symbol, interval)| {
+                (
+                    "/market/candles".to_string(),
+                    Self::to_candlestick_channel(symbol, *interval),
+                )
+            })
+            .collect::<Vec<(String, String)>>();
+        self.translate_to_commands(subscribe, &topics)
     }
 }
 
@@ -195,17 +192,13 @@ mod tests {
         let translator = super::KucoinCommandTranslator {};
         let commands = translator.translate_to_candlestick_commands(
             true,
-            &vec![("BTC-USDT".to_string(), 60), ("BTC-USDT".to_string(), 180)],
+            &vec![("BTC-USDT".to_string(), 180), ("ETH-USDT".to_string(), 60)],
         );
 
-        assert_eq!(2, commands.len());
+        assert_eq!(1, commands.len());
         assert_eq!(
-            r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/market/candles:BTC-USDT_1min","privateChannel":false,"response":true}"#,
+            r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/market/candles:BTC-USDT_3min,ETH-USDT_1min","privateChannel":false,"response":true}"#,
             commands[0]
-        );
-        assert_eq!(
-            r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/market/candles:BTC-USDT_3min","privateChannel":false,"response":true}"#,
-            commands[1]
         );
     }
 }
