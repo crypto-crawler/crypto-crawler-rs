@@ -10,7 +10,7 @@ edition = "2021"
 crypto-crawler = "4.0.0"
 crypto-market-type = "1.0.8"
 crypto-msg-type = "1.0.5"
-crypto-ws-client = "4.0.3"
+crypto-ws-client = "4.0.4"
 redis = "0.21"
 reopen = { version = "1", features = ["signals"] }
 serde_json = "1"

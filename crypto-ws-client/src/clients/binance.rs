@@ -1,5 +1,6 @@
 use async_trait::async_trait;
-use std::collections::HashMap;
+use nonzero_ext::nonzero;
+use std::{collections::HashMap, num::NonZeroU32};
 
 use crate::{
     common::{
@@ -22,6 +23,15 @@ const INVERSE_WEBSOCKET_URL: &str = "wss://dstream.binance.com/stream";
 // the websocket message size should not exceed 4096 bytes, otherwise
 // you'll get `code: 3001, reason: illegal request`
 const WS_FRAME_SIZE: usize = 4096;
+
+// WebSocket connections have a limit of 10 incoming messages per second
+//
+// See:
+//
+// * https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
+// * https://binance-docs.github.io/apidocs/delivery/en/#websocket-market-streams
+const UPLINK_LIMIT: (NonZeroU32, std::time::Duration) =
+    (nonzero!(10u32), std::time::Duration::from_secs(1));
 
 // Internal unified client
 pub struct BinanceWSClient<const URL: char> {
@@ -68,6 +78,7 @@ impl<const URL: char> BinanceWSClient<URL> {
                 EXCHANGE_NAME,
                 real_url,
                 BinanceMessageHandler {},
+                Some(UPLINK_LIMIT),
                 tx,
             )
             .await,

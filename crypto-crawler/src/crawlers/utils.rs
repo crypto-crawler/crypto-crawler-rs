@@ -331,91 +331,26 @@ async fn subscribe_with_lock(
     symbols: Vec<String>,
     ws_client: Arc<dyn WSClient + Send + Sync>,
 ) {
-    if let Some(interval) = get_send_interval_ms(&exchange, market_type) {
-        let lock = WS_LOCKS
-            .get(&exchange)
-            .unwrap()
-            .get(&market_type)
-            .unwrap()
-            .clone();
-        let mut lock = lock.lock().await;
-        if !lock.owns_lock() {
-            lock.lock_with_pid().unwrap();
-            tokio::time::sleep(Duration::from_millis(interval)).await;
-        }
-        match msg_type {
-            MessageType::BBO => ws_client.subscribe_bbo(&symbols).await,
-            MessageType::Trade => ws_client.subscribe_trade(&symbols).await,
-            MessageType::L2Event => ws_client.subscribe_orderbook(&symbols).await,
-            MessageType::L3Event => ws_client.subscribe_l3_orderbook(&symbols).await,
-            MessageType::L2TopK => ws_client.subscribe_orderbook_topk(&symbols).await,
-            MessageType::Ticker => ws_client.subscribe_ticker(&symbols).await,
-            _ => panic!(
-                "{} {} does NOT have {} websocket channel",
-                exchange, market_type, msg_type
-            ),
-        };
-        if lock.owns_lock() {
-            lock.unlock().unwrap();
-        }
-    } else {
-        match msg_type {
-            MessageType::BBO => ws_client.subscribe_bbo(&symbols).await,
-            MessageType::Trade => ws_client.subscribe_trade(&symbols).await,
-            MessageType::L2Event => ws_client.subscribe_orderbook(&symbols).await,
-            MessageType::L3Event => ws_client.subscribe_l3_orderbook(&symbols).await,
-            MessageType::L2TopK => ws_client.subscribe_orderbook_topk(&symbols).await,
-            MessageType::Ticker => ws_client.subscribe_ticker(&symbols).await,
-            _ => panic!(
-                "{} {} does NOT have {} websocket channel",
-                exchange, market_type, msg_type
-            ),
-        };
-    }
-}
-
-async fn subscribe_candlestick_with_lock(
-    exchange: String,
-    market_type: MarketType,
-    symbol_interval_list: Vec<(String, usize)>,
-    ws_client: Arc<dyn WSClient + Send + Sync>,
-) {
-    if let Some(interval) = get_send_interval_ms(&exchange, market_type) {
-        let lock = WS_LOCKS
-            .get(&exchange)
-            .unwrap()
-            .get(&market_type)
-            .unwrap()
-            .clone();
-        let mut lock = lock.lock().await;
-        if !lock.owns_lock() {
-            lock.lock_with_pid().unwrap();
-            tokio::time::sleep(Duration::from_millis(interval)).await;
-        }
-        ws_client.subscribe_candlestick(&symbol_interval_list).await;
-        if lock.owns_lock() {
-            lock.unlock().unwrap();
-        }
-    } else {
-        ws_client.subscribe_candlestick(&symbol_interval_list).await;
-    }
+    match msg_type {
+        MessageType::BBO => ws_client.subscribe_bbo(&symbols).await,
+        MessageType::Trade => ws_client.subscribe_trade(&symbols).await,
+        MessageType::L2Event => ws_client.subscribe_orderbook(&symbols).await,
+        MessageType::L3Event => ws_client.subscribe_l3_orderbook(&symbols).await,
+        MessageType::L2TopK => ws_client.subscribe_orderbook_topk(&symbols).await,
+        MessageType::Ticker => ws_client.subscribe_ticker(&symbols).await,
+        _ => panic!(
+            "{} {} does NOT have {} websocket channel",
+            exchange, market_type, msg_type
+        ),
+    };
 }
 
 fn get_connection_interval_ms(exchange: &str, _market_type: MarketType) -> Option<u64> {
     match exchange {
         // "bitmex" => Some(9000), // 40 per hour
         "bitz" => Some(100), // `cat crawler-trade-bitz-spot-error-12.log` has many "429 Too Many Requests"
-        "kucoin" => Some(2000), //  Connection Limit: 30 per minute
+        "kucoin" => Some(1000), //  Connection limit: 1 time per second, see https://bitgetlimited.github.io/apidoc/en/mix/#connect
         "okx" => Some(1000), // Connection limit: 1 time per second, https://www.okx.com/docs-v5/en/#websocket-api-connect
-        _ => None,
-    }
-}
-
-fn get_send_interval_ms(exchange: &str, _market_type: MarketType) -> Option<u64> {
-    match exchange {
-        "binance" => Some(100), // WebSocket connections have a limit of 10 incoming messages per second
-        "kucoin" => Some(100),  //  Message limit sent to the server: 100 per 10 seconds
-        // "okx" => Some(15000), // 240 times per hour, https://www.okx.com/docs-v5/en/#websocket-api-connect
         _ => None,
     }
 }
@@ -648,14 +583,11 @@ fn create_new_symbol_receiver_thread(
 }
 
 fn create_new_symbol_receiver_thread_candlestick(
-    exchange: String,
-    market_type: MarketType,
     intervals: Vec<usize>,
     mut rx: tokio::sync::mpsc::Receiver<Vec<String>>,
     ws_client: Arc<dyn WSClient + Send + Sync>,
 ) -> tokio::task::JoinHandle<()> {
     tokio::task::spawn(async move {
-        let exchange_clone = exchange;
         while let Some(new_symbols) = rx.recv().await {
             let new_symbol_interval_list = new_symbols
                 .iter()
@@ -666,13 +598,9 @@ fn create_new_symbol_receiver_thread_candlestick(
                         .map(move |interval| (symbol.clone(), interval))
                 })
                 .collect::<Vec<(String, usize)>>();
-            subscribe_candlestick_with_lock(
-                exchange_clone.clone(),
-                market_type,
-                new_symbol_interval_list,
-                ws_client.clone(),
-            )
-            .await;
+            ws_client
+                .subscribe_candlestick(&new_symbol_interval_list)
+                .await;
         }
     })
 }
@@ -942,16 +870,11 @@ async fn crawl_candlestick_one_chunk(
 
     {
         // fire and forget
-        let exchange_clone = exchange.to_string();
         let ws_client_clone = ws_client.clone();
         tokio::task::spawn(async move {
-            subscribe_candlestick_with_lock(
-                exchange_clone,
-                market_type,
-                symbol_interval_list,
-                ws_client_clone,
-            )
-            .await;
+            ws_client_clone
+                .subscribe_candlestick(&symbol_interval_list)
+                .await;
         });
     }
 
@@ -1025,17 +948,9 @@ pub(crate) async fn crawl_candlestick_ext(
 
     if symbol_interval_list.len() <= num_topics_per_connection {
         let ws_client = create_ws_client(exchange, market_type, MessageType::Candlestick, tx).await;
-        subscribe_candlestick_with_lock(
-            exchange.to_string(),
-            market_type,
-            symbol_interval_list,
-            ws_client.clone(),
-        )
-        .await;
+        ws_client.subscribe_candlestick(&symbol_interval_list).await;
         if automatic_symbol_discovery {
             create_new_symbol_receiver_thread_candlestick(
-                exchange.to_string(),
-                market_type,
                 real_intervals,
                 rx_symbols,
                 ws_client.clone(),
@@ -1091,8 +1006,6 @@ pub(crate) async fn crawl_candlestick_ext(
         }
         if automatic_symbol_discovery && last_ws_client.is_some() {
             create_new_symbol_receiver_thread_candlestick(
-                exchange.to_string(),
-                market_type,
                 real_intervals,
                 rx_symbols,
                 last_ws_client.unwrap(),

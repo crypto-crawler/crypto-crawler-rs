@@ -1,4 +1,4 @@
-use super::utils::{fetch_ws_token, KucoinMessageHandler, EXCHANGE_NAME};
+use super::utils::{fetch_ws_token, KucoinMessageHandler, EXCHANGE_NAME, UPLINK_LIMIT};
 use crate::{
     clients::common_traits::{
         Candlestick, Level3OrderBook, OrderBook, OrderBookTopK, Ticker, Trade, BBO,
@@ -39,6 +39,7 @@ impl KuCoinSpotWSClient {
                 EXCHANGE_NAME,
                 &real_url,
                 KucoinMessageHandler {},
+                Some(UPLINK_LIMIT),
                 tx,
             )
             .await,
