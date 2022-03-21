@@ -1,39 +1,42 @@
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-};
+use std::{collections::HashMap, sync::Arc};
 
 use crypto_market_type::MarketType;
 use fslock::LockFile;
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 
-lazy_static! {
-    static ref EXCHANGES: &'static [&'static str] = &[
-        "binance",
-        "bitfinex",
-        "bitget",
-        "bithumb",
-        "bitmex",
-        "bitstamp",
-        "bitz",
-        "bybit",
-        "coinbase_pro",
-        "deribit",
-        "dydx",
-        "ftx",
-        "gate",
-        "huobi",
-        "kraken",
-        "kucoin",
-        "mexc",
-        "okx",
-        "zbg",
-    ];
-    pub(crate) static ref REST_LOCKS: HashMap<String, HashMap<MarketType, Arc<Mutex<LockFile>>>> =
-        create_all_lock_files("rest");
-    pub(crate) static ref WS_LOCKS: HashMap<String, HashMap<MarketType, Arc<Mutex<LockFile>>>> =
-        create_all_lock_files("ws");
-}
+const EXCHANGES: &[&str] = &[
+    "binance",
+    "bitfinex",
+    "bitget",
+    "bithumb",
+    "bitmex",
+    "bitstamp",
+    "bitz",
+    "bybit",
+    "coinbase_pro",
+    "deribit",
+    "dydx",
+    "ftx",
+    "gate",
+    "huobi",
+    "kraken",
+    "kucoin",
+    "mexc",
+    "okx",
+    "zbg",
+];
+
+const EXCHANGES_WS: &[&str] = &["binance", "bitz", "kucoin", "okx"];
+
+#[allow(clippy::type_complexity)]
+pub(crate) static REST_LOCKS: Lazy<
+    HashMap<String, HashMap<MarketType, Arc<std::sync::Mutex<LockFile>>>>,
+> = Lazy::new(create_all_lock_files_rest);
+
+#[allow(clippy::type_complexity)]
+pub(crate) static WS_LOCKS: Lazy<
+    HashMap<String, HashMap<MarketType, Arc<tokio::sync::Mutex<LockFile>>>>,
+> = Lazy::new(create_all_lock_files_ws);
 
 /// Markets with the same endpoint will have the same file name.
 fn get_lock_file_name(exchange: &str, market_type: MarketType, prefix: &str) -> String {
@@ -96,7 +99,7 @@ fn get_lock_file_name(exchange: &str, market_type: MarketType, prefix: &str) -> 
     format!("{}.{}", prefix, filename)
 }
 
-fn create_lock_file(filename: &str) -> Arc<Mutex<LockFile>> {
+fn create_lock_file(filename: &str) -> LockFile {
     let mut dir = if std::env::var("DATA_DIR").is_ok() {
         std::path::Path::new(std::env::var("DATA_DIR").unwrap().as_str()).join("locks")
     } else {
@@ -104,15 +107,16 @@ fn create_lock_file(filename: &str) -> Arc<Mutex<LockFile>> {
     };
     let _ = std::fs::create_dir_all(&dir);
     dir.push(filename);
-    Arc::new(Mutex::new(LockFile::open(dir.as_path()).unwrap()))
+    LockFile::open(dir.as_path()).unwrap()
 }
 
-fn create_all_lock_files(
-    prefix: &str,
-) -> HashMap<String, HashMap<MarketType, Arc<Mutex<LockFile>>>> {
+fn create_all_lock_files_rest(
+) -> HashMap<String, HashMap<MarketType, Arc<std::sync::Mutex<LockFile>>>> {
+    let prefix = "rest";
     // filename -> lock
-    let mut cache: HashMap<String, Arc<Mutex<LockFile>>> = HashMap::new();
-    let mut result: HashMap<String, HashMap<MarketType, Arc<Mutex<LockFile>>>> = HashMap::new();
+    let mut cache: HashMap<String, Arc<std::sync::Mutex<LockFile>>> = HashMap::new();
+    let mut result: HashMap<String, HashMap<MarketType, Arc<std::sync::Mutex<LockFile>>>> =
+        HashMap::new();
     for exchange in EXCHANGES.iter() {
         let m = result
             .entry(exchange.to_string())
@@ -128,7 +132,36 @@ fn create_all_lock_files(
             let filename = get_lock_file_name(exchange, market_type, prefix);
             let lock_file = cache
                 .entry(filename.clone())
-                .or_insert_with(|| create_lock_file(&filename));
+                .or_insert_with(|| Arc::new(std::sync::Mutex::new(create_lock_file(&filename))));
+            m.insert(market_type, lock_file.clone());
+        }
+    }
+    result
+}
+
+fn create_all_lock_files_ws(
+) -> HashMap<String, HashMap<MarketType, Arc<tokio::sync::Mutex<LockFile>>>> {
+    let prefix = "ws";
+    // filename -> lock
+    let mut cache: HashMap<String, Arc<tokio::sync::Mutex<LockFile>>> = HashMap::new();
+    let mut result: HashMap<String, HashMap<MarketType, Arc<tokio::sync::Mutex<LockFile>>>> =
+        HashMap::new();
+    for exchange in EXCHANGES_WS.iter() {
+        let m = result
+            .entry(exchange.to_string())
+            .or_insert_with(HashMap::new);
+        let mut market_types = crypto_market_type::get_market_types(exchange);
+        if *exchange == "bitmex" {
+            market_types.push(MarketType::Unknown);
+        }
+        if prefix == "rest" && (*exchange == "ftx" || *exchange == "kucoin") {
+            market_types.push(MarketType::Unknown); // for OpenInterest
+        }
+        for market_type in market_types {
+            let filename = get_lock_file_name(exchange, market_type, prefix);
+            let lock_file = cache
+                .entry(filename.clone())
+                .or_insert_with(|| Arc::new(tokio::sync::Mutex::new(create_lock_file(&filename))));
             m.insert(market_type, lock_file.clone());
         }
     }

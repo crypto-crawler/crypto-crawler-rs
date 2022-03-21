@@ -16,7 +16,8 @@ const EXCHANGE_NAME: &str = "okx";
 #[test_case(MarketType::InverseSwap)]
 #[test_case(MarketType::LinearSwap)]
 #[test_case(MarketType::EuropeanOption)]
-fn test_crawl_trade_all(market_type: MarketType) {
+#[tokio::test(flavor = "multi_thread")]
+async fn test_crawl_trade_all(market_type: MarketType) {
     test_all_symbols!(crawl_trade, EXCHANGE_NAME, market_type, MessageType::Trade)
 }
 
@@ -25,8 +26,9 @@ fn test_crawl_trade_all(market_type: MarketType) {
 #[test_case(MarketType::LinearFuture, "BTC-USDT-220325")]
 #[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
 #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
-#[test_case(MarketType::EuropeanOption, "BTC-USD-220325-10000-P"; "inconclusive")]
-fn test_crawl_trade(market_type: MarketType, symbol: &str) {
+// #[test_case(MarketType::EuropeanOption, "BTC-USD-220325-10000-P"; "ignore")]
+#[tokio::test(flavor = "multi_thread")]
+async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
         crawl_trade,
         EXCHANGE_NAME,
@@ -42,7 +44,8 @@ fn test_crawl_trade(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
 #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
 #[test_case(MarketType::EuropeanOption, "BTC-USD-220325-10000-P")]
-fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
+#[tokio::test(flavor = "multi_thread")]
+async fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
         crawl_l2_event,
         EXCHANGE_NAME,
@@ -58,7 +61,8 @@ fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
 #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
 #[test_case(MarketType::EuropeanOption, "BTC-USD-220325-10000-P")]
-fn test_crawl_l2_topk(market_type: MarketType, symbol: &str) {
+#[tokio::test(flavor = "multi_thread")]
+async fn test_crawl_l2_topk(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
         crawl_l2_topk,
         EXCHANGE_NAME,
@@ -75,7 +79,7 @@ fn test_crawl_l2_topk(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
 #[test_case(MarketType::EuropeanOption, "BTC-USD-220325-10000-P")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
-    test_one_symbol!(
+    test_crawl_restful!(
         crawl_l2_snapshot,
         EXCHANGE_NAME,
         market_type,
@@ -91,7 +95,7 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::LinearSwap)]
 #[test_case(MarketType::EuropeanOption)]
 fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
-    test_all_symbols!(
+    test_crawl_restful_all_symbols!(
         crawl_l2_snapshot,
         EXCHANGE_NAME,
         market_type,
@@ -101,7 +105,8 @@ fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
 
 #[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
 #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
-fn test_crawl_funding_rate(market_type: MarketType, symbol: &str) {
+#[tokio::test(flavor = "multi_thread")]
+async fn test_crawl_funding_rate(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
         crawl_funding_rate,
         EXCHANGE_NAME,
@@ -118,20 +123,17 @@ fn test_crawl_funding_rate(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::EuropeanOption)]
 fn test_crawl_open_interest(market_type: MarketType) {
     let (tx, rx) = std::sync::mpsc::channel();
-    let mut messages = Vec::new();
-    crawl_open_interest(EXCHANGE_NAME, market_type, tx, Some(0));
+    std::thread::spawn(move || {
+        crawl_open_interest(EXCHANGE_NAME, market_type, tx);
+    });
 
-    for msg in rx {
-        messages.push(msg);
-    }
+    let msg = rx.recv().unwrap();
 
-    assert!(!messages.is_empty());
-    assert_eq!(messages[0].exchange, EXCHANGE_NAME);
-    assert_eq!(messages[0].market_type, market_type);
-    assert_eq!(messages[0].msg_type, MessageType::OpenInterest);
-    for msg in messages {
-        assert!(parse(msg));
-    }
+    assert_eq!(msg.exchange, EXCHANGE_NAME.to_string());
+    assert_eq!(msg.market_type, market_type);
+    assert_eq!(msg.msg_type, MessageType::OpenInterest);
+
+    assert!(parse(msg));
 }
 
 #[test_case(MarketType::Spot, "BTC-USDT")]
@@ -140,7 +142,8 @@ fn test_crawl_open_interest(market_type: MarketType) {
 #[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
 #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
 #[test_case(MarketType::EuropeanOption, "BTC-USD-220325-10000-P")]
-fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
+#[tokio::test(flavor = "multi_thread")]
+async fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
         crawl_ticker,
         EXCHANGE_NAME,
@@ -156,16 +159,17 @@ fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::InverseSwap)]
 #[test_case(MarketType::LinearSwap)]
 #[test_case(MarketType::EuropeanOption)]
-fn test_crawl_candlestick(market_type: MarketType) {
+#[tokio::test(flavor = "multi_thread")]
+async fn test_crawl_candlestick(market_type: MarketType) {
     gen_test_crawl_candlestick!(EXCHANGE_NAME, market_type)
 }
 
-#[test_case(MarketType::Spot, "BTC-USDT")]
-#[test_case(MarketType::InverseFuture, "BTC-USD-220325")]
-#[test_case(MarketType::LinearFuture, "BTC-USDT-220325")]
-#[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
-#[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
-#[test_case(MarketType::EuropeanOption, "BTC-USD-220325-10000-P")]
-fn test_subscribe_symbol(market_type: MarketType, symbol: &str) {
-    gen_test_subscribe_symbol!(EXCHANGE_NAME, market_type, symbol)
-}
+// #[test_case(MarketType::Spot, "BTC-USDT")]
+// #[test_case(MarketType::InverseFuture, "BTC-USD-220325")]
+// #[test_case(MarketType::LinearFuture, "BTC-USDT-220325")]
+// #[test_case(MarketType::InverseSwap, "BTC-USD-SWAP")]
+// #[test_case(MarketType::LinearSwap, "BTC-USDT-SWAP")]
+// #[test_case(MarketType::EuropeanOption, "BTC-USD-220325-10000-P")]
+// fn test_subscribe_symbol(market_type: MarketType, symbol: &str) {
+//     gen_test_subscribe_symbol!(EXCHANGE_NAME, market_type, symbol)
+// }

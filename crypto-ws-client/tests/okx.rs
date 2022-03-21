@@ -200,56 +200,51 @@ mod okex_swap {
 mod okex_option {
     use crypto_ws_client::{OkxWSClient, WSClient};
 
-    #[test]
-    #[ignore]
-    fn subscribe_trade() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
         gen_test_code!(
             OkxWSClient,
             subscribe_trade,
-            &vec!["BTC-USD-220304-32000-P".to_string()]
+            &vec!["BTC-USD-220624-50000-C".to_string()]
         );
     }
 
-    #[test]
-    #[ignore]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             OkxWSClient,
             subscribe_ticker,
-            &vec!["BTC-USD-220304-32000-P".to_string()]
+            &vec!["BTC-USD-220624-50000-C".to_string()]
         );
     }
 
-    #[test]
-    #[ignore]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             OkxWSClient,
             subscribe_orderbook,
-            &vec!["BTC-USD-220304-32000-P".to_string()]
+            &vec!["BTC-USD-220624-50000-C".to_string()]
         );
     }
 
-    #[test]
-    #[ignore]
-    fn subscribe_orderbook_topk() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook_topk() {
         gen_test_code!(
             OkxWSClient,
             subscribe_orderbook_topk,
-            &vec!["BTC-USD-220304-32000-P".to_string()]
+            &vec!["BTC-USD-220624-50000-C".to_string()]
         );
     }
 
-    #[test]
-    #[ignore]
-    fn subscribe_candlestick() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             OkxWSClient,
-            &vec![("BTC-USD-220304-32000-P".to_string(), 60)]
+            &vec![("BTC-USD-220624-50000-C".to_string(), 60)]
         );
         gen_test_subscribe_candlestick!(
             OkxWSClient,
-            &vec![("BTC-USD-220304-32000-P".to_string(), 604800)]
+            &vec![("BTC-USD-220624-50000-C".to_string(), 604800)]
         );
     }
 }

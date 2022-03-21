@@ -1,8 +1,10 @@
-use super::MarketType;
+use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 use serde::{Deserialize, Serialize};
-use std::convert::TryInto;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::{
+    convert::TryInto,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 /// Message represents messages received by crawlers.
 #[derive(Serialize, Deserialize)]

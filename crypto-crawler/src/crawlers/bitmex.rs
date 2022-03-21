@@ -10,7 +10,7 @@ use std::sync::mpsc::Sender;
 
 const EXCHANGE_NAME: &str = "bitmex";
 
-fn crawl_all(msg_type: MessageType, tx: Sender<Message>, duration: Option<u64>) {
+async fn crawl_all(msg_type: MessageType, tx: Sender<Message>) {
     let tx = create_conversion_thread(EXCHANGE_NAME.to_string(), msg_type, MarketType::Unknown, tx);
 
     let channel: &str = match msg_type {
@@ -22,43 +22,35 @@ fn crawl_all(msg_type: MessageType, tx: Sender<Message>, duration: Option<u64>) 
         MessageType::FundingRate => "funding",
         _ => panic!("unsupported message type {}", msg_type),
     };
-    let channels = vec![channel.to_string()];
+    let commands = vec![format!(r#"{{"op":"subscribe","args":["{}"]}}"#, channel)];
 
-    let ws_client = BitmexWSClient::new(tx, None);
-    ws_client.subscribe(channels.as_slice());
-    ws_client.run(duration);
+    let ws_client = BitmexWSClient::new(tx, None).await;
+    ws_client.send(&commands).await;
+    ws_client.run().await;
+    ws_client.close();
 }
 
-pub(crate) fn crawl_trade(
+pub(crate) async fn crawl_trade(
     market_type: MarketType,
     symbols: Option<&[String]>,
     tx: Sender<Message>,
-    duration: Option<u64>,
 ) {
     if market_type == MarketType::Unknown {
         // crawl all symbols
-        crawl_all(MessageType::Trade, tx, duration)
+        crawl_all(MessageType::Trade, tx).await;
     } else {
-        crawl_event(
-            EXCHANGE_NAME,
-            MessageType::Trade,
-            market_type,
-            symbols,
-            tx,
-            duration,
-        );
+        crawl_event(EXCHANGE_NAME, MessageType::Trade, market_type, symbols, tx).await;
     }
 }
 
-pub(crate) fn crawl_l2_event(
+pub(crate) async fn crawl_l2_event(
     market_type: MarketType,
     symbols: Option<&[String]>,
     tx: Sender<Message>,
-    duration: Option<u64>,
 ) {
     if market_type == MarketType::Unknown {
         // crawl all symbols
-        crawl_all(MessageType::L2Event, tx, duration);
+        crawl_all(MessageType::L2Event, tx).await;
     } else {
         crawl_event(
             EXCHANGE_NAME,
@@ -66,63 +58,46 @@ pub(crate) fn crawl_l2_event(
             market_type,
             symbols,
             tx,
-            duration,
-        );
+        )
+        .await;
     }
 }
 
-pub(crate) fn crawl_bbo(
+pub(crate) async fn crawl_bbo(
     market_type: MarketType,
     symbols: Option<&[String]>,
     tx: Sender<Message>,
-    duration: Option<u64>,
 ) {
     if market_type == MarketType::Unknown {
         // crawl all symbols
-        crawl_all(MessageType::BBO, tx, duration);
+        crawl_all(MessageType::BBO, tx).await;
     } else {
-        crawl_event(
-            EXCHANGE_NAME,
-            MessageType::BBO,
-            market_type,
-            symbols,
-            tx,
-            duration,
-        );
+        crawl_event(EXCHANGE_NAME, MessageType::BBO, market_type, symbols, tx).await;
     }
 }
 
-pub(crate) fn crawl_l2_topk(
+pub(crate) async fn crawl_l2_topk(
     market_type: MarketType,
     symbols: Option<&[String]>,
     tx: Sender<Message>,
-    duration: Option<u64>,
 ) {
     if market_type == MarketType::Unknown {
         // crawl all symbols
-        crawl_all(MessageType::L2TopK, tx, duration);
+        crawl_all(MessageType::L2TopK, tx).await;
     } else {
-        crawl_event(
-            EXCHANGE_NAME,
-            MessageType::L2TopK,
-            market_type,
-            symbols,
-            tx,
-            duration,
-        );
+        crawl_event(EXCHANGE_NAME, MessageType::L2TopK, market_type, symbols, tx).await;
     }
 }
 
 #[allow(clippy::unnecessary_unwrap)]
-pub(crate) fn crawl_funding_rate(
+pub(crate) async fn crawl_funding_rate(
     market_type: MarketType,
     symbols: Option<&[String]>,
     tx: Sender<Message>,
-    duration: Option<u64>,
 ) {
     if market_type == MarketType::Unknown {
         // crawl all symbols
-        crawl_all(MessageType::FundingRate, tx, duration);
+        crawl_all(MessageType::FundingRate, tx).await;
     } else {
         let is_empty = match symbols {
             Some(list) => {
@@ -137,7 +112,7 @@ pub(crate) fn crawl_funding_rate(
         };
 
         let real_symbols = if is_empty {
-            fetch_symbols_retry(EXCHANGE_NAME, market_type)
+            tokio::task::block_in_place(move || fetch_symbols_retry(EXCHANGE_NAME, market_type))
         } else {
             symbols.unwrap().to_vec()
         };
@@ -151,27 +126,27 @@ pub(crate) fn crawl_funding_rate(
             tx,
         );
 
-        let channels: Vec<String> = real_symbols
+        let topics: Vec<(String, String)> = real_symbols
             .iter()
-            .map(|symbol| format!("funding:{}", symbol))
+            .map(|symbol| ("funding".to_string(), symbol.to_string()))
             .collect();
 
         match market_type {
             MarketType::InverseSwap | MarketType::QuantoSwap => {
-                let ws_client = BitmexWSClient::new(tx, None);
-                ws_client.subscribe(&channels);
-                ws_client.run(duration);
+                let ws_client = BitmexWSClient::new(tx, None).await;
+                ws_client.subscribe(&topics).await;
+                ws_client.run().await;
+                ws_client.close();
             }
             _ => panic!("BitMEX {} does NOT have funding rates", market_type),
         }
     }
 }
 
-pub(crate) fn crawl_candlestick(
+pub(crate) async fn crawl_candlestick(
     market_type: MarketType,
     symbol_interval_list: Option<&[(String, usize)]>,
     tx: Sender<Message>,
-    duration: Option<u64>,
 ) {
     if market_type == MarketType::Unknown {
         let tx = create_conversion_thread(
@@ -181,18 +156,16 @@ pub(crate) fn crawl_candlestick(
             tx,
         );
 
-        let channels = vec!["tradeBin1m".to_string(), "tradeBin5m".to_string()];
+        let commands = vec![
+            r#"{"op":"subscribe","args":["tradeBin1m"]}"#.to_string(),
+            r#"{"op":"subscribe","args":["tradeBin5m"]}"#.to_string(),
+        ];
 
-        let ws_client = BitmexWSClient::new(tx, None);
-        ws_client.subscribe(channels.as_slice());
-        ws_client.run(duration);
+        let ws_client = BitmexWSClient::new(tx, None).await;
+        ws_client.send(&commands).await;
+        ws_client.run().await;
+        ws_client.close();
     } else {
-        crawl_candlestick_ext(
-            EXCHANGE_NAME,
-            market_type,
-            symbol_interval_list,
-            tx,
-            duration,
-        );
+        crawl_candlestick_ext(EXCHANGE_NAME, market_type, symbol_interval_list, tx).await;
     }
 }
