@@ -1,5 +1,9 @@
 use async_trait::async_trait;
-use std::collections::{BTreeMap, HashMap};
+use nonzero_ext::nonzero;
+use std::{
+    collections::{BTreeMap, HashMap},
+    num::NonZeroU32,
+};
 
 use log::*;
 use serde_json::Value;
@@ -25,6 +29,11 @@ const WEBSOCKET_URL: &str = "wss://ws.okx.com:8443/ws/v5/public";
 /// The total length of multiple channels cannot exceed 4096 bytes
 const WS_FRAME_SIZE: usize = 4096;
 
+// Subscription limit: 240 times per hour
+// see https://www.okx.com/docs-v5/en/#websocket-api-connect
+const UPLINK_LIMIT: (NonZeroU32, std::time::Duration) =
+    (nonzero!(240u32), std::time::Duration::from_secs(3600));
+
 /// The WebSocket client for OKX.
 ///
 /// OKX has Spot, Future, Swap and Option markets.
@@ -40,13 +49,25 @@ pub struct OkxWSClient {
     translator: OkxCommandTranslator,
 }
 
-impl_new_constructor!(
-    OkxWSClient,
-    EXCHANGE_NAME,
-    WEBSOCKET_URL,
-    OkxMessageHandler {},
-    OkxCommandTranslator {}
-);
+impl OkxWSClient {
+    pub async fn new(tx: std::sync::mpsc::Sender<String>, url: Option<&str>) -> Self {
+        let real_url = match url {
+            Some(endpoint) => endpoint,
+            None => WEBSOCKET_URL,
+        };
+        OkxWSClient {
+            client: WSClientInternal::connect(
+                EXCHANGE_NAME,
+                real_url,
+                OkxMessageHandler {},
+                Some(UPLINK_LIMIT),
+                tx,
+            )
+            .await,
+            translator: OkxCommandTranslator {},
+        }
+    }
+}
 
 impl_trait!(Trade, OkxWSClient, subscribe_trade, "trades");
 impl_trait!(Ticker, OkxWSClient, subscribe_ticker, "tickers");

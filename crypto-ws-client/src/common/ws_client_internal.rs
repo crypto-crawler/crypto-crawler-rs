@@ -1,5 +1,6 @@
 use std::{
     io::prelude::*,
+    num::NonZeroU32,
     sync::{
         atomic::{AtomicIsize, Ordering},
         Arc,
@@ -34,6 +35,7 @@ impl<H: MessageHandler> WSClientInternal<H> {
         exchange: &'static str,
         url: &str,
         handler: H,
+        uplink_limit: Option<(NonZeroU32, std::time::Duration)>,
         tx: std::sync::mpsc::Sender<String>,
     ) -> Self {
         // A channel to send parameters to run()
@@ -43,7 +45,7 @@ impl<H: MessageHandler> WSClientInternal<H> {
             std::sync::mpsc::Sender<String>,
         )>();
 
-        let (message_rx, command_tx) = super::connect_async::connect_async(url)
+        let (message_rx, command_tx) = super::connect_async::connect_async(url, uplink_limit)
             .await
             .expect("Failed to connect to websocket");
         let _ = params_tx.send((handler, message_rx, tx));

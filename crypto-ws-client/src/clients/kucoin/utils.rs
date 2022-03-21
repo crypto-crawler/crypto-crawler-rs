@@ -1,6 +1,10 @@
-use std::collections::{BTreeMap, HashMap};
+use std::{
+    collections::{BTreeMap, HashMap},
+    num::NonZeroU32,
+};
 
 use log::*;
+use nonzero_ext::nonzero;
 use reqwest::{header, Result};
 use serde_json::Value;
 
@@ -11,6 +15,10 @@ pub(super) const EXCHANGE_NAME: &str = "kucoin";
 // Maximum number of batch subscriptions at a time: 100 topics
 // See https://docs.kucoin.cc/#request-rate-limit
 const MAX_TOPICS_PER_COMMAND: usize = 100;
+
+// Message limit sent to the server: 100 per 10 seconds, see https://docs.kucoin.cc/#request-rate-limit
+pub(super) const UPLINK_LIMIT: (NonZeroU32, std::time::Duration) =
+    (nonzero!(100u32), std::time::Duration::from_secs(10));
 
 pub(super) struct WebsocketToken {
     pub token: String,

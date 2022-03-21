@@ -88,8 +88,14 @@ impl<const URL: char> HuobiWSClient<URL> {
             }
         };
         HuobiWSClient {
-            client: WSClientInternal::connect(EXCHANGE_NAME, real_url, HuobiMessageHandler {}, tx)
-                .await,
+            client: WSClientInternal::connect(
+                EXCHANGE_NAME,
+                real_url,
+                HuobiMessageHandler {},
+                None,
+                tx,
+            )
+            .await,
             translator: HuobiCommandTranslator {},
         }
     }

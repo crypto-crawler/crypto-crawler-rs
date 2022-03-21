@@ -161,7 +161,8 @@ macro_rules! impl_new_constructor {
                     None => $default_url,
                 };
                 $struct_name {
-                    client: WSClientInternal::connect($exchange, real_url, $handler, tx).await,
+                    client: WSClientInternal::connect($exchange, real_url, $handler, None, tx)
+                        .await,
                     translator: $translator,
                 }
             }
