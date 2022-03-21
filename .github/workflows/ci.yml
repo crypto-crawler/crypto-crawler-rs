@@ -27,7 +27,7 @@ jobs:
                   override: true
             - uses: actions-rs/cargo@v1
               with:
-                  command: test -- --skip kucoin
+                  command: test
     fmt:
         name: Cargo fmt
         runs-on: ubuntu-latest

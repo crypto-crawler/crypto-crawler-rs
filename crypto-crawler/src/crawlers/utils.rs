@@ -349,7 +349,7 @@ fn get_connection_interval_ms(exchange: &str, _market_type: MarketType) -> Optio
     match exchange {
         // "bitmex" => Some(9000), // 40 per hour
         "bitz" => Some(100), // `cat crawler-trade-bitz-spot-error-12.log` has many "429 Too Many Requests"
-        "kucoin" => Some(1000), //  Connection limit: 1 time per second, see https://bitgetlimited.github.io/apidoc/en/mix/#connect
+        "kucoin" => Some(2000), //  Connection Limit: 30 per minute, see https://docs.kucoin.com/#connection-times
         "okx" => Some(1000), // Connection limit: 1 time per second, https://www.okx.com/docs-v5/en/#websocket-api-connect
         _ => None,
     }
@@ -370,8 +370,7 @@ fn get_num_subscriptions_per_connection(exchange: &str, market_type: MarketType)
         } // https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
         // All websocket connections have a limit of 30 subscriptions to public market data feed channels
         "bitfinex" => 30, // https://docs.bitfinex.com/docs/ws-general#subscribe-to-channels
-        // Subscription limit for each connection: 300 topics
-        "kucoin" => 300, // https://docs.kucoin.cc/#request-rate-limit
+        "kucoin" => 300, // Subscription limit for each connection: 300 topics, see https://docs.kucoin.com/#topic-subscription-limit
         "okx" => 256,    // okx spot l2_event throws many ResetWithoutClosingHandshake errors
         _ => usize::MAX, // usize::MAX means unlimited
     }

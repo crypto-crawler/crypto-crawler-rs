@@ -88,10 +88,12 @@ mod kucoin_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(KuCoinSpotWSClient, &vec![("BTC-USDT".to_string(), 60)]);
         gen_test_subscribe_candlestick!(
             KuCoinSpotWSClient,
-            &vec![("BTC-USDT".to_string(), 604800)]
+            &vec![
+                ("BTC-USDT".to_string(), 60),
+                ("BTC-USDT".to_string(), 604800)
+            ]
         );
     }
 }
@@ -123,7 +125,7 @@ mod kucoin_inverse_swap {
         gen_test_code!(
             KuCoinSwapWSClient,
             send,
-            &vec![r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/contractMarket/execution:XBTUSDM","privateChannel":false,"response":true}"#.to_string()]
+            &vec![r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/contractMarket/execution:XBTUSDM,ETHUSDM","privateChannel":false,"response":true}"#.to_string()]
         );
     }
 
@@ -132,7 +134,7 @@ mod kucoin_inverse_swap {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_trade,
-            &vec!["XBTUSDM".to_string()]
+            &vec!["XBTUSDM".to_string(), "ETHUSDM".to_string()]
         );
     }
 
@@ -186,11 +188,9 @@ mod kucoin_inverse_swap {
     async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             KuCoinSwapWSClient,
-            &vec![("XBTUSDM".to_string(), 60), ("ETHUSDM".to_string(), 60)]
-        );
-        gen_test_subscribe_candlestick!(
-            KuCoinSwapWSClient,
             &vec![
+                ("XBTUSDM".to_string(), 60),
+                ("ETHUSDM".to_string(), 60),
                 ("XBTUSDM".to_string(), 604800),
                 ("ETHUSDM".to_string(), 604800)
             ]
@@ -282,13 +282,11 @@ mod kucoin_linear_swap {
     async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             KuCoinSwapWSClient,
-            &vec![("XBTUSDTM".to_string(), 60), ("ETHUSDTM".to_string(), 60)]
-        );
-        gen_test_subscribe_candlestick!(
-            KuCoinSwapWSClient,
             &vec![
+                ("XBTUSDTM".to_string(), 60),
+                ("ETHUSDTM".to_string(), 60),
                 ("XBTUSDTM".to_string(), 604800),
-                ("ETHUSDTM".to_string(), 604800)
+                ("ETHUSDTM".to_string(), 604800),
             ]
         );
     }
@@ -380,7 +378,9 @@ mod kucoin_inverse_future {
     #[ignore]
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(KuCoinSwapWSClient, &vec![("XBTMH22".to_string(), 60)]);
-        gen_test_subscribe_candlestick!(KuCoinSwapWSClient, &vec![("XBTMH22".to_string(), 604800)]);
+        gen_test_subscribe_candlestick!(
+            KuCoinSwapWSClient,
+            &vec![("XBTMH22".to_string(), 60), ("XBTMH22".to_string(), 604800)]
+        );
     }
 }

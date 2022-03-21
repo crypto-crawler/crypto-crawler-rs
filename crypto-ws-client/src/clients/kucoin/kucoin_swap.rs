@@ -68,7 +68,7 @@ impl_ws_client_trait!(KuCoinSwapWSClient);
 struct KucoinCommandTranslator {}
 
 impl KucoinCommandTranslator {
-    fn to_candlestick_command(symbol: &str, interval: usize, subscribe: bool) -> String {
+    fn to_candlestick_channel(symbol: &str, interval: usize) -> String {
         let valid_set: Vec<usize> = vec![
             60, 300, 900, 1800, 3600, 7200, 14400, 28800, 43200, 86400, 604800,
         ];
@@ -80,16 +80,7 @@ impl KucoinCommandTranslator {
                 .join(",");
             panic!("KuCoin Swap available intervals {}", joined);
         }
-        format!(
-            r#"{{"id":"crypto-ws-client","type":"{}","topic":"/contractMarket/candle:{}_{}","privateChannel":false,"response":true}}"#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
-            symbol,
-            interval / 60,
-        )
+        format!("{}_{}", symbol, interval / 60)
     }
 }
 
@@ -103,10 +94,17 @@ impl CommandTranslator for KucoinCommandTranslator {
         subscribe: bool,
         symbol_interval_list: &[(String, usize)],
     ) -> Vec<String> {
-        symbol_interval_list
+        let topics = symbol_interval_list
             .iter()
-            .map(|(symbol, interval)| Self::to_candlestick_command(symbol, *interval, subscribe))
-            .collect::<Vec<String>>()
+            .map(|(symbol, interval)| {
+                (
+                    "/contractMarket/candle".to_string(),
+                    Self::to_candlestick_channel(symbol, *interval),
+                )
+            })
+            .collect::<Vec<(String, String)>>();
+
+        self.translate_to_commands(subscribe, &topics)
     }
 }
 
@@ -208,17 +206,13 @@ mod tests {
         let translator = super::KucoinCommandTranslator {};
         let commands = translator.translate_to_candlestick_commands(
             true,
-            &vec![("BTC_USD".to_string(), 60), ("BTC_USD".to_string(), 300)],
+            &vec![("BTC_USD".to_string(), 300), ("ETH_USD".to_string(), 60)],
         );
 
-        assert_eq!(2, commands.len());
+        assert_eq!(1, commands.len());
         assert_eq!(
-            r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/contractMarket/candle:BTC_USD_1","privateChannel":false,"response":true}"#,
+            r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/contractMarket/candle:BTC_USD_5,ETH_USD_1","privateChannel":false,"response":true}"#,
             commands[0]
-        );
-        assert_eq!(
-            r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/contractMarket/candle:BTC_USD_5","privateChannel":false,"response":true}"#,
-            commands[1]
         );
     }
 }
