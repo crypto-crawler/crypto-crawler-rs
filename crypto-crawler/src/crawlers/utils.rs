@@ -1,23 +1,14 @@
 use std::{
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        mpsc::{
-            self, {Receiver, Sender},
-        },
-        Arc,
-    },
-    thread::JoinHandle,
-    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
+    sync::{mpsc::Sender, Arc},
+    time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
 use crate::utils::{REST_LOCKS, WS_LOCKS};
-use crypto_market_type::get_market_types;
-use crypto_market_type::MarketType;
+use crypto_market_type::{get_market_types, MarketType};
 use crypto_markets::fetch_symbols;
 use crypto_rest_client::{fetch_l2_snapshot, fetch_l3_snapshot, fetch_open_interest};
 use crypto_ws_client::*;
 use log::*;
-use rand::Rng;
 
 use crate::{get_hot_spot_symbols, utils::cmc_rank::sort_by_cmc_rank, Message, MessageType};
 
@@ -76,15 +67,8 @@ pub(super) fn check_args(exchange: &str, market_type: MarketType, symbols: &[Str
     let valid_symbols = fetch_symbols_retry(exchange, market_type);
     let invalid_symbols: Vec<String> = symbols
         .iter()
-        // at Binance all symbols for websocket are lowercase while for REST they are uppercase
-        .map(|symbol| {
-            if exchange == "binance" {
-                symbol.to_uppercase()
-            } else {
-                symbol.to_string()
-            }
-        })
         .filter(|symbol| !valid_symbols.contains(symbol))
+        .cloned()
         .collect();
     if !invalid_symbols.is_empty() {
         panic!(
@@ -129,9 +113,7 @@ pub(crate) fn crawl_snapshot(
     msg_type: MessageType, // L2Snapshot or L3Snapshot
     symbols: Option<&[String]>,
     tx: Sender<Message>,
-    duration: Option<u64>,
 ) {
-    let now = Instant::now();
     let is_empty = match symbols {
         Some(list) => {
             if list.is_empty() {
@@ -152,7 +134,7 @@ pub(crate) fn crawl_snapshot(
         .get(&market_type)
         .unwrap()
         .clone();
-    loop {
+    'outer: loop {
         let mut real_symbols = if is_empty {
             if market_type == MarketType::Spot {
                 let spot_symbols = fetch_symbols_retry(exchange, market_type);
@@ -191,7 +173,10 @@ pub(crate) fn crawl_snapshot(
                     success_count += 1;
                     backoff_factor = 1;
                     let message = Message::new(exchange.to_string(), market_type, msg_type, msg);
-                    tx.send(message).unwrap();
+                    if tx.send(message).is_err() {
+                        // break the loop if there is no receiver
+                        break 'outer;
+                    }
                 }
                 Err(err) => {
                     let current_timestamp = SystemTime::now()
@@ -220,28 +205,21 @@ pub(crate) fn crawl_snapshot(
                 }
             }
         }
-        if let Some(seconds) = duration {
-            if now.elapsed() > Duration::from_secs(seconds) {
-                break;
-            }
-        }
         std::thread::sleep(cooldown_time * 2); // if real_symbols is empty, CPU will be 100% without this line
     }
 }
 
 /// Crawl open interests of all trading symbols.
-pub(crate) fn crawl_open_interest(
-    exchange: &str,
-    market_type: MarketType,
-    tx: Sender<Message>,
-    duration: Option<u64>,
-) {
+pub(crate) fn crawl_open_interest(exchange: &str, market_type: MarketType, tx: Sender<Message>) {
     if exchange == "okx" {
+        let rt = tokio::runtime::Builder::new_multi_thread()
+            .enable_all()
+            .build()
+            .unwrap();
         // use websocket instead of RESTful API
-        super::okx::crawl_open_interest(market_type, None, tx, duration);
+        rt.block_on(super::okx::crawl_open_interest(market_type, None, tx));
         return;
     }
-    let now = Instant::now();
     let cooldown_time = get_cooldown_time_per_request(exchange, market_type);
 
     let lock = REST_LOCKS
@@ -250,7 +228,7 @@ pub(crate) fn crawl_open_interest(
         .get(&market_type)
         .unwrap()
         .clone();
-    loop {
+    'outer: loop {
         match exchange {
             "bitz" | "deribit" | "dydx" | "ftx" | "huobi" | "kucoin" => {
                 let mut lock_ = lock.lock().unwrap();
@@ -265,7 +243,9 @@ pub(crate) fn crawl_open_interest(
                         MessageType::OpenInterest,
                         json,
                     );
-                    tx.send(message).unwrap();
+                    if tx.send(message).is_err() {
+                        break; // break the loop if there is no receiver
+                    }
                 }
                 // Cooldown after each request, and make all other processes wait
                 // on the lock to avoid parallel requests, thus avoid 429 error
@@ -304,7 +284,10 @@ pub(crate) fn crawl_open_interest(
                                 MessageType::OpenInterest,
                                 msg,
                             );
-                            tx.send(message).unwrap();
+                            if tx.send(message).is_err() {
+                                // break the loop if there is no receiver
+                                break 'outer;
+                            }
                         }
                         Err(err) => {
                             let current_timestamp = SystemTime::now()
@@ -337,76 +320,84 @@ pub(crate) fn crawl_open_interest(
             }
             _ => panic!("{} does NOT have open interest RESTful API", exchange),
         }
-        if let Some(seconds) = duration {
-            if now.elapsed() > Duration::from_secs(seconds) {
-                break;
-            }
-        }
         std::thread::sleep(cooldown_time * 2); // if real_symbols is empty, CPU will be 100% without this line
     }
 }
 
-fn subscribe_with_lock(
-    exchange: &str,
+async fn subscribe_with_lock(
+    exchange: String,
     market_type: MarketType,
     msg_type: MessageType,
-    symbols: &[String],
-    ws_client: Arc<dyn WSClient>,
+    symbols: Vec<String>,
+    ws_client: Arc<dyn WSClient + Send + Sync>,
 ) {
-    let lock = WS_LOCKS
-        .get(exchange)
-        .unwrap()
-        .get(&market_type)
-        .unwrap()
-        .clone();
-    let mut lock = lock.lock().unwrap();
-    let interval = get_send_interval_ms(exchange, market_type);
-    if interval.is_some() && !lock.owns_lock() {
-        lock.lock().unwrap();
-    }
-    match msg_type {
-        MessageType::BBO => ws_client.subscribe_bbo(symbols),
-        MessageType::Trade => ws_client.subscribe_trade(symbols),
-        MessageType::L2Event => ws_client.subscribe_orderbook(symbols),
-        MessageType::L3Event => ws_client.subscribe_l3_orderbook(symbols),
-        MessageType::L2TopK => ws_client.subscribe_orderbook_topk(symbols),
-        MessageType::Ticker => ws_client.subscribe_ticker(symbols),
-        _ => panic!(
-            "{} {} does NOT have {} websocket channel",
-            exchange, market_type, msg_type
-        ),
-    };
-    if let Some(interval) = interval {
-        std::thread::sleep(Duration::from_millis(interval));
+    if let Some(interval) = get_send_interval_ms(&exchange, market_type) {
+        let lock = WS_LOCKS
+            .get(&exchange)
+            .unwrap()
+            .get(&market_type)
+            .unwrap()
+            .clone();
+        let mut lock = lock.lock().await;
+        if !lock.owns_lock() {
+            lock.lock_with_pid().unwrap();
+            tokio::time::sleep(Duration::from_millis(interval)).await;
+        }
+        match msg_type {
+            MessageType::BBO => ws_client.subscribe_bbo(&symbols).await,
+            MessageType::Trade => ws_client.subscribe_trade(&symbols).await,
+            MessageType::L2Event => ws_client.subscribe_orderbook(&symbols).await,
+            MessageType::L3Event => ws_client.subscribe_l3_orderbook(&symbols).await,
+            MessageType::L2TopK => ws_client.subscribe_orderbook_topk(&symbols).await,
+            MessageType::Ticker => ws_client.subscribe_ticker(&symbols).await,
+            _ => panic!(
+                "{} {} does NOT have {} websocket channel",
+                exchange, market_type, msg_type
+            ),
+        };
         if lock.owns_lock() {
             lock.unlock().unwrap();
         }
+    } else {
+        match msg_type {
+            MessageType::BBO => ws_client.subscribe_bbo(&symbols).await,
+            MessageType::Trade => ws_client.subscribe_trade(&symbols).await,
+            MessageType::L2Event => ws_client.subscribe_orderbook(&symbols).await,
+            MessageType::L3Event => ws_client.subscribe_l3_orderbook(&symbols).await,
+            MessageType::L2TopK => ws_client.subscribe_orderbook_topk(&symbols).await,
+            MessageType::Ticker => ws_client.subscribe_ticker(&symbols).await,
+            _ => panic!(
+                "{} {} does NOT have {} websocket channel",
+                exchange, market_type, msg_type
+            ),
+        };
     }
 }
 
-fn subscribe_candlestick_with_lock(
-    exchange: &str,
+async fn subscribe_candlestick_with_lock(
+    exchange: String,
     market_type: MarketType,
-    symbol_interval_list: &[(String, usize)],
-    ws_client: Arc<dyn WSClient>,
+    symbol_interval_list: Vec<(String, usize)>,
+    ws_client: Arc<dyn WSClient + Send + Sync>,
 ) {
-    let lock = WS_LOCKS
-        .get(exchange)
-        .unwrap()
-        .get(&market_type)
-        .unwrap()
-        .clone();
-    let mut lock = lock.lock().unwrap();
-    let interval = get_send_interval_ms(exchange, market_type);
-    if interval.is_some() && !lock.owns_lock() {
-        lock.lock().unwrap();
-    }
-    ws_client.subscribe_candlestick(symbol_interval_list);
-    if let Some(interval) = interval {
-        std::thread::sleep(Duration::from_millis(interval));
+    if let Some(interval) = get_send_interval_ms(&exchange, market_type) {
+        let lock = WS_LOCKS
+            .get(&exchange)
+            .unwrap()
+            .get(&market_type)
+            .unwrap()
+            .clone();
+        let mut lock = lock.lock().await;
+        if !lock.owns_lock() {
+            lock.lock_with_pid().unwrap();
+            tokio::time::sleep(Duration::from_millis(interval)).await;
+        }
+        ws_client.subscribe_candlestick(&symbol_interval_list).await;
         if lock.owns_lock() {
             lock.unlock().unwrap();
         }
+    } else {
+        ws_client.subscribe_candlestick(&symbol_interval_list).await;
     }
 }
 
@@ -429,10 +420,19 @@ fn get_send_interval_ms(exchange: &str, _market_type: MarketType) -> Option<u64>
     }
 }
 
-fn get_num_subscriptions_per_connection(exchange: &str) -> usize {
+fn get_num_subscriptions_per_connection(exchange: &str, market_type: MarketType) -> usize {
     match exchange {
         // A single connection can listen to a maximum of 200 streams
-        "binance" => 200, // https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
+        "binance" => {
+            if market_type == MarketType::Spot {
+                // https://binance-docs.github.io/apidocs/spot/en/#websocket-limits
+                1024
+            } else {
+                // https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
+                // https://binance-docs.github.io/apidocs/delivery/en/#websocket-market-streams
+                200
+            }
+        } // https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
         // All websocket connections have a limit of 30 subscriptions to public market data feed channels
         "bitfinex" => 30, // https://docs.bitfinex.com/docs/ws-general#subscribe-to-channels
         // Subscription limit for each connection: 300 topics
@@ -442,92 +442,92 @@ fn get_num_subscriptions_per_connection(exchange: &str) -> usize {
     }
 }
 
-fn create_ws_client_internal(
+async fn create_ws_client_internal(
     exchange: &str,
     market_type: MarketType,
     tx: Sender<String>,
 ) -> Arc<dyn WSClient + Send + Sync> {
     match exchange {
         "binance" => match market_type {
-            MarketType::Spot => Arc::new(BinanceSpotWSClient::new(tx, None)),
+            MarketType::Spot => Arc::new(BinanceSpotWSClient::new(tx, None).await),
             MarketType::InverseFuture | MarketType::InverseSwap => {
-                Arc::new(BinanceInverseWSClient::new(tx, None))
+                Arc::new(BinanceInverseWSClient::new(tx, None).await)
             }
             MarketType::LinearFuture | MarketType::LinearSwap => {
-                Arc::new(BinanceLinearWSClient::new(tx, None))
+                Arc::new(BinanceLinearWSClient::new(tx, None).await)
             }
-            MarketType::EuropeanOption => Arc::new(BinanceOptionWSClient::new(tx, None)),
+            MarketType::EuropeanOption => Arc::new(BinanceOptionWSClient::new(tx, None).await),
             _ => panic!("Binance does NOT have the {} market type", market_type),
         },
-        "bitfinex" => Arc::new(BitfinexWSClient::new(tx, None)),
+        "bitfinex" => Arc::new(BitfinexWSClient::new(tx, None).await),
         "bitget" => match market_type {
             MarketType::InverseSwap | MarketType::LinearSwap => {
-                Arc::new(BitgetSwapWSClient::new(tx, None))
+                Arc::new(BitgetSwapWSClient::new(tx, None).await)
             }
             _ => panic!("Bitget does NOT have the {} market type", market_type),
         },
-        "bithumb" => Arc::new(BithumbWSClient::new(tx, None)),
-        "bitmex" => Arc::new(BitmexWSClient::new(tx, None)),
-        "bitstamp" => Arc::new(BitstampWSClient::new(tx, None)),
+        "bithumb" => Arc::new(BithumbWSClient::new(tx, None).await),
+        "bitmex" => Arc::new(BitmexWSClient::new(tx, None).await),
+        "bitstamp" => Arc::new(BitstampWSClient::new(tx, None).await),
         "bitz" => match market_type {
-            MarketType::Spot => Arc::new(BitzSpotWSClient::new(tx, None)),
+            MarketType::Spot => Arc::new(BitzSpotWSClient::new(tx, None).await),
             _ => panic!("Bitz does NOT have the {} market type", market_type),
         },
         "bybit" => match market_type {
             MarketType::InverseFuture | MarketType::InverseSwap => {
-                Arc::new(BybitInverseWSClient::new(tx, None))
+                Arc::new(BybitInverseWSClient::new(tx, None).await)
             }
-            MarketType::LinearSwap => Arc::new(BybitLinearSwapWSClient::new(tx, None)),
+            MarketType::LinearSwap => Arc::new(BybitLinearSwapWSClient::new(tx, None).await),
             _ => panic!("Bybit does NOT have the {} market type", market_type),
         },
-        "coinbase_pro" => Arc::new(CoinbaseProWSClient::new(tx, None)),
-        "deribit" => Arc::new(DeribitWSClient::new(tx, None)),
+        "coinbase_pro" => Arc::new(CoinbaseProWSClient::new(tx, None).await),
+        "deribit" => Arc::new(DeribitWSClient::new(tx, None).await),
         "dydx" => match market_type {
-            MarketType::LinearSwap => Arc::new(DydxSwapWSClient::new(tx, None)),
+            MarketType::LinearSwap => Arc::new(DydxSwapWSClient::new(tx, None).await),
             _ => panic!("dYdX does NOT have the {} market type", market_type),
         },
-        "ftx" => Arc::new(FtxWSClient::new(tx, None)),
+        "ftx" => Arc::new(FtxWSClient::new(tx, None).await),
         "gate" => match market_type {
-            MarketType::Spot => Arc::new(GateSpotWSClient::new(tx, None)),
-            MarketType::InverseSwap => Arc::new(GateInverseSwapWSClient::new(tx, None)),
-            MarketType::LinearSwap => Arc::new(GateLinearSwapWSClient::new(tx, None)),
-            MarketType::LinearFuture => Arc::new(GateLinearFutureWSClient::new(tx, None)),
+            MarketType::Spot => Arc::new(GateSpotWSClient::new(tx, None).await),
+            MarketType::InverseSwap => Arc::new(GateInverseSwapWSClient::new(tx, None).await),
+            MarketType::LinearSwap => Arc::new(GateLinearSwapWSClient::new(tx, None).await),
+            MarketType::LinearFuture => Arc::new(GateLinearFutureWSClient::new(tx, None).await),
             _ => panic!("Gate does NOT have the {} market type", market_type),
         },
         "huobi" => match market_type {
-            MarketType::Spot => Arc::new(HuobiSpotWSClient::new(tx, None)),
-            MarketType::InverseFuture => Arc::new(HuobiFutureWSClient::new(tx, None)),
-            MarketType::LinearSwap => Arc::new(HuobiLinearSwapWSClient::new(tx, None)),
-            MarketType::InverseSwap => Arc::new(HuobiInverseSwapWSClient::new(tx, None)),
-            MarketType::EuropeanOption => Arc::new(HuobiOptionWSClient::new(tx, None)),
+            MarketType::Spot => Arc::new(HuobiSpotWSClient::new(tx, None).await),
+            MarketType::InverseFuture => Arc::new(HuobiFutureWSClient::new(tx, None).await),
+            MarketType::LinearSwap => Arc::new(HuobiLinearSwapWSClient::new(tx, None).await),
+            MarketType::InverseSwap => Arc::new(HuobiInverseSwapWSClient::new(tx, None).await),
+            MarketType::EuropeanOption => Arc::new(HuobiOptionWSClient::new(tx, None).await),
             _ => panic!("Huobi does NOT have the {} market type", market_type),
         },
         "kraken" => match market_type {
-            MarketType::Spot => Arc::new(KrakenSpotWSClient::new(tx, None)),
+            MarketType::Spot => Arc::new(KrakenSpotWSClient::new(tx, None).await),
             MarketType::InverseFuture | MarketType::InverseSwap => {
-                Arc::new(KrakenFuturesWSClient::new(tx, None))
+                Arc::new(KrakenFuturesWSClient::new(tx, None).await)
             }
             _ => panic!("Kraken does NOT have the {} market type", market_type),
         },
         "kucoin" => match market_type {
-            MarketType::Spot => Arc::new(KuCoinSpotWSClient::new(tx, None)),
+            MarketType::Spot => Arc::new(KuCoinSpotWSClient::new(tx, None).await),
             MarketType::InverseSwap | MarketType::LinearSwap | MarketType::InverseFuture => {
-                Arc::new(KuCoinSwapWSClient::new(tx, None))
+                Arc::new(KuCoinSwapWSClient::new(tx, None).await)
             }
             _ => panic!("KuCoin does NOT have the {} market type", market_type),
         },
         "mexc" => match market_type {
-            MarketType::Spot => Arc::new(MexcSpotWSClient::new(tx, None)),
+            MarketType::Spot => Arc::new(MexcSpotWSClient::new(tx, None).await),
             MarketType::LinearSwap | MarketType::InverseSwap => {
-                Arc::new(MexcSwapWSClient::new(tx, None))
+                Arc::new(MexcSwapWSClient::new(tx, None).await)
             }
             _ => panic!("MEXC does NOT have the {} market type", market_type),
         },
-        "okx" => Arc::new(OkxWSClient::new(tx, None)),
+        "okx" => Arc::new(OkxWSClient::new(tx, None).await),
         "zbg" => match market_type {
-            MarketType::Spot => Arc::new(ZbgSpotWSClient::new(tx, None)),
+            MarketType::Spot => Arc::new(ZbgSpotWSClient::new(tx, None).await),
             MarketType::InverseSwap | MarketType::LinearSwap => {
-                Arc::new(ZbgSwapWSClient::new(tx, None))
+                Arc::new(ZbgSwapWSClient::new(tx, None).await)
             }
             _ => panic!("ZBG does NOT have the {} market type", market_type),
         },
@@ -535,87 +535,91 @@ fn create_ws_client_internal(
     }
 }
 
-fn create_ws_client(
+async fn create_ws_client(
     exchange: &str,
     market_type: MarketType,
     msg_type: MessageType,
     tx: Sender<Message>,
 ) -> Arc<dyn WSClient + Send + Sync> {
-    let lock = WS_LOCKS
-        .get(exchange)
-        .unwrap()
-        .get(&market_type)
-        .unwrap()
-        .clone();
-    let mut lock = lock.lock().unwrap();
-    let interval = get_connection_interval_ms(exchange, market_type);
-    if let Some(interval) = interval {
-        if !lock.owns_lock() {
-            lock.lock().unwrap();
-            std::thread::sleep(Duration::from_millis(interval));
-        }
-    }
     let tx = create_conversion_thread(exchange.to_string(), msg_type, market_type, tx);
-    let ws_client = create_ws_client_internal(exchange, market_type, tx);
-    if interval.is_some() && lock.owns_lock() {
-        lock.unlock().unwrap();
+    if let Some(interval) = get_connection_interval_ms(exchange, market_type) {
+        let lock = WS_LOCKS
+            .get(exchange)
+            .unwrap()
+            .get(&market_type)
+            .unwrap()
+            .clone();
+        let mut lock = lock.lock().await;
+        if !lock.owns_lock() {
+            lock.lock_with_pid().unwrap();
+            tokio::time::sleep(Duration::from_millis(interval)).await;
+        }
+        let ws_client = create_ws_client_internal(exchange, market_type, tx).await;
+        if lock.owns_lock() {
+            lock.unlock().unwrap();
+        }
+        ws_client
+    } else {
+        create_ws_client_internal(exchange, market_type, tx).await
     }
-    ws_client
 }
 
-pub(crate) fn create_ws_client_symbol(
+pub(crate) async fn create_ws_client_symbol(
     exchange: &str,
     market_type: MarketType,
     tx: Sender<String>,
 ) -> Arc<dyn WSClient + Send + Sync> {
     let tx = create_parser_thread(exchange.to_string(), market_type, tx);
-    create_ws_client_internal(exchange, market_type, tx)
+    create_ws_client_internal(exchange, market_type, tx).await
 }
+
+#[derive(Clone)]
+struct EmptyStruct {} // for stop channel
 
 fn create_symbol_discovery_thread(
     exchange: String,
     market_type: MarketType,
-    should_stop: Arc<AtomicBool>,
     subscribed_symbols: Vec<String>,
-    tx: Sender<Vec<String>>, // send out new symbols
-) -> JoinHandle<()> {
-    let num_topics_per_connection = get_num_subscriptions_per_connection(&exchange);
-    std::thread::spawn(move || {
-        let mut subscribed_symbols = subscribed_symbols;
-        let mut num_subscribed_of_last_client =
-            subscribed_symbols.len() % num_topics_per_connection;
-        let mut rng = rand::thread_rng();
-        while !should_stop.load(Ordering::Acquire) {
-            // update symbols every hour
-            std::thread::sleep(Duration::from_secs(3600));
-            let latest_symbols = if exchange == "binance" {
-                fetch_symbols_retry(&exchange, market_type)
-                    .into_iter()
-                    .map(|s| s.to_lowercase())
-                    .collect()
-            } else {
-                fetch_symbols_retry(&exchange, market_type)
-            };
-            let mut new_symbols: Vec<String> = latest_symbols
-                .iter()
-                .filter(|s| !subscribed_symbols.contains(s))
-                .cloned()
-                .collect();
+    mut stop_ch_rx: tokio::sync::broadcast::Receiver<EmptyStruct>,
+    tx: tokio::sync::mpsc::Sender<Vec<String>>, // send out new symbols
+) -> tokio::task::JoinHandle<()> {
+    let num_topics_per_connection = get_num_subscriptions_per_connection(&exchange, market_type);
+    let mut subscribed_symbols = subscribed_symbols;
+    let mut num_subscribed_of_last_client = subscribed_symbols.len() % num_topics_per_connection;
+    let mut hourly = tokio::time::interval(Duration::from_secs(3600));
+    tokio::task::spawn(async move {
+        loop {
+            tokio::select! {
+                _ = stop_ch_rx.recv() => {
+                    break;
+                }
+                _ = hourly.tick() => {
+                    let exchange_clone = exchange.to_string();
+                    let latest_symbols = tokio::task::block_in_place(move || {
+                        fetch_symbols_retry(&exchange_clone, market_type)
+                    });
 
-            if !new_symbols.is_empty() {
-                warn!("Found new symbols: {}", new_symbols.join(", "));
-                tx.send(new_symbols.clone()).unwrap();
-                num_subscribed_of_last_client += new_symbols.len();
-                subscribed_symbols.append(&mut new_symbols);
-            }
-            if num_subscribed_of_last_client >= num_topics_per_connection {
-                warn!(
-                    "The last connection has subscribed {} topics, which is more than {}, restarting the process",
-                    num_subscribed_of_last_client, num_topics_per_connection,
-                );
-                let millis = rng.gen_range(3000_u64..10000_u64);
-                std::thread::sleep(Duration::from_millis(millis)); // sleep for a random time
-                std::process::exit(0); // pm2 will restart the whole process
+                    let mut new_symbols: Vec<String> = latest_symbols
+                        .iter()
+                        .filter(|s| !subscribed_symbols.contains(s))
+                        .cloned()
+                        .collect();
+
+                    if !new_symbols.is_empty() {
+                        warn!("Found new symbols: {}", new_symbols.join(", "));
+                        if tx.send(new_symbols.clone()).await.is_err() {
+                            break; // break the loop if there is no receiver
+                        }
+                        num_subscribed_of_last_client += new_symbols.len();
+                        subscribed_symbols.append(&mut new_symbols);
+                    }
+                    if num_subscribed_of_last_client >= num_topics_per_connection {
+                        panic!(
+                            "The last connection has subscribed {} topics, which is more than {}, restarting the process",
+                             num_subscribed_of_last_client, num_topics_per_connection,
+                        ); // pm2 will restart the whole process
+                    }
+                }
             }
         }
     })
@@ -625,18 +629,20 @@ fn create_new_symbol_receiver_thread(
     exchange: String,
     msg_type: MessageType,
     market_type: MarketType,
-    rx: Receiver<Vec<String>>,
+    mut symbols_rx: tokio::sync::mpsc::Receiver<Vec<String>>,
     ws_client: Arc<dyn WSClient + Send + Sync>,
-) -> JoinHandle<()> {
-    std::thread::spawn(move || {
-        for new_symbols in rx {
+) -> tokio::task::JoinHandle<()> {
+    tokio::task::spawn(async move {
+        let exchange_clone = exchange;
+        while let Some(new_symbols) = symbols_rx.recv().await {
             subscribe_with_lock(
-                &exchange,
+                exchange_clone.clone(),
                 market_type,
                 msg_type,
-                &new_symbols,
+                new_symbols,
                 ws_client.clone(),
-            );
+            )
+            .await;
         }
     })
 }
@@ -645,11 +651,12 @@ fn create_new_symbol_receiver_thread_candlestick(
     exchange: String,
     market_type: MarketType,
     intervals: Vec<usize>,
-    rx: Receiver<Vec<String>>,
+    mut rx: tokio::sync::mpsc::Receiver<Vec<String>>,
     ws_client: Arc<dyn WSClient + Send + Sync>,
-) -> JoinHandle<()> {
-    std::thread::spawn(move || {
-        for new_symbols in rx {
+) -> tokio::task::JoinHandle<()> {
+    tokio::task::spawn(async move {
+        let exchange_clone = exchange;
+        while let Some(new_symbols) = rx.recv().await {
             let new_symbol_interval_list = new_symbols
                 .iter()
                 .flat_map(|symbol| {
@@ -660,11 +667,12 @@ fn create_new_symbol_receiver_thread_candlestick(
                 })
                 .collect::<Vec<(String, usize)>>();
             subscribe_candlestick_with_lock(
-                &exchange,
+                exchange_clone.clone(),
                 market_type,
-                new_symbol_interval_list.as_slice(),
+                new_symbol_interval_list,
                 ws_client.clone(),
-            );
+            )
+            .await;
         }
     })
 }
@@ -677,10 +685,12 @@ pub(crate) fn create_conversion_thread(
     tx: Sender<Message>,
 ) -> Sender<String> {
     let (tx_raw, rx_raw) = std::sync::mpsc::channel();
-    std::thread::spawn(move || {
+    tokio::task::spawn(async move {
         for json in rx_raw {
             let msg = Message::new(exchange.clone(), market_type, msg_type, json);
-            tx.send(msg).unwrap();
+            if tx.send(msg).is_err() {
+                break; // break the loop if there is no receiver
+            }
         }
     });
     tx_raw
@@ -721,43 +731,74 @@ fn create_parser_thread(
                 }
                 _ => panic!("unknown msg type {}", msg_type),
             };
-            tx.send(parsed).unwrap();
+            if tx.send(parsed).is_err() {
+                break; // break the loop if there is no receiver
+            }
         }
     });
     tx_raw
 }
 
-pub(crate) fn crawl_event(
+async fn crawl_event_one_chunk(
+    exchange: String,
+    market_type: MarketType,
+    msg_type: MessageType,
+    ws_client: Option<Arc<dyn WSClient + Send + Sync>>,
+    symbols: Vec<String>,
+    tx: Sender<Message>,
+) -> tokio::task::JoinHandle<()> {
+    let ws_client = if let Some(ws_client) = ws_client {
+        ws_client
+    } else {
+        let tx_clone = tx.clone();
+        create_ws_client(&exchange, market_type, msg_type, tx_clone).await
+    };
+
+    {
+        // fire and forget
+        let exchange_clone = exchange.to_string();
+        let ws_client_clone = ws_client.clone();
+        tokio::task::spawn(async move {
+            subscribe_with_lock(
+                exchange_clone,
+                market_type,
+                msg_type,
+                symbols,
+                ws_client_clone,
+            )
+            .await;
+        });
+    }
+
+    tokio::task::spawn(async move {
+        ws_client.run().await;
+        ws_client.close();
+    })
+}
+
+pub(crate) async fn crawl_event(
     exchange: &str,
     msg_type: MessageType,
     market_type: MarketType,
     symbols: Option<&[String]>,
     tx: Sender<Message>,
-    duration: Option<u64>,
 ) {
-    let num_topics_per_connection = get_num_subscriptions_per_connection(exchange);
+    let num_topics_per_connection = get_num_subscriptions_per_connection(exchange, market_type);
     let is_empty = match symbols {
         Some(list) => {
             if list.is_empty() {
                 true
             } else {
-                check_args(exchange, market_type, list);
+                tokio::task::block_in_place(move || check_args(exchange, market_type, list));
                 false
             }
         }
         None => true,
     };
-    let automatic_symbol_discovery = is_empty && duration.is_none();
+    let automatic_symbol_discovery = is_empty;
 
     let real_symbols = if is_empty {
-        if exchange == "binance" {
-            fetch_symbols_retry(exchange, market_type)
-                .into_iter()
-                .map(|s| s.to_lowercase())
-                .collect()
-        } else {
-            fetch_symbols_retry(exchange, market_type)
-        }
+        tokio::task::block_in_place(move || fetch_symbols_retry(exchange, market_type))
     } else {
         symbols.unwrap().to_vec()
     };
@@ -766,15 +807,17 @@ pub(crate) fn crawl_event(
         return;
     }
 
+    // The stop channel is used by all tokio tasks
+    let (stop_ch_tx, stop_ch_rx) = tokio::sync::broadcast::channel::<EmptyStruct>(1);
+
     // create a thread to discover new symbols
-    let (tx_symbols, rx_symbols): (Sender<Vec<String>>, Receiver<Vec<String>>) = mpsc::channel();
-    let symbol_discovery_thread_stop = Arc::new(AtomicBool::new(false));
+    let (tx_symbols, rx_symbols) = tokio::sync::mpsc::channel::<Vec<String>>(4);
     let symbol_discovery_thread = if automatic_symbol_discovery {
         let thread = create_symbol_discovery_thread(
             exchange.to_string(),
             market_type,
-            symbol_discovery_thread_stop.clone(),
             real_symbols.clone(),
+            stop_ch_rx,
             tx_symbols,
         );
         Some(thread)
@@ -783,30 +826,27 @@ pub(crate) fn crawl_event(
     };
 
     // create a thread to convert Sender<String> to Sender<Message>
-    let new_symbol_receiver_thread = if real_symbols.len() <= num_topics_per_connection {
-        let ws_client = create_ws_client(exchange, market_type, msg_type, tx);
+    if real_symbols.len() <= num_topics_per_connection {
+        let ws_client = create_ws_client(exchange, market_type, msg_type, tx).await;
         subscribe_with_lock(
-            exchange,
+            exchange.to_string(),
             market_type,
             msg_type,
-            &real_symbols,
+            real_symbols,
             ws_client.clone(),
-        );
-        let new_symbol_receiver_thread = if automatic_symbol_discovery {
-            let thread = create_new_symbol_receiver_thread(
+        )
+        .await;
+        if automatic_symbol_discovery {
+            create_new_symbol_receiver_thread(
                 exchange.to_string(),
                 msg_type,
                 market_type,
                 rx_symbols,
                 ws_client.clone(),
             );
-            Some(thread)
-        } else {
-            None
-        };
-        ws_client.run(duration);
+        }
+        ws_client.run().await;
         ws_client.close();
-        new_symbol_receiver_thread
     } else {
         // split to chunks
         let mut chunks: Vec<Vec<String>> = Vec::new();
@@ -816,70 +856,53 @@ pub(crate) fn crawl_event(
                 .to_vec();
             chunks.push(chunk);
         }
+        debug!(
+            "{} {} {}",
+            real_symbols.len(),
+            num_topics_per_connection,
+            chunks.len(),
+        );
         assert!(chunks.len() > 1);
-        let n = chunks.len();
 
-        let last_ws_client = create_ws_client(exchange, market_type, msg_type, tx.clone());
-        let mut join_handles: Vec<std::thread::JoinHandle<()>> = Vec::new();
-        for (index, chunk) in chunks.into_iter().enumerate() {
-            let exchange_clone = exchange.to_string();
-            let tx_clone = tx.clone();
-            let last_ws_client_clone = last_ws_client.clone();
-            let handle = std::thread::Builder::new()
-                .name(format!(
-                    "websocket.{}.{}.{}.{}",
-                    exchange, msg_type, market_type, index
-                ))
-                .spawn(move || {
-                    let exchange: &str = exchange_clone.as_str();
-                    if index == n - 1 {
-                        subscribe_with_lock(
-                            exchange,
-                            market_type,
-                            msg_type,
-                            &chunk,
-                            last_ws_client_clone.clone(),
-                        );
-                        last_ws_client_clone.run(duration);
-                        last_ws_client_clone.close();
-                    } else {
-                        let ws_client = create_ws_client(exchange, market_type, msg_type, tx_clone);
-                        subscribe_with_lock(
-                            exchange,
-                            market_type,
-                            msg_type,
-                            &chunk,
-                            ws_client.clone(),
-                        );
-                        ws_client.run(duration);
-                        ws_client.close();
-                    }
-                })
-                .unwrap();
-            join_handles.push(handle);
+        let mut last_ws_client = None;
+        let mut handles = Vec::new();
+        {
+            let n = chunks.len();
+            for (i, chunk) in chunks.into_iter().enumerate() {
+                last_ws_client = if i == (n - 1) {
+                    let tx_clone = tx.clone();
+                    Some(create_ws_client(exchange, market_type, msg_type, tx_clone).await)
+                } else {
+                    None
+                };
+                let ret = crawl_event_one_chunk(
+                    exchange.to_string(),
+                    market_type,
+                    msg_type,
+                    last_ws_client.clone(),
+                    chunk,
+                    tx.clone(),
+                );
+                handles.push(ret.await);
+            }
+            drop(tx);
         }
-        drop(tx);
-        let new_symbol_receiver_thread = if automatic_symbol_discovery {
-            let thread = create_new_symbol_receiver_thread(
+        if automatic_symbol_discovery && last_ws_client.is_some() {
+            create_new_symbol_receiver_thread(
                 exchange.to_string(),
                 msg_type,
                 market_type,
                 rx_symbols,
-                last_ws_client,
+                last_ws_client.unwrap(),
             );
-            Some(thread)
-        } else {
-            None
-        };
-        for handle in join_handles {
-            handle.join().unwrap();
         }
-        new_symbol_receiver_thread
+        for handle in handles {
+            handle.await.unwrap();
+        }
     };
-    symbol_discovery_thread_stop.store(true, Ordering::Release);
+    _ = stop_ch_tx.send(EmptyStruct {});
     if let Some(thread) = symbol_discovery_thread {
-        thread.join().unwrap();
-        new_symbol_receiver_thread.unwrap().join().unwrap();
+        _ = thread.await;
     }
 }
 
@@ -903,37 +926,65 @@ fn get_candlestick_intervals(exchange: &str, market_type: MarketType) -> Vec<usi
     }
 }
 
-pub(crate) fn crawl_candlestick_ext(
+async fn crawl_candlestick_one_chunk(
+    exchange: String,
+    market_type: MarketType,
+    ws_client: Option<Arc<dyn WSClient + Send + Sync>>,
+    symbol_interval_list: Vec<(String, usize)>,
+    tx: Sender<Message>,
+) -> tokio::task::JoinHandle<()> {
+    let ws_client = if let Some(ws_client) = ws_client {
+        ws_client
+    } else {
+        let tx_clone = tx.clone();
+        create_ws_client(&exchange, market_type, MessageType::Candlestick, tx_clone).await
+    };
+
+    {
+        // fire and forget
+        let exchange_clone = exchange.to_string();
+        let ws_client_clone = ws_client.clone();
+        tokio::task::spawn(async move {
+            subscribe_candlestick_with_lock(
+                exchange_clone,
+                market_type,
+                symbol_interval_list,
+                ws_client_clone,
+            )
+            .await;
+        });
+    }
+
+    tokio::task::spawn(async move {
+        ws_client.run().await;
+        ws_client.close();
+    })
+}
+
+pub(crate) async fn crawl_candlestick_ext(
     exchange: &str,
     market_type: MarketType,
     symbol_interval_list: Option<&[(String, usize)]>,
     tx: Sender<Message>,
-    duration: Option<u64>,
 ) {
-    let num_topics_per_connection = get_num_subscriptions_per_connection(exchange);
+    let num_topics_per_connection = get_num_subscriptions_per_connection(exchange, market_type);
     let is_empty = match symbol_interval_list {
         Some(list) => {
             if list.is_empty() {
                 true
             } else {
                 let symbols: Vec<String> = list.iter().map(|t| t.0.clone()).collect();
-                check_args(exchange, market_type, symbols.as_slice());
+                tokio::task::block_in_place(move || check_args(exchange, market_type, &symbols));
                 false
             }
         }
         None => true,
     };
-    let automatic_symbol_discovery = is_empty && duration.is_none();
+    let automatic_symbol_discovery = is_empty;
 
     let symbol_interval_list: Vec<(String, usize)> = if is_empty {
-        let symbols = if exchange == "binance" {
-            fetch_symbols_retry(exchange, market_type)
-                .into_iter()
-                .map(|s| s.to_lowercase())
-                .collect()
-        } else {
-            fetch_symbols_retry(exchange, market_type)
-        };
+        let symbols =
+            tokio::task::block_in_place(move || fetch_symbols_retry(exchange, market_type));
         let intervals = get_candlestick_intervals(exchange, market_type);
         symbols
             .iter()
@@ -954,15 +1005,17 @@ pub(crate) fn crawl_candlestick_ext(
     let real_symbols: Vec<String> = symbol_interval_list.iter().map(|t| t.0.clone()).collect();
     let real_intervals: Vec<usize> = symbol_interval_list.iter().map(|t| t.1).collect();
 
+    // The stop channel is used by all tokio tasks
+    let (stop_ch_tx, stop_ch_rx) = tokio::sync::broadcast::channel::<EmptyStruct>(1);
+
     // create a thread to discover new symbols
-    let (tx_symbols, rx_symbols): (Sender<Vec<String>>, Receiver<Vec<String>>) = mpsc::channel();
-    let symbol_discovery_thread_stop = Arc::new(AtomicBool::new(false));
+    let (tx_symbols, rx_symbols) = tokio::sync::mpsc::channel::<Vec<String>>(4);
     let symbol_discovery_thread = if automatic_symbol_discovery {
         let thread = create_symbol_discovery_thread(
             exchange.to_string(),
             market_type,
-            symbol_discovery_thread_stop.clone(),
             real_symbols,
+            stop_ch_rx,
             tx_symbols,
         );
         Some(thread)
@@ -970,95 +1023,87 @@ pub(crate) fn crawl_candlestick_ext(
         None
     };
 
-    let new_symbol_receiver_thread = if symbol_interval_list.len() <= num_topics_per_connection {
-        let ws_client = create_ws_client(exchange, market_type, MessageType::Candlestick, tx);
+    if symbol_interval_list.len() <= num_topics_per_connection {
+        let ws_client = create_ws_client(exchange, market_type, MessageType::Candlestick, tx).await;
         subscribe_candlestick_with_lock(
-            exchange,
+            exchange.to_string(),
             market_type,
-            symbol_interval_list.as_slice(),
+            symbol_interval_list,
             ws_client.clone(),
-        );
-        let new_symbol_receiver_thread = if automatic_symbol_discovery {
-            let thread = create_new_symbol_receiver_thread_candlestick(
+        )
+        .await;
+        if automatic_symbol_discovery {
+            create_new_symbol_receiver_thread_candlestick(
                 exchange.to_string(),
                 market_type,
                 real_intervals,
                 rx_symbols,
                 ws_client.clone(),
             );
-            Some(thread)
-        } else {
-            None
-        };
-        ws_client.run(duration);
+        }
+        ws_client.run().await;
         ws_client.close();
-        new_symbol_receiver_thread
     } else {
         // split to chunks
         let mut chunks: Vec<Vec<(String, usize)>> = Vec::new();
-        for i in (0..symbol_interval_list.len()).step_by(num_topics_per_connection) {
-            let chunk: Vec<(String, usize)> = (&symbol_interval_list
-                [i..(std::cmp::min(i + num_topics_per_connection, symbol_interval_list.len()))])
-                .to_vec();
-            chunks.push(chunk);
+        {
+            for i in (0..symbol_interval_list.len()).step_by(num_topics_per_connection) {
+                let chunk: Vec<(String, usize)> = (&symbol_interval_list[i..(std::cmp::min(
+                    i + num_topics_per_connection,
+                    symbol_interval_list.len(),
+                ))])
+                    .to_vec();
+                chunks.push(chunk);
+            }
         }
+        debug!(
+            "{} {} {}",
+            symbol_interval_list.len(),
+            num_topics_per_connection,
+            chunks.len(),
+        );
         assert!(chunks.len() > 1);
-        let n = chunks.len();
 
-        let last_ws_client =
-            create_ws_client(exchange, market_type, MessageType::Candlestick, tx.clone());
-        let mut join_handles: Vec<std::thread::JoinHandle<()>> = Vec::new();
-        for (index, chunk) in chunks.into_iter().enumerate() {
-            let exchange_clone = exchange.to_string();
-            let tx_clone = tx.clone();
-            let last_ws_client_clone = last_ws_client.clone();
-            let handle = std::thread::spawn(move || {
-                let exchange: &str = exchange_clone.as_str();
-                if index == n - 1 {
-                    subscribe_candlestick_with_lock(
-                        exchange,
-                        market_type,
-                        chunk.as_slice(),
-                        last_ws_client_clone.clone(),
-                    );
-                    last_ws_client_clone.run(duration);
-                    last_ws_client_clone.close();
+        let mut last_ws_client = None;
+        let mut handles = Vec::new();
+        {
+            let n = chunks.len();
+            for (i, chunk) in chunks.into_iter().enumerate() {
+                last_ws_client = if i == (n - 1) {
+                    let tx_clone = tx.clone();
+                    Some(
+                        create_ws_client(exchange, market_type, MessageType::Candlestick, tx_clone)
+                            .await,
+                    )
                 } else {
-                    let ws_client =
-                        create_ws_client(exchange, market_type, MessageType::Candlestick, tx_clone);
-                    subscribe_candlestick_with_lock(
-                        exchange,
-                        market_type,
-                        chunk.as_slice(),
-                        ws_client.clone(),
-                    );
-                    ws_client.run(duration);
-                    ws_client.close();
-                }
-            });
-            join_handles.push(handle);
+                    None
+                };
+                let ret = crawl_candlestick_one_chunk(
+                    exchange.to_string(),
+                    market_type,
+                    last_ws_client.clone(),
+                    chunk,
+                    tx.clone(),
+                );
+                handles.push(ret.await);
+            }
+            drop(tx);
         }
-        drop(tx);
-        let new_symbol_receiver_thread = if automatic_symbol_discovery {
-            let thread = create_new_symbol_receiver_thread_candlestick(
+        if automatic_symbol_discovery && last_ws_client.is_some() {
+            create_new_symbol_receiver_thread_candlestick(
                 exchange.to_string(),
                 market_type,
                 real_intervals,
                 rx_symbols,
-                last_ws_client,
+                last_ws_client.unwrap(),
             );
-            Some(thread)
-        } else {
-            None
-        };
-        for handle in join_handles {
-            handle.join().unwrap();
         }
-        new_symbol_receiver_thread
+        for handle in handles {
+            handle.await.unwrap();
+        }
     };
-    symbol_discovery_thread_stop.store(true, Ordering::Release);
+    _ = stop_ch_tx.send(EmptyStruct {});
     if let Some(thread) = symbol_discovery_thread {
-        thread.join().unwrap();
-        new_symbol_receiver_thread.unwrap().join().unwrap();
+        _ = thread.await;
     }
 }

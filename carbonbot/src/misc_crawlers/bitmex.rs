@@ -6,10 +6,10 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 use crypto_ws_client::*;
 
-pub(super) fn crawl_other(market_type: MarketType, tx: Sender<Message>, duration: Option<u64>) {
+pub(super) async fn crawl_other(market_type: MarketType, tx: Sender<Message>) {
     assert_eq!(market_type, MarketType::Unknown);
     let tx = create_conversion_thread("bitmex".to_string(), MessageType::Other, market_type, tx);
-    let channels: Vec<String> = vec![
+    let commands: Vec<String> = vec![
         "announcement",
         "connected",
         "instrument",
@@ -19,11 +19,11 @@ pub(super) fn crawl_other(market_type: MarketType, tx: Sender<Message>, duration
         "settlement",
     ]
     .into_iter()
-    .map(|x| x.to_string())
+    .map(|x| format!(r#"{{"op":"subscribe","args":["{}"]}}"#, x))
     .collect();
 
-    let ws_client = BitmexWSClient::new(tx, None);
-    ws_client.subscribe(&channels);
-    ws_client.run(duration);
+    let ws_client = BitmexWSClient::new(tx, None).await;
+    ws_client.send(&commands).await;
+    ws_client.run().await;
     ws_client.close();
 }

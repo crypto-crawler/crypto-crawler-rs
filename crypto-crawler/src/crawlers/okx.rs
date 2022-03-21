@@ -8,11 +8,10 @@ use std::sync::mpsc::Sender;
 const EXCHANGE_NAME: &str = "okx";
 
 #[allow(clippy::unnecessary_unwrap)]
-pub(crate) fn crawl_funding_rate(
+pub(crate) async fn crawl_funding_rate(
     market_type: MarketType,
     symbols: Option<&[String]>,
     tx: Sender<Message>,
-    duration: Option<u64>,
 ) {
     let tx = create_conversion_thread(
         EXCHANGE_NAME.to_string(),
@@ -22,30 +21,30 @@ pub(crate) fn crawl_funding_rate(
     );
 
     let symbols: Vec<String> = if symbols.is_none() || symbols.unwrap().is_empty() {
-        fetch_symbols_retry(EXCHANGE_NAME, market_type)
+        tokio::task::block_in_place(move || fetch_symbols_retry(EXCHANGE_NAME, market_type))
     } else {
         symbols.unwrap().to_vec()
     };
-    let channels: Vec<String> = symbols
+    let topics: Vec<(String, String)> = symbols
         .into_iter()
-        .map(|symbol| format!("funding-rate:{}", symbol))
+        .map(|symbol| ("funding-rate".to_string(), symbol))
         .collect();
 
     match market_type {
         MarketType::InverseSwap | MarketType::LinearSwap => {
-            let ws_client = OkxWSClient::new(tx, None);
-            ws_client.subscribe(&channels);
-            ws_client.run(duration);
+            let ws_client = OkxWSClient::new(tx, None).await;
+            ws_client.subscribe(&topics).await;
+            ws_client.run().await;
+            ws_client.close();
         }
         _ => panic!("OKX {} does NOT have funding rates", market_type),
     }
 }
 
-pub(crate) fn crawl_open_interest(
+pub(crate) async fn crawl_open_interest(
     market_type: MarketType,
     symbols: Option<&[String]>,
     tx: Sender<Message>,
-    duration: Option<u64>,
 ) {
     let tx = create_conversion_thread(
         EXCHANGE_NAME.to_string(),
@@ -56,22 +55,23 @@ pub(crate) fn crawl_open_interest(
 
     let symbols = if let Some(symbols) = symbols {
         if symbols.is_empty() {
-            fetch_symbols_retry(EXCHANGE_NAME, market_type)
+            tokio::task::block_in_place(move || fetch_symbols_retry(EXCHANGE_NAME, market_type))
         } else {
             symbols.to_vec()
         }
     } else {
-        fetch_symbols_retry(EXCHANGE_NAME, market_type)
+        tokio::task::block_in_place(move || fetch_symbols_retry(EXCHANGE_NAME, market_type))
     };
-    let channels: Vec<String> = symbols
+    let topics: Vec<(String, String)> = symbols
         .into_iter()
-        .map(|symbol| format!("open-interest:{}", symbol))
+        .map(|symbol| ("open-interest".to_string(), symbol))
         .collect();
 
     if market_type != MarketType::Spot {
-        let ws_client = OkxWSClient::new(tx, None);
-        ws_client.subscribe(&channels);
-        ws_client.run(duration);
+        let ws_client = OkxWSClient::new(tx, None).await;
+        ws_client.subscribe(&topics).await;
+        ws_client.run().await;
+        ws_client.close();
     } else {
         panic!("spot does NOT have open interest");
     }

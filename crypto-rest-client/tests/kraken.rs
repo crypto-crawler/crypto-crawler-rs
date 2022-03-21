@@ -17,7 +17,7 @@ fn test_trades() {
 }
 
 #[test]
-fn test_l2_snapshot() {
+fn test_restful_accepts_two_symbols() {
     let text = fetch_l2_snapshot("kraken", MarketType::Spot, "XBTUSD", Some(3)).unwrap();
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
     assert!(obj.get("error").unwrap().as_array().unwrap().is_empty());

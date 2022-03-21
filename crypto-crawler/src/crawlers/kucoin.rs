@@ -8,30 +8,22 @@ use super::crawl_event;
 
 const EXCHANGE_NAME: &str = "kucoin";
 
-pub(crate) fn crawl_bbo(
+pub(crate) async fn crawl_bbo(
     market_type: MarketType,
     symbols: Option<&[String]>,
     tx: Sender<Message>,
-    duration: Option<u64>,
 ) {
     if market_type == MarketType::Spot && (symbols.is_none() || symbols.unwrap().is_empty()) {
         let tx =
             create_conversion_thread(EXCHANGE_NAME.to_string(), MessageType::BBO, market_type, tx);
 
         // https://docs.kucoin.com/#all-symbols-ticker
-        let channels: Vec<String> = vec!["/market/ticker:all".to_string()];
-
-        let ws_client = KuCoinSpotWSClient::new(tx, None);
-        ws_client.subscribe(&channels);
-        ws_client.run(duration);
+        let commands: Vec<String> = vec![r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/market/ticker:all","privateChannel":false,"response":true}"#.to_string()];
+        let ws_client = KuCoinSpotWSClient::new(tx, None).await;
+        ws_client.send(&commands).await;
+        ws_client.run().await;
+        ws_client.close();
     } else {
-        crawl_event(
-            EXCHANGE_NAME,
-            MessageType::BBO,
-            market_type,
-            symbols,
-            tx,
-            duration,
-        );
+        crawl_event(EXCHANGE_NAME, MessageType::BBO, market_type, symbols, tx).await;
     }
 }

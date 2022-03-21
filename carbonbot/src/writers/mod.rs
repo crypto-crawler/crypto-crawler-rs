@@ -3,11 +3,11 @@ pub(super) mod file_writer;
 use crypto_crawler::*;
 use log::*;
 use redis::{self, Commands};
-use std::collections::HashMap;
-use std::thread::JoinHandle;
 use std::{
+    collections::HashMap,
     path::Path,
     sync::mpsc::{Receiver, Sender},
+    thread::JoinHandle,
 };
 
 pub trait Writer {
