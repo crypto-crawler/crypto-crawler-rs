@@ -93,7 +93,7 @@ async fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::Spot)]
 #[test_case(MarketType::LinearSwap)]
 #[test_case(MarketType::InverseSwap)]
-#[tokio::test(flavor = "multi_thread")]
+#[tokio::test(flavor = "multi_thread", worker_threads = 8)]
 async fn test_crawl_candlestick(market_type: MarketType) {
     gen_test_crawl_candlestick!(EXCHANGE_NAME, market_type)
 }
