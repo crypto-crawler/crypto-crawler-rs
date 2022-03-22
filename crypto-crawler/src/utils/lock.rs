@@ -26,7 +26,7 @@ const EXCHANGES: &[&str] = &[
     "zbg",
 ];
 
-const EXCHANGES_WS: &[&str] = &["binance", "bitz", "kucoin", "okx"];
+const EXCHANGES_WS: &[&str] = &["bitfinex", "bitz", "kucoin", "okx"];
 
 #[allow(clippy::type_complexity)]
 pub(crate) static REST_LOCKS: Lazy<

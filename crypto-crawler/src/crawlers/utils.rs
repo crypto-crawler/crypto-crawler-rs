@@ -347,6 +347,7 @@ async fn subscribe_with_lock(
 
 fn get_connection_interval_ms(exchange: &str, _market_type: MarketType) -> Option<u64> {
     match exchange {
+        "bitfinex" => Some(3000), // you cannot open more than 20 connections per minute, see https://docs.bitfinex.com/docs/requirements-and-limitations#websocket-rate-limits
         // "bitmex" => Some(9000), // 40 per hour
         "bitz" => Some(100), // `cat crawler-trade-bitz-spot-error-12.log` has many "429 Too Many Requests"
         "kucoin" => Some(2000), //  Connection Limit: 30 per minute, see https://docs.kucoin.com/#connection-times
