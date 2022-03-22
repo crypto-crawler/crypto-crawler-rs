@@ -133,7 +133,7 @@ mod bitfinex_swap {
         gen_test_code!(
             BitfinexWSClient,
             subscribe_l3_orderbook,
-            &vec!["tBTCF0:USTF0".to_string()]
+            &vec!["tBTCF0:USTF0".to_string(), "tETHF0:USTF0".to_string()]
         );
     }
 
