@@ -164,8 +164,9 @@ fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
 mod tests {
     use serde_json::Value;
 
-    use super::super::utils::http_get;
-    use super::{fetch_linear_swap_symbols, fetch_raw_markets, fetch_spot_symbols};
+    use super::{
+        super::utils::http_get, fetch_linear_swap_symbols, fetch_raw_markets, fetch_spot_symbols,
+    };
     use crate::error::Result;
 
     fn _fetch_symbols(url: &str) -> Result<Vec<String>> {

@@ -3,8 +3,7 @@ use std::collections::HashMap;
 use super::utils::http_get;
 use crate::{error::Result, Fees, Market, MarketType, Precision};
 
-use chrono::prelude::*;
-use chrono::DateTime;
+use chrono::{prelude::*, DateTime};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
