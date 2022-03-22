@@ -27,11 +27,11 @@ struct FuturesMarket {
     #[serde(rename = "type")]
     type_: String,
     tradeable: bool,
-    underlying: String,
+    underlying: Option<String>,
     lastTradingTime: Option<String>, // only applicable for futures
     tickSize: f64,
     contractSize: f64,
-    isin: String,
+    isin: Option<String>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -116,6 +116,7 @@ pub(super) fn fetch_inverse_swap_markets() -> Result<Vec<Market>> {
 fn fetch_futures_markets() -> Result<Vec<Market>> {
     let markets = fetch_futures_markets_raw()?
         .into_iter()
+        .filter(|m| m.symbol.starts_with("pi_") || m.symbol.starts_with("fi_")) // TODO: Multi-Collateral, e.g., pf_xbtusd
         .map(|m| {
             let info = serde_json::to_value(&m)
                 .unwrap()
