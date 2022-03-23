@@ -79,6 +79,7 @@ fn fetch_futures_markets_raw() -> Vec<FuturesMarket> {
         .instruments
         .into_iter()
         .filter(|x| x.tradeable)
+        .filter(|m| m.symbol.starts_with("pi_") || m.symbol.starts_with("fi_"))
         .collect::<Vec<FuturesMarket>>();
     markets
 }
