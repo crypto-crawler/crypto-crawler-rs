@@ -10,5 +10,4 @@ members = [
   "crypto-rest-client",
   "crypto-ws-client",
   "crypto-crawler",
-  "carbonbot",
 ]
