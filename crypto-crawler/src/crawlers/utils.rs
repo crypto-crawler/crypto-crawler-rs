@@ -496,7 +496,7 @@ async fn create_ws_client(
                 break;
             } else {
                 tokio::time::sleep(std::time::Duration::from_millis(
-                    rand::random::<u64>() % 100,
+                    rand::random::<u64>() % 90 + 11,
                 ))
                 .await; // give chances to other tasks
             }
