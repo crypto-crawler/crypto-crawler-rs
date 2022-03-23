@@ -10,6 +10,14 @@ use utils::parse;
 
 const EXCHANGE_NAME: &str = "deribit";
 
+#[test_case(MarketType::InverseSwap)]
+#[test_case(MarketType::InverseFuture)]
+#[test_case(MarketType::EuropeanOption)]
+#[tokio::test(flavor = "multi_thread")]
+async fn test_crawl_trade_all(market_type: MarketType) {
+    test_all_symbols!(crawl_trade, EXCHANGE_NAME, market_type, MessageType::Trade)
+}
+
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
 #[test_case(MarketType::InverseFuture, "BTC-24JUN22")]
 #[test_case(MarketType::EuropeanOption, "BTC-24JUN22-40000-C"; "inconclusive")]
@@ -22,14 +30,6 @@ async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
         symbol,
         MessageType::Trade
     )
-}
-
-#[test_case(MarketType::InverseSwap)]
-#[test_case(MarketType::InverseFuture)]
-#[test_case(MarketType::EuropeanOption)]
-#[tokio::test(flavor = "multi_thread")]
-async fn test_crawl_trade_all(market_type: MarketType) {
-    test_all_symbols!(crawl_trade, EXCHANGE_NAME, market_type, MessageType::Trade)
 }
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]

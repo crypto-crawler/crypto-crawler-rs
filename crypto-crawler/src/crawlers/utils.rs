@@ -485,11 +485,31 @@ async fn create_ws_client(
             .unwrap()
             .clone();
         let mut lock = lock.lock().await;
+
+        if !lock.owns_lock() {
+            let mut duration = std::time::Duration::from_millis(16);
+            for i in 0..10 {
+                debug!(
+                    "{} {} {} try_lock_with_pid() the {}th time",
+                    exchange, market_type, msg_type, i
+                );
+                // retry for 10 times
+                if lock.try_lock_with_pid().is_ok() {
+                    break;
+                } else {
+                    tokio::time::sleep(
+                        duration + std::time::Duration::from_millis(rand::random::<u64>() % 100),
+                    )
+                    .await; // give chances to other tasks
+                    duration *= 2;
+                }
+            }
+        }
         if !lock.owns_lock() {
             lock.lock_with_pid().unwrap();
-            tokio::time::sleep(Duration::from_millis(interval)).await;
         }
         let ws_client = create_ws_client_internal(exchange, market_type, tx).await;
+        tokio::time::sleep(Duration::from_millis(interval)).await;
         if lock.owns_lock() {
             lock.unlock().unwrap();
         }

@@ -10,6 +10,15 @@ use utils::parse;
 
 const EXCHANGE_NAME: &str = "huobi";
 
+#[test_case(MarketType::Spot)]
+#[test_case(MarketType::InverseFuture)]
+#[test_case(MarketType::InverseSwap)]
+#[test_case(MarketType::LinearSwap)]
+#[tokio::test(flavor = "multi_thread")]
+async fn test_crawl_trade_all(market_type: MarketType) {
+    test_all_symbols!(crawl_trade, EXCHANGE_NAME, market_type, MessageType::Trade)
+}
+
 #[test_case(MarketType::Spot, "btcusdt")]
 #[test_case(MarketType::InverseFuture, "BTC_CQ")]
 #[test_case(MarketType::InverseSwap, "BTC-USD")]
