@@ -12,7 +12,7 @@ const EXCHANGE_NAME: &str = "bitget";
 
 #[test_case(MarketType::InverseSwap)]
 #[test_case(MarketType::LinearSwap)]
-#[tokio::test(flavor = "multi_thread")]
+#[tokio::test(flavor = "multi_thread", worker_threads = 8)]
 async fn test_crawl_trade_all(market_type: MarketType) {
     test_all_symbols!(crawl_trade, EXCHANGE_NAME, market_type, MessageType::Trade)
 }
