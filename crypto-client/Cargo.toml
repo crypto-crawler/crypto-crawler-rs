@@ -5,8 +5,8 @@ authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "An unified restful client for all cryptocurrency exchanges."
 license = "Apache-2.0"
-repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-client"
-homepage = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-client"
+repository = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/crypto-client"
+homepage = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/crypto-client"
 
 [dependencies]
 reqwest = { version = "0.11", features = ["blocking", "json"] }

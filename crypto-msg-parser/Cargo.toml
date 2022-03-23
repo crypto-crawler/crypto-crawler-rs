@@ -5,7 +5,7 @@ authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description = "Parse websocket messages from cryptocurreny exchanges"
 license = "Apache-2.0"
-repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-msg-parser"
+repository = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/crypto-msg-parser"
 keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]

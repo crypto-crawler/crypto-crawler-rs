@@ -1,10 +1,10 @@
 # crypto-crawler-rs
 
-[![](https://img.shields.io/github/workflow/status/soulmachine/crypto-crawler-rs/CI/main)](https://github.com/soulmachine/crypto-crawler-rs/actions?query=branch%3Amain)
+[![](https://img.shields.io/github/workflow/status/crypto-crawler/crypto-crawler-rs/CI/main)](https://github.com/crypto-crawler/crypto-crawler-rs/actions?query=branch%3Amain)
 
 This project contains a list of useful cryptocurrency librarys:
 
-- [carbonbot](./carbonbot) is the main CLI tool to run crawlers.
+- [carbonbot](https://github.com/crypto-crawler/carbonbot) is the main CLI tool to run crawlers.
 - [crypto-crawler](./crypto-crawler) is the crawler library to crawl websocket and restful messages from exchanges
 - [crypto-msg-parser](./crypto-msg-parser) is the parser library to parse messages from `crypto-crawler`.
 - [crypto-client](./crypto-client) is a RESTful client library to place and cancel orders.

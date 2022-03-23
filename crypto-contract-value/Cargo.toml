@@ -5,7 +5,7 @@ authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "Get contract value."
 license = "Apache-2.0"
-repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-contract-value"
+repository = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/crypto-contract-value"
 keywords = ["cryptocurrency", "blockchain", "trading"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

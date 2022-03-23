@@ -5,8 +5,8 @@ authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description = "Parse exchange-specific symbols to unified format"
 license = "Apache-2.0"
-repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-pair"
-homepage = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-pair"
+repository = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/crypto-pair"
+homepage = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/crypto-pair"
 
 [dependencies]
 crypto-market-type = "1.0.8"

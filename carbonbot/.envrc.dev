@@ -1,4 +1,0 @@
-export https_proxy="socks5://127.0.0.1:9050"
-export DATA_DIR="/tmp/carbonbot"
-export RUST_BACKTRACE=1
-export REST_RETRY_COUNT=5

@@ -5,7 +5,7 @@ authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "A rock-solid cryprocurrency crawler."
 license = "Apache-2.0"
-repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-crawler"
+repository = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/crypto-crawler"
 keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
