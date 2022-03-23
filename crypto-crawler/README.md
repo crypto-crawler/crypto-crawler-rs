@@ -1,6 +1,6 @@
 # crypto-crawler
 
-[![](https://img.shields.io/github/workflow/status/soulmachine/crypto-crawler-rs/CI/main)](https://github.com/soulmachine/crypto-crawler-rs/actions?query=branch%3Amain)
+[![](https://img.shields.io/github/workflow/status/crypto-crawler/crypto-crawler-rs/CI/main)](https://github.com/crypto-crawler/crypto-crawler-rs/actions?query=branch%3Amain)
 [![](https://img.shields.io/crates/v/crypto-crawler.svg)](https://crates.io/crates/crypto-crawler)
 [![](https://docs.rs/crypto-crawler/badge.svg)](https://docs.rs/crypto-crawler)
 ==========

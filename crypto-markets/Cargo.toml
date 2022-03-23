@@ -5,7 +5,7 @@ authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "Fetch trading markets from a cryptocurrency exchange"
 license = "Apache-2.0"
-repository = "https://github.com/soulmachine/crypto-crawler-rs/tree/main/crypto-markets"
+repository = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/crypto-markets"
 keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
