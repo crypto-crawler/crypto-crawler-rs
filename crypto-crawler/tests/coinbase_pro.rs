@@ -10,6 +10,12 @@ use utils::parse;
 
 const EXCHANGE_NAME: &str = "coinbase_pro";
 
+#[test_case(MarketType::Spot)]
+#[tokio::test(flavor = "multi_thread")]
+async fn test_crawl_trade_all(market_type: MarketType) {
+    test_all_symbols!(crawl_trade, EXCHANGE_NAME, market_type, MessageType::Trade)
+}
+
 #[test_case(MarketType::Spot, "BTC-USD")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
