@@ -146,6 +146,7 @@ mod deribit_option {
         "BTC-24JUN22-60000-C",
     ];
 
+    #[ignore = "lack of liquidity"]
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
         gen_test_code!(

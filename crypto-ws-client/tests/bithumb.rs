@@ -3,6 +3,7 @@ use crypto_ws_client::{BithumbWSClient, WSClient};
 #[macro_use]
 mod utils;
 
+#[ignore = "duplicated"]
 #[tokio::test(flavor = "multi_thread")]
 async fn subscribe() {
     gen_test_code!(
@@ -52,9 +53,9 @@ async fn subscribe_orderbook() {
     );
 }
 
-#[test]
 #[ignore = "too slow"]
-fn subscribe_ticker() {
+#[tokio::test(flavor = "multi_thread")]
+async fn subscribe_ticker() {
     gen_test_code!(
         BithumbWSClient,
         subscribe_ticker,

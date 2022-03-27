@@ -215,16 +215,16 @@ mod bitmex_linear_future {
             BitmexWSClient,
             subscribe_trade,
             &vec![
-                "XBTUSDTH22".to_string(),
-                "ETHH22".to_string(),
-                "ETHUSDTH22".to_string()
+                "XBTUSDTM22".to_string(),
+                "ETHM22".to_string(),
+                "ETHUSDTM22".to_string()
             ]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(BitmexWSClient, subscribe_bbo, &vec!["ETHH22".to_string()]);
+        gen_test_code!(BitmexWSClient, subscribe_bbo, &vec!["ETHM22".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -232,7 +232,7 @@ mod bitmex_linear_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe_orderbook,
-            &vec!["ETHH22".to_string()]
+            &vec!["ETHM22".to_string()]
         );
     }
 
@@ -241,13 +241,13 @@ mod bitmex_linear_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe_orderbook_topk,
-            &vec!["ETHH22".to_string()]
+            &vec!["ETHM22".to_string()]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(BitmexWSClient, &vec![("ETHH22".to_string(), 60)]);
-        gen_test_subscribe_candlestick!(BitmexWSClient, &vec![("ETHH22".to_string(), 86400)]);
+        gen_test_subscribe_candlestick!(BitmexWSClient, &vec![("ETHM22".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(BitmexWSClient, &vec![("ETHM22".to_string(), 86400)]);
     }
 }
