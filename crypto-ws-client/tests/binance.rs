@@ -236,8 +236,8 @@ mod binance_linear_future {
             BinanceLinearWSClient,
             subscribe,
             &vec![
-                ("aggTrade".to_string(), "BTCUSDT_220325".to_string()),
-                ("aggTrade".to_string(), "ETHUSDT_220325".to_string()),
+                ("aggTrade".to_string(), "BTCUSDT_220624".to_string()),
+                ("aggTrade".to_string(), "ETHUSDT_220624".to_string()),
             ]
         );
     }
@@ -256,7 +256,7 @@ mod binance_linear_future {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_trade,
-            &vec!["BTCUSDT_220325".to_string(), "ETHUSDT_220325".to_string()]
+            &vec!["BTCUSDT_220624".to_string(), "ETHUSDT_220624".to_string()]
         );
     }
 
@@ -265,7 +265,7 @@ mod binance_linear_future {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_ticker,
-            &vec!["BTCUSDT_220325".to_string(), "ETHUSDT_220325".to_string()]
+            &vec!["BTCUSDT_220624".to_string(), "ETHUSDT_220624".to_string()]
         );
     }
 
@@ -283,7 +283,7 @@ mod binance_linear_future {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_bbo,
-            &vec!["BTCUSDT_220325".to_string(), "ETHUSDT_220325".to_string()]
+            &vec!["BTCUSDT_220624".to_string(), "ETHUSDT_220624".to_string()]
         );
     }
 
@@ -292,7 +292,7 @@ mod binance_linear_future {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_orderbook,
-            &vec!["BTCUSDT_220325".to_string(), "ETHUSDT_220325".to_string()]
+            &vec!["BTCUSDT_220624".to_string(), "ETHUSDT_220624".to_string()]
         );
     }
 
@@ -301,7 +301,7 @@ mod binance_linear_future {
         gen_test_code!(
             BinanceLinearWSClient,
             subscribe_orderbook_topk,
-            &vec!["BTCUSDT_220325".to_string(), "ETHUSDT_220325".to_string()]
+            &vec!["BTCUSDT_220624".to_string(), "ETHUSDT_220624".to_string()]
         );
     }
 
@@ -310,15 +310,15 @@ mod binance_linear_future {
         gen_test_subscribe_candlestick!(
             BinanceLinearWSClient,
             &vec![
-                ("BTCUSDT_220325".to_string(), 60),
-                ("ETHUSDT_220325".to_string(), 60)
+                ("BTCUSDT_220624".to_string(), 60),
+                ("ETHUSDT_220624".to_string(), 60)
             ]
         );
         gen_test_subscribe_candlestick!(
             BinanceLinearWSClient,
             &vec![
-                ("BTCUSDT_220325".to_string(), 2592000),
-                ("ETHUSDT_220325".to_string(), 2592000)
+                ("BTCUSDT_220624".to_string(), 2592000),
+                ("ETHUSDT_220624".to_string(), 2592000)
             ]
         );
     }

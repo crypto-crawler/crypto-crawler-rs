@@ -15,7 +15,9 @@ pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result
         MarketType::InverseSwap | MarketType::LinearSwap => {
             gate_swap::GateSwapRestClient::fetch_l2_snapshot
         }
-        MarketType::LinearFuture => gate_future::GateFutureRestClient::fetch_l2_snapshot,
+        MarketType::InverseFuture | MarketType::LinearFuture => {
+            gate_future::GateFutureRestClient::fetch_l2_snapshot
+        }
         _ => panic!("Gate unknown market_type: {}", market_type),
     };
 

@@ -85,6 +85,7 @@ mod gate_spot {
 mod gate_inverse_swap {
     use crypto_ws_client::{GateInverseSwapWSClient, WSClient};
 
+    #[ignore = "lack of liquidity"]
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
         gen_test_code!(
@@ -92,23 +93,27 @@ mod gate_inverse_swap {
             subscribe,
             &vec![
                 ("trades".to_string(), "BTC_USD".to_string()),
-                ("trades".to_string(), "ETH_USD".to_string())
+                ("trades".to_string(), "ETH_USD".to_string()),
+                ("trades".to_string(), "BNB_USD".to_string()),
+                ("trades".to_string(), "XRP_USD".to_string())
             ]
         );
     }
 
+    #[ignore = "lack of liquidity"]
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_raw_json() {
         gen_test_code!(
             GateInverseSwapWSClient,
             send,
             &vec![
-                r#"{"channel":"futures.trades", "event":"subscribe", "payload":["BTC_USD","ETH_USD"]}"#
+                r#"{"channel":"futures.trades", "event":"subscribe", "payload":["BTC_USD","ETH_USD","BNB_USD","XRP_USD"]}"#
                     .to_string()
             ]
         );
     }
 
+    #[ignore = "lack of liquidity"]
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
         gen_test_code!(
@@ -241,7 +246,7 @@ mod gate_inverse_future {
         gen_test_code!(
             GateInverseFutureWSClient,
             subscribe_trade,
-            &vec!["BTC_USD_20220325".to_string()]
+            &vec!["BTC_USD_20220624".to_string()]
         );
     }
 
@@ -251,7 +256,7 @@ mod gate_inverse_future {
         gen_test_code!(
             GateInverseFutureWSClient,
             subscribe_orderbook,
-            &vec!["BTC_USD_20220325".to_string()]
+            &vec!["BTC_USD_20220624".to_string()]
         );
     }
 
@@ -260,7 +265,7 @@ mod gate_inverse_future {
         gen_test_code!(
             GateInverseFutureWSClient,
             subscribe_ticker,
-            &vec!["BTC_USD_20220325".to_string()]
+            &vec!["BTC_USD_20220624".to_string()]
         );
     }
 
@@ -269,11 +274,11 @@ mod gate_inverse_future {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             GateInverseFutureWSClient,
-            &vec![("BTC_USD_20220325".to_string(), 10)]
+            &vec![("BTC_USD_20220624".to_string(), 10)]
         );
         gen_test_subscribe_candlestick!(
             GateInverseFutureWSClient,
-            &vec![("BTC_USD_20220325".to_string(), 604800)]
+            &vec![("BTC_USD_20220624".to_string(), 604800)]
         );
     }
 }
@@ -288,7 +293,7 @@ mod gate_linear_future {
         gen_test_code!(
             GateLinearFutureWSClient,
             subscribe_trade,
-            &vec!["BTC_USDT_20220325".to_string()]
+            &vec!["BTC_USDT_20220624".to_string()]
         );
     }
 
@@ -298,7 +303,7 @@ mod gate_linear_future {
         gen_test_code!(
             GateLinearFutureWSClient,
             subscribe_orderbook,
-            &vec!["BTC_USDT_20220325".to_string()]
+            &vec!["BTC_USDT_20220624".to_string()]
         );
     }
 
@@ -307,7 +312,7 @@ mod gate_linear_future {
         gen_test_code!(
             GateLinearFutureWSClient,
             subscribe_ticker,
-            &vec!["BTC_USDT_20220325".to_string()]
+            &vec!["BTC_USDT_20220624".to_string()]
         );
     }
 
@@ -316,11 +321,11 @@ mod gate_linear_future {
     fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             GateLinearFutureWSClient,
-            &vec![("BTC_USDT_20220325".to_string(), 10)]
+            &vec![("BTC_USDT_20220624".to_string(), 10)]
         );
         gen_test_subscribe_candlestick!(
             GateLinearFutureWSClient,
-            &vec![("BTC_USDT_20220325".to_string(), 604800)]
+            &vec![("BTC_USDT_20220624".to_string(), 604800)]
         );
     }
 }

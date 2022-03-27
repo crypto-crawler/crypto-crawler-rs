@@ -67,8 +67,15 @@ impl MessageHandler for FtxMessageHandler {
             }
             "partial" | "update" => MiscMessage::Normal,
             "error" => {
-                error!("Received {} from {}", msg, EXCHANGE_NAME);
-                panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                let code = obj.get("code").unwrap().as_i64().unwrap();
+                match code {
+                    400 => {
+                        // Already subscribed
+                        warn!("Received {} from {}", msg, EXCHANGE_NAME);
+                    }
+                    _ => panic!("Received {} from {}", msg, EXCHANGE_NAME),
+                }
+                MiscMessage::Other
             }
             _ => {
                 warn!("Received {} from {}", msg, EXCHANGE_NAME);

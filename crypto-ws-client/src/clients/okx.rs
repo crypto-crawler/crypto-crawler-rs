@@ -158,6 +158,10 @@ impl MessageHandler for OkxMessageHandler {
                             // channel doesn't exist, ignore because some symbols don't exist in websocket while they exist in `/v3/instruments`
                             error!("Received {} from {}", msg, EXCHANGE_NAME);
                         }
+                        60018 => {
+                            // doesn't exist
+                            panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                        }
                         _ => warn!("Received {} from {}", msg, EXCHANGE_NAME),
                     }
                 }

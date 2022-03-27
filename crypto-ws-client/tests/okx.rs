@@ -81,7 +81,7 @@ mod okex_future {
         gen_test_code!(
             OkxWSClient,
             subscribe,
-            &vec![("trades".to_string(), "BTC-USDT-220325".to_string())]
+            &vec![("trades".to_string(), "BTC-USDT-220624".to_string())]
         );
     }
 
@@ -90,7 +90,7 @@ mod okex_future {
         gen_test_code!(
             OkxWSClient,
             subscribe_trade,
-            &vec!["BTC-USDT-220325".to_string()]
+            &vec!["BTC-USDT-220624".to_string()]
         );
     }
 
@@ -99,7 +99,7 @@ mod okex_future {
         gen_test_code!(
             OkxWSClient,
             subscribe_ticker,
-            &vec!["BTC-USDT-220325".to_string()]
+            &vec!["BTC-USDT-220624".to_string()]
         );
     }
 
@@ -108,7 +108,7 @@ mod okex_future {
         gen_test_code!(
             OkxWSClient,
             subscribe_orderbook,
-            &vec!["BTC-USDT-220325".to_string()]
+            &vec!["BTC-USDT-220624".to_string()]
         );
     }
 
@@ -117,16 +117,16 @@ mod okex_future {
         gen_test_code!(
             OkxWSClient,
             subscribe_orderbook_topk,
-            &vec!["BTC-USDT-220325".to_string()]
+            &vec!["BTC-USDT-220624".to_string()]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(OkxWSClient, &vec![("BTC-USDT-220325".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(OkxWSClient, &vec![("BTC-USDT-220624".to_string(), 60)]);
         gen_test_subscribe_candlestick!(
             OkxWSClient,
-            &vec![("BTC-USDT-220325".to_string(), 604800)]
+            &vec![("BTC-USDT-220624".to_string(), 604800)]
         );
     }
 }

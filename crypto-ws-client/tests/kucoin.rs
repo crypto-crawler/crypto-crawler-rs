@@ -115,6 +115,14 @@ mod kucoin_inverse_swap {
                 (
                     "/contractMarket/execution".to_string(),
                     "ETHUSDM".to_string()
+                ),
+                (
+                    "/contractMarket/execution".to_string(),
+                    "DOTUSDM".to_string()
+                ),
+                (
+                    "/contractMarket/execution".to_string(),
+                    "XRPUSDM".to_string()
                 )
             ]
         );
@@ -125,7 +133,7 @@ mod kucoin_inverse_swap {
         gen_test_code!(
             KuCoinSwapWSClient,
             send,
-            &vec![r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/contractMarket/execution:XBTUSDM,ETHUSDM","privateChannel":false,"response":true}"#.to_string()]
+            &vec![r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/contractMarket/execution:XBTUSDM,ETHUSDM,DOTUSDM,XRPUSDM","privateChannel":false,"response":true}"#.to_string()]
         );
     }
 
@@ -134,7 +142,12 @@ mod kucoin_inverse_swap {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_trade,
-            &vec!["XBTUSDM".to_string(), "ETHUSDM".to_string()]
+            &vec![
+                "XBTUSDM".to_string(),
+                "ETHUSDM".to_string(),
+                "DOTUSDM".to_string(),
+                "XRPUSDM".to_string()
+            ]
         );
     }
 
@@ -304,7 +317,7 @@ mod kucoin_inverse_future {
             subscribe,
             &vec![(
                 "/contractMarket/execution".to_string(),
-                "XBTMH22".to_string()
+                "XBTMM22".to_string()
             )]
         );
     }
@@ -315,7 +328,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             send,
-            &vec![r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/contractMarket/execution:XBTMH22","privateChannel":false,"response":true}"#.to_string()]
+            &vec![r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/contractMarket/execution:XBTMM22","privateChannel":false,"response":true}"#.to_string()]
         );
     }
 
@@ -325,7 +338,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_trade,
-            &vec!["XBTMH22".to_string()]
+            &vec!["XBTMM22".to_string()]
         );
     }
 
@@ -335,7 +348,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_bbo,
-            &vec!["XBTMH22".to_string()]
+            &vec!["XBTMM22".to_string()]
         );
     }
 
@@ -344,7 +357,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_orderbook,
-            &vec!["XBTMH22".to_string()]
+            &vec!["XBTMM22".to_string()]
         );
     }
 
@@ -353,7 +366,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_l3_orderbook,
-            &vec!["XBTMH22".to_string()]
+            &vec!["XBTMM22".to_string()]
         );
     }
 
@@ -362,7 +375,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_orderbook_topk,
-            &vec!["XBTMH22".to_string()]
+            &vec!["XBTMM22".to_string()]
         );
     }
 
@@ -371,7 +384,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_ticker,
-            &vec!["XBTMH22".to_string()]
+            &vec!["XBTMM22".to_string()]
         );
     }
 
@@ -380,7 +393,7 @@ mod kucoin_inverse_future {
     async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             KuCoinSwapWSClient,
-            &vec![("XBTMH22".to_string(), 60), ("XBTMH22".to_string(), 604800)]
+            &vec![("XBTMM22".to_string(), 60), ("XBTMM22".to_string(), 604800)]
         );
     }
 }
