@@ -1,6 +1,6 @@
 [package]
 name = "crypto-ws-client"
-version = "4.0.7"
+version = "4.0.8"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description = "A versatile websocket client that supports many cryptocurrency exchanges."
@@ -9,7 +9,7 @@ repository = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/cryp
 keywords = ["cryptocurrency", "blockchain", "trading", "websocket"]
 
 [dependencies]
-async-trait = "0.1.52"
+async-trait = "0.1.53"
 flate2 = "1.0.22"
 futures-util = "0.3.21"
 governor = "0.4.2"
