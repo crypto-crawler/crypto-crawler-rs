@@ -1,6 +1,6 @@
 [package]
 name = "crypto-rest-client"
-version = "0.8.5"
+version = "0.8.6"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "An RESTful client for all cryptocurrency exchanges."
@@ -9,7 +9,7 @@ repository = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/cryp
 keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
-crypto-market-type = "1.0.8"
+crypto-market-type = "1.0.9"
 once_cell = "1.10.0"
 log = "0.4.16"
 regex = "1.5.5"
