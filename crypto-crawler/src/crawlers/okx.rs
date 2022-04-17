@@ -41,6 +41,11 @@ pub(crate) async fn crawl_funding_rate(
     }
 }
 
+#[deprecated(
+    since = "4.1.2",
+    note = "OKX open interest is fetched via HTTP for now"
+)]
+#[allow(dead_code)]
 pub(crate) async fn crawl_open_interest(
     market_type: MarketType,
     symbols: Option<&[String]>,

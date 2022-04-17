@@ -1,5 +1,6 @@
 use super::utils::http_get;
 use crate::error::Result;
+use crypto_market_type::MarketType;
 use serde_json::Value;
 use std::collections::{BTreeMap, HashMap};
 
@@ -73,10 +74,26 @@ impl OkxRestClient {
     ///
     /// For example:
     /// - <https://www.okx.com/api/v5/public/open-interest?instType=SWAP>
-    pub fn fetch_open_interest(inst_type: &str) -> Result<String> {
-        gen_api!(format!(
-            "/api/v5/public/open-interest?instType={}",
-            inst_type
-        ))
+    /// - <https://www.okx.com/api/v5/public/open-interest?instType=SWAP&instId=BTC-USD-SWAP>
+    pub fn fetch_open_interest(market_type: MarketType, symbol: Option<&str>) -> Result<String> {
+        let inst_type = match market_type {
+            MarketType::LinearFuture => "FUTURES",
+            MarketType::InverseFuture => "FUTURES",
+            MarketType::LinearSwap => "SWAP",
+            MarketType::InverseSwap => "SWAP",
+            MarketType::EuropeanOption => "OPTION",
+            _ => panic!("okx {} doesn't have open interest", market_type),
+        };
+        if let Some(inst_id) = symbol {
+            gen_api!(format!(
+                "/api/v5/public/open-interest?instType={}&instId={}",
+                inst_type, inst_id,
+            ))
+        } else {
+            gen_api!(format!(
+                "/api/v5/public/open-interest?instType={}",
+                inst_type
+            ))
+        }
     }
 }
