@@ -101,7 +101,7 @@ pub fn fetch_open_interest(
         "gate" => exchanges::gate::fetch_open_interest(market_type, symbol.unwrap()),
         "huobi" => exchanges::huobi::fetch_open_interest(market_type, symbol),
         "kucoin" => exchanges::kucoin::fetch_open_interest(market_type),
-        "okx" => exchanges::okx::OkxRestClient::fetch_open_interest(symbol.unwrap()),
+        "okx" => exchanges::okx::OkxRestClient::fetch_open_interest(market_type, symbol),
         "zbg" => exchanges::zbg::fetch_open_interest(market_type, symbol.unwrap()),
         _ => panic!("{} does NOT have open interest RESTful API", exchange),
     }

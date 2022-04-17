@@ -211,15 +211,6 @@ pub(crate) fn crawl_snapshot(
 
 /// Crawl open interests of all trading symbols.
 pub(crate) fn crawl_open_interest(exchange: &str, market_type: MarketType, tx: Sender<Message>) {
-    if exchange == "okx" {
-        let rt = tokio::runtime::Builder::new_multi_thread()
-            .enable_all()
-            .build()
-            .unwrap();
-        // use websocket instead of RESTful API
-        rt.block_on(super::okx::crawl_open_interest(market_type, None, tx));
-        return;
-    }
     let cooldown_time = get_cooldown_time_per_request(exchange, market_type);
 
     let lock = REST_LOCKS
@@ -230,7 +221,7 @@ pub(crate) fn crawl_open_interest(exchange: &str, market_type: MarketType, tx: S
         .clone();
     'outer: loop {
         match exchange {
-            "bitz" | "deribit" | "dydx" | "ftx" | "huobi" | "kucoin" => {
+            "bitz" | "deribit" | "dydx" | "ftx" | "huobi" | "kucoin" | "okx" => {
                 let mut lock_ = lock.lock().unwrap();
                 if !lock_.owns_lock() {
                     lock_.lock().unwrap();
