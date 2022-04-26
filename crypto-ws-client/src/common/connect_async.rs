@@ -21,8 +21,14 @@ pub async fn connect_async(
     uplink_limit: Option<(NonZeroU32, std::time::Duration)>,
 ) -> Result<(Receiver<Message>, Sender<Message>), Error> {
 
-    if let Ok(proxy_addr) = env::var("SOCKS_PROXY") {
-        connect_async_with_socks5_proxy(url, proxy_addr, uplink_limit).await
+    if let Ok(proxy_env) = env::var("https_proxy") {
+        let proxy_url = Url::parse(&proxy_env).unwrap();
+        let proxy_addr = format!("{}:{}", proxy_url.host_str().unwrap(), proxy_url.port_or_known_default().unwrap());
+        match proxy_url.scheme().to_lowercase().as_str() {
+            "socks5" => connect_async_with_socks5_proxy(url, &proxy_addr, uplink_limit).await,
+            _ => panic!("proxy scheme not implement")
+        }
+
     } else {
         connect_async_direct(url, uplink_limit).await
     }
@@ -96,7 +102,7 @@ pub async fn connect_async_direct(
 
 pub async fn connect_async_with_socks5_proxy(
     url: &str,
-    proxy_addr: String,
+    proxy_addr: &str,
     uplink_limit: Option<(NonZeroU32, std::time::Duration)>,
 ) -> Result<(Receiver<Message>, Sender<Message>), Error> {
     let (command_tx, mut command_rx) = tokio::sync::mpsc::channel::<Message>(1);
@@ -104,7 +110,7 @@ pub async fn connect_async_with_socks5_proxy(
     // replace with socks5 stream
     let connect_url = Url::parse(url).unwrap();
     let proxy_stream = Socks5Stream::connect(
-        proxy_addr,
+        proxy_addr.to_string(),
         connect_url.host_str().unwrap().to_string(),
         connect_url.port().unwrap(),
         Config::default()
@@ -171,4 +177,28 @@ pub async fn connect_async_with_socks5_proxy(
     });
 
     Ok((message_rx, command_tx))
+}
+
+#[cfg(test)]
+mod tests{
+    use reqwest::Url;
+
+    #[test]
+    fn test_url(){
+        let endpoint = Url::parse("socks5://127.0.0.1:10808").unwrap();
+        let proxy_addr = format!("{}:{}", endpoint.host_str().unwrap(), endpoint.port_or_known_default().unwrap());
+        eprintln!("{}", proxy_addr);
+        let endpoint = Url::parse("http://127.0.0.1:10809").unwrap();
+        let proxy_addr = format!("{}:{}", endpoint.host_str().unwrap(), endpoint.port_or_known_default().unwrap());
+        eprintln!("{}", proxy_addr);
+        let endpoint = Url::parse("https://127.0.0.1:10809").unwrap();
+        let proxy_addr = format!("{}:{}", endpoint.host_str().unwrap(), endpoint.port_or_known_default().unwrap());
+        eprintln!("{}", proxy_addr);
+        let endpoint = Url::parse("https://example.com").unwrap();
+        let proxy_addr = format!("{}:{}", endpoint.host_str().unwrap(), endpoint.port_or_known_default().unwrap());
+        eprintln!("{}", proxy_addr);
+        let endpoint = Url::parse("https://example.com:8443").unwrap();
+        let proxy_addr = format!("{}:{}", endpoint.host_str().unwrap(), endpoint.port_or_known_default().unwrap());
+        eprintln!("{}", proxy_addr);
+    }
 }
