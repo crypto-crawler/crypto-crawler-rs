@@ -173,32 +173,8 @@ pub async fn connect_async_with_socks5_proxy(
               }
             };
         }
-        write.send(Message::Close(None)).await;
+        _ = write.send(Message::Close(None)).await;
     });
 
     Ok((message_rx, command_tx))
-}
-
-#[cfg(test)]
-mod tests{
-    use reqwest::Url;
-
-    #[test]
-    fn test_url(){
-        let endpoint = Url::parse("socks5://127.0.0.1:10808").unwrap();
-        let proxy_addr = format!("{}:{}", endpoint.host_str().unwrap(), endpoint.port_or_known_default().unwrap());
-        eprintln!("{}", proxy_addr);
-        let endpoint = Url::parse("http://127.0.0.1:10809").unwrap();
-        let proxy_addr = format!("{}:{}", endpoint.host_str().unwrap(), endpoint.port_or_known_default().unwrap());
-        eprintln!("{}", proxy_addr);
-        let endpoint = Url::parse("https://127.0.0.1:10809").unwrap();
-        let proxy_addr = format!("{}:{}", endpoint.host_str().unwrap(), endpoint.port_or_known_default().unwrap());
-        eprintln!("{}", proxy_addr);
-        let endpoint = Url::parse("https://example.com").unwrap();
-        let proxy_addr = format!("{}:{}", endpoint.host_str().unwrap(), endpoint.port_or_known_default().unwrap());
-        eprintln!("{}", proxy_addr);
-        let endpoint = Url::parse("https://example.com:8443").unwrap();
-        let proxy_addr = format!("{}:{}", endpoint.host_str().unwrap(), endpoint.port_or_known_default().unwrap());
-        eprintln!("{}", proxy_addr);
-    }
 }
