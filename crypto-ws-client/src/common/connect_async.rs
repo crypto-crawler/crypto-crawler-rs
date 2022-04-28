@@ -21,7 +21,7 @@ pub async fn connect_async(
     uplink_limit: Option<(NonZeroU32, std::time::Duration)>,
 ) -> Result<(Receiver<Message>, Sender<Message>), Error> {
 
-    if let Ok(proxy_env) = env::var("https_proxy") {
+    if let Ok(proxy_env) = env::var("https_proxy").or(env::var("http_proxy")) {
         let proxy_url = Url::parse(&proxy_env).unwrap();
         let proxy_addr = format!("{}:{}", proxy_url.host_str().unwrap(), proxy_url.port_or_known_default().unwrap());
         match proxy_url.scheme().to_lowercase().as_str() {
