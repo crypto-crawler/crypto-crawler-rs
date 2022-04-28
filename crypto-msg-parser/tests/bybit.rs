@@ -87,6 +87,7 @@ mod trade {
 mod l2_orderbook {
     use crypto_market_type::MarketType;
     use crypto_msg_parser::{extract_symbol, parse_l2};
+    use crypto_msg_type::MessageType;
 
     #[test]
     fn inverse_future_snapshot() {
@@ -100,6 +101,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "bybit",
             MarketType::InverseFuture,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("bybit", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
@@ -141,6 +143,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "bybit",
             MarketType::InverseFuture,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("bybit", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
@@ -177,6 +180,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "bybit",
             MarketType::InverseFuture,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("bybit", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
@@ -218,6 +222,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "bybit",
             MarketType::InverseFuture,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("bybit", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
@@ -254,6 +259,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "bybit",
             MarketType::LinearSwap,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("bybit", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
@@ -295,6 +301,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "bybit",
             MarketType::LinearSwap,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("bybit", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,

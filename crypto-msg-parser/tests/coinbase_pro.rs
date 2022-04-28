@@ -3,6 +3,7 @@ mod utils;
 use chrono::prelude::*;
 use crypto_market_type::MarketType;
 use crypto_msg_parser::{extract_symbol, parse_l2, parse_trade, TradeSide};
+use crypto_msg_type::MessageType;
 
 #[test]
 fn trade() {
@@ -40,6 +41,7 @@ fn l2_orderbook_snapshot() {
     crate::utils::check_orderbook_fields(
         "coinbase_pro",
         MarketType::Spot,
+        MessageType::L2Event,
         "BTC/USD".to_string(),
         extract_symbol("coinbase_pro", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
@@ -75,6 +77,7 @@ fn l2_orderbook_update() {
     crate::utils::check_orderbook_fields(
         "coinbase_pro",
         MarketType::Spot,
+        MessageType::L2Event,
         "BTC/USD".to_string(),
         extract_symbol("coinbase_pro", MarketType::Spot, raw_msg).unwrap(),
         orderbook,

@@ -200,6 +200,7 @@ mod funding_rate {
 mod l2_orderbook {
     use crypto_market_type::MarketType;
     use crypto_msg_parser::{extract_symbol, parse_l2};
+    use crypto_msg_type::MessageType;
     use float_cmp::approx_eq;
 
     #[test]
@@ -214,6 +215,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "huobi",
             MarketType::Spot,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("huobi", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
@@ -246,6 +248,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "huobi",
             MarketType::Spot,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("huobi", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
@@ -271,6 +274,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "huobi",
             MarketType::InverseFuture,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("huobi", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
@@ -313,6 +317,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "huobi",
             MarketType::InverseFuture,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("huobi", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
@@ -355,6 +360,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "huobi",
             MarketType::InverseSwap,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("huobi", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
@@ -397,6 +403,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "huobi",
             MarketType::InverseSwap,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("huobi", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
@@ -434,6 +441,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "huobi",
             MarketType::LinearSwap,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("huobi", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
@@ -486,6 +494,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "huobi",
             MarketType::LinearSwap,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("huobi", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,

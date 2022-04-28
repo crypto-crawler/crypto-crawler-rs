@@ -104,6 +104,7 @@ mod trade {
 mod l2_orderbook {
     use crypto_market_type::MarketType;
     use crypto_msg_parser::{extract_symbol, parse_l2};
+    use crypto_msg_type::MessageType;
 
     #[test]
     fn spot_snapshot() {
@@ -117,6 +118,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "ftx",
             MarketType::Spot,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("ftx", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
@@ -154,6 +156,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "ftx",
             MarketType::Spot,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("ftx", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
@@ -187,6 +190,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "ftx",
             MarketType::LinearFuture,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("ftx", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
@@ -228,6 +232,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "ftx",
             MarketType::LinearFuture,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("ftx", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
@@ -259,6 +264,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "ftx",
             MarketType::LinearSwap,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("ftx", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
@@ -300,6 +306,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "ftx",
             MarketType::LinearSwap,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("ftx", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,

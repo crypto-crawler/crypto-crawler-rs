@@ -50,18 +50,22 @@ struct RawTradeMsg {
 /// price, quantity
 pub type RawOrder = [String; 2];
 
-// see https://binance-docs.github.io/apidocs/spot/en/#diff-depth-stream
+// See:
+// https://binance-docs.github.io/apidocs/spot/en/#diff-depth-stream
 // https://binance-docs.github.io/apidocs/delivery/en/#diff-book-depth-streams
+// https://binance-docs.github.io/apidocs/futures/en/#partial-book-depth-streams
+// https://binance-docs.github.io/apidocs/delivery/en/#partial-book-depth-streams
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct RawOrderbookMsg {
-    e: String,       // Event type
-    E: i64,          // Event time
-    T: Option<i64>,  // Transction time
-    s: String,       // Symbol
-    U: u64,          // First update ID in event
-    u: u64,          // Final update ID in event
-    pu: Option<u64>, // Previous event update sequense ("u" of previous message)
+    e: String,          // Event type
+    E: i64,             // Event time
+    T: Option<i64>,     // Transction time
+    s: String,          // Symbol
+    ps: Option<String>, // Pair, available to L2_TOPK
+    U: u64,             // First update ID in event
+    u: u64,             // Final update ID in event
+    pu: Option<u64>,    // Previous event update sequense ("u" of previous message)
     b: Vec<RawOrder>,
     a: Vec<RawOrder>,
     #[serde(flatten)]
@@ -226,6 +230,22 @@ pub(crate) fn parse_l2(
         json: msg.to_string(),
     };
     Ok(vec![orderbook])
+}
+
+pub(crate) fn parse_l2_topk(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    match parse_l2(market_type, msg) {
+        Ok(mut orderbooks) => {
+            for ob in orderbooks.iter_mut() {
+                ob.snapshot = true;
+                ob.msg_type = MessageType::L2TopK;
+            }
+            Ok(orderbooks)
+        }
+        Err(err) => Err(err),
+    }
 }
 
 #[derive(Serialize, Deserialize)]

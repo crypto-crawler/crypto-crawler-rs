@@ -132,6 +132,36 @@ pub fn parse_l2(
     }
 }
 
+/// Parse level2 topk orderbook messages.
+pub fn parse_l2_topk(
+    exchange: &str,
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ret = match exchange {
+        "binance" => exchanges::binance::parse_l2_topk(market_type, msg),
+        _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
+    };
+    match ret {
+        Ok(mut orderbooks) => {
+            for orderbook in orderbooks.iter_mut() {
+                if orderbook.snapshot {
+                    // sorted in ascending order by price
+                    orderbook
+                        .asks
+                        .sort_by(|a, b| a.price.partial_cmp(&b.price).unwrap());
+                    // sorted in descending order by price
+                    orderbook
+                        .bids
+                        .sort_by(|a, b| b.price.partial_cmp(&a.price).unwrap());
+                }
+            }
+            Ok(orderbooks)
+        }
+        Err(_) => ret,
+    }
+}
+
 /// Parse funding rate messages.
 pub fn parse_funding_rate(
     exchange: &str,
