@@ -34,7 +34,10 @@ pub(crate) fn get_msg_type(msg: &str) -> MessageType {
                 MessageType::Trade
             } else if stream.ends_with("@depth") || stream.ends_with("@depth@100ms") {
                 MessageType::L2Event
-            } else if stream.ends_with("@depth5") || stream.ends_with("@depth10") || stream.ends_with("depth20") {
+            } else if stream.ends_with("@depth5")
+                || stream.ends_with("@depth10")
+                || stream.ends_with("depth20")
+            {
                 MessageType::L2TopK
             } else if stream.ends_with("@bookTicker") {
                 MessageType::BBO

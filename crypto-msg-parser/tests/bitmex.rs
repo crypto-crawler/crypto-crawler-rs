@@ -175,8 +175,8 @@ mod funding_rate {
 mod l2_orderbook {
     use chrono::prelude::*;
     use crypto_market_type::MarketType;
-    use crypto_msg_type::MessageType;
     use crypto_msg_parser::{exchanges::bitmex::price_to_id, extract_symbol, parse_l2};
+    use crypto_msg_type::MessageType;
     use float_cmp::approx_eq;
 
     #[test]

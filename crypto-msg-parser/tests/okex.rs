@@ -227,8 +227,8 @@ mod funding_rate {
 #[cfg(test)]
 mod l2_orderbook {
     use crypto_market_type::MarketType;
-    use crypto_msg_type::MessageType;
     use crypto_msg_parser::{extract_symbol, parse_l2};
+    use crypto_msg_type::MessageType;
 
     #[test]
     fn spot_snapshot() {

@@ -70,7 +70,6 @@ pub fn parse_trade(
     }
 }
 
-
 /// Parse level2 orderbook messages.
 pub fn parse_l2(
     exchange: &str,
@@ -132,7 +131,6 @@ pub fn parse_l2(
         Err(_) => ret,
     }
 }
-
 
 /// Parse level2 topk orderbook messages.
 pub fn parse_l2_topk(

@@ -58,14 +58,14 @@ pub type RawOrder = [String; 2];
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct RawOrderbookMsg {
-    e: String,       // Event type
-    E: i64,          // Event time
-    T: Option<i64>,  // Transction time
-    s: String,       // Symbol
+    e: String,          // Event type
+    E: i64,             // Event time
+    T: Option<i64>,     // Transction time
+    s: String,          // Symbol
     ps: Option<String>, // Pair, available to L2_TOPK
-    U: u64,          // First update ID in event
-    u: u64,          // Final update ID in event
-    pu: Option<u64>, // Previous event update sequense ("u" of previous message)
+    U: u64,             // First update ID in event
+    u: u64,             // Final update ID in event
+    pu: Option<u64>,    // Previous event update sequense ("u" of previous message)
     b: Vec<RawOrder>,
     a: Vec<RawOrder>,
     #[serde(flatten)]
@@ -244,7 +244,7 @@ pub(crate) fn parse_l2_topk(
             }
             Ok(orderbooks)
         }
-        Err(err) => Err(err)
+        Err(err) => Err(err),
     }
 }
 
