@@ -177,7 +177,6 @@ impl<H: MessageHandler> WSClientInternal<H> {
             };
 
             if let Some(txt) = txt {
-                println!("{}", txt);
                 match handler.handle_message(&txt) {
                     MiscMessage::Normal => {
                         // the receiver might get dropped earlier than this loop

@@ -198,6 +198,7 @@ mod funding_rate {
 #[cfg(test)]
 mod l2_orderbook {
     use crypto_market_type::MarketType;
+    use crypto_msg_type::MessageType;
     use crypto_msg_parser::{extract_symbol, parse_l2};
 
     #[test]
@@ -212,6 +213,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "okx",
             MarketType::Spot,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("okx", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
@@ -241,6 +243,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "okx",
             MarketType::Spot,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("okx", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
@@ -270,6 +273,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "okx",
             MarketType::LinearFuture,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("okx", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
@@ -301,6 +305,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "okx",
             MarketType::InverseSwap,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("okx", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
@@ -332,6 +337,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "okx",
             MarketType::EuropeanOption,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("okx", MarketType::EuropeanOption, raw_msg).unwrap(),
             orderbook,

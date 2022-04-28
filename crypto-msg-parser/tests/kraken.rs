@@ -117,6 +117,7 @@ mod trade {
 
 mod l2_event {
     use crypto_market_type::MarketType;
+    use crypto_msg_type::MessageType;
     use crypto_msg_parser::{extract_symbol, parse_l2};
 
     #[test]
@@ -135,6 +136,7 @@ mod l2_event {
         crate::utils::check_orderbook_fields(
             "kraken",
             MarketType::Spot,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("kraken", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
@@ -172,6 +174,7 @@ mod l2_event {
         crate::utils::check_orderbook_fields(
             "kraken",
             MarketType::Spot,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("kraken", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
@@ -194,6 +197,7 @@ mod l2_event {
         crate::utils::check_orderbook_fields(
             "kraken",
             MarketType::Spot,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("kraken", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
@@ -225,6 +229,7 @@ mod l2_event {
         crate::utils::check_orderbook_fields(
             "kraken",
             MarketType::InverseSwap,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("kraken", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
@@ -266,6 +271,7 @@ mod l2_event {
         crate::utils::check_orderbook_fields(
             "kraken",
             MarketType::InverseSwap,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("kraken", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
@@ -292,6 +298,7 @@ mod l2_event {
         crate::utils::check_orderbook_fields(
             "kraken",
             MarketType::InverseFuture,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("kraken", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
@@ -333,6 +340,7 @@ mod l2_event {
         crate::utils::check_orderbook_fields(
             "kraken",
             MarketType::InverseFuture,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("kraken", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,

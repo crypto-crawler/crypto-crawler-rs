@@ -175,6 +175,7 @@ mod funding_rate {
 mod l2_orderbook {
     use chrono::prelude::*;
     use crypto_market_type::MarketType;
+    use crypto_msg_type::MessageType;
     use crypto_msg_parser::{exchanges::bitmex::price_to_id, extract_symbol, parse_l2};
     use float_cmp::approx_eq;
 
@@ -196,6 +197,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "bitmex",
             MarketType::InverseSwap,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("bitmex", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
@@ -252,6 +254,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "bitmex",
             MarketType::InverseSwap,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("bitmex", MarketType::InverseSwap, update_msg).unwrap(),
             orderbook,
@@ -279,6 +282,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "bitmex",
             MarketType::InverseSwap,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("bitmex", MarketType::InverseSwap, delete_msg).unwrap(),
             orderbook,
@@ -309,6 +313,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "bitmex",
             MarketType::LinearFuture,
+            MessageType::L2Event,
             "ETH/BTC".to_string(),
             extract_symbol("bitmex", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
@@ -369,6 +374,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "bitmex",
             MarketType::LinearFuture,
+            MessageType::L2Event,
             "ETH/BTC".to_string(),
             extract_symbol("bitmex", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,

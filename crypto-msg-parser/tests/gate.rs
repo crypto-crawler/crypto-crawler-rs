@@ -147,6 +147,7 @@ mod trade {
 mod l2_orderbook {
     use chrono::prelude::*;
     use crypto_market_type::MarketType;
+    use crypto_msg_type::MessageType;
     use crypto_msg_parser::{extract_symbol, parse_l2};
     use float_cmp::approx_eq;
 
@@ -168,6 +169,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "gate",
             MarketType::Spot,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
@@ -209,6 +211,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "gate",
             MarketType::Spot,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
@@ -254,6 +257,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "gate",
             MarketType::Spot,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
@@ -291,6 +295,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "gate",
             MarketType::Spot,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
@@ -332,6 +337,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "gate",
             MarketType::InverseSwap,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("gate", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
@@ -359,6 +365,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "gate",
             MarketType::InverseSwap,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("gate", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
@@ -400,6 +407,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "gate",
             MarketType::LinearSwap,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
@@ -427,6 +435,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "gate",
             MarketType::LinearSwap,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
@@ -498,6 +507,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "gate",
             MarketType::LinearFuture,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
@@ -539,6 +549,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "gate",
             MarketType::LinearFuture,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("gate", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
