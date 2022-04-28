@@ -34,7 +34,7 @@ pub(crate) fn get_msg_type(msg: &str) -> MessageType {
                 MessageType::Trade
             } else if stream.ends_with("@depth") || stream.ends_with("@depth@100ms") {
                 MessageType::L2Event
-            } else if stream.ends_with("@depth5") {
+            } else if stream.ends_with("@depth5") || stream.ends_with("@depth10") || stream.ends_with("depth20") {
                 MessageType::L2TopK
             } else if stream.ends_with("@bookTicker") {
                 MessageType::BBO
@@ -88,5 +88,16 @@ pub(crate) fn parse_l2(
         Ok(Vec::new())
     } else {
         binance_all::parse_l2(market_type, msg)
+    }
+}
+
+pub(crate) fn parse_l2_topk(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    if market_type == MarketType::EuropeanOption {
+        Ok(Vec::new())
+    } else {
+        binance_all::parse_l2_topk(market_type, msg)
     }
 }
