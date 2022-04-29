@@ -13,24 +13,24 @@ use super::{
     EXCHANGE_NAME,
 };
 
-const WEBSOCKET_URL: &str = "wss://ws.bitget.com/mix/v1/stream";
+const WEBSOCKET_URL: &str = "wss://ws.bitget.com/spot/v1/stream";
 
-/// The WebSocket client for Bitget swap markets.
+/// The WebSocket client for Bitget Spot market.
 ///
-/// * WebSocket API doc: <https://bitgetlimited.github.io/apidoc/en/mix/#websocketapi>
-/// * Trading at: <https://www.bitget.com/en/swap/>
-pub struct BitgetSwapWSClient {
+/// * WebSocket API doc: <https://bitgetlimited.github.io/apidoc/en/spot/#websocketapi>
+/// * Trading at: <https://www.bitget.com/en/spot/>
+pub struct BitgetSpotWSClient {
     client: WSClientInternal<BitgetMessageHandler>,
-    translator: BitgetCommandTranslator<'M'>,
+    translator: BitgetCommandTranslator<'S'>,
 }
 
-impl BitgetSwapWSClient {
+impl BitgetSpotWSClient {
     pub async fn new(tx: std::sync::mpsc::Sender<String>, url: Option<&str>) -> Self {
         let real_url = match url {
             Some(endpoint) => endpoint,
             None => WEBSOCKET_URL,
         };
-        BitgetSwapWSClient {
+        BitgetSpotWSClient {
             client: WSClientInternal::connect(
                 EXCHANGE_NAME,
                 real_url,
@@ -39,19 +39,19 @@ impl BitgetSwapWSClient {
                 tx,
             )
             .await,
-            translator: BitgetCommandTranslator::<'M'> {},
+            translator: BitgetCommandTranslator::<'S'> {},
         }
     }
 }
 
-impl_trait!(Trade, BitgetSwapWSClient, subscribe_trade, "trade");
+impl_trait!(Trade, BitgetSpotWSClient, subscribe_trade, "trade");
 #[rustfmt::skip]
-impl_trait!(OrderBookTopK, BitgetSwapWSClient, subscribe_orderbook_topk, "books15");
-impl_trait!(OrderBook, BitgetSwapWSClient, subscribe_orderbook, "books");
-impl_trait!(Ticker, BitgetSwapWSClient, subscribe_ticker, "ticker");
-impl_candlestick!(BitgetSwapWSClient);
+impl_trait!(OrderBookTopK, BitgetSpotWSClient, subscribe_orderbook_topk, "books15");
+impl_trait!(OrderBook, BitgetSpotWSClient, subscribe_orderbook, "books");
+impl_trait!(Ticker, BitgetSpotWSClient, subscribe_ticker, "ticker");
+impl_candlestick!(BitgetSpotWSClient);
 
-panic_bbo!(BitgetSwapWSClient);
-panic_l3_orderbook!(BitgetSwapWSClient);
+panic_bbo!(BitgetSpotWSClient);
+panic_l3_orderbook!(BitgetSpotWSClient);
 
-impl_ws_client_trait!(BitgetSwapWSClient);
+impl_ws_client_trait!(BitgetSpotWSClient);

@@ -5,10 +5,10 @@ use std::collections::HashMap;
 
 #[test]
 fn test_l2_snapshot() {
-    let text = fetch_l2_snapshot("bitget", MarketType::Spot, "btc_usdt", Some(3)).unwrap();
+    let text = fetch_l2_snapshot("bitget", MarketType::Spot, "BTCUSDT_SPBL", Some(3)).unwrap();
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
 
-    assert_eq!(obj.get("status").unwrap().as_str().unwrap(), "ok");
+    assert_eq!(obj.get("msg").unwrap().as_str().unwrap(), "success");
 
     let data = obj.get("data").unwrap().as_object().unwrap();
     assert!(data.get("asks").unwrap().as_array().unwrap().len() > 0);
