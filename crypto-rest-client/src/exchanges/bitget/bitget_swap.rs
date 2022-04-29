@@ -2,12 +2,12 @@ use super::super::utils::http_get;
 use crate::error::Result;
 use std::collections::BTreeMap;
 
-const BASE_URL: &str = "https://capi.bitget.com/api/swap";
+const BASE_URL: &str = "https://api.bitget.com";
 
 /// The RESTful client for Bitget swap markets.
 ///
-/// * RESTful API doc: <https://bitgetlimited.github.io/apidoc/en/swap/>
-/// * Trading at: <https://www.bitget.com/en/swap/>
+/// * RESTful API doc: <https://bitgetlimited.github.io/apidoc/en/mix/>
+/// * Trading at: <https://www.bitget.com/mix/>
 pub struct BitgetSwapRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
@@ -23,19 +23,25 @@ impl BitgetSwapRestClient {
 
     /// Get the latest Level2 snapshot of orderbook.
     ///
-    /// For example: <https://capi.bitget.com/api/swap/v3/market/depth?symbol=btcusd&limit=1000>
+    /// For example: <https://api.bitget.com/api/mix/v1/market/depth?symbol=BTCUSDT_UMCBL&limit=100>
     ///
     /// Rate Limit：20 requests per 2 seconds
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/v3/market/depth?symbol={}&limit=1000", symbol))
+        gen_api!(format!(
+            "/api/mix/v1/market/depth?symbol={}&limit=100",
+            symbol
+        ))
     }
 
     /// Get open interest.
     ///
     /// For example:
     ///
-    /// - <https://capi.bitget.com/api/swap/v3/market/open_interest?symbol=btcusd>
+    /// - <https://api.bitget.com/api/mix/v1/market/open-interest?symbol=BTCUSDT_UMCBL>
     pub fn fetch_open_interest(symbol: &str) -> Result<String> {
-        gen_api!(format!("/v3/market/open_interest?symbol={}", symbol))
+        gen_api!(format!(
+            "/api/mix/v1/market/open-interest?symbol={}",
+            symbol
+        ))
     }
 }

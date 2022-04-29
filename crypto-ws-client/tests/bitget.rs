@@ -2,6 +2,53 @@
 mod utils;
 
 #[cfg(test)]
+mod bitget_spot {
+    use crypto_ws_client::{BitgetSpotWSClient, WSClient};
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_trade() {
+        gen_test_code!(
+            BitgetSpotWSClient,
+            subscribe_trade,
+            &vec!["BTCUSDT".to_string()]
+        );
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook_topk() {
+        gen_test_code!(
+            BitgetSpotWSClient,
+            subscribe_orderbook_topk,
+            &vec!["BTCUSDT".to_string()]
+        );
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
+        gen_test_code!(
+            BitgetSpotWSClient,
+            subscribe_orderbook,
+            &vec!["BTCUSDT".to_string()]
+        );
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
+        gen_test_code!(
+            BitgetSpotWSClient,
+            subscribe_ticker,
+            &vec!["BTCUSDT".to_string()]
+        );
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_candlestick() {
+        gen_test_subscribe_candlestick!(BitgetSpotWSClient, &vec![("BTCUSDT".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(BitgetSpotWSClient, &vec![("BTCUSDT".to_string(), 604800)]);
+    }
+}
+
+#[cfg(test)]
 mod bitget_inverse_swap {
     use crypto_ws_client::{BitgetSwapWSClient, WSClient};
 
@@ -10,7 +57,7 @@ mod bitget_inverse_swap {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe,
-            &vec![("trade".to_string(), "btcusd".to_string())]
+            &vec![("trade".to_string(), "BTCUSD".to_string())]
         );
     }
 
@@ -19,7 +66,7 @@ mod bitget_inverse_swap {
         gen_test_code!(
             BitgetSwapWSClient,
             send,
-            &vec![r#"{"op":"subscribe","args":["swap/trade:btcusd"]}"#.to_string()]
+            &vec![r#"{"op":"subscribe","args":[{"channel":"trade","instId":"BTCUSD","instType":"MC"}]}"#.to_string()]
         );
     }
 
@@ -28,7 +75,7 @@ mod bitget_inverse_swap {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe_trade,
-            &vec!["btcusd".to_string()]
+            &vec!["BTCUSD".to_string()]
         );
     }
 
@@ -37,7 +84,7 @@ mod bitget_inverse_swap {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe_orderbook_topk,
-            &vec!["btcusd".to_string()]
+            &vec!["BTCUSD".to_string()]
         );
     }
 
@@ -46,7 +93,7 @@ mod bitget_inverse_swap {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe_orderbook,
-            &vec!["btcusd".to_string()]
+            &vec!["BTCUSD".to_string()]
         );
     }
 
@@ -55,14 +102,14 @@ mod bitget_inverse_swap {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe_ticker,
-            &vec!["btcusd".to_string()]
+            &vec!["BTCUSD".to_string()]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec![("btcusd".to_string(), 60)]);
-        gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec![("btcusd".to_string(), 604800)]);
+        gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec![("BTCUSD".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec![("BTCUSD".to_string(), 604800)]);
     }
 
     #[ignore]
@@ -71,7 +118,7 @@ mod bitget_inverse_swap {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe,
-            &vec![("funding_rate".to_string(), "btcusd".to_string())]
+            &vec![("funding_rate".to_string(), "BTCUSD".to_string())]
         );
     }
 }
@@ -85,7 +132,7 @@ mod bitget_linear_swap {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe_trade,
-            &vec!["cmt_btcusdt".to_string()]
+            &vec!["BTCUSDT".to_string()]
         );
     }
 
@@ -94,7 +141,7 @@ mod bitget_linear_swap {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe_orderbook_topk,
-            &vec!["cmt_btcusdt".to_string()]
+            &vec!["BTCUSDT".to_string()]
         );
     }
 
@@ -103,7 +150,7 @@ mod bitget_linear_swap {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe_orderbook,
-            &vec!["cmt_btcusdt".to_string()]
+            &vec!["BTCUSDT".to_string()]
         );
     }
 
@@ -112,17 +159,14 @@ mod bitget_linear_swap {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe_ticker,
-            &vec!["cmt_btcusdt".to_string()]
+            &vec!["BTCUSDT".to_string()]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec![("cmt_btcusdt".to_string(), 60)]);
-        gen_test_subscribe_candlestick!(
-            BitgetSwapWSClient,
-            &vec![("cmt_btcusdt".to_string(), 604800)]
-        );
+        gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec![("BTCUSDT".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(BitgetSwapWSClient, &vec![("BTCUSDT".to_string(), 604800)]);
     }
 
     #[ignore]
@@ -131,7 +175,7 @@ mod bitget_linear_swap {
         gen_test_code!(
             BitgetSwapWSClient,
             subscribe,
-            &vec![("funding_rate".to_string(), "cmt_btcusdt".to_string())]
+            &vec![("funding_rate".to_string(), "BTCUSDT".to_string())]
         );
     }
 }
