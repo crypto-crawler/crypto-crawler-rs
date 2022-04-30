@@ -202,7 +202,13 @@ pub(crate) fn parse_l2(
             msg
         ))
     })?;
-    let snapshot = ws_msg.action.unwrap() == "snapshot";
+    let snapshot = {
+        if let Some(action) = ws_msg.action{
+            action == "snapshot"
+        } else {
+            true
+        }
+    };
     debug_assert_eq!(ws_msg.data.len(), 1);
 
     let symbol = ws_msg.arg["instId"].clone();
