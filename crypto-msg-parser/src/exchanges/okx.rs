@@ -32,6 +32,7 @@ struct RawOrderbookMsg {
     asks: Vec<[String; 4]>,
     bids: Vec<[String; 4]>,
     ts: String,
+    #[serde(default)]
     checksum: i64,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
