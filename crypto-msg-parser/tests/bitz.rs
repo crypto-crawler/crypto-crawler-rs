@@ -2,6 +2,7 @@ mod utils;
 
 use crypto_market_type::MarketType;
 use crypto_msg_parser::{extract_symbol, parse_l2, parse_trade, TradeSide};
+use crypto_msg_type::MessageType;
 
 #[test]
 #[ignore = "bitz.com has shutdown since October 2021"]
@@ -42,6 +43,7 @@ fn l2_orderbook_update() {
     crate::utils::check_orderbook_fields(
         "bitz",
         MarketType::Spot,
+        MessageType::L2Event,
         "BTC/USDT".to_string(),
         extract_symbol("bitz", MarketType::Spot, raw_msg).unwrap(),
         orderbook,

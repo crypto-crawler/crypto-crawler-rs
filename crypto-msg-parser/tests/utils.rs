@@ -44,6 +44,7 @@ pub fn check_trade_fields(
 pub fn check_orderbook_fields(
     exchange: &str,
     market_type: MarketType,
+    msg_type: MessageType,
     pair: String,
     symbol: String,
     orderbook: &OrderBookMsg,
@@ -51,15 +52,15 @@ pub fn check_orderbook_fields(
 ) {
     assert_eq!(orderbook.exchange, exchange);
     assert_eq!(orderbook.market_type, market_type);
+    assert_eq!(orderbook.msg_type, msg_type);
     assert_eq!(orderbook.pair, pair);
     assert_eq!(orderbook.symbol, symbol);
-    assert_eq!(orderbook.msg_type, MessageType::L2Event);
     if [
         "binance", "bitget", "bitmex", "bybit", "deribit", "ftx", "huobi", "okex",
     ]
     .contains(&exchange)
     {
-        assert_eq!(MessageType::L2Event, get_msg_type(exchange, raw_msg));
+        assert_eq!(msg_type, get_msg_type(exchange, raw_msg));
     }
     assert_eq!(orderbook.timestamp.to_string().len(), 13);
 

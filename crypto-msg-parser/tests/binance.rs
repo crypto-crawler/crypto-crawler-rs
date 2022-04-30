@@ -234,6 +234,7 @@ mod funding_rate {
 mod l2_orderbook {
     use crypto_market_type::MarketType;
     use crypto_msg_parser::{extract_symbol, parse_l2};
+    use crypto_msg_type::MessageType;
 
     #[test]
     fn spot() {
@@ -247,6 +248,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "binance",
             MarketType::Spot,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("binance", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
@@ -285,6 +287,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "binance",
             MarketType::InverseFuture,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("binance", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
@@ -328,6 +331,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "binance",
             MarketType::LinearFuture,
+            MessageType::L2Event,
             "ETH/USDT".to_string(),
             extract_symbol("binance", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
@@ -371,6 +375,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "binance",
             MarketType::LinearSwap,
+            MessageType::L2Event,
             "BTC/USDT".to_string(),
             extract_symbol("binance", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
@@ -414,6 +419,7 @@ mod l2_orderbook {
         crate::utils::check_orderbook_fields(
             "binance",
             MarketType::InverseSwap,
+            MessageType::L2Event,
             "BTC/USD".to_string(),
             extract_symbol("binance", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
@@ -447,4 +453,55 @@ mod l2_orderbook {
 
     #[test]
     fn option() {}
+}
+
+#[cfg(test)]
+mod l2_topk {
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, parse_l2_topk};
+    use crypto_msg_type::MessageType;
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"stream":"ethusdt@depth20","data":{"e":"depthUpdate","E":1651122265861,"T":1651122265854,"s":"ETHUSDT","U":1437010873371,"u":1437010882721,"pu":1437010873329,"b":[["2886.71","0.454"],["2886.70","2.755"],["2886.67","1.000"]],"a":[["2886.72","77.215"],["2886.73","1.734"],["2886.74","0.181"]]}}"#;
+        let orderbook = &parse_l2_topk("binance", MarketType::LinearSwap, raw_msg).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 3);
+        assert_eq!(orderbook.bids.len(), 3);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "binance",
+            MarketType::LinearSwap,
+            MessageType::L2TopK,
+            "ETH/USDT".to_string(),
+            extract_symbol("binance", MarketType::LinearSwap, raw_msg).unwrap(),
+            orderbook,
+            raw_msg,
+        );
+
+        assert_eq!(orderbook.timestamp, 1651122265854);
+        assert_eq!(orderbook.seq_id, Some(1437010882721));
+        assert_eq!(orderbook.prev_seq_id, Some(1437010873329));
+
+        assert_eq!(orderbook.bids[0].price, 2886.71);
+        // assert_eq!(orderbook.bids[0].quantity_base, 1.6);
+        // assert_eq!(orderbook.bids[0].quantity_quote, 35729.77 * 1.6);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 0.454);
+
+        assert_eq!(orderbook.bids[2].price, 2886.67);
+        // assert_eq!(orderbook.bids[2].quantity_base, 5.106);
+        // assert_eq!(orderbook.bids[2].quantity_quote, 35750.0 * 5.106);
+        assert_eq!(orderbook.bids[2].quantity_contract.unwrap(), 1.000);
+
+        assert_eq!(orderbook.asks[0].price, 2886.72);
+        // assert_eq!(orderbook.asks[0].quantity_base, 0.211);
+        // assert_eq!(orderbook.asks[0].quantity_quote, 35819.2 * 0.211);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 77.215);
+
+        assert_eq!(orderbook.asks[2].price, 2886.74);
+        // assert_eq!(orderbook.asks[2].quantity_base, 0.001);
+        // assert_eq!(orderbook.asks[2].quantity_quote, 35820.31 * 0.001);
+        assert_eq!(orderbook.asks[2].quantity_contract.unwrap(), 0.181);
+    }
 }
