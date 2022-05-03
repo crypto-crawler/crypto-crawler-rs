@@ -6,7 +6,7 @@ const BASE_URL: &str = "https://api.bitget.com";
 
 /// The RESTful client for Bitget swap markets.
 ///
-/// * RESTful API doc: <https://bitgetlimited.github.io/apidoc/en/mix/>
+/// * RESTful API doc: <https://bitgetlimited.github.io/apidoc/en/mix/#restapi>
 /// * Trading at: <https://www.bitget.com/mix/>
 pub struct BitgetSwapRestClient {
     _api_key: Option<String>,
