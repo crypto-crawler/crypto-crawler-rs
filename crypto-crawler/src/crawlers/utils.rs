@@ -150,7 +150,8 @@ pub(crate) fn crawl_snapshot(
         let mut index = 0_usize;
         let mut success_count = 0_u64;
         let mut backoff_factor = 1;
-        while index < real_symbols.len() {
+        // retry 5 times at most
+        while index < real_symbols.len() && backoff_factor < 6 {
             let symbol = &real_symbols[index];
             let mut lock_ = lock.lock().unwrap();
             if !lock_.owns_lock() {
@@ -196,12 +197,7 @@ pub(crate) fn crawl_snapshot(
                     );
                     std::thread::sleep(backoff_factor * cooldown_time);
                     success_count = 0;
-                    if err.0.contains("429") || err.0.contains("509") {
-                        backoff_factor += 1;
-                    } else {
-                        // Handle 403, 418, etc.
-                        backoff_factor *= 2;
-                    }
+                    backoff_factor += 1;
                 }
             }
         }
@@ -251,7 +247,8 @@ pub(crate) fn crawl_open_interest(exchange: &str, market_type: MarketType, tx: S
                 let mut index = 0_usize;
                 let mut success_count = 0_u64;
                 let mut backoff_factor = 1;
-                while index < real_symbols.len() {
+                // retry 5 times at most
+                while index < real_symbols.len() && backoff_factor < 6 {
                     let symbol = &real_symbols[index];
                     let mut lock_ = lock.lock().unwrap();
                     if !lock_.owns_lock() {
@@ -299,12 +296,7 @@ pub(crate) fn crawl_open_interest(exchange: &str, market_type: MarketType, tx: S
                             );
                             std::thread::sleep(backoff_factor * cooldown_time);
                             success_count = 0;
-                            if err.0.contains("429") || err.0.contains("509") {
-                                backoff_factor += 1;
-                            } else {
-                                // Handle 403, 418, etc.
-                                backoff_factor *= 2;
-                            }
+                            backoff_factor += 1;
                         }
                     }
                 }
