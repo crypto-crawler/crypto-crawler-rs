@@ -50,7 +50,8 @@ fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
         let markets = resp
             .data
             .into_iter()
-            .filter(|x| x.status == "online")
+            // Ignored ETH_SPBL and BTC_SPBL for now because they're not tradable
+            .filter(|x| x.status == "online" && x.symbol.ends_with("USDT_SPBL"))
             .collect::<Vec<SpotMarket>>();
         Ok(markets)
     }
