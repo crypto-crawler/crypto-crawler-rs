@@ -38,6 +38,16 @@ impl<const MARKET_TYPE: char> BitgetCommandTranslator<MARKET_TYPE> {
             .map(|t| {
                 let mut map = BTreeMap::new();
                 let (channel, symbol) = t;
+                // websocket doesn't recognize SPBL, DMCBL and UMCBL suffixes
+                let symbol = if let Some(x) = symbol.strip_suffix("_SPBL") {
+                    x
+                } else if let Some(x) = symbol.strip_suffix("_DMCBL") {
+                    x
+                } else if let Some(x) = symbol.strip_suffix("_UMCBL") {
+                    x
+                } else {
+                    symbol
+                };
                 map.insert(
                     "instType".to_string(),
                     (if MARKET_TYPE == 'S' { "SP" } else { "MC" }).to_string(),
