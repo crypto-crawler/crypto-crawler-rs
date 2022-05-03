@@ -92,22 +92,7 @@ impl MessageHandler for BitgetMessageHandler {
 
         if let Some(event) = obj.get("event") {
             match event.as_str().unwrap() {
-                "error" => {
-                    let error_code = obj
-                        .get("code")
-                        .unwrap()
-                        .as_str()
-                        .unwrap()
-                        .parse::<i64>()
-                        .unwrap();
-                    match error_code {
-                        30040 => {
-                            // channel doesn't exist, ignore because some symbols don't exist in websocket while they exist in `/v3/instruments`
-                            error!("Received {} from {}", msg, EXCHANGE_NAME);
-                        }
-                        _ => warn!("Received {} from {}", msg, EXCHANGE_NAME),
-                    }
-                }
+                "error" => error!("Received {} from {}", msg, EXCHANGE_NAME),
                 "subscribe" => info!("Received {} from {}", msg, EXCHANGE_NAME),
                 "unsubscribe" => info!("Received {} from {}", msg, EXCHANGE_NAME),
                 _ => warn!("Received {} from {}", msg, EXCHANGE_NAME),
