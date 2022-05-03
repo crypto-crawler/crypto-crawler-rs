@@ -387,6 +387,7 @@ async fn create_ws_client_internal(
         },
         "bitfinex" => Arc::new(BitfinexWSClient::new(tx, None).await),
         "bitget" => match market_type {
+            MarketType::Spot => Arc::new(BitgetSpotWSClient::new(tx, None).await),
             MarketType::InverseSwap | MarketType::LinearSwap => {
                 Arc::new(BitgetSwapWSClient::new(tx, None).await)
             }
