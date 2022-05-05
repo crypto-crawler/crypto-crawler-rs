@@ -822,7 +822,9 @@ pub(crate) async fn crawl_event(
             );
         }
         for handle in handles {
-            handle.await.unwrap();
+            if let Err(err) = handle.await {
+                error!("{}", err);
+            }
         }
     };
     _ = stop_ch_tx.send(EmptyStruct {});
@@ -1009,7 +1011,9 @@ pub(crate) async fn crawl_candlestick_ext(
             );
         }
         for handle in handles {
-            handle.await.unwrap();
+            if let Err(err) = handle.await {
+                error!("{}", err);
+            }
         }
     };
     _ = stop_ch_tx.send(EmptyStruct {});
