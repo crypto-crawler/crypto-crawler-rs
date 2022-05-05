@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use std::collections::{BTreeMap, HashMap};
+use tokio_tungstenite::tungstenite::Message;
 
 use crate::{
     clients::common_traits::{
@@ -91,7 +92,7 @@ impl MessageHandler for CoinbaseProMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         None
     }
 }

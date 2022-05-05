@@ -3,6 +3,7 @@ use std::{
     collections::HashMap,
     time::{SystemTime, UNIX_EPOCH},
 };
+use tokio_tungstenite::tungstenite::Message;
 
 use crate::{
     clients::common_traits::{
@@ -98,9 +99,9 @@ impl MessageHandler for BitzMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // See https://apidocv2.bitz.plus/en/#heartbeat-and-persistent-connection-strategy
-        Some(("ping".to_string(), 10))
+        Some((Message::Text("ping".to_string()), 10))
     }
 }
 

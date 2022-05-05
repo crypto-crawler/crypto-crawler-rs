@@ -266,7 +266,7 @@ impl MessageHandler for BitfinexMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // If there is no activity in the channel for 15 seconds, the Websocket server will send
         // you a heartbeat message, see https://docs.bitfinex.com/docs/ws-general#heartbeating
         None

@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use std::collections::HashMap;
+use tokio_tungstenite::tungstenite::Message;
 
 use super::EXCHANGE_NAME;
 use crate::{
@@ -80,9 +81,9 @@ impl MessageHandler for MexcMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // more than 60 seconds no response, close the channel
-        Some((r#"{"method":"ping"}"#.to_string(), 60))
+        Some((Message::Text(r#"{"method":"ping"}"#.to_string()), 60))
     }
 }
 

@@ -101,8 +101,8 @@ impl<H: MessageHandler> WSClientInternal<H> {
                 };
                 loop {
                     let now = timer.tick().await;
-                    debug!("{:?} sending ping {}", now, msg);
-                    if let Err(err) = command_tx_clone.send(Message::Text(msg.clone())).await {
+                    debug!("{:?} sending ping {}", now, msg.to_text().unwrap());
+                    if let Err(err) = command_tx_clone.send(msg.clone()).await {
                         error!("Error sending ping {}", err);
                     } else {
                         num_unanswered_ping_clone.fetch_add(1, Ordering::SeqCst);
@@ -158,6 +158,11 @@ impl<H: MessageHandler> WSClientInternal<H> {
                         self.exchange,
                         num_unanswered_ping.load(Ordering::Acquire)
                     );
+                    if self.exchange == "binance" {
+                        // send a pong frame
+                        debug!("Sending a pong frame to {}", self.url);
+                        _ = self.command_tx.send(Message::Pong(Vec::new())).await;
+                    }
                     None
                 }
                 Message::Frame(_) => todo!(),

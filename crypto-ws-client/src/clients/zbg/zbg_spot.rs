@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use std::collections::HashMap;
+use tokio_tungstenite::tungstenite::Message;
 
 use crate::{
     clients::common_traits::{
@@ -62,8 +63,8 @@ impl MessageHandler for ZbgMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
-        Some((r#"{"action":"PING"}"#.to_string(), 10))
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
+        Some((Message::Text(r#"{"action":"PING"}"#.to_string()), 10))
     }
 }
 

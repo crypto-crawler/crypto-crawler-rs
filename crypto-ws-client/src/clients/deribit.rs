@@ -144,7 +144,7 @@ impl MessageHandler for DeribitMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         None
     }
 }

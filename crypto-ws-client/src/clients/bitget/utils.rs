@@ -3,6 +3,7 @@ use std::{
     collections::{BTreeMap, HashMap},
     num::NonZeroU32,
 };
+use tokio_tungstenite::tungstenite::Message;
 
 use log::*;
 use serde_json::Value;
@@ -116,9 +117,9 @@ impl MessageHandler for BitgetMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // https://bitgetlimited.github.io/apidoc/en/spot/#connect
-        Some(("ping".to_string(), 30))
+        Some((Message::Text("ping".to_string()), 30))
     }
 }
 

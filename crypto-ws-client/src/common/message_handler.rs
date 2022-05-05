@@ -15,7 +15,7 @@ pub(crate) trait MessageHandler {
     /// Given a message from the exchange, return a MiscMessage which will be procesed in run().
     fn handle_message(&mut self, msg: &str) -> MiscMessage;
     /// To keep the connection alive, how often should the client send a ping?
-    /// None means the client doesn't need to send
-    /// ping, instead the server will send ping and the client just needs to reply a pong
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)>;
+    /// None means the client doesn't need to send ping, instead the server will
+    /// send ping and the client just needs to reply a pong
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)>;
 }

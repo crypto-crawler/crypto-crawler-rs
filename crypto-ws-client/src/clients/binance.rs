@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use nonzero_ext::nonzero;
 use std::{collections::HashMap, num::NonZeroU32};
+use tokio_tungstenite::tungstenite::Message;
 
 use crate::{
     common::{
@@ -241,14 +242,15 @@ impl MessageHandler for BinanceMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // https://binance-docs.github.io/apidocs/spot/en/#websocket-market-streams
         // https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
         // https://binance-docs.github.io/apidocs/delivery/en/#websocket-market-streams
         // The websocket server will send a ping frame every 3 minutes. If the websocket server
         // does not receive a pong frame back from the connection within a 10 minute period, the
         // connection will be disconnected. Unsolicited pong frames are allowed.
-        None
+        // Send unsolicited pong frames per 3 minutes
+        Some((Message::Pong(Vec::new()), 180))
     }
 }
 
