@@ -823,7 +823,7 @@ pub(crate) async fn crawl_event(
         }
         for handle in handles {
             if let Err(err) = handle.await {
-                error!("{}", err);
+                panic!("{}", err); // TODO: use tokio::task::JoinSet or futures::stream::FuturesUnordered
             }
         }
     };
@@ -1012,7 +1012,7 @@ pub(crate) async fn crawl_candlestick_ext(
         }
         for handle in handles {
             if let Err(err) = handle.await {
-                error!("{}", err);
+                panic!("{}", err); // TODO: use tokio::task::JoinSet or futures::stream::FuturesUnordered
             }
         }
     };
