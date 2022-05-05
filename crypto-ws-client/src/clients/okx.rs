@@ -4,6 +4,7 @@ use std::{
     collections::{BTreeMap, HashMap},
     num::NonZeroU32,
 };
+use tokio_tungstenite::tungstenite::Message;
 
 use log::*;
 use serde_json::Value;
@@ -178,9 +179,9 @@ impl MessageHandler for OkxMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // https://www.okx.com/docs-v5/en/#websocket-api-connect
-        Some(("ping".to_string(), 30))
+        Some((Message::Text("ping".to_string()), 30))
     }
 }
 

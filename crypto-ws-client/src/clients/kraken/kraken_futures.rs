@@ -102,7 +102,7 @@ impl MessageHandler for KrakenMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // In order to keep the websocket connection alive, you will need to
         // make a ping request at least every 60 seconds.
         // https://support.kraken.com/hc/en-us/articles/360022635632-Subscriptions-WebSockets-API-

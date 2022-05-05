@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use std::collections::HashMap;
+use tokio_tungstenite::tungstenite::Message;
 
 use crate::{
     clients::common_traits::{
@@ -86,9 +87,12 @@ impl MessageHandler for BitstampMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // See "Heartbeat" at https://www.bitstamp.net/websocket/v2/
-        Some((r#"{"event": "bts:heartbeat"}"#.to_string(), 10))
+        Some((
+            Message::Text(r#"{"event": "bts:heartbeat"}"#.to_string()),
+            10,
+        ))
     }
 }
 

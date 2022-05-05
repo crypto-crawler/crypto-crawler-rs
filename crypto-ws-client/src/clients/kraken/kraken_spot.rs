@@ -122,10 +122,10 @@ impl MessageHandler for KrakenMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // Client can ping server to determine whether connection is alive
         // https://docs.kraken.com/websockets/#message-ping
-        Some((r#"{"event":"ping"}"#.to_string(), 10))
+        Some((Message::Text(r#"{"event":"ping"}"#.to_string()), 10))
     }
 }
 

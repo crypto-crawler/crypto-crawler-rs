@@ -7,6 +7,7 @@ use log::*;
 use nonzero_ext::nonzero;
 use reqwest::{header, Result};
 use serde_json::Value;
+use tokio_tungstenite::tungstenite::Message;
 
 use crate::common::message_handler::{MessageHandler, MiscMessage};
 
@@ -140,14 +141,14 @@ impl MessageHandler for KucoinMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // See:
         // - https://docs.kucoin.com/#ping
         // - https://docs.kucoin.cc/futures/#ping
         //
         // If the server has not received the ping from the client for 60 seconds , the connection will be disconnected.
         Some((
-            r#"{"type":"ping", "id": "crypto-ws-client"}"#.to_string(),
+            Message::Text(r#"{"type":"ping", "id": "crypto-ws-client"}"#.to_string()),
             60,
         ))
     }

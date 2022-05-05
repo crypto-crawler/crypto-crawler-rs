@@ -294,7 +294,7 @@ impl MessageHandler for HuobiMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // The server will send a heartbeat every 5 seconds,
         // - Spot <https://huobiapi.github.io/docs/spot/v1/en/#heartbeat-and-connection>
         // - Future <https://huobiapi.github.io/docs/dm/v1/en/#market-heartbeat>

@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use std::collections::HashMap;
+use tokio_tungstenite::tungstenite::Message;
 
 use super::EXCHANGE_NAME;
 use crate::{
@@ -85,8 +86,8 @@ impl MessageHandler for MexcMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
-        Some(("ping".to_string(), 5))
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
+        Some((Message::Text("ping".to_string()), 5))
     }
 }
 

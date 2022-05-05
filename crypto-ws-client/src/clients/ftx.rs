@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use std::collections::HashMap;
+use tokio_tungstenite::tungstenite::Message;
 
 use crate::{
     clients::common_traits::{
@@ -84,10 +85,10 @@ impl MessageHandler for FtxMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // Send pings at regular intervals (every 15 seconds): {'op': 'ping'}.
         // You will see an {'type': 'pong'} response.
-        Some((r#"{"op":"ping"}"#.to_string(), 15))
+        Some((Message::Text(r#"{"op":"ping"}"#.to_string()), 15))
     }
 }
 

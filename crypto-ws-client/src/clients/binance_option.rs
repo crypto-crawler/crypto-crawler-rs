@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use std::collections::HashMap;
+use tokio_tungstenite::tungstenite::Message;
 
 use crate::{
     clients::common_traits::{
@@ -118,12 +119,12 @@ impl MessageHandler for BinanceOptionMessageHandler {
         MiscMessage::Normal
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // https://binance-docs.github.io/apidocs/voptions/en/#push-websocket-account-info
         // The client will send a ping frame every 2 minutes. If the websocket server does not
         // receive a ping frame back from the connection within a 2 minute period, the
         // connection will be disconnected. Unsolicited ping frames are allowed.
-        Some((r#"{"event":"ping"}"#.to_string(), 120))
+        Some((Message::Text(r#"{"event":"ping"}"#.to_string()), 120))
     }
 }
 

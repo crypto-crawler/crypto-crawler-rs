@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use log::*;
 use serde_json::Value;
+use tokio_tungstenite::tungstenite::Message;
 
 use crate::common::message_handler::{MessageHandler, MiscMessage};
 
@@ -51,11 +52,11 @@ impl MessageHandler for BybitMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // See:
         // - https://bybit-exchange.github.io/docs/inverse/#t-heartbeat
         // - https://bybit-exchange.github.io/docs/linear/#t-heartbeat
-        Some((r#"{"op":"ping"}"#.to_string(), 30))
+        Some((Message::Text(r#"{"op":"ping"}"#.to_string()), 30))
     }
 }
 

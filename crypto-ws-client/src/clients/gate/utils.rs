@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use log::*;
 use serde_json::Value;
+use tokio_tungstenite::tungstenite::Message;
 
 use crate::common::{
     command_translator::CommandTranslator,
@@ -58,14 +59,17 @@ impl<const MARKET_TYPE: char> MessageHandler for GateMessageHandler<MARKET_TYPE>
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         if MARKET_TYPE == 'S' {
             // https://www.gate.io/docs/apiv4/ws/en/#application-ping-pong
-            Some((r#"{"channel":"spot.ping"}"#.to_string(), 60))
+            Some((Message::Text(r#"{"channel":"spot.ping"}"#.to_string()), 60))
         } else {
             // https://www.gate.io/docs/futures/ws/en/#ping-and-pong
             // https://www.gate.io/docs/delivery/ws/en/#ping-and-pong
-            Some((r#"{"channel":"futures.ping"}"#.to_string(), 60))
+            Some((
+                Message::Text(r#"{"channel":"futures.ping"}"#.to_string()),
+                60,
+            ))
         }
     }
 }

@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use std::collections::HashMap;
+use tokio_tungstenite::tungstenite::Message;
 
 use crate::{
     clients::common_traits::{
@@ -83,11 +84,11 @@ impl MessageHandler for DydxMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // https://docs.dydx.exchange/#v3-websocket-api
         // The server will send pings every 30s and expects a pong within 10s.
         // The server does not expect pings, but will respond with a pong if sent one.
-        Some((r#"{"type":"ping"}"#.to_string(), 30))
+        Some((Message::Text(r#"{"type":"ping"}"#.to_string()), 30))
     }
 }
 

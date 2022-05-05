@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use std::{collections::HashMap, time::Duration};
+use tokio_tungstenite::tungstenite::Message;
 
 use crate::{
     clients::common_traits::{
@@ -134,8 +135,8 @@ impl MessageHandler for BitmexMessageHandler {
         }
     }
 
-    fn get_ping_msg_and_interval(&self) -> Option<(String, u64)> {
-        Some(("ping".to_string(), 5))
+    fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
+        Some((Message::Text("ping".to_string()), 5))
     }
 }
 
