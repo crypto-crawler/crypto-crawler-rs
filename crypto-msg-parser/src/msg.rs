@@ -1,8 +1,9 @@
+use crate::order::Order;
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 use serde::{Deserialize, Serialize};
-
-use crate::order::Order;
+use std::str::FromStr;
+use strum_macros::{Display, EnumString};
 
 macro_rules! add_common_fields {
     (
@@ -46,8 +47,9 @@ add_common_fields!(
 );
 
 /// Which side is taker
-#[derive(Copy, Clone, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Copy, Clone, PartialEq, Serialize, Deserialize, Display, Debug, EnumString)]
 #[serde(rename_all = "snake_case")]
+#[strum(serialize_all = "snake_case")]
 pub enum TradeSide {
     /// Buyer is taker
     Buy,
@@ -62,12 +64,12 @@ pub struct TradeMsg {
     pub exchange: String,
     /// Market type
     pub market_type: MarketType,
-    /// Exchange-specific trading symbol or id, recognized by RESTful API
-    pub symbol: String,
-    /// Unified pair, base/quote, e.g., BTC/USDT
-    pub pair: String,
     /// Message type
     pub msg_type: MessageType,
+    /// Unified pair, base/quote, e.g., BTC/USDT
+    pub pair: String,
+    /// Exchange-specific trading symbol or id, recognized by RESTful API
+    pub symbol: String,
     /// Unix timestamp, in milliseconds
     pub timestamp: i64,
 
@@ -197,3 +199,171 @@ add_common_fields!(
         quote_volume: Option<f64>,
     }
 );
+
+// TSV utilities.
+
+impl TradeMsg {
+    /// Convert to a TSV string.
+    ///
+    /// The `exchange`, `market_type`, `msg_type`, `pair` and `symbol` fields are not
+    /// included to save some disk space.
+    pub fn to_tsv_string(&self) -> String {
+        format!(
+            "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+            self.timestamp,
+            self.price,
+            self.quantity_base,
+            self.quantity_quote,
+            self.quantity_contract
+                .map(|x| x.to_string())
+                .unwrap_or_default(),
+            self.side.to_string(),
+            self.trade_id,
+            self.json
+        )
+    }
+
+    /// Convert from a TSV string.
+    pub fn from_tsv_string(
+        exchange: &str,
+        market_type: &str,
+        msg_type: &str,
+        pair: &str,
+        symbol: &str,
+        s: &str,
+    ) -> Self {
+        let v: Vec<&str> = s.split('\t').collect();
+        assert_eq!(8, v.len());
+        let market_type = MarketType::from_str(market_type).unwrap();
+        let msg_type = MessageType::from_str(msg_type).unwrap();
+        let price = v[1].parse::<f64>().unwrap();
+        let quantity_base = v[2].parse::<f64>().unwrap();
+        let quantity_quote = v[3].parse::<f64>().unwrap();
+        let quantity_contract = if v[4].is_empty() {
+            None
+        } else {
+            Some(v[4].parse::<f64>().unwrap())
+        };
+        let side = TradeSide::from_str(v[5]).unwrap();
+
+        TradeMsg {
+            exchange: exchange.to_string(),
+            market_type,
+            msg_type,
+            pair: pair.to_string(),
+            symbol: symbol.to_string(),
+            timestamp: v[0].parse::<i64>().unwrap(),
+            price,
+            quantity_base,
+            quantity_quote,
+            quantity_contract,
+            side,
+            trade_id: v[6].to_string(),
+            json: v[7].to_string(),
+        }
+    }
+}
+
+impl OrderBookMsg {
+    /// Convert to a TSV string.
+    ///
+    /// The `exchange`, `market_type`, `msg_type`, `pair` and `symbol` fields are not
+    /// included to save some disk space.
+    pub fn to_tsv_string(&self) -> String {
+        format!(
+            "{}\t{}\t{}\t{}\t{}\t{}\t{}",
+            self.timestamp,
+            self.seq_id.map(|x| x.to_string()).unwrap_or_default(),
+            self.prev_seq_id.map(|x| x.to_string()).unwrap_or_default(),
+            serde_json::to_string(&self.asks).unwrap(),
+            serde_json::to_string(&self.bids).unwrap(),
+            self.snapshot,
+            self.json
+        )
+    }
+
+    /// Convert from a TSV string.
+    pub fn from_tsv_string(
+        exchange: &str,
+        market_type: &str,
+        msg_type: &str,
+        pair: &str,
+        symbol: &str,
+        s: &str,
+    ) -> Self {
+        let v: Vec<&str> = s.split('\t').collect();
+        assert_eq!(7, v.len());
+        let market_type = MarketType::from_str(market_type).unwrap();
+        let msg_type = MessageType::from_str(msg_type).unwrap();
+        let seq_id = if v[1].is_empty() {
+            None
+        } else {
+            Some(v[1].parse::<u64>().unwrap())
+        };
+        let prev_seq_id = if v[2].is_empty() {
+            None
+        } else {
+            Some(v[2].parse::<u64>().unwrap())
+        };
+        let asks = serde_json::from_str::<Vec<Order>>(v[3]).unwrap();
+        let bids = serde_json::from_str::<Vec<Order>>(v[4]).unwrap();
+
+        OrderBookMsg {
+            exchange: exchange.to_string(),
+            market_type,
+            msg_type,
+            pair: pair.to_string(),
+            symbol: symbol.to_string(),
+            timestamp: v[0].parse::<i64>().unwrap(),
+            seq_id,
+            prev_seq_id,
+            asks,
+            bids,
+            snapshot: v[5].parse::<bool>().unwrap(),
+            json: v[6].to_string(),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::TradeMsg;
+    use super::TradeSide;
+    use crypto_market_type::MarketType;
+    use crypto_msg_type::MessageType;
+
+    #[test]
+    fn test_trade() {
+        let trade_msg = TradeMsg {
+            exchange: "binance".to_string(),
+            market_type: MarketType::LinearSwap,
+            symbol: "BTCUSDT".to_string(),
+            pair: "BTC/USDT".to_string(),
+            msg_type: MessageType::Trade,
+            timestamp: 1646092800027,
+            price: 43150.8,
+            quantity_base: 0.001,
+            quantity_quote: 43.1508,
+            quantity_contract: Some(0.001),
+            side: TradeSide::Sell,
+            trade_id: "1108933367".to_string(),
+            json: r#"{"stream":"btcusdt@aggTrade","data":{"e":"aggTrade","E":1646092800098,"a":1108933367,"s":"BTCUSDT","p":"43150.80","q":"0.001","f":1987119093,"l":1987119093,"T":1646092800027,"m":true}}"#.to_string(),
+        };
+        let tsv_string = trade_msg.to_tsv_string();
+        let tsv_string_expected = r#"1646092800027	43150.8	0.001	43.1508	0.001	sell	1108933367	{"stream":"btcusdt@aggTrade","data":{"e":"aggTrade","E":1646092800098,"a":1108933367,"s":"BTCUSDT","p":"43150.80","q":"0.001","f":1987119093,"l":1987119093,"T":1646092800027,"m":true}}"#;
+        assert_eq!(tsv_string_expected, tsv_string);
+
+        let trade_msg_restored = TradeMsg::from_tsv_string(
+            "binance",
+            "linear_swap",
+            "trade",
+            "BTC/USDT",
+            "BTCUSDT",
+            &tsv_string,
+        );
+        assert_eq!(
+            serde_json::to_string(&trade_msg).unwrap(),
+            serde_json::to_string(&trade_msg_restored).unwrap()
+        );
+    }
+}
