@@ -148,6 +148,11 @@ impl<H: MessageHandler> WSClientInternal<H> {
                         std::str::from_utf8(&resp).unwrap(),
                         self.url,
                     );
+                    if self.exchange == "binance" {
+                        // send a pong frame
+                        debug!("Sending a pong frame to {}", self.url);
+                        _ = self.command_tx.send(Message::Pong(Vec::new())).await;
+                    }
                     None
                 }
                 Message::Pong(resp) => {
@@ -158,11 +163,6 @@ impl<H: MessageHandler> WSClientInternal<H> {
                         self.exchange,
                         num_unanswered_ping.load(Ordering::Acquire)
                     );
-                    if self.exchange == "binance" {
-                        // send a pong frame
-                        debug!("Sending a pong frame to {}", self.url);
-                        _ = self.command_tx.send(Message::Pong(Vec::new())).await;
-                    }
                     None
                 }
                 Message::Frame(_) => todo!(),
