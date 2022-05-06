@@ -93,7 +93,7 @@ async fn connect_async_internal<S: AsyncRead + AsyncWrite + Unpin + Send + 'stat
                       _ => {
                         limiter.until_ready().await;
                         if let Err(err) =write.send(command).await {
-                          error!("{:#?}", err);
+                          error!("Failed to send, error: {}", err);
                         }
                       }
                     }
@@ -109,7 +109,7 @@ async fn connect_async_internal<S: AsyncRead + AsyncWrite + Unpin + Send + 'stat
                   let _= message_tx.send(msg).await;
                 }
                 Some(Err(err)) => {
-                  error!("{}", err);
+                  error!("Failed to read, error: {}", err);
                   break;
                 }
                 None => {
