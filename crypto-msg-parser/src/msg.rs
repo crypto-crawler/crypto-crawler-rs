@@ -73,6 +73,8 @@ pub struct TradeMsg {
     /// Unix timestamp, in milliseconds
     pub timestamp: i64,
 
+    /// Which side is taker
+    pub side: TradeSide,
     /// price
     pub price: f64,
     // Number of base coins
@@ -82,8 +84,6 @@ pub struct TradeMsg {
     /// Number of contracts, always None for Spot
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quantity_contract: Option<f64>,
-    /// Which side is taker
-    pub side: TradeSide,
     // Trade ID
     pub trade_id: String,
     /// the original JSON message
@@ -209,13 +209,13 @@ impl TradeMsg {
         format!(
             "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
             self.timestamp,
+            self.side,
             self.price,
             self.quantity_base,
             self.quantity_quote,
             self.quantity_contract
                 .map(|x| x.to_string())
                 .unwrap_or_default(),
-            self.side,
             self.trade_id,
             self.json
         )
@@ -234,15 +234,15 @@ impl TradeMsg {
         assert_eq!(8, v.len());
         let market_type = MarketType::from_str(market_type).unwrap();
         let msg_type = MessageType::from_str(msg_type).unwrap();
-        let price = v[1].parse::<f64>().unwrap();
-        let quantity_base = v[2].parse::<f64>().unwrap();
-        let quantity_quote = v[3].parse::<f64>().unwrap();
-        let quantity_contract = if v[4].is_empty() {
+        let side = TradeSide::from_str(v[1]).unwrap();
+        let price = v[2].parse::<f64>().unwrap();
+        let quantity_base = v[3].parse::<f64>().unwrap();
+        let quantity_quote = v[4].parse::<f64>().unwrap();
+        let quantity_contract = if v[5].is_empty() {
             None
         } else {
-            Some(v[4].parse::<f64>().unwrap())
+            Some(v[5].parse::<f64>().unwrap())
         };
-        let side = TradeSide::from_str(v[5]).unwrap();
 
         TradeMsg {
             exchange: exchange.to_string(),
@@ -339,16 +339,16 @@ mod tests {
             pair: "BTC/USDT".to_string(),
             msg_type: MessageType::Trade,
             timestamp: 1646092800027,
+            side: TradeSide::Sell,
             price: 43150.8,
             quantity_base: 0.001,
             quantity_quote: 43.1508,
             quantity_contract: Some(0.001),
-            side: TradeSide::Sell,
             trade_id: "1108933367".to_string(),
             json: r#"{"stream":"btcusdt@aggTrade","data":{"e":"aggTrade","E":1646092800098,"a":1108933367,"s":"BTCUSDT","p":"43150.80","q":"0.001","f":1987119093,"l":1987119093,"T":1646092800027,"m":true}}"#.to_string(),
         };
         let tsv_string = trade_msg.to_tsv_string();
-        let tsv_string_expected = r#"1646092800027	43150.8	0.001	43.1508	0.001	sell	1108933367	{"stream":"btcusdt@aggTrade","data":{"e":"aggTrade","E":1646092800098,"a":1108933367,"s":"BTCUSDT","p":"43150.80","q":"0.001","f":1987119093,"l":1987119093,"T":1646092800027,"m":true}}"#;
+        let tsv_string_expected = r#"1646092800027	sell	43150.8	0.001	43.1508	0.001	1108933367	{"stream":"btcusdt@aggTrade","data":{"e":"aggTrade","E":1646092800098,"a":1108933367,"s":"BTCUSDT","p":"43150.80","q":"0.001","f":1987119093,"l":1987119093,"T":1646092800027,"m":true}}"#;
         assert_eq!(tsv_string_expected, tsv_string);
 
         let trade_msg_restored = TradeMsg::from_tsv_string(
