@@ -105,18 +105,16 @@ pub struct OrderBookMsg {
     pub msg_type: MessageType,
     /// Unix timestamp, in milliseconds
     pub timestamp: i64,
-    /// The sequence ID for this update (not all exchanges provide this information)
-    pub seq_id: Option<u64>,
-    /// The sequence ID for the previous update (not all exchanges provide this information)
-    pub prev_seq_id: Option<u64>,
-
+    // true means snapshot, false means updates
+    pub snapshot: bool,
     /// sorted in ascending order by price if snapshot=true, otherwise not sorted
     pub asks: Vec<Order>,
     /// sorted in descending order by price if snapshot=true, otherwise not sorted
     pub bids: Vec<Order>,
-    // true means snapshot, false means updates
-    pub snapshot: bool,
-
+    /// The sequence ID for this update (not all exchanges provide this information)
+    pub seq_id: Option<u64>,
+    /// The sequence ID for the previous update (not all exchanges provide this information)
+    pub prev_seq_id: Option<u64>,
     /// the original JSON message
     pub json: String,
 }
@@ -217,7 +215,7 @@ impl TradeMsg {
             self.quantity_contract
                 .map(|x| x.to_string())
                 .unwrap_or_default(),
-            self.side.to_string(),
+            self.side,
             self.trade_id,
             self.json
         )
@@ -273,11 +271,11 @@ impl OrderBookMsg {
         format!(
             "{}\t{}\t{}\t{}\t{}\t{}\t{}",
             self.timestamp,
-            self.seq_id.map(|x| x.to_string()).unwrap_or_default(),
-            self.prev_seq_id.map(|x| x.to_string()).unwrap_or_default(),
+            self.snapshot,
             serde_json::to_string(&self.asks).unwrap(),
             serde_json::to_string(&self.bids).unwrap(),
-            self.snapshot,
+            self.seq_id.map(|x| x.to_string()).unwrap_or_default(),
+            self.prev_seq_id.map(|x| x.to_string()).unwrap_or_default(),
             self.json
         )
     }
@@ -295,18 +293,18 @@ impl OrderBookMsg {
         assert_eq!(7, v.len());
         let market_type = MarketType::from_str(market_type).unwrap();
         let msg_type = MessageType::from_str(msg_type).unwrap();
-        let seq_id = if v[1].is_empty() {
+        let asks = serde_json::from_str::<Vec<Order>>(v[2]).unwrap();
+        let bids = serde_json::from_str::<Vec<Order>>(v[3]).unwrap();
+        let seq_id = if v[4].is_empty() {
             None
         } else {
-            Some(v[1].parse::<u64>().unwrap())
+            Some(v[4].parse::<u64>().unwrap())
         };
-        let prev_seq_id = if v[2].is_empty() {
+        let prev_seq_id = if v[5].is_empty() {
             None
         } else {
-            Some(v[2].parse::<u64>().unwrap())
+            Some(v[5].parse::<u64>().unwrap())
         };
-        let asks = serde_json::from_str::<Vec<Order>>(v[3]).unwrap();
-        let bids = serde_json::from_str::<Vec<Order>>(v[4]).unwrap();
 
         OrderBookMsg {
             exchange: exchange.to_string(),
@@ -315,11 +313,11 @@ impl OrderBookMsg {
             pair: pair.to_string(),
             symbol: symbol.to_string(),
             timestamp: v[0].parse::<i64>().unwrap(),
-            seq_id,
-            prev_seq_id,
+            snapshot: v[1].parse::<bool>().unwrap(),
             asks,
             bids,
-            snapshot: v[5].parse::<bool>().unwrap(),
+            seq_id,
+            prev_seq_id,
             json: v[6].to_string(),
         }
     }
