@@ -24,7 +24,9 @@ mod trade {
         );
         assert_eq!(
             1616362370760,
-            extract_timestamp("kucoin", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("kucoin", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.00013064);
@@ -50,7 +52,9 @@ mod trade {
         );
         assert_eq!(
             1616362645429,
-            extract_timestamp("kucoin", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("kucoin", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert!(approx_eq!(
@@ -87,7 +91,9 @@ mod trade {
         );
         assert_eq!(
             1616362601277,
-            extract_timestamp("kucoin", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("kucoin", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 5000.0 / 57798.0);
@@ -114,7 +120,9 @@ mod trade {
         );
         assert_eq!(
             1616363046546,
-            extract_timestamp("kucoin", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("kucoin", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 1510.0 / 57963.0);
@@ -153,8 +161,8 @@ mod l2_orderbook {
             raw_msg,
         );
         assert_eq!(
-            received_at,
-            extract_timestamp("kucoin", MarketType::Spot, raw_msg, Some(received_at)).unwrap()
+            None,
+            extract_timestamp("kucoin", MarketType::Spot, raw_msg).unwrap()
         );
 
         assert_eq!(orderbook.bids[0].price, 39272.0);
@@ -182,7 +190,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622718985044,
-            extract_timestamp("kucoin", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("kucoin", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622718985044);
@@ -214,7 +224,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622719195286,
-            extract_timestamp("kucoin", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("kucoin", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622719195286);
@@ -246,7 +258,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622719594867,
-            extract_timestamp("kucoin", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("kucoin", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622719594867);

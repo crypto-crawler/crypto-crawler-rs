@@ -21,7 +21,9 @@ mod trade {
         );
         assert_eq!(
             1615514404608,
-            extract_timestamp("bitmex", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("bitmex", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.015813);
@@ -45,7 +47,9 @@ mod trade {
         );
         assert_eq!(
             1616286129258,
-            extract_timestamp("bitmex", MarketType::QuantoSwap, raw_msg, None).unwrap()
+            extract_timestamp("bitmex", MarketType::QuantoSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.058513750731421885);
@@ -74,7 +78,9 @@ mod trade {
         );
         assert_eq!(
             1616289162361,
-            extract_timestamp("bitmex", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("bitmex", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.1276);
@@ -98,7 +104,9 @@ mod trade {
         );
         assert_eq!(
             1615513563886,
-            extract_timestamp("bitmex", MarketType::LinearFuture, raw_msg, None).unwrap()
+            extract_timestamp("bitmex", MarketType::LinearFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 1.0);
@@ -122,7 +130,9 @@ mod trade {
         );
         assert_eq!(
             1615515223222,
-            extract_timestamp("bitmex", MarketType::QuantoFuture, raw_msg, None).unwrap()
+            extract_timestamp("bitmex", MarketType::QuantoFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.6814310051107325);
@@ -222,14 +232,8 @@ mod l2_orderbook {
             raw_msg,
         );
         assert_eq!(
-            received_at,
-            extract_timestamp(
-                "bitmex",
-                MarketType::InverseSwap,
-                raw_msg,
-                Some(received_at)
-            )
-            .unwrap()
+            None,
+            extract_timestamp("bitmex", MarketType::InverseSwap, raw_msg,).unwrap()
         );
 
         assert_eq!(orderbook.bids[0].price, 36145.0);
@@ -285,14 +289,8 @@ mod l2_orderbook {
             update_msg,
         );
         assert_eq!(
-            received_at,
-            extract_timestamp(
-                "bitmex",
-                MarketType::InverseSwap,
-                update_msg,
-                Some(received_at)
-            )
-            .unwrap()
+            None,
+            extract_timestamp("bitmex", MarketType::InverseSwap, update_msg,).unwrap()
         );
 
         assert_eq!(orderbook.asks[0].price, 36760.5);
@@ -350,14 +348,8 @@ mod l2_orderbook {
             raw_msg,
         );
         assert_eq!(
-            received_at,
-            extract_timestamp(
-                "bitmex",
-                MarketType::LinearFuture,
-                raw_msg,
-                Some(received_at)
-            )
-            .unwrap()
+            None,
+            extract_timestamp("bitmex", MarketType::LinearFuture, raw_msg,).unwrap()
         );
 
         assert_eq!(orderbook.bids[0].price, 0.0675);
@@ -422,14 +414,8 @@ mod l2_orderbook {
             raw_msg,
         );
         assert_eq!(
-            received_at,
-            extract_timestamp(
-                "bitmex",
-                MarketType::LinearFuture,
-                raw_msg,
-                Some(received_at)
-            )
-            .unwrap()
+            None,
+            extract_timestamp("bitmex", MarketType::LinearFuture, raw_msg,).unwrap()
         );
 
         assert!(approx_eq!(f64, orderbook.bids[0].price, 0.06982, ulps = 12));

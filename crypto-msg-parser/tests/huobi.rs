@@ -20,7 +20,9 @@ mod trade {
         );
         assert_eq!(
             1616243199157,
-            extract_timestamp("huobi", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("huobi", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 1.98E-4);
@@ -56,7 +58,9 @@ mod trade {
         );
         assert_eq!(
             1616269629976,
-            extract_timestamp("huobi", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("huobi", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 20.0 / 1997.132);
@@ -94,7 +98,9 @@ mod trade {
         );
         assert_eq!(
             1616269812566,
-            extract_timestamp("huobi", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("huobi", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 3460.0 / 1849.18);
@@ -117,7 +123,9 @@ mod trade {
         );
         assert_eq!(
             1616233478594,
-            extract_timestamp("huobi", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("huobi", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.04);
@@ -159,7 +167,9 @@ mod trade {
         }
         assert_eq!(
             1616246303142,
-            extract_timestamp("huobi", MarketType::EuropeanOption, raw_msg, None).unwrap()
+            extract_timestamp("huobi", MarketType::EuropeanOption, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trades[0].quantity_base, 0.036);
@@ -196,7 +206,9 @@ mod funding_rate {
         }
         assert_eq!(
             1617309842839,
-            extract_timestamp("huobi", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("huobi", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(funding_rates[0].pair, "BTC/USD".to_string());
@@ -217,7 +229,9 @@ mod funding_rate {
         }
         assert_eq!(
             1617309787271,
-            extract_timestamp("huobi", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("huobi", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(funding_rates[0].pair, "BTC/USDT".to_string());
@@ -254,7 +268,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622707662703,
-            extract_timestamp("huobi", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("huobi", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622707662703);
@@ -291,7 +307,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1634601197516,
-            extract_timestamp("huobi", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("huobi", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1634601197516);
@@ -321,7 +339,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622708089134,
-            extract_timestamp("huobi", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("huobi", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622708089134);
@@ -368,7 +388,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622711041458,
-            extract_timestamp("huobi", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("huobi", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622711041458);
@@ -415,7 +437,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622711365595,
-            extract_timestamp("huobi", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("huobi", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622711365595);
@@ -462,7 +486,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622711368355,
-            extract_timestamp("huobi", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("huobi", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622711368355);
@@ -504,7 +530,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622711946534,
-            extract_timestamp("huobi", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("huobi", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622711946534);
@@ -561,7 +589,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622711948514,
-            extract_timestamp("huobi", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("huobi", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622711948514);

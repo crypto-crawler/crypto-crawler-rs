@@ -23,7 +23,9 @@ mod trade {
         );
         assert_eq!(
             1646311839593,
-            extract_timestamp("okx", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("okx", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.timestamp, 1646311839593);
@@ -51,7 +53,9 @@ mod trade {
         );
         assert_eq!(
             1646311972504,
-            extract_timestamp("okx", MarketType::LinearFuture, raw_msg, None).unwrap()
+            extract_timestamp("okx", MarketType::LinearFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.timestamp, 1646311972504);
@@ -80,7 +84,9 @@ mod trade {
         );
         assert_eq!(
             1646312440645,
-            extract_timestamp("okx", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("okx", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.timestamp, 1646312440645);
@@ -109,7 +115,9 @@ mod trade {
         );
         assert_eq!(
             1646312543604,
-            extract_timestamp("okx", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("okx", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.timestamp, 1646312543604);
@@ -138,7 +146,9 @@ mod trade {
         );
         assert_eq!(
             1646312664791,
-            extract_timestamp("okx", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("okx", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.timestamp, 1646312664791);
@@ -167,7 +177,9 @@ mod trade {
         );
         assert_eq!(
             1646138219181,
-            extract_timestamp("okx", MarketType::EuropeanOption, raw_msg, None).unwrap()
+            extract_timestamp("okx", MarketType::EuropeanOption, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.timestamp, 1646138219181);
@@ -245,7 +257,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1646313944551,
-            extract_timestamp("okx", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("okx", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1646313944551);
@@ -279,7 +293,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1646314295200,
-            extract_timestamp("okx", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("okx", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1646314295200);
@@ -313,7 +329,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1646314548269,
-            extract_timestamp("okx", MarketType::LinearFuture, raw_msg, None).unwrap()
+            extract_timestamp("okx", MarketType::LinearFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1646314548269);
@@ -349,7 +367,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1646314888087,
-            extract_timestamp("okx", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("okx", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1646314888087);
@@ -385,7 +405,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1646315100798,
-            extract_timestamp("okx", MarketType::EuropeanOption, raw_msg, None).unwrap()
+            extract_timestamp("okx", MarketType::EuropeanOption, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1646315100798);

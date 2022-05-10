@@ -24,7 +24,9 @@ mod trade {
         }
         assert_eq!(
             1616304614117,
-            extract_timestamp("bybit", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("bybit", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trades[0].quantity_base, 100.0 / 61094.5);
@@ -57,7 +59,9 @@ mod trade {
         );
         assert_eq!(
             1616304710061,
-            extract_timestamp("bybit", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("bybit", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 237.0 / 57073.5);
@@ -85,7 +89,9 @@ mod trade {
         );
         assert_eq!(
             1616304737092,
-            extract_timestamp("bybit", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("bybit", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.04);
@@ -121,7 +127,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622538339073,
-            extract_timestamp("bybit", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("bybit", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622538339073);
@@ -167,7 +175,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622540847513,
-            extract_timestamp("bybit", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("bybit", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622540847513);
@@ -208,7 +218,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622542809357,
-            extract_timestamp("bybit", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("bybit", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622542809357);
@@ -254,7 +266,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622542809497,
-            extract_timestamp("bybit", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("bybit", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622542809497);
@@ -295,7 +309,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622543529282,
-            extract_timestamp("bybit", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("bybit", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622543529282);
@@ -341,7 +357,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622544088904,
-            extract_timestamp("bybit", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("bybit", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622544088904);

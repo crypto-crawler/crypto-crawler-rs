@@ -25,7 +25,9 @@ fn trade() {
     }
     assert_eq!(
         1616271105098,
-        extract_timestamp("bithumb", MarketType::Spot, raw_msg, None).unwrap()
+        extract_timestamp("bithumb", MarketType::Spot, raw_msg)
+            .unwrap()
+            .unwrap()
     );
 
     let raw_msg = r#"{"code":"00007","data":{"p":"1674.7700000000","symbol":"ETH-USDT","ver":"15186035","s":"buy","t":"1616487024","v":"0.065614"},"topic":"TRADE","timestamp":1616487024837}"#;
@@ -69,7 +71,9 @@ fn l2_orderbook_snapshot() {
     );
     assert_eq!(
         1622446974153,
-        extract_timestamp("bithumb", MarketType::Spot, raw_msg, None).unwrap()
+        extract_timestamp("bithumb", MarketType::Spot, raw_msg)
+            .unwrap()
+            .unwrap()
     );
 
     assert_eq!(orderbook.timestamp, 1622446974153);
@@ -112,7 +116,9 @@ fn l2_orderbook_update() {
     );
     assert_eq!(
         1622446975394,
-        extract_timestamp("bithumb", MarketType::Spot, raw_msg, None).unwrap()
+        extract_timestamp("bithumb", MarketType::Spot, raw_msg)
+            .unwrap()
+            .unwrap()
     );
 
     assert_eq!(orderbook.timestamp, 1622446975394);

@@ -25,7 +25,9 @@ mod trade {
         }
         assert_eq!(
             1616321287195,
-            extract_timestamp("deribit", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("deribit", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         let contract_value = crypto_contract_value::get_contract_value(
@@ -62,7 +64,9 @@ mod trade {
         }
         assert_eq!(
             1616321478553,
-            extract_timestamp("deribit", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("deribit", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         let contract_value = crypto_contract_value::get_contract_value(
@@ -108,7 +112,9 @@ mod trade {
         }
         assert_eq!(
             1616321732986,
-            extract_timestamp("deribit", MarketType::EuropeanOption, raw_msg, None).unwrap()
+            extract_timestamp("deribit", MarketType::EuropeanOption, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trades[0].quantity_base, 0.1);
@@ -143,7 +149,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622626472678,
-            extract_timestamp("deribit", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("deribit", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622626472678);
@@ -210,7 +218,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622626784890,
-            extract_timestamp("deribit", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("deribit", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         let contract_value = crypto_contract_value::get_contract_value(
@@ -276,7 +286,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622627433440,
-            extract_timestamp("deribit", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("deribit", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         let contract_value = crypto_contract_value::get_contract_value(
@@ -343,7 +355,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622627435737,
-            extract_timestamp("deribit", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("deribit", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         let contract_value = crypto_contract_value::get_contract_value(
@@ -400,7 +414,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622627851747,
-            extract_timestamp("deribit", MarketType::EuropeanOption, raw_msg, None).unwrap()
+            extract_timestamp("deribit", MarketType::EuropeanOption, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622627851747);

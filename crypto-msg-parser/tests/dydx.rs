@@ -20,7 +20,9 @@ mod trade {
         );
         assert_eq!(
             1633948601464,
-            extract_timestamp("dydx", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("dydx", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.124);
@@ -59,8 +61,8 @@ mod l2_orderbook {
             raw_msg,
         );
         assert_eq!(
-            received_at,
-            extract_timestamp("dydx", MarketType::LinearSwap, raw_msg, Some(received_at)).unwrap()
+            None,
+            extract_timestamp("dydx", MarketType::LinearSwap, raw_msg).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, received_at);

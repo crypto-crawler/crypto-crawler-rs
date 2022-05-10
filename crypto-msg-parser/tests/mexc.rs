@@ -25,7 +25,9 @@ mod trade {
         );
         assert_eq!(
             1616373554541,
-            extract_timestamp(super::EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.007811);
@@ -50,7 +52,9 @@ mod trade {
         );
         assert_eq!(
             1646996447307,
-            extract_timestamp(super::EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.timestamp, 1646996447307);
@@ -77,7 +81,9 @@ mod trade {
         );
         assert_eq!(
             1616370338806,
-            extract_timestamp(super::EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.timestamp, 1616370338806);
@@ -106,7 +112,9 @@ mod trade {
         );
         assert_eq!(
             1646999591755,
-            extract_timestamp(super::EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.timestamp, 1646999591755);
@@ -135,7 +143,8 @@ mod trade {
         );
         assert_eq!(
             1616370470356,
-            extract_timestamp(super::EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None)
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
                 .unwrap()
         );
 
@@ -165,7 +174,8 @@ mod trade {
         );
         assert_eq!(
             1647000043904,
-            extract_timestamp(super::EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None)
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
                 .unwrap()
         );
 
@@ -211,14 +221,8 @@ mod l2_orderbook {
             raw_msg,
         );
         assert_eq!(
-            received_at,
-            extract_timestamp(
-                super::EXCHANGE_NAME,
-                MarketType::Spot,
-                raw_msg,
-                Some(received_at)
-            )
-            .unwrap()
+            None,
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::Spot, raw_msg,).unwrap()
         );
 
         assert_eq!(orderbook.bids[0].price, 38932.19);
@@ -253,14 +257,8 @@ mod l2_orderbook {
             raw_msg,
         );
         assert_eq!(
-            received_at,
-            extract_timestamp(
-                super::EXCHANGE_NAME,
-                MarketType::Spot,
-                raw_msg,
-                Some(received_at)
-            )
-            .unwrap()
+            None,
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::Spot, raw_msg,).unwrap()
         );
 
         assert_eq!(orderbook.bids[0].price, 39763.35);
@@ -288,7 +286,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622722473816,
-            extract_timestamp(super::EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622722473816);
@@ -323,7 +323,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1647000258746,
-            extract_timestamp(super::EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.asks[0].price, 39961.0);
@@ -358,7 +360,8 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622723010000,
-            extract_timestamp(super::EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None)
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
                 .unwrap()
         );
 
@@ -394,7 +397,8 @@ mod l2_orderbook {
         );
         assert_eq!(
             1647000870946,
-            extract_timestamp(super::EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None)
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
                 .unwrap()
         );
 

@@ -20,7 +20,9 @@ fn trade() {
     );
     assert_eq!(
         1616298447112,
-        extract_timestamp("coinbase_pro", MarketType::Spot, raw_msg, None).unwrap()
+        extract_timestamp("coinbase_pro", MarketType::Spot, raw_msg)
+            .unwrap()
+            .unwrap()
     );
 
     assert_eq!(trade.quantity_base, 0.00031874);
@@ -48,8 +50,8 @@ fn l2_orderbook_snapshot() {
         raw_msg,
     );
     assert_eq!(
-        received_at,
-        extract_timestamp("coinbase_pro", MarketType::Spot, raw_msg, Some(received_at)).unwrap()
+        None,
+        extract_timestamp("coinbase_pro", MarketType::Spot, raw_msg).unwrap()
     );
     assert_eq!(received_at, orderbook.timestamp);
 
@@ -90,7 +92,9 @@ fn l2_orderbook_update() {
     );
     assert_eq!(
         1622624529048,
-        extract_timestamp("coinbase_pro", MarketType::Spot, raw_msg, None).unwrap()
+        extract_timestamp("coinbase_pro", MarketType::Spot, raw_msg)
+            .unwrap()
+            .unwrap()
     );
 
     assert_eq!(orderbook.timestamp, 1622624529048);

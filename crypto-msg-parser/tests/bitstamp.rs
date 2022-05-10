@@ -19,7 +19,9 @@ fn trade() {
     );
     assert_eq!(
         1616297318187,
-        extract_timestamp("bitstamp", MarketType::Spot, raw_msg, None).unwrap()
+        extract_timestamp("bitstamp", MarketType::Spot, raw_msg)
+            .unwrap()
+            .unwrap()
     );
 
     assert_eq!(trade.quantity_base, 1e-08);
@@ -46,7 +48,9 @@ fn l2_orderbook_update() {
     );
     assert_eq!(
         1622520011989,
-        extract_timestamp("bitstamp", MarketType::Spot, raw_msg, None).unwrap()
+        extract_timestamp("bitstamp", MarketType::Spot, raw_msg)
+            .unwrap()
+            .unwrap()
     );
 
     assert_eq!(orderbook.timestamp, 1622520011989);

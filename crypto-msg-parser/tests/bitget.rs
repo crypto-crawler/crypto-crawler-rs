@@ -26,7 +26,9 @@ mod trade {
         }
         assert_eq!(
             1616236107276,
-            extract_timestamp("bitget", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("bitget", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trades[0].quantity_base, 158.0 / 58722.0);
@@ -63,7 +65,9 @@ mod trade {
         }
         assert_eq!(
             1616236212569,
-            extract_timestamp("bitget", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("bitget", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert!(approx_eq!(
@@ -163,7 +167,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622432420458,
-            extract_timestamp("bitget", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("bitget", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622432420458);
@@ -249,7 +255,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622434075797,
-            extract_timestamp("bitget", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("bitget", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622434075797);
@@ -320,7 +328,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622426574770,
-            extract_timestamp("bitget", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("bitget", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622426574770);
@@ -366,7 +376,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622431636806,
-            extract_timestamp("bitget", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("bitget", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622431636806);

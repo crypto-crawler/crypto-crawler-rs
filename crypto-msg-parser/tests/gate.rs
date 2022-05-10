@@ -24,7 +24,9 @@ mod trade {
         );
         assert_eq!(
             1616327474624,
-            extract_timestamp("gate", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("gate", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trades[0].quantity_base, 0.0037);
@@ -51,7 +53,9 @@ mod trade {
         );
         assert_eq!(
             1631824310261,
-            extract_timestamp("gate", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("gate", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trades[0].price, 47395.009);
@@ -79,7 +83,9 @@ mod trade {
         );
         assert_eq!(
             1615253386000,
-            extract_timestamp("gate", MarketType::LinearFuture, raw_msg, None).unwrap()
+            extract_timestamp("gate", MarketType::LinearFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert!(approx_eq!(
@@ -116,7 +122,9 @@ mod trade {
         );
         assert_eq!(
             1616327545436,
-            extract_timestamp("gate", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("gate", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 7.0 / 56155.2);
@@ -143,7 +151,9 @@ mod trade {
         );
         assert_eq!(
             1616327563918,
-            extract_timestamp("gate", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("gate", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert!(approx_eq!(
@@ -191,8 +201,8 @@ mod l2_orderbook {
             raw_msg,
         );
         assert_eq!(
-            received_at,
-            extract_timestamp("gate", MarketType::Spot, raw_msg, Some(received_at)).unwrap()
+            None,
+            extract_timestamp("gate", MarketType::Spot, raw_msg).unwrap()
         );
 
         assert_eq!(orderbook.asks[0].price, 37483.21);
@@ -238,7 +248,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1631845775906,
-            extract_timestamp("gate", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("gate", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.asks[0].price, 47815.98);
@@ -282,8 +294,8 @@ mod l2_orderbook {
             raw_msg,
         );
         assert_eq!(
-            received_at,
-            extract_timestamp("gate", MarketType::Spot, raw_msg, Some(received_at)).unwrap()
+            None,
+            extract_timestamp("gate", MarketType::Spot, raw_msg).unwrap()
         );
         assert_eq!(received_at, orderbook.timestamp);
 
@@ -326,7 +338,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1631836142325,
-            extract_timestamp("gate", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("gate", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.seq_id, Some(4622074364));
@@ -372,7 +386,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1632793098358,
-            extract_timestamp("gate", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("gate", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1632793098358);
@@ -404,7 +420,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622682306315,
-            extract_timestamp("gate", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("gate", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622682306315);
@@ -450,7 +468,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1632799979523,
-            extract_timestamp("gate", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("gate", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1632799979523);
@@ -482,7 +502,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622689062072,
-            extract_timestamp("gate", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("gate", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622689062072);
@@ -558,7 +580,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622697760000,
-            extract_timestamp("gate", MarketType::LinearFuture, raw_msg, None).unwrap()
+            extract_timestamp("gate", MarketType::LinearFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622697760000);
@@ -604,7 +628,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622769533000,
-            extract_timestamp("gate", MarketType::LinearFuture, raw_msg, None).unwrap()
+            extract_timestamp("gate", MarketType::LinearFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622769533000);

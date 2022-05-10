@@ -24,7 +24,9 @@ mod trade {
         );
         assert_eq!(
             1616375788687,
-            extract_timestamp("okex", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("okex", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.00020621);
@@ -50,7 +52,9 @@ mod trade {
         );
         assert_eq!(
             1616376738087,
-            extract_timestamp("okex", MarketType::LinearFuture, raw_msg, None).unwrap()
+            extract_timestamp("okex", MarketType::LinearFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert!(approx_eq!(
@@ -87,7 +91,9 @@ mod trade {
         );
         assert_eq!(
             1616376780684,
-            extract_timestamp("okex", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("okex", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert!(approx_eq!(
@@ -124,7 +130,9 @@ mod trade {
         );
         assert_eq!(
             1616376761377,
-            extract_timestamp("okex", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("okex", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 100.0 * 7.0 / 59999.7);
@@ -151,7 +159,9 @@ mod trade {
         );
         assert_eq!(
             1616376794051,
-            extract_timestamp("okex", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("okex", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 100.0 * 1.0 / 56535.9);
@@ -178,7 +188,9 @@ mod trade {
         );
         assert_eq!(
             1616241676947,
-            extract_timestamp("okex", MarketType::EuropeanOption, raw_msg, None).unwrap()
+            extract_timestamp("okex", MarketType::EuropeanOption, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.1 * 4.0);
@@ -202,7 +214,9 @@ mod trade {
         );
         assert_eq!(
             1637664956522,
-            extract_timestamp("okex", MarketType::EuropeanOption, raw_msg, None).unwrap()
+            extract_timestamp("okex", MarketType::EuropeanOption, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.1 * 10.0);
@@ -278,7 +292,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622723951253,
-            extract_timestamp("okex", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("okex", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622723951253);
@@ -312,7 +328,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622724009962,
-            extract_timestamp("okex", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("okex", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622724009962);
@@ -346,7 +364,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622725774429,
-            extract_timestamp("okex", MarketType::LinearFuture, raw_msg, None).unwrap()
+            extract_timestamp("okex", MarketType::LinearFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622725774429);
@@ -382,7 +402,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622726064831,
-            extract_timestamp("okex", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("okex", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622726064831);
@@ -418,7 +440,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622726335745,
-            extract_timestamp("okex", MarketType::EuropeanOption, raw_msg, None).unwrap()
+            extract_timestamp("okex", MarketType::EuropeanOption, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622726335745);

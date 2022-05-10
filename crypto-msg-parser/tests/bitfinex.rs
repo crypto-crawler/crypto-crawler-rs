@@ -20,7 +20,9 @@ mod trade {
         );
         assert_eq!(
             1615232733897,
-            extract_timestamp("bitfinex", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("bitfinex", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.11546588);
@@ -45,7 +47,9 @@ mod trade {
         );
         assert_eq!(
             1615232733897,
-            extract_timestamp("bitfinex", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("bitfinex", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.11546588);
@@ -74,7 +78,9 @@ mod trade {
         }
         assert_eq!(
             1616217509543,
-            extract_timestamp("bitfinex", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("bitfinex", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
     }
 
@@ -93,7 +99,9 @@ mod trade {
         );
         assert_eq!(
             1616219711336,
-            extract_timestamp("bitfinex", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("bitfinex", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.00020449);
@@ -118,7 +126,9 @@ mod trade {
         );
         assert_eq!(
             1616219711336,
-            extract_timestamp("bitfinex", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("bitfinex", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.00020449);
@@ -147,7 +157,9 @@ mod trade {
         }
         assert_eq!(
             1616219105954,
-            extract_timestamp("bitfinex", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("bitfinex", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
     }
 }
@@ -180,8 +192,8 @@ mod l2_orderbook {
             raw_msg,
         );
         assert_eq!(
-            received_at,
-            extract_timestamp("bitfinex", MarketType::Spot, raw_msg, Some(received_at)).unwrap()
+            None,
+            extract_timestamp("bitfinex", MarketType::Spot, raw_msg).unwrap()
         );
 
         assert_eq!(orderbook.bids[0].price, 36167.0);
@@ -222,8 +234,8 @@ mod l2_orderbook {
             raw_msg,
         );
         assert_eq!(
-            received_at,
-            extract_timestamp("bitfinex", MarketType::Spot, raw_msg, Some(received_at)).unwrap()
+            None,
+            extract_timestamp("bitfinex", MarketType::Spot, raw_msg).unwrap()
         );
 
         assert_eq!(orderbook.asks[0].price, 34668.0);
@@ -257,8 +269,8 @@ mod l2_orderbook {
             raw_msg,
         );
         assert_eq!(
-            received_at,
-            extract_timestamp("bitfinex", MarketType::Spot, raw_msg, Some(received_at)).unwrap()
+            None,
+            extract_timestamp("bitfinex", MarketType::Spot, raw_msg).unwrap()
         );
 
         assert_eq!(orderbook.bids[0].price, 34840.0);
@@ -308,8 +320,8 @@ mod l2_orderbook {
             raw_msg,
         );
         assert_eq!(
-            received_at,
-            extract_timestamp("bitfinex", MarketType::Spot, raw_msg, Some(received_at)).unwrap()
+            None,
+            extract_timestamp("bitfinex", MarketType::Spot, raw_msg).unwrap()
         );
 
         assert_eq!(orderbook.bids[0].price, 34442.0);

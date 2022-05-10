@@ -20,7 +20,9 @@ mod trade {
         );
         assert_eq!(
             1616176861895,
-            extract_timestamp("binance", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("binance", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.00035600);
@@ -44,7 +46,9 @@ mod trade {
         );
         assert_eq!(
             1616201787561,
-            extract_timestamp("binance", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("binance", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 500.0 / 62838.0);
@@ -68,7 +72,9 @@ mod trade {
         );
         assert_eq!(
             1616201036113,
-            extract_timestamp("binance", MarketType::LinearFuture, raw_msg, None).unwrap()
+            extract_timestamp("binance", MarketType::LinearFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.094);
@@ -93,7 +99,9 @@ mod trade {
         );
         assert_eq!(
             1616201883458,
-            extract_timestamp("binance", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("binance", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.price, 58570.1);
@@ -119,7 +127,9 @@ mod trade {
         );
         assert_eq!(
             1616202009196,
-            extract_timestamp("binance", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("binance", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.043);
@@ -149,7 +159,9 @@ mod trade {
         }
         assert_eq!(
             1616205287778,
-            extract_timestamp("binance", MarketType::EuropeanOption, raw_msg, None).unwrap()
+            extract_timestamp("binance", MarketType::EuropeanOption, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trades[0].quantity_base, 0.0001);
@@ -181,7 +193,9 @@ mod funding_rate {
         }
         assert_eq!(
             1617309477000,
-            extract_timestamp("binance", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("binance", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(funding_rates[0].pair, "BTC/USD".to_string());
@@ -230,7 +244,9 @@ mod funding_rate {
         }
         assert_eq!(
             1617308820003,
-            extract_timestamp("binance", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("binance", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(funding_rates[0].pair, "BTC/USDT".to_string());
@@ -288,7 +304,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622363903670,
-            extract_timestamp("binance", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("binance", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622363903670);
@@ -331,7 +349,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622368000245,
-            extract_timestamp("binance", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("binance", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622368000234);
@@ -379,7 +399,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622368962075,
-            extract_timestamp("binance", MarketType::LinearFuture, raw_msg, None).unwrap()
+            extract_timestamp("binance", MarketType::LinearFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622368962065);
@@ -427,7 +449,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622371244693,
-            extract_timestamp("binance", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("binance", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622371244687);
@@ -475,7 +499,9 @@ mod l2_orderbook {
         );
         assert_eq!(
             1622370862564,
-            extract_timestamp("binance", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("binance", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622370862553);
@@ -533,7 +559,9 @@ mod l2_topk {
         );
         assert_eq!(
             1651122265861,
-            extract_timestamp("binance", MarketType::LinearSwap, raw_msg, None).unwrap()
+            extract_timestamp("binance", MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1651122265854);

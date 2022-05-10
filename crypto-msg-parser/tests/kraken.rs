@@ -19,7 +19,9 @@ mod trade {
         );
         assert_eq!(
             1616333924737,
-            extract_timestamp("kraken", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("kraken", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.02063928);
@@ -43,7 +45,9 @@ mod trade {
         );
         assert_eq!(
             1646472607008,
-            extract_timestamp("kraken", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("kraken", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.timestamp, 1646472607008);
@@ -69,7 +73,9 @@ mod trade {
         );
         assert_eq!(
             1646472684700,
-            extract_timestamp("kraken", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("kraken", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.timestamp, 1646472684700);
@@ -97,7 +103,9 @@ mod trade {
         );
         assert_eq!(
             1646476382705,
-            extract_timestamp("kraken", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("kraken", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.timestamp, 1646476382705);
@@ -123,7 +131,9 @@ mod trade {
         );
         assert_eq!(
             1646478498512,
-            extract_timestamp("kraken", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("kraken", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(trade.timestamp, 1646478498512);
@@ -164,7 +174,9 @@ mod l2_event {
         );
         assert_eq!(
             1622714255963,
-            extract_timestamp("kraken", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("kraken", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622714255963);
@@ -206,7 +218,9 @@ mod l2_event {
         );
         assert_eq!(
             1622714256068,
-            extract_timestamp("kraken", MarketType::Spot, raw_msg, None).unwrap()
+            extract_timestamp("kraken", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622714256068);
@@ -265,7 +279,9 @@ mod l2_event {
         );
         assert_eq!(
             1646478671000,
-            extract_timestamp("kraken", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("kraken", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.bids[0].price, 39253.0);
@@ -311,7 +327,9 @@ mod l2_event {
         );
         assert_eq!(
             1646479025941,
-            extract_timestamp("kraken", MarketType::InverseSwap, raw_msg, None).unwrap()
+            extract_timestamp("kraken", MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.bids[0].price, 39080.5);
@@ -342,7 +360,9 @@ mod l2_event {
         );
         assert_eq!(
             1646480395477,
-            extract_timestamp("kraken", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("kraken", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.bids[0].price, 39347.5);
@@ -388,7 +408,9 @@ mod l2_event {
         );
         assert_eq!(
             1646480579478,
-            extract_timestamp("kraken", MarketType::InverseFuture, raw_msg, None).unwrap()
+            extract_timestamp("kraken", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
         );
 
         assert_eq!(orderbook.asks[0].price, 39442.5);

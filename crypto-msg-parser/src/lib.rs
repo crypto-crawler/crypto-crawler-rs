@@ -44,9 +44,8 @@ pub fn extract_timestamp(
     exchange: &str,
     market_type: MarketType,
     msg: &str,
-    received_at: Option<i64>,
-) -> Result<i64, SimpleError> {
-    let timestamp = match exchange {
+) -> Result<Option<i64>, SimpleError> {
+    match exchange {
         "binance" => exchanges::binance::extract_timestamp(msg),
         "bitfinex" => exchanges::bitfinex::extract_timestamp(msg),
         "bitget" => exchanges::bitget::extract_timestamp(market_type, msg),
@@ -68,11 +67,6 @@ pub fn extract_timestamp(
         "okx" => exchanges::okx::extract_timestamp(market_type, msg),
         "zbg" => exchanges::zbg::extract_timestamp(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
-    };
-    match timestamp {
-        // if the timestamp is not available, use received_at as the timestamp
-        Ok(ts) => Ok(ts.unwrap_or_else(|| received_at.unwrap())),
-        Err(e) => Err(e),
     }
 }
 
