@@ -156,7 +156,7 @@ pub(super) fn extract_timestamp(
         "future_tick" => {
             let raw_trades = ws_msg[1]["trades"].as_array().unwrap();
             let timestamp = raw_trades.iter().fold(std::i64::MIN, |a, raw_trade| {
-                a.max(raw_trade[0].as_i64().unwrap() / 1000)
+                a.max(raw_trade[0].as_i64().expect(msg) / 1000)
             });
             if timestamp == std::i64::MIN {
                 Err(SimpleError::new(format!("result is empty in {}", msg)))
