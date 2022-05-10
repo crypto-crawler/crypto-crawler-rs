@@ -146,6 +146,32 @@ pub(super) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
     Ok(symbol.to_string())
 }
 
+pub(super) fn extract_timestamp(
+    _market_type: MarketType,
+    msg: &str,
+) -> Result<Option<i64>, SimpleError> {
+    let ws_msg = serde_json::from_str::<Vec<Value>>(msg).unwrap();
+    let channel = ws_msg[0].as_str().unwrap();
+    match channel {
+        "future_tick" => {
+            let raw_trades = ws_msg[1]["trades"].as_array().unwrap();
+            let timestamp = raw_trades.iter().fold(std::i64::MIN, |a, raw_trade| {
+                a.max(raw_trade[0].as_i64().unwrap() / 1000)
+            });
+            if timestamp == std::i64::MIN {
+                Err(SimpleError::new(format!("result is empty in {}", msg)))
+            } else {
+                Ok(Some(timestamp))
+            }
+        }
+        "future_snapshot_depth" => Ok(Some(ws_msg[1]["time"].as_i64().unwrap() / 1000)),
+        _ => Err(SimpleError::new(format!(
+            "Unknown channel {} in  {}",
+            channel, msg
+        ))),
+    }
+}
+
 fn calc_quantity_and_volume(
     market_type: MarketType,
     contract_id: i64,

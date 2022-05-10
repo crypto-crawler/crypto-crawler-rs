@@ -54,6 +54,48 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
     Ok(ws_msg.market)
 }
 
+pub(crate) fn extract_timestamp(
+    _market_type: MarketType,
+    msg: &str,
+) -> Result<Option<i64>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Value>",
+            msg
+        ))
+    })?;
+    let channel = ws_msg.channel.as_str();
+    match channel {
+        "trades" => {
+            let timestamp = ws_msg
+                .data
+                .as_array()
+                .unwrap()
+                .iter()
+                .fold(std::i64::MIN, |a, x| {
+                    a.max(
+                        DateTime::parse_from_rfc3339(x["time"].as_str().unwrap())
+                            .unwrap()
+                            .timestamp_millis(),
+                    )
+                });
+
+            if timestamp == std::i64::MIN {
+                Err(SimpleError::new(format!("data is empty in {}", msg)))
+            } else {
+                Ok(Some(timestamp))
+            }
+        }
+        "orderbook" => Ok(Some(
+            (ws_msg.data["time"].as_f64().unwrap() * 1000.0) as i64,
+        )),
+        _ => Err(SimpleError::new(format!(
+            "unknown channel {} in {}",
+            channel, msg
+        ))),
+    }
+}
+
 pub(crate) fn get_msg_type(msg: &str) -> MessageType {
     if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
         let channel = ws_msg.channel;

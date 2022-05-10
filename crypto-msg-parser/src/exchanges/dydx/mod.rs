@@ -9,9 +9,22 @@ use simple_error::SimpleError;
 
 use self::message::WebsocketMsg;
 
-pub(crate) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Result<String, SimpleError> {
+pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
     Ok(ws_msg.id)
+}
+
+pub(crate) fn extract_timestamp(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Option<i64>, SimpleError> {
+    match market_type {
+        MarketType::LinearSwap => dydx_swap::extract_timestamp(msg),
+        _ => Err(SimpleError::new(format!(
+            "Unknown dYdX market type {}",
+            market_type
+        ))),
+    }
 }
 
 pub(crate) fn parse_trade(

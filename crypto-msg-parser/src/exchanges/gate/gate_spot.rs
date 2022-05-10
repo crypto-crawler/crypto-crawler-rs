@@ -22,6 +22,23 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     }
 }
 
+pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
+    let json_obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to HashMap<String, Value>",
+            msg
+        ))
+    })?;
+    if json_obj.contains_key("params") {
+        #[allow(deprecated)]
+        gate_spot_20210916::extract_timestamp(msg)
+    } else if json_obj.contains_key("result") {
+        gate_spot_current::extract_timestamp(msg)
+    } else {
+        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
+    }
+}
+
 pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
     let json_obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
         SimpleError::new(format!(

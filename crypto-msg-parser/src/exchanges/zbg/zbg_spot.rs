@@ -11,13 +11,41 @@ const EXCHANGE_NAME: &str = "zbg";
 
 pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     if let Ok(list) = serde_json::from_str::<Vec<Vec<Value>>>(msg) {
-        if msg.starts_with(r#"[["T","#) || msg.starts_with(r#"["T","#) {
+        if msg.starts_with(r#"[["T","#) {
             Ok(list[0][3].as_str().unwrap().to_string())
         } else {
             Ok(list[0][2].as_str().unwrap().to_string())
         }
     } else if let Ok(list) = serde_json::from_str::<Vec<Value>>(msg) {
         Ok(list[3].as_str().unwrap().to_string())
+    } else {
+        Err(SimpleError::new(format!(
+            "Failed to extract symbol from {}",
+            msg
+        )))
+    }
+}
+
+pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
+    if let Ok(list) = serde_json::from_str::<Vec<Vec<Value>>>(msg) {
+        let timestamp = if msg.starts_with(r#"[["T","#) {
+            let timestamp = list.iter().fold(std::i64::MIN, |a, raw_trade| {
+                a.max(raw_trade[2].as_str().unwrap().parse::<i64>().unwrap())
+            });
+            timestamp
+        } else {
+            let timestamp = list.iter().fold(std::i64::MIN, |a, raw_trade| {
+                a.max(raw_trade[3].as_str().unwrap().parse::<i64>().unwrap())
+            });
+            timestamp
+        };
+        if timestamp == std::i64::MIN {
+            Err(SimpleError::new(format!("array is empty in {}", msg)))
+        } else {
+            Ok(Some(timestamp))
+        }
+    } else if let Ok(list) = serde_json::from_str::<Vec<Value>>(msg) {
+        Ok(Some(list[2].as_str().unwrap().parse::<i64>().unwrap()))
     } else {
         Err(SimpleError::new(format!(
             "Failed to extract symbol from {}",

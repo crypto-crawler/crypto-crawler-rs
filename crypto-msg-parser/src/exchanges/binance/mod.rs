@@ -11,7 +11,7 @@ use crate::{FundingRateMsg, OrderBookMsg, TradeMsg};
 use serde_json::Value;
 use simple_error::SimpleError;
 
-pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
+pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     let obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
         SimpleError::new(format!(
             "Failed to deserialize {} to HashMap<String, Value>",
@@ -25,6 +25,22 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
         SimpleError::new(format!("There is no s field in the data field of {}", msg))
     })?;
     Ok(symbol.to_string())
+}
+
+pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to HashMap<String, Value>",
+            msg
+        ))
+    })?;
+    let data = obj
+        .get("data")
+        .ok_or_else(|| SimpleError::new(format!("There is no data field in {}", msg)))?;
+    let timestamp = data["E"]
+        .as_i64()
+        .ok_or_else(|| SimpleError::new(format!("There is no E field in {}", msg)))?;
+    Ok(Some(timestamp))
 }
 
 pub(crate) fn get_msg_type(msg: &str) -> MessageType {

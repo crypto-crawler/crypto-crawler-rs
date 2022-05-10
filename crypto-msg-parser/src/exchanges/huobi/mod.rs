@@ -4,6 +4,8 @@ mod huobi_linear;
 mod huobi_spot;
 mod message;
 
+use std::collections::HashMap;
+
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
@@ -14,10 +16,15 @@ use simple_error::SimpleError;
 
 use message::WebsocketMsg;
 
-pub(crate) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Result<String, SimpleError> {
+pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
     let v = ws_msg.ch.split('.').collect::<Vec<&str>>();
     Ok(v[1].to_string())
+}
+
+pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
+    let json_obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
+    Ok(Some(json_obj["ts"].as_i64().unwrap()))
 }
 
 pub(crate) fn get_msg_type(msg: &str) -> MessageType {

@@ -2,7 +2,7 @@ mod utils;
 
 use chrono::prelude::*;
 use crypto_market_type::MarketType;
-use crypto_msg_parser::{extract_symbol, parse_l2, parse_trade, TradeSide};
+use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2, parse_trade, TradeSide};
 use crypto_msg_type::MessageType;
 
 #[test]
@@ -18,6 +18,10 @@ fn trade() {
         trade,
         raw_msg,
     );
+    assert_eq!(
+        1616298447112,
+        extract_timestamp("coinbase_pro", MarketType::Spot, raw_msg, None).unwrap()
+    );
 
     assert_eq!(trade.quantity_base, 0.00031874);
     assert_eq!(trade.side, TradeSide::Sell);
@@ -26,13 +30,9 @@ fn trade() {
 #[test]
 fn l2_orderbook_snapshot() {
     let raw_msg = r#"{"type":"snapshot","product_id":"BTC-USD","asks":[["37212.77","0.05724592"],["37215.39","0.00900000"],["37215.69","0.09654865"]],"bids":[["37209.96","0.04016376"],["37209.32","0.00192256"],["37209.16","0.01130000"]]}"#;
-    let orderbook = &parse_l2(
-        "coinbase_pro",
-        MarketType::Spot,
-        raw_msg,
-        Some(Utc::now().timestamp_millis()),
-    )
-    .unwrap()[0];
+    let received_at = Utc::now().timestamp_millis();
+    let orderbook =
+        &parse_l2("coinbase_pro", MarketType::Spot, raw_msg, Some(received_at)).unwrap()[0];
 
     assert_eq!(orderbook.asks.len(), 3);
     assert_eq!(orderbook.bids.len(), 3);
@@ -47,6 +47,11 @@ fn l2_orderbook_snapshot() {
         orderbook,
         raw_msg,
     );
+    assert_eq!(
+        received_at,
+        extract_timestamp("coinbase_pro", MarketType::Spot, raw_msg, Some(received_at)).unwrap()
+    );
+    assert_eq!(received_at, orderbook.timestamp);
 
     assert_eq!(orderbook.bids[0].price, 37209.96);
     assert_eq!(orderbook.bids[0].quantity_base, 0.04016376);
@@ -82,6 +87,10 @@ fn l2_orderbook_update() {
         extract_symbol("coinbase_pro", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
         raw_msg,
+    );
+    assert_eq!(
+        1622624529048,
+        extract_timestamp("coinbase_pro", MarketType::Spot, raw_msg, None).unwrap()
     );
 
     assert_eq!(orderbook.timestamp, 1622624529048);

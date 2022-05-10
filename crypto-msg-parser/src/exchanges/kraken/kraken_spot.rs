@@ -55,6 +55,119 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     Ok(symbol.to_string())
 }
 
+pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
+    let arr = serde_json::from_str::<Vec<Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
+    debug_assert_eq!(arr.len(), 4);
+    let channel = arr[arr.len() - 2].as_str().unwrap();
+    if channel == "trade" {
+        let raw_trades: Vec<Vec<String>> =
+            serde_json::from_value(arr[1].clone()).map_err(|_e| {
+                SimpleError::new(format!(
+                    "Failed to deserialize {} to Vec<Vec<String>>",
+                    arr[1]
+                ))
+            })?;
+        Ok(Some(
+            (raw_trades[0][2].parse::<f64>().unwrap() * 1000.0) as i64,
+        ))
+    } else if channel.starts_with("book-") {
+        let snapshot = {
+            let obj = arr[1].as_object().unwrap();
+            obj.contains_key("as") || obj.contains_key("bs")
+        };
+        if snapshot {
+            let orderbook_snapshot = serde_json::from_value::<OrderbookSnapshot>(arr[1].clone())
+                .map_err(|_e| {
+                    SimpleError::new(format!(
+                        "Failed to deserialize {} to OrderbookSnapshot",
+                        arr[1]
+                    ))
+                })?;
+            let mut timestamp = std::i64::MIN;
+            {
+                for ask in orderbook_snapshot.asks.iter() {
+                    let t = (ask[2].parse::<f64>().unwrap() * 1000.0) as i64;
+                    if t > timestamp {
+                        timestamp = t;
+                    }
+                }
+                for bid in orderbook_snapshot.bids.iter() {
+                    let t = (bid[2].parse::<f64>().unwrap() * 1000.0) as i64;
+                    if t > timestamp {
+                        timestamp = t;
+                    }
+                }
+            };
+            if timestamp == std::i64::MIN {
+                Err(SimpleError::new(format!("as and bs are empty in {}", msg)))
+            } else {
+                Ok(Some(timestamp))
+            }
+        } else {
+            let mut timestamp = std::i64::MIN;
+            let mut process_update = |update: OrderbookUpdate| {
+                if let Some(a) = update.a {
+                    for raw_order in a.iter() {
+                        let t = (raw_order[2].parse::<f64>().unwrap() * 1000.0) as i64;
+                        if t > timestamp {
+                            timestamp = t;
+                        }
+                    }
+                }
+                if let Some(b) = update.b {
+                    for raw_order in b.iter() {
+                        let t = (raw_order[2].parse::<f64>().unwrap() * 1000.0) as i64;
+                        if t > timestamp {
+                            timestamp = t;
+                        }
+                    }
+                }
+            };
+            if arr.len() == 4 {
+                let update =
+                    serde_json::from_value::<OrderbookUpdate>(arr[1].clone()).map_err(|_e| {
+                        SimpleError::new(format!(
+                            "Failed to deserialize {} to OrderbookUpdate",
+                            arr[1]
+                        ))
+                    })?;
+                process_update(update);
+            } else if arr.len() == 5 {
+                let update =
+                    serde_json::from_value::<OrderbookUpdate>(arr[1].clone()).map_err(|_e| {
+                        SimpleError::new(format!(
+                            "Failed to deserialize {} to OrderbookUpdate",
+                            arr[1]
+                        ))
+                    })?;
+                process_update(update);
+                let update =
+                    serde_json::from_value::<OrderbookUpdate>(arr[2].clone()).map_err(|_e| {
+                        SimpleError::new(format!(
+                            "Failed to deserialize {} to OrderbookUpdate",
+                            arr[2]
+                        ))
+                    })?;
+                process_update(update);
+            } else {
+                return Err(SimpleError::new(format!("Unknown message format {}", msg)));
+            };
+
+            if timestamp == std::i64::MIN {
+                Err(SimpleError::new(format!(
+                    "Neither a nor b exists in {}",
+                    msg
+                )))
+            } else {
+                Ok(Some(timestamp))
+            }
+        }
+    } else {
+        Err(SimpleError::new(format!("Unknown channel: {}", channel)))
+    }
+}
+
 pub(crate) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
     let arr = serde_json::from_str::<Vec<Value>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
@@ -113,7 +226,10 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
     let symbol = arr[arr.len() - 1].as_str().unwrap().to_string();
     let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME)
         .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
-    let snapshot = arr[1].as_object().unwrap().contains_key("as");
+    let snapshot = {
+        let obj = arr[1].as_object().unwrap();
+        obj.contains_key("as") || obj.contains_key("bs")
+    };
 
     let parse_order = |raw_order: &[String]| -> Order {
         let price = raw_order[0].parse::<f64>().unwrap();

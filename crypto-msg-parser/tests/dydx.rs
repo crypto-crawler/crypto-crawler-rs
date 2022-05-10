@@ -3,7 +3,7 @@ mod utils;
 #[cfg(test)]
 mod trade {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_trade, TradeSide};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
 
     #[test]
     fn linear_swap() {
@@ -18,6 +18,10 @@ mod trade {
             trade,
             raw_msg,
         );
+        assert_eq!(
+            1633948601464,
+            extract_timestamp("dydx", MarketType::LinearSwap, raw_msg, None).unwrap()
+        );
 
         assert_eq!(trade.quantity_base, 0.124);
         assert_eq!(trade.quantity_quote, 0.124 * 56503.0);
@@ -29,15 +33,17 @@ mod trade {
 
 #[cfg(test)]
 mod l2_orderbook {
+    use chrono::prelude::*;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_l2};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2};
     use crypto_msg_type::MessageType;
 
     #[test]
     fn linear_swap() {
         let raw_msg = r#"{"type":"subscribed","connection_id":"f1e5eecb-7929-4033-8f47-47a2eb71af96","message_id":1,"channel":"v3_orderbook","id":"BTC-USD","contents":{"asks":[{"size":"1.7415","price":"56490"},{"size":"1.7718","price":"56493"}],"bids":[{"size":"1.7088","price":"56489"},{"size":"2.1594","price":"56488"}]}}"#;
+        let received_at = Utc::now().timestamp_millis();
         let orderbook =
-            &parse_l2("dydx", MarketType::LinearSwap, raw_msg, Some(1633951152106)).unwrap()[0];
+            &parse_l2("dydx", MarketType::LinearSwap, raw_msg, Some(received_at)).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
@@ -52,8 +58,12 @@ mod l2_orderbook {
             orderbook,
             raw_msg,
         );
+        assert_eq!(
+            received_at,
+            extract_timestamp("dydx", MarketType::LinearSwap, raw_msg, Some(received_at)).unwrap()
+        );
 
-        assert_eq!(orderbook.timestamp, 1633951152106);
+        assert_eq!(orderbook.timestamp, received_at);
 
         assert_eq!(orderbook.bids[0].price, 56489.0);
         assert_eq!(orderbook.bids[0].quantity_base, 1.7088);

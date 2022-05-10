@@ -18,6 +18,17 @@ pub(crate) fn extract_symbol(market_type: MarketType, msg: &str) -> Result<Strin
     }
 }
 
+pub(crate) fn extract_timestamp(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Option<i64>, SimpleError> {
+    if market_type == MarketType::Spot {
+        gate_spot::extract_timestamp(msg)
+    } else {
+        gate_swap::extract_timestamp(msg)
+    }
+}
+
 pub(crate) fn parse_trade(
     market_type: MarketType,
     msg: &str,

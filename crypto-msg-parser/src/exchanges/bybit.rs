@@ -96,6 +96,61 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
     Ok(arr[1].to_string())
 }
 
+pub(crate) fn extract_timestamp(
+    _market_type: MarketType,
+    msg: &str,
+) -> Result<Option<i64>, SimpleError> {
+    let ws_msg = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to HashMap<String, Value>",
+            msg
+        ))
+    })?;
+    let msg_type = ws_msg
+        .get("topic")
+        .unwrap()
+        .as_str()
+        .unwrap()
+        .split('.')
+        .next()
+        .unwrap();
+    match msg_type {
+        "trade" => {
+            let raw_trades = ws_msg["data"].as_array().unwrap();
+            let timestamp = raw_trades.iter().fold(std::i64::MIN, |a, raw_trade| {
+                a.max(if raw_trade["trade_time_ms"].is_i64() {
+                    raw_trade["trade_time_ms"].as_i64().unwrap()
+                } else {
+                    raw_trade["trade_time_ms"]
+                        .as_str()
+                        .unwrap()
+                        .parse::<i64>()
+                        .unwrap()
+                })
+            });
+
+            if timestamp == std::i64::MIN {
+                Err(SimpleError::new(format!("data is empty in {}", msg)))
+            } else {
+                Ok(Some(timestamp))
+            }
+        }
+        "orderBookL2_25" => {
+            let timestamp_e6 = &ws_msg["timestamp_e6"];
+            let timestamp = if timestamp_e6.is_i64() {
+                timestamp_e6.as_i64().unwrap()
+            } else {
+                timestamp_e6.as_str().unwrap().parse::<i64>().unwrap()
+            } / 1000;
+            Ok(Some(timestamp))
+        }
+        _ => Err(SimpleError::new(format!(
+            "Unknown msg_type {} in {}",
+            msg_type, msg
+        ))),
+    }
+}
+
 pub(crate) fn get_msg_type(msg: &str) -> MessageType {
     if let Ok(ws_msg) = serde_json::from_str::<HashMap<String, Value>>(msg) {
         let table = ws_msg.get("topic").unwrap().as_str().unwrap();

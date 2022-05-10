@@ -1,7 +1,7 @@
 mod utils;
 
 use crypto_market_type::MarketType;
-use crypto_msg_parser::{extract_symbol, parse_l2, parse_trade, TradeSide};
+use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2, parse_trade, TradeSide};
 use crypto_msg_type::MessageType;
 
 #[test]
@@ -23,6 +23,10 @@ fn trade() {
 
         assert_eq!(trade.side, TradeSide::Sell);
     }
+    assert_eq!(
+        1616271105098,
+        extract_timestamp("bithumb", MarketType::Spot, raw_msg, None).unwrap()
+    );
 
     let raw_msg = r#"{"code":"00007","data":{"p":"1674.7700000000","symbol":"ETH-USDT","ver":"15186035","s":"buy","t":"1616487024","v":"0.065614"},"topic":"TRADE","timestamp":1616487024837}"#;
     let trades = &parse_trade("bithumb", MarketType::Spot, raw_msg).unwrap();
@@ -63,6 +67,10 @@ fn l2_orderbook_snapshot() {
         orderbook,
         raw_msg,
     );
+    assert_eq!(
+        1622446974153,
+        extract_timestamp("bithumb", MarketType::Spot, raw_msg, None).unwrap()
+    );
 
     assert_eq!(orderbook.timestamp, 1622446974153);
     assert_eq!(orderbook.seq_id, Some(509670288));
@@ -101,6 +109,10 @@ fn l2_orderbook_update() {
         extract_symbol("bithumb", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
         raw_msg,
+    );
+    assert_eq!(
+        1622446975394,
+        extract_timestamp("bithumb", MarketType::Spot, raw_msg, None).unwrap()
     );
 
     assert_eq!(orderbook.timestamp, 1622446975394);

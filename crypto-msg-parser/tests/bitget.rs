@@ -3,7 +3,7 @@ mod utils;
 #[cfg(test)]
 mod trade {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_trade, TradeSide};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
     use float_cmp::approx_eq;
 
     #[test]
@@ -24,6 +24,10 @@ mod trade {
             );
             assert_eq!(trade.side, TradeSide::Sell);
         }
+        assert_eq!(
+            1616236107276,
+            extract_timestamp("bitget", MarketType::InverseSwap, raw_msg, None).unwrap()
+        );
 
         assert_eq!(trades[0].quantity_base, 158.0 / 58722.0);
         assert_eq!(trades[0].quantity_quote, 158.0);
@@ -57,6 +61,11 @@ mod trade {
 
             assert_eq!(trade.side, TradeSide::Sell);
         }
+        assert_eq!(
+            1616236212569,
+            extract_timestamp("bitget", MarketType::LinearSwap, raw_msg, None).unwrap()
+        );
+
         assert!(approx_eq!(
             f64,
             trades[0].quantity_base,
@@ -130,7 +139,7 @@ mod funding_rate {
 #[cfg(test)]
 mod l2_orderbook {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_l2};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2};
     use crypto_msg_type::MessageType;
     use float_cmp::approx_eq;
 
@@ -151,6 +160,10 @@ mod l2_orderbook {
             extract_symbol("bitget", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622432420458,
+            extract_timestamp("bitget", MarketType::LinearSwap, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622432420458);
@@ -234,6 +247,10 @@ mod l2_orderbook {
             orderbook,
             raw_msg,
         );
+        assert_eq!(
+            1622434075797,
+            extract_timestamp("bitget", MarketType::LinearSwap, raw_msg, None).unwrap()
+        );
 
         assert_eq!(orderbook.timestamp, 1622434075797);
 
@@ -301,6 +318,10 @@ mod l2_orderbook {
             orderbook,
             raw_msg,
         );
+        assert_eq!(
+            1622426574770,
+            extract_timestamp("bitget", MarketType::LinearSwap, raw_msg, None).unwrap()
+        );
 
         assert_eq!(orderbook.timestamp, 1622426574770);
 
@@ -342,6 +363,10 @@ mod l2_orderbook {
             extract_symbol("bitget", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622431636806,
+            extract_timestamp("bitget", MarketType::InverseSwap, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622431636806);

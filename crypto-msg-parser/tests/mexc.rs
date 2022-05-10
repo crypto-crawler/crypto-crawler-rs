@@ -5,7 +5,7 @@ const EXCHANGE_NAME: &str = "mexc";
 #[cfg(test)]
 mod trade {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_trade, TradeSide};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
 
     #[test]
     fn spot() {
@@ -22,6 +22,10 @@ mod trade {
             extract_symbol(super::EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1616373554541,
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.007811);
@@ -43,6 +47,10 @@ mod trade {
             extract_symbol(super::EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1646996447307,
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap()
         );
 
         assert_eq!(trade.timestamp, 1646996447307);
@@ -66,6 +74,10 @@ mod trade {
             extract_symbol(super::EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1616370338806,
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap()
         );
 
         assert_eq!(trade.timestamp, 1616370338806);
@@ -92,6 +104,10 @@ mod trade {
             trade,
             raw_msg,
         );
+        assert_eq!(
+            1646999591755,
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap()
+        );
 
         assert_eq!(trade.timestamp, 1646999591755);
         assert_eq!(trade.price, 39766.5);
@@ -116,6 +132,11 @@ mod trade {
             extract_symbol(super::EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1616370470356,
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None)
+                .unwrap()
         );
 
         assert_eq!(trade.timestamp, 1616370470356);
@@ -142,6 +163,11 @@ mod trade {
             trade,
             raw_msg,
         );
+        assert_eq!(
+            1647000043904,
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None)
+                .unwrap()
+        );
 
         assert_eq!(trade.timestamp, 1647000043904);
         assert_eq!(trade.price, 39885.5);
@@ -156,17 +182,18 @@ mod trade {
 mod l2_orderbook {
     use chrono::prelude::*;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_l2};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2};
     use crypto_msg_type::MessageType;
 
     #[test]
     fn spot_update() {
         let raw_msg = r#"["push.symbol",{"symbol":"BTC_USDT","data":{"bids":[{"p":"38932.19","q":"0.049010","a":"1908.06663"},{"p":"38931.18","q":"0.038220","a":"1487.94969"}],"asks":[{"p":"38941.81","q":"0.000000","a":"0.00000000"},{"p":"38940.71","q":"0.000000","a":"0.00000000"}]}}]"#;
+        let received_at = Utc::now().timestamp_millis();
         let orderbook = &parse_l2(
             super::EXCHANGE_NAME,
             MarketType::Spot,
             raw_msg,
-            Some(Utc::now().timestamp_millis()),
+            Some(received_at),
         )
         .unwrap()[0];
 
@@ -183,6 +210,16 @@ mod l2_orderbook {
             orderbook,
             raw_msg,
         );
+        assert_eq!(
+            received_at,
+            extract_timestamp(
+                super::EXCHANGE_NAME,
+                MarketType::Spot,
+                raw_msg,
+                Some(received_at)
+            )
+            .unwrap()
+        );
 
         assert_eq!(orderbook.bids[0].price, 38932.19);
         assert_eq!(orderbook.bids[0].quantity_base, 0.04901);
@@ -192,11 +229,12 @@ mod l2_orderbook {
     #[test]
     fn spot_20220311() {
         let raw_msg = r#"{"symbol":"BTC_USDT","data":{"version":"672257402","bids":[{"p":"39763.35","q":"0.054069","a":"2149.96457"}]},"channel":"push.depth"}"#;
+        let received_at = Utc::now().timestamp_millis();
         let orderbook = &parse_l2(
             super::EXCHANGE_NAME,
             MarketType::Spot,
             raw_msg,
-            Some(Utc::now().timestamp_millis()),
+            Some(received_at),
         )
         .unwrap()[0];
 
@@ -213,6 +251,16 @@ mod l2_orderbook {
             extract_symbol(super::EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            received_at,
+            extract_timestamp(
+                super::EXCHANGE_NAME,
+                MarketType::Spot,
+                raw_msg,
+                Some(received_at)
+            )
+            .unwrap()
         );
 
         assert_eq!(orderbook.bids[0].price, 39763.35);
@@ -237,6 +285,10 @@ mod l2_orderbook {
             extract_symbol(super::EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622722473816,
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622722473816);
@@ -269,6 +321,10 @@ mod l2_orderbook {
             orderbook,
             raw_msg,
         );
+        assert_eq!(
+            1647000258746,
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap()
+        );
 
         assert_eq!(orderbook.asks[0].price, 39961.0);
         assert_eq!(orderbook.asks[0].quantity_contract, Some(0.0));
@@ -300,6 +356,11 @@ mod l2_orderbook {
             orderbook,
             raw_msg,
         );
+        assert_eq!(
+            1622723010000,
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None)
+                .unwrap()
+        );
 
         assert_eq!(orderbook.timestamp, 1622723010000);
         assert_eq!(orderbook.seq_id, Some(1151578213));
@@ -330,6 +391,11 @@ mod l2_orderbook {
             extract_symbol(super::EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1647000870946,
+            extract_timestamp(super::EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None)
+                .unwrap()
         );
 
         assert_eq!(orderbook.bids[0].price, 39944.0);

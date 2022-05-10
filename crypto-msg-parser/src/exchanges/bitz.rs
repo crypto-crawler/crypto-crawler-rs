@@ -61,6 +61,19 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
     Ok(symbol.to_string())
 }
 
+pub(crate) fn extract_timestamp(
+    _market_type: MarketType,
+    msg: &str,
+) -> Result<Option<i64>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Value>",
+            msg
+        ))
+    })?;
+    Ok(Some(ws_msg.time))
+}
+
 pub(crate) fn parse_trade(
     market_type: MarketType,
     msg: &str,

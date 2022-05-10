@@ -103,6 +103,41 @@ pub(super) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Result<Str
     }
 }
 
+pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Value>",
+            msg
+        ))
+    })?;
+    let result = ws_msg.result;
+    if ws_msg.channel == "futures.trades" {
+        let raw_trades = result.as_array().unwrap();
+        let timestamp = raw_trades.iter().fold(std::i64::MIN, |a, raw_trade| {
+            a.max(if let Some(x) = raw_trade.get("create_time_ms") {
+                x.as_i64().unwrap()
+            } else {
+                raw_trade.get("create_time").unwrap().as_i64().unwrap() * 1000
+            })
+        });
+        if timestamp == std::i64::MIN {
+            Err(SimpleError::new(format!("result is empty in {}", msg)))
+        } else {
+            Ok(Some(timestamp))
+        }
+    } else if ws_msg.channel == "futures.order_book" {
+        if let Some(x) = result.get("t") {
+            Ok(Some(x.as_i64().unwrap()))
+        } else {
+            Ok(Some(ws_msg.time * 1000))
+        }
+    } else if ws_msg.channel == "futures.order_book_update" {
+        Ok(Some(result["t"].as_i64().unwrap()))
+    } else {
+        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
+    }
+}
+
 pub(super) fn parse_trade(
     market_type: MarketType,
     msg: &str,

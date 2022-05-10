@@ -3,7 +3,7 @@ mod utils;
 #[cfg(test)]
 mod trade {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_trade, TradeSide};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
 
     #[test]
     fn spot() {
@@ -24,6 +24,10 @@ mod trade {
 
             assert_eq!(trade.side, TradeSide::Buy);
         }
+        assert_eq!(
+            1616322277319,
+            extract_timestamp("ftx", MarketType::Spot, raw_msg, None).unwrap()
+        );
         assert_eq!(trades[0].quantity_base, 0.0444);
     }
 
@@ -44,6 +48,10 @@ mod trade {
                 raw_msg,
             );
         }
+        assert_eq!(
+            1616324306498,
+            extract_timestamp("ftx", MarketType::LinearFuture, raw_msg, None).unwrap()
+        );
 
         assert_eq!(trades[0].quantity_base, 0.0043);
         assert_eq!(trades[0].quantity_quote, 0.0043 * 56244.0);
@@ -68,6 +76,10 @@ mod trade {
                 raw_msg,
             );
         }
+        assert_eq!(
+            1616324438933,
+            extract_timestamp("ftx", MarketType::LinearSwap, raw_msg, None).unwrap()
+        );
 
         assert_eq!(trades[0].quantity_base, 0.005);
         assert_eq!(trades[0].quantity_quote, 0.005 * 56115.0);
@@ -92,6 +104,10 @@ mod trade {
                 raw_msg,
             );
         }
+        assert_eq!(
+            1616089670727,
+            extract_timestamp("ftx", MarketType::Move, raw_msg, None).unwrap()
+        );
 
         assert_eq!(trades[0].quantity_base, 0.1136);
         assert_eq!(trades[0].quantity_quote, 0.1136 * 5862.0);
@@ -103,7 +119,7 @@ mod trade {
 #[cfg(test)]
 mod l2_orderbook {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_l2};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2};
     use crypto_msg_type::MessageType;
 
     #[test]
@@ -123,6 +139,10 @@ mod l2_orderbook {
             extract_symbol("ftx", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622668801966,
+            extract_timestamp("ftx", MarketType::Spot, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622668801966);
@@ -162,6 +182,10 @@ mod l2_orderbook {
             orderbook,
             raw_msg,
         );
+        assert_eq!(
+            1622668802026,
+            extract_timestamp("ftx", MarketType::Spot, raw_msg, None).unwrap()
+        );
 
         assert_eq!(orderbook.timestamp, 1622668802026);
 
@@ -195,6 +219,10 @@ mod l2_orderbook {
             extract_symbol("ftx", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622669504820,
+            extract_timestamp("ftx", MarketType::LinearFuture, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622669504820);
@@ -238,6 +266,10 @@ mod l2_orderbook {
             orderbook,
             raw_msg,
         );
+        assert_eq!(
+            1622669504843,
+            extract_timestamp("ftx", MarketType::LinearFuture, raw_msg, None).unwrap()
+        );
 
         assert_eq!(orderbook.timestamp, 1622669504843);
 
@@ -269,6 +301,10 @@ mod l2_orderbook {
             extract_symbol("ftx", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622660997436,
+            extract_timestamp("ftx", MarketType::LinearSwap, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622660997436);
@@ -311,6 +347,10 @@ mod l2_orderbook {
             extract_symbol("ftx", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622660997459,
+            extract_timestamp("ftx", MarketType::LinearSwap, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622660997459);

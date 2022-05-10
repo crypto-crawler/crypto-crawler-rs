@@ -15,8 +15,8 @@ pub fn extract_symbol(
     msg: &str,
 ) -> Result<String, SimpleError> {
     match exchange {
-        "binance" => exchanges::binance::extract_symbol(market_type, msg),
-        "bitfinex" => exchanges::bitfinex::extract_symbol(market_type, msg),
+        "binance" => exchanges::binance::extract_symbol(msg),
+        "bitfinex" => exchanges::bitfinex::extract_symbol(msg),
         "bitget" => exchanges::bitget::extract_symbol(market_type, msg),
         "bithumb" => exchanges::bithumb::extract_symbol(market_type, msg),
         "bitmex" => exchanges::bitmex::extract_symbol(market_type, msg),
@@ -25,17 +25,54 @@ pub fn extract_symbol(
         "bybit" => exchanges::bybit::extract_symbol(market_type, msg),
         "coinbase_pro" => exchanges::coinbase_pro::extract_symbol(market_type, msg),
         "deribit" => exchanges::deribit::extract_symbol(market_type, msg),
-        "dydx" => exchanges::dydx::extract_symbol(market_type, msg),
+        "dydx" => exchanges::dydx::extract_symbol(msg),
         "ftx" => exchanges::ftx::extract_symbol(market_type, msg),
         "gate" => exchanges::gate::extract_symbol(market_type, msg),
-        "huobi" => exchanges::huobi::extract_symbol(market_type, msg),
+        "huobi" => exchanges::huobi::extract_symbol(msg),
         "kraken" => exchanges::kraken::extract_symbol(market_type, msg),
-        "kucoin" => exchanges::kucoin::extract_symbol(market_type, msg),
-        "mxc" | "mexc" => exchanges::mexc::extract_symbol(market_type, msg),
+        "kucoin" => exchanges::kucoin::extract_symbol(msg),
+        "mxc" | "mexc" => exchanges::mexc::extract_symbol(msg),
         "okex" => exchanges::okex::extract_symbol(market_type, msg),
         "okx" => exchanges::okx::extract_symbol(market_type, msg),
         "zbg" => exchanges::zbg::extract_symbol(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
+    }
+}
+
+/// Extract the timestamp from the message.
+pub fn extract_timestamp(
+    exchange: &str,
+    market_type: MarketType,
+    msg: &str,
+    received_at: Option<i64>,
+) -> Result<i64, SimpleError> {
+    let timestamp = match exchange {
+        "binance" => exchanges::binance::extract_timestamp(msg),
+        "bitfinex" => exchanges::bitfinex::extract_timestamp(msg),
+        "bitget" => exchanges::bitget::extract_timestamp(market_type, msg),
+        "bithumb" => exchanges::bithumb::extract_timestamp(market_type, msg),
+        "bitmex" => exchanges::bitmex::extract_timestamp(market_type, msg),
+        "bitstamp" => exchanges::bitstamp::extract_timestamp(market_type, msg),
+        "bitz" => exchanges::bitz::extract_timestamp(market_type, msg),
+        "bybit" => exchanges::bybit::extract_timestamp(market_type, msg),
+        "coinbase_pro" => exchanges::coinbase_pro::extract_timestamp(market_type, msg),
+        "deribit" => exchanges::deribit::extract_timestamp(market_type, msg),
+        "dydx" => exchanges::dydx::extract_timestamp(market_type, msg),
+        "ftx" => exchanges::ftx::extract_timestamp(market_type, msg),
+        "gate" => exchanges::gate::extract_timestamp(market_type, msg),
+        "huobi" => exchanges::huobi::extract_timestamp(msg),
+        "kraken" => exchanges::kraken::extract_timestamp(market_type, msg),
+        "kucoin" => exchanges::kucoin::extract_timestamp(market_type, msg),
+        "mxc" | "mexc" => exchanges::mexc::extract_timestamp(msg),
+        "okex" => exchanges::okex::extract_timestamp(market_type, msg),
+        "okx" => exchanges::okx::extract_timestamp(market_type, msg),
+        "zbg" => exchanges::zbg::extract_timestamp(market_type, msg),
+        _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
+    };
+    match timestamp {
+        // if the timestamp is not available, use received_at as the timestamp
+        Ok(ts) => Ok(ts.unwrap_or_else(|| received_at.unwrap())),
+        Err(e) => Err(e),
     }
 }
 

@@ -60,6 +60,42 @@ struct RawOrderBookUpdateMsg {
     extra: HashMap<String, Value>,
 }
 
+pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
+    let channel = ws_msg.channel.as_str();
+    match channel {
+        "v3_trades" => {
+            let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradesMsg>>(msg).map_err(|_e| {
+                SimpleError::new(format!(
+                    "Failed to deserialize {} to WebsocketMsg<RawTradesMsg>",
+                    msg
+                ))
+            })?;
+            let timestamp = ws_msg
+                .contents
+                .trades
+                .iter()
+                .fold(std::i64::MIN, |a, raw_trade| {
+                    a.max(
+                        DateTime::parse_from_rfc3339(&raw_trade.createdAt)
+                            .unwrap()
+                            .timestamp_millis(),
+                    )
+                });
+            if timestamp == std::i64::MIN {
+                Err(SimpleError::new(format!("data is empty in {}", msg)))
+            } else {
+                Ok(Some(timestamp))
+            }
+        }
+        "v3_orderbook" => Ok(None),
+        _ => Err(SimpleError::new(format!(
+            "Failed to extract timestamp from {}",
+            msg
+        ))),
+    }
+}
+
 pub(crate) fn parse_trade(
     market_type: MarketType,
     msg: &str,

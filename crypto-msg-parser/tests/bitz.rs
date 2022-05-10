@@ -1,7 +1,7 @@
 mod utils;
 
 use crypto_market_type::MarketType;
-use crypto_msg_parser::{extract_symbol, parse_l2, parse_trade, TradeSide};
+use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2, parse_trade, TradeSide};
 use crypto_msg_type::MessageType;
 
 #[test]
@@ -22,6 +22,10 @@ fn trade() {
             raw_msg,
         );
     }
+    assert_eq!(
+        1616486110921,
+        extract_timestamp("bitz", MarketType::Spot, raw_msg, None).unwrap()
+    );
 
     assert_eq!(trades[0].side, TradeSide::Sell);
     assert_eq!(trades[0].quantity_base, 0.1310);
@@ -48,6 +52,10 @@ fn l2_orderbook_update() {
         extract_symbol("bitz", MarketType::Spot, raw_msg).unwrap(),
         orderbook,
         raw_msg,
+    );
+    assert_eq!(
+        1622527417489,
+        extract_timestamp("bitz", MarketType::Spot, raw_msg, None).unwrap()
     );
 
     assert_eq!(orderbook.timestamp, 1622527417489);

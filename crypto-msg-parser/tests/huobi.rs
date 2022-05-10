@@ -3,7 +3,7 @@ mod utils;
 #[cfg(test)]
 mod trade {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_trade, TradeSide};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
 
     #[test]
     fn spot() {
@@ -17,6 +17,10 @@ mod trade {
             extract_symbol("huobi", MarketType::Spot, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1616243199157,
+            extract_timestamp("huobi", MarketType::Spot, raw_msg, None).unwrap()
         );
 
         assert_eq!(trade.quantity_base, 1.98E-4);
@@ -50,6 +54,11 @@ mod trade {
             trade,
             raw_msg,
         );
+        assert_eq!(
+            1616269629976,
+            extract_timestamp("huobi", MarketType::Spot, raw_msg, None).unwrap()
+        );
+
         assert_eq!(trade.quantity_base, 20.0 / 1997.132);
         assert_eq!(trade.quantity_quote, 20.0);
         assert_eq!(trade.quantity_contract, Some(2.0));
@@ -83,6 +92,11 @@ mod trade {
             trade,
             raw_msg,
         );
+        assert_eq!(
+            1616269812566,
+            extract_timestamp("huobi", MarketType::InverseSwap, raw_msg, None).unwrap()
+        );
+
         assert_eq!(trade.quantity_base, 3460.0 / 1849.18);
         assert_eq!(trade.quantity_quote, 3460.0);
         assert_eq!(trade.quantity_contract, Some(346.0));
@@ -101,6 +115,11 @@ mod trade {
             trade,
             raw_msg,
         );
+        assert_eq!(
+            1616233478594,
+            extract_timestamp("huobi", MarketType::LinearSwap, raw_msg, None).unwrap()
+        );
+
         assert_eq!(trade.quantity_base, 0.04);
         assert_eq!(trade.quantity_quote, 2350.796);
         assert_eq!(trade.quantity_contract, Some(40.0));
@@ -138,6 +157,10 @@ mod trade {
                 raw_msg,
             );
         }
+        assert_eq!(
+            1616246303142,
+            extract_timestamp("huobi", MarketType::EuropeanOption, raw_msg, None).unwrap()
+        );
 
         assert_eq!(trades[0].quantity_base, 0.036);
         assert_eq!(trades[0].quantity_quote, 971.69976);
@@ -154,7 +177,7 @@ mod trade {
 #[cfg(test)]
 mod funding_rate {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::parse_funding_rate;
+    use crypto_msg_parser::{extract_timestamp, parse_funding_rate};
 
     #[test]
     fn inverse_swap() {
@@ -171,6 +194,10 @@ mod funding_rate {
                 raw_msg,
             );
         }
+        assert_eq!(
+            1617309842839,
+            extract_timestamp("huobi", MarketType::InverseSwap, raw_msg, None).unwrap()
+        );
 
         assert_eq!(funding_rates[0].pair, "BTC/USD".to_string());
         assert_eq!(funding_rates[0].funding_rate, 0.000624180443735412);
@@ -188,6 +215,10 @@ mod funding_rate {
         for rate in funding_rates.iter() {
             crate::utils::check_funding_rate_fields("huobi", MarketType::LinearSwap, rate, raw_msg);
         }
+        assert_eq!(
+            1617309787271,
+            extract_timestamp("huobi", MarketType::LinearSwap, raw_msg, None).unwrap()
+        );
 
         assert_eq!(funding_rates[0].pair, "BTC/USDT".to_string());
         assert_eq!(funding_rates[0].funding_rate, 0.000754108135233895);
@@ -199,7 +230,7 @@ mod funding_rate {
 #[cfg(test)]
 mod l2_orderbook {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_l2};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2};
     use crypto_msg_type::MessageType;
     use float_cmp::approx_eq;
 
@@ -220,6 +251,10 @@ mod l2_orderbook {
             extract_symbol("huobi", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622707662703,
+            extract_timestamp("huobi", MarketType::Spot, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622707662703);
@@ -254,6 +289,10 @@ mod l2_orderbook {
             orderbook,
             raw_msg,
         );
+        assert_eq!(
+            1634601197516,
+            extract_timestamp("huobi", MarketType::Spot, raw_msg, None).unwrap()
+        );
 
         assert_eq!(orderbook.timestamp, 1634601197516);
 
@@ -279,6 +318,10 @@ mod l2_orderbook {
             extract_symbol("huobi", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622708089134,
+            extract_timestamp("huobi", MarketType::InverseFuture, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622708089134);
@@ -323,6 +366,10 @@ mod l2_orderbook {
             orderbook,
             raw_msg,
         );
+        assert_eq!(
+            1622711041458,
+            extract_timestamp("huobi", MarketType::InverseFuture, raw_msg, None).unwrap()
+        );
 
         assert_eq!(orderbook.timestamp, 1622711041458);
         assert_eq!(orderbook.seq_id, Some(138219575176));
@@ -365,6 +412,10 @@ mod l2_orderbook {
             extract_symbol("huobi", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622711365595,
+            extract_timestamp("huobi", MarketType::InverseSwap, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622711365595);
@@ -409,6 +460,10 @@ mod l2_orderbook {
             orderbook,
             raw_msg,
         );
+        assert_eq!(
+            1622711368355,
+            extract_timestamp("huobi", MarketType::InverseSwap, raw_msg, None).unwrap()
+        );
 
         assert_eq!(orderbook.timestamp, 1622711368355);
         assert_eq!(orderbook.seq_id, Some(99893958868));
@@ -446,6 +501,10 @@ mod l2_orderbook {
             extract_symbol("huobi", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622711946534,
+            extract_timestamp("huobi", MarketType::LinearSwap, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622711946534);
@@ -499,6 +558,10 @@ mod l2_orderbook {
             extract_symbol("huobi", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622711948514,
+            extract_timestamp("huobi", MarketType::LinearSwap, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622711948514);

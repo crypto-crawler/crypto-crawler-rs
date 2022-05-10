@@ -3,7 +3,7 @@ mod utils;
 #[cfg(test)]
 mod trade {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_trade, TradeSide};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
     use float_cmp::approx_eq;
 
     #[test]
@@ -18,6 +18,10 @@ mod trade {
             extract_symbol("bitmex", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1615514404608,
+            extract_timestamp("bitmex", MarketType::InverseSwap, raw_msg, None).unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.015813);
@@ -38,6 +42,10 @@ mod trade {
             extract_symbol("bitmex", MarketType::QuantoSwap, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1616286129258,
+            extract_timestamp("bitmex", MarketType::QuantoSwap, raw_msg, None).unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.058513750731421885);
@@ -64,6 +72,10 @@ mod trade {
             trade,
             raw_msg,
         );
+        assert_eq!(
+            1616289162361,
+            extract_timestamp("bitmex", MarketType::InverseFuture, raw_msg, None).unwrap()
+        );
 
         assert_eq!(trade.quantity_base, 0.1276);
         assert_eq!(trade.quantity_quote, 8000.0);
@@ -84,6 +96,10 @@ mod trade {
             trade,
             raw_msg,
         );
+        assert_eq!(
+            1615513563886,
+            extract_timestamp("bitmex", MarketType::LinearFuture, raw_msg, None).unwrap()
+        );
 
         assert_eq!(trade.quantity_base, 1.0);
         assert_eq!(trade.quantity_quote, 0.03191);
@@ -103,6 +119,10 @@ mod trade {
             extract_symbol("bitmex", MarketType::QuantoFuture, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1615515223222,
+            extract_timestamp("bitmex", MarketType::QuantoFuture, raw_msg, None).unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.6814310051107325);
@@ -175,20 +195,18 @@ mod funding_rate {
 mod l2_orderbook {
     use chrono::prelude::*;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{exchanges::bitmex::price_to_id, extract_symbol, parse_l2};
+    use crypto_msg_parser::{
+        exchanges::bitmex::price_to_id, extract_symbol, extract_timestamp, parse_l2,
+    };
     use crypto_msg_type::MessageType;
     use float_cmp::approx_eq;
 
     #[test]
     fn inverse_swap_snapshot() {
         let raw_msg = r#"{"table":"orderBookL2_25","action":"partial","data":[{"symbol":"XBTUSD","id":8796381000,"side":"Sell","size":49900,"price":36190},{"symbol":"XBTUSD","id":8796381050,"side":"Sell","size":125714,"price":36189.5},{"symbol":"XBTUSD","id":8796381100,"side":"Sell","size":34600,"price":36189},{"symbol":"XBTUSD","id":8796385500,"side":"Buy","size":136,"price":36145},{"symbol":"XBTUSD","id":8796385600,"side":"Buy","size":26,"price":36144},{"symbol":"XBTUSD","id":8796385800,"side":"Buy","size":18067,"price":36142}]}"#;
-        let orderbook = &parse_l2(
-            "bitmex",
-            MarketType::Unknown,
-            raw_msg,
-            Some(Utc::now().timestamp_millis()),
-        )
-        .unwrap()[0];
+        let received_at = Utc::now().timestamp_millis();
+        let orderbook =
+            &parse_l2("bitmex", MarketType::Unknown, raw_msg, Some(received_at)).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
@@ -202,6 +220,16 @@ mod l2_orderbook {
             extract_symbol("bitmex", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            received_at,
+            extract_timestamp(
+                "bitmex",
+                MarketType::InverseSwap,
+                raw_msg,
+                Some(received_at)
+            )
+            .unwrap()
         );
 
         assert_eq!(orderbook.bids[0].price, 36145.0);
@@ -232,12 +260,8 @@ mod l2_orderbook {
     #[test]
     fn inverse_swap_update() {
         let insert_msg = r#"{"table":"orderBookL2_25","action":"insert","data":[{"symbol":"XBTUSD","id":8796323950,"side":"Sell","size":38760,"price":36760.5}]}"#;
-        let _ = parse_l2(
-            "bitmex",
-            MarketType::Unknown,
-            insert_msg,
-            Some(Utc::now().timestamp_millis()),
-        );
+        let received_at = Utc::now().timestamp_millis();
+        let _ = parse_l2("bitmex", MarketType::Unknown, insert_msg, Some(received_at));
         let update_msg = r#"{"table":"orderBookL2_25","action":"update","data":[{"symbol":"XBTUSD","id":8796323950,"side":"Sell","size":36760}]}"#;
         let orderbook = &parse_l2(
             "bitmex",
@@ -259,6 +283,16 @@ mod l2_orderbook {
             extract_symbol("bitmex", MarketType::InverseSwap, update_msg).unwrap(),
             orderbook,
             update_msg,
+        );
+        assert_eq!(
+            received_at,
+            extract_timestamp(
+                "bitmex",
+                MarketType::InverseSwap,
+                update_msg,
+                Some(received_at)
+            )
+            .unwrap()
         );
 
         assert_eq!(orderbook.asks[0].price, 36760.5);
@@ -298,13 +332,9 @@ mod l2_orderbook {
     #[test]
     fn linear_future_snapshot() {
         let raw_msg = r#"{"table":"orderBookL2_25","action":"partial","data":[{"symbol":"ETHH22","id":75899993108,"side":"Sell","size":50000,"price":0.06892,"timestamp":"2022-03-01T01:55:45.088Z"},{"symbol":"ETHH22","id":75899993113,"side":"Sell","size":125000,"price":0.06887,"timestamp":"2022-03-01T01:55:45.088Z"},{"symbol":"ETHH22","id":75899993250,"side":"Buy","size":3000,"price":0.0675,"timestamp":"2022-03-01T01:55:45.088Z"},{"symbol":"ETHH22","id":75899993260,"side":"Buy","size":117000,"price":0.0674,"timestamp":"2022-03-01T01:55:45.088Z"}]}"#;
-        let orderbook = &parse_l2(
-            "bitmex",
-            MarketType::Unknown,
-            raw_msg,
-            Some(Utc::now().timestamp_millis()),
-        )
-        .unwrap()[0];
+        let received_at = Utc::now().timestamp_millis();
+        let orderbook =
+            &parse_l2("bitmex", MarketType::Unknown, raw_msg, Some(received_at)).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 2);
@@ -318,6 +348,16 @@ mod l2_orderbook {
             extract_symbol("bitmex", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            received_at,
+            extract_timestamp(
+                "bitmex",
+                MarketType::LinearFuture,
+                raw_msg,
+                Some(received_at)
+            )
+            .unwrap()
         );
 
         assert_eq!(orderbook.bids[0].price, 0.0675);
@@ -364,8 +404,9 @@ mod l2_orderbook {
     #[test]
     fn linear_future_delete() {
         let raw_msg = r#"{"table":"orderBookL2_25","action":"delete","data":[{"symbol":"ETHZ21","id":63399993018,"side":"Buy"}]}"#;
+        let received_at = Utc::now().timestamp_millis();
         let orderbook =
-            &parse_l2("bitmex", MarketType::Unknown, raw_msg, Some(1635724802280)).unwrap()[0];
+            &parse_l2("bitmex", MarketType::Unknown, raw_msg, Some(received_at)).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 0);
         assert_eq!(orderbook.bids.len(), 1);
@@ -379,6 +420,16 @@ mod l2_orderbook {
             extract_symbol("bitmex", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            received_at,
+            extract_timestamp(
+                "bitmex",
+                MarketType::LinearFuture,
+                raw_msg,
+                Some(received_at)
+            )
+            .unwrap()
         );
 
         assert!(approx_eq!(f64, orderbook.bids[0].price, 0.06982, ulps = 12));

@@ -3,7 +3,7 @@ mod utils;
 #[cfg(test)]
 mod trade {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_trade, TradeSide};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
     use float_cmp::approx_eq;
 
     #[test]
@@ -21,6 +21,10 @@ mod trade {
             extract_symbol("kucoin", MarketType::Spot, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1616362370760,
+            extract_timestamp("kucoin", MarketType::Spot, raw_msg, None).unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.00013064);
@@ -43,6 +47,10 @@ mod trade {
             extract_symbol("kucoin", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1616362645429,
+            extract_timestamp("kucoin", MarketType::LinearSwap, raw_msg, None).unwrap()
         );
 
         assert!(approx_eq!(
@@ -77,6 +85,10 @@ mod trade {
             trade,
             raw_msg,
         );
+        assert_eq!(
+            1616362601277,
+            extract_timestamp("kucoin", MarketType::InverseSwap, raw_msg, None).unwrap()
+        );
 
         assert_eq!(trade.quantity_base, 5000.0 / 57798.0);
         assert_eq!(trade.quantity_quote, 5000.0);
@@ -100,6 +112,10 @@ mod trade {
             trade,
             raw_msg,
         );
+        assert_eq!(
+            1616363046546,
+            extract_timestamp("kucoin", MarketType::InverseFuture, raw_msg, None).unwrap()
+        );
 
         assert_eq!(trade.quantity_base, 1510.0 / 57963.0);
         assert_eq!(trade.quantity_quote, 1510.0);
@@ -111,19 +127,20 @@ mod trade {
 #[cfg(test)]
 mod l2_orderbook {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_l2};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2};
     use crypto_msg_type::MessageType;
 
     #[test]
     fn spot_update() {
         let raw_msg = r#"{"data":{"sequenceStart":1617071937790,"symbol":"BTC-USDT","changes":{"asks":[],"bids":[["39272","0.0530867","1617071937790"]]},"sequenceEnd":1617071937790},"subject":"trade.l2update","topic":"/market/level2:BTC-USDT","type":"message"}"#;
+        let received_at = 1625097804231_i64;
         let orderbook =
-            &parse_l2("kucoin", MarketType::Spot, raw_msg, Some(1625097804231)).unwrap()[0];
+            &parse_l2("kucoin", MarketType::Spot, raw_msg, Some(received_at)).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 0);
         assert_eq!(orderbook.bids.len(), 1);
         assert!(!orderbook.snapshot);
-        assert_eq!(orderbook.timestamp, 1625097804231);
+        assert_eq!(orderbook.timestamp, received_at);
         assert_eq!(orderbook.seq_id, Some(1617071937790));
 
         crate::utils::check_orderbook_fields(
@@ -134,6 +151,10 @@ mod l2_orderbook {
             extract_symbol("kucoin", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            received_at,
+            extract_timestamp("kucoin", MarketType::Spot, raw_msg, Some(received_at)).unwrap()
         );
 
         assert_eq!(orderbook.bids[0].price, 39272.0);
@@ -158,6 +179,10 @@ mod l2_orderbook {
             extract_symbol("kucoin", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622718985044,
+            extract_timestamp("kucoin", MarketType::InverseSwap, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622718985044);
@@ -187,6 +212,10 @@ mod l2_orderbook {
             orderbook,
             raw_msg,
         );
+        assert_eq!(
+            1622719195286,
+            extract_timestamp("kucoin", MarketType::LinearSwap, raw_msg, None).unwrap()
+        );
 
         assert_eq!(orderbook.timestamp, 1622719195286);
         assert_eq!(orderbook.seq_id, Some(1618232029293));
@@ -214,6 +243,10 @@ mod l2_orderbook {
             extract_symbol("kucoin", MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622719594867,
+            extract_timestamp("kucoin", MarketType::InverseFuture, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622719594867);

@@ -81,6 +81,33 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     }
 }
 
+pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to HashMap<String, Value>",
+            msg
+        ))
+    })?;
+    let feed = obj["feed"].as_str().unwrap();
+    match feed {
+        "trade" => Ok(Some(obj["time"].as_i64().unwrap())),
+        "trade_snapshot" => {
+            let trades = obj["trades"].as_array().unwrap();
+            let timestamp = trades.iter().fold(std::i64::MIN, |a, raw_trade| {
+                a.max(raw_trade["time"].as_i64().unwrap())
+            });
+            if timestamp == std::i64::MIN {
+                Err(SimpleError::new(format!("trades is empty in {}", msg)))
+            } else {
+                Ok(Some(timestamp))
+            }
+        }
+        "book" => Ok(Some(obj["timestamp"].as_i64().unwrap())),
+        "book_snapshot" => Ok(Some(obj["timestamp"].as_i64().unwrap())),
+        _ => Err(SimpleError::new(format!("Unknown feed in {}", msg))),
+    }
+}
+
 fn convert_trade(raw_trade: Trade) -> TradeMsg {
     let market_type = if raw_trade.product_id.starts_with("PI_") {
         MarketType::InverseSwap

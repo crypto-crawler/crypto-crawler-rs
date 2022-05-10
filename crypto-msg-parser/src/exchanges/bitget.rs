@@ -61,6 +61,26 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
     }
 }
 
+pub(crate) fn extract_timestamp(
+    _market_type: MarketType,
+    msg: &str,
+) -> Result<Option<i64>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Value>",
+            msg
+        ))
+    })?;
+    let timestamp = ws_msg.data.iter().fold(std::i64::MIN, |a, v| {
+        a.max(v["timestamp"].as_str().unwrap().parse::<i64>().unwrap())
+    });
+    if timestamp == std::i64::MIN {
+        Err(SimpleError::new(format!("data is empty in {}", msg)))
+    } else {
+        Ok(Some(timestamp))
+    }
+}
+
 pub(crate) fn get_msg_type(msg: &str) -> MessageType {
     if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
         let table = ws_msg.table;

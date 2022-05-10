@@ -37,6 +37,7 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("ADAM19", (331, 0.00000001)),
         ("ADAM20", (383, 0.00000001)),
         ("ADAM21", (523, 0.00000001)),
+        ("ADAM22", (814, 0.00000001)),
         ("ADAU18", (286, 0.00000001)),
         ("ADAU19", (339, 0.00000001)),
         ("ADAU20", (398, 0.00000001)),
@@ -51,6 +52,7 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("ADAZ21", (638, 0.00000001)),
         ("ALTMEXTUSDT", (801, 0.01)),
         ("ALTMEXUSD", (616, 0.01)),
+        ("APEUSDT", (826, 0.001)),
         ("AVAXUSD", (675, 0.001)),
         ("AVAXUSDT", (808, 0.001)),
         ("AXSUSD", (706, 0.01)),
@@ -140,6 +142,7 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("ETHM19", (327, 0.00001)),
         ("ETHM20", (379, 0.00001)),
         ("ETHM21", (526, 0.00001)),
+        ("ETHM22", (812, 0.00001)),
         ("ETHU17", (208, 0.00001)),
         ("ETHU18", (282, 0.00001)),
         ("ETHU19", (335, 0.00001)),
@@ -150,8 +153,10 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("ETHUSDH22", (762, 0.05)),
         ("ETHUSDM20", (386, 0.05)),
         ("ETHUSDM21", (527, 0.05)),
+        ("ETHUSDM22", (815, 0.05)),
         ("ETHUSDT", (734, 0.05)),
         ("ETHUSDTH22", (764, 0.05)),
+        ("ETHUSDTM22", (817, 0.05)),
         ("ETHUSDTZ21", (735, 0.05)),
         ("ETHUSDU20", (401, 0.05)),
         ("ETHUSDU21", (573, 0.05)),
@@ -168,6 +173,8 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("FCTXBT", (93, 0.000001)),
         ("FILUSDT", (556, 0.01)),
         ("FTMUSDT", (755, 0.0001)),
+        ("GMTUSD", (839, 0.0001)),
+        ("GMTUSDT", (838, 0.0001)),
         ("GNOM17", (184, 0.000001)),
         ("LINKUSD", (708, 0.001)),
         ("LINKUSDT", (441, 0.001)),
@@ -203,6 +210,8 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("MANAUSDT", (781, 0.0001)),
         ("MATICUSDT", (588, 0.0001)),
         ("METAMEXTUSDT", (803, 0.01)),
+        ("NEARUSD", (851, 0.001)),
+        ("NEARUSDT", (850, 0.001)),
         ("NEOG18", (269, 0.000001)),
         ("NEOH18", (270, 0.000001)),
         ("QTUMU17", (195, 0.000001)),
@@ -268,8 +277,10 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("XBTH21", (422, 0.5)),
         ("XBTH22", (633, 0.5)),
         ("XBTJ15", (26, 0.01)),
+        ("XBTJ22", (810, 0.5)),
         ("XBTK15", (27, 0.01)),
         ("XBTK15_M15", (30, 0.01)),
+        ("XBTK22", (827, 0.5)),
         ("XBTM15", (29, 0.01)),
         ("XBTM15_U15", (40, 0.01)),
         ("XBTM15_Z15", (42, 0.01)),
@@ -290,9 +301,12 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("XBTU19", (326, 0.5)),
         ("XBTU20", (378, 0.5)),
         ("XBTU21", (532, 0.5)),
+        ("XBTU22", (811, 0.5)),
         ("XBTUSD", (88, 0.01)),
         ("XBTUSDT", (732, 0.5)),
         ("XBTUSDTH22", (763, 0.5)),
+        ("XBTUSDTM22", (816, 0.5)),
+        ("XBTUSDTU22", (819, 0.5)),
         ("XBTUSDTZ21", (733, 0.5)),
         ("XBTV15", (56, 0.01)),
         ("XBTV21", (650, 0.5)),
@@ -307,6 +321,7 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("XBTZ19", (334, 0.5)),
         ("XBTZ20", (393, 0.5)),
         ("XBTZ21", (565, 0.5)),
+        ("XBTZ22", (818, 0.5)),
         ("XBU24H", (22, 0.01)),
         ("XBU7D", (63, 0.01)),
         ("XBUH15", (6, 0.01)),
@@ -346,6 +361,7 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("XRPM19", (329, 0.00000001)),
         ("XRPM20", (381, 0.00000001)),
         ("XRPM21", (531, 0.00000001)),
+        ("XRPM22", (813, 0.00000001)),
         ("XRPU17", (212, 0.00000001)),
         ("XRPU18", (284, 0.00000001)),
         ("XRPU19", (337, 0.00000001)),
@@ -490,6 +506,40 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
         Err(SimpleError::new("data is empty array"))
     } else {
         Ok(symbols[0].to_string())
+    }
+}
+
+pub(crate) fn extract_timestamp(
+    _market_type: MarketType,
+    msg: &str,
+) -> Result<Option<i64>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Value>",
+            msg
+        ))
+    })?;
+    let table = ws_msg.table.as_str();
+    match table {
+        "trade" => {
+            let timestamp = ws_msg.data.iter().fold(std::i64::MIN, |a, raw_trade| {
+                a.max(
+                    DateTime::parse_from_rfc3339(raw_trade["timestamp"].as_str().unwrap())
+                        .unwrap()
+                        .timestamp_millis(),
+                )
+            });
+            if timestamp == std::i64::MIN {
+                Err(SimpleError::new(format!("data is empty in {}", msg)))
+            } else {
+                Ok(Some(timestamp))
+            }
+        }
+        "orderBookL2_25" => Ok(None),
+        _ => Err(SimpleError::new(format!(
+            "Unknown table {} in {}",
+            table, msg
+        ))),
     }
 }
 

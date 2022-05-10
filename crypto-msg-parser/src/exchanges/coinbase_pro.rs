@@ -60,8 +60,32 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
             msg
         ))
     })?;
-    let symbol = ws_msg.get("product_id").unwrap().as_str().unwrap();
+    let symbol = ws_msg["product_id"].as_str().unwrap();
     Ok(symbol.to_string())
+}
+
+pub(crate) fn extract_timestamp(
+    _market_type: MarketType,
+    msg: &str,
+) -> Result<Option<i64>, SimpleError> {
+    let ws_msg = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to HashMap<String, Value>",
+            msg
+        ))
+    })?;
+    let type_ = ws_msg["type"].as_str().unwrap();
+    if type_ == "snapshot" {
+        Ok(None) // orderbook snapshot doesn't have a timestamp
+    } else if let Some(time) = ws_msg.get("time") {
+        Ok(Some(
+            DateTime::parse_from_rfc3339(time.as_str().unwrap())
+                .unwrap()
+                .timestamp_millis(),
+        ))
+    } else {
+        Err(SimpleError::new(format!("No time field in {}", msg)))
+    }
 }
 
 pub(crate) fn parse_trade(

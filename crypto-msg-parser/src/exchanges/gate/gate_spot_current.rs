@@ -69,6 +69,28 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     }
 }
 
+pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Value>",
+            msg
+        ))
+    })?;
+    if ws_msg.channel == "spot.trades" {
+        Ok(Some(
+            ws_msg.result["create_time_ms"]
+                .as_str()
+                .unwrap()
+                .parse::<f64>()
+                .unwrap() as i64,
+        ))
+    } else if ws_msg.channel.starts_with("spot.order_book") {
+        Ok(Some(ws_msg.result["t"].as_i64().unwrap()))
+    } else {
+        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
+    }
+}
+
 pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<SpotTradeMsg>>(msg).map_err(|_e| {
         SimpleError::new(format!(

@@ -1,15 +1,14 @@
+use crate::{exchanges::utils::calc_quantity_and_volume, Order, OrderBookMsg, TradeMsg, TradeSide};
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 use if_chain::if_chain;
-
-use crate::{exchanges::utils::calc_quantity_and_volume, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde_json::Value;
 use simple_error::SimpleError;
 
 const EXCHANGE_NAME: &str = "bitfinex";
 
-pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
+pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     let arr = serde_json::from_str::<Vec<Value>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
     if_chain! {
@@ -19,6 +18,46 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
             Ok(symbol.to_string())
         } else {
             Err(SimpleError::new(format!("Failed to extract symbol from {}", msg)))
+        }
+    }
+}
+
+pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
+    let arr = serde_json::from_str::<Vec<Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
+    if_chain! {
+        if let Some(obj) = arr[0].as_object();
+        if let Some(channel) = obj["channel"].as_str();
+        then {
+            match channel {
+                "trades" => {
+                    // see https://docs.bitfinex.com/reference#ws-public-trades
+                    if arr[1].is_string() {
+                        if let Some(timestamp) = arr[2].as_array().unwrap()[1].as_i64() {
+                            Ok(Some(timestamp))
+                        } else {
+                            Err(SimpleError::new(format!("Failed to extract timestamp from {}", msg)))
+                        }
+                    } else if arr[1].is_array() {
+                        // snapshot
+                        let raw_trades: Vec<Vec<f64>> = serde_json::from_value(arr[1].clone()).unwrap();
+                        let timestamp = raw_trades.iter().fold(std::i64::MIN, |a, raw_trade| {
+                            a.max(raw_trade[1] as i64)
+                        });
+                        if timestamp == std::i64::MIN {
+                            Err(SimpleError::new(format!("array is empty in {}", msg)))
+                        } else {
+                            Ok(Some(timestamp))
+                        }
+                    } else {
+                        Err(SimpleError::new(format!("Failed to extract timestamp from {}", msg)))
+                    }
+                }
+                "book" => Ok(None),
+                _ => Err(SimpleError::new(format!("Failed to extract timestamp from {}", msg)))
+            }
+        } else {
+            Err(SimpleError::new(format!("No channel field in {}", msg)))
         }
     }
 }

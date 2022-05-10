@@ -3,7 +3,7 @@ mod utils;
 #[cfg(test)]
 mod trade {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_trade, TradeSide};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
     use float_cmp::approx_eq;
 
     #[test]
@@ -21,6 +21,10 @@ mod trade {
             extract_symbol("okex", MarketType::Spot, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1616375788687,
+            extract_timestamp("okex", MarketType::Spot, raw_msg, None).unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.00020621);
@@ -43,6 +47,10 @@ mod trade {
             extract_symbol("okex", MarketType::LinearFuture, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1616376738087,
+            extract_timestamp("okex", MarketType::LinearFuture, raw_msg, None).unwrap()
         );
 
         assert!(approx_eq!(
@@ -77,6 +85,10 @@ mod trade {
             trade,
             raw_msg,
         );
+        assert_eq!(
+            1616376780684,
+            extract_timestamp("okex", MarketType::LinearSwap, raw_msg, None).unwrap()
+        );
 
         assert!(approx_eq!(
             f64,
@@ -110,6 +122,10 @@ mod trade {
             trade,
             raw_msg,
         );
+        assert_eq!(
+            1616376761377,
+            extract_timestamp("okex", MarketType::InverseFuture, raw_msg, None).unwrap()
+        );
 
         assert_eq!(trade.quantity_base, 100.0 * 7.0 / 59999.7);
         assert_eq!(trade.quantity_quote, 100.0 * 7.0);
@@ -132,6 +148,10 @@ mod trade {
             extract_symbol("okex", MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1616376794051,
+            extract_timestamp("okex", MarketType::InverseSwap, raw_msg, None).unwrap()
         );
 
         assert_eq!(trade.quantity_base, 100.0 * 1.0 / 56535.9);
@@ -156,6 +176,10 @@ mod trade {
             trade,
             raw_msg,
         );
+        assert_eq!(
+            1616241676947,
+            extract_timestamp("okex", MarketType::EuropeanOption, raw_msg, None).unwrap()
+        );
 
         assert_eq!(trade.quantity_base, 0.1 * 4.0);
         assert_eq!(trade.quantity_quote, 0.1 * 4.0 * 0.1545);
@@ -175,6 +199,10 @@ mod trade {
             extract_symbol("okex", MarketType::EuropeanOption, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1637664956522,
+            extract_timestamp("okex", MarketType::EuropeanOption, raw_msg, None).unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.1 * 10.0);
@@ -227,7 +255,7 @@ mod funding_rate {
 #[cfg(test)]
 mod l2_orderbook {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_l2};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2};
     use crypto_msg_type::MessageType;
 
     #[test]
@@ -247,6 +275,10 @@ mod l2_orderbook {
             extract_symbol("okex", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622723951253,
+            extract_timestamp("okex", MarketType::Spot, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622723951253);
@@ -278,6 +310,10 @@ mod l2_orderbook {
             orderbook,
             raw_msg,
         );
+        assert_eq!(
+            1622724009962,
+            extract_timestamp("okex", MarketType::Spot, raw_msg, None).unwrap()
+        );
 
         assert_eq!(orderbook.timestamp, 1622724009962);
 
@@ -307,6 +343,10 @@ mod l2_orderbook {
             extract_symbol("okex", MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622725774429,
+            extract_timestamp("okex", MarketType::LinearFuture, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622725774429);
@@ -340,6 +380,10 @@ mod l2_orderbook {
             orderbook,
             raw_msg,
         );
+        assert_eq!(
+            1622726064831,
+            extract_timestamp("okex", MarketType::InverseSwap, raw_msg, None).unwrap()
+        );
 
         assert_eq!(orderbook.timestamp, 1622726064831);
 
@@ -371,6 +415,10 @@ mod l2_orderbook {
             extract_symbol("okex", MarketType::EuropeanOption, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622726335745,
+            extract_timestamp("okex", MarketType::EuropeanOption, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622726335745);

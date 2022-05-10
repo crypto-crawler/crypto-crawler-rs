@@ -19,6 +19,19 @@ pub(crate) fn extract_symbol(market_type: MarketType, msg: &str) -> Result<Strin
     }
 }
 
+pub(crate) fn extract_timestamp(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Option<i64>, SimpleError> {
+    match market_type {
+        MarketType::Spot => kraken_spot::extract_timestamp(msg),
+        MarketType::InverseFuture | MarketType::InverseSwap => {
+            kraken_futures::extract_timestamp(msg)
+        }
+        _ => panic!("Kraken unknown market_type: {}", market_type),
+    }
+}
+
 pub(crate) fn get_msg_type(msg: &str) -> MessageType {
     if let Ok(arr) = serde_json::from_str::<Vec<Value>>(msg) {
         // spot
