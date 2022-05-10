@@ -41,6 +41,9 @@ pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
                     } else if arr[1].is_array() {
                         // snapshot
                         let raw_trades: Vec<Vec<f64>> = serde_json::from_value(arr[1].clone()).unwrap();
+                        if raw_trades.is_empty() {
+                            return Ok(None); // skip empty data like [{"channel":"trades","symbol":"tBTC:CNHT"}, []]
+                        }
                         let timestamp = raw_trades.iter().fold(std::i64::MIN, |a, raw_trade| {
                             a.max(raw_trade[1] as i64)
                         });
