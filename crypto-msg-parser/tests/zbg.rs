@@ -3,7 +3,7 @@ mod utils;
 #[cfg(test)]
 mod trade {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_trade, TradeSide};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
 
     #[test]
     fn spot() {
@@ -20,6 +20,10 @@ mod trade {
             extract_symbol("zbg", MarketType::Spot, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1616384937000,
+            extract_timestamp("zbg", MarketType::Spot, raw_msg, None).unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.048800);
@@ -38,6 +42,10 @@ mod trade {
             extract_symbol("zbg", MarketType::Spot, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1616486457000,
+            extract_timestamp("zbg", MarketType::Spot, raw_msg, None).unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.654172);
@@ -60,6 +68,10 @@ mod trade {
             extract_symbol("zbg", MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
             raw_msg,
+        );
+        assert_eq!(
+            1616385064674,
+            extract_timestamp("zbg", MarketType::LinearSwap, raw_msg, None).unwrap()
         );
 
         assert_eq!(trade.quantity_base, 0.01 * 31.0);
@@ -84,6 +96,10 @@ mod trade {
             trade,
             raw_msg,
         );
+        assert_eq!(
+            1616385036580,
+            extract_timestamp("zbg", MarketType::InverseSwap, raw_msg, None).unwrap()
+        );
 
         assert_eq!(trade.quantity_base, 188.0 / 57370.0);
         assert_eq!(trade.quantity_quote, 188.0);
@@ -95,7 +111,7 @@ mod trade {
 #[cfg(test)]
 mod l2_orderbook {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, parse_l2};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2};
     use crypto_msg_type::MessageType;
 
     #[test]
@@ -115,6 +131,10 @@ mod l2_orderbook {
             extract_symbol("zbg", MarketType::Spot, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622729950000,
+            extract_timestamp("zbg", MarketType::Spot, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622729950000);
@@ -146,6 +166,10 @@ mod l2_orderbook {
             orderbook,
             raw_msg,
         );
+        assert_eq!(
+            1622729958000,
+            extract_timestamp("zbg", MarketType::Spot, raw_msg, None).unwrap()
+        );
 
         assert_eq!(orderbook.timestamp, 1622729958000);
 
@@ -171,6 +195,10 @@ mod l2_orderbook {
             extract_symbol("zbg", MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622733219128,
+            extract_timestamp("zbg", MarketType::LinearSwap, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622733219128);
@@ -203,6 +231,10 @@ mod l2_orderbook {
             extract_symbol("zbg", MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
             raw_msg,
+        );
+        assert_eq!(
+            1622734001831,
+            extract_timestamp("zbg", MarketType::InverseSwap, raw_msg, None).unwrap()
         );
 
         assert_eq!(orderbook.timestamp, 1622734001831);
