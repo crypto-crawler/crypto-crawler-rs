@@ -123,7 +123,7 @@ mod l2_orderbook {
     use crypto_msg_type::MessageType;
 
     #[test]
-    fn spot_snapshot() {
+    fn spot_snapshot_1() {
         let raw_msg = r#"[["AE","329","BTC_USDT","1622729950",{"asks":[["38394.8","0.01917"],["38394.2","0.195885"]]},{"bids":[["38388.7","0.146025"],["38388.1","0.155175"]]}]]"#;
         let orderbook = &parse_l2("zbg", MarketType::Spot, raw_msg, None).unwrap()[0];
 
@@ -156,6 +156,46 @@ mod l2_orderbook {
         assert_eq!(orderbook.asks[0].price, 38394.2);
         assert_eq!(orderbook.asks[0].quantity_base, 0.195885);
         assert_eq!(orderbook.asks[0].quantity_quote, 38394.2 * 0.195885);
+    }
+
+    #[test]
+    fn spot_snapshot_2() {
+        let raw_msg = r#"[["AE","5374","SOS_USDT","1648785278",{"asks":[[0.00000471,2033667.52],[0.000004664,10167976.22]]},{"bids":[[0.000001726,41991455.48],["6E-7",300000000.00]]}]]"#;
+        let orderbook = &parse_l2("zbg", MarketType::Spot, raw_msg, None).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 2);
+        assert_eq!(orderbook.bids.len(), 2);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "zbg",
+            MarketType::Spot,
+            MessageType::L2Event,
+            "SOS/USDT".to_string(),
+            extract_symbol("zbg", MarketType::Spot, raw_msg).unwrap(),
+            orderbook,
+            raw_msg,
+        );
+        assert_eq!(
+            1648785278000,
+            extract_timestamp("zbg", MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+
+        assert_eq!(orderbook.timestamp, 1648785278000);
+
+        assert_eq!(orderbook.bids[0].price, 0.000001726);
+        assert_eq!(orderbook.bids[0].quantity_base, 41991455.48);
+        assert_eq!(orderbook.bids[0].quantity_quote, 0.000001726 * 41991455.48);
+
+        assert_eq!(orderbook.bids[1].price, 0.0000006);
+        assert_eq!(orderbook.bids[1].quantity_base, 300000000.0);
+        assert_eq!(orderbook.bids[1].quantity_quote, 0.0000006 * 300000000.0);
+
+        assert_eq!(orderbook.asks[0].price, 0.000004664);
+        assert_eq!(orderbook.asks[0].quantity_base, 10167976.22);
+        assert_eq!(orderbook.asks[0].quantity_quote, 0.000004664 * 10167976.22);
     }
 
     #[test]

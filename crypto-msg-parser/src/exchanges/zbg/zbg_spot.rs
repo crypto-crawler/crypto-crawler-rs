@@ -130,28 +130,27 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
         })?;
 
         let parse_order = |raw_order: &[Value; 2]| -> Order {
-            if raw_order[0].is_string() {
-                let price = raw_order[0].as_str().unwrap().parse::<f64>().unwrap();
-                let quantity_base = raw_order[1].as_str().unwrap().parse::<f64>().unwrap();
-
-                Order {
-                    price,
-                    quantity_base,
-                    quantity_quote: price * quantity_base,
-                    quantity_contract: None,
-                }
+            let price: f64 = if raw_order[0].is_string() {
+                raw_order[0].as_str().unwrap().parse::<f64>().unwrap()
             } else if raw_order[0].is_f64() {
-                let price = raw_order[0].as_f64().unwrap();
-                let quantity_base = raw_order[1].as_f64().unwrap();
-
-                Order {
-                    price,
-                    quantity_base,
-                    quantity_quote: price * quantity_base,
-                    quantity_contract: None,
-                }
+                raw_order[0].as_f64().unwrap()
             } else {
                 panic!("Unknown format {}", msg);
+            };
+
+            let quantity_base: f64 = if raw_order[1].is_string() {
+                raw_order[1].as_str().unwrap().parse::<f64>().unwrap()
+            } else if raw_order[1].is_f64() {
+                raw_order[1].as_f64().unwrap()
+            } else {
+                panic!("Unknown format {}", msg);
+            };
+
+            Order {
+                price,
+                quantity_base,
+                quantity_quote: price * quantity_base,
+                quantity_contract: None,
             }
         };
 
