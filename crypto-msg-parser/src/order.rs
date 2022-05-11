@@ -5,7 +5,6 @@ use serde::{
 };
 
 /// An order in the orderbook asks or bids array.
-#[derive(Clone)]
 pub struct Order {
     /// price
     pub price: f64,
@@ -29,8 +28,17 @@ impl Serialize for Order {
         };
         let mut seq = serializer.serialize_seq(Some(len))?;
         seq.serialize_element(&self.price)?;
-        seq.serialize_element(&self.quantity_base)?;
-        seq.serialize_element(&self.quantity_quote)?;
+        // limit the number of decimals to 12
+        let quantity_base = format!("{:.12}", self.quantity_base)
+            .as_str()
+            .parse::<f64>()
+            .unwrap();
+        let quantity_quote = format!("{:.12}", self.quantity_quote)
+            .as_str()
+            .parse::<f64>()
+            .unwrap();
+        seq.serialize_element(&quantity_base)?;
+        seq.serialize_element(&quantity_quote)?;
         if let Some(qc) = self.quantity_contract {
             seq.serialize_element(&qc)?;
         }
@@ -86,7 +94,7 @@ mod tests {
     fn order_serialize() {
         let order = Order {
             price: 59999.8,
-            quantity_base: 1.7,
+            quantity_base: 1.7000000000001,
             quantity_quote: 59999.8 * 1.7,
             quantity_contract: Some(1.7),
         };

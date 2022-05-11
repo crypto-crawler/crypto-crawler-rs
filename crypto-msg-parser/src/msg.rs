@@ -78,8 +78,10 @@ pub struct TradeMsg {
     /// price
     pub price: f64,
     // Number of base coins
+    #[serde(with = "crate::f64_limited_serde")]
     pub quantity_base: f64,
     // Number of quote coins(mostly USDT)
+    #[serde(with = "crate::f64_limited_serde")]
     pub quantity_quote: f64,
     /// Number of contracts, always None for Spot
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -112,8 +114,10 @@ pub struct OrderBookMsg {
     /// sorted in descending order by price if snapshot=true, otherwise not sorted
     pub bids: Vec<Order>,
     /// The sequence ID for this update (not all exchanges provide this information)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub seq_id: Option<u64>,
     /// The sequence ID for the previous update (not all exchanges provide this information)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub prev_seq_id: Option<u64>,
     /// the original JSON message
     pub json: String,

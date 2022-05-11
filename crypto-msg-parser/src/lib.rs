@@ -1,4 +1,5 @@
 pub mod exchanges;
+mod f64_limited_serde;
 mod msg;
 mod order;
 
