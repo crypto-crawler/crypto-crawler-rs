@@ -16,6 +16,8 @@ pub struct Message {
     pub market_type: MarketType,
     /// Message type
     pub msg_type: MessageType,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub symbol: Option<String>,
     /// Unix timestamp in milliseconds
     pub received_at: u64,
     /// the original message
@@ -33,6 +35,7 @@ impl Message {
             exchange,
             market_type,
             msg_type,
+            symbol: None,
             received_at: SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
@@ -41,6 +44,18 @@ impl Message {
                 .unwrap(),
             json,
         }
+    }
+
+    pub fn new_with_symbol(
+        exchange: String,
+        market_type: MarketType,
+        msg_type: MessageType,
+        symbol: String,
+        json: String,
+    ) -> Self {
+        let mut msg = Self::new(exchange, market_type, msg_type, json);
+        msg.symbol = Some(symbol);
+        msg
     }
 
     /// Convert to a TSV string.
@@ -61,6 +76,7 @@ impl Message {
             exchange: exchange.to_string(),
             market_type,
             msg_type,
+            symbol: None,
             received_at: v[0].parse::<u64>().unwrap(),
             json: v[1].to_string(),
         }

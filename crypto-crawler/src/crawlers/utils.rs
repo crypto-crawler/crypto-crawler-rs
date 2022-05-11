@@ -152,7 +152,7 @@ pub(crate) fn crawl_snapshot(
         let mut backoff_factor = 1;
         // retry 5 times at most
         while index < real_symbols.len() && backoff_factor < 6 {
-            let symbol = &real_symbols[index];
+            let symbol = real_symbols[index].as_str();
             let mut lock_ = lock.lock().unwrap();
             if !lock_.owns_lock() {
                 lock_.lock().unwrap();
@@ -173,7 +173,13 @@ pub(crate) fn crawl_snapshot(
                     index += 1;
                     success_count += 1;
                     backoff_factor = 1;
-                    let message = Message::new(exchange.to_string(), market_type, msg_type, msg);
+                    let message = Message::new_with_symbol(
+                        exchange.to_string(),
+                        market_type,
+                        msg_type,
+                        symbol.to_string(),
+                        msg,
+                    );
                     if tx.send(message).is_err() {
                         // break the loop if there is no receiver
                         break 'outer;
@@ -249,7 +255,7 @@ pub(crate) fn crawl_open_interest(exchange: &str, market_type: MarketType, tx: S
                 let mut backoff_factor = 1;
                 // retry 5 times at most
                 while index < real_symbols.len() && backoff_factor < 6 {
-                    let symbol = &real_symbols[index];
+                    let symbol = real_symbols[index].as_str();
                     let mut lock_ = lock.lock().unwrap();
                     if !lock_.owns_lock() {
                         lock_.lock().unwrap();
@@ -266,10 +272,11 @@ pub(crate) fn crawl_open_interest(exchange: &str, market_type: MarketType, tx: S
                             index += 1;
                             success_count += 1;
                             backoff_factor = 1;
-                            let message = Message::new(
+                            let message = Message::new_with_symbol(
                                 exchange.to_string(),
                                 market_type,
                                 MessageType::OpenInterest,
+                                symbol.to_string(),
                                 msg,
                             );
                             if tx.send(message).is_err() {
