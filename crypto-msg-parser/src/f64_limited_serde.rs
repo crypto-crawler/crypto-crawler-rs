@@ -1,11 +1,11 @@
 use serde::{de::Deserializer, ser::Serializer, Deserialize};
 
-/// Serialize a f64 to a string with 12 maximal decimals.
+/// Serialize a f64 to a string with 9 maximal decimals.
 pub fn serialize<S>(num: &f64, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {
-    let s = format!("{:.12}", num);
+    let s = format!("{:.9}", num);
     let x = s.as_str().trim_end_matches('0');
     serializer.serialize_str(x)
 }
@@ -31,21 +31,21 @@ mod tests {
     #[test]
     fn test_serialize() {
         let my_struct = MyStruct {
-            price: 1.8999999999999,
-        };
-        let text = serde_json::to_string(&my_struct).unwrap();
-        assert_eq!(text.as_str(), r#"{"price":"1.9"}"#);
-
-        let my_struct = MyStruct {
-            price: 1.2000000000001,
+            price: 1.2000000001,
         };
         let text = serde_json::to_string(&my_struct).unwrap();
         assert_eq!(text.as_str(), r#"{"price":"1.2"}"#);
+
+        let my_struct = MyStruct {
+            price: 1.2000000006,
+        };
+        let text = serde_json::to_string(&my_struct).unwrap();
+        assert_eq!(text.as_str(), r#"{"price":"1.200000001"}"#);
     }
 
     #[test]
     fn order_deserialize() {
-        let my_struct1 = serde_json::from_str::<MyStruct>(r#"{"price":"1.9"}"#).unwrap();
-        assert_eq!(my_struct1.price, 1.9);
+        let my_struct1 = serde_json::from_str::<MyStruct>(r#"{"price":"1.200000001"}"#).unwrap();
+        assert_eq!(my_struct1.price, 1.200000001);
     }
 }

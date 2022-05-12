@@ -28,12 +28,12 @@ impl Serialize for Order {
         };
         let mut seq = serializer.serialize_seq(Some(len))?;
         seq.serialize_element(&self.price)?;
-        // limit the number of decimals to 12
-        let quantity_base = format!("{:.12}", self.quantity_base)
+        // limit the number of decimals to 9
+        let quantity_base = format!("{:.9}", self.quantity_base)
             .as_str()
             .parse::<f64>()
             .unwrap();
-        let quantity_quote = format!("{:.12}", self.quantity_quote)
+        let quantity_quote = format!("{:.9}", self.quantity_quote)
             .as_str()
             .parse::<f64>()
             .unwrap();
@@ -94,12 +94,21 @@ mod tests {
     fn order_serialize() {
         let order = Order {
             price: 59999.8,
-            quantity_base: 1.7000000000001,
+            quantity_base: 1.7000000001,
             quantity_quote: 59999.8 * 1.7,
             quantity_contract: Some(1.7),
         };
         let text = serde_json::to_string(&order).unwrap();
         assert_eq!(text.as_str(), "[59999.8,1.7,101999.66,1.7]");
+
+        let order = Order {
+            price: 59999.8,
+            quantity_base: 1.7000000006,
+            quantity_quote: 59999.8 * 1.7,
+            quantity_contract: Some(1.7),
+        };
+        let text = serde_json::to_string(&order).unwrap();
+        assert_eq!(text.as_str(), "[59999.8,1.700000001,101999.66,1.7]");
     }
 
     #[test]
