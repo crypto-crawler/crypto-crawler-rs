@@ -29,18 +29,24 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
 pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
     if let Ok(list) = serde_json::from_str::<Vec<Vec<Value>>>(msg) {
         let timestamp = if msg.starts_with(r#"[["T","#) {
-            let timestamp = list.iter().fold(std::i64::MIN, |a, raw_trade| {
-                a.max(raw_trade[2].as_str().unwrap().parse::<i64>().unwrap() * 1000)
-            });
+            let timestamp = list
+                .iter()
+                .filter(|raw_trade| raw_trade[2].is_string())
+                .fold(std::i64::MIN, |a, raw_trade| {
+                    a.max(raw_trade[2].as_str().unwrap().parse::<i64>().unwrap() * 1000)
+                });
             timestamp
         } else {
-            let timestamp = list.iter().fold(std::i64::MIN, |a, raw_trade| {
-                a.max(raw_trade[3].as_str().unwrap().parse::<i64>().unwrap() * 1000)
-            });
+            let timestamp = list
+                .iter()
+                .filter(|raw_trade| raw_trade[3].is_string())
+                .fold(std::i64::MIN, |a, raw_trade| {
+                    a.max(raw_trade[3].as_str().unwrap().parse::<i64>().unwrap() * 1000)
+                });
             timestamp
         };
         if timestamp == std::i64::MIN {
-            Err(SimpleError::new(format!("array is empty in {}", msg)))
+            Ok(None) // some messages are empty, e.g., [["AE","5319","YFI_USDT",null,{"asks":null},{"bids":null}]]
         } else {
             Ok(Some(timestamp))
         }
@@ -156,6 +162,7 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
 
         let mut v = arr
             .iter()
+            .filter(|raw_orderbook| !raw_orderbook[3].is_null())
             .map(|raw_orderbook| {
                 let symbol = raw_orderbook[2].as_str().unwrap();
                 let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();

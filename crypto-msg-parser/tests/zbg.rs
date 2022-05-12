@@ -199,6 +199,21 @@ mod l2_orderbook {
     }
 
     #[test]
+    fn spot_snapshot_null() {
+        let raw_msg = r#"[["AE","5319","YFI_USDT",null,{"asks":null},{"bids":null}]]"#;
+        let orderbooks = &parse_l2("zbg", MarketType::Spot, raw_msg, None).unwrap();
+        assert!(orderbooks.is_empty());
+        assert_eq!(
+            "YFI_USDT",
+            extract_symbol("zbg", MarketType::Spot, raw_msg).unwrap()
+        );
+        assert_eq!(
+            None,
+            extract_timestamp("zbg", MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
     fn spot_update() {
         let raw_msg = r#"["E","329","1622729958","BTC_USDT","BID","38382.3","0.1842"]"#;
         let orderbook = &parse_l2("zbg", MarketType::Spot, raw_msg, None).unwrap()[0];
