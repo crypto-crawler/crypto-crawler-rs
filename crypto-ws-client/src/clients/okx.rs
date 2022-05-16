@@ -72,12 +72,13 @@ impl OkxWSClient {
 
 impl_trait!(Trade, OkxWSClient, subscribe_trade, "trades");
 impl_trait!(Ticker, OkxWSClient, subscribe_ticker, "tickers");
+impl_trait!(BBO, OkxWSClient, subscribe_bbo, "bbo-tbt");
 #[rustfmt::skip]
-impl_trait!(OrderBook, OkxWSClient, subscribe_orderbook, "books50-l2-tbt");
+// books-l2-tbt and books50-l2-tbt require login, only books doesn't require it
+impl_trait!(OrderBook, OkxWSClient, subscribe_orderbook, "books");
 #[rustfmt::skip]
 impl_trait!(OrderBookTopK, OkxWSClient, subscribe_orderbook_topk, "books5");
 impl_candlestick!(OkxWSClient);
-panic_bbo!(OkxWSClient);
 panic_l3_orderbook!(OkxWSClient);
 
 impl_ws_client_trait!(OkxWSClient);
@@ -159,11 +160,7 @@ impl MessageHandler for OkxMessageHandler {
                             // channel doesn't exist, ignore because some symbols don't exist in websocket while they exist in `/v3/instruments`
                             error!("Received {} from {}", msg, EXCHANGE_NAME);
                         }
-                        60018 => {
-                            // doesn't exist
-                            panic!("Received {} from {}", msg, EXCHANGE_NAME);
-                        }
-                        _ => warn!("Received {} from {}", msg, EXCHANGE_NAME),
+                        _ => panic!("Received {} from {}", msg, EXCHANGE_NAME),
                     }
                 }
                 "subscribe" => info!("Received {} from {}", msg, EXCHANGE_NAME),
