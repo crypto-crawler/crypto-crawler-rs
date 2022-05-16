@@ -32,7 +32,7 @@ struct RawOrderbookMsg {
     asks: Vec<[String; 4]>,
     bids: Vec<[String; 4]>,
     ts: String,
-    checksum: i64,
+    checksum: Option<i64>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -223,11 +223,24 @@ pub(crate) fn parse_l2(
             msg
         ))
     })?;
-    let snapshot = ws_msg.action.unwrap() == "snapshot";
+
+    let channel = ws_msg.arg["channel"].as_str();
+    let msg_type = if channel == "books5" {
+        MessageType::L2TopK
+    } else {
+        MessageType::L2Event
+    };
+    let snapshot = {
+        if let Some(action) = ws_msg.action {
+            action == "snapshot"
+        } else {
+            channel == "books5"
+        }
+    };
     debug_assert_eq!(ws_msg.data.len(), 1);
 
-    let symbol = ws_msg.arg["instId"].clone();
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+    let symbol = ws_msg.arg["instId"].as_str();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
 
     let mut orderbooks = ws_msg
         .data
@@ -251,9 +264,9 @@ pub(crate) fn parse_l2(
             OrderBookMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type,
-                symbol: symbol.clone(),
+                symbol: symbol.to_string(),
                 pair: pair.clone(),
-                msg_type: MessageType::L2Event,
+                msg_type,
                 timestamp,
                 seq_id: None,
                 prev_seq_id: None,
@@ -277,4 +290,11 @@ pub(crate) fn parse_l2(
         orderbooks[0].json = msg.to_string();
     }
     Ok(orderbooks)
+}
+
+pub(crate) fn parse_l2_topk(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    parse_l2(market_type, msg)
 }
