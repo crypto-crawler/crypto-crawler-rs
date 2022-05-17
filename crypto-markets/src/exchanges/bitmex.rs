@@ -84,7 +84,7 @@ struct Instrument {
     state: String,      // State of the instrument, it can be `Open`Closed`Unlisted`Expired`Cleared.
     typ: String,        // Type of the instrument (e.g. Futures, Perpetual Contracts).
     listing: String,
-    front: String,
+    front: Option<String>,
     expiry: Option<String>,
     settle: Option<String>,
     listedSettle: Option<String>,
@@ -111,8 +111,8 @@ struct Instrument {
     isInverse: bool,
     initMargin: f64,
     maintMargin: f64,
-    riskLimit: i64,
-    riskStep: i64,
+    riskLimit: Option<i64>,
+    riskStep: Option<i64>,
     limit: Option<i64>,
     capped: bool,
     taxed: bool,
@@ -158,7 +158,7 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
     let text = http_get("https://www.bitmex.com/api/v1/instrument/active", None)?;
     let instruments: Vec<Instrument> = serde_json::from_str::<Vec<Instrument>>(&text)?
         .into_iter()
-        .filter(|x| x.state == "Open")
+        .filter(|x| x.state == "Open" && x.hasLiquidity && x.openInterest > 0)
         .collect();
 
     let swap: Vec<Instrument> = instruments
