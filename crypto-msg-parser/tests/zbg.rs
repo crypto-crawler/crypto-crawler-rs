@@ -204,7 +204,7 @@ mod l2_orderbook {
         let orderbooks = &parse_l2("zbg", MarketType::Spot, raw_msg, None).unwrap();
         assert!(orderbooks.is_empty());
         assert_eq!(
-            "YFI_USDT",
+            "yfi_usdt",
             extract_symbol("zbg", MarketType::Spot, raw_msg).unwrap()
         );
         assert_eq!(

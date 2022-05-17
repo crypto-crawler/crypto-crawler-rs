@@ -9,15 +9,17 @@ use simple_error::SimpleError;
 
 const EXCHANGE_NAME: &str = "zbg";
 
+// NOTE:zbg spot websocket sometimes returns lowercase symbols, and sometimes
+// returns uppercase, which is very annoying, thus we unify to lowercase here
 pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     if let Ok(list) = serde_json::from_str::<Vec<Vec<Value>>>(msg) {
         if msg.starts_with(r#"[["T","#) {
-            Ok(list[0][3].as_str().unwrap().to_string())
+            Ok(list[0][3].as_str().unwrap().to_lowercase())
         } else {
-            Ok(list[0][2].as_str().unwrap().to_string())
+            Ok(list[0][2].as_str().unwrap().to_lowercase())
         }
     } else if let Ok(list) = serde_json::from_str::<Vec<Value>>(msg) {
-        Ok(list[3].as_str().unwrap().to_string())
+        Ok(list[3].as_str().unwrap().to_lowercase())
     } else {
         Err(SimpleError::new(format!(
             "Failed to extract symbol from {}",
@@ -95,7 +97,7 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
             TradeMsg {
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type: MarketType::Spot,
-                symbol: symbol.to_string(),
+                symbol: symbol.to_lowercase(),
                 pair: crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap(),
                 msg_type: MessageType::Trade,
                 timestamp,
@@ -196,7 +198,7 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
                 OrderBookMsg {
                     exchange: EXCHANGE_NAME.to_string(),
                     market_type: MarketType::Spot,
-                    symbol: symbol.to_string(),
+                    symbol: symbol.to_lowercase(),
                     pair,
                     msg_type: MessageType::L2Event,
                     timestamp,
@@ -221,7 +223,7 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
         let arr = serde_json::from_str::<Vec<String>>(msg).map_err(|_e| {
             SimpleError::new(format!("Failed to deserialize {} to Vec<String>", msg))
         })?;
-        let symbol = arr[3].clone();
+        let symbol = arr[3].to_lowercase();
         let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).ok_or_else(|| {
             SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg))
         })?;
