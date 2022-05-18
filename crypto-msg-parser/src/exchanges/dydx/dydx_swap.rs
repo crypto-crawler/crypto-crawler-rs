@@ -83,7 +83,7 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
                     )
                 });
             if timestamp == std::i64::MIN {
-                Err(SimpleError::new(format!("data is empty in {}", msg)))
+                Ok(None) // contents.trades is an empty array
             } else {
                 Ok(Some(timestamp))
             }
