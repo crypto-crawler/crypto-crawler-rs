@@ -78,11 +78,16 @@ pub(crate) fn extract_timestamp(
     if type_ == "snapshot" {
         Ok(None) // orderbook snapshot doesn't have a timestamp
     } else if let Some(time) = ws_msg.get("time") {
-        Ok(Some(
-            DateTime::parse_from_rfc3339(time.as_str().unwrap())
-                .unwrap()
-                .timestamp_millis(),
-        ))
+        let time_str = time.as_str().unwrap();
+        if time_str.starts_with("0001-01-01T00:00:00") {
+            Ok(None)
+        } else {
+            Ok(Some(
+                DateTime::parse_from_rfc3339(time_str)
+                    .unwrap()
+                    .timestamp_millis(),
+            ))
+        }
     } else {
         Err(SimpleError::new(format!("No time field in {}", msg)))
     }
