@@ -202,10 +202,10 @@ add_common_fields!(
     }
 );
 
-// TSV utilities.
+// CSV utilities.
 
 impl TradeMsg {
-    /// Convert to a TSV string.
+    /// Convert to a CSV string.
     ///
     /// The `exchange`, `market_type`, `msg_type`, `pair` and `symbol` fields are not
     /// included to save some disk space.
@@ -225,7 +225,7 @@ impl TradeMsg {
         )
     }
 
-    /// Convert from a TSV string.
+    /// Convert from a CSV string.
     pub fn from_csv_string(
         exchange: &str,
         market_type: &str,
@@ -267,7 +267,7 @@ impl TradeMsg {
 }
 
 impl OrderBookMsg {
-    /// Convert to a TSV string.
+    /// Convert to a CSV string.
     ///
     /// The `exchange`, `market_type`, `msg_type`, `pair` and `symbol` fields are not
     /// included to save some disk space.
@@ -283,7 +283,7 @@ impl OrderBookMsg {
         )
     }
 
-    /// Convert from a TSV string.
+    /// Convert from a CSV string.
     pub fn from_csv_string(
         exchange: &str,
         market_type: &str,
@@ -350,9 +350,9 @@ mod tests {
             trade_id: "1108933367".to_string(),
             json: r#"{"stream":"btcusdt@aggTrade","data":{"e":"aggTrade","E":1646092800098,"a":1108933367,"s":"BTCUSDT","p":"43150.80","q":"0.001","f":1987119093,"l":1987119093,"T":1646092800027,"m":true}}"#.to_string(),
         };
-        let tsv_string = trade_msg.to_csv_string();
-        let tsv_string_expected = r#"1646092800027	sell	43150.8	0.001	43.1508	0.001	1108933367	{"stream":"btcusdt@aggTrade","data":{"e":"aggTrade","E":1646092800098,"a":1108933367,"s":"BTCUSDT","p":"43150.80","q":"0.001","f":1987119093,"l":1987119093,"T":1646092800027,"m":true}}"#;
-        assert_eq!(tsv_string_expected, tsv_string);
+        let csv_string = trade_msg.to_csv_string();
+        let csv_string_expected = r#"1646092800027	sell	43150.8	0.001	43.1508	0.001	1108933367	{"stream":"btcusdt@aggTrade","data":{"e":"aggTrade","E":1646092800098,"a":1108933367,"s":"BTCUSDT","p":"43150.80","q":"0.001","f":1987119093,"l":1987119093,"T":1646092800027,"m":true}}"#;
+        assert_eq!(csv_string_expected, csv_string);
 
         let trade_msg_restored = TradeMsg::from_csv_string(
             "binance",
@@ -360,7 +360,7 @@ mod tests {
             "trade",
             "BTC/USDT",
             "BTCUSDT",
-            &tsv_string,
+            &csv_string,
         );
         assert_eq!(
             serde_json::to_string(&trade_msg).unwrap(),
@@ -410,9 +410,9 @@ mod tests {
             prev_seq_id: Some(1343268961876_u64),
             json: "".to_string(),
         };
-        let tsv_string = orderbook_msg.to_csv_string();
-        let tsv_string_expected = r#"1648785270714	false	[[44405.4,0.0,0.0,0.0],[44427.2,0.0,0.0,0.0]]	[[43633.4,4.515,197004.801,4.515],[43855.6,6.058,265677.2248,6.058]]	1343268964711	1343268961876"#;
-        assert_eq!(tsv_string_expected, tsv_string);
+        let csv_string = orderbook_msg.to_csv_string();
+        let csv_string_expected = r#"1648785270714	false	[[44405.4,0.0,0.0,0.0],[44427.2,0.0,0.0,0.0]]	[[43633.4,4.515,197004.801,4.515],[43855.6,6.058,265677.2248,6.058]]	1343268964711	1343268961876"#;
+        assert_eq!(csv_string_expected, csv_string);
 
         let orderbook_msg_restored = OrderBookMsg::from_csv_string(
             "binance",
@@ -420,7 +420,7 @@ mod tests {
             "l2_event",
             "BTC/USDT",
             "BTCUSDT",
-            &tsv_string,
+            &csv_string,
         );
         assert_eq!(
             serde_json::to_string(&orderbook_msg).unwrap(),
