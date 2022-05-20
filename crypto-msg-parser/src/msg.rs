@@ -209,7 +209,7 @@ impl TradeMsg {
     ///
     /// The `exchange`, `market_type`, `msg_type`, `pair` and `symbol` fields are not
     /// included to save some disk space.
-    pub fn to_tsv_string(&self) -> String {
+    pub fn to_csv_string(&self) -> String {
         format!(
             "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
             self.timestamp,
@@ -226,7 +226,7 @@ impl TradeMsg {
     }
 
     /// Convert from a TSV string.
-    pub fn from_tsv_string(
+    pub fn from_csv_string(
         exchange: &str,
         market_type: &str,
         msg_type: &str,
@@ -271,21 +271,20 @@ impl OrderBookMsg {
     ///
     /// The `exchange`, `market_type`, `msg_type`, `pair` and `symbol` fields are not
     /// included to save some disk space.
-    pub fn to_tsv_string(&self) -> String {
+    pub fn to_csv_string(&self) -> String {
         format!(
-            "{}\t{}\t{}\t{}\t{}\t{}\t{}",
+            "{}\t{}\t{}\t{}\t{}\t{}",
             self.timestamp,
             self.snapshot,
             serde_json::to_string(&self.asks).unwrap(),
             serde_json::to_string(&self.bids).unwrap(),
             self.seq_id.map(|x| x.to_string()).unwrap_or_default(),
-            self.prev_seq_id.map(|x| x.to_string()).unwrap_or_default(),
-            self.json
+            self.prev_seq_id.map(|x| x.to_string()).unwrap_or_default()
         )
     }
 
     /// Convert from a TSV string.
-    pub fn from_tsv_string(
+    pub fn from_csv_string(
         exchange: &str,
         market_type: &str,
         msg_type: &str,
@@ -294,7 +293,7 @@ impl OrderBookMsg {
         s: &str,
     ) -> Self {
         let v: Vec<&str> = s.split('\t').collect();
-        assert_eq!(7, v.len());
+        assert_eq!(6, v.len());
         let market_type = MarketType::from_str(market_type).unwrap();
         let msg_type = MessageType::from_str(msg_type).unwrap();
         let asks = serde_json::from_str::<Vec<Order>>(v[2]).unwrap();
@@ -322,15 +321,15 @@ impl OrderBookMsg {
             bids,
             seq_id,
             prev_seq_id,
-            json: v[6].to_string(),
+            json: "".to_string(),
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::TradeMsg;
     use super::TradeSide;
+    use super::{Order, OrderBookMsg, TradeMsg};
     use crypto_market_type::MarketType;
     use crypto_msg_type::MessageType;
 
@@ -351,11 +350,11 @@ mod tests {
             trade_id: "1108933367".to_string(),
             json: r#"{"stream":"btcusdt@aggTrade","data":{"e":"aggTrade","E":1646092800098,"a":1108933367,"s":"BTCUSDT","p":"43150.80","q":"0.001","f":1987119093,"l":1987119093,"T":1646092800027,"m":true}}"#.to_string(),
         };
-        let tsv_string = trade_msg.to_tsv_string();
+        let tsv_string = trade_msg.to_csv_string();
         let tsv_string_expected = r#"1646092800027	sell	43150.8	0.001	43.1508	0.001	1108933367	{"stream":"btcusdt@aggTrade","data":{"e":"aggTrade","E":1646092800098,"a":1108933367,"s":"BTCUSDT","p":"43150.80","q":"0.001","f":1987119093,"l":1987119093,"T":1646092800027,"m":true}}"#;
         assert_eq!(tsv_string_expected, tsv_string);
 
-        let trade_msg_restored = TradeMsg::from_tsv_string(
+        let trade_msg_restored = TradeMsg::from_csv_string(
             "binance",
             "linear_swap",
             "trade",
@@ -366,6 +365,66 @@ mod tests {
         assert_eq!(
             serde_json::to_string(&trade_msg).unwrap(),
             serde_json::to_string(&trade_msg_restored).unwrap()
+        );
+    }
+
+    #[test]
+    fn test_l2_event() {
+        let orderbook_msg = OrderBookMsg {
+            exchange: "binance".to_string(),
+            market_type: MarketType::LinearSwap,
+            symbol: "BTCUSDT".to_string(),
+            pair: "BTC/USDT".to_string(),
+            msg_type: MessageType::L2Event,
+            timestamp: 1648785270714,
+            snapshot: false,
+            asks: vec![
+                Order {
+                    price: 44405.4,
+                    quantity_base: 0.0,
+                    quantity_quote: 0.0,
+                    quantity_contract: Some(0.0),
+                },
+                Order {
+                    price: 44427.2,
+                    quantity_base: 0.0,
+                    quantity_quote: 0.0,
+                    quantity_contract: Some(0.0),
+                },
+            ],
+            bids: vec![
+                Order {
+                    price: 43633.4,
+                    quantity_base: 4.515,
+                    quantity_quote: 197004.801,
+                    quantity_contract: Some(4.515),
+                },
+                Order {
+                    price: 43855.6,
+                    quantity_base: 6.058,
+                    quantity_quote: 265677.2248,
+                    quantity_contract: Some(6.058),
+                },
+            ],
+            seq_id: Some(1343268964711_u64),
+            prev_seq_id: Some(1343268961876_u64),
+            json: "".to_string(),
+        };
+        let tsv_string = orderbook_msg.to_csv_string();
+        let tsv_string_expected = r#"1648785270714	false	[[44405.4,0.0,0.0,0.0],[44427.2,0.0,0.0,0.0]]	[[43633.4,4.515,197004.801,4.515],[43855.6,6.058,265677.2248,6.058]]	1343268964711	1343268961876"#;
+        assert_eq!(tsv_string_expected, tsv_string);
+
+        let orderbook_msg_restored = OrderBookMsg::from_csv_string(
+            "binance",
+            "linear_swap",
+            "l2_event",
+            "BTC/USDT",
+            "BTCUSDT",
+            &tsv_string,
+        );
+        assert_eq!(
+            serde_json::to_string(&orderbook_msg).unwrap(),
+            serde_json::to_string(&orderbook_msg_restored).unwrap()
         );
     }
 }
