@@ -94,19 +94,6 @@ async fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
     )
 }
 
-#[test_case(MarketType::InverseSwap, "BTCUSD_DMCBL")]
-#[test_case(MarketType::LinearSwap, "BTCUSDT_UMCBL")]
-#[tokio::test(flavor = "multi_thread")]
-async fn test_crawl_funding_rate(market_type: MarketType, symbol: &str) {
-    test_one_symbol!(
-        crawl_funding_rate,
-        EXCHANGE_NAME,
-        market_type,
-        symbol,
-        MessageType::FundingRate
-    )
-}
-
 #[test_case(MarketType::InverseSwap)]
 #[test_case(MarketType::LinearSwap)]
 #[tokio::test(flavor = "multi_thread", worker_threads = 16)]
