@@ -374,7 +374,6 @@ pub async fn crawl_funding_rate(
 ) {
     match exchange {
         "binance" => crawlers::binance::crawl_funding_rate(market_type, symbols, tx).await,
-        "bitget" => crawlers::bitget::crawl_funding_rate(market_type, symbols, tx).await,
         "bitmex" => crawlers::bitmex::crawl_funding_rate(market_type, symbols, tx).await,
         "huobi" => crawlers::huobi::crawl_funding_rate(market_type, symbols, tx).await,
         "okx" => crawlers::okx::crawl_funding_rate(market_type, symbols, tx).await,

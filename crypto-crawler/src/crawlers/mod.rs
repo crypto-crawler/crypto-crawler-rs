@@ -2,7 +2,6 @@
 mod utils;
 
 pub(super) mod binance;
-pub(super) mod bitget;
 pub(super) mod bitmex;
 pub(super) mod deribit;
 pub(super) mod huobi;
