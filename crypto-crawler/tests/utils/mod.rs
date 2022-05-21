@@ -3,6 +3,10 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
 pub(crate) fn parse(msg: Message) -> bool {
+    let skipped_exchanges = vec!["bitget"];
+    if skipped_exchanges.contains(&msg.exchange.as_str()) {
+        return true;
+    }
     match msg.msg_type {
         MessageType::Trade => {
             crypto_msg_parser::parse_trade(&msg.exchange, msg.market_type, &msg.json).is_ok()
