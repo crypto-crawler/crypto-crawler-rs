@@ -35,7 +35,7 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_trade,
-            &vec!["BTC-29APR22".to_string(), "BTC-24JUN22".to_string()]
+            &vec!["BTC-24JUN22".to_string(), "BTC-30SEP22".to_string()]
         );
     }
 
@@ -44,7 +44,7 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_ticker,
-            &vec!["BTC-24JUN22".to_string()]
+            &vec!["BTC-30SEP22".to_string()]
         );
     }
 
@@ -53,7 +53,7 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_orderbook,
-            &vec!["BTC-24JUN22".to_string()]
+            &vec!["BTC-30SEP22".to_string()]
         );
     }
 
@@ -62,14 +62,14 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_orderbook_topk,
-            &vec!["BTC-24JUN22".to_string()]
+            &vec!["BTC-30SEP22".to_string()]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(DeribitWSClient, &vec![("BTC-24JUN22".to_string(), 60)]);
-        gen_test_subscribe_candlestick!(DeribitWSClient, &vec![("BTC-24JUN22".to_string(), 86400)]);
+        gen_test_subscribe_candlestick!(DeribitWSClient, &vec![("BTC-30SEP22".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(DeribitWSClient, &vec![("BTC-30SEP22".to_string(), 86400)]);
     }
 }
 
@@ -140,10 +140,10 @@ mod deribit_option {
     use crypto_ws_client::{DeribitWSClient, WSClient};
 
     const SYMBOLS: &'static [&str] = &[
-        "BTC-29APR22-50000-C",
-        "BTC-29APR22-60000-C",
-        "BTC-24JUN22-40000-C",
+        "BTC-24JUN22-50000-C",
         "BTC-24JUN22-60000-C",
+        "BTC-30SEP22-40000-C",
+        "BTC-30SEP22-60000-C",
     ];
 
     #[ignore = "lack of liquidity"]

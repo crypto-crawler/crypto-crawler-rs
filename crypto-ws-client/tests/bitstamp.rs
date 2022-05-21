@@ -20,7 +20,10 @@ async fn subscribe_raw_json() {
     gen_test_code!(
         BitstampWSClient,
         send,
-        &vec![r#"{"event":"bts:subscribe","data":{"channel":"live_trades_btcusd"}}"#.to_string()]
+        &vec![
+            r#"{"event":"bts:subscribe","data":{"channel":"live_trades_btcusd"}}"#.to_string(),
+            r#"{"event":"bts:subscribe","data":{"channel":"live_trades_ethusd"}}"#.to_string()
+        ]
     );
 }
 
