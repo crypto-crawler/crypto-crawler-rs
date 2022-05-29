@@ -224,6 +224,7 @@ mod okx_option {
     use crypto_ws_client::{OkxWSClient, WSClient};
 
     #[tokio::test(flavor = "multi_thread")]
+    #[ignore = "lack of liquidity"]
     async fn subscribe_trade() {
         gen_test_code!(
             OkxWSClient,
@@ -269,6 +270,7 @@ mod okx_option {
     }
 
     #[tokio::test(flavor = "multi_thread")]
+    #[ignore = "lack of liquidity"]
     async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             OkxWSClient,

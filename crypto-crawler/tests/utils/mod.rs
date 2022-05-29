@@ -3,7 +3,7 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
 pub(crate) fn parse(msg: Message) -> bool {
-    let skipped_exchanges = vec!["bitget"];
+    let skipped_exchanges = vec!["bitget", "zb"];
     if skipped_exchanges.contains(&msg.exchange.as_str()) {
         return true;
     }

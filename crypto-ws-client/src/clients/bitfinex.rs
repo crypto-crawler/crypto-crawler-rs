@@ -247,7 +247,7 @@ impl MessageHandler for BitfinexMessageHandler {
         } else {
             debug_assert!(txt.starts_with('['));
             let arr = serde_json::from_str::<Vec<Value>>(txt).unwrap();
-            if arr.len() == 0 {
+            if arr.is_empty() {
                 MiscMessage::Other // ignore empty array
             } else if arr.len() == 2 && arr[1].as_str().unwrap_or("null") == "hb" {
                 // If there is no activity in the channel for 15 seconds, the Websocket server

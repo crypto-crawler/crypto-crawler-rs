@@ -103,6 +103,20 @@ macro_rules! panic_bbo {
     };
 }
 
+macro_rules! panic_l2 {
+    ($struct_name:ident) => {
+        #[async_trait]
+        impl OrderBook for $struct_name {
+            async fn subscribe_orderbook(&self, _symbols: &[String]) {
+                panic!(
+                    "{} does NOT have the incremental level2 websocket channel",
+                    EXCHANGE_NAME
+                );
+            }
+        }
+    };
+}
+
 macro_rules! panic_l2_topk {
     ($struct_name:ident) => {
         #[async_trait]

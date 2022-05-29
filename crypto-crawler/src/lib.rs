@@ -240,7 +240,8 @@ pub async fn crawl_trade(
         "bitmex" => crawlers::bitmex::crawl_trade(market_type, symbols, tx).await,
         "deribit" => crawlers::deribit::crawl_trade(market_type, symbols, tx).await,
         "bitfinex" | "bitget" | "bithumb" | "bitstamp" | "bitz" | "bybit" | "coinbase_pro"
-        | "dydx" | "ftx" | "gate" | "huobi" | "kraken" | "kucoin" | "mexc" | "okx" | "zbg" => {
+        | "dydx" | "ftx" | "gate" | "huobi" | "kraken" | "kucoin" | "mexc" | "okx" | "zb"
+        | "zbg" => {
             crawlers::crawl_event(exchange, MessageType::Trade, market_type, symbols, tx).await
         }
         _ => panic!("{} does NOT have the trade websocket channel", exchange),
@@ -259,7 +260,7 @@ pub async fn crawl_l2_event(
         "huobi" => crawlers::huobi::crawl_l2_event(market_type, symbols, tx).await,
         "binance" | "bitfinex" | "bitget" | "bithumb" | "bitstamp" | "bitz" | "bybit"
         | "coinbase_pro" | "deribit" | "dydx" | "ftx" | "gate" | "kraken" | "kucoin" | "mexc"
-        | "okx" | "zbg" => {
+        | "okx" | "zb" | "zbg" => {
             crawlers::crawl_event(exchange, MessageType::L2Event, market_type, symbols, tx).await
         }
         _ => panic!(
@@ -325,7 +326,7 @@ pub async fn crawl_l2_topk(
     match exchange {
         "bitmex" => crawlers::bitmex::crawl_l2_topk(market_type, symbols, tx).await,
         "binance" | "bitget" | "bybit" | "bitstamp" | "deribit" | "huobi" | "kucoin" | "mexc"
-        | "okx" => {
+        | "okx" | "zb" => {
             crawlers::crawl_event(exchange, MessageType::L2TopK, market_type, symbols, tx).await
         }
         _ => panic!(
@@ -361,6 +362,7 @@ pub async fn crawl_ticker(
         | "gate" | "huobi" | "kraken" | "kucoin" | "mexc" | "okx" | "zbg" => {
             crawlers::crawl_event(exchange, MessageType::Ticker, market_type, symbols, tx).await
         }
+        "zb" => crawlers::zb::crawl_ticker(market_type, symbols, tx).await,
         _ => panic!("{} does NOT have the ticker websocket channel", exchange),
     }
 }
@@ -396,7 +398,7 @@ pub async fn crawl_candlestick(
             crawlers::bitmex::crawl_candlestick(market_type, symbol_interval_list, tx).await
         }
         "binance" | "bitfinex" | "bitget" | "bitz" | "bybit" | "deribit" | "gate" | "huobi"
-        | "kraken" | "kucoin" | "mexc" | "okx" | "zbg" => {
+        | "kraken" | "kucoin" | "mexc" | "okx" | "zb" | "zbg" => {
             crawlers::crawl_candlestick_ext(exchange, market_type, symbol_interval_list, tx).await
         }
         _ => panic!(

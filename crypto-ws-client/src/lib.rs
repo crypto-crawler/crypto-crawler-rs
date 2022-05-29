@@ -66,5 +66,5 @@ pub use common::ws_client::WSClient;
 pub use clients::{
     binance::*, binance_option::*, bitfinex::*, bitget::*, bithumb::*, bitmex::*, bitstamp::*,
     bitz::*, bybit::*, coinbase_pro::*, deribit::*, dydx::*, ftx::*, gate::*, huobi::*, kraken::*,
-    kucoin::*, mexc::*, okx::*, zbg::*,
+    kucoin::*, mexc::*, okx::*, zb::*, zbg::*,
 };

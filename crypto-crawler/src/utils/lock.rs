@@ -23,6 +23,7 @@ const EXCHANGES: &[&str] = &[
     "kucoin",
     "mexc",
     "okx",
+    "zb",
     "zbg",
 ];
 
@@ -89,6 +90,11 @@ fn get_lock_file_name(exchange: &str, market_type: MarketType, prefix: &str) -> 
             _ => panic!("Unknown market_type {} of {}", market_type, exchange),
         },
         "okx" => "okx.lock".to_string(),
+        "zb" => match market_type {
+            MarketType::LinearSwap => "zb_swap.lock".to_string(),
+            MarketType::Spot => "zb_spot.lock".to_string(),
+            _ => panic!("Unknown market_type {} of {}", market_type, exchange),
+        },
         "zbg" => match market_type {
             MarketType::InverseSwap | MarketType::LinearSwap => "zbg_swap.lock".to_string(),
             MarketType::Spot => "zbg_spot.lock".to_string(),

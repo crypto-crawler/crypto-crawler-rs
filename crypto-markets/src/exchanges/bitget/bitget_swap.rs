@@ -81,7 +81,7 @@ pub(super) fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
 pub(super) fn fetch_inverse_swap_markets() -> Result<Vec<Market>> {
     let markets = fetch_swap_markets_raw("dmcbl")?
         .into_iter()
-        .map(|m| to_market(m))
+        .map(to_market)
         .collect::<Vec<Market>>();
     Ok(markets)
 }
@@ -89,7 +89,7 @@ pub(super) fn fetch_inverse_swap_markets() -> Result<Vec<Market>> {
 pub(super) fn fetch_linear_swap_markets() -> Result<Vec<Market>> {
     let markets = fetch_swap_markets_raw("umcbl")?
         .into_iter()
-        .map(|m| to_market(m))
+        .map(to_market)
         .collect::<Vec<Market>>();
     Ok(markets)
 }
