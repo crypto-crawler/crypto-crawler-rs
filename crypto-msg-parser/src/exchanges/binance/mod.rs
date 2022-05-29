@@ -18,13 +18,32 @@ pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
             msg
         ))
     })?;
+
+    let stream = obj["stream"].as_str().unwrap();
+    if stream.starts_with('!') && stream.ends_with("@arr") {
+        // for example: !ticker@arr, !markPrice@arr
+        return Ok("ALL".to_string());
+    }
+
     let data = obj
         .get("data")
-        .ok_or_else(|| SimpleError::new(format!("There is no data field in {}", msg)))?;
-    let symbol = data["s"].as_str().ok_or_else(|| {
-        SimpleError::new(format!("There is no s field in the data field of {}", msg))
-    })?;
-    Ok(symbol.to_string())
+        .expect("The data field does NOT exist")
+        .as_object()
+        .expect("The data field is NOT an object");
+    if data.contains_key("s") {
+        let symbol = data["s"].as_str().ok_or_else(|| {
+            SimpleError::new(format!("There is no s field in the data field of {}", msg))
+        })?;
+        Ok(symbol.to_string())
+    } else if !(stream.starts_with('!') && stream.ends_with("@arr")) {
+        let symbol = stream.split('@').next().unwrap();
+        Ok(symbol.to_uppercase())
+    } else {
+        Err(SimpleError::new(format!(
+            "Failed to extract symbol from {}",
+            msg
+        )))
+    }
 }
 
 pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
@@ -34,13 +53,23 @@ pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
             msg
         ))
     })?;
-    let data = obj
-        .get("data")
-        .ok_or_else(|| SimpleError::new(format!("There is no data field in {}", msg)))?;
-    let timestamp = data["E"]
-        .as_i64()
-        .ok_or_else(|| SimpleError::new(format!("There is no E field in {}", msg)))?;
-    Ok(Some(timestamp))
+    let data = obj.get("data").expect("The data field does NOT exist");
+    if data.is_object() {
+        Ok(data.get("E").map(|x| x.as_i64().unwrap())) // !bookTicker has no E field
+    } else if data.is_array() {
+        let timestamp = data
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|x| x["E"].as_i64().unwrap())
+            .max();
+        Ok(timestamp)
+    } else {
+        Err(SimpleError::new(format!(
+            "Failed to extract timestamp from {}",
+            msg
+        )))
+    }
 }
 
 pub(crate) fn get_msg_type(msg: &str) -> MessageType {
