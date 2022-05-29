@@ -1,5 +1,6 @@
 mod binance_all;
 mod binance_option;
+mod binance_spot;
 
 use std::collections::HashMap;
 
@@ -10,6 +11,8 @@ use crate::{FundingRateMsg, OrderBookMsg, TradeMsg};
 
 use serde_json::Value;
 use simple_error::SimpleError;
+
+const EXCHANGE_NAME: &str = "binance";
 
 pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     let obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
@@ -142,9 +145,12 @@ pub(crate) fn parse_l2(
 pub(crate) fn parse_l2_topk(
     market_type: MarketType,
     msg: &str,
+    received_at: Option<i64>,
 ) -> Result<Vec<OrderBookMsg>, SimpleError> {
     if market_type == MarketType::EuropeanOption {
-        Ok(Vec::new())
+        Err(SimpleError::new("Not implemented"))
+    } else if market_type == MarketType::Spot {
+        binance_spot::parse_l2_topk(msg, received_at)
     } else {
         binance_all::parse_l2_topk(market_type, msg)
     }

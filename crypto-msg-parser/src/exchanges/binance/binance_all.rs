@@ -4,12 +4,11 @@ use crypto_msg_type::MessageType;
 use crate::{FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use super::super::utils::calc_quantity_and_volume;
+use super::EXCHANGE_NAME;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
 use std::collections::HashMap;
-
-const EXCHANGE_NAME: &str = "binance";
 
 // see https://binance-docs.github.io/apidocs/spot/en/#aggregate-trade-streams
 #[derive(Serialize, Deserialize)]
@@ -78,7 +77,7 @@ struct WebsocketMsg<T: Sized> {
     data: T,
 }
 
-pub(crate) fn parse_trade(
+pub(super) fn parse_trade(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<TradeMsg>, SimpleError> {
@@ -110,7 +109,7 @@ pub(crate) fn parse_trade(
                 symbol: agg_trade.s.clone(),
                 pair,
                 msg_type: MessageType::Trade,
-                timestamp: agg_trade.T,
+                timestamp: agg_trade.E,
                 price,
                 quantity_base,
                 quantity_quote,
@@ -144,7 +143,7 @@ pub(crate) fn parse_trade(
                 symbol: raw_trade.s.clone(),
                 pair,
                 msg_type: MessageType::Trade,
-                timestamp: raw_trade.T,
+                timestamp: raw_trade.E,
                 price,
                 quantity_base,
                 quantity_quote,
@@ -167,7 +166,7 @@ pub(crate) fn parse_trade(
     }
 }
 
-pub(crate) fn parse_l2(
+pub(super) fn parse_l2(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<OrderBookMsg>, SimpleError> {
@@ -207,11 +206,7 @@ pub(crate) fn parse_l2(
         symbol: ws_msg.data.s.clone(),
         pair: pair.clone(),
         msg_type: MessageType::L2Event,
-        timestamp: if market_type == MarketType::Spot {
-            ws_msg.data.E
-        } else {
-            ws_msg.data.T.unwrap()
-        },
+        timestamp: ws_msg.data.E,
         seq_id: Some(ws_msg.data.u),
         prev_seq_id: ws_msg.data.pu,
         asks: ws_msg
@@ -232,7 +227,7 @@ pub(crate) fn parse_l2(
     Ok(vec![orderbook])
 }
 
-pub(crate) fn parse_l2_topk(
+pub(super) fn parse_l2_topk(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<OrderBookMsg>, SimpleError> {
@@ -263,7 +258,7 @@ struct RawFundingRateMsg {
     extra: HashMap<String, Value>,
 }
 
-pub(crate) fn parse_funding_rate(
+pub(super) fn parse_funding_rate(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<FundingRateMsg>, SimpleError> {
