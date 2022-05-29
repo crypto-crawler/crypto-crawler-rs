@@ -22,6 +22,7 @@ pub fn get_contract_value(exchange: &str, market_type: MarketType, pair: &str) -
         "kucoin" => exchanges::kucoin::get_contract_value(market_type, pair),
         "mxc" | "mexc" => exchanges::mexc::get_contract_value(market_type, pair),
         "okex" | "okx" => exchanges::okx::get_contract_value(market_type, pair),
+        "zb" => Some(1.0),
         "zbg" => exchanges::zbg::get_contract_value(market_type, pair),
         _ => panic!("Unknown exchange {}", exchange),
     }

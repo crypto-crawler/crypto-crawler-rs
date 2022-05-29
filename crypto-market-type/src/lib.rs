@@ -138,6 +138,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::InverseSwap,
             MarketType::EuropeanOption,
         ],
+        "zb" => vec![MarketType::Spot, MarketType::LinearSwap],
         "zbg" => vec![
             MarketType::Spot,
             MarketType::InverseSwap,

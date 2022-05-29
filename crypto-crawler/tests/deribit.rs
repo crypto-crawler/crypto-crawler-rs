@@ -19,8 +19,8 @@ async fn test_crawl_trade_all(market_type: MarketType) {
 }
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
-#[test_case(MarketType::InverseFuture, "BTC-30SEP22")]
-#[test_case(MarketType::EuropeanOption, "BTC-24JUN22-40000-C"; "inconclusive")]
+// #[test_case(MarketType::InverseFuture, "BTC-30SEP22")]
+// #[test_case(MarketType::EuropeanOption, "BTC-24JUN22-40000-C")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     test_one_symbol!(

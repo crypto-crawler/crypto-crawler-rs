@@ -28,6 +28,7 @@ pub use exchanges::{
     kucoin::*,
     mexc::{mexc_spot::MexcSpotRestClient, mexc_swap::MexcSwapRestClient},
     okx::OkxRestClient,
+    zb::*,
     zbg::*,
 };
 
@@ -60,6 +61,7 @@ fn fetch_l2_snapshot_internal(
         "kucoin" => exchanges::kucoin::fetch_l2_snapshot(market_type, symbol),
         "mexc" => exchanges::mexc::fetch_l2_snapshot(market_type, symbol),
         "okx" => exchanges::okx::OkxRestClient::fetch_l2_snapshot(symbol),
+        "zb" => exchanges::zb::fetch_l2_snapshot(market_type, symbol),
         "zbg" => exchanges::zbg::fetch_l2_snapshot(market_type, symbol),
         _ => panic!("Unknown exchange {}", exchange),
     }

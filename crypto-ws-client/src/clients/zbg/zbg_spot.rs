@@ -20,7 +20,7 @@ const WEBSOCKET_URL: &str = "wss://kline.zbg.com/websocket";
 
 /// The WebSocket client for ZBG spot market.
 ///
-/// * WebSocket API doc: <https://zbgapi.github.io/docs/spot/v1/en/#websocket-market-data>
+/// * WebSocket API doc: <https://www.zbg.com/docs/spot/v1/en/#websocket-market-data>
 /// * Trading at: <https://www.zbg.com/trade/>
 pub struct ZbgSpotWSClient {
     client: WSClientInternal<ZbgMessageHandler>,

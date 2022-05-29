@@ -1,6 +1,6 @@
 [package]
 name = "crypto-market-type"
-version = "1.0.9"
+version = "1.1.0"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "Cryptocurrenty market type"
@@ -9,6 +9,6 @@ repository = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/cryp
 keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
-serde = { version = "1.0.136", features = ["derive"] }
+serde = { version = "1.0.137", features = ["derive"] }
 strum = "0.24.0"
 strum_macros = "0.24.0"

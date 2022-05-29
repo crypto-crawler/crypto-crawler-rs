@@ -450,6 +450,11 @@ async fn create_ws_client_internal(
             _ => panic!("MEXC does NOT have the {} market type", market_type),
         },
         "okx" => Arc::new(OkxWSClient::new(tx, None).await),
+        "zb" => match market_type {
+            MarketType::Spot => Arc::new(ZbSpotWSClient::new(tx, None).await),
+            MarketType::LinearSwap => Arc::new(ZbSwapWSClient::new(tx, None).await),
+            _ => panic!("ZB does NOT have the {} market type", market_type),
+        },
         "zbg" => match market_type {
             MarketType::Spot => Arc::new(ZbgSpotWSClient::new(tx, None).await),
             MarketType::InverseSwap | MarketType::LinearSwap => {
@@ -852,6 +857,11 @@ fn get_candlestick_intervals(exchange: &str, market_type: MarketType) -> Vec<usi
             _ => vec![60, 300],
         },
         "okx" => vec![60, 180, 300],
+        "zb" => match market_type {
+            MarketType::Spot => vec![60, 180, 300],
+            MarketType::LinearSwap => vec![60, 300],
+            _ => vec![60, 180, 300],
+        },
         "zbg" => match market_type {
             MarketType::Spot => vec![60, 300],
             _ => vec![60, 180, 300],

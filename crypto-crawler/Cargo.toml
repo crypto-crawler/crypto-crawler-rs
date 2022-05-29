@@ -1,6 +1,6 @@
 [package]
 name = "crypto-crawler"
-version = "4.3.0"
+version = "4.3.1"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "A rock-solid cryprocurrency crawler."
@@ -9,15 +9,15 @@ repository = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/cryp
 keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
-crypto-markets = "1.2.2"
-crypto-market-type = "1.0.9"
-crypto-msg-parser = "2.1.8"
+crypto-markets = "1.2.4"
+crypto-market-type = "1.1.0"
+crypto-msg-parser = "2.2.1"
 crypto-msg-type = "1.0.6"
-crypto-pair = "2.2.3"
-crypto-rest-client = "0.8.9"
-crypto-ws-client = "4.10.8"
+crypto-pair = "2.2.6"
+crypto-rest-client = "0.9.0"
+crypto-ws-client = "4.11.1"
 fslock = "0.2.1"
-once_cell = "1.11.0"
+once_cell = "1.12.0"
 log = "0.4.17"
 rand = "0.8.5"
 reqwest = { version = "0.11.10", features = ["blocking", "gzip"] }

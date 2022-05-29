@@ -35,6 +35,7 @@ pub fn extract_symbol(
         "mxc" | "mexc" => exchanges::mexc::extract_symbol(msg),
         "okex" => exchanges::okex::extract_symbol(market_type, msg),
         "okx" => exchanges::okx::extract_symbol(market_type, msg),
+        "zb" => exchanges::zb::extract_symbol(market_type, msg),
         "zbg" => exchanges::zbg::extract_symbol(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
@@ -66,6 +67,7 @@ pub fn extract_timestamp(
         "mxc" | "mexc" => exchanges::mexc::extract_timestamp(msg),
         "okex" => exchanges::okex::extract_timestamp(market_type, msg),
         "okx" => exchanges::okx::extract_timestamp(market_type, msg),
+        "zb" => exchanges::zb::extract_timestamp(market_type, msg),
         "zbg" => exchanges::zbg::extract_timestamp(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
@@ -97,6 +99,7 @@ pub fn parse_trade(
         "mxc" | "mexc" => exchanges::mexc::parse_trade(market_type, msg),
         "okex" => exchanges::okex::parse_trade(market_type, msg),
         "okx" => exchanges::okx::parse_trade(market_type, msg),
+        "zb" => exchanges::zb::parse_trade(market_type, msg),
         "zbg" => exchanges::zbg::parse_trade(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
@@ -141,6 +144,7 @@ pub fn parse_l2(
         "mxc" | "mexc" => exchanges::mexc::parse_l2(market_type, msg, timestamp),
         "okex" => exchanges::okex::parse_l2(market_type, msg),
         "okx" => exchanges::okx::parse_l2(market_type, msg),
+        "zb" => exchanges::zb::parse_l2(market_type, msg),
         "zbg" => exchanges::zbg::parse_l2(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     };

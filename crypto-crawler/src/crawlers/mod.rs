@@ -7,6 +7,7 @@ pub(super) mod deribit;
 pub(super) mod huobi;
 pub(super) mod kucoin;
 pub(super) mod okx;
+pub(super) mod zb;
 
 pub use utils::fetch_symbols_retry;
 pub(super) use utils::{

@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
@@ -39,8 +40,6 @@ pub fn check_trade_fields(
     assert_eq!(trade.timestamp.to_string().len(), 13);
 }
 
-// TODO: weird, it is actually being used
-#[allow(dead_code)]
 pub fn check_orderbook_fields(
     exchange: &str,
     market_type: MarketType,
@@ -75,8 +74,6 @@ pub fn check_orderbook_fields(
     }
 }
 
-// TODO: fake warning
-#[allow(dead_code)]
 pub fn check_funding_rate_fields(
     exchange: &str,
     market_type: MarketType,

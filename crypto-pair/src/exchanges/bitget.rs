@@ -16,6 +16,7 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
             panic!("Failed to parse {}", symbol);
         }
     } else {
+        #[allow(clippy::collapsible_else_if)]
         if symbol.starts_with("cmt_") {
             // linear swap
             assert!(symbol.ends_with("usdt"));

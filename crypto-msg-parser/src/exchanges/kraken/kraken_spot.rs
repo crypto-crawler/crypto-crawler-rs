@@ -100,7 +100,8 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
                 }
             };
             if timestamp == std::i64::MIN {
-                Err(SimpleError::new(format!("as and bs are empty in {}", msg)))
+                // as and bs can be both empty, e.g., [6960,{"as":[],"bs":[]},"book-25","LINK/JPY"]
+                Ok(None)
             } else {
                 Ok(Some(timestamp))
             }

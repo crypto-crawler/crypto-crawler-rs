@@ -21,6 +21,8 @@ struct Instrument {
     isQuanto: bool,
     isInverse: bool,
     expiry: Option<String>,
+    hasLiquidity: bool,
+    openInterest: i64,
     fairMethod: String,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
@@ -31,7 +33,7 @@ fn fetch_instruments() -> Vec<Instrument> {
     let instruments: Vec<Instrument> = serde_json::from_str::<Vec<Instrument>>(&text)
         .unwrap()
         .into_iter()
-        .filter(|x| x.state == "Open")
+        .filter(|x| x.state == "Open" && x.hasLiquidity && x.openInterest > 0)
         .collect();
     instruments
 }

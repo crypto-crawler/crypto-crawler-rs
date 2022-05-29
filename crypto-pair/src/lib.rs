@@ -69,6 +69,7 @@ pub fn normalize_pair(symbol: &str, exchange: &str) -> Option<String> {
         }
         "Poloniex" => Some(symbol.replace('_', "/")),
         "Upbit" => Some(symbol.replace('-', "/")),
+        "zb" => exchanges::zb::normalize_pair(symbol),
         "zbg" => exchanges::zbg::normalize_pair(symbol),
         _ => panic!("Unknown exchange {}", exchange),
     }
@@ -101,6 +102,7 @@ pub fn get_market_type(symbol: &str, exchange: &str, is_spot: Option<bool>) -> M
         "kucoin" => exchanges::kucoin::get_market_type(symbol),
         "mxc" | "mexc" => exchanges::mexc::get_market_type(symbol, is_spot),
         "okex" | "okx" => exchanges::okx::get_market_type(symbol),
+        "zb" => exchanges::zb::get_market_type(symbol),
         "zbg" => exchanges::zbg::get_market_type(symbol),
         _ => MarketType::Unknown,
     }
