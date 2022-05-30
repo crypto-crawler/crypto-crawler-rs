@@ -45,7 +45,7 @@ impl_new_constructor!(
 impl_trait!(Trade, BitmexWSClient, subscribe_trade, "trade");
 impl_trait!(BBO, BitmexWSClient, subscribe_bbo, "quote");
 #[rustfmt::skip]
-impl_trait!(OrderBook, BitmexWSClient, subscribe_orderbook, "orderBookL2_25");
+impl_trait!(OrderBook, BitmexWSClient, subscribe_orderbook, "orderBookL2");
 #[rustfmt::skip]
 impl_trait!(OrderBookTopK, BitmexWSClient, subscribe_orderbook_topk, "orderBook10");
 impl_candlestick!(BitmexWSClient);
