@@ -173,9 +173,11 @@ pub fn parse_l2_topk(
     exchange: &str,
     market_type: MarketType,
     msg: &str,
+    received_at: Option<i64>,
 ) -> Result<Vec<OrderBookMsg>, SimpleError> {
     let ret = match exchange {
-        "binance" => exchanges::binance::parse_l2_topk(market_type, msg),
+        "binance" => exchanges::binance::parse_l2_topk(market_type, msg, received_at),
+        "bitget" => exchanges::bitget::parse_l2_topk(market_type, msg),
         "okx" => exchanges::okx::parse_l2_topk(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     };
