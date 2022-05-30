@@ -250,9 +250,8 @@ mod gate_inverse_future {
         );
     }
 
-    #[test]
-    #[ignore]
-    fn subscribe_orderbook() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_orderbook() {
         gen_test_code!(
             GateInverseFutureWSClient,
             subscribe_orderbook,

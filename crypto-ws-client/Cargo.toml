@@ -1,6 +1,6 @@
 [package]
 name = "crypto-ws-client"
-version = "4.11.1"
+version = "4.11.2"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description = "A versatile websocket client that supports many cryptocurrency exchanges."
@@ -10,7 +10,7 @@ keywords = ["cryptocurrency", "blockchain", "trading", "websocket"]
 
 [dependencies]
 async-trait = "0.1.53"
-flate2 = "1.0.23"
+flate2 = "1.0.24"
 futures-util = "0.3.21"
 governor = "0.4.2"
 nonzero_ext = "0.3.0"
