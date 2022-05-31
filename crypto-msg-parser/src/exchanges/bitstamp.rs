@@ -54,8 +54,7 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
         ))
     })?;
     let channel = ws_msg.channel;
-    let pos = channel.rfind('_').unwrap();
-    let symbol = &channel[pos + 1..];
+    let symbol = channel.split('_').last().unwrap();
     Ok(symbol.to_string())
 }
 
@@ -89,7 +88,7 @@ pub(crate) fn parse_trade(
             msg
         ))
     })?;
-    let symbol = ws_msg.channel.strip_prefix("live_trades_").unwrap();
+    let symbol = ws_msg.channel.split('_').last().unwrap();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
         .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
     let raw_trade = ws_msg.data;
@@ -127,9 +126,14 @@ pub(crate) fn parse_l2(
             msg
         ))
     })?;
-    let symbol = ws_msg.channel.strip_prefix("diff_order_book_").unwrap();
+    let symbol = ws_msg.channel.split('_').last().unwrap();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
         .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
+    let msg_type = if ws_msg.channel.starts_with("diff_order_book_") {
+        MessageType::L2Event
+    } else {
+        MessageType::L2TopK
+    };
     let raw_orderbook = ws_msg.data;
 
     let parse_order = |raw_order: &[String; 2]| -> Order {
@@ -149,15 +153,22 @@ pub(crate) fn parse_l2(
         market_type,
         symbol: symbol.to_string(),
         pair,
-        msg_type: MessageType::L2Event,
+        msg_type,
         timestamp: raw_orderbook.microtimestamp.parse::<i64>().unwrap() / 1000,
         seq_id: None,
         prev_seq_id: None,
         asks: raw_orderbook.asks.iter().map(|x| parse_order(x)).collect(),
         bids: raw_orderbook.bids.iter().map(|x| parse_order(x)).collect(),
-        snapshot: false,
+        snapshot: ws_msg.channel.starts_with("order_book_"),
         json: msg.to_string(),
     };
 
     Ok(vec![orderbook])
+}
+
+pub(crate) fn parse_l2_topk(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    parse_l2(market_type, msg)
 }

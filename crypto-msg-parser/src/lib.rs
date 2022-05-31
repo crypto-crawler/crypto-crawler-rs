@@ -181,6 +181,7 @@ pub fn parse_l2_topk(
         "binance" => exchanges::binance::parse_l2_topk(market_type, msg, received_at),
         "bitget" => exchanges::bitget::parse_l2_topk(market_type, msg),
         "bitmex" => exchanges::bitmex::parse_l2_topk(market_type, msg),
+        "bitstamp" => exchanges::bitstamp::parse_l2_topk(market_type, msg),
         "okx" => exchanges::okx::parse_l2_topk(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     };
