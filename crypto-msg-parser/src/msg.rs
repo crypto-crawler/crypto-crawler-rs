@@ -180,9 +180,16 @@ add_common_fields!(
     #[derive(Serialize, Deserialize)]
     struct BboMsg {
         bid_price: f64,
-        bid_quantity: f64,
+        bid_quantity_base: f64,
+        bid_quantity_quote: f64,
+        bid_quantity_contract: Option<f64>,
+
         ask_price: f64,
-        ask_quantity: f64,
+        ask_quantity_base: f64,
+        ask_quantity_quote: f64,
+        ask_quantity_contract: Option<f64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        id: Option<u64>,
     }
 );
 

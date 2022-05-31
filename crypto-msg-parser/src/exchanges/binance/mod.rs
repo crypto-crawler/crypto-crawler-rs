@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crate::{FundingRateMsg, OrderBookMsg, TradeMsg};
+use crate::{BboMsg, FundingRateMsg, OrderBookMsg, TradeMsg};
 
 use serde_json::Value;
 use simple_error::SimpleError;
@@ -153,5 +153,17 @@ pub(crate) fn parse_l2_topk(
         binance_spot::parse_l2_topk(msg, received_at)
     } else {
         binance_all::parse_l2_topk(market_type, msg)
+    }
+}
+
+pub(crate) fn parse_bbo(
+    market_type: MarketType,
+    msg: &str,
+    received_at: Option<i64>,
+) -> Result<BboMsg, SimpleError> {
+    if market_type == MarketType::EuropeanOption {
+        Err(SimpleError::new("Not implemented"))
+    } else {
+        binance_all::parse_bbo(market_type, msg, received_at)
     }
 }

@@ -210,6 +210,19 @@ pub fn parse_l2_topk(
     }
 }
 
+/// Parse BBO(best bid&offer) messages.
+pub fn parse_bbo(
+    exchange: &str,
+    market_type: MarketType,
+    msg: &str,
+    received_at: Option<i64>,
+) -> Result<BboMsg, SimpleError> {
+    match exchange {
+        "binance" => exchanges::binance::parse_bbo(market_type, msg, received_at),
+        _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
+    }
+}
+
 /// Parse funding rate messages.
 pub fn parse_funding_rate(
     exchange: &str,
