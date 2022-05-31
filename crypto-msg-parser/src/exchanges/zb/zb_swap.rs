@@ -1,7 +1,10 @@
 use crypto_market_type::MarketType;
 
-use crate::{OrderBookMsg, TradeMsg};
+use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
 
+use super::EXCHANGE_NAME;
+use crate::exchanges::utils::calc_quantity_and_volume;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
 use std::collections::HashMap;
@@ -72,10 +75,146 @@ pub(super) fn extract_timestamp(
     }
 }
 
-pub(super) fn parse_trade(_msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
-    Err(SimpleError::new("Not implemented"))
+// doc: https://github.com/ZBFuture/docs/blob/main/API%20V2%20_en.md#86-trade
+pub(super) fn parse_trade(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<TradeMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Vec<[f64; 4]>>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Vec<[f64; 4]>>",
+            msg
+        ))
+    })?;
+    debug_assert!(ws_msg.channel.ends_with(".Trade"));
+    let symbol = ws_msg.channel.split('.').next().unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+
+    let trades: Vec<TradeMsg> = ws_msg
+        .data
+        .into_iter()
+        .map(|raw_trade| {
+            let price = raw_trade[0];
+            let quantity = raw_trade[1];
+            let timestamp = (raw_trade[3] as i64) * 1000;
+
+            let (quantity_base, quantity_quote, quantity_contract) =
+                calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
+
+            TradeMsg {
+                exchange: EXCHANGE_NAME.to_string(),
+                market_type,
+                symbol: symbol.to_string(),
+                pair: pair.to_string(),
+                msg_type: MessageType::Trade,
+                timestamp,
+                price,
+                quantity_base,
+                quantity_quote,
+                quantity_contract,
+                side: if raw_trade[3] < 0.0 {
+                    TradeSide::Sell
+                } else {
+                    TradeSide::Buy
+                },
+                trade_id: timestamp.to_string(),
+                json: serde_json::to_string(&raw_trade).unwrap(),
+            }
+        })
+        .collect();
+
+    Ok(trades)
 }
 
-pub(crate) fn parse_l2(_msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
-    Err(SimpleError::new("Not implemented"))
+#[derive(Serialize, Deserialize)]
+struct WebsocketMsg<T: Sized> {
+    channel: String,
+    data: T,
+    #[serde(rename = "type")]
+    type_: Option<String>, // Whole
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct Level2Msg {
+    time: String,
+    asks: Vec<[f64; 2]>,
+    bids: Vec<[f64; 2]>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+/// Docs:
+/// * https://github.com/ZBFuture/docs/blob/main/API%20V2%20_en.md#84-increment-depth
+/// * https://github.com/ZBFuture/docs/blob/main/API%20V2%20_en.md#84-increment-depth
+pub(super) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Level2Msg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<Level2Msg>",
+            msg
+        ))
+    })?;
+    let msg_type = if ws_msg.channel.ends_with(".DepthWhole") {
+        MessageType::L2TopK
+    } else if ws_msg.channel.ends_with(".Depth") {
+        MessageType::L2Event
+    } else {
+        panic!("Unsupported channel: {}", ws_msg.channel);
+    };
+    let snapshot = if msg_type == MessageType::L2TopK {
+        true
+    } else if let Some(x) = ws_msg.type_ {
+        x == "Whole"
+    } else {
+        false
+    };
+
+    let symbol = ws_msg.channel.split('.').next().unwrap();
+    let timestamp = ws_msg.data.time.parse::<i64>().unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+
+    let parse_order = |raw_order: &[f64; 2]| -> Order {
+        let price = raw_order[0];
+        let quantity = raw_order[1];
+
+        let (quantity_base, quantity_quote, quantity_contract) =
+            calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
+        Order {
+            price,
+            quantity_base,
+            quantity_quote,
+            quantity_contract,
+        }
+    };
+
+    let orderbook = OrderBookMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: symbol.to_string(),
+        pair: pair.clone(),
+        msg_type,
+        timestamp,
+        seq_id: None,
+        prev_seq_id: None,
+        asks: ws_msg
+            .data
+            .asks
+            .iter()
+            .map(parse_order)
+            .collect::<Vec<Order>>(),
+        bids: ws_msg
+            .data
+            .bids
+            .iter()
+            .map(parse_order)
+            .collect::<Vec<Order>>(),
+        snapshot,
+        json: msg.to_string(),
+    };
+    Ok(vec![orderbook])
 }

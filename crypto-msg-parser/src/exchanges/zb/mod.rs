@@ -10,7 +10,7 @@ use crate::{OrderBookMsg, TradeMsg};
 
 use simple_error::SimpleError;
 
-// const EXCHANGE_NAME: &str = "zb";
+const EXCHANGE_NAME: &str = "zb";
 
 pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
     let obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
@@ -53,7 +53,7 @@ pub(crate) fn parse_trade(
     if market_type == MarketType::Spot {
         zb_spot::parse_trade(msg)
     } else {
-        zb_swap::parse_trade(msg)
+        zb_swap::parse_trade(market_type, msg)
     }
 }
 
@@ -64,6 +64,17 @@ pub(crate) fn parse_l2(
     if market_type == MarketType::Spot {
         zb_spot::parse_l2(msg)
     } else {
-        zb_swap::parse_l2(msg)
+        zb_swap::parse_l2(market_type, msg)
+    }
+}
+
+pub(crate) fn parse_l2_topk(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    if market_type == MarketType::Spot {
+        zb_spot::parse_l2_topk(msg)
+    } else {
+        zb_swap::parse_l2(market_type, msg)
     }
 }
