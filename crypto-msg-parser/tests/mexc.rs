@@ -5,7 +5,7 @@ const EXCHANGE_NAME: &str = "mexc";
 #[cfg(test)]
 mod trade {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, round, TradeSide};
 
     #[test]
     fn spot() {
@@ -121,7 +121,7 @@ mod trade {
         assert_eq!(trade.price, 39766.5);
         assert_eq!(trade.quantity_contract, Some(32.0));
         assert_eq!(trade.quantity_base, 0.0001 * 32.0);
-        assert_eq!(trade.quantity_quote, 0.0001 * 32.0 * 39766.5);
+        assert_eq!(trade.quantity_quote, round(0.0001 * 32.0 * 39766.5));
         assert_eq!(trade.side, TradeSide::Sell);
     }
 

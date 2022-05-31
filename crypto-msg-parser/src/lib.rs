@@ -6,6 +6,7 @@ mod order;
 
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
+pub use exchanges::utils::round; // for test only
 pub use msg::*;
 pub use order::Order;
 use simple_error::SimpleError;

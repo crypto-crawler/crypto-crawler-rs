@@ -26,7 +26,7 @@ pub(super) fn http_get(url: &str) -> Result<String> {
 
 const PRECISION: f64 = 1000000000.0; // 9 decimals
 
-pub(crate) fn round(f: f64) -> f64 {
+pub fn round(f: f64) -> f64 {
     (f * PRECISION).round() / PRECISION
 }
 
@@ -41,7 +41,7 @@ pub(super) fn calc_quantity_and_volume(
     let contract_value =
         crypto_contract_value::get_contract_value(exchange, market_type, pair).unwrap() as f64;
     match market_type {
-        MarketType::Spot => (quantity, quantity * price, None),
+        MarketType::Spot => (quantity, round(quantity * price), None),
         MarketType::InverseSwap | MarketType::InverseFuture => {
             let quantity_quote = quantity * contract_value;
             (quantity_quote / price, quantity_quote, Some(quantity))

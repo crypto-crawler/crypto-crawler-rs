@@ -425,7 +425,7 @@ mod order_book_l2_25 {
 mod l2_topk {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2_topk};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2_topk, round};
     use crypto_msg_type::MessageType;
 
     #[test]
@@ -516,17 +516,17 @@ mod l2_topk {
 
         assert_eq!(orderbook.bids[9].price, 0.06224);
         assert_eq!(orderbook.bids[9].quantity_base, 0.09);
-        assert_eq!(orderbook.bids[9].quantity_quote, 0.0056016); // 0.06224 * 0.09 = 0.0056016
+        assert_eq!(orderbook.bids[9].quantity_quote, round(0.06224 * 0.09));
         assert_eq!(orderbook.bids[9].quantity_contract.unwrap(), 9000.0);
 
         assert_eq!(orderbook.asks[0].price, 0.06263);
         assert_eq!(orderbook.asks[0].quantity_base, 1.31);
-        assert_eq!(orderbook.asks[0].quantity_quote, 0.0820453); // 0.06263 * 1.31 = 0.0820453
+        assert_eq!(orderbook.asks[0].quantity_quote, round(0.06263 * 1.31));
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 131000.0);
 
         assert_eq!(orderbook.asks[9].price, 0.0628);
         assert_eq!(orderbook.asks[9].quantity_base, 0.12);
-        assert_eq!(orderbook.asks[9].quantity_quote, 0.007536); // 0.0628 * 0.12 =
+        assert_eq!(orderbook.asks[9].quantity_quote, round(0.0628 * 0.12));
         assert_eq!(orderbook.asks[9].quantity_contract.unwrap(), 12000.0);
     }
 
@@ -623,12 +623,12 @@ mod l2_topk {
 
         assert_eq!(orderbook.asks[0].price, 31650.5);
         assert_eq!(orderbook.asks[0].quantity_base, 0.00004);
-        assert_eq!(orderbook.asks[0].quantity_quote, 1.26602); // 0.00004 * 31650.5 = 1.26602
+        assert_eq!(orderbook.asks[0].quantity_quote, round(0.00004 * 31650.5));
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 4000.0);
 
         assert_eq!(orderbook.asks[9].price, 31679.0);
         assert_eq!(orderbook.asks[9].quantity_base, 0.00443);
-        assert_eq!(orderbook.asks[9].quantity_quote, 140.33797); // 31679.0 * 0.00443 = 140.33797
+        assert_eq!(orderbook.asks[9].quantity_quote, round(31679.0 * 0.00443));
         assert_eq!(orderbook.asks[9].quantity_contract.unwrap(), 443000.0);
     }
 }

@@ -3,8 +3,7 @@ mod utils;
 #[cfg(test)]
 mod trade {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
-    use float_cmp::approx_eq;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, round, TradeSide};
 
     #[test]
     fn spot_20210916() {
@@ -66,6 +65,35 @@ mod trade {
     }
 
     #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"time":1653808101,"channel":"futures.trades","event":"update","error":null,"result":[{"size":-7,"id":376991,"create_time":1653808101,"price":"29009.9","contract":"BTC_USD_20220603"},{"size":-9,"id":376992,"create_time":1653808101,"price":"29008.7","contract":"BTC_USD_20220603"}]}"#;
+        let trades = &parse_trade("gate", MarketType::InverseFuture, raw_msg).unwrap();
+
+        assert_eq!(trades.len(), 2);
+        let trade = &trades[0];
+
+        crate::utils::check_trade_fields(
+            "gate",
+            MarketType::InverseFuture,
+            "BTC/USD".to_string(),
+            extract_symbol("gate", MarketType::InverseFuture, raw_msg).unwrap(),
+            trade,
+            raw_msg,
+        );
+        assert_eq!(
+            1653808101000,
+            extract_timestamp("gate", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+
+        assert_eq!(trade.quantity_base, 7.0 / 29009.9);
+        assert_eq!(trade.quantity_quote, 7.0);
+        assert_eq!(trade.quantity_contract, Some(7.0));
+        assert_eq!(trade.side, TradeSide::Sell);
+    }
+
+    #[test]
     fn linear_future() {
         let raw_msg = r#"{"time":1615253386,"channel":"futures.trades","event":"update","error":null,"result":[{"size":-19,"id":48081,"create_time":1615253386,"price":"53560.5","contract":"BTC_USDT_20210326"}]}"#;
         let trades = &parse_trade("gate", MarketType::LinearFuture, raw_msg).unwrap();
@@ -88,18 +116,8 @@ mod trade {
                 .unwrap()
         );
 
-        assert!(approx_eq!(
-            f64,
-            trade.quantity_base,
-            19.0 * 0.0001,
-            epsilon = 0.0000000001
-        ));
-        assert!(approx_eq!(
-            f64,
-            trade.quantity_quote,
-            0.0019 * 53560.5,
-            epsilon = 0.0001
-        ));
+        assert_eq!(trade.quantity_base, 19.0 * 0.0001);
+        assert_eq!(trade.quantity_quote, 0.0019 * 53560.5);
         assert_eq!(trade.quantity_contract, Some(19.0));
         assert_eq!(trade.side, TradeSide::Sell);
     }
@@ -156,30 +174,19 @@ mod trade {
                 .unwrap()
         );
 
-        assert!(approx_eq!(
-            f64,
-            trade.quantity_base,
-            0.0001 * 50.0,
-            epsilon = 0.00000001
-        ));
-        assert!(approx_eq!(
-            f64,
-            trade.quantity_quote,
-            0.005 * 56233.3,
-            epsilon = 0.00001
-        ));
+        assert_eq!(trade.quantity_base, 0.0001 * 50.0);
+        assert_eq!(trade.quantity_quote, round(0.005 * 56233.3));
         assert_eq!(trade.quantity_contract, Some(50.0));
         assert_eq!(trade.side, TradeSide::Buy);
     }
 }
 
 #[cfg(test)]
-mod l2_orderbook {
+mod l2_event {
     use chrono::prelude::*;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2, round};
     use crypto_msg_type::MessageType;
-    use float_cmp::approx_eq;
 
     #[test]
     fn spot_snapshot_20200916() {
@@ -478,7 +485,7 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.bids[0].price, 42459.2);
         assert_eq!(orderbook.bids[0].quantity_base, 7.3982);
-        assert_eq!(orderbook.bids[0].quantity_quote, 42459.2 * 7.3982);
+        assert_eq!(orderbook.bids[0].quantity_quote, round(42459.2 * 7.3982));
         assert_eq!(orderbook.bids[0].quantity_contract, Some(73982.0));
     }
 
@@ -510,54 +517,72 @@ mod l2_orderbook {
         assert_eq!(orderbook.timestamp, 1622689062072);
 
         assert_eq!(orderbook.asks[0].price, 37396.5);
-        assert!(approx_eq!(
-            f64,
-            orderbook.asks[0].quantity_base,
-            2.2137,
-            epsilon = 0.000000000000001
-        ));
-        assert!(approx_eq!(
-            f64,
-            orderbook.asks[0].quantity_quote,
-            37396.5 * 2.2137,
-            epsilon = 0.0000000001
-        ));
+        assert_eq!(orderbook.asks[0].quantity_base, 2.2137);
+        assert_eq!(orderbook.asks[0].quantity_quote, round(37396.5 * 2.2137));
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 22137.0);
 
         assert_eq!(orderbook.asks[2].price, 37401.2);
         assert_eq!(orderbook.asks[2].quantity_base, 0.079);
-        assert_eq!(orderbook.asks[2].quantity_quote, 37401.2 * 0.079);
+        assert_eq!(orderbook.asks[2].quantity_quote, round(37401.2 * 0.079));
         assert_eq!(orderbook.asks[2].quantity_contract.unwrap(), 790.0);
 
         assert_eq!(orderbook.bids[0].price, 37396.4);
-        assert!(approx_eq!(
-            f64,
-            orderbook.bids[0].quantity_base,
-            0.8553,
-            epsilon = 0.000000000000001
-        ));
-        assert!(approx_eq!(
-            f64,
-            orderbook.bids[0].quantity_quote,
-            37396.4 * 0.8553,
-            epsilon = 0.001
-        ));
+        assert_eq!(orderbook.bids[0].quantity_base, 0.8553);
+        assert_eq!(orderbook.bids[0].quantity_quote, round(37396.4 * 0.8553));
         assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 8553.0);
 
         assert_eq!(orderbook.bids[2].price, 37393.6);
-        assert!(approx_eq!(
-            f64,
-            orderbook.bids[2].quantity_base,
-            0.05,
-            epsilon = 0.00000001
-        ));
-        assert!(approx_eq!(
-            f64,
-            orderbook.bids[2].quantity_quote,
-            37393.6 * 0.05,
-            epsilon = 0.01
-        ));
+        assert_eq!(orderbook.bids[2].quantity_base, 0.05);
+        assert_eq!(orderbook.bids[2].quantity_quote, 37393.6 * 0.05);
         assert_eq!(orderbook.bids[2].quantity_contract.unwrap(), 500.0);
+    }
+
+    #[test]
+    fn inverse_future_snapshot() {
+        let raw_msg = r#"{"time":1653810275,"channel":"futures.order_book","event":"all","error":null,"result":{"t":1653810274815,"id":79619326,"contract":"BTC_USD_20220624","asks":[{"p":"28988.9","s":620},{"p":"28991.8","s":535},{"p":"28997.6","s":513}],"bids":[{"p":"28941.5","s":564},{"p":"28938.6","s":535},{"p":"28932.8","s":513}]}}"#;
+        let orderbook = &parse_l2("gate", MarketType::InverseFuture, raw_msg, None).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 3);
+        assert_eq!(orderbook.bids.len(), 3);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            "gate",
+            MarketType::InverseFuture,
+            MessageType::L2Event,
+            "BTC/USD".to_string(),
+            extract_symbol("gate", MarketType::InverseFuture, raw_msg).unwrap(),
+            orderbook,
+            raw_msg,
+        );
+        assert_eq!(
+            1653810274815,
+            extract_timestamp("gate", MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+
+        assert_eq!(orderbook.timestamp, 1653810274815);
+
+        assert_eq!(orderbook.asks[0].price, 28988.9);
+        assert_eq!(orderbook.asks[0].quantity_base, 620.0 / 28988.9);
+        assert_eq!(orderbook.asks[0].quantity_quote, 620.0);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 620.0);
+
+        assert_eq!(orderbook.asks[2].price, 28997.6);
+        assert_eq!(orderbook.asks[2].quantity_base, 513.0 / 28997.6);
+        assert_eq!(orderbook.asks[2].quantity_quote, 513.0);
+        assert_eq!(orderbook.asks[2].quantity_contract.unwrap(), 513.0);
+
+        assert_eq!(orderbook.bids[0].price, 28941.5);
+        assert_eq!(orderbook.bids[0].quantity_base, 564.0 / 28941.5);
+        assert_eq!(orderbook.bids[0].quantity_quote, 564.0);
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 564.0);
+
+        assert_eq!(orderbook.bids[2].price, 28932.8);
+        assert_eq!(orderbook.bids[2].quantity_base, 513.0 / 28932.8);
+        assert_eq!(orderbook.bids[2].quantity_quote, 513.0);
+        assert_eq!(orderbook.bids[2].quantity_contract.unwrap(), 513.0);
     }
 
     #[test]
@@ -594,7 +619,7 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.asks[2].price, 38821.0);
         assert_eq!(orderbook.asks[2].quantity_base, 0.2);
-        assert_eq!(orderbook.asks[2].quantity_quote, 38821.0 * 0.2);
+        assert_eq!(orderbook.asks[2].quantity_quote, round(38821.0 * 0.2));
         assert_eq!(orderbook.asks[2].quantity_contract.unwrap(), 2000.0);
 
         assert_eq!(orderbook.bids[0].price, 38538.0);
@@ -637,7 +662,7 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.asks[0].price, 38258.9);
         assert_eq!(orderbook.asks[0].quantity_base, 0.05);
-        assert_eq!(orderbook.asks[0].quantity_quote, 38258.9 * 0.05);
+        assert_eq!(orderbook.asks[0].quantity_quote, round(38258.9 * 0.05));
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 500.0);
 
         assert_eq!(orderbook.asks[1].price, 38258.9);

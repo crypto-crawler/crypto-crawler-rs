@@ -2,8 +2,7 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crypto_msg_parser::{get_msg_type, FundingRateMsg, OrderBookMsg, TradeMsg};
-use float_cmp::approx_eq;
+use crypto_msg_parser::{get_msg_type, round, FundingRateMsg, OrderBookMsg, TradeMsg};
 
 pub fn check_trade_fields(
     exchange: &str,
@@ -29,12 +28,10 @@ pub fn check_trade_fields(
     assert!(trade.quantity_base > 0.0);
     assert!(trade.quantity_quote > 0.0);
     if exchange != "bitmex" {
-        assert!(approx_eq!(
-            f64,
-            trade.quantity_quote,
-            trade.price * trade.quantity_base,
-            epsilon = 0.0000000001
-        ));
+        assert_eq!(
+            round(trade.quantity_quote),
+            round(trade.price * trade.quantity_base)
+        );
     }
     assert!(!trade.trade_id.is_empty());
     assert_eq!(trade.timestamp.to_string().len(), 13);

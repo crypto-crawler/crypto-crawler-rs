@@ -4,7 +4,6 @@ mod utils;
 mod trade {
     use crypto_market_type::MarketType;
     use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
-    use float_cmp::approx_eq;
 
     #[test]
     fn spot() {
@@ -57,18 +56,8 @@ mod trade {
                 .unwrap()
         );
 
-        assert!(approx_eq!(
-            f64,
-            trade.quantity_base,
-            0.001 * 16.0,
-            epsilon = 0.000000001
-        ));
-        assert!(approx_eq!(
-            f64,
-            trade.quantity_quote,
-            0.016 * 57850.0,
-            epsilon = 0.0001
-        ));
+        assert_eq!(trade.quantity_base, 0.001 * 16.0);
+        assert_eq!(trade.quantity_quote, 0.001 * 16.0 * 57850.0);
         assert_eq!(trade.quantity_contract, Some(16.0));
         assert_eq!(trade.side, TradeSide::Buy);
     }

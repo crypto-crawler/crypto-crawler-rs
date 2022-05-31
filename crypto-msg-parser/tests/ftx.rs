@@ -3,7 +3,7 @@ mod utils;
 #[cfg(test)]
 mod trade {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, round, TradeSide};
 
     #[test]
     fn spot() {
@@ -118,16 +118,16 @@ mod trade {
         );
 
         assert_eq!(trades[0].quantity_base, 0.1136);
-        assert_eq!(trades[0].quantity_quote, 0.1136 * 5862.0);
+        assert_eq!(trades[0].quantity_quote, round(0.1136 * 5862.0));
         assert_eq!(trades[0].quantity_contract, Some(0.1136));
         assert_eq!(trades[0].side, TradeSide::Buy);
     }
 }
 
 #[cfg(test)]
-mod l2_orderbook {
+mod l2_event {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2, round};
     use crypto_msg_type::MessageType;
 
     #[test]
@@ -296,7 +296,7 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.asks[1].price, 38440.0);
         assert_eq!(orderbook.asks[1].quantity_base, 0.0026);
-        assert_eq!(orderbook.asks[1].quantity_quote, 38440.0 * 0.0026);
+        assert_eq!(orderbook.asks[1].quantity_quote, round(38440.0 * 0.0026));
         assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 0.0026);
     }
 
@@ -334,12 +334,12 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.bids[2].price, 37953.0);
         assert_eq!(orderbook.bids[2].quantity_base, 0.0025);
-        assert_eq!(orderbook.bids[2].quantity_quote, 37953.0 * 0.0025);
+        assert_eq!(orderbook.bids[2].quantity_quote, round(37953.0 * 0.0025));
         assert_eq!(orderbook.bids[2].quantity_contract.unwrap(), 0.0025);
 
         assert_eq!(orderbook.asks[0].price, 37956.0);
         assert_eq!(orderbook.asks[0].quantity_base, 4.8852);
-        assert_eq!(orderbook.asks[0].quantity_quote, 37956.0 * 4.8852);
+        assert_eq!(orderbook.asks[0].quantity_quote, round(37956.0 * 4.8852));
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 4.8852);
 
         assert_eq!(orderbook.asks[2].price, 37958.0);

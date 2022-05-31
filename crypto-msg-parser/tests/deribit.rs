@@ -4,7 +4,6 @@ mod utils;
 mod trade {
     use crypto_market_type::MarketType;
     use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
-    use float_cmp::approx_eq;
 
     #[test]
     fn inverse_future() {
@@ -76,12 +75,8 @@ mod trade {
         )
         .unwrap();
 
-        assert!(approx_eq!(
-            f64,
-            trades[0].quantity_base,
-            contract_value * 5580.0 / 56168.5,
-            epsilon = 0.0001
-        ));
+        assert_eq!(trades[0].price, 56168.0);
+        assert_eq!(trades[0].quantity_base, contract_value * 5580.0 / 56168.0);
         assert_eq!(trades[0].quantity_quote, contract_value * 5580.0);
         assert_eq!(trades[0].quantity_contract, Some(5580.0));
         assert_eq!(trades[0].side, TradeSide::Buy);

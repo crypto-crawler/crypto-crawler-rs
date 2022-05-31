@@ -6,7 +6,7 @@ const EXCHANGE_NAME: &str = "binance";
 mod trade {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, round, TradeSide};
 
     #[test]
     fn spot() {
@@ -81,7 +81,7 @@ mod trade {
         );
 
         assert_eq!(trade.quantity_base, 0.094);
-        assert_eq!(trade.quantity_quote, 0.094 * 62595.8);
+        assert_eq!(trade.quantity_quote, round(0.094 * 62595.8));
         assert_eq!(trade.quantity_contract, Some(0.094));
 
         assert_eq!(trade.side, TradeSide::Buy);
@@ -291,10 +291,10 @@ mod funding_rate {
 }
 
 #[cfg(test)]
-mod l2_orderbook {
+mod l2_event {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2, round};
     use crypto_msg_type::MessageType;
 
     #[test]
@@ -435,12 +435,12 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.asks[0].price, 2441.23);
         assert_eq!(orderbook.asks[0].quantity_base, 1.5);
-        assert_eq!(orderbook.asks[0].quantity_quote, 2441.23 * 1.5);
+        assert_eq!(orderbook.asks[0].quantity_quote, round(2441.23 * 1.5));
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 1.5);
 
         assert_eq!(orderbook.asks[1].price, 2441.24);
         assert_eq!(orderbook.asks[1].quantity_base, 0.220);
-        assert_eq!(orderbook.asks[1].quantity_quote, 2441.24 * 0.220);
+        assert_eq!(orderbook.asks[1].quantity_quote, round(2441.24 * 0.220));
         assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 0.220);
     }
 
@@ -485,7 +485,7 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.asks[0].price, 35819.2);
         assert_eq!(orderbook.asks[0].quantity_base, 0.211);
-        assert_eq!(orderbook.asks[0].quantity_quote, 35819.2 * 0.211);
+        assert_eq!(orderbook.asks[0].quantity_quote, round(35819.2 * 0.211));
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 0.211);
 
         assert_eq!(orderbook.asks[1].price, 35820.31);
@@ -553,7 +553,7 @@ mod l2_orderbook {
 mod l2_topk {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2_topk};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2_topk, round};
     use crypto_msg_type::MessageType;
 
     #[test]
@@ -801,12 +801,12 @@ mod l2_topk {
 
         assert_eq!(orderbook.asks[0].price, 2886.72);
         assert_eq!(orderbook.asks[0].quantity_base, 77.215);
-        assert_eq!(orderbook.asks[0].quantity_quote, 2886.72 * 77.215);
+        assert_eq!(orderbook.asks[0].quantity_quote, round(2886.72 * 77.215));
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 77.215);
 
         assert_eq!(orderbook.asks[2].price, 2886.74);
         assert_eq!(orderbook.asks[2].quantity_base, 0.181);
-        assert_eq!(orderbook.asks[2].quantity_quote, 2886.74 * 0.181);
+        assert_eq!(orderbook.asks[2].quantity_quote, round(2886.74 * 0.181));
         assert_eq!(orderbook.asks[2].quantity_contract.unwrap(), 0.181);
     }
 }

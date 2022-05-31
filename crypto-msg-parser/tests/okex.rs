@@ -3,8 +3,7 @@ mod utils;
 #[cfg(test)]
 mod trade {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
-    use float_cmp::approx_eq;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, round, TradeSide};
 
     #[test]
     fn spot() {
@@ -57,18 +56,8 @@ mod trade {
                 .unwrap()
         );
 
-        assert!(approx_eq!(
-            f64,
-            trade.quantity_base,
-            20.0 * 0.01,
-            epsilon = 0.00000001
-        ));
-        assert!(approx_eq!(
-            f64,
-            trade.quantity_quote,
-            20.0 * 0.01 * 60059.7,
-            epsilon = 0.001
-        ));
+        assert_eq!(trade.quantity_base, 20.0 * 0.01);
+        assert_eq!(trade.quantity_quote, 20.0 * 0.01 * 60059.7);
         assert_eq!(trade.quantity_contract, Some(20.0));
         assert_eq!(trade.side, TradeSide::Buy);
     }
@@ -96,18 +85,8 @@ mod trade {
                 .unwrap()
         );
 
-        assert!(approx_eq!(
-            f64,
-            trade.quantity_base,
-            0.01 * 3.0,
-            epsilon = 0.000000001
-        ));
-        assert!(approx_eq!(
-            f64,
-            trade.quantity_quote,
-            0.01 * 3.0 * 56480.1,
-            epsilon = 0.0001
-        ));
+        assert_eq!(trade.quantity_base, 0.01 * 3.0);
+        assert_eq!(trade.quantity_quote, round(0.01 * 3.0 * 56480.1));
         assert_eq!(trade.quantity_contract, Some(3.0));
         assert_eq!(trade.side, TradeSide::Buy);
     }
@@ -269,7 +248,7 @@ mod funding_rate {
 #[cfg(test)]
 mod l2_orderbook {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2, round};
     use crypto_msg_type::MessageType;
 
     #[test]
@@ -301,7 +280,10 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.bids[0].price, 38929.9);
         assert_eq!(orderbook.bids[0].quantity_base, 0.05005381);
-        assert_eq!(orderbook.bids[0].quantity_quote, 38929.9 * 0.05005381);
+        assert_eq!(
+            orderbook.bids[0].quantity_quote,
+            round(38929.9 * 0.05005381)
+        );
 
         assert_eq!(orderbook.asks[0].price, 38930.0);
         assert_eq!(orderbook.asks[0].quantity_base, 3.84264467);
@@ -373,7 +355,7 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.asks[0].price, 39302.5);
         assert_eq!(orderbook.asks[0].quantity_base, 0.01);
-        assert_eq!(orderbook.asks[0].quantity_quote, 39302.5 * 0.01);
+        assert_eq!(orderbook.asks[0].quantity_quote, round(39302.5 * 0.01));
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 1.0);
 
         assert_eq!(orderbook.bids[0].price, 39302.2);

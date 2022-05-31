@@ -104,7 +104,7 @@ mod trade {
 #[cfg(test)]
 mod l2_orderbook {
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2, round};
     use crypto_msg_type::MessageType;
 
     #[test]
@@ -323,7 +323,7 @@ mod l2_orderbook {
 
         assert_eq!(orderbook.bids[0].price, 36386.5);
         assert_eq!(orderbook.bids[0].quantity_base, 5.93);
-        assert_eq!(orderbook.bids[0].quantity_quote, 36386.5 * 5.93);
+        assert_eq!(orderbook.bids[0].quantity_quote, round(36386.5 * 5.93));
         assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 5.93);
 
         assert_eq!(orderbook.asks[0].price, 36400.0);
