@@ -54,7 +54,7 @@ impl_trait!(Ticker, DeribitWSClient, subscribe_ticker, "ticker.SYMBOL.100ms");
 #[rustfmt::skip]
 impl_trait!(OrderBook, DeribitWSClient, subscribe_orderbook, "book.SYMBOL.100ms");
 #[rustfmt::skip]
-impl_trait!(OrderBookTopK, DeribitWSClient, subscribe_orderbook_topk, "book.SYMBOL.5.10.100ms");
+impl_trait!(OrderBookTopK, DeribitWSClient, subscribe_orderbook_topk, "book.SYMBOL.none.20.100ms");
 impl_trait!(BBO, DeribitWSClient, subscribe_bbo, "quote.SYMBOL");
 
 impl_candlestick!(DeribitWSClient);
