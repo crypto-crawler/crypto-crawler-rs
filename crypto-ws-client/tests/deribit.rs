@@ -67,6 +67,15 @@ mod deribit_inverse_future {
     }
 
     #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_bbo() {
+        gen_test_code!(
+            DeribitWSClient,
+            subscribe_bbo,
+            &vec!["BTC-30SEP22".to_string()]
+        );
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(DeribitWSClient, &vec![("BTC-30SEP22".to_string(), 60)]);
         gen_test_subscribe_candlestick!(DeribitWSClient, &vec![("BTC-30SEP22".to_string(), 86400)]);
@@ -121,6 +130,15 @@ mod deribit_inverse_swap {
         gen_test_code!(
             DeribitWSClient,
             subscribe_orderbook_topk,
+            &vec!["BTC-PERPETUAL".to_string()]
+        );
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_bbo() {
+        gen_test_code!(
+            DeribitWSClient,
+            subscribe_bbo,
             &vec!["BTC-PERPETUAL".to_string()]
         );
     }
@@ -200,6 +218,18 @@ mod deribit_option {
         gen_test_code!(
             DeribitWSClient,
             subscribe_orderbook_topk,
+            &SYMBOLS
+                .iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>()
+        );
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_bbo() {
+        gen_test_code!(
+            DeribitWSClient,
+            subscribe_bbo,
             &SYMBOLS
                 .iter()
                 .map(|s| s.to_string())
