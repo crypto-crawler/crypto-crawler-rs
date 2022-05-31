@@ -112,18 +112,24 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
     })?;
     let result = ws_msg.result;
     if ws_msg.channel == "futures.trades" {
-        let raw_trades = result.as_array().unwrap();
-        let timestamp = raw_trades.iter().fold(std::i64::MIN, |a, raw_trade| {
-            a.max(if let Some(x) = raw_trade.get("create_time_ms") {
-                x.as_i64().unwrap()
-            } else {
-                raw_trade.get("create_time").unwrap().as_i64().unwrap() * 1000
+        let timestamp = result
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|x| x.as_object().unwrap())
+            .map(|x| {
+                if x.contains_key("create_time_ms") {
+                    x["create_time_ms"].as_i64().unwrap()
+                } else {
+                    x["create_time"].as_i64().unwrap() * 1000
+                }
             })
-        });
-        if timestamp == std::i64::MIN {
+            .max();
+
+        if timestamp.is_none() {
             Err(SimpleError::new(format!("result is empty in {}", msg)))
         } else {
-            Ok(Some(timestamp))
+            Ok(timestamp)
         }
     } else if ws_msg.channel == "futures.order_book" {
         if let Some(x) = result.get("t") {
@@ -143,7 +149,7 @@ pub(super) fn parse_trade(
     msg: &str,
 ) -> Result<Vec<TradeMsg>, SimpleError> {
     match market_type {
-        MarketType::LinearFuture => {
+        MarketType::InverseFuture | MarketType::LinearFuture => {
             let ws_msg =
                 serde_json::from_str::<WebsocketMsg<Vec<FutureTradeMsg>>>(msg).map_err(|_e| {
                     SimpleError::new(format!(

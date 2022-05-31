@@ -67,13 +67,15 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
             msg
         ))
     })?;
-    let timestamp = ws_msg.data.iter().fold(std::i64::MIN, |a, v| {
-        a.max(v["timestamp"].as_str().unwrap().parse::<i64>().unwrap())
-    });
-    if timestamp == std::i64::MIN {
+    let timestamp = ws_msg
+        .data
+        .iter()
+        .map(|v| v["timestamp"].as_str().unwrap().parse::<i64>().unwrap())
+        .max();
+    if timestamp.is_none() {
         Err(SimpleError::new(format!("data is empty in {}", msg)))
     } else {
-        Ok(Some(timestamp))
+        Ok(timestamp)
     }
 }
 

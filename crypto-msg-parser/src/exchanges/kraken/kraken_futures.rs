@@ -93,13 +93,14 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
         "trade" => Ok(Some(obj["time"].as_i64().unwrap())),
         "trade_snapshot" => {
             let trades = obj["trades"].as_array().unwrap();
-            let timestamp = trades.iter().fold(std::i64::MIN, |a, raw_trade| {
-                a.max(raw_trade["time"].as_i64().unwrap())
-            });
-            if timestamp == std::i64::MIN {
+            let timestamp = trades
+                .iter()
+                .map(|raw_trade| raw_trade["time"].as_i64().unwrap())
+                .max();
+            if timestamp.is_none() {
                 Err(SimpleError::new(format!("trades is empty in {}", msg)))
             } else {
-                Ok(Some(timestamp))
+                Ok(timestamp)
             }
         }
         "book" => Ok(Some(obj["timestamp"].as_i64().unwrap())),

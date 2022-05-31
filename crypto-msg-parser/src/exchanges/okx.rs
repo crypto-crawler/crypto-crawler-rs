@@ -83,14 +83,16 @@ pub(crate) fn extract_timestamp(
             msg
         ))
     })?;
-    let timestamp = ws_msg.data.iter().fold(std::i64::MIN, |a, x| {
-        a.max(x["ts"].as_str().unwrap().parse::<i64>().unwrap())
-    });
+    let timestamp = ws_msg
+        .data
+        .iter()
+        .map(|x| x["ts"].as_str().unwrap().parse::<i64>().unwrap())
+        .max();
 
-    if timestamp == std::i64::MIN {
+    if timestamp.is_none() {
         Err(SimpleError::new(format!("data is empty in {}", msg)))
     } else {
-        Ok(Some(timestamp))
+        Ok(timestamp)
     }
 }
 

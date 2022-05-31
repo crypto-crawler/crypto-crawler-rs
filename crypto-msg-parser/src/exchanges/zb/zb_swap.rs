@@ -20,17 +20,16 @@ pub(super) fn extract_timestamp(
     let channel = raw_channel.split('.').nth(1).unwrap();
     match channel {
         "Trade" => {
-            let arr = obj["data"]
+            let timestamp = obj["data"]
                 .as_array()
                 .unwrap()
                 .iter()
                 .map(|x| x[3].as_i64().unwrap())
-                .collect::<Vec<i64>>();
-            let timestamp = arr.iter().fold(std::i64::MIN, |a, t| a.max(*t));
-            if timestamp == std::i64::MIN {
-                Err(SimpleError::new(format!("data is empty in {}", msg)))
-            } else {
+                .max();
+            if let Some(timestamp) = timestamp {
                 Ok(Some(timestamp * 1000))
+            } else {
+                Err(SimpleError::new(format!("data is empty in {}", msg)))
             }
         }
         "Depth" | "DepthWhole" => Ok(obj["data"]
@@ -39,15 +38,11 @@ pub(super) fn extract_timestamp(
         "Ticker" => {
             if raw_channel == "All.Ticker" {
                 let m = obj["data"].as_object().unwrap();
-                let arr = m
-                    .values()
-                    .map(|x| x[6].as_i64().unwrap())
-                    .collect::<Vec<i64>>();
-                let timestamp = arr.iter().fold(std::i64::MIN, |a, t| a.max(*t));
-                if timestamp == std::i64::MIN {
-                    Err(SimpleError::new(format!("data is empty in {}", msg)))
-                } else {
+                let timestamp = m.values().map(|x| x[6].as_i64().unwrap()).max();
+                if let Some(timestamp) = timestamp {
                     Ok(Some(timestamp * 1000))
+                } else {
+                    Err(SimpleError::new(format!("data is empty in {}", msg)))
                 }
             } else {
                 let timestamp = obj["data"].as_array().unwrap()[6].as_i64().unwrap();
@@ -56,17 +51,16 @@ pub(super) fn extract_timestamp(
         }
         _ => {
             if channel.starts_with("KLine_") {
-                let arr = obj["data"]
+                let timestamp = obj["data"]
                     .as_array()
                     .unwrap()
                     .iter()
                     .map(|x| x.as_array().unwrap()[5].as_i64().unwrap())
-                    .collect::<Vec<i64>>();
-                let timestamp = arr.iter().fold(std::i64::MIN, |a, t| a.max(*t));
-                if timestamp == std::i64::MIN {
-                    Err(SimpleError::new(format!("data is empty in {}", msg)))
-                } else {
+                    .max();
+                if let Some(timestamp) = timestamp {
                     Ok(Some(timestamp * 1000))
+                } else {
+                    Err(SimpleError::new(format!("data is empty in {}", msg)))
                 }
             } else {
                 Err(SimpleError::new(format!(

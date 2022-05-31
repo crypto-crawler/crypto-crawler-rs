@@ -59,13 +59,14 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
     })?;
     if ws_msg.method == "trades.update" {
         let raw_trades = ws_msg.params[1].as_array().unwrap();
-        let timestamp = raw_trades.iter().fold(std::i64::MIN, |a, raw_trade| {
-            a.max((raw_trade.get("time").unwrap().as_f64().unwrap() * 1000.0) as i64)
-        });
-        if timestamp == std::i64::MIN {
+        let timestamp = raw_trades
+            .iter()
+            .map(|raw_trade| (raw_trade.get("time").unwrap().as_f64().unwrap() * 1000.0) as i64)
+            .max();
+        if timestamp.is_none() {
             Err(SimpleError::new(format!("as and bs are empty in {}", msg)))
         } else {
-            Ok(Some(timestamp))
+            Ok(timestamp)
         }
     } else if ws_msg.method == "depth.update" {
         Ok(None)

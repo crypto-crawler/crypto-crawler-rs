@@ -31,27 +31,17 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
 pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
     if let Ok(list) = serde_json::from_str::<Vec<Vec<Value>>>(msg) {
         let timestamp = if msg.starts_with(r#"[["T","#) {
-            let timestamp = list
-                .iter()
+            list.iter()
                 .filter(|raw_trade| raw_trade[2].is_string())
-                .fold(std::i64::MIN, |a, raw_trade| {
-                    a.max(raw_trade[2].as_str().unwrap().parse::<i64>().unwrap() * 1000)
-                });
-            timestamp
+                .map(|raw_trade| raw_trade[2].as_str().unwrap().parse::<i64>().unwrap() * 1000)
+                .max()
         } else {
-            let timestamp = list
-                .iter()
+            list.iter()
                 .filter(|raw_trade| raw_trade[3].is_string())
-                .fold(std::i64::MIN, |a, raw_trade| {
-                    a.max(raw_trade[3].as_str().unwrap().parse::<i64>().unwrap() * 1000)
-                });
-            timestamp
+                .map(|raw_trade| raw_trade[3].as_str().unwrap().parse::<i64>().unwrap() * 1000)
+                .max()
         };
-        if timestamp == std::i64::MIN {
-            Ok(None) // some messages are empty, e.g., [["AE","5319","YFI_USDT",null,{"asks":null},{"bids":null}]]
-        } else {
-            Ok(Some(timestamp))
-        }
+        Ok(timestamp) // some messages are empty, e.g., [["AE","5319","YFI_USDT",null,{"asks":null},{"bids":null}]]
     } else if let Ok(list) = serde_json::from_str::<Vec<Value>>(msg) {
         Ok(Some(
             list[2].as_str().unwrap().parse::<i64>().unwrap() * 1000,

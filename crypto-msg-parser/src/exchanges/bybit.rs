@@ -117,22 +117,25 @@ pub(crate) fn extract_timestamp(
     match msg_type {
         "trade" => {
             let raw_trades = ws_msg["data"].as_array().unwrap();
-            let timestamp = raw_trades.iter().fold(std::i64::MIN, |a, raw_trade| {
-                a.max(if raw_trade["trade_time_ms"].is_i64() {
-                    raw_trade["trade_time_ms"].as_i64().unwrap()
-                } else {
-                    raw_trade["trade_time_ms"]
-                        .as_str()
-                        .unwrap()
-                        .parse::<i64>()
-                        .unwrap()
+            let timestamp = raw_trades
+                .iter()
+                .map(|raw_trade| {
+                    if raw_trade["trade_time_ms"].is_i64() {
+                        raw_trade["trade_time_ms"].as_i64().unwrap()
+                    } else {
+                        raw_trade["trade_time_ms"]
+                            .as_str()
+                            .unwrap()
+                            .parse::<i64>()
+                            .unwrap()
+                    }
                 })
-            });
+                .max();
 
-            if timestamp == std::i64::MIN {
+            if timestamp.is_none() {
                 Err(SimpleError::new(format!("data is empty in {}", msg)))
             } else {
-                Ok(Some(timestamp))
+                Ok(timestamp)
             }
         }
         "orderBookL2_25" => {

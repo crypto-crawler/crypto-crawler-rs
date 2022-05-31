@@ -93,18 +93,20 @@ pub(crate) fn extract_timestamp(
             msg
         ))
     })?;
-    let timestamp = ws_msg.data.iter().fold(std::i64::MIN, |a, x| {
-        a.max(
+    let timestamp = ws_msg
+        .data
+        .iter()
+        .map(|x| {
             DateTime::parse_from_rfc3339(x["timestamp"].as_str().unwrap())
                 .unwrap()
-                .timestamp_millis(),
-        )
-    });
+                .timestamp_millis()
+        })
+        .max();
 
-    if timestamp == std::i64::MIN {
+    if timestamp.is_none() {
         Err(SimpleError::new(format!("data is empty in {}", msg)))
     } else {
-        Ok(Some(timestamp))
+        Ok(timestamp)
     }
 }
 

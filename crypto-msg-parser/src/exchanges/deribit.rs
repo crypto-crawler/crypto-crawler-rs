@@ -91,14 +91,12 @@ pub(crate) fn extract_timestamp(
         Ok(Some(data["timestamp"].as_i64().unwrap()))
     } else if data.is_array() {
         let arr = data.as_array().unwrap();
-        let timestamp = arr.iter().fold(std::i64::MIN, |a, x| {
-            a.max(x["timestamp"].as_i64().unwrap())
-        });
+        let timestamp = arr.iter().map(|x| x["timestamp"].as_i64().unwrap()).max();
 
-        if timestamp == std::i64::MIN {
+        if timestamp.is_none() {
             Err(SimpleError::new(format!("data is empty in {}", msg)))
         } else {
-            Ok(Some(timestamp))
+            Ok(timestamp)
         }
     } else {
         Err(SimpleError::new(format!("Unknown message format: {}", msg)))

@@ -38,14 +38,15 @@ pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
                 let data = arr[1]["data"].as_object().unwrap();
                 if let Some(deals) = data.get("deals") {
                     let raw_trades = deals.as_array().unwrap();
-                    let timestamp = raw_trades.iter().fold(std::i64::MIN, |a, raw_trade| {
-                        a.max(raw_trade["t"].as_i64().unwrap())
-                    });
+                    let timestamp = raw_trades
+                        .iter()
+                        .map(|raw_trade| raw_trade["t"].as_i64().unwrap())
+                        .max();
 
-                    if timestamp == std::i64::MIN {
+                    if timestamp.is_none() {
                         Err(SimpleError::new(format!("deals is empty in {}", msg)))
                     } else {
-                        Ok(Some(timestamp))
+                        Ok(timestamp)
                     }
                 } else {
                     Ok(None)
@@ -64,13 +65,12 @@ pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
                 .as_array()
                 .unwrap()
                 .iter()
-                .fold(std::i64::MIN, |a, raw_trade| {
-                    a.max(raw_trade["t"].as_i64().unwrap())
-                });
-            if timestamp == std::i64::MIN {
+                .map(|raw_trade| raw_trade["t"].as_i64().unwrap())
+                .max();
+            if timestamp.is_none() {
                 Err(SimpleError::new(format!("deals is empty in {}", msg)))
             } else {
-                Ok(Some(timestamp))
+                Ok(timestamp)
             }
         } else {
             Ok(None)

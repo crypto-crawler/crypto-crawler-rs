@@ -72,18 +72,17 @@ pub(crate) fn extract_timestamp(
                 .as_array()
                 .unwrap()
                 .iter()
-                .fold(std::i64::MIN, |a, x| {
-                    a.max(
-                        DateTime::parse_from_rfc3339(x["time"].as_str().unwrap())
-                            .unwrap()
-                            .timestamp_millis(),
-                    )
-                });
+                .map(|x| {
+                    DateTime::parse_from_rfc3339(x["time"].as_str().unwrap())
+                        .unwrap()
+                        .timestamp_millis()
+                })
+                .max();
 
-            if timestamp == std::i64::MIN {
+            if timestamp.is_none() {
                 Err(SimpleError::new(format!("data is empty in {}", msg)))
             } else {
-                Ok(Some(timestamp))
+                Ok(timestamp)
             }
         }
         "orderbook" => Ok(Some(

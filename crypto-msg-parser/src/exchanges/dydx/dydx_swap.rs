@@ -75,18 +75,13 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
                 .contents
                 .trades
                 .iter()
-                .fold(std::i64::MIN, |a, raw_trade| {
-                    a.max(
-                        DateTime::parse_from_rfc3339(&raw_trade.createdAt)
-                            .unwrap()
-                            .timestamp_millis(),
-                    )
-                });
-            if timestamp == std::i64::MIN {
-                Ok(None) // contents.trades is an empty array
-            } else {
-                Ok(Some(timestamp))
-            }
+                .map(|raw_trade| {
+                    DateTime::parse_from_rfc3339(&raw_trade.createdAt)
+                        .unwrap()
+                        .timestamp_millis()
+                })
+                .max();
+            Ok(timestamp) // contents.trades can be an empty array sometimes
         }
         "v3_orderbook" => Ok(None),
         _ => Err(SimpleError::new(format!(

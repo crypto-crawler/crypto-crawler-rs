@@ -18,31 +18,29 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
         "ticker" => Ok(Some(obj["date"].as_str().unwrap().parse::<i64>().unwrap())),
         "depth" => Ok(obj.get("timestamp").map(|x| x.as_i64().unwrap() * 1000)),
         "trades" => {
-            let arr = obj["data"]
+            let timestamp = obj["data"]
                 .as_array()
                 .unwrap()
                 .iter()
                 .map(|x| x["date"].as_i64().unwrap())
-                .collect::<Vec<i64>>();
-            let timestamp = arr.iter().fold(std::i64::MIN, |a, t| a.max(*t));
-            if timestamp == std::i64::MIN {
-                Err(SimpleError::new(format!("data is empty in {}", msg)))
-            } else {
+                .max();
+            if let Some(timestamp) = timestamp {
                 Ok(Some(timestamp * 1000))
+            } else {
+                Err(SimpleError::new(format!("data is empty in {}", msg)))
             }
         }
         "kline" => {
-            let arr = obj["datas"]["data"]
+            let timestamp = obj["datas"]["data"]
                 .as_array()
                 .unwrap()
                 .iter()
                 .map(|x| x[0].as_i64().unwrap())
-                .collect::<Vec<i64>>();
-            let timestamp = arr.iter().fold(std::i64::MIN, |a, t| a.max(*t));
-            if timestamp == std::i64::MIN {
+                .max();
+            if timestamp.is_none() {
                 Err(SimpleError::new(format!("data is empty in {}", msg)))
             } else {
-                Ok(Some(timestamp))
+                Ok(timestamp)
             }
         }
         _ => Err(SimpleError::new(format!(
