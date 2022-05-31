@@ -78,10 +78,10 @@ pub struct TradeMsg {
     /// price
     pub price: f64,
     // Number of base coins
-    #[serde(with = "crate::f64_limited_serde")]
+    // #[serde(with = "crate::f64_limited_serde")]
     pub quantity_base: f64,
     // Number of quote coins(mostly USDT)
-    #[serde(with = "crate::f64_limited_serde")]
+    // #[serde(with = "crate::f64_limited_serde")]
     pub quantity_quote: f64,
     /// Number of contracts, always None for Spot
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -215,11 +215,13 @@ impl TradeMsg {
             self.timestamp,
             self.side,
             self.price,
-            self.quantity_base,
-            self.quantity_quote,
-            self.quantity_contract
-                .map(|x| x.to_string())
-                .unwrap_or_default(),
+            crate::exchanges::utils::round(self.quantity_base),
+            crate::exchanges::utils::round(self.quantity_quote),
+            if let Some(x) = self.quantity_contract {
+                crate::exchanges::utils::round(x).to_string()
+            } else {
+                "".to_string()
+            },
             self.trade_id,
             self.json
         )

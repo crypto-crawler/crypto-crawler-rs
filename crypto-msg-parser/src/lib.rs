@@ -1,4 +1,5 @@
 pub mod exchanges;
+#[allow(dead_code)]
 mod f64_limited_serde;
 mod msg;
 mod order;
@@ -178,6 +179,7 @@ pub fn parse_l2_topk(
     let ret = match exchange {
         "binance" => exchanges::binance::parse_l2_topk(market_type, msg, received_at),
         "bitget" => exchanges::bitget::parse_l2_topk(market_type, msg),
+        "bitmex" => exchanges::bitmex::parse_l2_topk(market_type, msg),
         "okx" => exchanges::okx::parse_l2_topk(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     };

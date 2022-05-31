@@ -1,4 +1,4 @@
-mod utils;
+pub(crate) mod utils;
 
 pub(super) mod binance;
 pub(super) mod bitfinex;
