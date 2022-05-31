@@ -29,15 +29,8 @@ mod trade {
                 .unwrap()
         );
 
-        let contract_value = crypto_contract_value::get_contract_value(
-            "deribit",
-            MarketType::InverseFuture,
-            "BTC/USD",
-        )
-        .unwrap();
-
-        assert_eq!(trades[0].quantity_base, contract_value * 6000.0 / 56273.5);
-        assert_eq!(trades[0].quantity_quote, contract_value * 6000.0);
+        assert_eq!(trades[0].quantity_base, 10.0 * 6000.0 / 56273.5);
+        assert_eq!(trades[0].quantity_quote, 10.0 * 6000.0);
         assert_eq!(trades[0].quantity_contract, Some(6000.0));
         assert_eq!(trades[0].side, TradeSide::Buy);
     }
@@ -68,22 +61,15 @@ mod trade {
                 .unwrap()
         );
 
-        let contract_value = crypto_contract_value::get_contract_value(
-            "deribit",
-            MarketType::InverseSwap,
-            "BTC/USD",
-        )
-        .unwrap();
-
         assert_eq!(trades[0].price, 56168.0);
-        assert_eq!(trades[0].quantity_base, contract_value * 5580.0 / 56168.0);
-        assert_eq!(trades[0].quantity_quote, contract_value * 5580.0);
+        assert_eq!(trades[0].quantity_base, 10.0 * 5580.0 / 56168.0);
+        assert_eq!(trades[0].quantity_quote, 10.0 * 5580.0);
         assert_eq!(trades[0].quantity_contract, Some(5580.0));
         assert_eq!(trades[0].side, TradeSide::Buy);
 
         // volume == amount
-        assert_eq!(trades[0].quantity_quote, contract_value * 5580.0);
-        assert_eq!(trades[1].quantity_quote, contract_value * 60.0);
+        assert_eq!(trades[0].quantity_quote, 10.0 * 5580.0);
+        assert_eq!(trades[1].quantity_quote, 10.0 * 60.0);
     }
 
     #[test]
@@ -153,43 +139,24 @@ mod l2_event {
         assert_eq!(orderbook.seq_id, Some(31479219781));
         assert_eq!(orderbook.prev_seq_id, None);
 
-        let contract_value = crypto_contract_value::get_contract_value(
-            "deribit",
-            MarketType::InverseFuture,
-            "BTC/USD",
-        )
-        .unwrap();
-
         assert_eq!(orderbook.bids[0].price, 37317.0);
-        assert_eq!(
-            orderbook.bids[0].quantity_base,
-            contract_value * 2960.0 / 37317.0
-        );
-        assert_eq!(orderbook.bids[0].quantity_quote, contract_value * 2960.0);
+        assert_eq!(orderbook.bids[0].quantity_base, 10.0 * 2960.0 / 37317.0);
+        assert_eq!(orderbook.bids[0].quantity_quote, 10.0 * 2960.0);
         assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 2960.0);
 
         assert_eq!(orderbook.bids[2].price, 37311.0);
-        assert_eq!(
-            orderbook.bids[2].quantity_base,
-            contract_value * 45170.0 / 37311.0
-        );
-        assert_eq!(orderbook.bids[2].quantity_quote, contract_value * 45170.0);
+        assert_eq!(orderbook.bids[2].quantity_base, 10.0 * 45170.0 / 37311.0);
+        assert_eq!(orderbook.bids[2].quantity_quote, 10.0 * 45170.0);
         assert_eq!(orderbook.bids[2].quantity_contract.unwrap(), 45170.0);
 
         assert_eq!(orderbook.asks[0].price, 37327.0);
-        assert_eq!(
-            orderbook.asks[0].quantity_base,
-            contract_value * 10.0 / 37327.0
-        );
-        assert_eq!(orderbook.asks[0].quantity_quote, contract_value * 10.0);
+        assert_eq!(orderbook.asks[0].quantity_base, 10.0 * 10.0 / 37327.0);
+        assert_eq!(orderbook.asks[0].quantity_quote, 10.0 * 10.0);
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 10.0);
 
         assert_eq!(orderbook.asks[2].price, 37328.0);
-        assert_eq!(
-            orderbook.asks[2].quantity_base,
-            contract_value * 3000.0 / 37328.0
-        );
-        assert_eq!(orderbook.asks[2].quantity_quote, contract_value * 3000.0);
+        assert_eq!(orderbook.asks[2].quantity_base, 10.0 * 3000.0 / 37328.0);
+        assert_eq!(orderbook.asks[2].quantity_quote, 10.0 * 3000.0);
         assert_eq!(orderbook.asks[2].quantity_contract.unwrap(), 3000.0);
     }
 
@@ -218,37 +185,21 @@ mod l2_event {
                 .unwrap()
         );
 
-        let contract_value = crypto_contract_value::get_contract_value(
-            "deribit",
-            MarketType::InverseSwap,
-            "BTC/USD",
-        )
-        .unwrap();
-
         assert_eq!(orderbook.timestamp, 1622626784890);
         assert_eq!(orderbook.seq_id, Some(31479339507));
         assert_eq!(orderbook.prev_seq_id, Some(31479339296));
         assert_eq!(orderbook.bids[0].price, 37392.5);
-        assert_eq!(
-            orderbook.bids[0].quantity_base,
-            contract_value * 3000.0 / 37392.5
-        );
-        assert_eq!(orderbook.bids[0].quantity_quote, contract_value * 3000.0);
+        assert_eq!(orderbook.bids[0].quantity_base, 10.0 * 3000.0 / 37392.5);
+        assert_eq!(orderbook.bids[0].quantity_quote, 10.0 * 3000.0);
         assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 3000.0);
         assert_eq!(orderbook.bids[1].price, 37399.0);
-        assert_eq!(
-            orderbook.bids[1].quantity_base,
-            contract_value * 6530.0 / 37399.0
-        );
-        assert_eq!(orderbook.bids[1].quantity_quote, contract_value * 6530.0);
+        assert_eq!(orderbook.bids[1].quantity_base, 10.0 * 6530.0 / 37399.0);
+        assert_eq!(orderbook.bids[1].quantity_quote, 10.0 * 6530.0);
         assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 6530.0);
 
         assert_eq!(orderbook.asks[0].price, 37850.0);
-        assert_eq!(
-            orderbook.asks[0].quantity_base,
-            contract_value * 8850.0 / 37850.0
-        );
-        assert_eq!(orderbook.asks[0].quantity_quote, contract_value * 8850.0);
+        assert_eq!(orderbook.asks[0].quantity_base, 10.0 * 8850.0 / 37850.0);
+        assert_eq!(orderbook.asks[0].quantity_quote, 10.0 * 8850.0);
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 8850.0);
 
         assert_eq!(orderbook.asks[1].price, 37848.5);
@@ -286,43 +237,24 @@ mod l2_event {
                 .unwrap()
         );
 
-        let contract_value = crypto_contract_value::get_contract_value(
-            "deribit",
-            MarketType::InverseSwap,
-            "BTC/USD",
-        )
-        .unwrap();
-
         assert_eq!(orderbook.bids[0].price, 37240.0);
-        assert_eq!(
-            orderbook.bids[0].quantity_base,
-            contract_value * 20.0 / 37240.0
-        );
-        assert_eq!(orderbook.bids[0].quantity_quote, contract_value * 20.0);
+        assert_eq!(orderbook.bids[0].quantity_base, 10.0 * 20.0 / 37240.0);
+        assert_eq!(orderbook.bids[0].quantity_quote, 10.0 * 20.0);
         assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 20.0);
 
         assert_eq!(orderbook.bids[2].price, 37233.0);
-        assert_eq!(
-            orderbook.bids[2].quantity_base,
-            contract_value * 50.0 / 37233.0
-        );
-        assert_eq!(orderbook.bids[2].quantity_quote, contract_value * 50.0);
+        assert_eq!(orderbook.bids[2].quantity_base, 10.0 * 50.0 / 37233.0);
+        assert_eq!(orderbook.bids[2].quantity_quote, 10.0 * 50.0);
         assert_eq!(orderbook.bids[2].quantity_contract.unwrap(), 50.0);
 
         assert_eq!(orderbook.asks[0].price, 37240.5);
-        assert_eq!(
-            orderbook.asks[0].quantity_base,
-            contract_value * 14240.0 / 37240.5
-        );
-        assert_eq!(orderbook.asks[0].quantity_quote, contract_value * 14240.0);
+        assert_eq!(orderbook.asks[0].quantity_base, 10.0 * 14240.0 / 37240.5);
+        assert_eq!(orderbook.asks[0].quantity_quote, 10.0 * 14240.0);
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 14240.0);
 
         assert_eq!(orderbook.asks[2].price, 37251.0);
-        assert_eq!(
-            orderbook.asks[2].quantity_base,
-            contract_value * 650.0 / 37251.0
-        );
-        assert_eq!(orderbook.asks[2].quantity_quote, contract_value * 650.0);
+        assert_eq!(orderbook.asks[2].quantity_base, 10.0 * 650.0 / 37251.0);
+        assert_eq!(orderbook.asks[2].quantity_quote, 10.0 * 650.0);
         assert_eq!(orderbook.asks[2].quantity_contract.unwrap(), 650.0);
     }
 
@@ -355,24 +287,14 @@ mod l2_event {
                 .unwrap()
         );
 
-        let contract_value = crypto_contract_value::get_contract_value(
-            "deribit",
-            MarketType::InverseSwap,
-            "BTC/USD",
-        )
-        .unwrap();
-
         assert_eq!(orderbook.bids[0].price, 36779.0);
         assert_eq!(orderbook.bids[0].quantity_base, 0.0 / 36779.0);
         assert_eq!(orderbook.bids[0].quantity_quote, 0.0);
         assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 0.0);
 
         assert_eq!(orderbook.bids[1].price, 36809.5);
-        assert_eq!(
-            orderbook.bids[1].quantity_base,
-            contract_value * 254870.0 / 36809.5
-        );
-        assert_eq!(orderbook.bids[1].quantity_quote, contract_value * 254870.0);
+        assert_eq!(orderbook.bids[1].quantity_base, 10.0 * 254870.0 / 36809.5);
+        assert_eq!(orderbook.bids[1].quantity_quote, 10.0 * 254870.0);
         assert_eq!(orderbook.bids[1].quantity_contract.unwrap(), 254870.0);
 
         assert_eq!(orderbook.asks[0].price, 37462.5);
@@ -381,11 +303,8 @@ mod l2_event {
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 0.0);
 
         assert_eq!(orderbook.asks[1].price, 37394.0);
-        assert_eq!(
-            orderbook.asks[1].quantity_base,
-            contract_value * 42670.0 / 37394.0
-        );
-        assert_eq!(orderbook.asks[1].quantity_quote, contract_value * 42670.0);
+        assert_eq!(orderbook.asks[1].quantity_base, 10.0 * 42670.0 / 37394.0);
+        assert_eq!(orderbook.asks[1].quantity_quote, 10.0 * 42670.0);
         assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 42670.0);
     }
 
@@ -476,43 +395,24 @@ mod l2_topk {
         assert_eq!(orderbook.seq_id, Some(45176371821));
         assert_eq!(orderbook.prev_seq_id, None);
 
-        let contract_value = crypto_contract_value::get_contract_value(
-            "deribit",
-            MarketType::InverseFuture,
-            "BTC/USD",
-        )
-        .unwrap();
-
         assert_eq!(orderbook.bids[0].price, 31975.0);
-        assert_eq!(
-            orderbook.bids[0].quantity_base,
-            contract_value * 1370.0 / 31975.0
-        );
-        assert_eq!(orderbook.bids[0].quantity_quote, contract_value * 1370.0);
+        assert_eq!(orderbook.bids[0].quantity_base, 10.0 * 1370.0 / 31975.0);
+        assert_eq!(orderbook.bids[0].quantity_quote, 10.0 * 1370.0);
         assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 1370.0);
 
         assert_eq!(orderbook.bids[2].price, 31961.0);
-        assert_eq!(
-            orderbook.bids[2].quantity_base,
-            contract_value * 300.0 / 31961.0
-        );
-        assert_eq!(orderbook.bids[2].quantity_quote, contract_value * 300.0);
+        assert_eq!(orderbook.bids[2].quantity_base, 10.0 * 300.0 / 31961.0);
+        assert_eq!(orderbook.bids[2].quantity_quote, 10.0 * 300.0);
         assert_eq!(orderbook.bids[2].quantity_contract.unwrap(), 300.0);
 
         assert_eq!(orderbook.asks[0].price, 31976.5);
-        assert_eq!(
-            orderbook.asks[0].quantity_base,
-            contract_value * 2500.0 / 31976.5
-        );
-        assert_eq!(orderbook.asks[0].quantity_quote, contract_value * 2500.0);
+        assert_eq!(orderbook.asks[0].quantity_base, 10.0 * 2500.0 / 31976.5);
+        assert_eq!(orderbook.asks[0].quantity_quote, 10.0 * 2500.0);
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 2500.0);
 
         assert_eq!(orderbook.asks[2].price, 31982.0);
-        assert_eq!(
-            orderbook.asks[2].quantity_base,
-            contract_value * 2200.0 / 31982.0
-        );
-        assert_eq!(orderbook.asks[2].quantity_quote, contract_value * 2200.0);
+        assert_eq!(orderbook.asks[2].quantity_base, 10.0 * 2200.0 / 31982.0);
+        assert_eq!(orderbook.asks[2].quantity_quote, 10.0 * 2200.0);
         assert_eq!(orderbook.asks[2].quantity_contract.unwrap(), 2200.0);
     }
 
@@ -546,43 +446,24 @@ mod l2_topk {
         assert_eq!(orderbook.seq_id, Some(45176552517));
         assert_eq!(orderbook.prev_seq_id, None);
 
-        let contract_value = crypto_contract_value::get_contract_value(
-            "deribit",
-            MarketType::InverseSwap,
-            "BTC/USD",
-        )
-        .unwrap();
-
         assert_eq!(orderbook.bids[0].price, 31523.5);
-        assert_eq!(
-            orderbook.bids[0].quantity_base,
-            contract_value * 128780.0 / 31523.5
-        );
-        assert_eq!(orderbook.bids[0].quantity_quote, contract_value * 128780.0);
+        assert_eq!(orderbook.bids[0].quantity_base, 10.0 * 128780.0 / 31523.5);
+        assert_eq!(orderbook.bids[0].quantity_quote, 10.0 * 128780.0);
         assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 128780.0);
 
         assert_eq!(orderbook.bids[2].price, 31521.5);
-        assert_eq!(
-            orderbook.bids[2].quantity_base,
-            contract_value * 14500.0 / 31521.5
-        );
-        assert_eq!(orderbook.bids[2].quantity_quote, contract_value * 14500.0);
+        assert_eq!(orderbook.bids[2].quantity_base, 10.0 * 14500.0 / 31521.5);
+        assert_eq!(orderbook.bids[2].quantity_quote, 10.0 * 14500.0);
         assert_eq!(orderbook.bids[2].quantity_contract.unwrap(), 14500.0);
 
         assert_eq!(orderbook.asks[0].price, 31524.0);
-        assert_eq!(
-            orderbook.asks[0].quantity_base,
-            contract_value * 30.0 / 31524.0
-        );
-        assert_eq!(orderbook.asks[0].quantity_quote, contract_value * 30.0);
+        assert_eq!(orderbook.asks[0].quantity_base, 10.0 * 30.0 / 31524.0);
+        assert_eq!(orderbook.asks[0].quantity_quote, 10.0 * 30.0);
         assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 30.0);
 
         assert_eq!(orderbook.asks[2].price, 31525.5);
-        assert_eq!(
-            orderbook.asks[2].quantity_base,
-            contract_value * 6010.0 / 31525.5
-        );
-        assert_eq!(orderbook.asks[2].quantity_quote, contract_value * 6010.0);
+        assert_eq!(orderbook.asks[2].quantity_base, 10.0 * 6010.0 / 31525.5);
+        assert_eq!(orderbook.asks[2].quantity_quote, 10.0 * 6010.0);
         assert_eq!(orderbook.asks[2].quantity_contract.unwrap(), 6010.0);
     }
 
