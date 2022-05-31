@@ -42,6 +42,17 @@ struct SpotOrderbookMsg {
     extra: HashMap<String, Value>,
 }
 
+// https://docs.kucoin.com/#level2-5-best-ask-bid-orders
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct SpotL2TopKMsg {
+    timestamp: i64,
+    asks: Vec<[String; 2]>,
+    bids: Vec<[String; 2]>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
 pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<SpotTradeMsg>>(msg).map_err(|_e| {
         SimpleError::new(format!(
@@ -83,7 +94,7 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
     Ok(vec![trade])
 }
 
-pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>, SimpleError> {
+pub(super) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<SpotOrderbookMsg>>(msg).map_err(|_e| {
         SimpleError::new(format!(
             "Failed to deserialize {} to WebsocketMsg<SpotOrderbookMsg>",
@@ -132,6 +143,49 @@ pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>, S
             .map(|x| parse_order(x))
             .collect(),
         snapshot: false,
+        json: msg.to_string(),
+    };
+
+    Ok(vec![orderbook])
+}
+
+pub(super) fn parse_l2_topk(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<SpotL2TopKMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<SpotOrderbookMsg>",
+            msg
+        ))
+    })?;
+    debug_assert_eq!(ws_msg.subject, "level2");
+    debug_assert!(ws_msg.topic.starts_with("/spotMarket/level2Depth5:"));
+    let symbol = ws_msg.topic.split(':').last().unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let timestamp = ws_msg.data.timestamp;
+
+    let parse_order = |raw_order: &[String; 2]| -> Order {
+        let price = raw_order[0].parse::<f64>().unwrap();
+        let quantity_base = raw_order[1].parse::<f64>().unwrap();
+
+        Order {
+            price,
+            quantity_base,
+            quantity_quote: price * quantity_base,
+            quantity_contract: None,
+        }
+    };
+
+    let orderbook = OrderBookMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type: MarketType::Spot,
+        symbol: symbol.to_string(),
+        pair,
+        msg_type: MessageType::L2TopK,
+        timestamp,
+        seq_id: None,
+        prev_seq_id: None,
+        asks: ws_msg.data.asks.iter().map(|x| parse_order(x)).collect(),
+        bids: ws_msg.data.bids.iter().map(|x| parse_order(x)).collect(),
+        snapshot: true,
         json: msg.to_string(),
     };
 

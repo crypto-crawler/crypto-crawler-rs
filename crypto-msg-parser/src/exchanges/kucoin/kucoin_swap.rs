@@ -53,7 +53,7 @@ struct ContractOrderbookMsg {
     extra: HashMap<String, Value>,
 }
 
-pub(crate) fn parse_trade(
+pub(super) fn parse_trade(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<TradeMsg>, SimpleError> {
@@ -98,7 +98,7 @@ pub(crate) fn parse_trade(
     Ok(vec![trade])
 }
 
-pub(crate) fn parse_l2(
+pub(super) fn parse_l2(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<OrderBookMsg>, SimpleError> {
@@ -110,10 +110,7 @@ pub(crate) fn parse_l2(
     })?;
     debug_assert_eq!(ws_msg.subject, "level2");
     debug_assert!(ws_msg.topic.starts_with("/contractMarket/level2:"));
-    let symbol = ws_msg
-        .topic
-        .strip_prefix("/contractMarket/level2:")
-        .unwrap();
+    let symbol = ws_msg.topic.split(':').last().unwrap();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
 
     let raw_order: Vec<&str> = ws_msg.data.change.split(',').collect();
@@ -151,6 +148,75 @@ pub(crate) fn parse_l2(
         asks,
         bids,
         snapshot: false,
+        json: msg.to_string(),
+    };
+
+    Ok(vec![orderbook])
+}
+
+// https://docs.kucoin.com/futures/#message-channel-for-the-5-best-ask-bid-full-data-of-level-2
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct SwapL2TopKMsg {
+    sequence: u64,
+    timestamp: i64,
+    asks: Vec<[f64; 2]>,
+    bids: Vec<[f64; 2]>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+pub(super) fn parse_l2_topk(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<SwapL2TopKMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<SwapL2TopKMsg>",
+            msg
+        ))
+    })?;
+    debug_assert_eq!(ws_msg.subject, "level2");
+    debug_assert!(ws_msg.topic.starts_with("/contractMarket/level2Depth"));
+    let symbol = ws_msg.topic.split(':').last().unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+
+    let parse_order = |raw_order: &[f64; 2], pair: &str| -> Order {
+        let price = raw_order[0];
+        let quantity = raw_order[1];
+
+        let (quantity_base, quantity_quote, quantity_contract) =
+            calc_quantity_and_volume(EXCHANGE_NAME, market_type, pair, price, quantity);
+        Order {
+            price,
+            quantity_base,
+            quantity_quote,
+            quantity_contract,
+        }
+    };
+
+    let orderbook = OrderBookMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: symbol.to_string(),
+        pair: pair.clone(),
+        msg_type: MessageType::L2TopK,
+        timestamp: ws_msg.data.timestamp,
+        seq_id: Some(ws_msg.data.sequence),
+        prev_seq_id: None,
+        asks: ws_msg
+            .data
+            .asks
+            .iter()
+            .map(|raw_order| parse_order(raw_order, pair.as_str()))
+            .collect(),
+        bids: ws_msg
+            .data
+            .bids
+            .iter()
+            .map(|raw_order| parse_order(raw_order, pair.as_str()))
+            .collect(),
+        snapshot: true,
         json: msg.to_string(),
     };
 
