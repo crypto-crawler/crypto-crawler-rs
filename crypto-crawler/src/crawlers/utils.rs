@@ -417,6 +417,7 @@ async fn create_ws_client_internal(
             MarketType::Spot => Arc::new(GateSpotWSClient::new(tx, None).await),
             MarketType::InverseSwap => Arc::new(GateInverseSwapWSClient::new(tx, None).await),
             MarketType::LinearSwap => Arc::new(GateLinearSwapWSClient::new(tx, None).await),
+            MarketType::InverseFuture => Arc::new(GateInverseFutureWSClient::new(tx, None).await),
             MarketType::LinearFuture => Arc::new(GateLinearFutureWSClient::new(tx, None).await),
             _ => panic!("Gate does NOT have the {} market type", market_type),
         },

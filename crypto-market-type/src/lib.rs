@@ -61,7 +61,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
         "bitfinex" => vec![MarketType::Spot, MarketType::LinearSwap],
         "bitget" => vec![
             MarketType::Spot,
-            MarketType::InverseSwap,
+            MarketType::InverseSwap, // TODO: Bitget's coin-margined swap market is a kind of mixed contract
             MarketType::LinearSwap,
         ],
         "bithumb" => vec![MarketType::Spot],
