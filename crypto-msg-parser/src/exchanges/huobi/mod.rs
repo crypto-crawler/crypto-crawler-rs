@@ -18,8 +18,8 @@ use message::WebsocketMsg;
 
 pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
-    let v = ws_msg.ch.split('.').collect::<Vec<&str>>();
-    Ok(v[1].to_string())
+    let symbol = ws_msg.ch.split('.').nth(1).unwrap();
+    Ok(symbol.to_string())
 }
 
 pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
@@ -111,4 +111,11 @@ pub(crate) fn parse_l2(
             market_type
         ))),
     }
+}
+
+pub(crate) fn parse_l2_topk(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    parse_l2(market_type, msg)
 }

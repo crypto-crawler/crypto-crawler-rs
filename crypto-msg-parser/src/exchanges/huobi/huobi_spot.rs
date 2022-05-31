@@ -30,9 +30,9 @@ struct SpotTradeMsg {
 #[allow(non_snake_case)]
 struct SpotOrderbookMsg {
     #[serde(rename = "seqNum")]
-    seq_num: u64,
+    seq_num: Option<u64>, // None if L2TopK
     #[serde(rename = "prevSeqNum")]
-    prev_seq_num: u64,
+    prev_seq_num: Option<u64>, // None if L2TopK
     asks: Option<Vec<[f64; 2]>>,
     bids: Option<Vec<[f64; 2]>>,
     #[serde(flatten)]
@@ -54,10 +54,7 @@ pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
         ))
     })?;
 
-    let symbol = {
-        let v: Vec<&str> = ws_msg.ch.split('.').collect();
-        v[1]
-    };
+    let symbol = ws_msg.ch.split('.').nth(1).unwrap();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
         .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
 
@@ -99,10 +96,7 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
             msg
         ))
     })?;
-    let symbol = {
-        let v: Vec<&str> = ws_msg.ch.split('.').collect();
-        v[1]
-    };
+    let symbol = ws_msg.ch.split('.').nth(1).unwrap();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
         .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
     let timestamp = ws_msg.ts;
@@ -118,16 +112,23 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
             quantity_contract: None,
         }
     };
+    let msg_type = if ws_msg.ch.contains(".mbp.") {
+        MessageType::L2Event
+    } else if ws_msg.ch.contains(".depth.step") {
+        MessageType::L2TopK
+    } else {
+        panic!("Unsupported channel {}", ws_msg.ch);
+    };
 
     let orderbook = OrderBookMsg {
         exchange: EXCHANGE_NAME.to_string(),
         market_type: MarketType::Spot,
         symbol: symbol.to_string(),
         pair,
-        msg_type: MessageType::L2Event,
+        msg_type,
         timestamp,
-        seq_id: Some(ws_msg.tick.seq_num),
-        prev_seq_id: Some(ws_msg.tick.prev_seq_num),
+        seq_id: ws_msg.tick.seq_num,
+        prev_seq_id: ws_msg.tick.prev_seq_num,
         asks: ws_msg
             .tick
             .asks
@@ -142,7 +143,7 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
             .flatten()
             .map(|x| parse_order(&x))
             .collect(),
-        snapshot: false,
+        snapshot: msg_type == MessageType::L2TopK,
         json: msg.to_string(),
     };
 

@@ -16,6 +16,7 @@ use crate::{
 
 pub(crate) const EXCHANGE_NAME: &str = "huobi";
 
+// or wss://api-aws.huobi.pro/feed
 const SPOT_WEBSOCKET_URL: &str = "wss://api.huobi.pro/ws";
 // const FUTURES_WEBSOCKET_URL: &str = "wss://www.hbdm.com/ws";
 // const COIN_SWAP_WEBSOCKET_URL: &str = "wss://api.hbdm.com/swap-ws";
@@ -113,17 +114,11 @@ impl<const URL: char> WSClient for HuobiWSClient<URL> {
 
     async fn subscribe_orderbook(&self, symbols: &[String]) {
         if URL == 'S' {
-            if self.client.url == "wss://api.huobi.pro/feed"
-                || self.client.url == "wss://api-aws.huobi.pro/feed"
-            {
-                let topics = symbols
-                    .iter()
-                    .map(|symbol| ("mbp.20".to_string(), symbol.to_string()))
-                    .collect::<Vec<(String, String)>>();
-                self.subscribe(&topics).await;
-            } else {
-                panic!("Huobi Spot market.$symbol.mbp.$levels must use wss://api.huobi.pro/feed or wss://api-aws.huobi.pro/feed");
-            }
+            let topics = symbols
+                .iter()
+                .map(|symbol| ("mbp.20".to_string(), symbol.to_string()))
+                .collect::<Vec<(String, String)>>();
+            self.subscribe(&topics).await;
         } else {
             let commands = symbols
                 .iter()

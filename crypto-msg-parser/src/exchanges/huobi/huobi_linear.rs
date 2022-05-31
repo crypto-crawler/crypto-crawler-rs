@@ -46,10 +46,7 @@ pub(crate) fn parse_trade(
         ))
     })?;
 
-    let symbol = {
-        let v: Vec<&str> = ws_msg.ch.split('.').collect();
-        v[1]
-    };
+    let symbol = ws_msg.ch.split('.').nth(1).unwrap();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
         .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
 

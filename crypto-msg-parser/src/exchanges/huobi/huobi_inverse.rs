@@ -26,7 +26,11 @@ struct InverseTradeMsg {
     extra: HashMap<String, Value>,
 }
 
+// https://huobiapi.github.io/docs/dm/v1/en/#subscribe-market-depth-data
+// https://huobiapi.github.io/docs/dm/v1/en/#subscribe-incremental-market-depth-data
+// https://huobiapi.github.io/docs/coin_margined_swap/v1/en/#subscribe-market-depth-data
 // https://huobiapi.github.io/docs/coin_margined_swap/v1/en/#subscribe-incremental-market-depth-data
+// https://huobiapi.github.io/docs/usdt_swap/v1/en/#general-subscribe-market-depth-data
 // https://huobiapi.github.io/docs/usdt_swap/v1/en/#general-subscribe-incremental-market-depth-data
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
@@ -34,7 +38,7 @@ struct InverseOrderbookMsg {
     id: i64,
     ts: i64,
     mrid: u64,
-    event: String, // snapshot, update
+    event: Option<String>, // snapshot, update, None if L2TopK
     ch: String,
     bids: Vec<[f64; 2]>,
     asks: Vec<[f64; 2]>,
@@ -60,10 +64,7 @@ pub(crate) fn parse_trade(
         ))
     })?;
 
-    let symbol = {
-        let v: Vec<&str> = ws_msg.ch.split('.').collect();
-        v[1]
-    };
+    let symbol = ws_msg.ch.split('.').nth(1).unwrap();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
         .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
 
@@ -117,14 +118,24 @@ pub(crate) fn parse_l2(
             msg
         ))
     })?;
-    let symbol = {
-        let v: Vec<&str> = ws_msg.tick.ch.split('.').collect();
-        v[1]
-    };
+    let symbol = ws_msg.ch.split('.').nth(1).unwrap();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
         .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
-    let timestamp = ws_msg.tick.ts;
-    let snapshot = ws_msg.tick.event == "snapshot";
+    let timestamp = ws_msg.ts;
+
+    let msg_type = if ws_msg.ch.ends_with(".high_freq") {
+        MessageType::L2Event
+    } else if ws_msg.ch.contains(".depth.step") {
+        MessageType::L2TopK
+    } else {
+        panic!("Unsupported channel {}", ws_msg.ch);
+    };
+
+    let snapshot = if msg_type == MessageType::L2Event {
+        ws_msg.tick.event.unwrap() == "snapshot"
+    } else {
+        true
+    };
 
     let parse_order = |raw_order: &[f64; 2]| -> Order {
         let price = raw_order[0];
@@ -145,7 +156,7 @@ pub(crate) fn parse_l2(
         market_type,
         symbol: symbol.to_string(),
         pair: pair.to_string(),
-        msg_type: MessageType::L2Event,
+        msg_type,
         timestamp,
         seq_id: Some(ws_msg.tick.mrid),
         prev_seq_id: None,
