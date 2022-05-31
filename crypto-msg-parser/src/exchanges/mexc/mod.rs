@@ -16,12 +16,7 @@ pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     if let Ok(arr) = serde_json::from_str::<Vec<Value>>(msg) {
         Ok(arr[1]["symbol"].as_str().unwrap().to_string())
     } else if let Ok(json_obj) = serde_json::from_str::<HashMap<String, Value>>(msg) {
-        Ok(json_obj
-            .get("symbol")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_string())
+        Ok(json_obj["symbol"].as_str().unwrap().to_string())
     } else {
         Err(SimpleError::new(format!(
             "Failed to extract symbol from {}",
@@ -103,6 +98,21 @@ pub(crate) fn parse_l2(
         mexc_spot::parse_l2(
             msg,
             timestamp.expect("MEXC Spot orderbook messages don't have timestamp"),
+        )
+    } else {
+        mexc_swap::parse_l2(market_type, msg)
+    }
+}
+
+pub(crate) fn parse_l2_topk(
+    market_type: MarketType,
+    msg: &str,
+    timestamp: Option<i64>,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    if market_type == MarketType::Spot {
+        mexc_spot::parse_l2_topk(
+            msg,
+            timestamp.expect("MEXC Spot L2TopK messages don't have timestamp"),
         )
     } else {
         mexc_swap::parse_l2(market_type, msg)

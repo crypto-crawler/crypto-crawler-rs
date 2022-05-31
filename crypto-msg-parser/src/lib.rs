@@ -185,6 +185,7 @@ pub fn parse_l2_topk(
         "deribit" => exchanges::deribit::parse_l2_topk(market_type, msg),
         "huobi" => exchanges::huobi::parse_l2_topk(market_type, msg),
         "kucoin" => exchanges::kucoin::parse_l2_topk(market_type, msg),
+        "mexc" => exchanges::mexc::parse_l2_topk(market_type, msg, received_at),
         "okx" => exchanges::okx::parse_l2_topk(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     };

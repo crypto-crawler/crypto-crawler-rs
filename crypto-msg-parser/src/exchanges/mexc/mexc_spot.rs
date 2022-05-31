@@ -43,6 +43,7 @@ struct PushSymbolData {
 struct WebsocketMsg<T: Sized> {
     symbol: String,
     data: T,
+    version: Option<String>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -118,7 +119,7 @@ fn parse_order(raw_order: &RawOrder) -> Order {
     }
 }
 
-pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>, SimpleError> {
+pub(super) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>, SimpleError> {
     let ws_msg: WebsocketMsg<PushSymbolData> =
         if let Ok(arr) = serde_json::from_str::<Vec<Value>>(msg) {
             assert_eq!(arr.len(), 2);
@@ -161,6 +162,62 @@ pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>, S
             Vec::new()
         },
         snapshot: false,
+        json: msg.to_string(),
+    };
+
+    Ok(vec![orderbook])
+}
+
+#[derive(Serialize, Deserialize)]
+struct RawL2TopKMsg {
+    asks: Vec<[String; 2]>,
+    bids: Vec<[String; 2]>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+pub(super) fn parse_l2_topk(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    let ws_msg =
+        serde_json::from_str::<WebsocketMsg<RawL2TopKMsg>>(msg).map_err(SimpleError::from)?;
+
+    let symbol = ws_msg.symbol.as_str();
+    let pair = crypto_pair::normalize_pair(symbol, super::EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
+
+    let parse_order = |raw_order: &[String; 2]| -> Order {
+        let price = raw_order[0].parse::<f64>().unwrap();
+        let quantity_base = raw_order[1].parse::<f64>().unwrap();
+
+        Order {
+            price,
+            quantity_base,
+            quantity_quote: price * quantity_base,
+            quantity_contract: None,
+        }
+    };
+
+    let orderbook = OrderBookMsg {
+        exchange: super::EXCHANGE_NAME.to_string(),
+        market_type: MarketType::Spot,
+        symbol: symbol.to_string(),
+        pair,
+        msg_type: MessageType::L2TopK,
+        timestamp,
+        seq_id: ws_msg.version.map(|v| v.parse::<u64>().unwrap()),
+        prev_seq_id: None,
+        asks: ws_msg
+            .data
+            .asks
+            .iter()
+            .map(parse_order)
+            .collect::<Vec<Order>>(),
+        bids: ws_msg
+            .data
+            .bids
+            .iter()
+            .map(parse_order)
+            .collect::<Vec<Order>>(),
+        snapshot: true,
         json: msg.to_string(),
     };
 

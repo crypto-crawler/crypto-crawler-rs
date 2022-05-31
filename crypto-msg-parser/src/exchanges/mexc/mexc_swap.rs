@@ -102,6 +102,12 @@ pub(crate) fn parse_l2(
     let pair = crypto_pair::normalize_pair(symbol, super::EXCHANGE_NAME)
         .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
 
+    let msg_type = match ws_msg.channel.as_str() {
+        "push.depth.full" => MessageType::L2TopK,
+        "push.depth" => MessageType::L2Event,
+        _ => panic!("Unsupported channel {}", ws_msg.channel),
+    };
+
     let parse_order = |raw_order: &[f64; 3]| -> Order {
         let price = raw_order[0];
         let quantity = raw_order[1];
@@ -120,7 +126,7 @@ pub(crate) fn parse_l2(
         market_type,
         symbol: symbol.to_string(),
         pair: pair.to_string(),
-        msg_type: MessageType::L2Event,
+        msg_type,
         timestamp: ws_msg.ts,
         seq_id: ws_msg.data.version,
         prev_seq_id: None,
@@ -136,7 +142,7 @@ pub(crate) fn parse_l2(
             .iter()
             .map(|x| parse_order(x))
             .collect::<Vec<Order>>(),
-        snapshot: false,
+        snapshot: msg_type == MessageType::L2TopK,
         json: msg.to_string(),
     };
 
