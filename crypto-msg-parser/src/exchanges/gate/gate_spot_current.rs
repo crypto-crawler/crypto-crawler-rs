@@ -62,7 +62,8 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     })?;
     if ws_msg.channel == "spot.trades" {
         Ok(ws_msg.result["currency_pair"].as_str().unwrap().to_string())
-    } else if ws_msg.channel.starts_with("spot.order_book") {
+    } else if ws_msg.channel.starts_with("spot.order_book") || ws_msg.channel == "spot.book_ticker"
+    {
         Ok(ws_msg.result["s"].as_str().unwrap().to_string())
     } else {
         Err(SimpleError::new(format!("Unknown message format: {}", msg)))
@@ -84,7 +85,8 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
                 .parse::<f64>()
                 .unwrap() as i64,
         ))
-    } else if ws_msg.channel.starts_with("spot.order_book") {
+    } else if ws_msg.channel.starts_with("spot.order_book") || ws_msg.channel == "spot.book_ticker"
+    {
         Ok(Some(ws_msg.result["t"].as_i64().unwrap()))
     } else {
         Err(SimpleError::new(format!("Unknown message format: {}", msg)))

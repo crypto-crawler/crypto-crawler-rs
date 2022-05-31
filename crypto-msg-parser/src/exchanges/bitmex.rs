@@ -548,7 +548,7 @@ pub(crate) fn extract_timestamp(
                 Ok(timestamp)
             }
         }
-        "orderBookL2" | "orderBookL2_25" | "orderBook10" => {
+        "orderBookL2" | "orderBookL2_25" | "orderBook10" | "quote" => {
             let timestamp = ws_msg
                 .data
                 .iter()

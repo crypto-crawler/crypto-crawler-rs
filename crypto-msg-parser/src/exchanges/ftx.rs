@@ -85,7 +85,7 @@ pub(crate) fn extract_timestamp(
                 Ok(timestamp)
             }
         }
-        "orderbook" => Ok(Some(
+        "orderbook" | "ticker" => Ok(Some(
             (ws_msg.data["time"].as_f64().unwrap() * 1000.0) as i64,
         )),
         _ => Err(SimpleError::new(format!(

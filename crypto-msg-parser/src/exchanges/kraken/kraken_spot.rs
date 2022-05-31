@@ -71,6 +71,9 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
         Ok(Some(
             (raw_trades[0][2].parse::<f64>().unwrap() * 1000.0) as i64,
         ))
+    } else if channel == "spread" {
+        let arr: Vec<String> = serde_json::from_value(arr[1].clone()).map_err(SimpleError::from)?;
+        Ok(Some((arr[2].parse::<f64>().unwrap() * 1000.0) as i64))
     } else if channel.starts_with("book-") {
         let snapshot = {
             let obj = arr[1].as_object().unwrap();

@@ -1,29 +1,32 @@
 mod utils;
 
+const EXCHANGE_NAME: &str = "okx";
+
 #[cfg(test)]
 mod trade {
+    use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
     use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, round, TradeSide};
 
     #[test]
     fn spot() {
         let raw_msg = r#"{"arg":{"channel":"trades","instId":"BTC-USDT"},"data":[{"instId":"BTC-USDT","tradeId":"314161276","px":"43474.1","sz":"0.00373695","side":"buy","ts":"1646311839593"}]}"#;
-        let trades = &parse_trade("okx", MarketType::Spot, raw_msg).unwrap();
+        let trades = &parse_trade(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap();
 
         assert_eq!(trades.len(), 1);
         let trade = &trades[0];
 
         crate::utils::check_trade_fields(
-            "okx",
+            EXCHANGE_NAME,
             MarketType::Spot,
             "BTC/USDT".to_string(),
-            extract_symbol("okx", MarketType::Spot, raw_msg).unwrap(),
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap(),
             trade,
             raw_msg,
         );
         assert_eq!(
             1646311839593,
-            extract_timestamp("okx", MarketType::Spot, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -38,22 +41,22 @@ mod trade {
     #[test]
     fn linear_future() {
         let raw_msg = r#"{"arg":{"channel":"trades","instId":"BTC-USDT-220325"},"data":[{"instId":"BTC-USDT-220325","tradeId":"17400303","px":"43535.3","sz":"2","side":"sell","ts":"1646311972504"}]}"#;
-        let trades = &parse_trade("okx", MarketType::LinearFuture, raw_msg).unwrap();
+        let trades = &parse_trade(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg).unwrap();
 
         assert_eq!(trades.len(), 1);
         let trade = &trades[0];
 
         crate::utils::check_trade_fields(
-            "okx",
+            EXCHANGE_NAME,
             MarketType::LinearFuture,
             "BTC/USDT".to_string(),
-            extract_symbol("okx", MarketType::LinearFuture, raw_msg).unwrap(),
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg).unwrap(),
             trade,
             raw_msg,
         );
         assert_eq!(
             1646311972504,
-            extract_timestamp("okx", MarketType::LinearFuture, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -69,22 +72,22 @@ mod trade {
     #[test]
     fn linear_swap() {
         let raw_msg = r#"{"arg":{"channel":"trades","instId":"BTC-USDT-SWAP"},"data":[{"instId":"BTC-USDT-SWAP","tradeId":"219066264","px":"43568.8","sz":"7","side":"buy","ts":"1646312440645"}]}"#;
-        let trades = &parse_trade("okx", MarketType::LinearSwap, raw_msg).unwrap();
+        let trades = &parse_trade(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap();
 
         assert_eq!(trades.len(), 1);
         let trade = &trades[0];
 
         crate::utils::check_trade_fields(
-            "okx",
+            EXCHANGE_NAME,
             MarketType::LinearSwap,
             "BTC/USDT".to_string(),
-            extract_symbol("okx", MarketType::LinearSwap, raw_msg).unwrap(),
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap(),
             trade,
             raw_msg,
         );
         assert_eq!(
             1646312440645,
-            extract_timestamp("okx", MarketType::LinearSwap, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -100,22 +103,22 @@ mod trade {
     #[test]
     fn inverse_future() {
         let raw_msg = r#"{"arg":{"channel":"trades","instId":"BTC-USD-220325"},"data":[{"instId":"BTC-USD-220325","tradeId":"18928717","px":"43568.7","sz":"1","side":"sell","ts":"1646312543604"}]}"#;
-        let trades = &parse_trade("okx", MarketType::InverseFuture, raw_msg).unwrap();
+        let trades = &parse_trade(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap();
 
         assert_eq!(trades.len(), 1);
         let trade = &trades[0];
 
         crate::utils::check_trade_fields(
-            "okx",
+            EXCHANGE_NAME,
             MarketType::InverseFuture,
             "BTC/USD".to_string(),
-            extract_symbol("okx", MarketType::InverseFuture, raw_msg).unwrap(),
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap(),
             trade,
             raw_msg,
         );
         assert_eq!(
             1646312543604,
-            extract_timestamp("okx", MarketType::InverseFuture, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -131,22 +134,22 @@ mod trade {
     #[test]
     fn inverse_swap() {
         let raw_msg = r#"{"arg":{"channel":"trades","instId":"BTC-USD-SWAP"},"data":[{"instId":"BTC-USD-SWAP","tradeId":"173543957","px":"43574.9","sz":"1","side":"sell","ts":"1646312664791"}]}"#;
-        let trades = &parse_trade("okx", MarketType::InverseSwap, raw_msg).unwrap();
+        let trades = &parse_trade(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap();
 
         assert_eq!(trades.len(), 1);
         let trade = &trades[0];
 
         crate::utils::check_trade_fields(
-            "okx",
+            EXCHANGE_NAME,
             MarketType::InverseSwap,
             "BTC/USD".to_string(),
-            extract_symbol("okx", MarketType::InverseSwap, raw_msg).unwrap(),
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap(),
             trade,
             raw_msg,
         );
         assert_eq!(
             1646312664791,
-            extract_timestamp("okx", MarketType::InverseSwap, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -162,22 +165,22 @@ mod trade {
     #[test]
     fn option() {
         let raw_msg = r#"{"arg":{"channel":"trades","instId":"BTC-USD-220304-32000-P"},"data":[{"instId":"BTC-USD-220304-32000-P","tradeId":"81","px":"0.001","sz":"85","side":"buy","ts":"1646138219181"}]}"#;
-        let trades = &parse_trade("okx", MarketType::EuropeanOption, raw_msg).unwrap();
+        let trades = &parse_trade(EXCHANGE_NAME, MarketType::EuropeanOption, raw_msg).unwrap();
 
         assert_eq!(trades.len(), 1);
         let trade = &trades[0];
 
         crate::utils::check_trade_fields(
-            "okx",
+            EXCHANGE_NAME,
             MarketType::EuropeanOption,
             "BTC/USD".to_string(),
-            extract_symbol("okx", MarketType::EuropeanOption, raw_msg).unwrap(),
+            extract_symbol(EXCHANGE_NAME, MarketType::EuropeanOption, raw_msg).unwrap(),
             trade,
             raw_msg,
         );
         assert_eq!(
             1646138219181,
-            extract_timestamp("okx", MarketType::EuropeanOption, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::EuropeanOption, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -193,18 +196,25 @@ mod trade {
 
 #[cfg(test)]
 mod funding_rate {
+    use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
     use crypto_msg_parser::parse_funding_rate;
 
     #[test]
     fn inverse_swap() {
         let raw_msg = r#"{"arg":{"channel":"funding-rate","instId":"BTC-USD-SWAP"},"data":[{"fundingRate":"0.0000734174532791","fundingTime":"1646323200000","instId":"BTC-USD-SWAP","instType":"SWAP","nextFundingRate":"0.0001163723201487"}]}"#;
-        let funding_rates = &parse_funding_rate("okx", MarketType::InverseSwap, raw_msg).unwrap();
+        let funding_rates =
+            &parse_funding_rate(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap();
 
         assert_eq!(funding_rates.len(), 1);
 
         for rate in funding_rates.iter() {
-            crate::utils::check_funding_rate_fields("okx", MarketType::InverseSwap, rate, raw_msg);
+            crate::utils::check_funding_rate_fields(
+                EXCHANGE_NAME,
+                MarketType::InverseSwap,
+                rate,
+                raw_msg,
+            );
         }
 
         assert_eq!(funding_rates[0].pair, "BTC/USD".to_string());
@@ -216,12 +226,18 @@ mod funding_rate {
     #[test]
     fn linear_swap() {
         let raw_msg = r#"{"arg":{"channel":"funding-rate","instId":"BTC-USDT-SWAP"},"data":[{"fundingRate":"0.0001534702159002","fundingTime":"1646323200000","instId":"BTC-USDT-SWAP","instType":"SWAP","nextFundingRate":"0.0001542145319804"}]}"#;
-        let funding_rates = &parse_funding_rate("okx", MarketType::InverseSwap, raw_msg).unwrap();
+        let funding_rates =
+            &parse_funding_rate(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap();
 
         assert_eq!(funding_rates.len(), 1);
 
         for rate in funding_rates.iter() {
-            crate::utils::check_funding_rate_fields("okx", MarketType::InverseSwap, rate, raw_msg);
+            crate::utils::check_funding_rate_fields(
+                EXCHANGE_NAME,
+                MarketType::InverseSwap,
+                rate,
+                raw_msg,
+            );
         }
 
         assert_eq!(funding_rates[0].pair, "BTC/USDT".to_string());
@@ -233,6 +249,7 @@ mod funding_rate {
 
 #[cfg(test)]
 mod l2_event {
+    use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
     use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2, round};
     use crypto_msg_type::MessageType;
@@ -240,24 +257,24 @@ mod l2_event {
     #[test]
     fn spot_snapshot() {
         let raw_msg = r#"{"arg":{"channel":"books-l2-tbt","instId":"BTC-USDT"},"action":"snapshot","data":[{"asks":[["43666.1","1.09431286","0","15"],["43666.3","0.01","0","1"],["43668.1","0.00102036","0","1"]],"bids":[["43666","0.00278174","0","5"],["43664","0.00245053","0","2"],["43662","0.00245065","0","2"]],"ts":"1646313944551","checksum":144433427}]}"#;
-        let orderbook = &parse_l2("okx", MarketType::Spot, raw_msg, None).unwrap()[0];
+        let orderbook = &parse_l2(EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
         assert!(orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
-            "okx",
+            EXCHANGE_NAME,
             MarketType::Spot,
             MessageType::L2Event,
             "BTC/USDT".to_string(),
-            extract_symbol("okx", MarketType::Spot, raw_msg).unwrap(),
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap(),
             orderbook,
             raw_msg,
         );
         assert_eq!(
             1646313944551,
-            extract_timestamp("okx", MarketType::Spot, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -276,24 +293,24 @@ mod l2_event {
     #[test]
     fn spot_update() {
         let raw_msg = r#"{"arg":{"channel":"books-l2-tbt","instId":"BTC-USDT"},"action":"update","data":[{"asks":[["43736.2","0.1358","0","2"]],"bids":[["43675.6","0.05","0","1"]],"ts":"1646314295200","checksum":796530682}]}"#;
-        let orderbook = &parse_l2("okx", MarketType::Spot, raw_msg, None).unwrap()[0];
+        let orderbook = &parse_l2(EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 1);
         assert_eq!(orderbook.bids.len(), 1);
         assert!(!orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
-            "okx",
+            EXCHANGE_NAME,
             MarketType::Spot,
             MessageType::L2Event,
             "BTC/USDT".to_string(),
-            extract_symbol("okx", MarketType::Spot, raw_msg).unwrap(),
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap(),
             orderbook,
             raw_msg,
         );
         assert_eq!(
             1646314295200,
-            extract_timestamp("okx", MarketType::Spot, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -312,24 +329,25 @@ mod l2_event {
     #[test]
     fn linear_future_snapshot() {
         let raw_msg = r#"{"arg":{"channel":"books-l2-tbt","instId":"BTC-USDT-220325"},"action":"snapshot","data":[{"asks":[["43741.9","4","0","1"],["43743.4","1","0","1"],["43743.5","4","0","1"]],"bids":[["43741.8","2","0","1"],["43739.3","4","0","1"],["43738","34","0","1"]],"ts":"1646314548269","checksum":2127111983}]}"#;
-        let orderbook = &parse_l2("okx", MarketType::LinearFuture, raw_msg, None).unwrap()[0];
+        let orderbook =
+            &parse_l2(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
         assert!(orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
-            "okx",
+            EXCHANGE_NAME,
             MarketType::LinearFuture,
             MessageType::L2Event,
             "BTC/USDT".to_string(),
-            extract_symbol("okx", MarketType::LinearFuture, raw_msg).unwrap(),
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
             raw_msg,
         );
         assert_eq!(
             1646314548269,
-            extract_timestamp("okx", MarketType::LinearFuture, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -356,24 +374,25 @@ mod l2_event {
     #[test]
     fn inverse_swap_snapshot() {
         let raw_msg = r#"{"arg":{"channel":"books-l2-tbt","instId":"BTC-USD-SWAP"},"action":"snapshot","data":[{"asks":[["43726.4","145","0","5"],["43730.5","10","0","1"],["43733.1","45","0","1"]],"bids":[["43726.3","131","0","1"],["43726","10","0","1"],["43722","16","0","1"]],"ts":"1646314888087","checksum":-1817371130}]}"#;
-        let orderbook = &parse_l2("okx", MarketType::InverseSwap, raw_msg, None).unwrap()[0];
+        let orderbook =
+            &parse_l2(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 3);
         assert_eq!(orderbook.bids.len(), 3);
         assert!(orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
-            "okx",
+            EXCHANGE_NAME,
             MarketType::InverseSwap,
             MessageType::L2Event,
             "BTC/USD".to_string(),
-            extract_symbol("okx", MarketType::InverseSwap, raw_msg).unwrap(),
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
             raw_msg,
         );
         assert_eq!(
             1646314888087,
-            extract_timestamp("okx", MarketType::InverseSwap, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -394,24 +413,25 @@ mod l2_event {
     #[test]
     fn option_snapshot() {
         let raw_msg = r#"{"arg":{"channel":"books-l2-tbt","instId":"BTC-USD-220304-32000-P"},"action":"snapshot","data":[{"asks":[["0.0005","305","0","1"],["0.001","550","0","2"]],"bids":[],"ts":"1646315100798","checksum":971343753}]}"#;
-        let orderbook = &parse_l2("okx", MarketType::EuropeanOption, raw_msg, None).unwrap()[0];
+        let orderbook =
+            &parse_l2(EXCHANGE_NAME, MarketType::EuropeanOption, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 2);
         assert_eq!(orderbook.bids.len(), 0);
         assert!(orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
-            "okx",
+            EXCHANGE_NAME,
             MarketType::EuropeanOption,
             MessageType::L2Event,
             "BTC/USD".to_string(),
-            extract_symbol("okx", MarketType::EuropeanOption, raw_msg).unwrap(),
+            extract_symbol(EXCHANGE_NAME, MarketType::EuropeanOption, raw_msg).unwrap(),
             orderbook,
             raw_msg,
         );
         assert_eq!(
             1646315100798,
-            extract_timestamp("okx", MarketType::EuropeanOption, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::EuropeanOption, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -427,6 +447,7 @@ mod l2_event {
 
 #[cfg(test)]
 mod l2_topk {
+    use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
     use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2_topk, round};
     use crypto_msg_type::MessageType;
@@ -434,24 +455,24 @@ mod l2_topk {
     #[test]
     fn spot() {
         let raw_msg = r#"{"arg":{"channel":"books5","instId":"BTC-USDT"},"data":[{"asks":[["30221.8","0.00439","0","2"],["30223.5","1.12","0","1"],["30223.7","1.16000647","0","3"],["30224.6","1.22","0","1"],["30225.6","1.64553107","0","2"]],"bids":[["30221.7","0.30608367","0","6"],["30220.9","0.01321829","0","1"],["30219.6","1.06226719","0","2"],["30219.5","0.0130546","0","1"],["30219.4","0.41","0","2"]],"instId":"BTC-USDT","ts":"1652671418459"}]}"#;
-        let orderbook = &parse_l2_topk("okx", MarketType::Spot, raw_msg, None).unwrap()[0];
+        let orderbook = &parse_l2_topk(EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 5);
         assert_eq!(orderbook.bids.len(), 5);
         assert!(orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
-            "okx",
+            EXCHANGE_NAME,
             MarketType::Spot,
             MessageType::L2TopK,
             "BTC/USDT".to_string(),
-            extract_symbol("okx", MarketType::Spot, raw_msg).unwrap(),
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap(),
             orderbook,
             raw_msg,
         );
         assert_eq!(
             1652671418459,
-            extract_timestamp("okx", MarketType::Spot, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -487,24 +508,25 @@ mod l2_topk {
     #[test]
     fn inverse_future() {
         let raw_msg = r#"{"arg":{"channel":"books5","instId":"BTC-USD-220624"},"data":[{"asks":[["31835.7","690","0","2"],["31841.2","5","0","1"],["31841.5","148","0","1"],["31841.8","5","0","1"],["31843.4","10","0","1"]],"bids":[["31835.6","6","0","2"],["31834","1","0","1"],["31833.2","23","0","1"],["31833.1","403","0","2"],["31832.9","5","0","1"]],"instId":"BTC-USD-220624","ts":"1653997473120"}]}"#;
-        let orderbook = &parse_l2_topk("okx", MarketType::InverseFuture, raw_msg, None).unwrap()[0];
+        let orderbook =
+            &parse_l2_topk(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 5);
         assert_eq!(orderbook.bids.len(), 5);
         assert!(orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
-            "okx",
+            EXCHANGE_NAME,
             MarketType::InverseFuture,
             MessageType::L2TopK,
             "BTC/USD".to_string(),
-            extract_symbol("okx", MarketType::InverseFuture, raw_msg).unwrap(),
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap(),
             orderbook,
             raw_msg,
         );
         assert_eq!(
             1653997473120,
-            extract_timestamp("okx", MarketType::InverseFuture, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -537,24 +559,25 @@ mod l2_topk {
     #[test]
     fn linear_future() {
         let raw_msg = r#"{"arg":{"channel":"books5","instId":"BTC-USDT-220624"},"data":[{"asks":[["30351.5","18","0","2"],["30355.2","6","0","1"],["30355.3","30","0","2"],["30356.5","1","0","1"],["30358","1","0","1"]],"bids":[["30346.1","1","0","1"],["30344.5","8","0","1"],["30343.6","1","0","1"],["30343.4","1","0","1"],["30340.6","45","0","1"]],"instId":"BTC-USDT-220624","ts":"1652672165391"}]}"#;
-        let orderbook = &parse_l2_topk("okx", MarketType::LinearFuture, raw_msg, None).unwrap()[0];
+        let orderbook =
+            &parse_l2_topk(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 5);
         assert_eq!(orderbook.bids.len(), 5);
         assert!(orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
-            "okx",
+            EXCHANGE_NAME,
             MarketType::LinearFuture,
             MessageType::L2TopK,
             "BTC/USDT".to_string(),
-            extract_symbol("okx", MarketType::LinearFuture, raw_msg).unwrap(),
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg).unwrap(),
             orderbook,
             raw_msg,
         );
         assert_eq!(
             1652672165391,
-            extract_timestamp("okx", MarketType::LinearFuture, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -590,24 +613,25 @@ mod l2_topk {
     #[test]
     fn inverse_swap() {
         let raw_msg = r#"{"arg":{"channel":"books5","instId":"BTC-USD-SWAP"},"data":[{"asks":[["29502","350","0","19"],["29502.2","42","0","2"],["29502.3","62","0","1"],["29502.7","5","0","1"],["29505","3","0","1"]],"bids":[["29501.9","77","0","1"],["29500.7","194","0","1"],["29499.5","1","0","1"],["29496.6","2","0","1"],["29495.1","1","0","1"]],"instId":"BTC-USD-SWAP","ts":"1652686260965"}]}"#;
-        let orderbook = &parse_l2_topk("okx", MarketType::InverseSwap, raw_msg, None).unwrap()[0];
+        let orderbook =
+            &parse_l2_topk(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 5);
         assert_eq!(orderbook.bids.len(), 5);
         assert!(orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
-            "okx",
+            EXCHANGE_NAME,
             MarketType::InverseSwap,
             MessageType::L2TopK,
             "BTC/USD".to_string(),
-            extract_symbol("okx", MarketType::InverseSwap, raw_msg).unwrap(),
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap(),
             orderbook,
             raw_msg,
         );
         assert_eq!(
             1652686260965,
-            extract_timestamp("okx", MarketType::InverseSwap, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -640,24 +664,25 @@ mod l2_topk {
     #[test]
     fn linear_swap() {
         let raw_msg = r#"{"arg":{"channel":"books5","instId":"BTC-USDT-SWAP"},"data":[{"asks":[["31806.6","159","0","6"],["31807.1","9","0","3"],["31807.5","32","0","1"],["31807.9","28","0","1"],["31808.3","1","0","1"]],"bids":[["31806.5","54","0","3"],["31806","1","0","1"],["31805.7","5","0","1"],["31805.6","4","0","1"],["31805","10","0","2"]],"instId":"BTC-USDT-SWAP","ts":"1653997254735"}]}"#;
-        let orderbook = &parse_l2_topk("okx", MarketType::LinearSwap, raw_msg, None).unwrap()[0];
+        let orderbook =
+            &parse_l2_topk(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(orderbook.asks.len(), 5);
         assert_eq!(orderbook.bids.len(), 5);
         assert!(orderbook.snapshot);
 
         crate::utils::check_orderbook_fields(
-            "okx",
+            EXCHANGE_NAME,
             MarketType::LinearSwap,
             MessageType::L2TopK,
             "BTC/USDT".to_string(),
-            extract_symbol("okx", MarketType::LinearSwap, raw_msg).unwrap(),
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap(),
             orderbook,
             raw_msg,
         );
         assert_eq!(
             1653997254735,
-            extract_timestamp("okx", MarketType::LinearSwap, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -688,5 +713,108 @@ mod l2_topk {
         assert_eq!(orderbook.bids[4].quantity_base, 10.0 * 0.01);
         assert_eq!(orderbook.bids[4].quantity_quote, 10.0 * 0.01 * 31805.0);
         assert_eq!(orderbook.bids[4].quantity_contract, Some(10.0));
+    }
+}
+
+#[cfg(test)]
+mod bbo {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"arg":{"channel":"bbo-tbt","instId":"BTC-USDT"},"data":[{"asks":[["31774.7","0.14368878","0","3"]],"bids":[["31774.6","0.3392211","0","3"]],"ts":"1654032991947"}]}"#;
+
+        assert_eq!(
+            1654032991947,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"arg":{"channel":"bbo-tbt","instId":"BTC-USD-220624"},"data":[{"asks":[["31769.9","15","0","1"]],"bids":[["31769.8","38","0","6"]],"ts":"1654033096078"}]}"#;
+
+        assert_eq!(
+            1654033096078,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-USD-220624",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_future() {
+        let raw_msg = r#"{"arg":{"channel":"bbo-tbt","instId":"BTC-USDT-220624"},"data":[{"asks":[["31854.6","4","0","1"]],"bids":[["31850.4","2","0","1"]],"ts":"1654033073837"}]}"#;
+
+        assert_eq!(
+            1654033073837,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-USDT-220624",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"arg":{"channel":"tickers","instId":"BTC-USD-SWAP"},"data":[{"instType":"SWAP","instId":"BTC-USD-SWAP","last":"31771.6","lastSz":"16","askPx":"31771.6","askSz":"16","bidPx":"31771.5","bidSz":"1967","open24h":"31648.1","high24h":"32398.1","low24h":"31202.4","sodUtc0":"31717.3","sodUtc8":"32038.6","volCcy24h":"13760.6923","vol24h":"4364424","ts":"1654033212805"}]}"#;
+
+        assert_eq!(
+            1654033212805,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-USD-SWAP",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"arg":{"channel":"tickers","instId":"BTC-USDT-SWAP"},"data":[{"instType":"SWAP","instId":"BTC-USDT-SWAP","last":"31807.4","lastSz":"3","askPx":"31807.4","askSz":"4","bidPx":"31807.3","bidSz":"482","open24h":"31671.1","high24h":"32450","low24h":"31234.8","sodUtc0":"31743.6","sodUtc8":"32052.7","volCcy24h":"122143.88","vol24h":"12214388","ts":"1654033232461"}]}"#;
+
+        assert_eq!(
+            1654033232461,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-USDT-SWAP",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn option() {
+        let raw_msg = r#"{"arg":{"channel":"bbo-tbt","instId":"BTC-USD-220624-50000-C"},"data":[{"asks":[["0.0015","8","0","1"]],"bids":[],"ts":"1654033343415"}]}"#;
+
+        assert_eq!(
+            1654033343415,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-USD-220624-50000-C",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
     }
 }

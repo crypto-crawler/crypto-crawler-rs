@@ -96,7 +96,9 @@ pub(super) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Result<Str
                 .collect::<Vec<&str>>();
             Ok(symbols[0].to_string())
         }
-    } else if ws_msg.channel == "futures.order_book_update" {
+    } else if ws_msg.channel == "futures.order_book_update"
+        || ws_msg.channel == "futures.book_ticker"
+    {
         Ok(result["s"].as_str().unwrap().to_string())
     } else {
         Err(SimpleError::new(format!("Unknown message format: {}", msg)))
@@ -137,7 +139,9 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
         } else {
             Ok(Some(ws_msg.time * 1000))
         }
-    } else if ws_msg.channel == "futures.order_book_update" {
+    } else if ws_msg.channel == "futures.order_book_update"
+        || ws_msg.channel == "futures.book_ticker"
+    {
         Ok(Some(result["t"].as_i64().unwrap()))
     } else {
         Err(SimpleError::new(format!("Unknown message format: {}", msg)))

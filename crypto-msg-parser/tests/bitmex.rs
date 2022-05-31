@@ -632,3 +632,42 @@ mod l2_topk {
         assert_eq!(orderbook.asks[9].quantity_contract.unwrap(), 443000.0);
     }
 }
+
+#[cfg(test)]
+mod bbo {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"table":"quote","action":"insert","data":[{"timestamp":"2022-05-31T15:21:51.493Z","symbol":"XBTUSD","bidSize":200,"bidPrice":31583.5,"askPrice":31584,"askSize":156000}]}"#;
+
+        assert_eq!(
+            1654010511493,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBTUSD",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"table":"orderBookL2","action":"update","data":[{"symbol":"XBTUSDT","id":73199935756,"side":"Buy","size":203000,"timestamp":"2022-05-31T15:53:31.605Z"}]}"#;
+
+        assert_eq!(
+            1654012411605,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBTUSDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

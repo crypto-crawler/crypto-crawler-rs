@@ -39,6 +39,8 @@ pub(crate) fn extract_timestamp(
             Ok(None)
         } else if topic.starts_with("/spotMarket/level2Depth") {
             Ok(Some(ws_msg.data["timestamp"].as_i64().unwrap()))
+        } else if topic.starts_with("/market/ticker") {
+            Ok(Some(ws_msg.data["time"].as_i64().unwrap()))
         } else {
             Err(SimpleError::new(format!(
                 "Unknown Kucoin topic {} in {}",
@@ -47,7 +49,9 @@ pub(crate) fn extract_timestamp(
         }
     } else {
         #[allow(clippy::collapsible_else_if)]
-        if topic.starts_with("/contractMarket/execution:") {
+        if topic.starts_with("/contractMarket/execution:")
+            || topic.starts_with("/contractMarket/tickerV2:")
+        {
             Ok(Some(ws_msg.data["ts"].as_i64().unwrap() / 1000000))
         } else if topic.starts_with("/contractMarket/level2:")
             || topic.starts_with("/contractMarket/level2Depth")
