@@ -549,3 +549,74 @@ mod bbo {
         );
     }
 }
+
+#[cfg(test)]
+mod l3_event {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"type":"message","topic":"/spotMarket/level3:BTC-USDT","subject":"received","data":{"symbol":"BTC-USDT","orderId":"629724de1f7e6b00015310cb","sequence":1630234429271,"clientOid":"d2b351d1-e185-11ec-aceb-068cc764f03f","ts":1654072542361747612}}"#;
+
+        assert_eq!(
+            1654072542361,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"type":"message","topic":"/contractMarket/level3v2:XBTMM22","subject":"open","data":{"symbol":"XBTMM22","sequence":1647173843748,"side":"sell","orderTime":1654073248891988536,"size":"28","orderId":"629727a023aac2000194fc87","price":"31615.0","ts":1654073248910399802}}"#;
+
+        assert_eq!(
+            1654073248910,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBTMM22",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"type":"message","topic":"/contractMarket/level3v2:XBTUSDM","subject":"open","data":{"symbol":"XBTUSDM","sequence":1639148481406,"side":"buy","orderTime":1654073289118060857,"size":"3671","orderId":"629727c9edde6b0001f422a7","price":"31570.0","ts":1654073289160921530}}"#;
+
+        assert_eq!(
+            1654073289160,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBTUSDM",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"type":"message","topic":"/contractMarket/level3v2:XBTUSDTM","subject":"received","data":{"symbol":"XBTUSDTM","sequence":1655525144741,"orderId":"629727ecdd16e300018810de","clientOid":"cabifr55rj7cmsu5a850","ts":1654073324184830142}}"#;
+
+        assert_eq!(
+            1654073324184,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBTUSDTM",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

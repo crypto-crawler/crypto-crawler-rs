@@ -65,7 +65,7 @@ pub fn extract_timestamp(
         "gate" => exchanges::gate::extract_timestamp(market_type, msg),
         "huobi" => exchanges::huobi::extract_timestamp(msg),
         "kraken" => exchanges::kraken::extract_timestamp(market_type, msg),
-        "kucoin" => exchanges::kucoin::extract_timestamp(market_type, msg),
+        "kucoin" => exchanges::kucoin::extract_timestamp(msg),
         "mxc" | "mexc" => exchanges::mexc::extract_timestamp(msg),
         "okex" => exchanges::okex::extract_timestamp(market_type, msg),
         "okx" => exchanges::okx::extract_timestamp(market_type, msg),

@@ -400,3 +400,66 @@ mod bbo {
         );
     }
 }
+
+#[cfg(test)]
+mod l3_event {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot_snapshot() {
+        let raw_msg = r#"[{"len":"250","symbol":"tBTCUST","channel":"book","prec":"R0","freq":"F0"},[[96124382782,31534,0.0285],[96124397723,31534,0.01],[96118584550,31532,0.01586],[96118584551,31544,-0.01585],[96124364148,31544,-0.27332593],[96124396297,31547,-0.6338]]]"#;
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+        assert_eq!(
+            "tBTCUST",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn spot_update() {
+        let raw_msg = r#"[{"len":"250","symbol":"tBTCUST","channel":"book","prec":"R0","freq":"F0"},[96118584550,31535,0.01586]]"#;
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+        assert_eq!(
+            "tBTCUST",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap_snapshot() {
+        let raw_msg = r#"[{"freq":"F0","channel":"book","prec":"R0","symbol":"tBTCF0:USTF0","len":"250"},[[96124920207,31556,0.19100648],[96124877610,31555,0.031],[96124911151,31555,0.25466876],[96124920217,31557,-0.19103873],[96124919043,31558,-0.25474405],[96124858873,31560,-0.31772226]]]"#;
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            "tBTCF0:USTF0",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap_update() {
+        let raw_msg = r#"[{"freq":"F0","channel":"book","prec":"R0","symbol":"tBTCF0:USTF0","len":"250"},[96124877612,31555,0.039]]"#;
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            "tBTCF0:USTF0",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}
