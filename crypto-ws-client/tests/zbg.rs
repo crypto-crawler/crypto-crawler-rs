@@ -50,6 +50,16 @@ mod zbg_spot {
         );
     }
 
+    #[ignore]
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker_all() {
+        gen_test_code!(
+            ZbgSpotWSClient,
+            send,
+            &vec![r#"{"action":"ADD", "dataType":"ALL_TRADE_STATISTIC_24H"}"#.to_string()]
+        );
+    }
+
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(ZbgSpotWSClient, &vec![("btc_usdt".to_string(), 60)]);
@@ -107,13 +117,23 @@ mod zbg_inverse_swap {
         );
     }
 
-    #[test]
     #[ignore]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             ZbgSwapWSClient,
             subscribe_ticker,
             &vec!["BTC_USD-R".to_string(), "ETH_USD-R".to_string()]
+        );
+    }
+
+    #[ignore]
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker_all() {
+        gen_test_code!(
+            ZbgSwapWSClient,
+            send,
+            &vec![r#"{"action":"sub", "topic":"future_all_indicator"}"#.to_string()]
         );
     }
 
@@ -184,13 +204,23 @@ mod zbg_linear_swap {
         );
     }
 
-    #[test]
     #[ignore]
-    fn subscribe_ticker() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker() {
         gen_test_code!(
             ZbgSwapWSClient,
             subscribe_ticker,
             &vec!["BTC_USDT".to_string(), "ETH_USDT".to_string()]
+        );
+    }
+
+    #[ignore]
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_ticker_all() {
+        gen_test_code!(
+            ZbgSwapWSClient,
+            send,
+            &vec![r#"{"action":"sub", "topic":"future_all_indicator"}"#.to_string()]
         );
     }
 
