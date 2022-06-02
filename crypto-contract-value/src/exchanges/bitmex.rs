@@ -10,6 +10,10 @@ use serde_json::Value;
 static CONTRACT_VALUES: Lazy<HashMap<String, i64>> = Lazy::new(|| {
     // offline data, in case the network is down
     let mut m: HashMap<String, i64> = vec![
+        ("inverse_future.BTC/USD", 100000000),
+        ("inverse_future.ETH/USD", 1000000000),
+        ("inverse_swap.BTC/EUR", 100000000),
+        ("inverse_swap.BTC/USD", 100000000),
         ("linear_future.ADA/BTC", 1000000),
         ("linear_future.BTC/USDT", 1),
         ("linear_future.ETH/BTC", 1000),
@@ -17,7 +21,10 @@ static CONTRACT_VALUES: Lazy<HashMap<String, i64>> = Lazy::new(|| {
         ("linear_future.XRP/BTC", 1000000),
         ("linear_swap.ADA/USDT", 10000),
         ("linear_swap.ALTMEXT/USDT", 100),
+        ("linear_swap.APE/USDT", 1000),
+        ("linear_swap.APE_/USDT", 1),
         ("linear_swap.AVAX/USDT", 100),
+        ("linear_swap.AXS_/USDT", 1),
         ("linear_swap.BCH/USDT", 10),
         ("linear_swap.BNB/USDT", 100),
         ("linear_swap.BTC/USDT", 1),
@@ -26,19 +33,29 @@ static CONTRACT_VALUES: Lazy<HashMap<String, i64>> = Lazy::new(|| {
         ("linear_swap.DOT/USDT", 1000),
         ("linear_swap.EOS/USDT", 1000),
         ("linear_swap.ETH/USDT", 10),
+        ("linear_swap.ETH_/USDT", 1),
         ("linear_swap.FTM/USDT", 10000),
+        ("linear_swap.GAL/USDT", 1000),
+        ("linear_swap.GMT/USDT", 1000),
         ("linear_swap.LINK/USDT", 1000),
+        ("linear_swap.LINK_/USDT", 1),
         ("linear_swap.LTC/USDT", 100),
         ("linear_swap.LUNA/USDT", 100),
         ("linear_swap.MANA/USDT", 1000),
         ("linear_swap.MATIC/USDT", 10000),
+        ("linear_swap.MATIC_/USDT", 1),
         ("linear_swap.METAMEXT/USDT", 100),
+        ("linear_swap.NEAR/USDT", 1000),
         ("linear_swap.SAND/USDT", 1000),
         ("linear_swap.SHIB/USDT", 1000000),
         ("linear_swap.SOL/USDT", 100),
+        ("linear_swap.TRX/USDT", 100000),
+        ("linear_swap.UNI_/USDT", 1),
+        ("linear_swap.XBT_/USDT", 1),
         ("linear_swap.XRP/USDT", 10000),
         ("quanto_future.ETH/USD", 100),
         ("quanto_swap.ADA/USD", 10000),
+        ("quanto_swap.APE/USD", 1000),
         ("quanto_swap.AVAX/USD", 1000),
         ("quanto_swap.AXS/USD", 100),
         ("quanto_swap.BCH/USD", 100),
@@ -47,10 +64,14 @@ static CONTRACT_VALUES: Lazy<HashMap<String, i64>> = Lazy::new(|| {
         ("quanto_swap.DOT/USD", 1000),
         ("quanto_swap.EOS/USD", 10000),
         ("quanto_swap.ETH/USD", 100),
+        ("quanto_swap.GAL/USD", 10000),
+        ("quanto_swap.GMT/USD", 10000),
         ("quanto_swap.LINK/USD", 1000),
         ("quanto_swap.LTC/USD", 200),
         ("quanto_swap.LUNA/USD", 1000),
+        ("quanto_swap.NEAR/USD", 10000),
         ("quanto_swap.SOL/USD", 100),
+        ("quanto_swap.TRX/USD", 100000),
         ("quanto_swap.XRP/USD", 20000),
     ]
     .into_iter()
@@ -75,6 +96,8 @@ struct Instrument {
     multiplier: i64,
     isQuanto: bool,
     isInverse: bool,
+    hasLiquidity: bool,
+    openInterest: i64,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -86,15 +109,20 @@ fn fetch_contract_values() -> BTreeMap<String, i64> {
         let instruments: Vec<Instrument> = serde_json::from_str::<Vec<Instrument>>(&text)
             .unwrap()
             .into_iter()
-            .filter(|x| x.state == "Open")
+            .filter(|x| x.state == "Open" && x.hasLiquidity && x.openInterest > 0)
             .collect();
 
-        for instrument in instruments.iter().filter(|x| !x.isInverse) {
+        for instrument in instruments.iter() {
             let market_type = crypto_pair::get_market_type(&instrument.symbol, "bitmex", None);
             let pair = crypto_pair::normalize_pair(&instrument.symbol, "bitmex").unwrap();
             mapping.insert(
                 market_type.to_string() + "." + pair.as_str(),
-                instrument.multiplier,
+                if instrument.isInverse {
+                    debug_assert!(instrument.multiplier < 0);
+                    instrument.multiplier.abs()
+                } else {
+                    instrument.multiplier
+                },
             );
         }
     }
@@ -104,15 +132,10 @@ fn fetch_contract_values() -> BTreeMap<String, i64> {
 
 pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<f64> {
     let key = market_type.to_string() + "." + pair;
-    match market_type {
-        MarketType::InverseSwap | MarketType::InverseFuture => Some(1.0),
-        MarketType::LinearFuture | MarketType::LinearSwap => {
-            Some(CONTRACT_VALUES[&key] as f64 * 1e-8)
-        }
-        MarketType::QuantoSwap | MarketType::QuantoFuture => {
-            Some(CONTRACT_VALUES[&key] as f64 * 1e-8)
-        }
-        _ => None,
+    if CONTRACT_VALUES.contains_key(key.as_str()) {
+        Some(CONTRACT_VALUES[&key] as f64 * 1e-8)
+    } else {
+        Some(1.0)
     }
 }
 
@@ -120,9 +143,15 @@ pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<
 mod tests {
     use super::fetch_contract_values;
 
+    #[ignore]
     #[test]
-    fn quanto() {
-        let mapping = fetch_contract_values();
+    fn test_fetch_contract_values() {
+        let mut mapping = fetch_contract_values();
+        for (key, value) in super::CONTRACT_VALUES.iter() {
+            if !mapping.contains_key(key) {
+                mapping.insert(key.to_string(), *value);
+            }
+        }
         for (pair, contract_value) in &mapping {
             println!("(\"{pair}\", {contract_value}),");
         }
