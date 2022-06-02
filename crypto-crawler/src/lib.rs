@@ -359,10 +359,11 @@ pub async fn crawl_ticker(
     match exchange {
         "binance" => crawlers::binance::crawl_ticker(market_type, symbols, tx).await,
         "bitfinex" | "bitget" | "bithumb" | "bitz" | "bybit" | "coinbase_pro" | "deribit"
-        | "gate" | "huobi" | "kraken" | "kucoin" | "mexc" | "okx" | "zbg" => {
+        | "gate" | "huobi" | "kraken" | "kucoin" | "mexc" | "okx" => {
             crawlers::crawl_event(exchange, MessageType::Ticker, market_type, symbols, tx).await
         }
         "zb" => crawlers::zb::crawl_ticker(market_type, symbols, tx).await,
+        "zbg" => crawlers::zbg::crawl_ticker(market_type, symbols, tx).await,
         _ => panic!("{} does NOT have the ticker websocket channel", exchange),
     }
 }
