@@ -12,47 +12,62 @@ const EXCHANGE_NAME: &str = "zbg";
 // NOTE:zbg spot websocket sometimes returns lowercase symbols, and sometimes
 // returns uppercase, which is very annoying, thus we unify to lowercase here
 pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
-    if let Ok(list) = serde_json::from_str::<Vec<Vec<Value>>>(msg) {
-        if msg.starts_with(r#"[["T","#) {
-            Ok(list[0][3].as_str().unwrap().to_lowercase())
-        } else {
-            Ok(list[0][2].as_str().unwrap().to_lowercase())
-        }
-    } else if let Ok(list) = serde_json::from_str::<Vec<Value>>(msg) {
-        Ok(list[3].as_str().unwrap().to_lowercase())
+    let arr = if let Ok(list) = serde_json::from_str::<Vec<Vec<Value>>>(msg) {
+        list[0].clone()
+    } else if let Ok(arr) = serde_json::from_str::<Vec<Value>>(msg) {
+        arr
     } else {
-        Err(SimpleError::new(format!(
+        return Err(SimpleError::new(format!(
             "Failed to extract symbol from {}",
             msg
-        )))
+        )));
+    };
+    let msg_type = arr[0].as_str().unwrap();
+    match msg_type {
+        "T" | "E" => Ok(arr[3].as_str().unwrap().to_lowercase()),
+        "K" | "AE" => Ok(arr[2].as_str().unwrap().to_lowercase()),
+        _ => Err(SimpleError::new(format!(
+            "Unsupported msg_type {} in {}",
+            msg_type, msg
+        ))),
     }
 }
 
 pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
-    if let Ok(list) = serde_json::from_str::<Vec<Vec<Value>>>(msg) {
-        let timestamp = if msg.starts_with(r#"[["T","#) {
-            list.iter()
-                .filter(|raw_trade| raw_trade[2].is_string())
-                .map(|raw_trade| raw_trade[2].as_str().unwrap().parse::<i64>().unwrap() * 1000)
-                .max()
-        } else {
-            list.iter()
-                .filter(|raw_trade| raw_trade[3].is_string())
-                .map(|raw_trade| raw_trade[3].as_str().unwrap().parse::<i64>().unwrap() * 1000)
-                .max()
-        };
-        Ok(timestamp) // some messages are empty, e.g., [["AE","5319","YFI_USDT",null,{"asks":null},{"bids":null}]]
+    let arr_2d = if let Ok(list) = serde_json::from_str::<Vec<Vec<Value>>>(msg) {
+        list
     } else if let Ok(list) = serde_json::from_str::<Vec<Value>>(msg) {
-        Ok(Some(
-            list[2].as_str().unwrap().parse::<i64>().unwrap() * 1000,
-        ))
+        vec![list]
     } else {
-        Err(SimpleError::new(format!(
+        return Err(SimpleError::new(format!(
             "Failed to extract symbol from {}",
             msg
-        )))
-    }
+        )));
+    };
+
+    let timestamp = arr_2d
+        .iter()
+        .filter(|arr| {
+            let msg_type = arr[0].as_str().unwrap();
+            match msg_type {
+                "T" | "E" => arr[2].is_string() && arr[2].as_str().unwrap().parse::<i64>().is_ok(),
+                "K" | "AE" => arr[3].is_string() && arr[3].as_str().unwrap().parse::<i64>().is_ok(),
+                _ => false,
+            }
+        })
+        .map(|arr| {
+            let msg_type = arr[0].as_str().unwrap();
+            match msg_type {
+                "T" | "E" => arr[2].as_str().unwrap().parse::<i64>().unwrap() * 1000,
+                "K" | "AE" => arr[3].as_str().unwrap().parse::<i64>().unwrap() * 1000,
+                _ => panic!("Not possible {}", msg),
+            }
+        })
+        .max();
+    Ok(timestamp)
 }
+
+// r#"[["AE","5319","YFI_USDT",null,{"asks":null},{"bids":null}]]"#;
 
 // https://zbgapi.github.io/docs/spot/v1/en/#market-trade
 // [T, symbol-id, symbol, timestamp, ask/bid, price, quantity]

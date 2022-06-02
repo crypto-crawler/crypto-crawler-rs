@@ -51,8 +51,17 @@ struct RawFundingRateMsg {
 }
 
 #[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct Arg {
+    channel: String,
+    instId: String,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+#[derive(Serialize, Deserialize)]
 struct WebsocketMsg<T: Sized> {
-    arg: HashMap<String, String>,
+    arg: Arg,
     action: Option<String>, // snapshot, update, only applicable to order book
     data: Vec<T>,
     #[serde(flatten)]
@@ -60,17 +69,8 @@ struct WebsocketMsg<T: Sized> {
 }
 
 pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
-            msg
-        ))
-    })?;
-    if let Some(symbol) = ws_msg.arg.get("instId") {
-        Ok(symbol.to_string())
-    } else {
-        Err(SimpleError::new("no instId found"))
-    }
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(SimpleError::from)?;
+    Ok(ws_msg.arg.instId)
 }
 
 pub(crate) fn extract_timestamp(
@@ -83,10 +83,19 @@ pub(crate) fn extract_timestamp(
             msg
         ))
     })?;
+    let channel = ws_msg.arg.channel.as_str();
     let timestamp = ws_msg
         .data
         .iter()
-        .map(|x| x["ts"].as_str().unwrap().parse::<i64>().unwrap())
+        .map(|x| {
+            (if channel.starts_with("candle") {
+                x[0].as_str().unwrap()
+            } else {
+                x["ts"].as_str().unwrap()
+            })
+            .parse::<i64>()
+            .unwrap()
+        })
         .max();
 
     if timestamp.is_none() {
@@ -98,24 +107,21 @@ pub(crate) fn extract_timestamp(
 
 pub(crate) fn get_msg_type(msg: &str) -> MessageType {
     if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
-        if !ws_msg.arg.contains_key("channel") {
-            return MessageType::Other;
-        }
-        let channel = ws_msg.arg["channel"].clone();
-        if channel == "trades" {
-            MessageType::Trade
-        } else if channel == "books-l2-tbt" {
-            MessageType::L2Event
-        } else if channel == "books5" {
-            MessageType::L2TopK
-        } else if channel == "tickers" {
-            MessageType::BBO
-        } else if channel.starts_with("candle") {
-            MessageType::Candlestick
-        } else if channel == "funding-rate" {
-            MessageType::FundingRate
-        } else {
-            MessageType::Other
+        let channel = ws_msg.arg.channel.as_str();
+        match channel {
+            "trades" => MessageType::Trade,
+            "books" | "books-l2-tbt" | "books50-l2-tbt" => MessageType::L2Event,
+            "books5" => MessageType::L2TopK,
+            "bbo-tbt" => MessageType::BBO,
+            "tickers" => MessageType::Ticker,
+            "funding-rate" => MessageType::FundingRate,
+            _ => {
+                if channel.starts_with("candle") {
+                    MessageType::Candlestick
+                } else {
+                    MessageType::Other
+                }
+            }
         }
     } else {
         MessageType::Other
@@ -226,7 +232,7 @@ pub(crate) fn parse_l2(
         ))
     })?;
 
-    let channel = ws_msg.arg["channel"].as_str();
+    let channel = ws_msg.arg.channel.as_str();
     let msg_type = if channel == "books5" {
         MessageType::L2TopK
     } else {
@@ -241,7 +247,7 @@ pub(crate) fn parse_l2(
     };
     debug_assert_eq!(ws_msg.data.len(), 1);
 
-    let symbol = ws_msg.arg["instId"].as_str();
+    let symbol = ws_msg.arg.instId.as_str();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
 
     let mut orderbooks = ws_msg

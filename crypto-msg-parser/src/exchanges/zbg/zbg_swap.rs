@@ -48,6 +48,7 @@ static SWAP_CONTRACT_MAP: Lazy<HashMap<i64, SwapContractInfo>> = Lazy::new(|| {
     m
 });
 
+#[derive(Clone)]
 struct SwapContractInfo {
     contract_id: i64,
     symbol: String,
@@ -156,6 +157,11 @@ pub(super) fn extract_timestamp(
         "future_tick" => {
             let raw_trade = ws_msg[1]["trades"].as_array().unwrap();
             Ok(Some(raw_trade[0].as_i64().unwrap() / 1000))
+        }
+        "future_kline" => {
+            let lines = ws_msg[1]["lines"].as_array().unwrap();
+            let timestamp = lines.iter().map(|line| line[0].as_i64().unwrap()).max();
+            Ok(timestamp)
         }
         "future_snapshot_depth" => Ok(Some(ws_msg[1]["time"].as_i64().unwrap() / 1000)),
         _ => Err(SimpleError::new(format!(
@@ -310,7 +316,13 @@ mod tests {
 
     #[test]
     fn print_contract_values() {
-        let mapping = fetch_swap_contracts();
+        let mut mapping = fetch_swap_contracts();
+        // merge
+        for (contract_id, info) in super::SWAP_CONTRACT_MAP.iter() {
+            if !mapping.contains_key(contract_id) {
+                mapping.insert(*contract_id, info.clone());
+            }
+        }
         for (_, contract) in mapping {
             println!(
                 "({}, \"{}\", {}_f64),",
