@@ -24,8 +24,8 @@ fn fetch_inverse_swap_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
-        assert!(symbol.starts_with("XBT"));
-        assert!(symbol.ends_with("USD") || symbol.ends_with("EUR"));
+        assert!(symbol.starts_with("XBT") || symbol.starts_with("ETH"));
+        assert!(symbol.ends_with("USD") || symbol.ends_with("EUR") || symbol.ends_with("_ETH"));
         assert_eq!(
             MarketType::InverseSwap,
             get_market_type(symbol, EXCHANGE_NAME, None)
@@ -64,8 +64,13 @@ fn fetch_inverse_future_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
-        assert!(symbol.starts_with("XBT"));
-        let date = &symbol[(symbol.len() - 2)..];
+        assert!(symbol.starts_with("XBT") || symbol.starts_with("ETH"));
+        let date = if let Some(pos) = symbol.rfind('_') {
+            // e.g., ETHUSDM22_ETH
+            &symbol[(pos - 2)..pos]
+        } else {
+            &symbol[(symbol.len() - 2)..]
+        };
         assert!(date.parse::<i64>().is_ok());
         assert_eq!(
             MarketType::InverseFuture,

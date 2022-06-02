@@ -176,20 +176,34 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
         assert_eq!("FundingRate", x.fairMethod.as_str());
         assert!(x.expiry.is_none()); // TODO: BitMEX data is not correct, comment it for now
         assert!((&x.symbol[x.symbol.len() - 1..]).parse::<i32>().is_err());
-        assert_eq!(x.symbol, format!("{}{}", x.underlying, x.quoteCurrency));
+        if let Some(pos) = x.symbol.rfind('_') {
+            // e.g., ETHUSD_ETH
+            assert_eq!(
+                &(x.symbol[..pos]),
+                format!("{}{}", x.underlying, x.quoteCurrency)
+            );
+        } else {
+            assert_eq!(x.symbol, format!("{}{}", x.underlying, x.quoteCurrency));
+        }
         // println!("{}, {}, {}, {}, {}, {}", x.symbol, x.rootSymbol, x.quoteCurrency, x.settlCurrency, x.positionCurrency, x.underlying);
     }
     for x in futures.iter() {
         assert_eq!("ImpactMidPrice", x.fairMethod.as_str());
         assert!(x.expiry.is_some());
-        assert!((&x.symbol[x.symbol.len() - 1..]).parse::<i32>().is_ok());
+        if let Some(pos) = x.symbol.rfind('_') {
+            // e.g., ETHUSDM22_ETH
+            assert!((&x.symbol[pos - 2..pos]).parse::<i32>().is_ok());
+        } else {
+            assert!((&x.symbol[x.symbol.len() - 2..]).parse::<i32>().is_ok());
+        }
     }
     // Inverse
     for x in instruments.iter().filter(|x| x.isInverse) {
-        assert!(x.symbol.starts_with("XBT"));
-        assert_eq!("XBT".to_string(), x.underlying);
-        // settled in XBT, quoted in USD or EUR
-        assert_eq!(x.settlCurrency.to_uppercase(), "XBT");
+        assert!(x.multiplier < 0);
+        assert!(x.symbol.starts_with("XBT") || x.symbol.starts_with("ETH"));
+        assert!(x.underlying == "XBT" || x.underlying == "ETH");
+        // settled in XBT or ETH, quoted in USD or EUR
+        assert!(x.settlCurrency == "XBt" || x.settlCurrency == "Gwei");
         assert!(x.quoteCurrency == "USD" || x.quoteCurrency == "EUR");
         assert_eq!(x.quoteCurrency, x.positionCurrency);
     }
