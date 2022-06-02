@@ -24,9 +24,13 @@ pub(crate) fn parse(msg: Message) -> bool {
                 .is_ok(),
             }
         }
-        MessageType::FundingRate => {
-            crypto_msg_parser::parse_funding_rate(&msg.exchange, msg.market_type, &msg.json).is_ok()
-        }
+        MessageType::FundingRate => crypto_msg_parser::parse_funding_rate(
+            &msg.exchange,
+            msg.market_type,
+            &msg.json,
+            Some(msg.received_at as i64),
+        )
+        .is_ok(),
         _ => true,
     }
 }
