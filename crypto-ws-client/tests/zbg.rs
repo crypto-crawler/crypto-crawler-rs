@@ -117,9 +117,9 @@ mod zbg_inverse_swap {
         );
     }
 
-    #[test]
     #[ignore]
-    fn subscribe_candlestick() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             ZbgSwapWSClient,
             &vec![("BTC_USD-R".to_string(), 60), ("ETH_USD-R".to_string(), 60)]
@@ -194,9 +194,9 @@ mod zbg_linear_swap {
         );
     }
 
-    #[test]
     #[ignore]
-    fn subscribe_candlestick() {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             ZbgSwapWSClient,
             &vec![("BTC_USDT".to_string(), 60), ("ETH_USDT".to_string(), 60)]
