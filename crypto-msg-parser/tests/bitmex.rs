@@ -148,13 +148,19 @@ mod trade {
 mod funding_rate {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::parse_funding_rate;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_funding_rate};
 
     #[test]
     fn inverse_swap() {
         let raw_msg = r#"{"table":"funding","action":"partial","data":[{"timestamp":"2021-04-01T20:00:00.000Z","symbol":"XBTUSD","fundingInterval":"2000-01-01T08:00:00.000Z","fundingRate":0.000817,"fundingRateDaily":0.002451}]}"#;
-        let funding_rates =
-            &parse_funding_rate(EXCHANGE_NAME, MarketType::Unknown, raw_msg).unwrap();
+        let received_at = 1615515223227;
+        let funding_rates = &parse_funding_rate(
+            EXCHANGE_NAME,
+            MarketType::InverseSwap,
+            raw_msg,
+            Some(received_at),
+        )
+        .unwrap();
 
         assert_eq!(funding_rates.len(), 1);
 
@@ -166,17 +172,32 @@ mod funding_rate {
                 raw_msg,
             );
         }
+        assert_eq!(
+            "XBTUSD",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
 
         assert_eq!(funding_rates[0].pair, "BTC/USD".to_string());
         assert_eq!(funding_rates[0].funding_rate, 0.000817);
         assert_eq!(funding_rates[0].funding_time, 1617307200000);
+        assert_eq!(funding_rates[0].timestamp, received_at);
     }
 
     #[test]
     fn quanto_swap() {
         let raw_msg = r#"{"table":"funding","action":"partial","data":[{"timestamp":"2021-04-01T20:00:00.000Z","symbol":"ETHUSD","fundingInterval":"2000-01-01T08:00:00.000Z","fundingRate":0.002142,"fundingRateDaily":0.006425999999999999}]}"#;
-        let funding_rates =
-            &parse_funding_rate(EXCHANGE_NAME, MarketType::Unknown, raw_msg).unwrap();
+        let received_at = 1615515223227;
+        let funding_rates = &parse_funding_rate(
+            EXCHANGE_NAME,
+            MarketType::QuantoSwap,
+            raw_msg,
+            Some(received_at),
+        )
+        .unwrap();
 
         assert_eq!(funding_rates.len(), 1);
 
@@ -188,10 +209,61 @@ mod funding_rate {
                 raw_msg,
             );
         }
+        assert_eq!(
+            "ETHUSD",
+            extract_symbol(EXCHANGE_NAME, MarketType::QuantoSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::QuantoSwap, raw_msg).unwrap()
+        );
 
         assert_eq!(funding_rates[0].pair, "ETH/USD".to_string());
         assert_eq!(funding_rates[0].funding_rate, 0.002142);
         assert_eq!(funding_rates[0].funding_time, 1617307200000);
+        assert_eq!(funding_rates[0].timestamp, received_at);
+    }
+
+    #[test]
+    fn all() {
+        let raw_msg = r#"{"table":"funding","action":"partial","data":[{"timestamp":"2021-11-02T12:00:00.000Z","symbol":"AAVEUSDT","fundingInterval":"2000-01-01T08:00:00.000Z","fundingRate":0.001941,"fundingRateDaily":0.005823},{"timestamp":"2022-06-02T12:00:00.000Z","symbol":"XBTUSDT","fundingInterval":"2000-01-01T08:00:00.000Z","fundingRate":0.000075,"fundingRateDaily":0.000225}]}"#;
+        let received_at = 1615515223227;
+        let funding_rates = &parse_funding_rate(
+            EXCHANGE_NAME,
+            MarketType::Unknown,
+            raw_msg,
+            Some(received_at),
+        )
+        .unwrap();
+
+        assert_eq!(funding_rates.len(), 2);
+
+        for rate in funding_rates.iter() {
+            crate::utils::check_funding_rate_fields(
+                EXCHANGE_NAME,
+                MarketType::LinearSwap,
+                rate,
+                raw_msg,
+            );
+        }
+        assert_eq!(
+            "ALL",
+            extract_symbol(EXCHANGE_NAME, MarketType::Unknown, raw_msg).unwrap()
+        );
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Unknown, raw_msg).unwrap()
+        );
+
+        assert_eq!(funding_rates[0].pair, "AAVE/USDT".to_string());
+        assert_eq!(funding_rates[0].funding_rate, 0.001941);
+        assert_eq!(funding_rates[0].funding_time, 1635854400000);
+        assert_eq!(funding_rates[0].timestamp, received_at);
+
+        assert_eq!(funding_rates[1].pair, "BTC/USDT".to_string());
+        assert_eq!(funding_rates[1].funding_rate, 0.000075);
+        assert_eq!(funding_rates[1].funding_time, 1654171200000);
+        assert_eq!(funding_rates[1].timestamp, received_at);
     }
 }
 

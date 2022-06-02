@@ -45,7 +45,7 @@ pub(super) fn parse_funding_rate(
             symbol: raw_msg.contract_code.clone(),
             pair: crypto_pair::normalize_pair(&raw_msg.contract_code, "huobi").unwrap(),
             msg_type: MessageType::FundingRate,
-            timestamp: raw_msg.funding_time.parse::<i64>().unwrap(),
+            timestamp: ws_msg.ts,
             funding_rate: raw_msg.funding_rate.parse::<f64>().unwrap(),
             funding_time: raw_msg.settlement_time.parse::<i64>().unwrap(),
             estimated_rate: Some(raw_msg.estimated_rate.parse::<f64>().unwrap()),

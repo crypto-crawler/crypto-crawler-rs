@@ -112,38 +112,38 @@ pub fn parse_l2(
     exchange: &str,
     market_type: MarketType,
     msg: &str,
-    timestamp: Option<i64>,
+    received_at: Option<i64>,
 ) -> Result<Vec<OrderBookMsg>, SimpleError> {
     let ret = match exchange {
         "binance" => exchanges::binance::parse_l2(market_type, msg),
         "bitfinex" => exchanges::bitfinex::parse_l2(
             market_type,
             msg,
-            timestamp.expect("Bitfinex orderbook messages doesn't have timestamp"),
+            received_at.expect("Bitfinex orderbook messages doesn't have timestamp"),
         ),
         "bitget" => exchanges::bitget::parse_l2(market_type, msg),
         "bithumb" => exchanges::bithumb::parse_l2(market_type, msg),
         "bitmex" => exchanges::bitmex::parse_l2(
             market_type,
             msg,
-            timestamp.expect("BitMEX orderbook messages don't have timestamp"),
+            received_at.expect("BitMEX orderbook messages don't have timestamp"),
         ),
         "bitstamp" => exchanges::bitstamp::parse_l2(market_type, msg),
         "bitz" => exchanges::bitz::parse_l2(market_type, msg),
         "bybit" => exchanges::bybit::parse_l2(market_type, msg),
-        "coinbase_pro" => exchanges::coinbase_pro::parse_l2(market_type, msg, timestamp),
+        "coinbase_pro" => exchanges::coinbase_pro::parse_l2(market_type, msg, received_at),
         "deribit" => exchanges::deribit::parse_l2(market_type, msg),
         "dydx" => exchanges::dydx::parse_l2(
             market_type,
             msg,
-            timestamp.expect("dYdX orderbook messages don't have timestamp"),
+            received_at.expect("dYdX orderbook messages don't have timestamp"),
         ),
         "ftx" => exchanges::ftx::parse_l2(market_type, msg),
-        "gate" => exchanges::gate::parse_l2(market_type, msg, timestamp),
+        "gate" => exchanges::gate::parse_l2(market_type, msg, received_at),
         "huobi" => exchanges::huobi::parse_l2(market_type, msg),
         "kraken" => exchanges::kraken::parse_l2(market_type, msg),
-        "kucoin" => exchanges::kucoin::parse_l2(market_type, msg, timestamp),
-        "mxc" | "mexc" => exchanges::mexc::parse_l2(market_type, msg, timestamp),
+        "kucoin" => exchanges::kucoin::parse_l2(market_type, msg, received_at),
+        "mxc" | "mexc" => exchanges::mexc::parse_l2(market_type, msg, received_at),
         "okex" => exchanges::okex::parse_l2(market_type, msg),
         "okx" => exchanges::okx::parse_l2(market_type, msg),
         "zb" => exchanges::zb::parse_l2(market_type, msg),
@@ -228,22 +228,43 @@ pub fn parse_funding_rate(
     exchange: &str,
     market_type: MarketType,
     msg: &str,
+    received_at: Option<i64>,
 ) -> Result<Vec<FundingRateMsg>, SimpleError> {
-    let func = match exchange {
-        "binance" => exchanges::binance::parse_funding_rate,
-        "bitget" => exchanges::bitget::parse_funding_rate,
-        "bitmex" => exchanges::bitmex::parse_funding_rate,
-        "huobi" => exchanges::huobi::parse_funding_rate,
-        "okex" => exchanges::okex::parse_funding_rate,
-        "okx" => exchanges::okx::parse_funding_rate,
+    if market_type != MarketType::InverseSwap
+        && market_type != MarketType::LinearSwap
+        && market_type != MarketType::QuantoSwap
+        && market_type != MarketType::Unknown
+    {
+        return Err(SimpleError::new(
+            "Only InverseSwap, LinearSwap and QuantoSwap markets have funding rate.",
+        ));
+    }
+    match exchange {
+        "binance" => exchanges::binance::parse_funding_rate(market_type, msg),
+        "bitget" => exchanges::bitget::parse_funding_rate(market_type, msg),
+        "bitmex" => exchanges::bitmex::parse_funding_rate(
+            market_type,
+            msg,
+            received_at.expect("BitMEX funding rate messages don't have timestamp"),
+        ),
+        "huobi" => exchanges::huobi::parse_funding_rate(market_type, msg),
+        "okex" => exchanges::okex::parse_funding_rate(
+            market_type,
+            msg,
+            received_at.expect("OKEx funding rate messages don't have timestamp"),
+        ),
+        "okx" => exchanges::okx::parse_funding_rate(
+            market_type,
+            msg,
+            received_at.expect("OKEx funding rate messages don't have timestamp"),
+        ),
         _ => {
             return Err(SimpleError::new(format!(
                 "{} does NOT have perpetual swap market",
                 exchange
             )))
         }
-    };
-    func(market_type, msg)
+    }
 }
 
 /// Infer the message type from the message.

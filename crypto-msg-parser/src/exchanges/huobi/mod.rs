@@ -17,9 +17,23 @@ use simple_error::SimpleError;
 use message::WebsocketMsg;
 
 pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
-    let symbol = ws_msg.ch.split('.').nth(1).unwrap();
-    Ok(symbol.to_string())
+    let json_obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
+    let channel = if json_obj.contains_key("ch") {
+        json_obj["ch"].as_str().unwrap()
+    } else if json_obj.contains_key("topic") {
+        json_obj["topic"].as_str().unwrap()
+    } else {
+        return Err(SimpleError::new(format!(
+            "No channel or topic found in {}",
+            msg
+        )));
+    };
+    if channel == "public.*.funding_rate" {
+        Ok("ALL".to_string())
+    } else {
+        let symbol = channel.split('.').nth(1).unwrap();
+        Ok(symbol.to_string())
+    }
 }
 
 pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {

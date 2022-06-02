@@ -1,6 +1,6 @@
 mod utils;
 
-const EXCHANGE_NAME: &str = "okx";
+const EXCHANGE_NAME: &str = "okx"; // V5 API
 
 #[cfg(test)]
 mod trade {
@@ -198,13 +198,19 @@ mod trade {
 mod funding_rate {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::parse_funding_rate;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_funding_rate};
 
     #[test]
     fn inverse_swap() {
         let raw_msg = r#"{"arg":{"channel":"funding-rate","instId":"BTC-USD-SWAP"},"data":[{"fundingRate":"0.0000734174532791","fundingTime":"1646323200000","instId":"BTC-USD-SWAP","instType":"SWAP","nextFundingRate":"0.0001163723201487"}]}"#;
-        let funding_rates =
-            &parse_funding_rate(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap();
+        let received_at = 1646323212345;
+        let funding_rates = &parse_funding_rate(
+            EXCHANGE_NAME,
+            MarketType::InverseSwap,
+            raw_msg,
+            Some(received_at),
+        )
+        .unwrap();
 
         assert_eq!(funding_rates.len(), 1);
 
@@ -216,18 +222,33 @@ mod funding_rate {
                 raw_msg,
             );
         }
+        assert_eq!(
+            "BTC-USD-SWAP",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
 
         assert_eq!(funding_rates[0].pair, "BTC/USD".to_string());
         assert_eq!(funding_rates[0].funding_rate, 0.0000734174532791);
         assert_eq!(funding_rates[0].estimated_rate, Some(0.0001163723201487));
         assert_eq!(funding_rates[0].funding_time, 1646323200000);
+        assert_eq!(funding_rates[0].timestamp, received_at);
     }
 
     #[test]
     fn linear_swap() {
         let raw_msg = r#"{"arg":{"channel":"funding-rate","instId":"BTC-USDT-SWAP"},"data":[{"fundingRate":"0.0001534702159002","fundingTime":"1646323200000","instId":"BTC-USDT-SWAP","instType":"SWAP","nextFundingRate":"0.0001542145319804"}]}"#;
-        let funding_rates =
-            &parse_funding_rate(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap();
+        let received_at = 1646323212345;
+        let funding_rates = &parse_funding_rate(
+            EXCHANGE_NAME,
+            MarketType::InverseSwap,
+            raw_msg,
+            Some(received_at),
+        )
+        .unwrap();
 
         assert_eq!(funding_rates.len(), 1);
 
@@ -239,11 +260,20 @@ mod funding_rate {
                 raw_msg,
             );
         }
+        assert_eq!(
+            "BTC-USDT-SWAP",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
 
         assert_eq!(funding_rates[0].pair, "BTC/USDT".to_string());
         assert_eq!(funding_rates[0].funding_rate, 0.0001534702159002);
         assert_eq!(funding_rates[0].estimated_rate, Some(0.0001542145319804));
         assert_eq!(funding_rates[0].funding_time, 1646323200000);
+        assert_eq!(funding_rates[0].timestamp, received_at);
     }
 }
 

@@ -421,7 +421,7 @@ mod funding_rate {
     fn inverse_swap() {
         let raw_msg = r#"{"data":[{"funding_rate":"0.000258514264","funding_time":"1617346800000","instrument_id":"btcusd"}],"table":"swap/funding_rate"}"#;
         let funding_rates =
-            &parse_funding_rate(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap();
+            &parse_funding_rate(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None).unwrap();
 
         assert_eq!(funding_rates.len(), 1);
 
@@ -443,7 +443,7 @@ mod funding_rate {
     fn linear_swap() {
         let raw_msg = r#"{"data":[{"funding_rate":"0.000106539854","funding_time":"1617346800000","instrument_id":"cmt_btcusdt"}],"table":"swap/funding_rate"}"#;
         let funding_rates =
-            &parse_funding_rate(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap();
+            &parse_funding_rate(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap();
 
         assert_eq!(funding_rates.len(), 1);
 
@@ -550,7 +550,7 @@ mod before20220429 {
         fn inverse_swap() {
             let raw_msg = r#"{"data":[{"funding_rate":"0.000258514264","funding_time":"1617346800000","instrument_id":"btcusd"}],"table":"swap/funding_rate"}"#;
             let funding_rates =
-                &parse_funding_rate(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap();
+                &parse_funding_rate(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None).unwrap();
 
             assert_eq!(funding_rates.len(), 1);
 
@@ -572,7 +572,7 @@ mod before20220429 {
         fn linear_swap() {
             let raw_msg = r#"{"data":[{"funding_rate":"0.000106539854","funding_time":"1617346800000","instrument_id":"cmt_btcusdt"}],"table":"swap/funding_rate"}"#;
             let funding_rates =
-                &parse_funding_rate(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap();
+                &parse_funding_rate(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap();
 
             assert_eq!(funding_rates.len(), 1);
 

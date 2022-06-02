@@ -7,7 +7,7 @@ use crate::{
     FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide,
 };
 
-use chrono::{prelude::*, DateTime};
+use chrono::DateTime;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -512,6 +512,9 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
             msg
         ))
     })?;
+    if ws_msg.table == "funding" && ws_msg.data.len() > 1 {
+        return Ok("ALL".to_string());
+    }
     let symbol = ws_msg
         .data
         .iter()
@@ -530,6 +533,9 @@ pub(crate) fn extract_timestamp(
 ) -> Result<Option<i64>, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<HashMap<String, Value>>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to parse the JSON string {}", msg)))?;
+    if ws_msg.table == "funding" {
+        return Ok(None);
+    }
     let timestamp = ws_msg
         .data
         .iter()
@@ -611,6 +617,7 @@ pub(crate) fn parse_trade(
 pub(crate) fn parse_funding_rate(
     market_type: MarketType,
     msg: &str,
+    received_at: i64,
 ) -> Result<Vec<FundingRateMsg>, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawFundingRateMsg>>(msg).map_err(|_e| {
         SimpleError::new(format!(
@@ -634,7 +641,7 @@ pub(crate) fn parse_funding_rate(
                 symbol: raw_msg.symbol.clone(),
                 pair: crypto_pair::normalize_pair(&raw_msg.symbol, EXCHANGE_NAME).unwrap(),
                 msg_type: MessageType::FundingRate,
-                timestamp: Utc::now().timestamp_millis(),
+                timestamp: received_at,
                 funding_rate: raw_msg.fundingRate,
                 funding_time: settlement_time.timestamp_millis(),
                 estimated_rate: None,

@@ -121,14 +121,7 @@ pub(crate) fn parse_funding_rate(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<FundingRateMsg>, SimpleError> {
-    if market_type == MarketType::InverseSwap || market_type == MarketType::LinearSwap {
-        binance_all::parse_funding_rate(market_type, msg)
-    } else {
-        Err(SimpleError::new(format!(
-            "Binance {} does NOT have funding rates",
-            market_type
-        )))
-    }
+    binance_all::parse_funding_rate(market_type, msg)
 }
 
 pub(crate) fn parse_l2(

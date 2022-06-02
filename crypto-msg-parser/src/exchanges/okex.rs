@@ -4,7 +4,7 @@ use crypto_msg_type::MessageType;
 use super::utils::calc_quantity_and_volume;
 use crate::{FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
-use chrono::{prelude::*, DateTime};
+use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
@@ -93,6 +93,9 @@ pub(crate) fn extract_timestamp(
             msg
         ))
     })?;
+    if ws_msg.table == "swap/funding_rate" {
+        return Ok(None);
+    }
     let timestamp = ws_msg
         .data
         .iter()
@@ -205,6 +208,7 @@ pub(crate) fn parse_trade(
 pub(crate) fn parse_funding_rate(
     market_type: MarketType,
     msg: &str,
+    received_at: i64,
 ) -> Result<Vec<FundingRateMsg>, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawFundingRateMsg>>(msg).map_err(|_e| {
         SimpleError::new(format!(
@@ -224,7 +228,7 @@ pub(crate) fn parse_funding_rate(
                 symbol: raw_msg.instrument_id.clone(),
                 pair: crypto_pair::normalize_pair(&raw_msg.instrument_id, EXCHANGE_NAME).unwrap(),
                 msg_type: MessageType::FundingRate,
-                timestamp: Utc::now().timestamp_millis(),
+                timestamp: received_at,
                 funding_rate: raw_msg.funding_rate.parse::<f64>().unwrap(),
                 funding_time: funding_time.timestamp_millis(),
                 estimated_rate: Some(raw_msg.estimated_rate.parse::<f64>().unwrap()),

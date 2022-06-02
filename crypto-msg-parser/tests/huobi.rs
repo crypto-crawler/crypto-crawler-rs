@@ -191,13 +191,13 @@ mod trade {
 mod funding_rate {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_timestamp, parse_funding_rate};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_funding_rate};
 
     #[test]
     fn inverse_swap() {
         let raw_msg = r#"{"op":"notify","topic":"public.BTC-USD.funding_rate","ts":1617309842839,"data":[{"symbol":"BTC","contract_code":"BTC-USD","fee_asset":"BTC","funding_time":"1617309840000","funding_rate":"0.000624180443735412","estimated_rate":"0.000807076648698898","settlement_time":"1617321600000"}]}"#;
         let funding_rates =
-            &parse_funding_rate(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap();
+            &parse_funding_rate(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None).unwrap();
 
         assert_eq!(funding_rates.len(), 1);
 
@@ -210,6 +210,10 @@ mod funding_rate {
             );
         }
         assert_eq!(
+            "BTC-USD",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
             1617309842839,
             extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
                 .unwrap()
@@ -220,13 +224,14 @@ mod funding_rate {
         assert_eq!(funding_rates[0].funding_rate, 0.000624180443735412);
         assert_eq!(funding_rates[0].estimated_rate, Some(0.000807076648698898));
         assert_eq!(funding_rates[0].funding_time, 1617321600000);
+        assert_eq!(funding_rates[0].timestamp, 1617309842839);
     }
 
     #[test]
     fn linear_swap() {
         let raw_msg = r#"{"op":"notify","topic":"public.BTC-USDT.funding_rate","ts":1617309787271,"data":[{"symbol":"BTC","contract_code":"BTC-USDT","fee_asset":"USDT","funding_time":"1617309780000","funding_rate":"0.000754108135233895","estimated_rate":"0.000429934303518805","settlement_time":"1617321600000"}]}"#;
         let funding_rates =
-            &parse_funding_rate(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap();
+            &parse_funding_rate(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap();
 
         assert_eq!(funding_rates.len(), 1);
 
@@ -239,6 +244,10 @@ mod funding_rate {
             );
         }
         assert_eq!(
+            "BTC-USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
             1617309787271,
             extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
                 .unwrap()
@@ -249,6 +258,47 @@ mod funding_rate {
         assert_eq!(funding_rates[0].funding_rate, 0.000754108135233895);
         assert_eq!(funding_rates[0].estimated_rate, Some(0.000429934303518805));
         assert_eq!(funding_rates[0].funding_time, 1617321600000);
+        assert_eq!(funding_rates[0].timestamp, 1617309787271);
+    }
+
+    #[test]
+    fn all() {
+        let raw_msg = r#"{"op":"notify","topic":"public.*.funding_rate","ts":1654174017332,"data":[{"symbol":"BTC","contract_code":"BTC-USD","fee_asset":"BTC","funding_time":"1654173960000","funding_rate":"0.000046774664737679","estimated_rate":"-0.000042194357938054","settlement_time":"1654185600000"},{"symbol":"ETH","contract_code":"ETH-USD","fee_asset":"ETH","funding_time":"1654173960000","funding_rate":"-0.000050627986553411","estimated_rate":"0.000074887269002104","settlement_time":"1654185600000"}]}"#;
+        let funding_rates =
+            &parse_funding_rate(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None).unwrap();
+
+        assert_eq!(funding_rates.len(), 2);
+
+        for rate in funding_rates.iter() {
+            crate::utils::check_funding_rate_fields(
+                EXCHANGE_NAME,
+                MarketType::InverseSwap,
+                rate,
+                raw_msg,
+            );
+        }
+        assert_eq!(
+            "ALL",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1654174017332,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+
+        assert_eq!(funding_rates[0].pair, "BTC/USD".to_string());
+        assert_eq!(funding_rates[0].funding_rate, 0.000046774664737679);
+        assert_eq!(funding_rates[0].estimated_rate, Some(-0.000042194357938054));
+        assert_eq!(funding_rates[0].funding_time, 1654185600000);
+        assert_eq!(funding_rates[0].timestamp, 1654174017332);
+
+        assert_eq!(funding_rates[1].pair, "ETH/USD".to_string());
+        assert_eq!(funding_rates[1].funding_rate, -0.000050627986553411);
+        assert_eq!(funding_rates[1].estimated_rate, Some(0.000074887269002104));
+        assert_eq!(funding_rates[1].funding_time, 1654185600000);
+        assert_eq!(funding_rates[1].timestamp, 1654174017332);
     }
 }
 

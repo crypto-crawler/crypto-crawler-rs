@@ -82,6 +82,15 @@ mod bitmex_inverse_swap {
     }
 
     #[tokio::test(flavor = "multi_thread")]
+    async fn subscribe_funding_rate_all() {
+        gen_test_code!(
+            BitmexWSClient,
+            send,
+            &vec![r#"{"op":"subscribe","args":["funding"]}"#.to_string()]
+        );
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_instrument() {
         gen_test_code!(
             BitmexWSClient,
