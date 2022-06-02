@@ -579,3 +579,58 @@ mod before_20220311 {
         }
     }
 }
+
+#[cfg(test)]
+mod candlestick {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"symbol":"BTC_USDT","data":{"symbol":"BTC_USDT","interval":"Min1","t":1654083120,"o":31512.39,"c":31514.38,"h":31514.41,"l":31512.39,"v":273.4783858,"q":0.008678,"e":31512.39,"rh":31514.41,"rl":31512.39,"tdt":1654083133266},"channel":"push.kline","symbol_display":"BTC_USDT"}"#;
+
+        assert_eq!(
+            1654083133266,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"channel":"push.kline","data":{"a":8.0759087605568165,"c":31439.5,"h":31439.5,"interval":"Min1","l":31439,"o":31439.5,"q":2539,"rc":31439.5,"rh":31439.5,"rl":31439,"ro":31439.5,"symbol":"BTC_USD","t":1654083720},"symbol":"BTC_USD","ts":1654083763923}"#;
+
+        assert_eq!(
+            1654083763923,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_USD",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"channel":"push.kline","data":{"a":99371.3865,"c":31575,"h":31585.5,"interval":"Min1","l":31574.5,"o":31576,"q":31468,"rc":31575,"rh":31585.5,"rl":31574.5,"ro":31576,"symbol":"BTC_USDT","t":1654083480},"symbol":"BTC_USDT","ts":1654083512507}"#;
+
+        assert_eq!(
+            1654083512507,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

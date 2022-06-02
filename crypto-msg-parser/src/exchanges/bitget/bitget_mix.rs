@@ -78,10 +78,21 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
                 .max();
             Ok(timestamp)
         }
-        _ => Err(SimpleError::new(format!(
-            "Failed to extract timestamp from {}",
-            msg
-        ))),
+        _ => {
+            if channel.starts_with("candle") {
+                let timestamp = obj
+                    .data
+                    .iter()
+                    .map(|x| x[0].as_str().unwrap().parse::<i64>().unwrap())
+                    .max();
+                Ok(timestamp)
+            } else {
+                Err(SimpleError::new(format!(
+                    "Failed to extract timestamp from {}",
+                    msg
+                )))
+            }
+        }
     }
 }
 

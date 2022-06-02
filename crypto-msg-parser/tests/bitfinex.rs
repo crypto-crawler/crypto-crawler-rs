@@ -463,3 +463,74 @@ mod l3_event {
         );
     }
 }
+
+#[cfg(test)]
+mod candlestick {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot_snapshot() {
+        let raw_msg = r#"[{"key":"trade:1m:tBTCUST","channel":"candles"},[[1654074480000,31636,31636,31636,31636,0.0001],[1654074420000,31633,31631,31640,31631,0.11289119],[1654074300000,31631,31626,31631,31626,0.00047848]]]"#;
+
+        assert_eq!(
+            1654074480000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "tBTCUST",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn spot_update() {
+        let raw_msg = r#"[{"channel":"candles","key":"trade:1m:tBTCUST"},[1654075080000,31619,31619,31619,31619,0.00843875]]"#;
+
+        assert_eq!(
+            1654075080000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "tBTCUST",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap_snapshot() {
+        let raw_msg = r#"[{"channel":"candles","key":"trade:1m:tBTCF0:USTF0"},[[1654076100000,31672,31667,31672,31667,0.053312790000000006],[1654076040000,31672,31673,31673,31667,0.00118434],[1654075980000,31669,31672,31672,31669,0.0008369499999999999]]]"#;
+
+        assert_eq!(
+            1654076100000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "tBTCF0:USTF0",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap_update() {
+        let raw_msg = r#"[{"channel":"candles","key":"trade:1m:tBTCF0:USTF0"},[1654076040000,31672,31673,31673,31667,0.00118434]]"#;
+
+        assert_eq!(
+            1654076040000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "tBTCF0:USTF0",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

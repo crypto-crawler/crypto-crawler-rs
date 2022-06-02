@@ -450,3 +450,26 @@ mod bbo {
         );
     }
 }
+
+#[cfg(test)]
+mod candlestick {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"[343,["1654081540.967902","1654081560.000000","31527.70000","31527.70000","31527.70000","31527.70000","31527.70000","0.00526133",2],"ohlc-1","XBT/USD"]"#;
+
+        assert_eq!(
+            1654081540967,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBT/USD",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+}

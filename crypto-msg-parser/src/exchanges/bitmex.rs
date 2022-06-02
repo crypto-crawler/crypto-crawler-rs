@@ -530,42 +530,17 @@ pub(crate) fn extract_timestamp(
 ) -> Result<Option<i64>, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<HashMap<String, Value>>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to parse the JSON string {}", msg)))?;
-    let table = ws_msg.table.as_str();
-    match table {
-        "trade" => {
-            let timestamp = ws_msg
-                .data
-                .iter()
-                .map(|raw_trade| {
-                    DateTime::parse_from_rfc3339(raw_trade["timestamp"].as_str().unwrap())
-                        .unwrap()
-                        .timestamp_millis()
-                })
-                .max();
-            if timestamp.is_none() {
-                Err(SimpleError::new(format!("data is empty in {}", msg)))
-            } else {
-                Ok(timestamp)
-            }
-        }
-        "orderBookL2" | "orderBookL2_25" | "orderBook10" | "quote" => {
-            let timestamp = ws_msg
-                .data
-                .iter()
-                .filter(|x| x.contains_key("timestamp"))
-                .map(|x| {
-                    DateTime::parse_from_rfc3339(x["timestamp"].as_str().unwrap())
-                        .unwrap()
-                        .timestamp_millis()
-                })
-                .max();
-            Ok(timestamp)
-        }
-        _ => Err(SimpleError::new(format!(
-            "Unknown table {} in {}",
-            table, msg
-        ))),
-    }
+    let timestamp = ws_msg
+        .data
+        .iter()
+        .filter(|x| x.contains_key("timestamp"))
+        .map(|x| {
+            DateTime::parse_from_rfc3339(x["timestamp"].as_str().unwrap())
+                .unwrap()
+                .timestamp_millis()
+        })
+        .max();
+    Ok(timestamp)
 }
 
 pub(crate) fn get_msg_type(msg: &str) -> MessageType {

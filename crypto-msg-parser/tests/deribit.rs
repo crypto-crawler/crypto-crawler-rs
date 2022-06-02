@@ -567,3 +567,58 @@ mod bbo {
         );
     }
 }
+
+#[cfg(test)]
+mod candlestick {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"jsonrpc":"2.0","method":"subscription","params":{"channel":"chart.trades.BTC-30SEP22.1","data":{"volume":0.0,"tick":1654078920000,"open":31949.0,"low":31949.0,"high":31949.0,"cost":0.0,"close":31949.0}}}"#;
+
+        assert_eq!(
+            1654078920000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-30SEP22",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"jsonrpc":"2.0","method":"subscription","params":{"channel":"chart.trades.BTC-PERPETUAL.1","data":{"volume":0.02120555,"tick":1654079340000,"open":31595.5,"low":31595.5,"high":31595.5,"cost":670.0,"close":31595.5}}}"#;
+
+        assert_eq!(
+            1654079340000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-PERPETUAL",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn option() {
+        let raw_msg = r#"{"jsonrpc":"2.0","method":"subscription","params":{"channel":"chart.trades.BTC-30SEP22-60000-C.1","data":{"volume":0.0,"tick":1654079400000,"open":0.0115,"low":0.0115,"high":0.0115,"cost":0.0,"close":0.0115}}}"#;
+
+        assert_eq!(
+            1654079400000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-30SEP22-60000-C",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

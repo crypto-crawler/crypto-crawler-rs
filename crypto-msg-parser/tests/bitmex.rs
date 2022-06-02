@@ -671,3 +671,42 @@ mod bbo {
         );
     }
 }
+
+#[cfg(test)]
+mod candlestick {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"table":"tradeBin1m","action":"insert","data":[{"timestamp":"2022-06-01T10:03:00.000Z","symbol":"XBTUSD","open":31639.5,"high":31639.5,"low":31635.5,"close":31635.5,"trades":6,"volume":101400,"vwap":31639.3619,"lastSize":200,"turnover":320487014,"homeNotional":3.2048701399999997,"foreignNotional":101400}]}"#;
+
+        assert_eq!(
+            1654077780000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBTUSD",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"table":"tradeBin1m","action":"insert","data":[{"timestamp":"2022-06-01T10:10:00.000Z","symbol":"XBTUSDT","open":31592.5,"high":31600,"low":31582.5,"close":31583.5,"trades":5,"volume":1634000,"vwap":31587.127,"lastSize":1233000,"turnover":51613365500,"homeNotional":1.6340000000000001,"foreignNotional":51613.3655}]}"#;
+
+        assert_eq!(
+            1654078200000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBTUSDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

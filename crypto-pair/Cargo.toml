@@ -1,6 +1,6 @@
 [package]
 name = "crypto-pair"
-version = "2.2.6"
+version = "2.2.7"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description = "Parse exchange-specific symbols to unified format"

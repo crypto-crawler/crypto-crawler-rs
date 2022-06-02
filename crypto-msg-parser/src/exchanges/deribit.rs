@@ -61,8 +61,13 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
             msg
         ))
     })?;
+    let channel = ws_msg.params.channel.as_str();
     let data = ws_msg.params.data;
-    if data.is_object() {
+
+    if channel.starts_with("chart.trades.") {
+        let symbol = channel.split('.').nth(2).unwrap();
+        Ok(symbol.to_string())
+    } else if data.is_object() {
         Ok(data["instrument_name"].as_str().unwrap().to_string())
     } else if data.is_array() {
         let arr = data.as_array().unwrap();
@@ -87,8 +92,11 @@ pub(crate) fn extract_timestamp(
             msg
         ))
     })?;
+    let channel = ws_msg.params.channel.as_str();
     let data = ws_msg.params.data;
-    if data.is_object() {
+    if channel.starts_with("chart.trades.") {
+        Ok(Some(data["tick"].as_i64().unwrap()))
+    } else if data.is_object() {
         Ok(Some(data["timestamp"].as_i64().unwrap()))
     } else if data.is_array() {
         let arr = data.as_array().unwrap();

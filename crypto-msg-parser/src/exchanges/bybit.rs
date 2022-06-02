@@ -86,14 +86,8 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
             msg
         ))
     })?;
-    let arr = ws_msg
-        .get("topic")
-        .unwrap()
-        .as_str()
-        .unwrap()
-        .split('.')
-        .collect::<Vec<&str>>();
-    Ok(arr[1].to_string())
+    let symbol = ws_msg["topic"].as_str().unwrap().split('.').last().unwrap();
+    Ok(symbol.to_string())
 }
 
 pub(crate) fn extract_timestamp(
@@ -106,14 +100,7 @@ pub(crate) fn extract_timestamp(
             msg
         ))
     })?;
-    let msg_type = ws_msg
-        .get("topic")
-        .unwrap()
-        .as_str()
-        .unwrap()
-        .split('.')
-        .next()
-        .unwrap();
+    let msg_type = ws_msg["topic"].as_str().unwrap().split('.').next().unwrap();
     match msg_type {
         "trade" => {
             let raw_trades = ws_msg["data"].as_array().unwrap();
@@ -138,7 +125,7 @@ pub(crate) fn extract_timestamp(
                 Ok(timestamp)
             }
         }
-        "orderBookL2_25" => {
+        _ => {
             let timestamp_e6 = &ws_msg["timestamp_e6"];
             let timestamp = if timestamp_e6.is_i64() {
                 timestamp_e6.as_i64().unwrap()
@@ -147,10 +134,6 @@ pub(crate) fn extract_timestamp(
             } / 1000;
             Ok(Some(timestamp))
         }
-        _ => Err(SimpleError::new(format!(
-            "Unknown msg_type {} in {}",
-            msg_type, msg
-        ))),
     }
 }
 

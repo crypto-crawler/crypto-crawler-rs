@@ -742,3 +742,90 @@ mod bbo {
         );
     }
 }
+
+#[cfg(test)]
+mod candlestick {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"time":1654080052,"channel":"spot.candlesticks","event":"update","result":{"t":"1654080050","v":"0","c":"31555.75","h":"31555.75","l":"31555.75","o":"31555.75","n":"10s_BTC_USDT","a":"0"}}"#;
+
+        assert_eq!(
+            1654080052000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"time":1654080481,"channel":"futures.candlesticks","event":"update","error":null,"result":[{"t":1654080470,"v":12,"c":"31551.4","h":"31551.7","l":"31551.4","o":"31551.7","n":"10s_BTC_USD_20220624"},{"t":1654080480,"v":0,"c":"31551.4","h":"31551.4","l":"31551.4","o":"31551.4","n":"10s_BTC_USD_20220624"}]}"#;
+
+        assert_eq!(
+            1654080481000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_USD_20220624",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_future() {
+        let raw_msg = r#"{"time":1654080831,"channel":"futures.candlesticks","event":"update","error":null,"result":[{"t":1654080810,"v":0,"c":"31638.9","h":"31638.9","l":"31638.9","o":"31638.9","n":"10s_BTC_USDT_20220624"},{"t":1654080820,"v":5,"c":"31640.3","h":"31640.3","l":"31640.3","o":"31640.3","n":"10s_BTC_USDT_20220624"},{"t":1654080830,"v":0,"c":"31640.3","h":"31640.3","l":"31640.3","o":"31640.3","n":"10s_BTC_USDT_20220624"}]}"#;
+
+        assert_eq!(
+            1654080831000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_USDT_20220624",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"time":1654080889,"channel":"futures.candlesticks","event":"update","result":[{"t":1654080880,"v":0,"c":"31509.2","h":"31509.2","l":"31509.2","o":"31509.2","a":"0","n":"10s_BTC_USD"}]}"#;
+
+        assert_eq!(
+            1654080889000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_USD",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"id":null,"time":1654080940,"channel":"futures.candlesticks","event":"update","error":null,"result":[{"t":1654080930,"v":923,"c":"31533.1","h":"31533.1","l":"31531.5","o":"31531.5","n":"10s_BTC_USDT"},{"t":1654080940,"v":0,"c":"31533.1","h":"31533.1","l":"31533.1","o":"31533.1","n":"10s_BTC_USDT"}]}"#;
+
+        assert_eq!(
+            1654080940000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

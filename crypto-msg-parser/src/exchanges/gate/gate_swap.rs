@@ -83,7 +83,7 @@ pub(super) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Result<Str
         } else {
             debug_assert_eq!(ws_msg.event, "update");
             let arr = result.as_array().unwrap();
-            let symbols = arr
+            let symbol = arr
                 .iter()
                 .map(|x| x.as_object().unwrap())
                 .map(|x| {
@@ -93,13 +93,28 @@ pub(super) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Result<Str
                         x["c"].as_str().unwrap()
                     }
                 })
-                .collect::<Vec<&str>>();
-            Ok(symbols[0].to_string())
+                .next()
+                .unwrap();
+            Ok(symbol.to_string())
         }
     } else if ws_msg.channel == "futures.order_book_update"
         || ws_msg.channel == "futures.book_ticker"
     {
         Ok(result["s"].as_str().unwrap().to_string())
+    } else if ws_msg.channel == "futures.candlesticks" {
+        let arr = result.as_array().unwrap();
+        let symbol = arr
+            .iter()
+            .map(|x| x.as_object().unwrap())
+            .map(|x| {
+                let n = x["n"].as_str().unwrap();
+                let pos = n.find('_').unwrap();
+                let symbol = &n[(pos + 1)..];
+                symbol.to_string()
+            })
+            .next()
+            .unwrap();
+        Ok(symbol)
     } else {
         Err(SimpleError::new(format!("Unknown message format: {}", msg)))
     }
@@ -144,7 +159,7 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
     {
         Ok(Some(result["t"].as_i64().unwrap()))
     } else {
-        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
+        Ok(Some(ws_msg.time * 1000))
     }
 }
 

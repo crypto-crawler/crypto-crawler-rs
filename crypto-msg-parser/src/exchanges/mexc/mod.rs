@@ -53,8 +53,16 @@ pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
             ))),
         }
     } else if let Ok(json_obj) = serde_json::from_str::<HashMap<String, Value>>(msg) {
+        let channel = json_obj["channel"].as_str().unwrap();
         if let Some(x) = json_obj.get("ts") {
             Ok(Some(x.as_i64().unwrap()))
+        } else if channel == "push.kline" {
+            let data = json_obj["data"].as_object().unwrap();
+            if let Some(tdt) = data.get("tdt") {
+                Ok(Some(tdt.as_i64().unwrap()))
+            } else {
+                Ok(Some(data["t"].as_i64().unwrap() * 1000))
+            }
         } else if let Some(deals) = json_obj["data"].get("deals") {
             let timestamp = deals
                 .as_array()

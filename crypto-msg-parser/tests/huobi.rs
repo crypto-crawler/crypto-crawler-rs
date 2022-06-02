@@ -900,3 +900,74 @@ mod bbo {
         );
     }
 }
+
+#[cfg(test)]
+mod candlestick {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"ch":"market.btcusdt.kline.1min","ts":1654081322624,"tick":{"id":1654081320,"open":31545.71,"close":31545.72,"low":31545.71,"high":31545.72,"amount":0.015443758717188892,"vol":487.1844552,"count":4}}"#;
+
+        assert_eq!(
+            1654081322624,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "btcusdt",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"ch":"market.BTC_CQ.kline.1min","ts":1654081396435,"tick":{"id":1654081380,"mrid":222601067490403,"open":31565.04,"close":31565.04,"high":31565.04,"low":31565.04,"amount":0.0063361237622382230467631278148229814,"vol":2,"count":1}}"#;
+
+        assert_eq!(
+            1654081396435,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_CQ",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"ch":"market.BTC-USD.kline.1min","ts":1654081441264,"tick":{"id":1654081440,"mrid":136483147489,"open":31514.4,"close":31514.4,"high":31514.4,"low":31514.4,"amount":0,"vol":0,"count":0}}"#;
+
+        assert_eq!(
+            1654081441264,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-USD",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"ch":"market.BTC-USDT.kline.1min","ts":1654081448870,"tick":{"id":1654081440,"mrid":108782988900,"open":31531.9,"close":31531.9,"high":31532,"low":31531.9,"amount":0.532,"vol":532,"trade_turnover":16774.9728,"count":5}}"#;
+
+        assert_eq!(
+            1654081448870,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

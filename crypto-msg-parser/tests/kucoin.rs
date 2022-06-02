@@ -620,3 +620,74 @@ mod l3_event {
         );
     }
 }
+
+#[cfg(test)]
+mod candlestick {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"type":"message","topic":"/market/candles:BTC-USDT_1week","subject":"trade.candles.update","data":{"symbol":"BTC-USDT","candles":["1653523200","29543.6","31613.8","32406.7","28014.1","93044.50911291","2792095272.950902197"],"time":1654081935182826588}}"#;
+
+        assert_eq!(
+            1654081935182,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"type":"message","topic":"/contractMarket/candle:XBTMM22_10080","subject":"candle.stick","data":{"volume":1364110,"symbol":"XBTMM22","high":32320.0,"low":29274.0,"granularity":10080,"time":1653868800000,"close":31504.0,"turnover":1364110.0,"open":29435.0}}"#;
+
+        assert_eq!(
+            1653868800000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBTMM22",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"type":"message","topic":"/contractMarket/candle:XBTUSDM_10080","subject":"candle.stick","data":{"volume":57904628,"symbol":"XBTUSDM","high":32382.0,"low":29244.0,"granularity":10080,"time":1653868800000,"close":31511.0,"turnover":57904628,"open":29397.0}}"#;
+
+        assert_eq!(
+            1653868800000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBTUSDM",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"type":"message","topic":"/contractMarket/candle:XBTUSDTM_10080","subject":"candle.stick","data":{"volume":113774348,"symbol":"XBTUSDTM","high":32410.0,"low":29294.0,"granularity":10080,"time":1653868800000,"close":31519.0,"turnover":113774348,"open":29450.0}}"#;
+
+        assert_eq!(
+            1653868800000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBTUSDTM",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

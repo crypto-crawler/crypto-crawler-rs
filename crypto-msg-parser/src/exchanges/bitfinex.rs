@@ -1,7 +1,6 @@
 use crate::{exchanges::utils::calc_quantity_and_volume, Order, OrderBookMsg, TradeMsg, TradeSide};
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
-use if_chain::if_chain;
 
 use serde_json::Value;
 use simple_error::SimpleError;
@@ -11,48 +10,65 @@ const EXCHANGE_NAME: &str = "bitfinex";
 pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     let arr = serde_json::from_str::<Vec<Value>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
-    if_chain! {
-        if let Some(obj) = arr[0].as_object();
-        if let Some(symbol) = obj["symbol"].as_str();
-        then {
-            Ok(symbol.to_string())
-        } else {
-            Err(SimpleError::new(format!("Failed to extract symbol from {}", msg)))
-        }
+    let obj = arr[0].as_object().unwrap();
+    let channel = obj["channel"].as_str().unwrap();
+    if let Some(symbol) = obj.get("symbol") {
+        Ok(symbol.as_str().unwrap().to_string())
+    } else if channel == "candles" {
+        let key = &(obj["key"].as_str().unwrap())["trade:".len()..];
+        let pos = key.find(':').unwrap();
+        Ok((&key[pos + 1..]).to_string())
+    } else {
+        Err(SimpleError::new(format!(
+            "Failed to extract symbol from {}",
+            msg
+        )))
     }
 }
 
 pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
     let arr = serde_json::from_str::<Vec<Value>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
-    if_chain! {
-        if let Some(obj) = arr[0].as_object();
-        if let Some(channel) = obj["channel"].as_str();
-        then {
-            match channel {
-                "trades" => {
-                    // see https://docs.bitfinex.com/reference#ws-public-trades
-                    if arr[1].is_string() {
-                        if let Some(timestamp) = arr[2].as_array().unwrap()[1].as_i64() {
-                            Ok(Some(timestamp))
-                        } else {
-                            Err(SimpleError::new(format!("Failed to extract timestamp from {}", msg)))
-                        }
-                    } else if arr[1].is_array() {
-                        // snapshot
-                        let raw_trades: Vec<Vec<f64>> = serde_json::from_value(arr[1].clone()).unwrap();
-                        let timestamp = raw_trades.iter().map(|raw_trade| raw_trade[1] as i64).max();
-                        Ok(timestamp) // Sometimes data can be empty, for example: [{"channel":"trades","symbol":"tBTC:CNHT"}, []]
-                    } else {
-                        Err(SimpleError::new(format!("Failed to extract timestamp from {}", msg)))
-                    }
+    let obj = arr[0].as_object().unwrap();
+    let channel = obj["channel"].as_str().unwrap();
+    match channel {
+        "trades" => {
+            // see https://docs.bitfinex.com/reference#ws-public-trades
+            if arr[1].is_string() {
+                if let Some(timestamp) = arr[2].as_array().unwrap()[1].as_i64() {
+                    Ok(Some(timestamp))
+                } else {
+                    Err(SimpleError::new(format!(
+                        "Failed to extract timestamp from {}",
+                        msg
+                    )))
                 }
-                "book" => Ok(None),
-                _ => Err(SimpleError::new(format!("Failed to extract timestamp from {}", msg)))
+            } else if arr[1].is_array() {
+                // snapshot
+                let raw_trades: Vec<Vec<f64>> = serde_json::from_value(arr[1].clone()).unwrap();
+                let timestamp = raw_trades.iter().map(|raw_trade| raw_trade[1] as i64).max();
+                Ok(timestamp) // Sometimes data can be empty, for example: [{"channel":"trades","symbol":"tBTC:CNHT"}, []]
+            } else {
+                Err(SimpleError::new(format!(
+                    "Failed to extract timestamp from {}",
+                    msg
+                )))
             }
-        } else {
-            Err(SimpleError::new(format!("No channel field in {}", msg)))
         }
+        "candles" => {
+            if let Ok(arr_2d) = serde_json::from_value::<Vec<Vec<f64>>>(arr[1].clone()) {
+                let timestamp = arr_2d.iter().map(|v| v[0] as i64).max();
+                Ok(timestamp)
+            } else {
+                let arr: Vec<f64> = serde_json::from_value(arr[1].clone()).unwrap();
+                Ok(Some(arr[0] as i64))
+            }
+        }
+        "book" => Ok(None),
+        _ => Err(SimpleError::new(format!(
+            "Failed to extract timestamp from {}",
+            msg
+        ))),
     }
 }
 
@@ -94,14 +110,14 @@ pub(crate) fn parse_trade(
 ) -> Result<Vec<TradeMsg>, SimpleError> {
     let arr = serde_json::from_str::<Vec<Value>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
-    let symbol = if_chain! {
-        if let Some(obj) = arr[0].as_object();
-        if let Some(symbol) = obj["symbol"].as_str();
-        then {
-            symbol
-        } else {
-            return Err(SimpleError::new(format!("Failed to extract symbol from {}", msg)));
-        }
+    let obj = arr[0].as_object().unwrap();
+    let symbol = if let Some(symbol) = obj.get("symbol") {
+        symbol.as_str().unwrap()
+    } else {
+        return Err(SimpleError::new(format!(
+            "Failed to extract symbol from {}",
+            msg
+        )));
     };
 
     // see https://docs.bitfinex.com/reference#ws-public-trades

@@ -17,7 +17,12 @@ pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to WebsocketMsg", msg)))?;
     let symbol = ws_msg.topic.split(':').last().unwrap();
-    Ok(symbol.to_string())
+    if ws_msg.topic.contains("/candle") {
+        let pos = symbol.rfind('_').unwrap();
+        Ok((&symbol[..pos]).to_string())
+    } else {
+        Ok(symbol.to_string())
+    }
 }
 
 pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
@@ -31,11 +36,15 @@ pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
     } else if let Some(t) = ws_msg.data.get("time") {
         if topic.starts_with("/market/match:") {
             Ok(Some(t.as_str().unwrap().parse::<i64>().unwrap() / 1000000))
-        } else if topic.starts_with("/market/ticker") {
+        } else if topic.starts_with("/market/ticker")
+            || topic.starts_with("/contractMarket/candle:")
+        {
             Ok(Some(t.as_i64().unwrap()))
+        } else if topic.starts_with("/market/candles:") {
+            Ok(Some(t.as_i64().unwrap() / 1000000))
         } else {
             Err(SimpleError::new(format!(
-                "Failed to extract timestampfrom {}",
+                "Failed to extract timestamp from {}",
                 msg
             )))
         }
@@ -43,7 +52,7 @@ pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
         Ok(None)
     } else {
         Err(SimpleError::new(format!(
-            "Failed to extract timestampfrom {}",
+            "Failed to extract timestamp from {}",
             msg
         )))
     }
