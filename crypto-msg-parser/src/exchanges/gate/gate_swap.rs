@@ -68,55 +68,27 @@ pub(super) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Result<Str
             msg
         ))
     })?;
-    let result = ws_msg.result;
-    if ws_msg.channel == "futures.trades" {
-        let symbols = result
-            .as_array()
-            .unwrap()
-            .iter()
-            .map(|trade_msg| trade_msg["contract"].as_str().unwrap())
-            .collect::<Vec<&str>>();
-        Ok(symbols[0].to_string())
-    } else if ws_msg.channel == "futures.order_book" {
-        if ws_msg.event == "all" {
-            Ok(result["contract"].as_str().unwrap().to_string())
-        } else {
-            debug_assert_eq!(ws_msg.event, "update");
-            let arr = result.as_array().unwrap();
-            let symbol = arr
-                .iter()
-                .map(|x| x.as_object().unwrap())
-                .map(|x| {
-                    if x.contains_key("contract") {
-                        x["contract"].as_str().unwrap()
-                    } else {
-                        x["c"].as_str().unwrap()
-                    }
-                })
-                .next()
-                .unwrap();
-            Ok(symbol.to_string())
-        }
-    } else if ws_msg.channel == "futures.order_book_update"
-        || ws_msg.channel == "futures.book_ticker"
-    {
-        Ok(result["s"].as_str().unwrap().to_string())
-    } else if ws_msg.channel == "futures.candlesticks" {
-        let arr = result.as_array().unwrap();
-        let symbol = arr
-            .iter()
-            .map(|x| x.as_object().unwrap())
-            .map(|x| {
-                let n = x["n"].as_str().unwrap();
-                let pos = n.find('_').unwrap();
-                let symbol = &n[(pos + 1)..];
-                symbol.to_string()
-            })
-            .next()
-            .unwrap();
-        Ok(symbol)
+    let v = if ws_msg.result.is_array() {
+        ws_msg.result.as_array().unwrap()[0].as_object().unwrap()
     } else {
-        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
+        ws_msg.result.as_object().unwrap()
+    };
+    if let Some(symbol) = v.get("contract") {
+        Ok(symbol.as_str().unwrap().to_string())
+    } else if v.contains_key("s") && v["s"].is_string() {
+        Ok(v["s"].as_str().unwrap().to_string())
+    } else if v.contains_key("n") && v["n"].is_string() {
+        let n = v["n"].as_str().unwrap();
+        let pos = n.find('_').unwrap();
+        let symbol = &n[(pos + 1)..];
+        Ok(symbol.to_string())
+    } else if v.contains_key("c") && v["c"].is_string() {
+        Ok(v["c"].as_str().unwrap().to_string())
+    } else {
+        Err(SimpleError::new(format!(
+            "Failed to extract symbol from {}",
+            msg
+        )))
     }
 }
 

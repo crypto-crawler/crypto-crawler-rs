@@ -829,3 +829,90 @@ mod candlestick {
         );
     }
 }
+
+#[cfg(test)]
+mod ticker {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"time":1654161931,"channel":"spot.tickers","event":"update","result":{"currency_pair":"BTC_USDT","last":"29968.31","lowest_ask":"29968.31","highest_bid":"29968.3","change_percentage":"-5.3731","base_volume":"10676.32785905","quote_volume":"324419781.600232","high_24h":"32399.99","low_24h":"29324.36"}}"#;
+
+        assert_eq!(
+            1654161931000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"time":1654162230,"channel":"futures.tickers","event":"update","error":null,"result":[{"total_size":"9999","volume_24h_quote":"265260","volume_24h_settle":"8","change_percentage":"-5.42","last":"29954.9","mark_price":"29955.64","volume_24h_base":"8","contract":"BTC_USD_20220624","volume_24h":"265260","settle_price":"0","basis_value":"-19.5","basis_rate":"-0.010791","high_24h":"31884.4","low_24h":"29336.9","index_price":"29975.14","quanto_base_rate":""}]}"#;
+
+        assert_eq!(
+            1654162230000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_USD_20220624",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_future() {
+        let raw_msg = r#"{"time":1654162642,"channel":"futures.tickers","event":"update","error":null,"result":[{"total_size":"10037","volume_24h_quote":"83155","volume_24h_settle":"83155","change_percentage":"-5.68","last":"29960.5","mark_price":"29953.01","volume_24h_base":"2","contract":"BTC_USDT_20220624","volume_24h":"27755","settle_price":"0","basis_value":"27.12","basis_rate":"0.015036","high_24h":"31971.7","low_24h":"21380.4","index_price":"29925.89","quanto_base_rate":""}]}"#;
+
+        assert_eq!(
+            1654162642000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_USDT_20220624",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"time":1654162687,"channel":"futures.tickers","event":"update","result":[{"contract":"BTC_USD","last":"29860.8","change_percentage":"-5.6438","total_size":"31659115","volume_24h":"15542254","volume_24h_base":"0","volume_24h_quote":"15542254","volume_24h_settle":"0.0000000000000006","mark_price":"29902.44","funding_rate":"0.0001","funding_rate_indicative":"-0.000292","index_price":"29900.05","quanto_base_rate":"","low_24h":"29259.1","high_24h":"31856.2","volume_24_usd":"15542254","volume_24_btc":"518.8480439694998983"}]}"#;
+
+        assert_eq!(
+            1654162687000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_USD",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"id":null,"time":1654162715,"channel":"futures.tickers","event":"update","error":null,"result":[{"contract":"BTC_USDT","last":"29885.9","change_percentage":"-5.61","funding_rate":"-0.00004","mark_price":"29908","index_price":"29908.95","total_size":"754413619","volume_24h":"337595135","quanto_base_rate":"","low_24h":"29280","high_24h":"31880","funding_rate_indicative":"0.000056","volume_24h_quote":"1008933444","volume_24h_settle":"1008933444","volume_24h_base":"33759"}]}"#;
+
+        assert_eq!(
+            1654162715000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

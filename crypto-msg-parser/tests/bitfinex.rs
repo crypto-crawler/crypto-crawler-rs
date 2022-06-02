@@ -534,3 +534,38 @@ mod candlestick {
         );
     }
 }
+
+#[cfg(test)]
+mod ticker {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"[{"symbol":"tBTCUST","channel":"ticker"},[29967,8.32497516,29976,13.30144555,-1674,-0.0529,29966,488.04182112,31887,29335]]"#;
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+        assert_eq!(
+            "tBTCUST",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"[{"symbol":"tBTCF0:USTF0","channel":"ticker"},[29936,25.086598379999998,29940,38.29793123,-1692,-0.0535,29940,3957.33360529,31878,29308]]"#;
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            "tBTCF0:USTF0",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

@@ -7,6 +7,8 @@ use crate::{OrderBookMsg, TradeMsg};
 
 use simple_error::SimpleError;
 
+const EXCHANGE_NAME: &str = "zbg";
+
 pub(crate) fn extract_symbol(market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
     if market_type == MarketType::Spot {
         zbg_spot::extract_symbol(msg)

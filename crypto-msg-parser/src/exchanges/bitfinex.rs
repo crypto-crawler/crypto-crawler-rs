@@ -64,7 +64,7 @@ pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
                 Ok(Some(arr[0] as i64))
             }
         }
-        "book" => Ok(None),
+        "book" | "ticker" => Ok(None),
         _ => Err(SimpleError::new(format!(
             "Failed to extract timestamp from {}",
             msg

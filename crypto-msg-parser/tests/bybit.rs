@@ -443,3 +443,106 @@ mod candlestick {
         );
     }
 }
+
+#[cfg(test)]
+mod ticker {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_future_snapshot() {
+        let raw_msg = r#"{"topic":"instrument_info.100ms.BTCUSDM22","type":"snapshot","data":{"id":10,"symbol":"BTCUSDM22","symbol_name":"BTCUSD0624","symbol_year":2022,"contract_type":"InverseFutures","coin":"BTC","quote_symbol":"BTCUSD","mode":"BothSide","is_up_borrowable":0,"import_time_e9":0,"start_trading_time_e9":1639699200000000000,"time_to_settle":1896310,"settle_time_e9":1656057600000000000,"settle_fee_rate_e8":50000,"contract_status":"Trading","system_subsidy_e8":0,"last_price_e4":299170000,"last_price":"29917.00","last_tick_direction":"MinusTick","bid1_price_e4":299145000,"bid1_price":"29914.50","ask1_price_e4":299150000,"ask1_price":"29915.00","prev_price_24h_e4":316080000,"prev_price_24h":"31608.00","price_24h_pcnt_e6":-53499,"high_price_24h_e4":318875000,"high_price_24h":"31887.50","low_price_24h_e4":292635000,"low_price_24h":"29263.50","prev_price_1h_e4":299150000,"prev_price_1h":"29915.00","price_1h_pcnt_e6":66,"mark_price_e4":299173200,"mark_price":"29917.32","index_price_e4":299345200,"index_price":"29934.52","open_interest":70172094,"open_value_e8":0,"total_turnover_e8":27128037154787,"turnover_24h_e8":365962616379,"total_volume":10511364035,"volume_24h":110918371,"fair_basis_e8":-1752000000,"fair_basis_rate_e8":-66712,"basis_in_year_e8":-762899,"expect_price_e4":0,"expect_price":"0.00","cross_seq":8485553665,"created_at_e9":0,"updated_at_e9":1654161286545264000},"cross_seq":8485553994,"timestamp_e6":1654161290233830}"#;
+
+        assert_eq!(
+            1654161290233,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSDM22",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_future_update() {
+        let raw_msg = r#"{"topic":"instrument_info.100ms.BTCUSDM22","type":"delta","data":{"delete":[],"update":[{"id":10,"symbol":"BTCUSDM22","symbol_name":"BTCUSD0624","symbol_year":2022,"contract_type":"InverseFutures","coin":"BTC","quote_symbol":"BTCUSD","mode":"BothSide","start_trading_time_e9":1639699200000000000,"time_to_settle":1896309,"settle_time_e9":1656057600000000000,"mark_price_e4":299142000,"mark_price":"29914.20","index_price_e4":299313700,"index_price":"29931.37","fair_basis_e8":-1687000000,"fair_basis_rate_e8":-55025,"expect_price":"0.00","cross_seq":8485554044}],"insert":[]},"cross_seq":8485554159,"timestamp_e6":1654161291734100}"#;
+
+        assert_eq!(
+            1654161291734,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSDM22",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap_snapshot() {
+        let raw_msg = r#"{"topic":"instrument_info.100ms.BTCUSD","type":"snapshot","data":{"id":1,"symbol":"BTCUSD","last_price_e4":299305000,"last_price":"29930.50","bid1_price_e4":299305000,"bid1_price":"29930.50","ask1_price_e4":299310000,"ask1_price":"29931.00","last_tick_direction":"ZeroMinusTick","prev_price_24h_e4":315895000,"prev_price_24h":"31589.50","price_24h_pcnt_e6":-52517,"high_price_24h_e4":318740000,"high_price_24h":"31874.00","low_price_24h_e4":292780000,"low_price_24h":"29278.00","prev_price_1h_e4":299600000,"prev_price_1h":"29960.00","price_1h_pcnt_e6":-984,"mark_price_e4":299463400,"mark_price":"29946.34","index_price_e4":299461300,"index_price":"29946.13","open_interest":654525102,"open_value_e8":1461680310351,"total_turnover_e8":10586114469373775,"turnover_24h_e8":5730317572180,"total_volume":2747007694755,"volume_24h":1745270625,"funding_rate_e6":8,"predicted_funding_rate_e6":-126,"cross_seq":13458633262,"created_at":"2018-11-14T16:33:26Z","updated_at":"2022-06-02T09:18:34Z","next_funding_time":"2022-06-02T16:00:00Z","countdown_hour":7,"funding_rate_interval":8,"settle_time_e9":0,"delisting_status":"0"},"cross_seq":13458633487,"timestamp_e6":1654161517001968}"#;
+
+        assert_eq!(
+            1654161517001,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSD",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap_update() {
+        let raw_msg = r#"{"topic":"instrument_info.100ms.BTCUSD","type":"delta","data":{"delete":[],"update":[{"id":1,"symbol":"BTCUSD","price_24h_pcnt_e6":-52517,"price_1h_pcnt_e6":-984,"total_turnover_e8":10586114472674754,"turnover_24h_e8":5730320873159,"total_volume":2747007695743,"volume_24h":1745271613,"cross_seq":13458633508,"created_at":"2018-11-14T16:33:26Z","updated_at":"2022-06-02T09:18:37Z"}],"insert":[]},"cross_seq":13458633510,"timestamp_e6":1654161517201318}"#;
+
+        assert_eq!(
+            1654161517201,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSD",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap_snapshot() {
+        let raw_msg = r#"{"topic":"instrument_info.100ms.BTCUSDT","type":"snapshot","data":{"id":1,"symbol":"BTCUSDT","last_price_e4":"299590000","last_price":"29959.00","bid1_price_e4":"299585000","bid1_price":"29958.50","ask1_price_e4":"299590000","ask1_price":"29959.00","last_tick_direction":"ZeroPlusTick","prev_price_24h_e4":"315980000","prev_price_24h":"31598.00","price_24h_pcnt_e6":"-51870","high_price_24h_e4":"318945000","high_price_24h":"31894.50","low_price_24h_e4":"292910000","low_price_24h":"29291.00","prev_price_1h_e4":"299735000","prev_price_1h":"29973.50","price_1h_pcnt_e6":"-483","mark_price_e4":"299770300","mark_price":"29977.03","index_price_e4":"299781200","index_price":"29978.12","open_interest_e8":"2818586500000","total_turnover_e8":"1313857544013650000","turnover_24h_e8":"508351634095750100","total_volume_e8":"3500773405099924","volume_24h_e8":"16697641599999","funding_rate_e6":"-43","predicted_funding_rate_e6":"-87","cross_seq":"12230809673","created_at":"1970-01-01T00:00:00.000Z","updated_at":"2022-06-02T09:19:37.000Z","next_funding_time":"2022-06-02T16:00:00Z","count_down_hour":"7","funding_rate_interval":"8","settle_time_e9":"0","delisting_status":"0"},"cross_seq":"12230809709","timestamp_e6":"1654161577978011"}"#;
+
+        assert_eq!(
+            1654161577978,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap_update() {
+        let raw_msg = r#"{"topic":"instrument_info.100ms.BTCUSDT","type":"delta","data":{"update":[{"id":1,"symbol":"BTCUSDT","index_price_e4":"299781300","index_price":"29978.13","cross_seq":"12230809673","created_at":"1970-01-01T00:00:00.000Z","updated_at":"2022-06-02T09:19:37.000Z"}]},"cross_seq":"12230809787","timestamp_e6":"1654161578478930"}"#;
+
+        assert_eq!(
+            1654161578478,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

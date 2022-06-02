@@ -74,6 +74,8 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
     } else if channel == "spread" {
         let arr: Vec<String> = serde_json::from_value(arr[1].clone()).map_err(SimpleError::from)?;
         Ok(Some((arr[2].parse::<f64>().unwrap() * 1000.0) as i64))
+    } else if channel == "ticker" {
+        Ok(None)
     } else if channel.starts_with("ohlc-") {
         let timestamp = (arr[1][0].as_str().unwrap().parse::<f64>().unwrap() * 1000.0) as i64;
         Ok(Some(timestamp))

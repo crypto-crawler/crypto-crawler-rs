@@ -1,17 +1,237 @@
+use std::collections::{BTreeMap, HashMap};
+
+use super::super::utils::http_get;
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
 use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
 
-const EXCHANGE_NAME: &str = "zbg";
+use super::EXCHANGE_NAME;
+
+static SYMBOL_MAP: Lazy<HashMap<i64, String>> = Lazy::new(|| {
+    // offline data, in case the network is down
+    let mut m: HashMap<i64, String> = vec![
+        (320, "eth_qc"),
+        (321, "zb_usdt"),
+        (329, "btc_usdt"),
+        (330, "eth_usdt"),
+        (331, "ltc_usdt"),
+        (333, "eos_usdt"),
+        (336, "zt_usdt"),
+        (354, "btmc_zt"),
+        (356, "abc_usdt"),
+        (364, "zt_qc"),
+        (380, "ada_usdt"),
+        (382, "etc_usdt"),
+        (386, "xrp_usdt"),
+        (411, "abbc_usdt"),
+        (415, "bch_usdt"),
+        (416, "bsv_usdt"),
+        (417, "dash_usdt"),
+        (466, "doge_usdt"),
+        (476, "xlm_usdt"),
+        (477, "trx_usdt"),
+        (5008, "qtum_qc"),
+        (5009, "qtum_usdt"),
+        (5063, "ggt_usdt"),
+        (5073, "520_qc"),
+        (5150, "bts_usdt"),
+        (5173, "torocus20_btc"),
+        (5186, "scc_qc"),
+        (5196, "xmr_usdt"),
+        (5205, "kok_usdt"),
+        (5209, "btc_qc"),
+        (5211, "vlx_usdt"),
+        (5212, "vlx_btc"),
+        (5213, "vlx_eth"),
+        (5214, "zb_qc"),
+        (5216, "xwc_usdt"),
+        (5223, "ksm_usdt"),
+        (5235, "dot_qc"),
+        (5238, "gdfc_qc"),
+        (5241, "dot_usdt"),
+        (5248, "uni_usdt"),
+        (5249, "nbs_usdt"),
+        (5256, "fil_usdt"),
+        (5258, "woo_usdt"),
+        (5259, "near_usdt"),
+        (5261, "xt_usdt"),
+        (5266, "fd_usdt"),
+        (5267, "lon_usdt"),
+        (5268, "cru_usdt"),
+        (5270, "a5t_usdt"),
+        (5271, "etha_usdt"),
+        (5272, "idv_usdt"),
+        (5273, "rc_usdt"),
+        (5274, "lpt_usdt"),
+        (5275, "dora_usdt"),
+        (5276, "math_usdt"),
+        (5277, "ht_usdt"),
+        (5278, "mdx_usdt"),
+        (5281, "dfl_usdt"),
+        (5285, "lemd_usdt"),
+        (5286, "xch_usdt"),
+        (5287, "xmpt_usdt"),
+        (5288, "cspr_usdt"),
+        (5289, "sol_usdt"),
+        (5290, "dog_usdt"),
+        (5294, "fly_usdt"),
+        (5295, "bzz_usdt"),
+        (5297, "nac_usdt"),
+        (5298, "svt_usdt"),
+        (5299, "ltc_qc"),
+        (5300, "doge_qc"),
+        (5301, "dash_qc"),
+        (5302, "xrp_qc"),
+        (5303, "trx_qc"),
+        (5305, "xlm_qc"),
+        (5306, "xem_qc"),
+        (5307, "btm_qc"),
+        (5308, "true_qc"),
+        (5310, "kerri_usdt"),
+        (5311, "enj_usdt"),
+        (5312, "matic_usdt"),
+        (5313, "chz_usdt"),
+        (5314, "aave_usdt"),
+        (5315, "neo_usdt"),
+        (5316, "atom_usdt"),
+        (5317, "comp_usdt"),
+        (5318, "algo_usdt"),
+        (5319, "yfi_usdt"),
+        (5320, "sand_usdt"),
+        (5321, "mana_qc"),
+        (5322, "sana_qc"),
+        (5323, "nfg_usdt"),
+        (5325, "dydx_usdt"),
+        (5327, "glc_qc"),
+        (5330, "ens_usdt"),
+        (5332, "nabox_usdt"),
+        (5333, "btv_usdt"),
+        (5335, "kilt_usdt"),
+        (5336, "people_usdt"),
+        (5339, "sgb_usdt"),
+        (5340, "aurora_usdt"),
+        (5341, "efi_usdt"),
+        (5342, "shib_usdt"),
+        (5343, "sdn_usdt"),
+        (5354, "imx_usdt"),
+        (5355, "nu_usdt"),
+        (5356, "1inch_usdt"),
+        (5357, "gtc_usdt"),
+        (5358, "cvx_usdt"),
+        (5359, "xym_qc"),
+        (5360, "cart_usdt"),
+        (5361, "ilv_usdt"),
+        (5362, "tvk_usdt"),
+        (5363, "alcx_usdt"),
+        (5364, "paf_usdt"),
+        (5365, "powr_usdt"),
+        (5366, "thg_usdt"),
+        (5367, "bnx_usdt"),
+        (5368, "dar_usdt"),
+        (5369, "vgx_usdt"),
+        (5370, "suku_usdt"),
+        (5371, "looks_usdt"),
+        (5372, "wtf_usdt"),
+        (5373, "justice_usdt"),
+        (5374, "sos_usdt"),
+        (5375, "nct_usdt"),
+        (5376, "rss3_usdt"),
+        (5377, "lqty_usdt"),
+        (5378, "inv_usdt"),
+        (5379, "gno_usdt"),
+        (5380, "cere_usdt"),
+        (5381, "ape_usdt"),
+        (5382, "aca_usdt"),
+        (5383, "glmr_usdt"),
+        (5384, "avax_usdt"),
+        (5385, "crf_usdt"),
+        (5386, "dia_usdt"),
+        (5387, "rlc_usdt"),
+        (5388, "gmt_usdt"),
+        (5389, "usdc_qc"),
+        (5390, "usdc_usdt"),
+        (5391, "strm_usdt"),
+        (5392, "entc_usdt"),
+        (5393, "sch_usdt"),
+        (5394, "gotg_usdt"),
+    ]
+    .into_iter()
+    .map(|x| (x.0, x.1.to_string()))
+    .collect();
+
+    let from_online = fetch_symbol_info();
+    for (pair, contract_value) in from_online {
+        m.insert(pair, contract_value);
+    }
+
+    m
+});
+
+// See https://zbgapi.github.io/docs/spot/v1/en/#public-get-all-supported-trading-symbols
+fn fetch_symbol_info() -> BTreeMap<i64, String> {
+    #[derive(Serialize, Deserialize)]
+    #[serde(rename_all = "kebab-case")]
+    struct SpotMarket {
+        symbol: String,
+        id: String,
+        #[serde(flatten)]
+        extra: HashMap<String, Value>,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    struct ResMsg {
+        message: String,
+        method: Option<String>,
+        code: String,
+    }
+
+    #[derive(Serialize, Deserialize)]
+    #[allow(non_snake_case)]
+    struct Response {
+        datas: Vec<SpotMarket>,
+        resMsg: ResMsg,
+    }
+
+    let mut mapping = BTreeMap::<i64, String>::new();
+    if let Ok(txt) = http_get("https://www.zbg.com/exchange/api/v1/common/symbols") {
+        let resp = serde_json::from_str::<Response>(&txt).unwrap();
+        let spot_markets = resp.datas;
+
+        for spot_market in spot_markets.iter() {
+            mapping.insert(
+                spot_market.id.parse::<i64>().unwrap(),
+                spot_market.symbol.clone(),
+            );
+        }
+    }
+
+    mapping
+}
 
 // NOTE:zbg spot websocket sometimes returns lowercase symbols, and sometimes
 // returns uppercase, which is very annoying, thus we unify to lowercase here
 pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
+    if msg.starts_with(r#"{"trade_statistic":[["#) {
+        let obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(SimpleError::from)?;
+        let trade_statistic = obj["trade_statistic"].as_array().unwrap();
+        let ret = if trade_statistic.len() > 1 {
+            Ok("ALL".to_string())
+        } else {
+            let symbol_id = trade_statistic[0][0]
+                .as_str()
+                .unwrap()
+                .parse::<i64>()
+                .unwrap();
+            Ok(SYMBOL_MAP[&symbol_id].clone())
+        };
+        return ret;
+    }
     let arr = if let Ok(list) = serde_json::from_str::<Vec<Vec<Value>>>(msg) {
         list[0].clone()
     } else if let Ok(arr) = serde_json::from_str::<Vec<Value>>(msg) {
@@ -34,6 +254,9 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
 }
 
 pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
+    if msg.starts_with(r#"{"trade_statistic":[["#) {
+        return Ok(None); // trade_statistic doesn't have timestamp
+    }
     let arr_2d = if let Ok(list) = serde_json::from_str::<Vec<Vec<Value>>>(msg) {
         list
     } else if let Ok(list) = serde_json::from_str::<Vec<Value>>(msg) {
@@ -272,4 +495,24 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
         vec![orderbook]
     };
     Ok(orderbooks)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::fetch_symbol_info;
+
+    #[test]
+    #[ignore]
+    fn print_contract_values() {
+        let mut mapping = fetch_symbol_info();
+        // merge
+        for (symbol_id, info) in super::SYMBOL_MAP.iter() {
+            if !mapping.contains_key(symbol_id) {
+                mapping.insert(*symbol_id, info.clone());
+            }
+        }
+        for (symbol_id, symbol) in mapping {
+            println!("({}, \"{}\"),", symbol_id, symbol,);
+        }
+    }
 }

@@ -888,3 +888,58 @@ mod candlestick {
         );
     }
 }
+
+#[cfg(test)]
+mod ticker {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"action":"snapshot","arg":{"instType":"sp","channel":"ticker","instId":"BTCUSDT"},"data":[{"instId":"BTCUSDT","last":"29948.21","open24h":"30726.18","high24h":"30741.06","low24h":"29336.95","bestBid":"29944.390000","bestAsk":"29944.550000","baseVolume":"24658.6272","quoteVolume":"749224809.9118","ts":1654160360101,"labeId":0}]}"#;
+
+        assert_eq!(
+            1654160360101,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSDT_SPBL",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"action":"snapshot","arg":{"instType":"mc","channel":"ticker","instId":"BTCUSD"},"data":[{"instId":"BTCUSD","last":"29898.50","bestAsk":"29899","bestBid":"29898","high24h":"30706.50","low24h":"29270.50","priceChangePercent":"-0.02","capitalRate":"0.000100","nextSettleTime":1654182000000,"systemTime":1654160828664,"markPrice":"29897.79","indexPrice":"29906.49","holding":"6166.235","baseVolume":"6601.040","quoteVolume":"201847558.263"}]}"#;
+
+        assert_eq!(
+            1654160828664,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSD_DMCBL",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"action":"snapshot","arg":{"instType":"mc","channel":"ticker","instId":"BTCUSDT"},"data":[{"instId":"BTCUSDT","last":"29905.50","bestAsk":"29905.5","bestBid":"29904.5","high24h":"30731.50","low24h":"29293.00","priceChangePercent":"-0.02","capitalRate":"0.000100","nextSettleTime":1654182000000,"systemTime":1654160847314,"markPrice":"29906.42","indexPrice":"29928.32","holding":"87338.493","baseVolume":"214176.417","quoteVolume":"6536325903.110"}]}"#;
+
+        assert_eq!(
+            1654160847314,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSDT_UMCBL",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

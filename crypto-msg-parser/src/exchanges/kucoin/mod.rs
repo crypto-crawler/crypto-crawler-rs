@@ -29,10 +29,10 @@ pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<HashMap<String, Value>>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to WebsocketMsg", msg)))?;
     let topic = ws_msg.topic.as_str();
-    if let Some(t) = ws_msg.data.get("timestamp") {
-        Ok(Some(t.as_i64().unwrap()))
-    } else if let Some(t) = ws_msg.data.get("ts") {
-        Ok(Some(t.as_i64().unwrap() / 1000000))
+    if ws_msg.data.contains_key("timestamp") && ws_msg.data["timestamp"].is_i64() {
+        Ok(Some(ws_msg.data["timestamp"].as_i64().unwrap()))
+    } else if ws_msg.data.contains_key("ts") && ws_msg.data["ts"].is_i64() {
+        Ok(Some(ws_msg.data["ts"].as_i64().unwrap() / 1000000))
     } else if let Some(t) = ws_msg.data.get("time") {
         if topic.starts_with("/market/match:") {
             Ok(Some(t.as_str().unwrap().parse::<i64>().unwrap() / 1000000))
@@ -50,6 +50,8 @@ pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
         }
     } else if topic.starts_with("/market/level2:") {
         Ok(None)
+    } else if topic.starts_with("/market/snapshot:") {
+        Ok(Some(ws_msg.data["data"]["datetime"].as_i64().unwrap()))
     } else {
         Err(SimpleError::new(format!(
             "Failed to extract timestamp from {}",

@@ -59,41 +59,32 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
 pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
     let obj = serde_json::from_str::<WebsocketMsg<Value>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to parse JSON string {}", msg)))?;
-    let channel = obj.arg.channel.as_str();
-    match channel {
-        "trade" => {
-            let timestamp = obj
-                .data
-                .iter()
-                .map(|x| x[0].as_str().unwrap().parse::<i64>().unwrap())
-                .max();
-            Ok(timestamp)
-        }
-        "books" | "books5" | "books15" => {
-            let timestamp = obj
-                .data
-                .iter()
-                .map(|x| x.as_object().unwrap())
-                .map(|x| x["ts"].as_str().unwrap().parse::<i64>().unwrap())
-                .max();
-            Ok(timestamp)
-        }
-        _ => {
-            if channel.starts_with("candle") {
-                let timestamp = obj
-                    .data
-                    .iter()
-                    .map(|x| x[0].as_str().unwrap().parse::<i64>().unwrap())
-                    .max();
-                Ok(timestamp)
+    let timestamp = obj
+        .data
+        .iter()
+        .map(|x| {
+            let v = if x.is_array() {
+                x[0].clone()
             } else {
-                Err(SimpleError::new(format!(
-                    "Failed to extract timestamp from {}",
-                    msg
-                )))
+                let obj = x.as_object().unwrap();
+                if obj.contains_key("ts") {
+                    obj["ts"].clone()
+                } else if obj.contains_key("systemTime") {
+                    obj["systemTime"].clone()
+                } else {
+                    panic!("Can not find timestamp related fields in {}", msg);
+                }
+            };
+            if v.is_string() {
+                v.as_str().unwrap().parse::<i64>().unwrap()
+            } else if v.is_i64() {
+                v.as_i64().unwrap()
+            } else {
+                panic!("Unsupported data format {}", msg);
             }
-        }
-    }
+        })
+        .max();
+    Ok(timestamp)
 }
 
 /// docs:

@@ -691,3 +691,74 @@ mod candlestick {
         );
     }
 }
+
+#[cfg(test)]
+mod ticker {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"type":"message","topic":"/market/snapshot:BTC-USDT","subject":"trade.snapshot","data":{"sequence":"1630306486588","data":{"averagePrice":29875.32051554,"baseCurrency":"BTC","board":1,"buy":29920,"changePrice":-1689.90000000000000000000,"changeRate":-0.0534,"close":29920.1,"datetime":1654165082007,"high":31901.40000000000000000000,"lastTradedPrice":29920.1,"low":29299.90000000000000000000,"makerCoefficient":1.000000,"makerFeeRate":0.001,"marginTrade":true,"mark":0,"market":"USDS","markets":["USDS"],"open":31610.00000000000000000000,"quoteCurrency":"USDT","sell":29920.1,"sort":100,"symbol":"BTC-USDT","symbolCode":"BTC-USDT","takerCoefficient":1.000000,"takerFeeRate":0.001,"trading":true,"vol":21637.26053196000000000000,"volValue":657871182.64000021200000000000}}}"#;
+
+        assert_eq!(
+            1654165082007,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"id":"629890fb75470d00010748c7","type":"message","topic":"/contractMarket/snapshot:XBTMM22","subject":"snapshot.24h","data":{"symbol":"XBTMM22","volume":590275,"turnover":19.41544404913293,"lastPrice":29912,"lowPrice":29332.0,"highPrice":31884.0,"priceChgPct":-0.0534,"priceChg":-1688,"ts":1654165755087785336}}"#;
+
+        assert_eq!(
+            1654165755087,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBTMM22",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"id":"6298915a75470d0001083713","type":"message","topic":"/contractMarket/snapshot:XBTUSDM","subject":"snapshot.24h","data":{"symbol":"XBTUSDM","volume":43626228,"turnover":1439.3403076772884,"lastPrice":29887,"lowPrice":29150.0,"highPrice":31890.0,"priceChgPct":-0.0535,"priceChg":-1692.0,"ts":1654165850007823190}}"#;
+
+        assert_eq!(
+            1654165850007,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBTUSDM",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"id":"6298917d75470d00010885b0","type":"message","topic":"/contractMarket/snapshot:XBTUSDTM","subject":"snapshot.24h","data":{"symbol":"XBTUSDTM","volume":58142.397,"turnover":1766775651.6259518,"lastPrice":29926,"lowPrice":29288.0,"highPrice":31891.0,"priceChgPct":-0.0524,"priceChg":-1657,"ts":1654165885016336830}}"#;
+
+        assert_eq!(
+            1654165885016,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBTUSDTM",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

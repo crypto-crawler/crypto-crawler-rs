@@ -10,7 +10,7 @@ use serde_json::Value;
 use simple_error::SimpleError;
 use std::collections::{BTreeMap, HashMap};
 
-const EXCHANGE_NAME: &str = "zbg";
+use super::EXCHANGE_NAME;
 
 static SWAP_CONTRACT_MAP: Lazy<HashMap<i64, SwapContractInfo>> = Lazy::new(|| {
     // offline data, in case the network is down
@@ -141,7 +141,15 @@ struct RawOrderbookMsg {
 
 pub(super) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
     let ws_msg = serde_json::from_str::<Vec<Value>>(msg).unwrap();
-    let contract_id = ws_msg[1]["contractId"].as_i64().unwrap();
+    let contract_id = if ws_msg[1]["contractId"].is_i64() {
+        ws_msg[1]["contractId"].as_i64().unwrap()
+    } else {
+        ws_msg[1]["contractId"]
+            .as_str()
+            .unwrap()
+            .parse::<i64>()
+            .unwrap()
+    };
     let contract_info = SWAP_CONTRACT_MAP.get(&contract_id).unwrap();
     let symbol = contract_info.symbol.as_str();
     Ok(symbol.to_string())
@@ -164,6 +172,7 @@ pub(super) fn extract_timestamp(
             Ok(timestamp)
         }
         "future_snapshot_depth" => Ok(Some(ws_msg[1]["time"].as_i64().unwrap() / 1000)),
+        "future_snapshot_indicator" => Ok(Some(ws_msg[1]["te"].as_i64().unwrap() / 1000)),
         _ => Err(SimpleError::new(format!(
             "Unknown channel {} in  {}",
             channel, msg
@@ -315,6 +324,7 @@ mod tests {
     use super::fetch_swap_contracts;
 
     #[test]
+    #[ignore]
     fn print_contract_values() {
         let mut mapping = fetch_swap_contracts();
         // merge

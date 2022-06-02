@@ -634,3 +634,42 @@ mod candlestick {
         );
     }
 }
+
+#[cfg(test)]
+mod ticker {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"channel":"push.ticker","data":{"amount24":69402.4579798127137243,"ask1":29902.5,"bid1":29901.5,"contractId":77,"fairPrice":29903.13,"fundingRate":-0.000012,"high24Price":31873,"holdVol":17766,"indexPrice":29926.05,"lastPrice":29902,"lower24Price":29275.5,"maxBidPrice":32918.5,"minAskPrice":26933,"riseFallRate":-0.0264,"riseFallValue":-813,"symbol":"BTC_USD","timestamp":1654165977028,"volume24":21030740},"symbol":"BTC_USD","ts":1654165977028}"#;
+
+        assert_eq!(
+            1654165977028,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_USD",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"channel":"push.ticker","data":{"amount24":898120149.6331,"ask1":29911.5,"bid1":29911,"contractId":10,"fairPrice":29911.1,"fundingRate":0.000072,"high24Price":31905.5,"holdVol":12357864,"indexPrice":29926.9,"lastPrice":29911.5,"lower24Price":29316,"maxBidPrice":32919.5,"minAskPrice":26934,"riseFallRate":-0.0275,"riseFallValue":-846,"symbol":"BTC_USDT","timestamp":1654165943014,"volume24":295146577},"symbol":"BTC_USDT","ts":1654165943014}"#;
+
+        assert_eq!(
+            1654165943014,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

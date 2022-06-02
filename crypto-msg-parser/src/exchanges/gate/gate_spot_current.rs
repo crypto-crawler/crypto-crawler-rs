@@ -54,24 +54,22 @@ struct SpotOrderbookSnapshotMsg {
 }
 
 pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
-            msg
-        ))
-    })?;
-    if ws_msg.channel == "spot.trades" {
-        Ok(ws_msg.result["currency_pair"].as_str().unwrap().to_string())
-    } else if ws_msg.channel.starts_with("spot.order_book") || ws_msg.channel == "spot.book_ticker"
-    {
-        Ok(ws_msg.result["s"].as_str().unwrap().to_string())
-    } else if ws_msg.channel == "spot.candlesticks" {
-        let n = ws_msg.result["n"].as_str().unwrap();
+    let ws_msg = serde_json::from_str::<WebsocketMsg<HashMap<String, Value>>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to parse JSON string {}", msg)))?;
+    if let Some(symbol) = ws_msg.result.get("currency_pair") {
+        Ok(symbol.as_str().unwrap().to_string())
+    } else if let Some(symbol) = ws_msg.result.get("s") {
+        Ok(symbol.as_str().unwrap().to_string())
+    } else if let Some(symbol) = ws_msg.result.get("n") {
+        let n = symbol.as_str().unwrap();
         let pos = n.find('_').unwrap();
         let symbol = &n[(pos + 1)..];
         Ok(symbol.to_string())
     } else {
-        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
+        Err(SimpleError::new(format!(
+            "Failed to extract symbol from {}",
+            msg
+        )))
     }
 }
 

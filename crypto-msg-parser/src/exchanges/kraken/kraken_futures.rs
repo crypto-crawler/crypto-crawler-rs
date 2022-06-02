@@ -90,7 +90,7 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
     })?;
     let feed = obj["feed"].as_str().unwrap();
     match feed {
-        "trade" => Ok(Some(obj["time"].as_i64().unwrap())),
+        "trade" | "ticker" => Ok(Some(obj["time"].as_i64().unwrap())),
         "trade_snapshot" => {
             let trades = obj["trades"].as_array().unwrap();
             let timestamp = trades
@@ -103,8 +103,7 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
                 Ok(timestamp)
             }
         }
-        "book" => Ok(Some(obj["timestamp"].as_i64().unwrap())),
-        "book_snapshot" => Ok(Some(obj["timestamp"].as_i64().unwrap())),
+        "book" | "book_snapshot" => Ok(Some(obj["timestamp"].as_i64().unwrap())),
         _ => Err(SimpleError::new(format!("Unknown feed in {}", msg))),
     }
 }

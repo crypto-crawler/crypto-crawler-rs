@@ -473,3 +473,56 @@ mod candlestick {
         );
     }
 }
+
+#[cfg(test)]
+mod ticker {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"[340,{"a":["29938.60000",12,"12.41074632"],"b":["29938.50000",0,"0.08410000"],"c":["29938.60000","0.10146338"],"v":["735.06931643","5243.60824494"],"p":["29812.62518","30272.79057"],"t":[6120,30832],"l":["29581.10000","29328.60000"],"h":["30085.80000","31869.30000"],"o":["29790.00000","31614.50000"]},"ticker","XBT/USD"]"#;
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+        assert_eq!(
+            "XBT/USD",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"time":1654164693039,"product_id":"FI_XBTUSD_220624","feed":"ticker","bid":29892.5,"ask":29916.0,"bid_size":4977.0,"ask_size":1477.0,"volume":5710706.0,"dtm":22,"leverage":"50x","index":29920.98,"premium":-0.1,"last":29876.0,"change":-5.511014121479518,"suspended":false,"tag":"month","pair":"XBT:USD","openInterest":7790153.0,"markPrice":29904.25,"maturityTime":1656082800000,"post_only":false}"#;
+
+        assert_eq!(
+            1654164693039,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "FI_XBTUSD_220624",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"time":1654164951042,"product_id":"PI_XBTUSD","funding_rate":3.216424e-12,"funding_rate_prediction":-8.63581351e-10,"relative_funding_rate":9.6321875e-8,"relative_funding_rate_prediction":-0.000025847309375,"next_funding_rate_time":1654171200000,"feed":"ticker","bid":29914.5,"ask":29925.0,"bid_size":8400.0,"ask_size":10000.0,"volume":100353210.0,"dtm":0,"leverage":"50x","index":29927.42,"premium":-0.0,"last":29929.0,"change":-5.280481050716035,"suspended":false,"tag":"perpetual","pair":"XBT:USD","openInterest":43967525.0,"markPrice":29919.75,"maturityTime":0,"post_only":false}"#;
+
+        assert_eq!(
+            1654164951042,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "PI_XBTUSD",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+}

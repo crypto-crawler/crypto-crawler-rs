@@ -622,3 +622,58 @@ mod candlestick {
         );
     }
 }
+
+#[cfg(test)]
+mod ticker {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"jsonrpc":"2.0","method":"subscription","params":{"channel":"ticker.BTC-30SEP22.100ms","data":{"timestamp":1654161740658,"stats":{"volume_usd":23223070.0,"volume":754.95506101,"price_change":-5.5392,"low":29592.5,"high":32248.0},"state":"open","settlement_price":30225.47,"open_interest":230733270,"min_price":29766.5,"max_price":30673.5,"mark_price":30218.9,"last_price":30218.0,"instrument_name":"BTC-30SEP22","index_price":29939.87,"estimated_delivery_price":29939.87,"best_bid_price":30220.0,"best_bid_amount":2300.0,"best_ask_price":30222.0,"best_ask_amount":4370.0}}}"#;
+
+        assert_eq!(
+            1654161740658,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-30SEP22",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"jsonrpc":"2.0","method":"subscription","params":{"channel":"ticker.BTC-PERPETUAL.100ms","data":{"timestamp":1654161785818,"stats":{"volume_usd":545442610.0,"volume":17945.19644566,"price_change":-5.4014,"low":29265.5,"high":31903.5},"state":"open","settlement_price":29945.69,"open_interest":559791310,"min_price":29485.31,"max_price":30383.34,"mark_price":29932.79,"last_price":29931.0,"instrument_name":"BTC-PERPETUAL","index_price":29930.44,"funding_8h":0.00000255,"estimated_delivery_price":29930.44,"current_funding":0.0,"best_bid_price":29930.5,"best_bid_amount":149910.0,"best_ask_price":29931.0,"best_ask_amount":62850.0}}}"#;
+
+        assert_eq!(
+            1654161785818,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-PERPETUAL",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn option() {
+        let raw_msg = r#"{"jsonrpc":"2.0","method":"subscription","params":{"channel":"ticker.BTC-30SEP22-60000-C.100ms","data":{"underlying_price":30220.5,"underlying_index":"BTC-30SEP22","timestamp":1654161839367,"stats":{"volume":16.7,"price_change":-18.1818,"low":0.009,"high":0.011},"state":"open","settlement_price":0.01,"open_interest":1767.5,"min_price":0.0001,"max_price":0.038,"mark_price":0.0084,"mark_iv":67.7,"last_price":0.009,"interest_rate":0.0,"instrument_name":"BTC-30SEP22-60000-C","index_price":29939.43,"greeks":{"vega":20.05335,"theta":-5.65962,"rho":4.91491,"gamma":0.00001,"delta":0.05785},"estimated_delivery_price":29939.43,"bid_iv":67.16,"best_bid_price":0.008,"best_bid_amount":2.8,"best_ask_price":0.009,"best_ask_amount":18.5,"ask_iv":68.65}}}"#;
+
+        assert_eq!(
+            1654161839367,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-30SEP22-60000-C",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

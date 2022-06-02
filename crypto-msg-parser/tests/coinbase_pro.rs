@@ -121,3 +121,19 @@ fn l3_event() {
         extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
     );
 }
+
+#[test]
+fn ticker() {
+    let raw_msg = r#"{"type":"ticker","sequence":38332655422,"product_id":"BTC-USD","price":"29940.91","open_24h":"31677.61","volume_24h":"27783.70216674","low_24h":"29308.01","high_24h":"31888","volume_30d":"778633.19135445","best_bid":"29940.90","best_ask":"29940.91","side":"buy","time":"2022-06-02T09:20:54.127011Z","trade_id":347875517,"last_size":"0.00061522"}"#;
+
+    assert_eq!(
+        1654161654127,
+        extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+            .unwrap()
+            .unwrap()
+    );
+    assert_eq!(
+        "BTC-USD",
+        extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+    );
+}
