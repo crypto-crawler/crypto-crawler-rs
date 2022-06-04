@@ -23,12 +23,24 @@ pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
         } else {
             Ok(symbol.to_string())
         }
-    } else if let Ok(rest_msg) = serde_json::from_str::<RestfulMsg>(msg) {
+    } else if let Ok(rest_msg) = serde_json::from_str::<RestfulMsg<HashMap<String, Value>>>(msg) {
         // RESTful
         if rest_msg.code != "200000" {
             Err(SimpleError::new(format!("Error HTTP response {}", msg)))
         } else if let Some(symbol) = rest_msg.data.get("symbol") {
             Ok(symbol.as_str().unwrap().to_string())
+        } else {
+            Ok("NONE".to_string())
+        }
+    } else if let Ok(rest_msg) = serde_json::from_str::<RestfulMsg<Vec<Value>>>(msg) {
+        // RESTful
+        if rest_msg.code != "200000" {
+            return Err(SimpleError::new(format!("Error HTTP response {}", msg)));
+        }
+        if rest_msg.data.len() > 1 {
+            Ok("ALL".to_string())
+        } else if rest_msg.data.len() == 1 {
+            Ok(rest_msg.data[0]["symbol"].as_str().unwrap().to_string())
         } else {
             Ok("NONE".to_string())
         }
@@ -73,7 +85,7 @@ pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
                 msg
             )))
         }
-    } else if let Ok(rest_msg) = serde_json::from_str::<RestfulMsg>(msg) {
+    } else if let Ok(rest_msg) = serde_json::from_str::<RestfulMsg<HashMap<String, Value>>>(msg) {
         // RESTful
         if rest_msg.code != "200000" {
             Err(SimpleError::new(format!("Error HTTP response {}", msg)))
@@ -86,6 +98,13 @@ pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
                 "Unsupported message format {}",
                 msg
             )))
+        }
+    } else if let Ok(rest_msg) = serde_json::from_str::<RestfulMsg<Vec<Value>>>(msg) {
+        // RESTful
+        if rest_msg.code != "200000" {
+            Err(SimpleError::new(format!("Error HTTP response {}", msg)))
+        } else {
+            Ok(None)
         }
     } else {
         Err(SimpleError::new(format!(

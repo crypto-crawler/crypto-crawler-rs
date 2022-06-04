@@ -998,3 +998,42 @@ mod l2_snapshot {
         );
     }
 }
+
+#[cfg(test)]
+mod open_interest {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"code":"00000","msg":"success","requestTime":1654337704617,"data":{"symbol":"BTCUSD_DMCBL","amount":"5030.748","timestamp":"1654337704617"}}"#;
+
+        assert_eq!(
+            "BTCUSD_DMCBL",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1654337704617,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"code":"00000","msg":"success","requestTime":1654337723059,"data":{"symbol":"BTCUSDT_UMCBL","amount":"89481.932","timestamp":"1654337723059"}}"#;
+
+        assert_eq!(
+            "BTCUSDT_UMCBL",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1654337723059,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+}

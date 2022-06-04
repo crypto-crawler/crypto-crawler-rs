@@ -103,6 +103,8 @@ pub(super) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Result<Str
         }
     } else if serde_json::from_str::<SwapRestL2SnapshotMsg>(msg).is_ok() {
         Ok("NONE".to_string())
+    } else if msg.contains("open_interest") {
+        Ok("NONE".to_string())
     } else {
         Err(SimpleError::new(format!(
             "Unsupported message format  {}",
@@ -149,6 +151,8 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
         }
     } else if let Ok(l2_snapshot) = serde_json::from_str::<SwapRestL2SnapshotMsg>(msg) {
         Ok(Some((l2_snapshot.current * 1000.0) as i64))
+    } else if msg.contains("open_interest") {
+        Ok(None)
     } else {
         Err(SimpleError::new(format!(
             "Unsupported message format  {}",

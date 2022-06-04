@@ -833,3 +833,25 @@ mod l2_snapshot {
         );
     }
 }
+
+#[cfg(test)]
+mod open_interest {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn unknown() {
+        let raw_msg = r#"{"code":"200000","data":[{"symbol":"XBTUSDTM","rootSymbol":"USDT","type":"FFWCSX","firstOpenDate":1585555200000,"expireDate":null,"settleDate":null,"baseCurrency":"XBT","quoteCurrency":"USDT","settleCurrency":"USDT","maxOrderQty":1000000,"maxPrice":1000000.0000000000,"lotSize":1,"tickSize":1.0,"indexPriceTickSize":0.01,"multiplier":0.001,"initialMargin":0.01,"maintainMargin":0.005,"maxRiskLimit":2000000,"minRiskLimit":2000000,"riskStep":1000000,"makerFeeRate":0.00020,"takerFeeRate":0.00060,"takerFixFee":0.0000000000,"makerFixFee":0.0000000000,"settlementFee":null,"isDeleverage":true,"isQuanto":true,"isInverse":false,"markMethod":"FairPrice","fairMethod":"FundingRate","fundingBaseSymbol":".XBTINT8H","fundingQuoteSymbol":".USDTINT8H","fundingRateSymbol":".XBTUSDTMFPI8H","indexSymbol":".KXBTUSDT","settlementSymbol":"","status":"Open","fundingFeeRate":-0.000013,"predictedFundingFeeRate":0.000048,"openInterest":"9876432","turnoverOf24h":751931474.32877920,"volumeOf24h":25408.11100000,"markPrice":29538.28,"indexPrice":29538.62,"lastTradePrice":29526.0000000000,"nextFundingRateTime":25242841,"maxLeverage":100,"sourceExchanges":["huobi","Okex","Binance","Kucoin","Poloniex","Hitbtc"],"premiumsSymbol1M":".XBTUSDTMPI","premiumsSymbol8H":".XBTUSDTMPI8H","fundingBaseSymbol1M":".XBTINT","fundingQuoteSymbol1M":".USDTINT","lowPrice":29275,"highPrice":29880,"priceChgPct":0.0004,"priceChg":13},{"symbol":"XBTUSDM","rootSymbol":"XBT","type":"FFWCSX","firstOpenDate":1552638575000,"expireDate":null,"settleDate":null,"baseCurrency":"XBT","quoteCurrency":"USD","settleCurrency":"XBT","maxOrderQty":10000000,"maxPrice":1000000.0000000000,"lotSize":1,"tickSize":1.0,"indexPriceTickSize":0.01,"multiplier":-1.0,"initialMargin":0.02,"maintainMargin":0.01,"maxRiskLimit":40,"minRiskLimit":40,"riskStep":20,"makerFeeRate":0.00020,"takerFeeRate":0.00060,"takerFixFee":0.0000000000,"makerFixFee":0.0000000000,"settlementFee":null,"isDeleverage":true,"isQuanto":false,"isInverse":true,"markMethod":"FairPrice","fairMethod":"FundingRate","fundingBaseSymbol":".XBTINT8H","fundingQuoteSymbol":".USDINT8H","fundingRateSymbol":".XBTUSDMFPI8H","indexSymbol":".BXBT","settlementSymbol":null,"status":"Open","fundingFeeRate":0.000100,"predictedFundingFeeRate":0.000086,"openInterest":"36857949","turnoverOf24h":480.86258578,"volumeOf24h":14215097.00000000,"markPrice":29519.05,"indexPrice":29515.53,"lastTradePrice":29486.0000000000,"nextFundingRateTime":25242830,"maxLeverage":50,"sourceExchanges":["Bitstamp","Bittrex","Coinbase","Gemini","Kraken","Liquid"],"premiumsSymbol1M":".XBTUSDMPI","premiumsSymbol8H":".XBTUSDMPI8H","fundingBaseSymbol1M":".XBTINT","fundingQuoteSymbol1M":".USDINT","lowPrice":29274,"highPrice":29864,"priceChgPct":0.0003,"priceChg":10}]}"#;
+
+        assert_eq!(
+            "ALL",
+            extract_symbol(EXCHANGE_NAME, MarketType::Unknown, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Unknown, raw_msg).unwrap()
+        );
+    }
+}

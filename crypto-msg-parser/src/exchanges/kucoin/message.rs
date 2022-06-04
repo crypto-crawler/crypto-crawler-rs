@@ -1,7 +1,4 @@
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 #[derive(Serialize, Deserialize)]
 pub(super) struct WebsocketMsg<T: Sized> {
@@ -13,7 +10,7 @@ pub(super) struct WebsocketMsg<T: Sized> {
 }
 
 #[derive(Serialize, Deserialize)]
-pub(super) struct RestfulMsg {
+pub(super) struct RestfulMsg<T: Sized> {
     pub code: String,
-    pub data: HashMap<String, Value>,
+    pub data: T,
 }

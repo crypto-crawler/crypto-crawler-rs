@@ -149,3 +149,25 @@ mod l2_snapshot {
         );
     }
 }
+
+#[cfg(test)]
+mod open_interest {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"markets":{"BTC-USD":{"market":"BTC-USD","status":"ONLINE","baseAsset":"BTC","quoteAsset":"USD","stepSize":"0.0001","tickSize":"1","indexPrice":"29718.5600","oraclePrice":"29686.8200","priceChange24H":"-3.120000","nextFundingRate":"0.0000077940","nextFundingAt":"2022-06-04T12:00:00.000Z","minOrderSize":"0.001","type":"PERPETUAL","initialMarginFraction":"0.05","maintenanceMarginFraction":"0.03","volume24H":"172496250.187000","trades24H":"27100","openInterest":"7989.6723","incrementalInitialMarginFraction":"0.01","incrementalPositionSize":"1.5","maxPositionSize":"170","baselinePositionSize":"9","assetResolution":"10000000000","syntheticAssetId":"0x4254432d3130000000000000000000"},"AVAX-USD":{"market":"AVAX-USD","status":"ONLINE","baseAsset":"AVAX","quoteAsset":"USD","stepSize":"0.1","tickSize":"0.01","indexPrice":"23.1026","oraclePrice":"23.0900","priceChange24H":"0.442564","nextFundingRate":"0.0000073995","nextFundingAt":"2022-06-04T12:00:00.000Z","minOrderSize":"1","type":"PERPETUAL","initialMarginFraction":"0.10","maintenanceMarginFraction":"0.05","volume24H":"17097633.955000","trades24H":"6889","openInterest":"988005.4","incrementalInitialMarginFraction":"0.02","incrementalPositionSize":"1800","maxPositionSize":"91000","baselinePositionSize":"9000","assetResolution":"10000000","syntheticAssetId":"0x415641582d37000000000000000000"}}}"#;
+
+        assert_eq!(
+            "ALL",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

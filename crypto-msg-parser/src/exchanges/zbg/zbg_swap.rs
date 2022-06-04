@@ -145,6 +145,8 @@ pub(super) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
         let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
         return if let Some(symbol) = obj.get("symbol") {
             Ok(symbol.as_str().unwrap().to_string())
+        } else if let Some(symbol) = obj["datas"].get("sb") {
+            Ok(symbol.as_str().unwrap().to_string())
         } else {
             Ok("NONE".to_string())
         };
@@ -173,7 +175,13 @@ pub(super) fn extract_timestamp(
     if msg.contains("datas") && msg.contains("resMsg") {
         // RESTful
         let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
-        return Ok(obj["datas"].get("timestamp").map(|x| x.as_i64().unwrap()));
+        return if let Some(t) = obj["datas"].get("timestamp") {
+            Ok(Some(t.as_i64().unwrap()))
+        } else if let Some(t) = obj["datas"].get("te") {
+            Ok(Some(t.as_i64().unwrap() / 1000))
+        } else {
+            Ok(None)
+        };
     }
 
     // websocket

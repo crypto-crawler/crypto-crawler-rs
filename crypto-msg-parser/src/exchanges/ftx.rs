@@ -45,20 +45,35 @@ struct WebsocketMsg<T: Sized> {
 }
 
 #[derive(Serialize, Deserialize)]
-struct RestMsg {
+struct RestMsg<T: Sized> {
     success: bool,
-    result: HashMap<String, Value>,
+    result: T,
 }
 
 pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
     if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
         Ok(ws_msg.market)
-    } else if let Ok(rest_msg) = serde_json::from_str::<RestMsg>(msg) {
+    } else if let Ok(rest_msg) = serde_json::from_str::<RestMsg<Value>>(msg) {
         if !rest_msg.success {
             return Err(SimpleError::new(format!("Error http response {}", msg)));
         }
-        if rest_msg.result.contains_key("asks") && rest_msg.result.contains_key("bids") {
-            Ok("NONE".to_string())
+        if let Some(result) = rest_msg.result.as_object() {
+            if result.contains_key("asks") && result.contains_key("bids") {
+                Ok("NONE".to_string())
+            } else {
+                Err(SimpleError::new(format!(
+                    "Unsupported message format {}",
+                    msg
+                )))
+            }
+        } else if let Some(result) = rest_msg.result.as_array() {
+            if result.len() > 1 {
+                Ok("ALL".to_string())
+            } else if result.len() == 1 {
+                Ok(result[0]["name"].as_str().unwrap().to_string())
+            } else {
+                Ok("NONE".to_string())
+            }
         } else {
             Err(SimpleError::new(format!(
                 "Unsupported message format {}",
@@ -107,17 +122,11 @@ pub(crate) fn extract_timestamp(
                 channel, msg
             ))),
         }
-    } else if let Ok(rest_msg) = serde_json::from_str::<RestMsg>(msg) {
+    } else if let Ok(rest_msg) = serde_json::from_str::<RestMsg<Value>>(msg) {
         if !rest_msg.success {
-            return Err(SimpleError::new(format!("Error http response {}", msg)));
-        }
-        if rest_msg.result.contains_key("asks") && rest_msg.result.contains_key("bids") {
-            Ok(None)
+            Err(SimpleError::new(format!("Error http response {}", msg)))
         } else {
-            Err(SimpleError::new(format!(
-                "Unsupported message format {}",
-                msg
-            )))
+            Ok(None)
         }
     } else {
         Err(SimpleError::new(format!(

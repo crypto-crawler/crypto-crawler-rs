@@ -515,3 +515,44 @@ mod l2_snapshot {
         );
     }
 }
+
+#[cfg(test)]
+mod open_interest {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"datas":{"mt":4,"ai":2,"ci":1000001,"sb":"BTC_USD-R","td":20220518,"te":1652804560181491,"lp":"29834.5","mq":"3050","op":"30117.5","ph":"30154","pl":"29834.5","hph":"69159","hpl":"0.5","tt":"1335.4253","tv":"40292642","tbv":"0","tav":"0","pp":"30117","cp":"29888.591354933333333334","pv":"12762468","pcr":"-0.009396530256495393","pc":"-283","lui":1621326625165456,"cs":2,"dp":"0","fr":"-0.000063829677908321","pfr":"-0.000063829677908321","pi":"-0.002437963975130133","ppi":"-0.000563829677908321","fb":"-0.000612588122859156","ts":0,"sl":0,"ip":"29906.911974","w24pc":"448","w24pcr":"0.01524509553706634","u24t":0,"c24t":0,"op24":0,"pcr24":0,"pc24":29834.5,"lwp24":0,"hgp24":0,"bids":[["29834","121320"],["29833.5","35241"]],"asks":[["29837","67897"],["29837.5","18902"]],"volumeUsd24h":"601776","currencyName":"btc","commodityName":"usd","contractUnit":"1","orderLimit":"150000","openInterestUSD":"12762468","indexPrice":"29906.911974","basis":"0.24%","fundingRate":"-0.0063829677908321%","symbol":"BTC_USD-R","contractId":"1000001","ask":"29837","bid":"29834","spread":"0.0101%"},"resMsg":{"message":"success !","method":null,"code":"1"}}"#;
+
+        assert_eq!(
+            "BTC_USD-R",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1652804560181,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"datas":{"mt":4,"ai":2,"ci":1000000,"sb":"BTC_USDT","td":20220518,"te":1652804560188093,"lp":"29860.5","mq":"383","op":"30131","ph":"30173","pl":"29860.5","hph":"69065","hpl":"1","tt":"427896130.025","tv":"1417290","tbv":"0","tav":"0","pp":"30132.5","cp":"29871.561143633333333334","pv":"500142","pcr":"-0.008977465069197836","pc":"-270.5","lui":1621326625165443,"cs":2,"dp":"0","fr":"-0.000073356024299116","pfr":"-0.000073356024299116","pi":"-0.001001523440190902","ppi":"-0.000573356024299116","fb":"-0.000614732921872445","ts":0,"sl":0,"ip":"29889.935471","w24pc":"437.5","w24pcr":"0.01486931991979064","u24t":0,"c24t":0,"op24":0,"pcr24":0,"pc24":29860.5,"lwp24":0,"hgp24":0,"bids":[["29860","5885"],["29858.5","1214"]],"asks":[["29861","3415"],["29863","811"]],"volumeUsd24h":"6245135.92","currencyName":"usdt","commodityName":"btc","contractUnit":"0.01","orderLimit":"1200","openInterestUSD":"149344901.91","indexPrice":"29889.935471","basis":"0.10%","fundingRate":"-0.0073356024299116%","symbol":"BTC_USDT","contractId":"1000000","ask":"29861","bid":"29860","spread":"0.0033%"},"resMsg":{"message":"success !","method":null,"code":"1"}}"#;
+
+        assert_eq!(
+            "BTC_USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1652804560188,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+}

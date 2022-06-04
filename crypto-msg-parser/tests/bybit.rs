@@ -603,3 +603,60 @@ mod l2_snapshot {
         );
     }
 }
+
+#[cfg(test)]
+mod open_interest {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"ret_code":0,"ret_msg":"OK","ext_code":"","ext_info":"","result":[{"open_interest":73900363,"timestamp":1654338300,"symbol":"BTCUSDM22"},{"open_interest":73897361,"timestamp":1654338000,"symbol":"BTCUSDM22"},{"open_interest":73850664,"timestamp":1654337700,"symbol":"BTCUSDM22"}],"time_now":"1654338598.173452"}"#;
+
+        assert_eq!(
+            "BTCUSDM22",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654338598173,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"ret_code":0,"ret_msg":"OK","ext_code":"","ext_info":"","result":[{"open_interest":645245219,"timestamp":1654338300,"symbol":"BTCUSD"},{"open_interest":645240649,"timestamp":1654338000,"symbol":"BTCUSD"},{"open_interest":643893467,"timestamp":1654337700,"symbol":"BTCUSD"}],"time_now":"1654338600.495296"}"#;
+
+        assert_eq!(
+            "BTCUSD",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654338600495,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"ret_code":0,"ret_msg":"OK","ext_code":"","ext_info":"","result":[{"symbol":"BTCUSDT","price":"30453.5","size":16.872,"side":"Buy"},{"symbol":"BTCUSDT","price":"30453","size":0.01,"side":"Buy"},{"symbol":"BTCUSDT","price":"30451.5","size":0.66,"side":"Buy"},{"symbol":"BTCUSDT","price":"30454","size":25.093,"side":"Sell"},{"symbol":"BTCUSDT","price":"30454.5","size":0.309,"side":"Sell"},{"symbol":"BTCUSDT","price":"30455","size":1.12,"side":"Sell"}],"time_now":"1654245012.731544"}"#;
+
+        assert_eq!(
+            1654245012731,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

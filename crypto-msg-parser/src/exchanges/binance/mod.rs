@@ -64,7 +64,13 @@ pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
         &obj
     };
     if data.is_object() {
-        Ok(data.get("E").map(|x| x.as_i64().unwrap())) // !bookTicker has no E field
+        if let Some(e) = data.get("E") {
+            Ok(Some(e.as_i64().unwrap()))
+        } else if let Some(time) = data.get("time") {
+            Ok(Some(time.as_i64().unwrap()))
+        } else {
+            Ok(None) // !bookTicker has no E field
+        }
     } else if data.is_array() {
         let timestamp = data
             .as_array()

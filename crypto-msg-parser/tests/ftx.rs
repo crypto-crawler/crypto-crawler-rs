@@ -494,3 +494,25 @@ mod l2_snapshot {
         );
     }
 }
+
+#[cfg(test)]
+mod open_interest {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn unknown() {
+        let raw_msg = r#"{"success":true,"result":[{"name":"1INCH-PERP","underlying":"1INCH","description":"1INCH Token Perpetual Futures","type":"perpetual","expiry":null,"perpetual":true,"expired":false,"enabled":true,"postOnly":false,"priceIncrement":0.0001,"sizeIncrement":1.0,"last":0.8525,"bid":0.8526,"ask":0.853,"index":0.853847992062,"mark":0.8528,"imfFactor":0.0005,"lowerBound":0.8099,"upperBound":0.8965,"underlyingDescription":"1INCH Token","expiryDescription":"Perpetual","moveStart":null,"marginPrice":0.8528,"positionLimitWeight":20.0,"group":"perpetual","change1h":-0.009868802972251248,"change24h":-0.023474178403755867,"changeBod":-0.0217939894471209,"volumeUsd24h":6256487.5398,"volume":7237781.0,"openInterest":16277750.0,"openInterestUsd":13881665.2},{"name":"1INCH-0624","underlying":"1INCH","description":"1INCH Token June 2022 Futures","type":"future","expiry":"2022-06-24T03:00:00+00:00","perpetual":false,"expired":false,"enabled":true,"postOnly":false,"priceIncrement":0.0001,"sizeIncrement":1.0,"last":0.8292,"bid":0.8276,"ask":0.8292,"index":0.853847992062,"mark":0.8292,"imfFactor":0.0005,"lowerBound":0.7855,"upperBound":0.8965,"underlyingDescription":"1INCH Token","expiryDescription":"June 2022","moveStart":null,"marginPrice":0.8292,"positionLimitWeight":40.0,"group":"quarterly","change1h":-0.008133971291866028,"change24h":-0.01367907695967646,"changeBod":-0.011916110581506196,"volumeUsd24h":68694.8909,"volume":82273.0,"openInterest":849727.0,"openInterestUsd":704593.6284}]}"#;
+
+        assert_eq!(
+            "ALL",
+            extract_symbol(EXCHANGE_NAME, MarketType::Unknown, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Unknown, raw_msg).unwrap()
+        );
+    }
+}

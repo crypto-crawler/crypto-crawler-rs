@@ -734,3 +734,77 @@ mod l2_snapshot {
         );
     }
 }
+
+#[cfg(test)]
+mod open_interest {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"jsonrpc":"2.0","result":[{"volume_usd":12498220.0,"volume_notional":12498220.0,"volume":422.01,"quote_currency":"USD","price_change":-0.2148,"open_interest":272308070,"mid_price":29730.25,"mark_price":29727.97,"low":29280.5,"last":29724.5,"instrument_name":"BTC-24JUN22","high":29973.0,"estimated_delivery_price":29695.94,"creation_timestamp":1654341687529,"bid_price":29729.5,"base_currency":"BTC","ask_price":29731.0}],"usIn":1654341687528897,"usOut":1654341687529042,"usDiff":145,"testnet":false}"#;
+
+        assert_eq!(
+            "BTC-24JUN22",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654341687529,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_future_all() {
+        let raw_msg = r#"{"jsonrpc":"2.0","result":[{"volume":175.6,"underlying_price":29755.49,"underlying_index":"BTC-24JUN22","quote_currency":"BTC","price_change":-13.2231,"open_interest":1124.7,"mid_price":0.053,"mark_price":0.05317014,"low":0.0515,"last":0.0525,"interest_rate":0.0,"instrument_name":"BTC-24JUN22-30000-C","high":0.0605,"estimated_delivery_price":29716.47,"creation_timestamp":1654338604906,"bid_price":0.0525,"base_currency":"BTC","ask_price":0.0535},{"volume":0.0,"underlying_price":30236.72,"underlying_index":"BTC-30DEC22","quote_currency":"BTC","price_change":null,"open_interest":8.1,"mid_price":null,"mark_price":1.98432769,"low":null,"last":1.099,"interest_rate":0.0,"instrument_name":"BTC-30DEC22-90000-P","high":null,"estimated_delivery_price":29716.47,"creation_timestamp":1654338604906,"bid_price":null,"base_currency":"BTC","ask_price":null}],"usIn":1654338604904465,"usOut":1654338604920779,"usDiff":16314,"testnet":false}"#;
+
+        assert_eq!(
+            "ALL",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654338604906,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"jsonrpc":"2.0","result":[{"volume_usd":223275080.0,"volume_notional":223275080.0,"volume":7539.21,"quote_currency":"USD","price_change":-0.369,"open_interest":560105870,"mid_price":29700.75,"mark_price":29700.53,"low":29266.5,"last":29698.0,"instrument_name":"BTC-PERPETUAL","high":29934.0,"funding_8h":0.00000214,"estimated_delivery_price":29695.49,"current_funding":0.0,"creation_timestamp":1654340303741,"bid_price":29700.5,"base_currency":"BTC","ask_price":29701.0}],"usIn":1654340303741682,"usOut":1654340303741855,"usDiff":173,"testnet":false}"#;
+
+        assert_eq!(
+            "BTC-PERPETUAL",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654340303741,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn option() {
+        let raw_msg = r#"{"jsonrpc":"2.0","result":[{"volume":786.0,"underlying_price":1770.45,"underlying_index":"ETH-24JUN22","quote_currency":"ETH","price_change":-12.178,"open_interest":15135.0,"mid_price":0.037,"mark_price":0.037071,"low":0.0375,"last":0.0375,"interest_rate":0.0,"instrument_name":"ETH-24JUN22-1600-P","high":0.044,"estimated_delivery_price":1768.89,"creation_timestamp":1654341866165,"bid_price":0.0365,"base_currency":"ETH","ask_price":0.0375}],"usIn":1654341866165387,"usOut":1654341866165540,"usDiff":153,"testnet":false}"#;
+
+        assert_eq!(
+            1654341866165,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "ETH-24JUN22-1600-P",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

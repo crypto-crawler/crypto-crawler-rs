@@ -14,6 +14,9 @@ pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
         Ok(ws_msg.id)
     } else if serde_json::from_str::<L2SnapshotRawMsg>(msg).is_ok() {
         Ok("NONE".to_string())
+    } else if msg.starts_with(r#"{"markets":"#) {
+        // https://api.dydx.exchange/v3/markets
+        Ok("ALL".to_string())
     } else {
         Err(SimpleError::new(format!(
             "Unsupported message format {}",

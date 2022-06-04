@@ -1364,3 +1364,79 @@ mod l2_snapshot {
         );
     }
 }
+
+#[cfg(test)]
+mod open_interest {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"symbol":"BTCUSD_220624","pair":"BTCUSD","openInterest":"2470927","contractType":"CURRENT_QUARTER","time":1654336766113}"#;
+
+        assert_eq!(
+            "BTCUSD_220624",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654336766113,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_future() {
+        let raw_msg =
+            r#"{"symbol":"BTCUSDT_220624","openInterest":"1275.028","time":1654336785074}"#;
+
+        assert_eq!(
+            "BTCUSDT_220624",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654336785074,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"symbol":"BTCUSD_PERP","pair":"BTCUSD","openInterest":"5827897","contractType":"PERPETUAL","time":1654336819740}"#;
+
+        assert_eq!(
+            "BTCUSD_PERP",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654336819740,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"symbol":"BTCUSDT","openInterest":"84617.188","time":1654336844754}"#;
+
+        assert_eq!(
+            "BTCUSDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654336844754,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+}

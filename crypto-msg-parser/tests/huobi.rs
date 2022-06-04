@@ -1163,3 +1163,58 @@ mod l2_snapshot {
         );
     }
 }
+
+#[cfg(test)]
+mod open_interest {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"status":"ok","data":[{"volume":9724.000000000000000000,"amount":10561.414560502221111967,"symbol":"DOT","contract_type":"next_week","contract_code":"DOT220617","trade_amount":202723.214486601744902941274231535293939693,"trade_volume":187732,"trade_turnover":1877320.000000000000000000},{"volume":209593.000000000000000000,"amount":707.442741972231269946,"symbol":"BTC","contract_type":"quarter","contract_code":"BTC220624","trade_amount":6024.809855090449174997774141172323490409,"trade_volume":1784034,"trade_turnover":178403400.000000000000000000}],"ts":1654344900121}"#;
+
+        assert_eq!(
+            1654344900121,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "ALL",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"status":"ok","data":[{"volume":119125.000000000000000000,"amount":945962.042404510442309219,"symbol":"EOS","contract_code":"EOS-USD","trade_amount":10322249.2071798754485976941552166206559822668,"trade_volume":1295420,"trade_turnover":12954200.000000000000000000},{"volume":6629.000000000000000000,"amount":68665.837994613631655272,"symbol":"MANA","contract_code":"MANA-USD","trade_amount":2774709.7417757547949533097365134609798406114,"trade_volume":270184,"trade_turnover":2701840.000000000000000000}],"ts":1654346524275}"#;
+
+        assert_eq!(
+            1654346524275,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "ALL",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"status":"ok","data":[{"volume":288491.000000000000000000,"amount":2884910.000000000000000000,"symbol":"MANA","value":2788265.515000000000000000,"contract_code":"MANA-USDT","trade_amount":8073320,"trade_volume":807332,"trade_turnover":7868174.158,"business_type":"swap","pair":"MANA-USDT","contract_type":"swap","trade_partition":"USDT"},{"volume":270380.000000000000000000,"amount":2703800.000000000000000000,"symbol":"NKN","value":243747.570000000000000000,"contract_code":"NKN-USDT","trade_amount":18409180,"trade_volume":1840918,"trade_turnover":1678370.2842,"business_type":"swap","pair":"NKN-USDT","contract_type":"swap","trade_partition":"USDT"}],"ts":1654346577824}"#;
+
+        assert_eq!(
+            1654346577824,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "ALL",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

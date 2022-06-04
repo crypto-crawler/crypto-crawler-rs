@@ -18,6 +18,14 @@ use message::WebsocketMsg;
 
 pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     let json_obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
+    if json_obj.contains_key("data")
+        && json_obj["data"].is_array()
+        && json_obj["data"].as_array().unwrap().len() > 1
+    {
+        // open interest from RESTful API
+        return Ok("ALL".to_string());
+    }
+
     let channel = if json_obj.contains_key("ch") {
         json_obj["ch"].as_str().unwrap()
     } else if json_obj.contains_key("topic") {

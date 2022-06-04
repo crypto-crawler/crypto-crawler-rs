@@ -83,9 +83,15 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
         if rest_msg.code != "0" {
             return Err(SimpleError::new(format!("Error HTTP response {}", msg)));
         }
-        let first_elem = &rest_msg.data[0];
-        if let Some(symbol) = first_elem.get("symbol") {
-            Ok(symbol.as_str().unwrap().to_string())
+        if rest_msg.data.len() > 1 {
+            Ok("ALL".to_string())
+        } else if rest_msg.data.len() == 1 {
+            let first_elem = &rest_msg.data[0];
+            if let Some(inst_id) = first_elem.get("instId") {
+                Ok(inst_id.as_str().unwrap().to_string())
+            } else {
+                Ok("NONE".to_string())
+            }
         } else {
             Ok("NONE".to_string())
         }

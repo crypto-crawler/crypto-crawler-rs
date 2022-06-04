@@ -24,7 +24,7 @@ pub(crate) fn extract_symbol(market_type: MarketType, msg: &str) -> Result<Strin
         before20220429::extract_symbol(market_type, msg)
     } else if obj.contains_key("arg") {
         bitget_mix::extract_symbol(msg)
-    } else if obj.contains_key("code") {
+    } else if obj.contains_key("code") && obj.contains_key("msg") {
         let code = obj["code"].as_str().unwrap();
         // from RESTful API
         if code == "00000" {

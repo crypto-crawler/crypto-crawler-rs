@@ -55,22 +55,14 @@ struct WebsocketMsg<T: Sized> {
 }
 
 #[derive(Serialize, Deserialize)]
-struct RestfulResult {
-    timestamp: i64,
-    instrument_name: String,
-    #[serde(flatten)]
-    extra: HashMap<String, Value>,
-}
-
-#[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
-struct RestfulMsg {
+struct RestfulResp<T: Sized> {
     jsonrpc: String,
     usIn: i64,
     usOut: i64,
     usDiff: i64,
     testnet: bool,
-    result: RestfulResult,
+    result: T,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -94,10 +86,30 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
                 .unwrap();
             Ok(symbol.to_string())
         } else {
-            Err(SimpleError::new(format!("Unknown message format: {}", msg)))
+            Err(SimpleError::new(format!(
+                "Unknown websocket message format: {}",
+                msg
+            )))
         }
-    } else if let Ok(rest_msg) = serde_json::from_str::<RestfulMsg>(msg) {
-        Ok(rest_msg.result.instrument_name)
+    } else if let Ok(rest_resp) = serde_json::from_str::<RestfulResp<Value>>(msg) {
+        if let Some(json_obj) = rest_resp.result.as_object() {
+            Ok(json_obj["instrument_name"].as_str().unwrap().to_string())
+        } else if let Some(arr) = rest_resp.result.as_array() {
+            // open interest
+            debug_assert!(msg.contains("open_interest"));
+            if arr.len() > 1 {
+                Ok("ALL".to_string())
+            } else if arr.len() == 1 {
+                Ok(arr[0]["instrument_name"].as_str().unwrap().to_string())
+            } else {
+                Ok("NONE".to_string())
+            }
+        } else {
+            Err(SimpleError::new(format!(
+                "Unknown HTTP message format: {}",
+                msg
+            )))
+        }
     } else {
         Err(SimpleError::new(format!(
             "Unsupported message format {}",
@@ -128,12 +140,27 @@ pub(crate) fn extract_timestamp(
             }
         } else {
             Err(SimpleError::new(format!(
-                "Unsupported message format: {}",
+                "Unsupported websocket message format: {}",
                 msg
             )))
         }
-    } else if let Ok(rest_msg) = serde_json::from_str::<RestfulMsg>(msg) {
-        Ok(Some(rest_msg.result.timestamp))
+    } else if let Ok(rest_resp) = serde_json::from_str::<RestfulResp<Value>>(msg) {
+        if let Some(json_obj) = rest_resp.result.as_object() {
+            Ok(Some(json_obj["timestamp"].as_i64().unwrap()))
+        } else if let Some(arr) = rest_resp.result.as_array() {
+            // open interest
+            debug_assert!(msg.contains("open_interest"));
+            let timestamp = arr
+                .iter()
+                .map(|x| x["creation_timestamp"].as_i64().unwrap())
+                .max();
+            Ok(timestamp)
+        } else {
+            Err(SimpleError::new(format!(
+                "Unknown HTTP message format: {}",
+                msg
+            )))
+        }
     } else {
         Err(SimpleError::new(format!(
             "Unsupported message format {}",

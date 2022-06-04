@@ -1003,3 +1003,38 @@ mod l2_snapshot {
         );
     }
 }
+
+#[cfg(test)]
+mod open_interest {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"[{"long_liq_size":0,"short_liq_size":0,"short_liq_usd":0,"lsr_account":1.8026315789474,"mark_price":29710.95,"top_lsr_size":0.93704798407213,"time":1654335000,"short_liq_amount":0,"long_liq_amount":0,"open_interest_usd":31828902,"top_lsr_account":1.5,"open_interest":31828902,"long_liq_usd":0,"lsr_taker":0.045587162654996},{"long_liq_size":0,"short_liq_size":0,"short_liq_usd":0,"lsr_account":1.8026315789474,"mark_price":29681.26,"top_lsr_size":0.93577945664931,"time":1654335300,"short_liq_amount":0,"long_liq_amount":0,"open_interest_usd":31883292,"top_lsr_account":1.5,"open_interest":31883292,"long_liq_usd":0,"lsr_taker":0.28336287667764}]"#;
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"[{"long_liq_size":0,"short_liq_size":0,"short_liq_usd":0,"lsr_account":1.7797816801139,"mark_price":29692.91,"top_lsr_size":0.91006677837509,"time":1654335300,"short_liq_amount":0,"long_liq_amount":0,"open_interest_usd":2226295750.1279,"top_lsr_account":1.1739130434783,"open_interest":749773515,"long_liq_usd":0,"lsr_taker":0.073035332215347},{"long_liq_size":0,"short_liq_size":0,"short_liq_usd":0,"lsr_account":1.7864954826438,"mark_price":29684.65,"top_lsr_size":0.90727688459152,"time":1654335600,"short_liq_amount":0,"long_liq_amount":0,"open_interest_usd":2225528156.4408,"top_lsr_account":1.1739130434783,"open_interest":749723563,"long_liq_usd":0,"lsr_taker":0.66780130171317}]"#;
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

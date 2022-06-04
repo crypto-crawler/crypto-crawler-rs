@@ -92,6 +92,9 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
         }
     } else if serde_json::from_str::<L2SnapshotRawMsg>(msg).is_ok() {
         Ok(None)
+    } else if msg.starts_with(r#"{"markets":"#) {
+        // https://api.dydx.exchange/v3/markets
+        Ok(None)
     } else {
         Err(SimpleError::new(format!(
             "Unsupported message format {}",
