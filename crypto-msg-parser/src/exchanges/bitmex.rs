@@ -506,6 +506,12 @@ struct WebsocketMsg<T: Sized> {
 }
 
 pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
+    if msg.starts_with(r#"[{"symbol":"#) {
+        // l2_snapshot
+        let arr = serde_json::from_str::<Vec<HashMap<String, Value>>>(msg).unwrap();
+        let symbol = arr[0]["symbol"].as_str().unwrap();
+        return Ok(symbol.to_string());
+    }
     let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
         SimpleError::new(format!(
             "Failed to deserialize {} to WebsocketMsg<Value>",
@@ -531,6 +537,10 @@ pub(crate) fn extract_timestamp(
     _market_type: MarketType,
     msg: &str,
 ) -> Result<Option<i64>, SimpleError> {
+    if msg.starts_with(r#"[{"symbol":"#) {
+        // l2_snapshot doesn't have timestamp
+        return Ok(None);
+    }
     let ws_msg = serde_json::from_str::<WebsocketMsg<HashMap<String, Value>>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to parse the JSON string {}", msg)))?;
     if ws_msg.table == "funding" {

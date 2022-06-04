@@ -943,3 +943,58 @@ mod ticker {
         );
     }
 }
+
+#[cfg(test)]
+mod l2_snapshot {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"code":"00000","msg":"success","requestTime":1654232411024,"data":{"asks":[["30413.33","0.0141"],["30413.37","0.0112"],["30413.41","0.0179"]],"bids":[["30413.27","0.0296"],["30413.23","0.0484"],["30413.19","0.1272"]],"timestamp":"1654232411024"}}"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1654232411024,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"code":"00000","msg":"success","requestTime":1654234201087,"data":{"asks":[["30521","1.661"],["30521.5","2.312"],["30522","0.139"]],"bids":[["3.052E+4","0.256"],["30519.5","0.482"],["30519","0.079"]],"timestamp":"1654234201087"}}"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1654234201087,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"code":"00000","msg":"success","requestTime":1654234229348,"data":{"asks":[["30544","13.904"],["30544.5","2.678"],["30545","4.923"]],"bids":[["30543","0.756"],["30542.5","0.749"],["30542","15.438"]],"timestamp":"1654234229348"}}"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1654234229348,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+}

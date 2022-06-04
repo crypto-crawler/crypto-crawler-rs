@@ -48,14 +48,39 @@ struct OrderbookUpdate {
     extra: HashMap<String, Value>,
 }
 
+#[derive(Serialize, Deserialize)]
+struct RestResp {
+    error: Vec<Value>,
+    result: HashMap<String, Value>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
 pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
-    let arr = serde_json::from_str::<Vec<Value>>(msg)
-        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
-    let symbol = arr[arr.len() - 1].as_str().unwrap();
-    Ok(symbol.to_string())
+    if let Ok(rest_resp) = serde_json::from_str::<RestResp>(msg) {
+        // RESTful API
+        if !rest_resp.error.is_empty() {
+            Err(SimpleError::new(format!("Error http response {}", msg)))
+        } else if rest_resp.result.len() > 1 {
+            Ok("ALL".to_string())
+        } else {
+            Ok(rest_resp.result.keys().next().unwrap().to_string())
+        }
+    } else {
+        // websocket
+        let arr = serde_json::from_str::<Vec<Value>>(msg).map_err(|_e| {
+            SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg))
+        })?;
+        let symbol = arr[arr.len() - 1].as_str().unwrap();
+        Ok(symbol.to_string())
+    }
 }
 
 pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
+    if msg.contains("error") && msg.contains("result") {
+        // RESTful API
+        return Ok(None);
+    }
     let arr = serde_json::from_str::<Vec<Value>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
     debug_assert_eq!(arr.len(), 4);

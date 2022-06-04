@@ -457,3 +457,61 @@ mod ticker {
         );
     }
 }
+
+#[cfg(test)]
+mod l2_snapshot {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"datas":{"asks":[[29763.69,"0.6260"],[29725.98,"0.1500"],[29723.01,"0.1500"]],"bids":[[29708.13,"0.1500"],[29705.16,"0.1500"],[29704.59,"0.4000"]],"timestamp":1654331401},"resMsg":{"message":"success !","method":null,"code":"1"}}"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654331401000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"datas":{"bids":[["29834","121320"],["29833.5","35241"],["29831.5","30812"]],"asks":[["29837","67897"],["29837.5","18902"],["29840.5","26717"]],"timestamp":1654331401775},"resMsg":{"message":"success !","method":null,"code":"1"}}"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654331401775,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"datas":{"bids":[["29860","5885"],["29858.5","1214"],["29856.5","1324"]],"asks":[["29861","3415"],["29863","811"],["29866.5","1216"]],"timestamp":1654332304984},"resMsg":{"message":"success !","method":null,"code":"1"}}"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654332304984,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+}

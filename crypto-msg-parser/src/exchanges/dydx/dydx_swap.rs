@@ -9,7 +9,7 @@ use serde_json::Value;
 use simple_error::SimpleError;
 use std::collections::HashMap;
 
-use super::message::WebsocketMsg;
+use super::message::{L2SnapshotRawMsg, WebsocketMsg};
 
 const EXCHANGE_NAME: &str = "dydx";
 
@@ -61,33 +61,42 @@ struct RawOrderBookUpdateMsg {
 }
 
 pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
-    let channel = ws_msg.channel.as_str();
-    match channel {
-        "v3_trades" => {
-            let ws_msg = serde_json::from_str::<WebsocketMsg<RawTradesMsg>>(msg).map_err(|_e| {
-                SimpleError::new(format!(
-                    "Failed to deserialize {} to WebsocketMsg<RawTradesMsg>",
-                    msg
-                ))
-            })?;
-            let timestamp = ws_msg
-                .contents
-                .trades
-                .iter()
-                .map(|raw_trade| {
-                    DateTime::parse_from_rfc3339(&raw_trade.createdAt)
-                        .unwrap()
-                        .timestamp_millis()
-                })
-                .max();
-            Ok(timestamp) // contents.trades can be an empty array sometimes
+    if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
+        let channel = ws_msg.channel.as_str();
+        match channel {
+            "v3_trades" => {
+                let ws_msg =
+                    serde_json::from_str::<WebsocketMsg<RawTradesMsg>>(msg).map_err(|_e| {
+                        SimpleError::new(format!(
+                            "Failed to deserialize {} to WebsocketMsg<RawTradesMsg>",
+                            msg
+                        ))
+                    })?;
+                let timestamp = ws_msg
+                    .contents
+                    .trades
+                    .iter()
+                    .map(|raw_trade| {
+                        DateTime::parse_from_rfc3339(&raw_trade.createdAt)
+                            .unwrap()
+                            .timestamp_millis()
+                    })
+                    .max();
+                Ok(timestamp) // contents.trades can be an empty array sometimes
+            }
+            "v3_orderbook" => Ok(None),
+            _ => Err(SimpleError::new(format!(
+                "Failed to extract timestamp from {}",
+                msg
+            ))),
         }
-        "v3_orderbook" => Ok(None),
-        _ => Err(SimpleError::new(format!(
-            "Failed to extract timestamp from {}",
+    } else if serde_json::from_str::<L2SnapshotRawMsg>(msg).is_ok() {
+        Ok(None)
+    } else {
+        Err(SimpleError::new(format!(
+            "Unsupported message format {}",
             msg
-        ))),
+        )))
     }
 }
 

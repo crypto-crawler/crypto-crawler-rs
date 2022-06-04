@@ -61,77 +61,99 @@ struct SwapTradeMsg {
     extra: HashMap<String, Value>,
 }
 
+#[derive(Serialize, Deserialize)]
+struct SwapRestL2SnapshotOrder {
+    p: String, // price
+    s: f64,    // size
+}
+
+// https://www.gate.io/docs/developers/apiv4/en/#futures-order-book
+// https://www.gate.io/docs/developers/apiv4/en/#futures-order-book-2
+#[derive(Serialize, Deserialize)]
+struct SwapRestL2SnapshotMsg {
+    current: f64,
+    update: f64,
+    asks: Vec<SwapRestL2SnapshotOrder>,
+    bids: Vec<SwapRestL2SnapshotOrder>,
+}
+
 pub(super) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Result<String, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
-            msg
-        ))
-    })?;
-    let v = if ws_msg.result.is_array() {
-        ws_msg.result.as_array().unwrap()[0].as_object().unwrap()
-    } else {
-        ws_msg.result.as_object().unwrap()
-    };
-    if let Some(symbol) = v.get("contract") {
-        Ok(symbol.as_str().unwrap().to_string())
-    } else if v.contains_key("s") && v["s"].is_string() {
-        Ok(v["s"].as_str().unwrap().to_string())
-    } else if v.contains_key("n") && v["n"].is_string() {
-        let n = v["n"].as_str().unwrap();
-        let pos = n.find('_').unwrap();
-        let symbol = &n[(pos + 1)..];
-        Ok(symbol.to_string())
-    } else if v.contains_key("c") && v["c"].is_string() {
-        Ok(v["c"].as_str().unwrap().to_string())
+    if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
+        let v = if ws_msg.result.is_array() {
+            ws_msg.result.as_array().unwrap()[0].as_object().unwrap()
+        } else {
+            ws_msg.result.as_object().unwrap()
+        };
+        if let Some(symbol) = v.get("contract") {
+            Ok(symbol.as_str().unwrap().to_string())
+        } else if v.contains_key("s") && v["s"].is_string() {
+            Ok(v["s"].as_str().unwrap().to_string())
+        } else if v.contains_key("n") && v["n"].is_string() {
+            let n = v["n"].as_str().unwrap();
+            let pos = n.find('_').unwrap();
+            let symbol = &n[(pos + 1)..];
+            Ok(symbol.to_string())
+        } else if v.contains_key("c") && v["c"].is_string() {
+            Ok(v["c"].as_str().unwrap().to_string())
+        } else {
+            Err(SimpleError::new(format!(
+                "Unsupported websocket message format  {}",
+                msg
+            )))
+        }
+    } else if serde_json::from_str::<SwapRestL2SnapshotMsg>(msg).is_ok() {
+        Ok("NONE".to_string())
     } else {
         Err(SimpleError::new(format!(
-            "Failed to extract symbol from {}",
+            "Unsupported message format  {}",
             msg
         )))
     }
 }
 
 pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
-            msg
-        ))
-    })?;
-    let result = ws_msg.result;
-    if ws_msg.channel == "futures.trades" {
-        let timestamp = result
-            .as_array()
-            .unwrap()
-            .iter()
-            .map(|x| x.as_object().unwrap())
-            .map(|x| {
-                if x.contains_key("create_time_ms") {
-                    x["create_time_ms"].as_i64().unwrap()
-                } else {
-                    x["create_time"].as_i64().unwrap() * 1000
-                }
-            })
-            .max();
+    if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
+        let result = ws_msg.result;
+        if ws_msg.channel == "futures.trades" {
+            let timestamp = result
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|x| x.as_object().unwrap())
+                .map(|x| {
+                    if x.contains_key("create_time_ms") {
+                        x["create_time_ms"].as_i64().unwrap()
+                    } else {
+                        x["create_time"].as_i64().unwrap() * 1000
+                    }
+                })
+                .max();
 
-        if timestamp.is_none() {
-            Err(SimpleError::new(format!("result is empty in {}", msg)))
-        } else {
-            Ok(timestamp)
-        }
-    } else if ws_msg.channel == "futures.order_book" {
-        if let Some(x) = result.get("t") {
-            Ok(Some(x.as_i64().unwrap()))
+            if timestamp.is_none() {
+                Err(SimpleError::new(format!("result is empty in {}", msg)))
+            } else {
+                Ok(timestamp)
+            }
+        } else if ws_msg.channel == "futures.order_book" {
+            if let Some(x) = result.get("t") {
+                Ok(Some(x.as_i64().unwrap()))
+            } else {
+                Ok(Some(ws_msg.time * 1000))
+            }
+        } else if ws_msg.channel == "futures.order_book_update"
+            || ws_msg.channel == "futures.book_ticker"
+        {
+            Ok(Some(result["t"].as_i64().unwrap()))
         } else {
             Ok(Some(ws_msg.time * 1000))
         }
-    } else if ws_msg.channel == "futures.order_book_update"
-        || ws_msg.channel == "futures.book_ticker"
-    {
-        Ok(Some(result["t"].as_i64().unwrap()))
+    } else if let Ok(l2_snapshot) = serde_json::from_str::<SwapRestL2SnapshotMsg>(msg) {
+        Ok(Some((l2_snapshot.current * 1000.0) as i64))
     } else {
-        Ok(Some(ws_msg.time * 1000))
+        Err(SimpleError::new(format!(
+            "Unsupported message format  {}",
+            msg
+        )))
     }
 }
 

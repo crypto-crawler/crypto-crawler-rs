@@ -43,21 +43,24 @@ struct WebsocketMsg<T: Sized> {
 }
 
 pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
-            msg
-        ))
-    })?;
-    if ws_msg.data.is_object() {
-        Ok(ws_msg.data["symbol"].as_str().unwrap().to_string())
-    } else if ws_msg.data.is_array() {
-        let arr = ws_msg.data.as_array().unwrap();
-        let symbols = arr
+    #[derive(Serialize, Deserialize)]
+    struct RawMsg {
+        code: String,
+        data: Value,
+        timestamp: i64,
+    }
+    let raw_msg = serde_json::from_str::<RawMsg>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to RawMsg", msg)))?;
+    if raw_msg.data.is_object() {
+        Ok(raw_msg.data["symbol"].as_str().unwrap().to_string())
+    } else if raw_msg.data.is_array() {
+        let arr = raw_msg.data.as_array().unwrap();
+        let symbol = arr
             .iter()
             .map(|v| v["symbol"].as_str().unwrap())
-            .collect::<Vec<&str>>();
-        Ok(symbols[0].to_string())
+            .next()
+            .unwrap();
+        Ok(symbol.to_string())
     } else {
         Err(SimpleError::new(format!("Unknown message format: {}", msg)))
     }
@@ -67,13 +70,9 @@ pub(crate) fn extract_timestamp(
     _market_type: MarketType,
     msg: &str,
 ) -> Result<Option<i64>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
-            msg
-        ))
-    })?;
-    Ok(Some(ws_msg.timestamp))
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to parse the JSON string {}", msg)))?;
+    Ok(obj.get("timestamp").map(|x| x.as_i64().unwrap()))
 }
 
 pub(crate) fn parse_trade(

@@ -140,6 +140,17 @@ struct RawOrderbookMsg {
 }
 
 pub(super) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
+    if msg.contains("datas") && msg.contains("resMsg") {
+        // RESTful
+        let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
+        return if let Some(symbol) = obj.get("symbol") {
+            Ok(symbol.as_str().unwrap().to_string())
+        } else {
+            Ok("NONE".to_string())
+        };
+    }
+
+    // websocket
     let ws_msg = serde_json::from_str::<Vec<Value>>(msg).unwrap();
     let contract_id = if ws_msg[1]["contractId"].is_i64() {
         ws_msg[1]["contractId"].as_i64().unwrap()
@@ -159,6 +170,13 @@ pub(super) fn extract_timestamp(
     _market_type: MarketType,
     msg: &str,
 ) -> Result<Option<i64>, SimpleError> {
+    if msg.contains("datas") && msg.contains("resMsg") {
+        // RESTful
+        let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
+        return Ok(obj["datas"].get("timestamp").map(|x| x.as_i64().unwrap()));
+    }
+
+    // websocket
     let ws_msg = serde_json::from_str::<Vec<Value>>(msg).unwrap();
     let channel = ws_msg[0].as_str().unwrap();
     match channel {

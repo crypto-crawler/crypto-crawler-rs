@@ -54,42 +54,55 @@ struct OrderbookUpdateMsg {
 }
 
 pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
-    let ws_msg = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to HashMap<String, Value>",
+    let json_obj = serde_json::from_str::<HashMap<String, Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to parse the JSON string {}", msg)))?;
+    if let Some(product_id) = json_obj.get("product_id") {
+        Ok(product_id.as_str().unwrap().to_string())
+    } else if json_obj.contains_key("asks") && json_obj.contains_key("bids") {
+        Ok("NONE".to_string())
+    } else {
+        Err(SimpleError::new(format!(
+            "Failed to extract symbol from {}",
             msg
-        ))
-    })?;
-    let symbol = ws_msg["product_id"].as_str().unwrap();
-    Ok(symbol.to_string())
+        )))
+    }
 }
 
 pub(crate) fn extract_timestamp(
     _market_type: MarketType,
     msg: &str,
 ) -> Result<Option<i64>, SimpleError> {
-    let ws_msg = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to HashMap<String, Value>",
-            msg
-        ))
-    })?;
-    let type_ = ws_msg["type"].as_str().unwrap();
-    if type_ == "snapshot" {
-        Ok(None) // orderbook snapshot doesn't have a timestamp
-    } else if let Some(time) = ws_msg.get("time") {
-        let time_str = time.as_str().unwrap();
-        if time_str.starts_with("0001-01-01T00:00:00") {
-            Ok(None)
+    let json_obj = serde_json::from_str::<HashMap<String, Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to parse the JSON string {}", msg)))?;
+    if json_obj.contains_key("type") && json_obj["type"].is_string() {
+        let type_ = json_obj["type"].as_str().unwrap();
+        if type_ == "snapshot" {
+            Ok(None) // orderbook snapshot doesn't have a timestamp
+        } else if let Some(time) = json_obj.get("time") {
+            let time_str = time.as_str().unwrap();
+            if time_str.starts_with("0001-01-01T00:00:00") {
+                Ok(None)
+            } else {
+                Ok(Some(
+                    DateTime::parse_from_rfc3339(time_str)
+                        .unwrap()
+                        .timestamp_millis(),
+                ))
+            }
         } else {
-            Ok(Some(
-                DateTime::parse_from_rfc3339(time_str)
-                    .unwrap()
-                    .timestamp_millis(),
-            ))
+            Err(SimpleError::new(format!(
+                "Failed to extract timestamp from {}",
+                msg
+            )))
         }
+    } else if json_obj.contains_key("asks") && json_obj.contains_key("bids") {
+        // l2_snapshot doesn't have a timestamp
+        Ok(None)
     } else {
-        Err(SimpleError::new(format!("No time field in {}", msg)))
+        Err(SimpleError::new(format!(
+            "Failed to extract timestamp from {}",
+            msg
+        )))
     }
 }
 

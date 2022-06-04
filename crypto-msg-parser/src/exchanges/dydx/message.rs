@@ -14,3 +14,15 @@ pub(super) struct WebsocketMsg<T: Sized> {
     #[serde(flatten)]
     pub extra: HashMap<String, Value>,
 }
+
+#[derive(Serialize, Deserialize)]
+pub(super) struct L2SnapshotOrder {
+    size: String,
+    price: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(super) struct L2SnapshotRawMsg {
+    asks: Vec<L2SnapshotOrder>,
+    bids: Vec<L2SnapshotOrder>,
+}

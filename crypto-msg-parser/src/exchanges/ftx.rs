@@ -44,54 +44,86 @@ struct WebsocketMsg<T: Sized> {
     data: T,
 }
 
+#[derive(Serialize, Deserialize)]
+struct RestMsg {
+    success: bool,
+    result: HashMap<String, Value>,
+}
+
 pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
+    if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
+        Ok(ws_msg.market)
+    } else if let Ok(rest_msg) = serde_json::from_str::<RestMsg>(msg) {
+        if !rest_msg.success {
+            return Err(SimpleError::new(format!("Error http response {}", msg)));
+        }
+        if rest_msg.result.contains_key("asks") && rest_msg.result.contains_key("bids") {
+            Ok("NONE".to_string())
+        } else {
+            Err(SimpleError::new(format!(
+                "Unsupported message format {}",
+                msg
+            )))
+        }
+    } else {
+        Err(SimpleError::new(format!(
+            "Unsupported message format {}",
             msg
-        ))
-    })?;
-    Ok(ws_msg.market)
+        )))
+    }
 }
 
 pub(crate) fn extract_timestamp(
     _market_type: MarketType,
     msg: &str,
 ) -> Result<Option<i64>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
-            msg
-        ))
-    })?;
-    let channel = ws_msg.channel.as_str();
-    match channel {
-        "trades" => {
-            let timestamp = ws_msg
-                .data
-                .as_array()
-                .unwrap()
-                .iter()
-                .map(|x| {
-                    DateTime::parse_from_rfc3339(x["time"].as_str().unwrap())
-                        .unwrap()
-                        .timestamp_millis()
-                })
-                .max();
+    if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
+        let channel = ws_msg.channel.as_str();
+        match channel {
+            "trades" => {
+                let timestamp = ws_msg
+                    .data
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|x| {
+                        DateTime::parse_from_rfc3339(x["time"].as_str().unwrap())
+                            .unwrap()
+                            .timestamp_millis()
+                    })
+                    .max();
 
-            if timestamp.is_none() {
-                Err(SimpleError::new(format!("data is empty in {}", msg)))
-            } else {
-                Ok(timestamp)
+                if timestamp.is_none() {
+                    Err(SimpleError::new(format!("data is empty in {}", msg)))
+                } else {
+                    Ok(timestamp)
+                }
             }
+            "orderbook" | "ticker" => Ok(Some(
+                (ws_msg.data["time"].as_f64().unwrap() * 1000.0) as i64,
+            )),
+            _ => Err(SimpleError::new(format!(
+                "unknown channel {} in {}",
+                channel, msg
+            ))),
         }
-        "orderbook" | "ticker" => Ok(Some(
-            (ws_msg.data["time"].as_f64().unwrap() * 1000.0) as i64,
-        )),
-        _ => Err(SimpleError::new(format!(
-            "unknown channel {} in {}",
-            channel, msg
-        ))),
+    } else if let Ok(rest_msg) = serde_json::from_str::<RestMsg>(msg) {
+        if !rest_msg.success {
+            return Err(SimpleError::new(format!("Error http response {}", msg)));
+        }
+        if rest_msg.result.contains_key("asks") && rest_msg.result.contains_key("bids") {
+            Ok(None)
+        } else {
+            Err(SimpleError::new(format!(
+                "Unsupported message format {}",
+                msg
+            )))
+        }
+    } else {
+        Err(SimpleError::new(format!(
+            "Unsupported message format {}",
+            msg
+        )))
     }
 }
 

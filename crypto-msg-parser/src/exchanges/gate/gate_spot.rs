@@ -15,10 +15,8 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     })?;
     if json_obj.contains_key("params") {
         gate_spot_20210916::extract_symbol(msg)
-    } else if json_obj.contains_key("result") {
-        gate_spot_current::extract_symbol(msg)
     } else {
-        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
+        gate_spot_current::extract_symbol(msg)
     }
 }
 
@@ -32,10 +30,8 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
     if json_obj.contains_key("params") {
         #[allow(deprecated)]
         gate_spot_20210916::extract_timestamp(msg)
-    } else if json_obj.contains_key("result") {
-        gate_spot_current::extract_timestamp(msg)
     } else {
-        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
+        gate_spot_current::extract_timestamp(msg)
     }
 }
 

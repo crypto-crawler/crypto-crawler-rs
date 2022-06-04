@@ -442,3 +442,55 @@ mod bbo {
         );
     }
 }
+
+#[cfg(test)]
+mod l2_snapshot {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"success":true,"result":{"bids":[[1151.0,0.36],[1150.0,0.683],[1149.5,0.651],[1148.5,13.132],[1148.0,3.057]],"asks":[[1153.5,13.326],[1154.0,0.622],[1154.5,4.182],[1155.0,26.58],[1156.0,4.106]]}}"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"success":true,"result":{"bids":[[1151.0,0.36],[1150.0,0.683],[1149.5,0.651],[1148.5,13.132],[1148.0,3.057]],"asks":[[1153.5,13.326],[1154.0,0.622],[1154.5,4.182],[1155.0,26.58],[1156.0,4.106]]}}"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_future() {
+        let raw_msg = r#"{"success":true,"result":{"bids":[[30215.0,0.0004],[30210.0,0.1287],[30209.0,0.9605],[30207.0,0.0824],[30206.0,0.1721]],"asks":[[30225.0,0.6408],[30226.0,0.8258],[30227.0,2.6539],[30228.0,0.3609],[30229.0,0.2078]]}}"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg).unwrap()
+        );
+    }
+}

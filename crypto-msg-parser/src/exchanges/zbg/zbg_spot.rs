@@ -217,6 +217,17 @@ fn fetch_symbol_info() -> BTreeMap<i64, String> {
 // NOTE:zbg spot websocket sometimes returns lowercase symbols, and sometimes
 // returns uppercase, which is very annoying, thus we unify to lowercase here
 pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
+    if msg.contains("datas") && msg.contains("resMsg") {
+        // RESTful
+        let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
+        return if let Some(symbol) = obj.get("symbol") {
+            Ok(symbol.as_str().unwrap().to_string())
+        } else {
+            Ok("NONE".to_string())
+        };
+    }
+
+    // websocket
     if msg.starts_with(r#"{"trade_statistic":[["#) {
         let obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(SimpleError::from)?;
         let trade_statistic = obj["trade_statistic"].as_array().unwrap();
@@ -254,6 +265,15 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
 }
 
 pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
+    if msg.contains("datas") && msg.contains("resMsg") {
+        // RESTful
+        let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
+        return Ok(obj["datas"]
+            .get("timestamp")
+            .map(|x| x.as_i64().unwrap() * 1000));
+    }
+
+    // websocket
     if msg.starts_with(r#"{"trade_statistic":[["#) {
         return Ok(None); // trade_statistic doesn't have timestamp
     }

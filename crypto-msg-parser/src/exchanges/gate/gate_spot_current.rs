@@ -53,46 +53,66 @@ struct SpotOrderbookSnapshotMsg {
     extra: HashMap<String, Value>,
 }
 
+// https://www.gate.io/docs/developers/apiv4/en/#retrieve-order-book
+#[derive(Serialize, Deserialize)]
+struct SpotRestL2SnapshotMsg {
+    current: i64,
+    update: i64,
+    asks: Vec<[String; 2]>,
+    bids: Vec<[String; 2]>,
+}
+
 pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<HashMap<String, Value>>>(msg)
-        .map_err(|_e| SimpleError::new(format!("Failed to parse JSON string {}", msg)))?;
-    if let Some(symbol) = ws_msg.result.get("currency_pair") {
-        Ok(symbol.as_str().unwrap().to_string())
-    } else if let Some(symbol) = ws_msg.result.get("s") {
-        Ok(symbol.as_str().unwrap().to_string())
-    } else if let Some(symbol) = ws_msg.result.get("n") {
-        let n = symbol.as_str().unwrap();
-        let pos = n.find('_').unwrap();
-        let symbol = &n[(pos + 1)..];
-        Ok(symbol.to_string())
+    if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<HashMap<String, Value>>>(msg) {
+        if let Some(symbol) = ws_msg.result.get("currency_pair") {
+            Ok(symbol.as_str().unwrap().to_string())
+        } else if let Some(symbol) = ws_msg.result.get("s") {
+            Ok(symbol.as_str().unwrap().to_string())
+        } else if let Some(symbol) = ws_msg.result.get("n") {
+            let n = symbol.as_str().unwrap();
+            let pos = n.find('_').unwrap();
+            let symbol = &n[(pos + 1)..];
+            Ok(symbol.to_string())
+        } else {
+            Err(SimpleError::new(format!(
+                "Unsupported websocket message format {}",
+                msg
+            )))
+        }
+    } else if serde_json::from_str::<SpotRestL2SnapshotMsg>(msg).is_ok() {
+        Ok("NONE".to_string())
     } else {
         Err(SimpleError::new(format!(
-            "Failed to extract symbol from {}",
+            "Unsupported message format {}",
             msg
         )))
     }
 }
 
 pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
-            msg
-        ))
-    })?;
-    if ws_msg.channel == "spot.trades" {
-        Ok(Some(
-            ws_msg.result["create_time_ms"]
-                .as_str()
-                .unwrap()
-                .parse::<f64>()
-                .unwrap() as i64,
-        ))
-    } else if ws_msg.channel.starts_with("spot.order_book") || ws_msg.channel == "spot.book_ticker"
-    {
-        Ok(Some(ws_msg.result["t"].as_i64().unwrap()))
+    if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<HashMap<String, Value>>>(msg) {
+        if ws_msg.channel == "spot.trades" {
+            Ok(Some(
+                ws_msg.result["create_time_ms"]
+                    .as_str()
+                    .unwrap()
+                    .parse::<f64>()
+                    .unwrap() as i64,
+            ))
+        } else if ws_msg.channel.starts_with("spot.order_book")
+            || ws_msg.channel == "spot.book_ticker"
+        {
+            Ok(Some(ws_msg.result["t"].as_i64().unwrap()))
+        } else {
+            Ok(Some(ws_msg.time * 1000))
+        }
+    } else if let Ok(l2_snapshot) = serde_json::from_str::<SpotRestL2SnapshotMsg>(msg) {
+        Ok(Some(l2_snapshot.current))
     } else {
-        Ok(Some(ws_msg.time * 1000))
+        Err(SimpleError::new(format!(
+            "Unsupported message format {}",
+            msg
+        )))
     }
 }
 

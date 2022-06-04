@@ -145,3 +145,19 @@ fn l3_event() {
         extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
     );
 }
+
+#[test]
+fn l2_snapshot() {
+    let raw_msg = r#"{"timestamp": "1654243213", "microtimestamp": "1654243213142992", "bids": [["30415.13", "0.37816633"], ["30415.11", "2.45236394"], ["30415.05", "0.21660771"], ["30413.74", "0.37055100"], ["30413.73", "0.10600000"]], "asks": [["30434.64", "0.26500000"], ["30434.73", "0.10600000"], ["30436.31", "0.19606825"], ["30436.48", "0.32839585"], ["30437.84", "0.19565692"]]}"#;
+
+    assert_eq!(
+        1654243213142,
+        extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+            .unwrap()
+            .unwrap()
+    );
+    assert_eq!(
+        "NONE",
+        extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+    );
+}

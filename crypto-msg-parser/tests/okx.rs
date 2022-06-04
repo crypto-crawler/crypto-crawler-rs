@@ -1054,3 +1054,106 @@ mod ticker {
         );
     }
 }
+
+#[cfg(test)]
+mod l2_snapshot {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"code":"0","msg":"","data":[{"asks":[["29692.5","0.10951348","0","5"],["29692.6","0.00631557","0","1"],["29692.8","0.10662911","0","1"]],"bids":[["29692.4","0.43986254","0","2"],["29691.2","0.33792","0","1"],["29690","0.39370474","0","2"]],"ts":"1654328918680"}]}"#;
+
+        assert_eq!(
+            1654328918680,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"code":"0","msg":"","data":[{"asks":[["29678.9","11","0","1"],["29679","5","0","1"],["29679.3","14","0","2"]],"bids":[["29673.5","8","0","1"],["29673.4","14","0","1"],["29673.1","285","0","1"]],"ts":"1654329601749"}]}"#;
+
+        assert_eq!(
+            1654329601749,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_future() {
+        let raw_msg = r#"{"code":"0","msg":"","data":[{"asks":[["29756.3","5","0","1"],["29756.4","90","0","1"],["29761.1","7","0","1"]],"bids":[["29755.4","95","0","1"],["29755.3","124","0","1"],["29755","128","0","1"]],"ts":"1654329646278"}]}"#;
+
+        assert_eq!(
+            1654329646278,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"code":"0","msg":"","data":[{"asks":[["29671.3","12","0","3"],["29675.7","10","0","1"],["29676.9","38","0","1"]],"bids":[["29671.2","759","0","9"],["29670.8","10","0","1"],["29670.2","4","0","1"]],"ts":"1654329603386"}]}"#;
+
+        assert_eq!(
+            1654329603386,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"code":"0","msg":"","data":[{"asks":[["29701.7","2","0","1"],["29702.9","19","0","1"],["29703.4","20","0","4"]],"bids":[["29701.6","5","0","1"],["29701.5","2","0","1"],["29700.4","2","0","2"]],"ts":"1654329607417"}]}"#;
+
+        assert_eq!(
+            1654329607417,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn option() {
+        let raw_msg = r#"{"code":"0","msg":"","data":[{"asks":[["0.0155","305","0","1"]],"bids":[["0.011","305","0","1"]],"ts":"1654329628580"}]}"#;
+
+        assert_eq!(
+            1654329628580,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

@@ -146,3 +146,19 @@ fn ticker() {
         extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
     );
 }
+
+#[test]
+fn l2_snapshot() {
+    let raw_msg = r#"{"data":{"symbol":"BTC-USDT","b":[["30402.440000000000","0.001458"],["30370.910000000000","0.002482"],["30338.010000000000","0.000540"]],"ver":"876388569","s":[["30651.830000000000","0.003630"],["30686.780000000000","0.003420"],["30698.550000000000","0.004859"]]},"code":"0","msg":"success","timestamp":1654234202305,"startTime":null}"#;
+
+    assert_eq!(
+        1654234202305,
+        extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+            .unwrap()
+            .unwrap()
+    );
+    assert_eq!(
+        "BTC-USDT",
+        extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+    );
+}

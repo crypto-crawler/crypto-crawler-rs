@@ -54,31 +54,55 @@ struct WebsocketMsg<T: Sized> {
     params: Params<T>,
 }
 
-pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
-            msg
-        ))
-    })?;
-    let channel = ws_msg.params.channel.as_str();
-    let data = ws_msg.params.data;
+#[derive(Serialize, Deserialize)]
+struct RestfulResult {
+    timestamp: i64,
+    instrument_name: String,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
 
-    if channel.starts_with("chart.trades.") {
-        let symbol = channel.split('.').nth(2).unwrap();
-        Ok(symbol.to_string())
-    } else if data.is_object() {
-        Ok(data["instrument_name"].as_str().unwrap().to_string())
-    } else if data.is_array() {
-        let arr = data.as_array().unwrap();
-        let symbol = arr
-            .iter()
-            .map(|v| v["instrument_name"].as_str().unwrap())
-            .next()
-            .unwrap();
-        Ok(symbol.to_string())
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RestfulMsg {
+    jsonrpc: String,
+    usIn: i64,
+    usOut: i64,
+    usDiff: i64,
+    testnet: bool,
+    result: RestfulResult,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
+    if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
+        let channel = ws_msg.params.channel.as_str();
+        let data = ws_msg.params.data;
+
+        if channel.starts_with("chart.trades.") {
+            let symbol = channel.split('.').nth(2).unwrap();
+            Ok(symbol.to_string())
+        } else if data.is_object() {
+            Ok(data["instrument_name"].as_str().unwrap().to_string())
+        } else if data.is_array() {
+            let arr = data.as_array().unwrap();
+            let symbol = arr
+                .iter()
+                .map(|v| v["instrument_name"].as_str().unwrap())
+                .next()
+                .unwrap();
+            Ok(symbol.to_string())
+        } else {
+            Err(SimpleError::new(format!("Unknown message format: {}", msg)))
+        }
+    } else if let Ok(rest_msg) = serde_json::from_str::<RestfulMsg>(msg) {
+        Ok(rest_msg.result.instrument_name)
     } else {
-        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
+        Err(SimpleError::new(format!(
+            "Unsupported message format {}",
+            msg
+        )))
     }
 }
 
@@ -86,29 +110,35 @@ pub(crate) fn extract_timestamp(
     _market_type: MarketType,
     msg: &str,
 ) -> Result<Option<i64>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
-            msg
-        ))
-    })?;
-    let channel = ws_msg.params.channel.as_str();
-    let data = ws_msg.params.data;
-    if channel.starts_with("chart.trades.") {
-        Ok(Some(data["tick"].as_i64().unwrap()))
-    } else if data.is_object() {
-        Ok(Some(data["timestamp"].as_i64().unwrap()))
-    } else if data.is_array() {
-        let arr = data.as_array().unwrap();
-        let timestamp = arr.iter().map(|x| x["timestamp"].as_i64().unwrap()).max();
+    if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
+        let channel = ws_msg.params.channel.as_str();
+        let data = ws_msg.params.data;
+        if channel.starts_with("chart.trades.") {
+            Ok(Some(data["tick"].as_i64().unwrap()))
+        } else if data.is_object() {
+            Ok(Some(data["timestamp"].as_i64().unwrap()))
+        } else if data.is_array() {
+            let arr = data.as_array().unwrap();
+            let timestamp = arr.iter().map(|x| x["timestamp"].as_i64().unwrap()).max();
 
-        if timestamp.is_none() {
-            Err(SimpleError::new(format!("data is empty in {}", msg)))
+            if timestamp.is_none() {
+                Err(SimpleError::new(format!("data is empty in {}", msg)))
+            } else {
+                Ok(timestamp)
+            }
         } else {
-            Ok(timestamp)
+            Err(SimpleError::new(format!(
+                "Unsupported message format: {}",
+                msg
+            )))
         }
+    } else if let Ok(rest_msg) = serde_json::from_str::<RestfulMsg>(msg) {
+        Ok(Some(rest_msg.result.timestamp))
     } else {
-        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
+        Err(SimpleError::new(format!(
+            "Unsupported message format {}",
+            msg
+        )))
     }
 }
 

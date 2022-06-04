@@ -916,3 +916,90 @@ mod ticker {
         );
     }
 }
+
+#[cfg(test)]
+mod l2_snapshot {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"current":1654249533113,"update":1654249526591,"asks":[["30168.33","0.1824"],["30177.13","0.18"],["30178.62","0.2495"],["30178.63","1.7315"],["30179.94","0.0158"]],"bids":[["30168.32","0.5748"],["30165.14","0.0158"],["30164.8","0.035"],["30163.13","0.0023"],["30162.67","0.1252"]]}"#;
+
+        assert_eq!(
+            1654249533113,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"current":1654249503.599,"asks":[{"s":564,"p":"30200.9"},{"s":535,"p":"30203.9"},{"s":564,"p":"30210"},{"s":497,"p":"30219"},{"s":487,"p":"30231.1"}],"bids":[{"s":564,"p":"30166.6"},{"s":535,"p":"30163.6"},{"s":513,"p":"30157.6"},{"s":546,"p":"30148.5"},{"s":487,"p":"30136.5"}],"update":1654249503.437}"#;
+
+        assert_eq!(
+            1654249503599,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_future() {
+        let raw_msg = r#"{"current":1654251300.95,"asks":[{"s":185,"p":"30199.7"},{"s":176,"p":"30202.7"},{"s":167,"p":"30208.8"},{"s":177,"p":"30217.8"},{"s":158,"p":"30229.9"}],"bids":[{"s":185,"p":"30174.5"},{"s":176,"p":"30171.5"},{"s":167,"p":"30165.4"},{"s":161,"p":"30156.4"},{"s":173,"p":"30144.3"}],"update":1654251300.797}"#;
+
+        assert_eq!(
+            1654251300950,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"current":1654251302.768,"asks":[{"s":475,"p":"30079.1"},{"s":4000,"p":"30079.2"},{"s":2408,"p":"30079.3"},{"s":10558,"p":"30079.6"},{"s":10,"p":"30090.8"}],"bids":[{"s":2,"p":"30061.6"},{"s":3,"p":"30061.5"},{"s":100,"p":"30056"},{"s":8036,"p":"30050.1"},{"s":500,"p":"30050"}],"update":1654251302.754}"#;
+
+        assert_eq!(
+            1654251302768,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"current":1654251438.92,"asks":[{"s":75703,"p":"30144.6"},{"s":30094,"p":"30144.7"},{"s":1750,"p":"30146.3"},{"s":1991,"p":"30146.4"},{"s":1658,"p":"30146.8"}],"bids":[{"s":324289,"p":"30144.5"},{"s":1369,"p":"30144"},{"s":1399,"p":"30143.9"},{"s":1376,"p":"30143.8"},{"s":1825,"p":"30143.4"}],"update":1654251438.902}"#;
+
+        assert_eq!(
+            1654251438920,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

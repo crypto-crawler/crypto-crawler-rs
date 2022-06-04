@@ -1274,3 +1274,93 @@ mod candlestick {
         );
     }
 }
+
+#[cfg(test)]
+mod l2_snapshot {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"lastUpdateId":19689626134,"bids":[["30618.66000000","1.82881000"],["30618.61000000","0.02494000"],["30618.45000000","0.94258000"]],"asks":[["30618.67000000","3.28780000"],["30618.69000000","0.44985000"],["30618.70000000","0.03360000"]]}"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"lastUpdateId":466364745366,"E":1654222838718,"T":1654222838710,"symbol":"BTCUSD_220624","pair":"BTCUSD","bids":[["30626.7","827"],["30624.4","11"],["30624.3","1"]],"asks":[["30626.8","114"],["30627.7","30"],["30630.2","4"]]}"#;
+
+        assert_eq!(
+            "BTCUSD_220624",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654222838718,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_future() {
+        let raw_msg = r#"{"lastUpdateId":1570223094073,"E":1654231622340,"T":1654231622320,"bids":[["30564.6","0.024"],["30561.1","0.003"],["30561.0","0.055"]],"asks":[["30569.5","0.141"],["30569.6","0.004"],["30569.7","0.067"]]}"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654231622340,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"lastUpdateId":466437000380,"E":1654232431449,"T":1654232431434,"symbol":"BTCUSD_PERP","pair":"BTCUSD","bids":[["30401.8","12984"],["30401.5","53"],["30401.4","150"]],"asks":[["30401.9","1788"],["30402.0","1"],["30402.1","384"]]}"#;
+
+        assert_eq!(
+            "BTCUSD_PERP",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654232431449,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"lastUpdateId":1570255790655,"E":1654232606707,"T":1654232606695,"bids":[["30430.80","0.482"],["30430.00","0.012"],["30429.90","0.001"]],"asks":[["30430.90","1.685"],["30431.00","0.001"],["30431.30","0.361"]]}"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654232606707,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+}

@@ -456,13 +456,13 @@ mod ticker {
 
         assert_eq!(
             1654161290233,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg)
                 .unwrap()
                 .unwrap()
         );
         assert_eq!(
             "BTCUSDM22",
-            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap()
         );
     }
 
@@ -472,13 +472,13 @@ mod ticker {
 
         assert_eq!(
             1654161291734,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg)
                 .unwrap()
                 .unwrap()
         );
         assert_eq!(
             "BTCUSDM22",
-            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap()
         );
     }
 
@@ -488,13 +488,13 @@ mod ticker {
 
         assert_eq!(
             1654161517001,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
                 .unwrap()
                 .unwrap()
         );
         assert_eq!(
             "BTCUSD",
-            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
         );
     }
 
@@ -504,13 +504,13 @@ mod ticker {
 
         assert_eq!(
             1654161517201,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
                 .unwrap()
                 .unwrap()
         );
         assert_eq!(
             "BTCUSD",
-            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
         );
     }
 
@@ -536,6 +536,63 @@ mod ticker {
 
         assert_eq!(
             1654161578478,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}
+
+#[cfg(test)]
+mod l2_snapshot {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"ret_code":0,"ret_msg":"OK","ext_code":"","ext_info":"","result":[{"symbol":"BTCUSDM22","price":"30489","size":58149,"side":"Buy"},{"symbol":"BTCUSDM22","price":"30488.5","size":32603,"side":"Buy"},{"symbol":"BTCUSDM22","price":"30488","size":21611,"side":"Buy"},{"symbol":"BTCUSDM22","price":"30489.5","size":25574,"side":"Sell"},{"symbol":"BTCUSDM22","price":"30490","size":15317,"side":"Sell"},{"symbol":"BTCUSDM22","price":"30490.5","size":9282,"side":"Sell"}],"time_now":"1654244100.527475"}"#;
+
+        assert_eq!(
+            "BTCUSDM22",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654244100527,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"ret_code":0,"ret_msg":"OK","ext_code":"","ext_info":"","result":[{"symbol":"BTCUSD","price":"30440","size":31756,"side":"Buy"},{"symbol":"BTCUSD","price":"30436","size":13371,"side":"Buy"},{"symbol":"BTCUSD","price":"30434","size":4783,"side":"Buy"},{"symbol":"BTCUSD","price":"30440.5","size":666758,"side":"Sell"},{"symbol":"BTCUSD","price":"30441.5","size":35117,"side":"Sell"},{"symbol":"BTCUSD","price":"30442.5","size":20100,"side":"Sell"}],"time_now":"1654245002.615582"}"#;
+
+        assert_eq!(
+            "BTCUSD",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654245002615,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"ret_code":0,"ret_msg":"OK","ext_code":"","ext_info":"","result":[{"symbol":"BTCUSDT","price":"30453.5","size":16.872,"side":"Buy"},{"symbol":"BTCUSDT","price":"30453","size":0.01,"side":"Buy"},{"symbol":"BTCUSDT","price":"30451.5","size":0.66,"side":"Buy"},{"symbol":"BTCUSDT","price":"30454","size":25.093,"side":"Sell"},{"symbol":"BTCUSDT","price":"30454.5","size":0.309,"side":"Sell"},{"symbol":"BTCUSDT","price":"30455","size":1.12,"side":"Sell"}],"time_now":"1654245012.731544"}"#;
+
+        assert_eq!(
+            1654245012731,
             extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
                 .unwrap()
                 .unwrap()

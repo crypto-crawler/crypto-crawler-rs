@@ -13,25 +13,36 @@ use simple_error::SimpleError;
 const EXCHANGE_NAME: &str = "zb";
 
 pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to HashMap<String, Value>",
-            msg
-        ))
-    })?;
-    let channel = obj["channel"].as_str().unwrap();
-
-    if channel.contains('.') {
-        let symbol = channel.split('.').next().unwrap();
-        Ok(symbol.to_string())
-    } else if channel.contains('_') {
-        let symbol = channel.split('_').next().unwrap();
-        Ok(symbol.to_string())
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to parse the JSON string {}", msg)))?;
+    if let Some(channel) = obj.get("channel") {
+        // websocket
+        let channel = channel.as_str().unwrap();
+        if channel.contains('.') {
+            let symbol = channel.split('.').next().unwrap();
+            Ok(symbol.to_string())
+        } else if channel.contains('_') {
+            let symbol = channel.split('_').next().unwrap();
+            Ok(symbol.to_string())
+        } else {
+            Err(SimpleError::new(format!(
+                "Failed to extract symbol from {}",
+                msg
+            )))
+        }
+    } else if obj.contains_key("asks") && obj.contains_key("bids") {
+        // e.g., https://api.zbex.site/data/v1/depth?market=btc_usdt&size=50
+        Ok("NONE".to_string())
+    } else if obj.contains_key("code") && obj.contains_key("desc") && obj.contains_key("data") {
+        // ZB linear_swap RESTful
+        let data = obj["data"].as_object().unwrap();
+        if let Some(symbol) = data.get("symbol") {
+            Ok(symbol.as_str().unwrap().to_string())
+        } else {
+            Ok("NONE".to_string())
+        }
     } else {
-        Err(SimpleError::new(format!(
-            "Failed to extract symbol from {}",
-            msg
-        )))
+        Err(SimpleError::new(format!("Unknown message format {}", msg)))
     }
 }
 

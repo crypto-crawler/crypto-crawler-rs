@@ -762,3 +762,74 @@ mod ticker {
         );
     }
 }
+
+#[cfg(test)]
+mod l2_snapshot {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"code":"200000","data":{"time":1654325095225,"sequence":"1630423725254","bids":[["29701.4","1.1244206"],["29701.2","0.00006727"],["29700.1","0.49009689"]],"asks":[["29701.5","0.00023088"],["29701.6","0.48701789"],["29701.7","0.00034976"]]}}"#;
+
+        assert_eq!(
+            1654325095225,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"code":"200000","data":{"symbol":"XBTMM22","sequence":1647109356374,"asks":[[29680.0,1400],[29688.0,1365],[29695.0,150]],"bids":[[29665.0,5463],[29664.0,1300],[29651.0,1344]],"ts":1654325996914997044}}"#;
+
+        assert_eq!(
+            1654325996914,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBTMM22",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"code":"200000","data":{"symbol":"XBTUSDM","sequence":1638901902423,"asks":[[29626.0,2521],[29627.0,16476],[29630.0,6266]],"bids":[[29625.0,15226],[29624.0,6845],[29623.0,2521]],"ts":1654326900579981822}}"#;
+
+        assert_eq!(
+            1654326900579,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBTUSDM",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"code":"200000","data":{"symbol":"XBTUSDTM","sequence":1645045405918,"asks":[[29641.0,30109],[29642.0,7922],[29643.0,5820]],"bids":[[29640.0,13007],[29639.0,1072],[29638.0,169]],"ts":1654326922830525196}}"#;
+
+        assert_eq!(
+            1654326922830,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "XBTUSDTM",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

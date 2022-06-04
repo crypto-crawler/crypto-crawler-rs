@@ -15,32 +15,38 @@ use simple_error::SimpleError;
 const EXCHANGE_NAME: &str = "binance";
 
 pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to HashMap<String, Value>",
-            msg
-        ))
-    })?;
-
-    let stream = obj["stream"].as_str().unwrap();
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to parse the JSON string {}", msg)))?;
+    let stream = if obj.contains_key("stream") && obj["stream"].is_string() {
+        obj["stream"].as_str().unwrap().to_string()
+    } else {
+        "".to_string()
+    };
     if stream.starts_with('!') && stream.ends_with("@arr") {
         // for example: !ticker@arr, !markPrice@arr
         return Ok("ALL".to_string());
     }
 
-    let data = obj
-        .get("data")
-        .expect("The data field does NOT exist")
-        .as_object()
-        .expect("The data field is NOT an object");
-    if data.contains_key("s") {
-        let symbol = data["s"].as_str().ok_or_else(|| {
-            SimpleError::new(format!("There is no s field in the data field of {}", msg))
-        })?;
+    let data = if obj.contains_key("stream") {
+        serde_json::from_value::<HashMap<String, Value>>(obj["data"].clone()).unwrap()
+    } else {
+        obj
+    };
+
+    if data.contains_key("s") && data["s"].is_string() {
+        let symbol = data["s"].as_str().unwrap();
         Ok(symbol.to_string())
-    } else if !(stream.starts_with('!') && stream.ends_with("@arr")) {
+    } else if data.contains_key("symbol") && data["symbol"].is_string() {
+        let symbol = data["symbol"].as_str().unwrap();
+        Ok(symbol.to_string())
+    } else if stream.contains('@') && !(stream.starts_with('!') && stream.ends_with("@arr")) {
         let symbol = stream.split('@').next().unwrap();
         Ok(symbol.to_uppercase())
+    } else if data.contains_key("lastUpdateId")
+        && data.contains_key("asks")
+        && data.contains_key("bids")
+    {
+        Ok("NONE".to_string())
     } else {
         Err(SimpleError::new(format!(
             "Failed to extract symbol from {}",
@@ -50,13 +56,13 @@ pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
 }
 
 pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to HashMap<String, Value>",
-            msg
-        ))
-    })?;
-    let data = obj.get("data").expect("The data field does NOT exist");
+    let obj = serde_json::from_str::<Value>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to parse the JSON string {}", msg)))?;
+    let data = if let Some(data) = obj.get("data") {
+        data
+    } else {
+        &obj
+    };
     if data.is_object() {
         Ok(data.get("E").map(|x| x.as_i64().unwrap())) // !bookTicker has no E field
     } else if data.is_array() {

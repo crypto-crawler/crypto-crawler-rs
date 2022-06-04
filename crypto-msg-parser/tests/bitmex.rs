@@ -782,3 +782,38 @@ mod candlestick {
         );
     }
 }
+
+#[cfg(test)]
+mod l2_snapshot {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"[{"symbol": "XBTUSD", "id": 8700000000, "side": "Sell", "size": 1007600, "price": 1000000}, {"symbol": "XBTUSD", "id": 8733748000, "side": "Sell", "size": 10000, "price": 662520}, {"symbol": "XBTUSD", "id": 8734110000, "side": "Sell", "size": 20000, "price": 658900}, {"symbol": "XBTUSD", "id": 8799999850, "side": "Buy", "size": 6000, "price": 1.5}, {"symbol": "XBTUSD", "id": 8799999900, "side": "Buy", "size": 500, "price": 1}, {"symbol": "XBTUSD", "id": 8799999950, "side": "Buy", "size": 1500, "price": 0.5}]"#;
+
+        assert_eq!(
+            "XBTUSD",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"[{"symbol": "XBTUSDT", "id": 73199872654, "side": "Sell", "size": 6000, "price": 63673}, {"symbol": "XBTUSDT", "id": 73199896000, "side": "Sell", "size": 5000, "price": 52000}, {"symbol": "XBTUSDT", "id": 73199899220, "side": "Sell", "size": 24000, "price": 50390}, {"symbol": "XBTUSDT", "id": 73199999997, "side": "Buy", "size": 16000000, "price": 1.5}, {"symbol": "XBTUSDT", "id": 73199999998, "side": "Buy", "size": 30000000, "price": 1}, {"symbol": "XBTUSDT", "id": 73199999999, "side": "Buy", "size": 85000000, "price": 0.5}]"#;
+
+        assert_eq!(
+            "XBTUSDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

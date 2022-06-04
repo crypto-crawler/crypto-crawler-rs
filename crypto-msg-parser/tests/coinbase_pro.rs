@@ -137,3 +137,18 @@ fn ticker() {
         extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
     );
 }
+
+#[test]
+fn l2_snapshot() {
+    let raw_msg = r#"{"bids": [["0.1135", "35", 1], ["0.1134", "20606.7", 5], ["0.1133", "41561.8", 8], ["0.1132", "51132.8", 4], ["0.1131", "745", 2]], "asks": [["0.1137", "10113.4", 4], ["0.1138", "49781.3", 6], ["0.1139", "34339.9", 6], ["0.114", "34409.1", 4], ["0.1141", "4126.6", 2]], "sequence": 406959136, "auction_mode": false, "auction": null}"#;
+
+    assert_eq!(
+        "NONE",
+        extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+    );
+
+    assert_eq!(
+        None,
+        extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+    );
+}

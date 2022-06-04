@@ -1092,3 +1092,74 @@ mod ticker {
         );
     }
 }
+
+#[cfg(test)]
+mod l2_snapshot {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"ch":"market.btcusdt.depth.step0","status":"ok","ts":1654253117316,"tick":{"bids":[[29805.62,0.309487],[29804.73,2.0E-4],[29804.43,0.030335],[29804.42,0.325215],[29802.06,0.03]],"asks":[[29805.63,1.650216],[29805.66,0.02902],[29807.73,2.0E-4],[29808.1,0.145506],[29808.74,0.420813]],"version":155671698426,"ts":1654253116701}}"#;
+
+        assert_eq!(
+            1654253117316,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "btcusdt",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"ch":"market.BTC_CQ.depth.step0","status":"ok","tick":{"asks":[[29799.58,2],[29802.55,216],[29802.79,9],[29803.64,2],[29804.19,20]],"bids":[[29795.25,24],[29795.24,1],[29793.3,2],[29792.15,19],[29792.14,400]],"ch":"market.BTC_CQ.depth.step0","id":1654253101,"mrid":222601100912603,"ts":1654253101500,"version":1654253101},"ts":1654253101541}"#;
+
+        assert_eq!(
+            1654253101541,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC_CQ",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"ch":"market.BTC-USD.depth.step0","status":"ok","tick":{"asks":[[29768.2,915],[29769.1,400],[29769.5,50],[29770.6,400],[29771,1036]],"bids":[[29768.1,516],[29768,1],[29767.4,150],[29767.1,25],[29765.5,218]],"ch":"market.BTC-USD.depth.step0","id":1654253101,"mrid":136558127685,"ts":1654253101089,"version":1654253101},"ts":1654253101098}"#;
+
+        assert_eq!(
+            1654253101098,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-USD",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"ch":"market.BTC-USDT.depth.step0","status":"ok","tick":{"asks":[[29796.8,4025],[29797.1,49],[29797.2,16],[29797.3,700],[29797.5,4]],"bids":[[29796.7,305],[29795.9,265],[29795.6,1],[29794.4,165],[29793.7,165]],"ch":"market.BTC-USDT.depth.step0","id":1654253113,"mrid":108917760661,"ts":1654253113226,"version":1654253113},"ts":1654253113251}"#;
+
+        assert_eq!(
+            1654253113251,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

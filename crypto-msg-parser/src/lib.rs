@@ -12,6 +12,9 @@ pub use order::Order;
 use simple_error::SimpleError;
 
 /// Extract the symbol from the message.
+///
+/// If the message contains multiple symbols, `ALL` is returned;
+/// If the message has no symbol, `NONE` is returned.
 pub fn extract_symbol(
     exchange: &str,
     market_type: MarketType,

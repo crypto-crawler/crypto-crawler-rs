@@ -569,3 +569,38 @@ mod ticker {
         );
     }
 }
+
+#[cfg(test)]
+mod l2_snapshot {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"[[30428,1,0.01],[30426,1,0.1],[30424,1,0.2954],[30423,1,0.3333],[30422,3,0.72231346],[30420,2,0.3349],[30416,2,0.29700845],[30415,3,0.482257],[30414,1,0.4],[30413,1,0.15439084]]"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"[[28293,1,0.0350506],[28291,1,0.0526735],[28289,2,0.1037385],[28287,1,0.1059222],[28285,1,0.1324028],[28284,1,0.1765371],[28282,1,0.2206713],[28280,1,0.2427385],[28277,1,0.2648056]]"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

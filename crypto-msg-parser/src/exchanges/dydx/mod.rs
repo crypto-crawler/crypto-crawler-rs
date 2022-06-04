@@ -7,11 +7,19 @@ use crypto_market_type::MarketType;
 use serde_json::Value;
 use simple_error::SimpleError;
 
-use self::message::WebsocketMsg;
+use self::message::{L2SnapshotRawMsg, WebsocketMsg};
 
 pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).unwrap();
-    Ok(ws_msg.id)
+    if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
+        Ok(ws_msg.id)
+    } else if serde_json::from_str::<L2SnapshotRawMsg>(msg).is_ok() {
+        Ok("NONE".to_string())
+    } else {
+        Err(SimpleError::new(format!(
+            "Unsupported message format {}",
+            msg
+        )))
+    }
 }
 
 pub(crate) fn extract_timestamp(

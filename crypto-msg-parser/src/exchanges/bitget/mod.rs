@@ -17,10 +17,29 @@ const EXCHANGE_NAME: &str = "bitget";
 pub(crate) fn extract_symbol(market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
     let obj = serde_json::from_str::<HashMap<String, Value>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to parse JSON string {}", msg)))?;
-    if obj.contains_key("data") && obj.contains_key("table") {
+    if !obj.contains_key("data") {
+        return Err(SimpleError::new(format!("No data field in {}", msg)));
+    }
+    if obj.contains_key("table") {
         before20220429::extract_symbol(market_type, msg)
-    } else if obj.contains_key("data") && obj.contains_key("arg") {
+    } else if obj.contains_key("arg") {
         bitget_mix::extract_symbol(msg)
+    } else if obj.contains_key("code") {
+        let code = obj["code"].as_str().unwrap();
+        // from RESTful API
+        if code == "00000" {
+            let symbol = obj["data"].get("symbol").map(|x| x.as_str().unwrap());
+            if let Some(symbol) = symbol {
+                Ok(symbol.to_string())
+            } else {
+                Ok("NONE".to_string())
+            }
+        } else {
+            Err(SimpleError::new(format!(
+                "This is a failed HTTP response {}",
+                msg
+            )))
+        }
     } else {
         Err(SimpleError::new(format!(
             "Failed to extract symbol from {}",
@@ -35,10 +54,27 @@ pub(crate) fn extract_timestamp(
 ) -> Result<Option<i64>, SimpleError> {
     let obj = serde_json::from_str::<HashMap<String, Value>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to parse JSON string {}", msg)))?;
-    if obj.contains_key("data") && obj.contains_key("table") {
+    if !obj.contains_key("data") {
+        return Err(SimpleError::new(format!("No data field in {}", msg)));
+    }
+    if obj.contains_key("table") {
         before20220429::extract_timestamp(market_type, msg)
-    } else if obj.contains_key("data") && obj.contains_key("arg") {
+    } else if obj.contains_key("arg") {
         bitget_mix::extract_timestamp(msg)
+    } else if obj.contains_key("code") {
+        let code = obj["code"].as_str().unwrap();
+        // from RESTful API
+        if code == "00000" {
+            let timestamp = obj["data"]
+                .get("timestamp")
+                .map(|x| x.as_str().unwrap().parse::<i64>().unwrap());
+            Ok(timestamp)
+        } else {
+            Err(SimpleError::new(format!(
+                "This is a failed HTTP response {}",
+                msg
+            )))
+        }
     } else {
         Err(SimpleError::new(format!(
             "Failed to extract timestamp from {}",

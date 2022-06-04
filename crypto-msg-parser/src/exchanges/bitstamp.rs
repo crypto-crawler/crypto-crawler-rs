@@ -47,35 +47,47 @@ struct WebsocketMsg<T: Sized> {
 }
 
 pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
+    let json_obj = serde_json::from_str::<HashMap<String, Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to parse the JSON string {}", msg)))?;
+    if let Some(channel) = json_obj.get("channel") {
+        let symbol = channel.as_str().unwrap().split('_').last().unwrap();
+        Ok(symbol.to_string())
+    } else if json_obj.contains_key("asks") && json_obj.contains_key("bids") {
+        // l2_snapshot has no symbol
+        Ok("NONE".to_string())
+    } else {
+        Err(SimpleError::new(format!(
+            "Failed to extract symbol from {}",
             msg
-        ))
-    })?;
-    let channel = ws_msg.channel;
-    let symbol = channel.split('_').last().unwrap();
-    Ok(symbol.to_string())
+        )))
+    }
 }
 
 pub(crate) fn extract_timestamp(
     _market_type: MarketType,
     msg: &str,
 ) -> Result<Option<i64>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
-            msg
+    let json_obj = serde_json::from_str::<HashMap<String, Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to parse the JSON string {}", msg)))?;
+    if let Some(data) = json_obj.get("data") {
+        Ok(Some(
+            data["microtimestamp"]
+                .as_str()
+                .unwrap()
+                .parse::<i64>()
+                .unwrap()
+                / 1000,
         ))
-    })?;
-    Ok(Some(
-        ws_msg.data["microtimestamp"]
-            .as_str()
-            .unwrap()
-            .parse::<i64>()
-            .unwrap()
-            / 1000,
-    ))
+    } else if let Some(microtimestamp) = json_obj.get("microtimestamp") {
+        Ok(Some(
+            microtimestamp.as_str().unwrap().parse::<i64>().unwrap() / 1000,
+        ))
+    } else {
+        Err(SimpleError::new(format!(
+            "No microtimestamp field in  {}",
+            msg
+        )))
+    }
 }
 
 pub(crate) fn parse_trade(

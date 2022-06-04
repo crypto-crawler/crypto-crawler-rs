@@ -67,43 +67,79 @@ struct WebsocketMsg<T: Sized> {
     extra: HashMap<String, Value>,
 }
 
+#[derive(Serialize, Deserialize)]
+struct RestfulMsg<T: Sized> {
+    code: String,
+    msg: String,
+    data: Vec<T>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
 pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(SimpleError::from)?;
-    Ok(ws_msg.arg.instId)
+    if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
+        Ok(ws_msg.arg.instId)
+    } else if let Ok(rest_msg) = serde_json::from_str::<RestfulMsg<HashMap<String, Value>>>(msg) {
+        if rest_msg.code != "0" {
+            return Err(SimpleError::new(format!("Error HTTP response {}", msg)));
+        }
+        let first_elem = &rest_msg.data[0];
+        if let Some(symbol) = first_elem.get("symbol") {
+            Ok(symbol.as_str().unwrap().to_string())
+        } else {
+            Ok("NONE".to_string())
+        }
+    } else {
+        Err(SimpleError::new(format!(
+            "Unsupported message format {}",
+            msg
+        )))
+    }
 }
 
 pub(crate) fn extract_timestamp(
     _market_type: MarketType,
     msg: &str,
 ) -> Result<Option<i64>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
-            msg
-        ))
-    })?;
-    if ws_msg.arg.channel == "funding-rate" {
-        return Ok(None);
-    }
-    let channel = ws_msg.arg.channel.as_str();
-    let timestamp = ws_msg
-        .data
-        .iter()
-        .map(|x| {
-            (if channel.starts_with("candle") {
-                x[0].as_str().unwrap()
-            } else {
-                x["ts"].as_str().unwrap()
+    if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
+        if ws_msg.arg.channel == "funding-rate" {
+            return Ok(None);
+        }
+        let channel = ws_msg.arg.channel.as_str();
+        let timestamp = ws_msg
+            .data
+            .iter()
+            .map(|x| {
+                (if channel.starts_with("candle") {
+                    x[0].as_str().unwrap()
+                } else {
+                    x["ts"].as_str().unwrap()
+                })
+                .parse::<i64>()
+                .unwrap()
             })
-            .parse::<i64>()
-            .unwrap()
-        })
-        .max();
+            .max();
 
-    if timestamp.is_none() {
-        Err(SimpleError::new(format!("data is empty in {}", msg)))
-    } else {
+        if timestamp.is_none() {
+            Err(SimpleError::new(format!("data is empty in {}", msg)))
+        } else {
+            Ok(timestamp)
+        }
+    } else if let Ok(rest_msg) = serde_json::from_str::<RestfulMsg<HashMap<String, Value>>>(msg) {
+        if rest_msg.code != "0" {
+            return Err(SimpleError::new(format!("Error HTTP response {}", msg)));
+        }
+        let timestamp = rest_msg
+            .data
+            .iter()
+            .map(|obj| obj["ts"].as_str().unwrap().parse::<i64>().unwrap())
+            .max();
         Ok(timestamp)
+    } else {
+        Err(SimpleError::new(format!(
+            "Unsupported message format {}",
+            msg
+        )))
     }
 }
 

@@ -80,60 +80,97 @@ struct RawOrderbookMsg {
 }
 
 pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
-    let ws_msg = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to HashMap<String, Value>",
+    let json_obj = serde_json::from_str::<HashMap<String, Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to parse the JSON string {}", msg)))?;
+    if json_obj.contains_key("topic") && json_obj["topic"].is_string() {
+        let symbol = json_obj["topic"]
+            .as_str()
+            .unwrap()
+            .split('.')
+            .last()
+            .unwrap();
+        Ok(symbol.to_string())
+    } else if json_obj.contains_key("ret_code")
+        && json_obj.contains_key("ret_msg")
+        && json_obj.contains_key("result")
+    {
+        // Data from RESTful APIs
+        if json_obj["ret_code"].as_i64().unwrap() != 0 {
+            return Err(SimpleError::new(format!("Error HTTP response {}", msg)));
+        }
+        let arr = json_obj["result"].as_array().unwrap();
+        Ok(arr[0]["symbol"].as_str().unwrap().to_string())
+    } else {
+        Err(SimpleError::new(format!(
+            "Failed to extract symbol from {}",
             msg
-        ))
-    })?;
-    let symbol = ws_msg["topic"].as_str().unwrap().split('.').last().unwrap();
-    Ok(symbol.to_string())
+        )))
+    }
 }
 
 pub(crate) fn extract_timestamp(
     _market_type: MarketType,
     msg: &str,
 ) -> Result<Option<i64>, SimpleError> {
-    let ws_msg = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to HashMap<String, Value>",
-            msg
-        ))
-    })?;
-    let msg_type = ws_msg["topic"].as_str().unwrap().split('.').next().unwrap();
-    match msg_type {
-        "trade" => {
-            let raw_trades = ws_msg["data"].as_array().unwrap();
-            let timestamp = raw_trades
-                .iter()
-                .map(|raw_trade| {
-                    if raw_trade["trade_time_ms"].is_i64() {
-                        raw_trade["trade_time_ms"].as_i64().unwrap()
-                    } else {
-                        raw_trade["trade_time_ms"]
-                            .as_str()
-                            .unwrap()
-                            .parse::<i64>()
-                            .unwrap()
-                    }
-                })
-                .max();
+    let json_obj = serde_json::from_str::<HashMap<String, Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to parse the JSON string {}", msg)))?;
+    if json_obj.contains_key("topic") && json_obj["topic"].is_string() {
+        let msg_type = json_obj["topic"]
+            .as_str()
+            .unwrap()
+            .split('.')
+            .next()
+            .unwrap();
+        match msg_type {
+            "trade" => {
+                let raw_trades = json_obj["data"].as_array().unwrap();
+                let timestamp = raw_trades
+                    .iter()
+                    .map(|raw_trade| {
+                        if raw_trade["trade_time_ms"].is_i64() {
+                            raw_trade["trade_time_ms"].as_i64().unwrap()
+                        } else {
+                            raw_trade["trade_time_ms"]
+                                .as_str()
+                                .unwrap()
+                                .parse::<i64>()
+                                .unwrap()
+                        }
+                    })
+                    .max();
 
-            if timestamp.is_none() {
-                Err(SimpleError::new(format!("data is empty in {}", msg)))
-            } else {
-                Ok(timestamp)
+                if timestamp.is_none() {
+                    Err(SimpleError::new(format!("data is empty in {}", msg)))
+                } else {
+                    Ok(timestamp)
+                }
+            }
+            _ => {
+                let timestamp_e6 = &json_obj["timestamp_e6"];
+                let timestamp = if timestamp_e6.is_i64() {
+                    timestamp_e6.as_i64().unwrap()
+                } else {
+                    timestamp_e6.as_str().unwrap().parse::<i64>().unwrap()
+                } / 1000;
+                Ok(Some(timestamp))
             }
         }
-        _ => {
-            let timestamp_e6 = &ws_msg["timestamp_e6"];
-            let timestamp = if timestamp_e6.is_i64() {
-                timestamp_e6.as_i64().unwrap()
-            } else {
-                timestamp_e6.as_str().unwrap().parse::<i64>().unwrap()
-            } / 1000;
-            Ok(Some(timestamp))
+    } else if json_obj.contains_key("ret_code")
+        && json_obj.contains_key("ret_msg")
+        && json_obj.contains_key("result")
+    {
+        // Data from RESTful APIs
+        if json_obj["ret_code"].as_i64().unwrap() != 0 {
+            return Err(SimpleError::new(format!("Error HTTP response {}", msg)));
         }
+        Ok(json_obj
+            .get("time_now")
+            .map(|x| (x.as_str().unwrap().parse::<f64>().unwrap() * 1000.0) as i64))
+    } else {
+        Err(SimpleError::new(format!(
+            "Failed to extract timestamp from {}",
+            msg
+        )))
     }
 }
 

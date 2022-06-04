@@ -3,6 +3,7 @@ use crypto_msg_type::MessageType;
 
 use crate::{exchanges::utils::calc_quantity_and_volume, Order, OrderBookMsg, TradeMsg, TradeSide};
 
+use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
@@ -76,18 +77,34 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     })?;
     if obj.contains_key("product_id") {
         Ok(obj.get("product_id").unwrap().as_str().unwrap().to_string())
+    } else if obj.contains_key("serverTime") && obj.contains_key("result") {
+        // RESTful API
+        if obj["result"].as_str().unwrap() != "success" {
+            Err(SimpleError::new(format!("Error HTTP response {}", msg)))
+        } else if obj.contains_key("orderBook") {
+            Ok("NONE".to_string())
+        } else {
+            Err(SimpleError::new(format!(
+                "Unsupported HTTP message {}",
+                msg
+            )))
+        }
     } else {
         Err(SimpleError::new(format!("No product_id found in {}", msg)))
     }
 }
 
 pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
-    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to HashMap<String, Value>",
-            msg
-        ))
-    })?;
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg)
+        .map_err(|_e| SimpleError::new(format!("Failed to parse the JSON string {}", msg)))?;
+    if obj.contains_key("serverTime") && obj.contains_key("result") {
+        // RESTful API
+        return Ok(Some(
+            DateTime::parse_from_rfc3339(obj["serverTime"].as_str().unwrap())
+                .unwrap()
+                .timestamp_millis(),
+        ));
+    }
     let feed = obj["feed"].as_str().unwrap();
     match feed {
         "trade" | "ticker" => Ok(Some(obj["time"].as_i64().unwrap())),

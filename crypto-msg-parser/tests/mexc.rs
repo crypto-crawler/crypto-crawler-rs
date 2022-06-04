@@ -673,3 +673,56 @@ mod ticker {
         );
     }
 }
+
+#[cfg(test)]
+mod l2_snapshot {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"code":200,"data":{"asks":[{"price":"29653.11","quantity":"2.401543"},{"price":"29653.12","quantity":"0.033048"},{"price":"29653.41","quantity":"0.40332"}],"bids":[{"price":"29653.08","quantity":"3.101382"},{"price":"29653.07","quantity":"0.018948"},{"price":"29653.04","quantity":"0.003084"}],"version":"1535017255"}}"#;
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"success":true,"code":0,"data":{"asks":[[29625,630,1],[29625.5,371,1],[29626,581,1]],"bids":[[29618,357,1],[29617.5,357,1],[29617,581,1]],"version":3094693618,"timestamp":1654326901060}}"#;
+
+        assert_eq!(
+            1654326901060,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"success":true,"code":0,"data":{"asks":[[29676.5,20696,2],[29677,19821,2],[29677.5,50122,2]],"bids":[[29675.5,59944,2],[29675,29676,2],[29674.5,15455,2]],"version":5216820883,"timestamp":1654328706778}}"#;
+
+        assert_eq!(
+            1654328706778,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

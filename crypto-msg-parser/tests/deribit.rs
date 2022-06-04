@@ -677,3 +677,60 @@ mod ticker {
         );
     }
 }
+
+#[cfg(test)]
+mod l2_snapshot {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"jsonrpc":"2.0","result":{"timestamp":1654245922403,"stats":{"volume_usd":10190920.0,"volume":335.62468116,"price_change":1.6501,"low":29846.0,"high":30976.5},"state":"open","settlement_price":30749.45,"open_interest":232318090,"min_price":30256.0,"max_price":31178.0,"mark_price":30717.33,"last_price":30709.5,"instrument_name":"BTC-30SEP22","index_price":30410.37,"estimated_delivery_price":30410.37,"change_id":45305026640,"bids":[[30718.5,2290.0],[30718.0,3000.0],[30714.0,5000.0]],"best_bid_price":30718.5,"best_bid_amount":2290.0,"best_ask_price":30723.0,"best_ask_amount":3000.0,"asks":[[30723.0,3000.0],[30723.5,29470.0],[30725.0,1380.0]]},"usIn":1654245922540414,"usOut":1654245922540910,"usDiff":496,"testnet":false}"#;
+
+        assert_eq!(
+            "BTC-30SEP22",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654245922403,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"jsonrpc":"2.0","result":{"timestamp":1654246806027,"stats":{"volume_usd":278922050.0,"volume":9229.89241729,"price_change":1.721,"low":29583.5,"high":30729.0},"state":"open","settlement_price":30458.76,"open_interest":560520540,"min_price":29980.5,"max_price":30893.61,"mark_price":30436.94,"last_price":30439.5,"instrument_name":"BTC-PERPETUAL","index_price":30418.45,"funding_8h":0.00002085,"estimated_delivery_price":30418.45,"current_funding":0.00010785,"change_id":45305261539,"bids":[[30434.5,600.0],[30433.0,15000.0],[30431.0,15010.0]],"best_bid_price":30434.5,"best_bid_amount":600.0,"best_ask_price":30435.0,"best_ask_amount":198440.0,"asks":[[30435.0,198440.0],[30438.5,1000.0],[30439.5,188330.0]]},"usIn":1654246806051360,"usOut":1654246806055238,"usDiff":3878,"testnet":false}"#;
+
+        assert_eq!(
+            "BTC-PERPETUAL",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654246806027,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn option() {
+        let raw_msg = r#"{"jsonrpc":"2.0","result":{"underlying_price":1806.5,"underlying_index":"ETH-24JUN22","timestamp":1654247489923,"stats":{"volume":1117.0,"price_change":-8.4507,"low":0.031,"high":0.036},"state":"open","settlement_price":0.03,"open_interest":15009.0,"min_price":0.009,"max_price":0.0795,"mark_price":0.0336,"mark_iv":86.54,"last_price":0.0325,"interest_rate":0.0,"instrument_name":"ETH-24JUN22-1600-P","index_price":1804.41,"greeks":{"vega":1.36169,"theta":-2.81237,"rho":-0.28927,"gamma":0.00084,"delta":-0.24537},"estimated_delivery_price":1804.41,"change_id":24460060432,"bids":[[0.033,226.0],[0.0325,797.0],[0.032,355.0]],"bid_iv":85.74,"best_bid_price":0.033,"best_bid_amount":226.0,"best_ask_price":0.034,"best_ask_amount":595.0,"asks":[[0.034,595.0],[0.0345,779.0],[0.035,186.0]],"ask_iv":87.07},"usIn":1654247489999588,"usOut":1654247489999885,"usDiff":297,"testnet":false}"#;
+
+        assert_eq!(
+            1654247489923,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "ETH-24JUN22-1600-P",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}

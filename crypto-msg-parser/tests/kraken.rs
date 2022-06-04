@@ -526,3 +526,56 @@ mod ticker {
         );
     }
 }
+
+#[cfg(test)]
+mod l2_snapshot {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"error":[],"result":{"XXBTZUSD":{"asks":[["29727.10000","0.420",1654302625],["29728.30000","5.047",1654302622],["29728.70000","0.474",1654302582]],"bids":[["29727.00000","3.127",1654302625],["29725.10000","0.085",1654302625],["29725.00000","0.586",1654302613]]}}}"#;
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+        assert_eq!(
+            "XXBTZUSD",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_future() {
+        let raw_msg = r#"{"result":"success","orderBook":{"bids":[[29623.5, 1480], [29621.5, 3500], [29621, 14795]],"asks":[[29641, 1480], [29646.5, 14802], [29647, 80937]]},"serverTime":"2022-06-04T06:30:03.653Z"}"#;
+
+        assert_eq!(
+            1654324203653,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"result":"success","orderBook":{"bids":[[29648, 66], [29647, 28976], [29646.5, 24786]],"asks":[[29656, 20000], [29656.5, 10000], [29657, 8000]]},"serverTime":"2022-06-04T06:30:00.247Z"}"#;
+
+        assert_eq!(
+            1654324200247,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+    }
+}
