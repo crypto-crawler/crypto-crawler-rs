@@ -43,6 +43,15 @@ async fn subscribe_ticker() {
 }
 
 #[tokio::test(flavor = "multi_thread")]
+async fn subscribe_ticker_all() {
+    gen_test_code!(
+        BinanceOptionWSClient,
+        subscribe,
+        &vec![("TICKER_ALL".to_string(), "BTCUSDT".to_string())]
+    );
+}
+
+#[tokio::test(flavor = "multi_thread")]
 #[ignore]
 async fn subscribe_orderbook() {
     gen_test_code!(
