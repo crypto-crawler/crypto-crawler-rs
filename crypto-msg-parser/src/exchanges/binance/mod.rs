@@ -26,6 +26,9 @@ pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
         // for example: !ticker@arr, !markPrice@arr
         return Ok("ALL".to_string());
     }
+    if stream.ends_with("_ALL") {
+        return Ok("ALL".to_string());
+    }
 
     let data = if obj.contains_key("stream") {
         serde_json::from_value::<HashMap<String, Value>>(obj["data"].clone()).unwrap()

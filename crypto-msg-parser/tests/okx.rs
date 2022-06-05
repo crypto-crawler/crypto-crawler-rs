@@ -179,6 +179,10 @@ mod trade {
             raw_msg,
         );
         assert_eq!(
+            "BTC-USD-220304-32000-P",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
             1646138219181,
             extract_timestamp(EXCHANGE_NAME, MarketType::EuropeanOption, raw_msg)
                 .unwrap()
@@ -743,6 +747,22 @@ mod l2_topk {
         assert_eq!(orderbook.bids[4].quantity_base, 10.0 * 0.01);
         assert_eq!(orderbook.bids[4].quantity_quote, 10.0 * 0.01 * 31805.0);
         assert_eq!(orderbook.bids[4].quantity_contract, Some(10.0));
+    }
+
+    #[test]
+    fn option() {
+        let raw_msg = r#"{"arg":{"channel":"books5","instId":"BTC-USD-220624-50000-C"},"data":[{"asks":[["0.001","606","0","2"],["0.0015","330","0","2"],["0.002","10","0","1"]],"bids":[],"instId":"BTC-USD-220624-50000-C","ts":"1654387553361"}]}"#;
+
+        assert_eq!(
+            1654387553361,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTC-USD-220624-50000-C",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
     }
 }
 

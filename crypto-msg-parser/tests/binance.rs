@@ -143,33 +143,19 @@ mod trade {
     }
 
     #[test]
-    #[ignore]
     fn option() {
         let raw_msg = r#"{"stream":"BTCUSDT_C@TRADE_ALL","data":{"e":"trade_all","E":1616205287778,"s":"BTCUSDT_C","t":[{"t":"315","p":"4842.24","q":"0.0001","b":"4612047757752932782","a":"4612057653433061439","T":1616204382000,"s":"1","S":"BTC-210430-68000-C"},{"t":"805","p":"5616.36","q":"0.0001","b":"4612047757752932781","a":"4612057653433055969","T":1616204357000,"s":"1","S":"BTC-210430-64000-C"},{"t":"313","p":"7028.44","q":"0.0001","b":"4612015871915728334","a":"4612057653433051715","T":1616204344000,"s":"1","S":"BTC-210430-60000-C"}]}}"#;
-        let trades = &parse_trade(EXCHANGE_NAME, MarketType::EuropeanOption, raw_msg).unwrap();
 
-        assert_eq!(trades.len(), 3);
-
-        for trade in trades.iter() {
-            crate::utils::check_trade_fields(
-                EXCHANGE_NAME,
-                MarketType::EuropeanOption,
-                "BTC/USDT".to_string(),
-                extract_symbol(EXCHANGE_NAME, MarketType::EuropeanOption, raw_msg).unwrap(),
-                trade,
-                raw_msg,
-            );
-        }
+        assert_eq!(
+            "ALL",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
         assert_eq!(
             1616205287778,
-            extract_timestamp(EXCHANGE_NAME, MarketType::EuropeanOption, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
                 .unwrap()
                 .unwrap()
         );
-
-        assert_eq!(trades[0].quantity_base, 0.0001);
-        assert_eq!(trades[0].quantity_quote, 0.0001 * 4842.24);
-        assert_eq!(trades[0].quantity_contract, Some(0.0001));
     }
 }
 
@@ -1177,6 +1163,23 @@ mod ticker {
         assert_eq!(
             1653814800126,
             extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn option() {
+        let raw_msg = r#"{"stream":"BTCUSDT@TICKER_ALL","data":{"e":"ticker_all","E":1654388207145,"s":"BTCUSDT","c":"1.7935","p":"1.2517"}}"#;
+
+        assert_eq!(
+            "ALL",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+
+        assert_eq!(
+            1654388207145,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
                 .unwrap()
                 .unwrap()
         );

@@ -67,6 +67,7 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
                 )))
             }
         } else if let Some(result) = rest_msg.result.as_array() {
+            #[allow(clippy::comparison_chain)]
             if result.len() > 1 {
                 Ok("ALL".to_string())
             } else if result.len() == 1 {

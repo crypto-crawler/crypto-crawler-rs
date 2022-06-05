@@ -97,6 +97,7 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
         } else if let Some(arr) = rest_resp.result.as_array() {
             // open interest
             debug_assert!(msg.contains("open_interest"));
+            #[allow(clippy::comparison_chain)]
             if arr.len() > 1 {
                 Ok("ALL".to_string())
             } else if arr.len() == 1 {

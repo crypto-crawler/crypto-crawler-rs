@@ -101,9 +101,9 @@ pub(super) fn extract_symbol(_market_type_: MarketType, msg: &str) -> Result<Str
                 msg
             )))
         }
-    } else if serde_json::from_str::<SwapRestL2SnapshotMsg>(msg).is_ok() {
-        Ok("NONE".to_string())
-    } else if msg.contains("open_interest") {
+    } else if msg.contains("open_interest")
+        || serde_json::from_str::<SwapRestL2SnapshotMsg>(msg).is_ok()
+    {
         Ok("NONE".to_string())
     } else {
         Err(SimpleError::new(format!(

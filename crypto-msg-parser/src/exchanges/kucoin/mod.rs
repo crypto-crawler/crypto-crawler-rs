@@ -37,6 +37,7 @@ pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
         if rest_msg.code != "200000" {
             return Err(SimpleError::new(format!("Error HTTP response {}", msg)));
         }
+        #[allow(clippy::comparison_chain)]
         if rest_msg.data.len() > 1 {
             Ok("ALL".to_string())
         } else if rest_msg.data.len() == 1 {

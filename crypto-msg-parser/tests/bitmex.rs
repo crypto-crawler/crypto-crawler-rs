@@ -491,6 +491,38 @@ mod order_book_l2_25 {
         assert_eq!(orderbook.bids[0].quantity_quote, 0.0);
         assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 0.0);
     }
+
+    #[test]
+    fn quanto_swap() {
+        let raw_msg = r#"{"table":"orderBookL2","action":"insert","data":[{"symbol":"ETHUSD","id":29699964036,"side":"Buy","size":93,"price":1798.2,"timestamp":"2022-06-04T23:34:52.603Z"}]}"#;
+
+        assert_eq!(
+            "ETHUSD",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1654385692603,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn quanto_future() {
+        let raw_msg = r#"{"table":"orderBookL2","action":"insert","data":[{"symbol":"ETHUSDM22","id":81499963133,"side":"Sell","size":5,"price":1843.35,"timestamp":"2022-06-04T23:46:20.175Z"}]}"#;
+
+        assert_eq!(
+            "ETHUSDM22",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1654386380175,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
 }
 
 #[cfg(test)]
@@ -702,6 +734,38 @@ mod l2_topk {
         assert_eq!(orderbook.asks[9].quantity_base, 0.00443);
         assert_eq!(orderbook.asks[9].quantity_quote, round(31679.0 * 0.00443));
         assert_eq!(orderbook.asks[9].quantity_contract.unwrap(), 443000.0);
+    }
+
+    #[test]
+    fn quanto_swap() {
+        let raw_msg = r#"{"table":"orderBook10","action":"update","data":[{"symbol":"ETHUSD","asks":[[1801.2,75],[1801.35,600],[1801.65,94],[1801.7,600],[1801.75,50],[1801.8,50],[1801.95,50],[1802.5,3534],[1802.8,4],[1802.9,360]],"timestamp":"2022-06-04T23:48:43.562Z","bids":[[1801.15,10],[1800.95,85],[1800.55,93],[1800.5,148],[1799.95,14],[1799.85,473],[1799.65,102],[1799.6,50],[1799.55,227],[1799.5,560]]}]}"#;
+
+        assert_eq!(
+            "ETHUSD",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1654386523562,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn quanto_future() {
+        let raw_msg = r#"{"table":"orderBook10","action":"update","data":[{"symbol":"ETHUSDM22","bids":[[1842.1,10],[1841.45,5],[1841.4,522],[1841.35,1300],[1840.55,4],[1840.25,5],[1840.2,904],[1840.15,2260],[1838.85,1144],[1838.8,3380]],"timestamp":"2022-06-04T23:49:27.444Z","asks":[[1844.9,19],[1844.95,1277],[1845,10],[1846.15,91],[1846.2,1965],[1846.85,6],[1847.7,1908],[1847.85,1],[1849.2,42],[1849.25,3261]]}]}"#;
+
+        assert_eq!(
+            "ETHUSDM22",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1654386567444,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
     }
 }
 
