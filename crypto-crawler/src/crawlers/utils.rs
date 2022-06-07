@@ -230,14 +230,29 @@ pub(crate) fn crawl_open_interest(exchange: &str, market_type: MarketType, tx: S
                 }
                 let resp = fetch_open_interest(exchange, market_type, None);
                 if let Ok(json) = resp {
-                    let message = Message::new(
-                        exchange.to_string(),
-                        market_type,
-                        MessageType::OpenInterest,
-                        json,
-                    );
-                    if tx.send(message).is_err() {
-                        break; // break the loop if there is no receiver
+                    if exchange == "deribit" {
+                        // A RESTful response of deribit open_interest contains two lines
+                        for x in json.trim().split('\n') {
+                            let message = Message::new(
+                                exchange.to_string(),
+                                market_type,
+                                MessageType::OpenInterest,
+                                x.to_string(),
+                            );
+                            if tx.send(message).is_err() {
+                                break; // break the loop if there is no receiver
+                            }
+                        }
+                    } else {
+                        let message = Message::new(
+                            exchange.to_string(),
+                            market_type,
+                            MessageType::OpenInterest,
+                            json,
+                        );
+                        if tx.send(message).is_err() {
+                            break; // break the loop if there is no receiver
+                        }
                     }
                 }
                 // Cooldown after each request, and make all other processes wait
