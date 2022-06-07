@@ -42,7 +42,7 @@ fn fetch_l2_snapshot_internal(
     market_type: MarketType,
     symbol: &str,
 ) -> Result<String> {
-    match exchange {
+    let ret = match exchange {
         "binance" => exchanges::binance::fetch_l2_snapshot(market_type, symbol),
         "bitfinex" => exchanges::bitfinex::BitfinexRestClient::fetch_l2_snapshot(symbol),
         "bitget" => exchanges::bitget::fetch_l2_snapshot(market_type, symbol),
@@ -64,6 +64,10 @@ fn fetch_l2_snapshot_internal(
         "zb" => exchanges::zb::fetch_l2_snapshot(market_type, symbol),
         "zbg" => exchanges::zbg::fetch_l2_snapshot(market_type, symbol),
         _ => panic!("Unknown exchange {}", exchange),
+    };
+    match ret {
+        Ok(s) => Ok(s.trim().to_string()),
+        Err(_) => ret,
     }
 }
 
@@ -72,7 +76,7 @@ pub fn fetch_l3_snapshot_internal(
     market_type: MarketType,
     symbol: &str,
 ) -> Result<String> {
-    match exchange {
+    let ret = match exchange {
         "bitfinex" => exchanges::bitfinex::BitfinexRestClient::fetch_l3_snapshot(symbol),
         "bitstamp" => exchanges::bitstamp::BitstampRestClient::fetch_l3_snapshot(symbol),
         "coinbase_pro" => exchanges::coinbase_pro::CoinbaseProRestClient::fetch_l3_snapshot(symbol),
@@ -81,6 +85,10 @@ pub fn fetch_l3_snapshot_internal(
             "{} {} does NOT provide level3 orderbook data",
             exchange, market_type
         ),
+    };
+    match ret {
+        Ok(s) => Ok(s.trim().to_string()),
+        Err(_) => ret,
     }
 }
 
@@ -92,7 +100,7 @@ pub fn fetch_open_interest(
     market_type: MarketType,
     symbol: Option<&str>,
 ) -> Result<String> {
-    match exchange {
+    let ret = match exchange {
         "binance" => exchanges::binance::fetch_open_interest(market_type, symbol.unwrap()),
         "bitget" => exchanges::bitget::fetch_open_interest(market_type, symbol.unwrap()),
         "bybit" => exchanges::bybit::BybitRestClient::fetch_open_interest(symbol.unwrap()),
@@ -106,6 +114,10 @@ pub fn fetch_open_interest(
         "okx" => exchanges::okx::OkxRestClient::fetch_open_interest(market_type, symbol),
         "zbg" => exchanges::zbg::fetch_open_interest(market_type, symbol.unwrap()),
         _ => panic!("{} does NOT have open interest RESTful API", exchange),
+    };
+    match ret {
+        Ok(s) => Ok(s.trim().to_string()),
+        Err(_) => ret,
     }
 }
 
