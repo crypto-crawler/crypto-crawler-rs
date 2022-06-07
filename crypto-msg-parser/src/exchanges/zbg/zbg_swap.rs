@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use super::super::utils::http_get;
+use super::super::utils::{convert_timestamp, http_get};
 use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use once_cell::sync::Lazy;
@@ -176,9 +176,9 @@ pub(super) fn extract_timestamp(
         // RESTful
         let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
         return if let Some(t) = obj["datas"].get("timestamp") {
-            Ok(Some(t.as_i64().unwrap()))
+            Ok(convert_timestamp(t))
         } else if let Some(t) = obj["datas"].get("te") {
-            Ok(Some(t.as_i64().unwrap() / 1000))
+            Ok(convert_timestamp(t))
         } else {
             Ok(None)
         };
@@ -190,15 +190,18 @@ pub(super) fn extract_timestamp(
     match channel {
         "future_tick" => {
             let raw_trade = ws_msg[1]["trades"].as_array().unwrap();
-            Ok(Some(raw_trade[0].as_i64().unwrap() / 1000))
+            Ok(convert_timestamp(&raw_trade[0]))
         }
         "future_kline" => {
             let lines = ws_msg[1]["lines"].as_array().unwrap();
-            let timestamp = lines.iter().map(|line| line[0].as_i64().unwrap()).max();
+            let timestamp = lines
+                .iter()
+                .map(|line| convert_timestamp(&line[0]).unwrap())
+                .max();
             Ok(timestamp)
         }
-        "future_snapshot_depth" => Ok(Some(ws_msg[1]["time"].as_i64().unwrap() / 1000)),
-        "future_snapshot_indicator" => Ok(Some(ws_msg[1]["te"].as_i64().unwrap() / 1000)),
+        "future_snapshot_depth" => Ok(convert_timestamp(&ws_msg[1]["time"])),
+        "future_snapshot_indicator" => Ok(convert_timestamp(&ws_msg[1]["te"])),
         _ => Err(SimpleError::new(format!(
             "Unknown channel {} in  {}",
             channel, msg

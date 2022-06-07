@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, HashMap};
 
-use super::super::utils::http_get;
+use super::super::utils::{convert_timestamp, http_get};
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
@@ -268,9 +268,11 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
     if msg.contains("datas") && msg.contains("resMsg") {
         // RESTful
         let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
-        return Ok(obj["datas"]
-            .get("timestamp")
-            .map(|x| x.as_i64().expect(msg) * 1000));
+        return if let Some(timestamp) = obj["datas"].get("timestamp") {
+            Ok(convert_timestamp(timestamp))
+        } else {
+            Ok(None)
+        };
     }
 
     // websocket
@@ -301,8 +303,8 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
         .map(|arr| {
             let msg_type = arr[0].as_str().unwrap();
             match msg_type {
-                "T" | "E" => arr[2].as_str().unwrap().parse::<i64>().unwrap() * 1000,
-                "K" | "AE" => arr[3].as_str().unwrap().parse::<i64>().unwrap() * 1000,
+                "T" | "E" => convert_timestamp(&arr[2]).unwrap(),
+                "K" | "AE" => convert_timestamp(&arr[3]).unwrap(),
                 _ => panic!("Not possible {}", msg),
             }
         })
