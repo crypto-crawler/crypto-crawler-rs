@@ -65,7 +65,9 @@ impl DeribitRestClient {
         } else {
             let btc = gen_api!("/public/get_book_summary_by_currency?currency=BTC")?;
             let eth = gen_api!("/public/get_book_summary_by_currency?currency=ETH")?;
-            Ok(format!("{}\n{}", btc, eth))
+            let sol = gen_api!("/public/get_book_summary_by_currency?currency=SOL")?;
+            let usdc = gen_api!("/public/get_book_summary_by_currency?currency=USDC")?;
+            Ok(format!("{}\n{}\n{}\n{}", btc, eth, sol, usdc))
         }
     }
 }
