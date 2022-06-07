@@ -231,7 +231,7 @@ pub(crate) fn crawl_open_interest(exchange: &str, market_type: MarketType, tx: S
                 let resp = fetch_open_interest(exchange, market_type, None);
                 if let Ok(json) = resp {
                     if exchange == "deribit" {
-                        // A RESTful response of deribit open_interest contains two lines
+                        // A RESTful response of deribit open_interest contains four lines
                         for x in json.trim().split('\n') {
                             let message = Message::new(
                                 exchange.to_string(),
