@@ -42,7 +42,7 @@ impl Message {
                 .as_millis()
                 .try_into()
                 .unwrap(),
-            json,
+            json: json.trim().to_string(),
         }
     }
 
