@@ -10,6 +10,9 @@ const EXCHANGE_NAME: &str = "bitfinex";
 pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     let arr = serde_json::from_str::<Vec<Value>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
+    if arr.is_empty() {
+        return Ok("NONE".to_string());
+    }
     if !arr[0].is_object() {
         return Ok("NONE".to_string());
     }
@@ -32,6 +35,9 @@ pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
 pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
     let arr = serde_json::from_str::<Vec<Value>>(msg)
         .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to Vec<Value>", msg)))?;
+    if arr.is_empty() {
+        return Ok(None);
+    }
     if !arr[0].is_object() {
         return Ok(None);
     }

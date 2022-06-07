@@ -270,7 +270,7 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
         let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
         return Ok(obj["datas"]
             .get("timestamp")
-            .map(|x| x.as_i64().unwrap() * 1000));
+            .map(|x| x.as_i64().expect(msg) * 1000));
     }
 
     // websocket
