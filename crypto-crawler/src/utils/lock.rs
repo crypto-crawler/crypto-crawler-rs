@@ -131,6 +131,9 @@ fn create_all_lock_files_rest(
         if *exchange == "bitmex" {
             market_types.push(MarketType::Unknown);
         }
+        if *exchange == "deribit" {
+            market_types.push(MarketType::Unknown);
+        }
         if prefix == "rest" && (*exchange == "ftx" || *exchange == "kucoin") {
             market_types.push(MarketType::Unknown); // for OpenInterest
         }
