@@ -57,6 +57,14 @@ typedef enum {
    * Open interest
    */
   OpenInterest,
+  /**
+   * Long/short ratio
+   */
+  LongShortRatio,
+  /**
+   * Taker buy/sell volume
+   */
+  TakerVolume,
 } MessageType;
 
 #endif /* CRYPTO_MSG_TYPE_H_ */
