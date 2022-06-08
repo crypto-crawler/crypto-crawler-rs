@@ -31,6 +31,8 @@ impl_new_constructor!(
 
 impl_trait!(Trade, BybitLinearSwapWSClient, subscribe_trade, "trade");
 #[rustfmt::skip]
+// Prefer orderBookL2_25 over orderBook_200.100ms because /public/orderBook/L2
+// returns a top 25 snapshot, which is the same depth as orderBookL2_25.
 impl_trait!(OrderBook, BybitLinearSwapWSClient, subscribe_orderbook, "orderBookL2_25");
 #[rustfmt::skip]
 impl_trait!(Ticker, BybitLinearSwapWSClient, subscribe_ticker, "instrument_info.100ms");
