@@ -42,6 +42,10 @@ pub enum MessageType {
     FundingRate,
     /// Open interest
     OpenInterest,
+    /// Long/short ratio
+    LongShortRatio,
+    /// Taker buy/sell volume
+    TakerVolume,
 }
 
 /// Translate to websocket subscribe/unsubscribe commands.
