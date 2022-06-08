@@ -121,6 +121,24 @@ pub fn fetch_open_interest(
     }
 }
 
+pub fn fetch_long_short_ratio(
+    exchange: &str,
+    market_type: MarketType,
+    symbol: &str,
+) -> Result<String> {
+    let ret = match exchange {
+        "bybit" => exchanges::bybit::BybitRestClient::fetch_long_short_ratio(symbol),
+        _ => panic!(
+            "{} {} does NOT provide level3 orderbook data",
+            exchange, market_type
+        ),
+    };
+    match ret {
+        Ok(s) => Ok(s.trim().to_string()),
+        Err(_) => ret,
+    }
+}
+
 /// Fetch level2 orderbook snapshot.
 ///
 /// `retry` None means no retry; Some(0) means retry unlimited times; Some(n) means retry n times.
