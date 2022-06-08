@@ -45,12 +45,26 @@ impl BybitRestClient {
     ///
     /// For example:
     ///
-    /// - <https://api.bybit.com/v2/public/open-interest?symbol=BTCUSD&period=5min>
-    /// - <https://api.bybit.com/v2/public/open-interest?symbol=BTCUSDT&period=5min>
-    /// - <https://api.bybit.com/v2/public/open-interest?symbol=BTCUSDZ21&period=5min>
+    /// - <https://api.bybit.com/v2/public/open-interest?symbol=BTCUSD&period=5min&limit=200>
+    /// - <https://api.bybit.com/v2/public/open-interest?symbol=BTCUSDT&period=5min&limit=200>
+    /// - <https://api.bybit.com/v2/public/open-interest?symbol=BTCUSDU22&period=5min&limit=200>
     pub fn fetch_open_interest(symbol: &str) -> Result<String> {
         gen_api!(format!(
-            "/public/open-interest?symbol={}&period=5min",
+            "/public/open-interest?symbol={}&period=5min&limit=200",
+            symbol
+        ))
+    }
+
+    /// Get long-short ratio.
+    ///
+    /// For example:
+    ///
+    /// - <https://api.bybit.com/v2/public/account-ratio?symbol=BTCUSD&period=5min&limit=500>
+    /// - <https://api.bybit.com/v2/public/account-ratio?symbol=BTCUSDT&period=5min&limit=500>
+    /// - <https://api.bybit.com/v2/public/account-ratio?symbol=BTCUSDU22&period=5min&limit=500>
+    pub fn fetch_long_short_ratio(symbol: &str) -> Result<String> {
+        gen_api!(format!(
+            "/public/account-ratio?symbol={}&period=5min&limit=200",
             symbol
         ))
     }
