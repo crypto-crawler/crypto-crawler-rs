@@ -239,7 +239,7 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
                 .unwrap()
                 .parse::<i64>()
                 .unwrap();
-            Ok(SYMBOL_MAP[&symbol_id].clone())
+            Ok(SYMBOL_MAP.get(&symbol_id).expect(msg).clone())
         };
         return ret;
     }
