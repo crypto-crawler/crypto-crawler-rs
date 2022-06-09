@@ -112,6 +112,7 @@ static SYMBOL_MAP: Lazy<HashMap<i64, String>> = Lazy::new(|| {
         (5330, "ens_usdt"),
         (5332, "nabox_usdt"),
         (5333, "btv_usdt"),
+        (5334, "btc3s_usdt"),
         (5335, "kilt_usdt"),
         (5336, "people_usdt"),
         (5339, "sgb_usdt"),
