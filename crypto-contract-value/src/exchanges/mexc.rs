@@ -23,10 +23,12 @@ static LINEAR_CONTRACT_VALUES: Lazy<HashMap<String, f64>> = Lazy::new(|| {
         ("ANKR/USDT", 1_f64),
         ("ANT/USDT", 1_f64),
         ("ANY/USDT", 0.1_f64),
+        ("APE/USDT", 1_f64),
         ("API3/USDT", 1_f64),
         ("APX/USDT", 10_f64),
         ("AR/USDT", 0.1_f64),
         ("ARPA/USDT", 1_f64),
+        ("ASTR/USDT", 10_f64),
         ("ATA/USDT", 1_f64),
         ("ATOM/USDT", 0.1_f64),
         ("AUDIO/USDT", 1_f64),
@@ -50,8 +52,10 @@ static LINEAR_CONTRACT_VALUES: Lazy<HashMap<String, f64>> = Lazy::new(|| {
         ("BTM/USDT", 10_f64),
         ("BTS/USDT", 1_f64),
         ("BTT/USDT", 1_f64),
+        ("BTTC/USDT", 1000000_f64),
         ("BZZ/USDT", 0.1_f64),
         ("C98/USDT", 1_f64),
+        ("CAW/USDT", 10000000_f64),
         ("CEEK/USDT", 10_f64),
         ("CELO/USDT", 1_f64),
         ("CELR/USDT", 1_f64),
@@ -67,6 +71,7 @@ static LINEAR_CONTRACT_VALUES: Lazy<HashMap<String, f64>> = Lazy::new(|| {
         ("CTK/USDT", 1_f64),
         ("CTSI/USDT", 1_f64),
         ("CVC/USDT", 1_f64),
+        ("DAR/USDT", 1_f64),
         ("DASH/USDT", 0.01_f64),
         ("DENT/USDT", 1_f64),
         ("DERI/USDT", 10_f64),
@@ -85,6 +90,7 @@ static LINEAR_CONTRACT_VALUES: Lazy<HashMap<String, f64>> = Lazy::new(|| {
         ("ETC/USDT", 0.1_f64),
         ("ETH/USDT", 0.01_f64),
         ("FILECOIN/USDT", 0.01_f64),
+        ("FITFI/USDT", 10_f64),
         ("FLM/USDT", 1_f64),
         ("FLOW/USDT", 0.1_f64),
         ("FLUX/USDT", 1_f64),
@@ -92,11 +98,13 @@ static LINEAR_CONTRACT_VALUES: Lazy<HashMap<String, f64>> = Lazy::new(|| {
         ("FREE/USDT", 100_f64),
         ("FTM/USDT", 1_f64),
         ("FTT/USDT", 0.1_f64),
+        ("GAL/USDT", 0.1_f64),
         ("GALA/USDT", 10_f64),
         ("GDO/USDT", 10000000_f64),
         ("GODS/USDT", 1_f64),
         ("GOLDFINCH/USDT", 1_f64),
         ("GRT/USDT", 1_f64),
+        ("GST/USDT", 1_f64),
         ("GTC/USDT", 0.1_f64),
         ("HBAR/USDT", 1_f64),
         ("HIVE/USDT", 1_f64),
@@ -129,6 +137,9 @@ static LINEAR_CONTRACT_VALUES: Lazy<HashMap<String, f64>> = Lazy::new(|| {
         ("LRC/USDT", 1_f64),
         ("LTC/USDT", 0.01_f64),
         ("LUNA/USDT", 1_f64),
+        ("LUNANEW/USDT", 1_f64),
+        ("LUNC/USDT", 10000_f64),
+        ("LUNCH/USDT", 1000_f64),
         ("MANA/USDT", 1_f64),
         ("MASK/USDT", 0.1_f64),
         ("MATIC/USDT", 1_f64),
@@ -142,6 +153,7 @@ static LINEAR_CONTRACT_VALUES: Lazy<HashMap<String, f64>> = Lazy::new(|| {
         ("NFT/USDT", 1000000_f64),
         ("NKN/USDT", 1_f64),
         ("NU/USDT", 1_f64),
+        ("NYM/USDT", 1_f64),
         ("O3/USDT", 1_f64),
         ("OCEAN/USDT", 1_f64),
         ("OGN/USDT", 1_f64),
@@ -149,6 +161,7 @@ static LINEAR_CONTRACT_VALUES: Lazy<HashMap<String, f64>> = Lazy::new(|| {
         ("OMG/USDT", 0.1_f64),
         ("ONE/USDT", 1_f64),
         ("ONT/USDT", 1_f64),
+        ("OP/USDT", 1_f64),
         ("PEOPLE/USDT", 10_f64),
         ("PIT/USDT", 1000000000_f64),
         ("PLA/USDT", 1_f64),
@@ -169,6 +182,7 @@ static LINEAR_CONTRACT_VALUES: Lazy<HashMap<String, f64>> = Lazy::new(|| {
         ("SDN/USDT", 0.1_f64),
         ("SFP/USDT", 1_f64),
         ("SHIB/USDT", 1000_f64),
+        ("SHIT/USDT", 10000000_f64),
         ("SKL/USDT", 1_f64),
         ("SLP/USDT", 1_f64),
         ("SNX/USDT", 0.1_f64),
@@ -179,6 +193,7 @@ static LINEAR_CONTRACT_VALUES: Lazy<HashMap<String, f64>> = Lazy::new(|| {
         ("SRM/USDT", 0.1_f64),
         ("SSS/USDT", 0.1_f64),
         ("STARL/USDT", 100000_f64),
+        ("STEPN/USDT", 1_f64),
         ("STMX/USDT", 1_f64),
         ("STORJ/USDT", 1_f64),
         ("SUSHI/USDT", 0.1_f64),
@@ -192,7 +207,9 @@ static LINEAR_CONTRACT_VALUES: Lazy<HashMap<String, f64>> = Lazy::new(|| {
         ("TRX/USDT", 10_f64),
         ("UMA/USDT", 0.1_f64),
         ("UMEE/USDT", 10_f64),
+        ("UNFI/USDT", 1_f64),
         ("UNI/USDT", 0.1_f64),
+        ("USTC/USDT", 100_f64),
         ("VET/USDT", 1_f64),
         ("VRA/USDT", 100_f64),
         ("WAVES/USDT", 0.1_f64),
@@ -265,7 +282,7 @@ fn fetch_linear_contract_sizes() -> BTreeMap<String, f64> {
 pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<f64> {
     match market_type {
         MarketType::InverseSwap => Some(if pair.starts_with("BTC") { 100.0 } else { 10.0 }),
-        MarketType::LinearSwap => Some(LINEAR_CONTRACT_VALUES[pair]),
+        MarketType::LinearSwap => Some(LINEAR_CONTRACT_VALUES.get(pair).expect(pair).clone()),
         _ => None,
     }
 }
@@ -276,7 +293,12 @@ mod tests {
 
     #[test]
     fn linear() {
-        let mapping = fetch_linear_contract_sizes();
+        let mut mapping = fetch_linear_contract_sizes();
+        for (key, value) in super::LINEAR_CONTRACT_VALUES.iter() {
+            if !mapping.contains_key(key) {
+                mapping.insert(key.to_string(), *value);
+            }
+        }
         for (pair, contract_value) in &mapping {
             println!("(\"{pair}\", {contract_value}_f64),");
         }
