@@ -829,6 +829,37 @@ mod l2_topk {
     }
 
     #[test]
+    fn inverse_swap_2() {
+        let raw_msg = r#"{"ch":"market.ANT-USD.depth.step7","ts":1653868800233,"tick":{"mrid":68112277468,"id":1653868800,"ts":1653868800233,"version":1653868800,"ch":"market.ANT-USD.depth.step7"}}"#;
+        let orderbook =
+            &parse_l2_topk(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None).unwrap()[0];
+
+        assert!(orderbook.asks.is_empty());
+        assert!(orderbook.bids.is_empty());
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            EXCHANGE_NAME,
+            MarketType::InverseSwap,
+            MessageType::L2TopK,
+            "ANT/USD".to_string(),
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap(),
+            orderbook,
+            raw_msg,
+        );
+        assert_eq!(
+            1653868800233,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+
+        assert_eq!(orderbook.timestamp, 1653868800233);
+        assert_eq!(orderbook.seq_id, Some(68112277468));
+        assert_eq!(orderbook.prev_seq_id, None);
+    }
+
+    #[test]
     fn linear_swap() {
         let raw_msg = r#"{"ch":"market.BTC-USDT.depth.step7","ts":1653988444928,"tick":{"mrid":108706801887,"id":1653988444,"bids":[[31589.9,2397],[31589.6,500],[31588.6,1]],"asks":[[31590,3053],[31590.5,6],[31590.6,692]],"ts":1653988444925,"version":1653988444,"ch":"market.BTC-USDT.depth.step7"}}"#;
         let orderbook =

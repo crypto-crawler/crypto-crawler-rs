@@ -40,7 +40,9 @@ struct InverseOrderbookMsg {
     mrid: u64,
     event: Option<String>, // snapshot, update, None if L2TopK
     ch: String,
+    #[serde(default)]
     bids: Vec<[f64; 2]>,
+    #[serde(default)]
     asks: Vec<[f64; 2]>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
