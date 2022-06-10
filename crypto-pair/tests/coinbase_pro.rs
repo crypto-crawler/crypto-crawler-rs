@@ -17,7 +17,11 @@ struct SpotMarket {
 // see <https://docs.pro.coinbase.com/#products>
 fn fetch_spot_markets_raw() -> Vec<SpotMarket> {
     let txt = http_get("https://api.pro.coinbase.com/products").unwrap();
-    serde_json::from_str::<Vec<SpotMarket>>(&txt).unwrap()
+    serde_json::from_str::<Vec<SpotMarket>>(&txt)
+        .unwrap()
+        .into_iter()
+        .filter(|m| !m.id.contains("AUCTION"))
+        .collect()
 }
 
 #[test]
