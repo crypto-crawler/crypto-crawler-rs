@@ -9,7 +9,8 @@ use serde_json::Value;
 static SPOT_QUOTES: Lazy<HashSet<String>> = Lazy::new(|| {
     // offline data, in case the network is down
     let mut set: HashSet<String> = vec![
-        "CHF", "DAI", "DOT", "USD", "XET", "XXB", "ZAU", "ZCA", "ZEU", "ZGB", "ZJP", "ZUS",
+        "AUD", "CAD", "CHF", "DAI", "DOT", "ETH", "EUR", "GBP", "JPY", "USD", "USDC", "USDT",
+        "XBT", "XET", "XXB", "ZAU", "ZCA", "ZEU", "ZGB", "ZJP", "ZUS",
     ]
     .into_iter()
     .map(|x| x.to_string())
