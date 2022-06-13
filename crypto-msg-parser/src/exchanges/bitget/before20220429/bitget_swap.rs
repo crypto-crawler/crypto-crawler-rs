@@ -37,7 +37,7 @@ struct SwapOrderbookMsg {
 #[derive(Serialize, Deserialize)]
 struct WebsocketMsg<T: Sized> {
     table: String,
-    data: Vec<T>,
+    data: T,
     action: Option<String>,
 }
 
@@ -48,15 +48,26 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
             msg
         ))
     })?;
-    let instrument_ids = ws_msg
-        .data
-        .iter()
-        .map(|v| v["instrument_id"].as_str().unwrap())
-        .collect::<Vec<&str>>();
-    if instrument_ids.is_empty() {
-        Err(SimpleError::new(format!("data is empty {}", msg)))
+    if ws_msg.data.is_array() {
+        let instrument_ids = ws_msg
+            .data
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|v| v["instrument_id"].as_str().unwrap())
+            .collect::<Vec<&str>>();
+        if instrument_ids.is_empty() {
+            Err(SimpleError::new(format!("data is empty {}", msg)))
+        } else {
+            Ok(instrument_ids[0].to_string())
+        }
+    } else if ws_msg.data.is_object() && ws_msg.data.get("instrument_id").is_some() {
+        Ok(ws_msg.data["instrument_id"].as_str().unwrap().to_string())
     } else {
-        Ok(instrument_ids[0].to_string())
+        Err(SimpleError::new(format!(
+            "Failed to extract symbol from {}",
+            msg
+        )))
     }
 }
 
@@ -67,11 +78,24 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
             msg
         ))
     })?;
-    let timestamp = ws_msg
-        .data
-        .iter()
-        .map(|v| v["timestamp"].as_str().unwrap().parse::<i64>().unwrap())
-        .max();
+    let table = ws_msg.table.as_str();
+    let timestamp = if table.starts_with("swap/candle") {
+        Some(
+            ws_msg.data["candle"].as_array().unwrap()[0]
+                .as_str()
+                .unwrap()
+                .parse::<i64>()
+                .unwrap(),
+        )
+    } else {
+        ws_msg
+            .data
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|v| v["timestamp"].as_str().unwrap().parse::<i64>().unwrap())
+            .max()
+    };
     if timestamp.is_none() {
         Err(SimpleError::new(format!("data is empty in {}", msg)))
     } else {
@@ -110,7 +134,7 @@ pub(super) fn parse_trade(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<TradeMsg>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<SwapTradeMsg>>(msg).map_err(|_e| {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Vec<SwapTradeMsg>>>(msg).map_err(|_e| {
         SimpleError::new(format!(
             "Failed to deserialize {} to WebsocketMsg<SwapTradeMsg>",
             msg
@@ -169,12 +193,13 @@ pub(super) fn parse_funding_rate(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<FundingRateMsg>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawFundingRateMsg>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<RawFundingRateMsg>",
-            msg
-        ))
-    })?;
+    let ws_msg =
+        serde_json::from_str::<WebsocketMsg<Vec<RawFundingRateMsg>>>(msg).map_err(|_e| {
+            SimpleError::new(format!(
+                "Failed to deserialize {} to WebsocketMsg<RawFundingRateMsg>",
+                msg
+            ))
+        })?;
 
     let mut rates: Vec<FundingRateMsg> = ws_msg
         .data
@@ -202,12 +227,13 @@ pub(super) fn parse_l2(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<OrderBookMsg>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<SwapOrderbookMsg>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<SwapOrderbookMsg>",
-            msg
-        ))
-    })?;
+    let ws_msg =
+        serde_json::from_str::<WebsocketMsg<Vec<SwapOrderbookMsg>>>(msg).map_err(|_e| {
+            SimpleError::new(format!(
+                "Failed to deserialize {} to WebsocketMsg<SwapOrderbookMsg>",
+                msg
+            ))
+        })?;
     let snapshot = ws_msg.action.unwrap() == "partial";
     let mut orderbooks = Vec::<OrderBookMsg>::new();
 

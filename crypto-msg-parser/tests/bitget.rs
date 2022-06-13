@@ -463,6 +463,258 @@ mod funding_rate {
 }
 
 #[cfg(test)]
+mod candlestick {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot_snapshot() {
+        let raw_msg = r#"{"action":"snapshot","arg":{"instType":"sp","channel":"candle1m","instId":"BTCUSDT"},"data":[["1654017060000","32173.42","32173.42","32154.98","32154.98","6.7112"],["1654017120000","32154.98","32171.66","32154.83","32157.96","10.3505"]]}"#;
+
+        assert_eq!(
+            1654017120000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSDT_SPBL",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn spot_update() {
+        let raw_msg = r#"{"action":"update","arg":{"instType":"sp","channel":"candle1m","instId":"BTCUSDT"},"data":[["1654077000000","31682.39","31683.63","31674.84","31676.58","20.3826"]]}"#;
+
+        assert_eq!(
+            1654077000000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSDT_SPBL",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap_snapshot() {
+        let raw_msg = r#"{"action":"snapshot","arg":{"instType":"mc","channel":"candle1m","instId":"BTCUSD"},"data":[["1654017420000","31974","31992.5","31922","31935","9.197"],["1654017480000","31935","31988.5","31914.5","31938.5","7.004"]]}"#;
+
+        assert_eq!(
+            1654017480000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSD_DMCBL",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap_update() {
+        let raw_msg = r#"{"action":"update","arg":{"instType":"mc","channel":"candle1m","instId":"BTCUSD"},"data":[["1654077360000","31652","31653.5","31651.5","31652","0.227"]]}"#;
+
+        assert_eq!(
+            1654077360000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSD_DMCBL",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap_snapshot() {
+        let raw_msg = r#"{"action":"snapshot","arg":{"instType":"mc","channel":"candle1m","instId":"BTCUSDT"},"data":[["1654017660000","31966.5","31966.5","31947","31952.5","111.769"],["1654017720000","31952.5","31974.5","31939","31940","109.557"]]}"#;
+
+        assert_eq!(
+            1654017720000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSDT_UMCBL",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap_update() {
+        let raw_msg = r#"{"action":"update","arg":{"instType":"mc","channel":"candle1m","instId":"BTCUSDT"},"data":[["1654077600000","31676.5","31676.5","31671","31671","5.639"]]}"#;
+
+        assert_eq!(
+            1654077600000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSDT_UMCBL",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}
+
+#[cfg(test)]
+mod ticker {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"action":"snapshot","arg":{"instType":"sp","channel":"ticker","instId":"BTCUSDT"},"data":[{"instId":"BTCUSDT","last":"29948.21","open24h":"30726.18","high24h":"30741.06","low24h":"29336.95","bestBid":"29944.390000","bestAsk":"29944.550000","baseVolume":"24658.6272","quoteVolume":"749224809.9118","ts":1654160360101,"labeId":0}]}"#;
+
+        assert_eq!(
+            1654160360101,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSDT_SPBL",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"action":"snapshot","arg":{"instType":"mc","channel":"ticker","instId":"BTCUSD"},"data":[{"instId":"BTCUSD","last":"29898.50","bestAsk":"29899","bestBid":"29898","high24h":"30706.50","low24h":"29270.50","priceChangePercent":"-0.02","capitalRate":"0.000100","nextSettleTime":1654182000000,"systemTime":1654160828664,"markPrice":"29897.79","indexPrice":"29906.49","holding":"6166.235","baseVolume":"6601.040","quoteVolume":"201847558.263"}]}"#;
+
+        assert_eq!(
+            1654160828664,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSD_DMCBL",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"action":"snapshot","arg":{"instType":"mc","channel":"ticker","instId":"BTCUSDT"},"data":[{"instId":"BTCUSDT","last":"29905.50","bestAsk":"29905.5","bestBid":"29904.5","high24h":"30731.50","low24h":"29293.00","priceChangePercent":"-0.02","capitalRate":"0.000100","nextSettleTime":1654182000000,"systemTime":1654160847314,"markPrice":"29906.42","indexPrice":"29928.32","holding":"87338.493","baseVolume":"214176.417","quoteVolume":"6536325903.110"}]}"#;
+
+        assert_eq!(
+            1654160847314,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "BTCUSDT_UMCBL",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+    }
+}
+
+#[cfg(test)]
+mod l2_snapshot {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"code":"00000","msg":"success","requestTime":1654232411024,"data":{"asks":[["30413.33","0.0141"],["30413.37","0.0112"],["30413.41","0.0179"]],"bids":[["30413.27","0.0296"],["30413.23","0.0484"],["30413.19","0.1272"]],"timestamp":"1654232411024"}}"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1654232411024,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"code":"00000","msg":"success","requestTime":1654234201087,"data":{"asks":[["30521","1.661"],["30521.5","2.312"],["30522","0.139"]],"bids":[["3.052E+4","0.256"],["30519.5","0.482"],["30519","0.079"]],"timestamp":"1654234201087"}}"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1654234201087,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"code":"00000","msg":"success","requestTime":1654234229348,"data":{"asks":[["30544","13.904"],["30544.5","2.678"],["30545","4.923"]],"bids":[["30543","0.756"],["30542.5","0.749"],["30542","15.438"]],"timestamp":"1654234229348"}}"#;
+
+        assert_eq!(
+            "NONE",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1654234229348,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+}
+
+#[cfg(test)]
+mod open_interest {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn inverse_swap() {
+        let raw_msg = r#"{"code":"00000","msg":"success","requestTime":1654337704617,"data":{"symbol":"BTCUSD_DMCBL","amount":"5030.748","timestamp":"1654337704617"}}"#;
+
+        assert_eq!(
+            "BTCUSD_DMCBL",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1654337704617,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn linear_swap() {
+        let raw_msg = r#"{"code":"00000","msg":"success","requestTime":1654337723059,"data":{"symbol":"BTCUSDT_UMCBL","amount":"89481.932","timestamp":"1654337723059"}}"#;
+
+        assert_eq!(
+            "BTCUSDT_UMCBL",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1654337723059,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+    }
+}
+
+#[cfg(test)]
 mod before20220429 {
     #[cfg(test)]
     mod trade {
@@ -784,256 +1036,43 @@ mod before20220429 {
             assert_eq!(orderbook.asks[1].quantity_contract.unwrap(), 25822.0);
         }
     }
-}
 
-#[cfg(test)]
-mod candlestick {
-    use super::EXCHANGE_NAME;
-    use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    #[cfg(test)]
+    mod candlestick {
+        use super::super::EXCHANGE_NAME;
+        use crypto_market_type::MarketType;
+        use crypto_msg_parser::{extract_symbol, extract_timestamp};
 
-    #[test]
-    fn spot_snapshot() {
-        let raw_msg = r#"{"action":"snapshot","arg":{"instType":"sp","channel":"candle1m","instId":"BTCUSDT"},"data":[["1654017060000","32173.42","32173.42","32154.98","32154.98","6.7112"],["1654017120000","32154.98","32171.66","32154.83","32157.96","10.3505"]]}"#;
+        #[test]
+        fn inverse_swap() {
+            let raw_msg = r#"{"data":{"candle":["1648801800000","45230.0","45230.0","45230.0","45230.0","0","0.000000000000"],"instrument_id":"btcusd"},"table":"swap/candle60s"}"#;
 
-        assert_eq!(
-            1654017120000,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
-                .unwrap()
-                .unwrap()
-        );
-        assert_eq!(
-            "BTCUSDT_SPBL",
-            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
-        );
-    }
+            assert_eq!(
+                "btcusd",
+                extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+            );
+            assert_eq!(
+                1648801800000,
+                extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                    .unwrap()
+                    .unwrap()
+            );
+        }
 
-    #[test]
-    fn spot_update() {
-        let raw_msg = r#"{"action":"update","arg":{"instType":"sp","channel":"candle1m","instId":"BTCUSDT"},"data":[["1654077000000","31682.39","31683.63","31674.84","31676.58","20.3826"]]}"#;
+        #[test]
+        fn linear_swap() {
+            let raw_msg = r#"{"data":{"candle":["1648801800000","45298.5","45298.5","45274.0","45274.0","1273","57633.802000000000"],"instrument_id":"cmt_btcusdt"},"table":"swap/candle60s"}"#;
 
-        assert_eq!(
-            1654077000000,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
-                .unwrap()
-                .unwrap()
-        );
-        assert_eq!(
-            "BTCUSDT_SPBL",
-            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
-        );
-    }
-
-    #[test]
-    fn inverse_swap_snapshot() {
-        let raw_msg = r#"{"action":"snapshot","arg":{"instType":"mc","channel":"candle1m","instId":"BTCUSD"},"data":[["1654017420000","31974","31992.5","31922","31935","9.197"],["1654017480000","31935","31988.5","31914.5","31938.5","7.004"]]}"#;
-
-        assert_eq!(
-            1654017480000,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
-                .unwrap()
-                .unwrap()
-        );
-        assert_eq!(
-            "BTCUSD_DMCBL",
-            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
-        );
-    }
-
-    #[test]
-    fn inverse_swap_update() {
-        let raw_msg = r#"{"action":"update","arg":{"instType":"mc","channel":"candle1m","instId":"BTCUSD"},"data":[["1654077360000","31652","31653.5","31651.5","31652","0.227"]]}"#;
-
-        assert_eq!(
-            1654077360000,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
-                .unwrap()
-                .unwrap()
-        );
-        assert_eq!(
-            "BTCUSD_DMCBL",
-            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
-        );
-    }
-
-    #[test]
-    fn linear_swap_snapshot() {
-        let raw_msg = r#"{"action":"snapshot","arg":{"instType":"mc","channel":"candle1m","instId":"BTCUSDT"},"data":[["1654017660000","31966.5","31966.5","31947","31952.5","111.769"],["1654017720000","31952.5","31974.5","31939","31940","109.557"]]}"#;
-
-        assert_eq!(
-            1654017720000,
-            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
-                .unwrap()
-                .unwrap()
-        );
-        assert_eq!(
-            "BTCUSDT_UMCBL",
-            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
-        );
-    }
-
-    #[test]
-    fn linear_swap_update() {
-        let raw_msg = r#"{"action":"update","arg":{"instType":"mc","channel":"candle1m","instId":"BTCUSDT"},"data":[["1654077600000","31676.5","31676.5","31671","31671","5.639"]]}"#;
-
-        assert_eq!(
-            1654077600000,
-            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
-                .unwrap()
-                .unwrap()
-        );
-        assert_eq!(
-            "BTCUSDT_UMCBL",
-            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
-        );
-    }
-}
-
-#[cfg(test)]
-mod ticker {
-    use super::EXCHANGE_NAME;
-    use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
-
-    #[test]
-    fn spot() {
-        let raw_msg = r#"{"action":"snapshot","arg":{"instType":"sp","channel":"ticker","instId":"BTCUSDT"},"data":[{"instId":"BTCUSDT","last":"29948.21","open24h":"30726.18","high24h":"30741.06","low24h":"29336.95","bestBid":"29944.390000","bestAsk":"29944.550000","baseVolume":"24658.6272","quoteVolume":"749224809.9118","ts":1654160360101,"labeId":0}]}"#;
-
-        assert_eq!(
-            1654160360101,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
-                .unwrap()
-                .unwrap()
-        );
-        assert_eq!(
-            "BTCUSDT_SPBL",
-            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
-        );
-    }
-
-    #[test]
-    fn inverse_swap() {
-        let raw_msg = r#"{"action":"snapshot","arg":{"instType":"mc","channel":"ticker","instId":"BTCUSD"},"data":[{"instId":"BTCUSD","last":"29898.50","bestAsk":"29899","bestBid":"29898","high24h":"30706.50","low24h":"29270.50","priceChangePercent":"-0.02","capitalRate":"0.000100","nextSettleTime":1654182000000,"systemTime":1654160828664,"markPrice":"29897.79","indexPrice":"29906.49","holding":"6166.235","baseVolume":"6601.040","quoteVolume":"201847558.263"}]}"#;
-
-        assert_eq!(
-            1654160828664,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
-                .unwrap()
-                .unwrap()
-        );
-        assert_eq!(
-            "BTCUSD_DMCBL",
-            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
-        );
-    }
-
-    #[test]
-    fn linear_swap() {
-        let raw_msg = r#"{"action":"snapshot","arg":{"instType":"mc","channel":"ticker","instId":"BTCUSDT"},"data":[{"instId":"BTCUSDT","last":"29905.50","bestAsk":"29905.5","bestBid":"29904.5","high24h":"30731.50","low24h":"29293.00","priceChangePercent":"-0.02","capitalRate":"0.000100","nextSettleTime":1654182000000,"systemTime":1654160847314,"markPrice":"29906.42","indexPrice":"29928.32","holding":"87338.493","baseVolume":"214176.417","quoteVolume":"6536325903.110"}]}"#;
-
-        assert_eq!(
-            1654160847314,
-            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
-                .unwrap()
-                .unwrap()
-        );
-        assert_eq!(
-            "BTCUSDT_UMCBL",
-            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
-        );
-    }
-}
-
-#[cfg(test)]
-mod l2_snapshot {
-    use super::EXCHANGE_NAME;
-    use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
-
-    #[test]
-    fn spot() {
-        let raw_msg = r#"{"code":"00000","msg":"success","requestTime":1654232411024,"data":{"asks":[["30413.33","0.0141"],["30413.37","0.0112"],["30413.41","0.0179"]],"bids":[["30413.27","0.0296"],["30413.23","0.0484"],["30413.19","0.1272"]],"timestamp":"1654232411024"}}"#;
-
-        assert_eq!(
-            "NONE",
-            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
-        );
-        assert_eq!(
-            1654232411024,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
-                .unwrap()
-                .unwrap()
-        );
-    }
-
-    #[test]
-    fn inverse_swap() {
-        let raw_msg = r#"{"code":"00000","msg":"success","requestTime":1654234201087,"data":{"asks":[["30521","1.661"],["30521.5","2.312"],["30522","0.139"]],"bids":[["3.052E+4","0.256"],["30519.5","0.482"],["30519","0.079"]],"timestamp":"1654234201087"}}"#;
-
-        assert_eq!(
-            "NONE",
-            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
-        );
-        assert_eq!(
-            1654234201087,
-            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
-                .unwrap()
-                .unwrap()
-        );
-    }
-
-    #[test]
-    fn linear_swap() {
-        let raw_msg = r#"{"code":"00000","msg":"success","requestTime":1654234229348,"data":{"asks":[["30544","13.904"],["30544.5","2.678"],["30545","4.923"]],"bids":[["30543","0.756"],["30542.5","0.749"],["30542","15.438"]],"timestamp":"1654234229348"}}"#;
-
-        assert_eq!(
-            "NONE",
-            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
-        );
-        assert_eq!(
-            1654234229348,
-            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
-                .unwrap()
-                .unwrap()
-        );
-    }
-}
-
-#[cfg(test)]
-mod open_interest {
-    use super::EXCHANGE_NAME;
-    use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
-
-    #[test]
-    fn inverse_swap() {
-        let raw_msg = r#"{"code":"00000","msg":"success","requestTime":1654337704617,"data":{"symbol":"BTCUSD_DMCBL","amount":"5030.748","timestamp":"1654337704617"}}"#;
-
-        assert_eq!(
-            "BTCUSD_DMCBL",
-            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
-        );
-        assert_eq!(
-            1654337704617,
-            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
-                .unwrap()
-                .unwrap()
-        );
-    }
-
-    #[test]
-    fn linear_swap() {
-        let raw_msg = r#"{"code":"00000","msg":"success","requestTime":1654337723059,"data":{"symbol":"BTCUSDT_UMCBL","amount":"89481.932","timestamp":"1654337723059"}}"#;
-
-        assert_eq!(
-            "BTCUSDT_UMCBL",
-            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
-        );
-        assert_eq!(
-            1654337723059,
-            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
-                .unwrap()
-                .unwrap()
-        );
+            assert_eq!(
+                "cmt_btcusdt",
+                extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+            );
+            assert_eq!(
+                1648801800000,
+                extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                    .unwrap()
+                    .unwrap()
+            );
+        }
     }
 }
