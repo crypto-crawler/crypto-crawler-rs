@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use crypto_market_type::MarketType;
 use reqwest::{header, Result};
+use serde::{Deserialize, Deserializer};
 use serde_json::Value;
 
 pub(super) fn http_get(url: &str) -> Result<String> {
@@ -91,4 +92,16 @@ pub(super) fn convert_timestamp(v: &Value) -> Option<i64> {
     } else {
         None
     }
+}
+
+// copied from https://github.com/serde-rs/serde/issues/1098
+pub(super) fn deserialize_null_default<'de, D, T>(
+    deserializer: D,
+) -> std::result::Result<T, D::Error>
+where
+    T: Default + Deserialize<'de>,
+    D: Deserializer<'de>,
+{
+    let opt = Option::deserialize(deserializer)?;
+    Ok(opt.unwrap_or_default())
 }

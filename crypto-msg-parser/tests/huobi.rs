@@ -481,6 +481,50 @@ mod l2_event {
     }
 
     #[test]
+    fn inverse_future_snapshot_2() {
+        let raw_msg = r#"{"ch":"market.DOT_CW.depth.size_20.high_freq","tick":{"asks":[[9.9252,1569],[9.9301,1964],[10.0029,44]],"bids":null,"ch":"market.DOT_CW.depth.size_20.high_freq","event":"snapshot","id":222100052218419,"mrid":222100052218419,"ts":1653033431770,"version":865562932},"ts":1653033431770}"#;
+        let orderbook =
+            &parse_l2(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg, None).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 3);
+        assert_eq!(orderbook.bids.len(), 0);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            EXCHANGE_NAME,
+            MarketType::InverseFuture,
+            MessageType::L2Event,
+            "DOT/USD".to_string(),
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap(),
+            orderbook,
+            raw_msg,
+        );
+        assert_eq!(
+            "DOT_CW",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1653033431770,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+
+        assert_eq!(orderbook.timestamp, 1653033431770);
+        assert_eq!(orderbook.seq_id, Some(222100052218419));
+
+        assert_eq!(orderbook.asks[0].price, 9.9252);
+        assert_eq!(orderbook.asks[0].quantity_base, 15690.0 / 9.9252);
+        assert_eq!(orderbook.asks[0].quantity_quote, 15690.0);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 1569.0);
+
+        assert_eq!(orderbook.asks[2].price, 10.0029);
+        assert_eq!(orderbook.asks[2].quantity_base, 440.0 / 10.0029);
+        assert_eq!(orderbook.asks[2].quantity_quote, 440.0);
+        assert_eq!(orderbook.asks[2].quantity_contract.unwrap(), 44.0);
+    }
+
+    #[test]
     fn inverse_swap_snapshot() {
         let raw_msg = r#"{"ch":"market.BTC-USD.depth.size_150.high_freq","tick":{"asks":[[38888,9949],[38888.1,1],[38888.2,1]],"bids":[[38887.9,3832],[38887.8,4],[38887.7,3]],"ch":"market.BTC-USD.depth.size_150.high_freq","event":"snapshot","id":99893955238,"mrid":99893955238,"ts":1622711365595,"version":1300632701},"ts":1622711365595}"#;
         let orderbook =

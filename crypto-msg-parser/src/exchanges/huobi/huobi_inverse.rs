@@ -1,14 +1,16 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crate::{exchanges::utils::calc_quantity_and_volume, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{
+    exchanges::utils::{calc_quantity_and_volume, deserialize_null_default},
+    Order, OrderBookMsg, TradeMsg, TradeSide,
+};
 
+use super::message::WebsocketMsg;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
 use std::collections::HashMap;
-
-use super::message::WebsocketMsg;
 
 const EXCHANGE_NAME: &str = "huobi";
 
@@ -40,9 +42,9 @@ struct InverseOrderbookMsg {
     mrid: u64,
     event: Option<String>, // snapshot, update, None if L2TopK
     ch: String,
-    #[serde(default)]
+    #[serde(deserialize_with = "deserialize_null_default")]
     bids: Vec<[f64; 2]>,
-    #[serde(default)]
+    #[serde(deserialize_with = "deserialize_null_default")]
     asks: Vec<[f64; 2]>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
