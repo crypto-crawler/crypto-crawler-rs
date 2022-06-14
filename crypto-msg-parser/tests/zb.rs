@@ -178,6 +178,45 @@ mod l2_event {
         assert_eq!(orderbook.bids[2].quantity_quote, 0.0);
         assert_eq!(orderbook.bids[2].quantity_contract.unwrap(), 0.0);
     }
+
+    #[test]
+    fn linear_swap_update_2() {
+        let raw_msg = r#"{"channel":"1000LUNC_USDT.Depth","data":{"bids":[[0.11,1.0]],"time":"1654009289339"}}"#;
+        let orderbook = &parse_l2(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 0);
+        assert_eq!(orderbook.bids.len(), 1);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            EXCHANGE_NAME,
+            MarketType::LinearSwap,
+            MessageType::L2Event,
+            "1000LUNC/USDT".to_string(),
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap(),
+            orderbook,
+            raw_msg,
+        );
+        assert_eq!(
+            "1000LUNC_USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1654009289339,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+
+        assert_eq!(orderbook.timestamp, 1654009289339);
+        assert_eq!(orderbook.seq_id, None);
+        assert_eq!(orderbook.prev_seq_id, None);
+
+        assert_eq!(orderbook.bids[0].price, 0.11);
+        assert_eq!(orderbook.bids[0].quantity_base, 1.0);
+        assert_eq!(orderbook.bids[0].quantity_quote, round(0.11 * 1.0));
+        assert_eq!(orderbook.bids[0].quantity_contract.unwrap(), 1.0);
+    }
 }
 
 #[cfg(test)]

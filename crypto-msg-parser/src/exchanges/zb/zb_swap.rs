@@ -144,7 +144,9 @@ struct WebsocketMsg<T: Sized> {
 #[allow(non_snake_case)]
 struct Level2Msg {
     time: String,
+    #[serde(default)]
     asks: Vec<[f64; 2]>,
+    #[serde(default)]
     bids: Vec<[f64; 2]>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
