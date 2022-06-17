@@ -502,6 +502,22 @@ mod bbo {
     }
 
     #[test]
+    fn spot_2() {
+        let raw_msg = r#"{"type":"message","topic":"/market/ticker:all","subject":"DOT-USDT","data":{"bestAsk":"10.4686","bestAskSize":"64.9647","bestBid":"10.4647","bestBidSize":"0.1416","price":"10.4686","sequence":"1619386350765","size":"0.0153","time":1653955200018}}"#;
+
+        assert_eq!(
+            1653955200018,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "ALL",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
     fn inverse_future() {
         let raw_msg = r#"{"type":"message","topic":"/contractMarket/tickerV2:XBTMM22","subject":"tickerV2","data":{"symbol":"XBTMM22","sequence":1647024019666,"bestBidSize":118,"bestBidPrice":"31741.0","bestAskPrice":"31776.0","ts":1654032575773272833,"bestAskSize":562}}"#;
 
