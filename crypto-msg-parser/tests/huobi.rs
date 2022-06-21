@@ -953,6 +953,54 @@ mod l2_topk {
         assert_eq!(orderbook.bids[2].quantity_quote, 31588.6 * 0.001);
         assert_eq!(orderbook.bids[2].quantity_contract.unwrap(), 1.0);
     }
+
+    #[test]
+    fn linear_swap_2() {
+        let raw_msg = r#"{"ch":"market.GST-USDT.depth.step7","ts":1651233614936,"tick":{"mrid":34526821266,"id":1651233614,"asks":[[7.5042,4218],[7.7385,194],[7.7451,67],[7.7484,281],[7.7517,439]],"ts":1651233614936,"version":1651233614,"ch":"market.GST-USDT.depth.step7"}}"#;
+        let orderbook =
+            &parse_l2_topk(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 5);
+        assert_eq!(orderbook.bids.len(), 0);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            EXCHANGE_NAME,
+            MarketType::LinearSwap,
+            MessageType::L2TopK,
+            "GST/USDT".to_string(),
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap(),
+            orderbook,
+            raw_msg,
+        );
+        assert_eq!(
+            "GST-USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1651233614936,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+
+        assert_eq!(orderbook.timestamp, 1651233614936);
+        assert_eq!(orderbook.seq_id, Some(34526821266));
+        assert_eq!(orderbook.prev_seq_id, None);
+
+        assert_eq!(orderbook.asks[0].price, 7.5042);
+        assert_eq!(orderbook.asks[0].quantity_base, 0.1 * 4218.0);
+        assert_eq!(orderbook.asks[0].quantity_quote, 0.1 * 4218.0 * 7.5042);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 4218.0);
+
+        assert_eq!(orderbook.asks[4].price, 7.7517);
+        assert_eq!(orderbook.asks[4].quantity_base, round(0.1 * 439.0));
+        assert_eq!(
+            orderbook.asks[4].quantity_quote,
+            round(7.7517 * 0.1 * 439.0)
+        );
+        assert_eq!(orderbook.asks[4].quantity_contract.unwrap(), 439.0);
+    }
 }
 
 #[cfg(test)]

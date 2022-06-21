@@ -42,9 +42,9 @@ struct InverseOrderbookMsg {
     mrid: u64,
     event: Option<String>, // snapshot, update, None if L2TopK
     ch: String,
-    #[serde(deserialize_with = "deserialize_null_default")]
+    #[serde(default, deserialize_with = "deserialize_null_default")]
     bids: Vec<[f64; 2]>,
-    #[serde(deserialize_with = "deserialize_null_default")]
+    #[serde(default, deserialize_with = "deserialize_null_default")]
     asks: Vec<[f64; 2]>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
@@ -61,12 +61,7 @@ pub(crate) fn parse_trade(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<TradeMsg>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<TradeTick>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<TradeTick>",
-            msg
-        ))
-    })?;
+    let ws_msg = serde_json::from_str::<WebsocketMsg<TradeTick>>(msg).map_err(SimpleError::from)?;
 
     let symbol = ws_msg.ch.split('.').nth(1).unwrap();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
@@ -116,12 +111,8 @@ pub(crate) fn parse_l2(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<OrderBookMsg>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<InverseOrderbookMsg>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<InverseOrderbookMsg>",
-            msg
-        ))
-    })?;
+    let ws_msg = serde_json::from_str::<WebsocketMsg<InverseOrderbookMsg>>(msg)
+        .map_err(SimpleError::from)?;
     let symbol = ws_msg.ch.split('.').nth(1).unwrap();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
         .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;

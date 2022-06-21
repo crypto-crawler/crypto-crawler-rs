@@ -234,7 +234,20 @@ pub(super) fn parse_l2(
                 msg
             ))
         })?;
-    let snapshot = ws_msg.action.unwrap() == "partial";
+    let table = ws_msg.table.as_str();
+
+    let snapshot = if let Some(action) = ws_msg.action {
+        action.as_str() == "partial"
+    } else {
+        table.starts_with("swap/depth") && table.chars().last().unwrap().is_numeric()
+    };
+    let msg_type = if table.starts_with("swap/depth") && table.chars().last().unwrap().is_numeric()
+    {
+        MessageType::L2TopK
+    } else {
+        MessageType::L2Event
+    };
+
     let mut orderbooks = Vec::<OrderBookMsg>::new();
 
     for raw_orderbook in ws_msg.data.iter() {
@@ -262,7 +275,7 @@ pub(super) fn parse_l2(
             market_type,
             symbol: symbol.to_string(),
             pair: pair.clone(),
-            msg_type: MessageType::L2Event,
+            msg_type,
             timestamp,
             seq_id: None,
             prev_seq_id: None,
