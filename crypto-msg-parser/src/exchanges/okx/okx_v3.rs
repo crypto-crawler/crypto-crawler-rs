@@ -1,16 +1,15 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use super::utils::calc_quantity_and_volume;
+use super::super::utils::calc_quantity_and_volume;
 use crate::{FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
+use super::EXCHANGE_NAME;
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
 use std::collections::HashMap;
-
-const EXCHANGE_NAME: &str = "okex";
 
 // https://www.okex.com/docs/en/#spot_ws-trade
 // https://www.okex.com/docs/en/#futures_ws-trade
@@ -64,7 +63,7 @@ struct WebsocketMsg<T: Sized> {
     extra: HashMap<String, Value>,
 }
 
-pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
+pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
         SimpleError::new(format!(
             "Failed to deserialize {} to WebsocketMsg<Value>",
@@ -83,10 +82,7 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
     }
 }
 
-pub(crate) fn extract_timestamp(
-    _market_type: MarketType,
-    msg: &str,
-) -> Result<Option<i64>, SimpleError> {
+pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
         SimpleError::new(format!(
             "Failed to deserialize {} to WebsocketMsg<Value>",
@@ -113,7 +109,7 @@ pub(crate) fn extract_timestamp(
     }
 }
 
-pub(crate) fn get_msg_type(msg: &str) -> MessageType {
+pub(super) fn get_msg_type(msg: &str) -> MessageType {
     if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
         let table = ws_msg.table;
         let channel = {
@@ -140,7 +136,7 @@ pub(crate) fn get_msg_type(msg: &str) -> MessageType {
     }
 }
 
-pub(crate) fn parse_trade(
+pub(super) fn parse_trade(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<TradeMsg>, SimpleError> {
@@ -205,7 +201,7 @@ pub(crate) fn parse_trade(
     trades.into_iter().collect()
 }
 
-pub(crate) fn parse_funding_rate(
+pub(super) fn parse_funding_rate(
     market_type: MarketType,
     msg: &str,
     received_at: i64,
@@ -243,7 +239,7 @@ pub(crate) fn parse_funding_rate(
     Ok(rates)
 }
 
-pub(crate) fn parse_l2(
+pub(super) fn parse_l2(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<OrderBookMsg>, SimpleError> {
@@ -253,8 +249,18 @@ pub(crate) fn parse_l2(
             msg
         ))
     })?;
-    let snapshot = ws_msg.action.unwrap() == "partial";
     debug_assert_eq!(ws_msg.data.len(), 1);
+
+    let msg_type = if ws_msg.table.ends_with("/depth5") {
+        MessageType::L2TopK
+    } else {
+        MessageType::L2Event
+    };
+    let snapshot = if let Some(action) = ws_msg.action {
+        action == "partial"
+    } else {
+        msg_type == MessageType::L2TopK
+    };
 
     let mut orderbooks = ws_msg
         .data
@@ -283,7 +289,7 @@ pub(crate) fn parse_l2(
                 market_type,
                 symbol,
                 pair: pair.clone(),
-                msg_type: MessageType::L2Event,
+                msg_type,
                 timestamp: timestamp.timestamp_millis(),
                 seq_id: None,
                 prev_seq_id: None,
