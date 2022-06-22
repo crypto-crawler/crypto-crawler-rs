@@ -64,7 +64,7 @@ struct RawOrderbookMsg {
     ps: Option<String>, // Pair, available to L2_TOPK
     U: u64,             // First update ID in event
     u: u64,             // Final update ID in event
-    pu: Option<u64>,    // Previous event update sequense ("u" of previous message)
+    pu: i64,            // Previous event update sequense ("u" of previous message), -1 means None
     b: Vec<RawOrder>,
     a: Vec<RawOrder>,
     #[serde(flatten)]
@@ -208,7 +208,11 @@ pub(super) fn parse_l2(
         msg_type: MessageType::L2Event,
         timestamp: ws_msg.data.E,
         seq_id: Some(ws_msg.data.u),
-        prev_seq_id: ws_msg.data.pu,
+        prev_seq_id: if ws_msg.data.pu == -1 {
+            None
+        } else {
+            Some(ws_msg.data.pu as u64)
+        },
         asks: ws_msg
             .data
             .a

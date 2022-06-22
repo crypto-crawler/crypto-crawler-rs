@@ -778,6 +778,46 @@ mod l2_topk {
     }
 
     #[test]
+    fn inverse_swap_2() {
+        let raw_msg = r#"{"stream":"runeusd_perp@depth5","data":{"e":"depthUpdate","E":1648006221596,"T":1648006221340,"s":"RUNEUSD_PERP","ps":"RUNEUSD","U":395028983849,"u":395028983849,"pu":-1,"b":[],"a":[["8.4400","2"]]}}"#;
+        let orderbook =
+            &parse_l2_topk(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 1);
+        assert_eq!(orderbook.bids.len(), 0);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            EXCHANGE_NAME,
+            MarketType::InverseSwap,
+            MessageType::L2TopK,
+            "RUNE/USD".to_string(),
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap(),
+            orderbook,
+            raw_msg,
+        );
+        assert_eq!(
+            "RUNEUSD_PERP",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1648006221596,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+
+        assert_eq!(orderbook.timestamp, 1648006221596);
+        assert_eq!(orderbook.seq_id, Some(395028983849));
+        assert_eq!(orderbook.prev_seq_id, None);
+
+        assert_eq!(orderbook.asks[0].price, 8.4400);
+        assert_eq!(orderbook.asks[0].quantity_base, 2.0 * 10.0 / 8.4400);
+        assert_eq!(orderbook.asks[0].quantity_quote, 2.0 * 10.0);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 2.0);
+    }
+
+    #[test]
     fn linear_swap() {
         let raw_msg = r#"{"stream":"ethusdt@depth20","data":{"e":"depthUpdate","E":1651122265861,"T":1651122265854,"s":"ETHUSDT","U":1437010873371,"u":1437010882721,"pu":1437010873329,"b":[["2886.71","0.454"],["2886.70","2.755"],["2886.67","1.000"]],"a":[["2886.72","77.215"],["2886.73","1.734"],["2886.74","0.181"]]}}"#;
         let orderbook =
