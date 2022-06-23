@@ -222,6 +222,7 @@ pub fn parse_bbo(
 ) -> Result<BboMsg, SimpleError> {
     match exchange {
         "binance" => exchanges::binance::parse_bbo(market_type, msg, received_at),
+        "huobi" => exchanges::huobi::parse_bbo(market_type, msg, received_at),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
 }
@@ -267,6 +268,38 @@ pub fn parse_funding_rate(
                 exchange
             )))
         }
+    }
+}
+
+pub fn parse_candlestick(
+    exchange: &str,
+    market_type: MarketType,
+    msg: &str,
+    msg_type: MessageType
+) -> Result<KlineMsg, SimpleError> {
+    match exchange {
+        "binance" => exchanges::binance::parse_candlestick(market_type, msg, msg_type),
+        // "bitfinex" => exchanges::bitfinex::parse_candlestick(market_type, msg),
+        // "bitget" => exchanges::bitget::parse_candlestick(market_type, msg),
+        // "bithumb" => exchanges::bithumb::parse_candlestick(market_type, msg),
+        // "bitmex" => exchanges::bitmex::parse_candlestick(market_type, msg),
+        // "bitstamp" => exchanges::bitstamp::parse_candlestick(market_type, msg),
+        // "bitz" => exchanges::bitz::parse_candlestick(market_type, msg),
+        // "bybit" => exchanges::bybit::parse_candlestick(market_type, msg),
+        // "coinbase_pro" => exchanges::coinbase_candlestick(market_type, msg),
+        // "deribit" => exchanges::deribit::parse_candlestick(market_type, msg),
+        // "dydx" => exchanges::dydx::parse_candlestick(market_type, msg),
+        // "ftx" => exchanges::ftx::parse_candlestick(market_type, msg),
+        // "gate" => exchanges::gate::parse_candlestick(market_type, msg),
+        "huobi" => exchanges::huobi::parse_candlestick(market_type, msg, msg_type),
+        // "kraken" => exchanges::kraken::parse_candlestick(market_type, msg),
+        // "kucoin" => exchanges::kucoin::parse_candlestick(market_type, msg),
+        // "mxc" | "mexc" => exchanges::mexc::parse_candlestick(market_type, msg),
+        // "okex" => exchanges::okex::parse_candlestick(market_type, msg),
+        // "okx" => exchanges::okx::parse_candlestick(market_type, msg),
+        // "zb" => exchanges::zb::parse_candlestick(market_type, msg),
+        // "zbg" => exchanges::zbg::parse_candlestick(market_type, msg),
+        _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
 }
 

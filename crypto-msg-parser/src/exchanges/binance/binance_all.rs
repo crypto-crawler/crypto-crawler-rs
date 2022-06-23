@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crate::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide, KlineMsg};
 
 use super::super::utils::calc_quantity_and_volume;
 use super::EXCHANGE_NAME;
@@ -381,4 +381,91 @@ pub(super) fn parse_funding_rate(
         funding_rates[0].json = msg.to_string();
     }
     Ok(funding_rates)
+}
+
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct Stream <T>{
+    stream: String,
+    data: T
+}
+
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct StreamData {
+    e: String,  // Event type
+    E: i64,     // Event time
+    s: String,  // Symbol
+    k: RawKlineMsg
+}
+
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawKlineMsg {
+    t: u64,     // Kline start time
+    T: u64,     // Kline close time
+    s: String,  // Symbol
+    i: String,  // Interval
+    f: u64,     // First trade ID
+    L: u64,     // Last trade ID
+    o: String,  // Open price
+    c: String,  // Close price
+    h: String,  // High price
+    l: String,  // Low price
+    v: String,  // Base asset volume
+    n: u64,     // Number of trades
+    x: bool,    // Is this kline closed?
+    q: String,  // Quote asset volume
+    V: String,  // Taker buy base asset volume
+    Q: String,  // Taker buy quote asset volume
+    B: String   // Ignore
+}
+
+
+
+
+pub(super) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+    msg_type: MessageType
+) -> Result<KlineMsg, SimpleError> {
+    let obj = serde_json::from_str::<Stream<StreamData>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to HashMap<String, Value>",
+            msg
+        ))
+    })?;
+
+    let symbol = obj.data.k.s;
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+
+
+    let open: f64 = obj.data.k.o.parse().unwrap();
+    let high: f64 = obj.data.k.h.parse().unwrap();
+    let low: f64 = obj.data.k.l.parse().unwrap();
+    let close: f64 = obj.data.k.c.parse().unwrap();
+    let volume: f64 = obj.data.k.v.parse().unwrap();
+    let quote_volume: f64 = obj.data.k.V.parse().unwrap();
+
+
+    // obj.data.k
+
+    let kline_msg = KlineMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: obj.data.s,
+        pair,
+        msg_type,
+        timestamp: obj.data.E,
+        json: msg.to_string(),
+        open,
+        high,
+        low,
+        close,
+        volume,
+        period: obj.data.k.i,
+        quote_volume: Some(quote_volume)
+    };
+
+    Ok(kline_msg)
 }
