@@ -3,7 +3,7 @@ use crypto_crawler::{
     crawl_bbo, crawl_candlestick, crawl_funding_rate, crawl_l2_event, crawl_l2_topk, MarketType,
     Message, MessageType, crawl_trade,
 };
-use crypto_msg_parser::{parse_l2_topk, Order, OrderBookMsg, TradeMsg, TradeSide, parse_trade, parse_bbo, BboMsg, KlineMsg};
+use crypto_msg_parser::{parse_l2_topk, Order, OrderBookMsg, TradeMsg, TradeSide, parse_trade, parse_bbo, BboMsg, KlineMsg, parse_candlestick};
 use miniz_oxide::deflate::compress_to_vec;
 use miniz_oxide::inflate::decompress_to_vec;
 use rust_decimal::prelude::ToPrimitive;
@@ -231,7 +231,7 @@ async fn main() {
 
             // let bbo = Arc::new(tokio::task::spawn_blocking(move || {
             //     parse_bbo(
-            //         "binance",
+            //         "huobi",
             //         MarketType::Spot,
             //         &(msg as Message).json,
             //         Some(received_at),
@@ -241,6 +241,19 @@ async fn main() {
             // .await
             // .ok()
             // .unwrap());
+
+            let kline = Arc::new(tokio::task::spawn_blocking(move || {
+                parse_candlestick(
+                    "binance",
+                    MarketType::Spot,
+                    &(msg as Message).json,
+                    MessageType::Candlestick,
+                )
+                .unwrap()
+            })
+            .await
+            .ok()
+            .unwrap());
 
             // encode
             // let orderbook_for_encode = orderbook.clone();
@@ -300,18 +313,19 @@ async fn main() {
         }
     });
 
-    let symbols_vec = &vec!["BTCUSDT".to_string()];
+    let symbols_vec = &vec!["btcusdt".to_string()];
     let symbols_opt: Option<&[String]> = Some(symbols_vec);
 
     // Crawl realtime trades for all symbols of binance inverse_swap markets
     // crawl_trade("okx", MarketType::Spot, symbols_opt, tx).await;
     // crawl_l2_event("huobi", MarketType::Spot, symbols_opt, tx).await;
     // crawl_l2_topk("okx", MarketType::Spot, symbols_opt, tx).await;
-    // crawl_bbo("binance", MarketType::Spot, symbols_opt, tx).await;
+    // crawl_bbo("huobi", MarketType::Spot, symbols_opt, tx).await;
     
-    let symbol_interval_list: &[(String, usize)] = &vec![("btcusdt".to_string(), 60usize)];
+    let symbol_interval_list: &[(String, usize)] = &vec![("BTCUSDT".to_string(), 60usize)];
     let symbol_interval_list = Some(symbol_interval_list);
-    crawl_candlestick("huobi", MarketType::Spot, symbol_interval_list, tx).await;
+    crawl_candlestick("binance", MarketType::Spot, symbol_interval_list, tx).await;
+
     // crawl_funding_rate("binance", MarketType::InverseSwap, None, tx).await;
 
     // to intToHex
