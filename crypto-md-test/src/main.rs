@@ -518,7 +518,6 @@ pub fn restore_orders<'a>(
 
 
 pub fn encode_orderbook(orderbook: &OrderBookMsg) -> Vec<i8> {
-
     let mut orderbook_bytes: Vec<i8> = Vec::new();
 
     let exchange_timestamp = orderbook.timestamp;
@@ -572,6 +571,8 @@ pub fn encode_orderbook(orderbook: &OrderBookMsg) -> Vec<i8> {
         MessageType::Candlestick => 9,
         MessageType::OpenInterest => 10,
         MessageType::FundingRate => 11,
+        MessageType::LongShortRatio => 12,
+        MessageType::TakerVolume => 12,
     };
     orderbook_bytes.push(_message_type);
 
@@ -617,9 +618,7 @@ pub fn encode_orderbook(orderbook: &OrderBookMsg) -> Vec<i8> {
     orderbook_bytes
 }
 
-
 fn decode_orderbook(payload: Vec<i8>) -> OrderBookMsg {
-
     let mut data_byte_index = 0;
 
     //1、交易所时间戳:6 or 8 字节时间戳
@@ -643,11 +642,10 @@ fn decode_orderbook(payload: Vec<i8>) -> OrderBookMsg {
     let exchange = payload.get(data_byte_index);
     data_byte_index += 1;
     let exchange_name = match exchange.unwrap() {
-        1 => "CRYPTO",
-        2 => "FTX",
-        3 => "BINANCE",
-        11 => "OKEX",
-        _ => "UNKNOWN",
+        1 => "crypto",
+        2 => "ftx",
+        3 => "binance",
+        _ => "unknow",
     };
 
     //4、MARKET_TYPE 1字节信息标识
@@ -757,7 +755,7 @@ fn decode_orderbook(payload: Vec<i8>) -> OrderBookMsg {
             };
 
             let data_type_flag_u8 = data_type_flag.unwrap().to_be();
-            if (1 == data_type_flag_u8) {
+            if 1 == data_type_flag_u8 {
                 // ask
                 asks.push(order);
             } else if (2 == data_type_flag_u8) {
@@ -788,9 +786,7 @@ fn decode_orderbook(payload: Vec<i8>) -> OrderBookMsg {
     orderbook
 }
 
-
 pub fn encode_trade(orderbook: &TradeMsg) -> Vec<i8> {
-
     let mut orderbook_bytes: Vec<i8> = Vec::new();
 
     let exchange_timestamp = orderbook.timestamp;
@@ -865,7 +861,6 @@ pub fn encode_trade(orderbook: &TradeMsg) -> Vec<i8> {
 
     orderbook_bytes
 }
-
 
 fn decode_trade(payload: Vec<i8>) -> TradeMsg {
 
