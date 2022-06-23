@@ -540,6 +540,60 @@ mod l2_topk {
     }
 
     #[test]
+    fn spot_2() {
+        let raw_msg = r#"{"table":"spot/depth5","data":[{"asks":[["0.9788","0.001","1"],["0.9789","0.944259","7"],["0.979","1.956785","1"],["0.9792","0.9401","1"],["0.98","31.459918","8"]],"bids":[["0.9768","0.605755","1"],["0.976","1.0532","1"],["0.9757","0.002","1"],["0.9752","0.720555","1"],["0.9748","0.001","1"]],"instrument_id":"BETH-ETH","timestamp":"2022-02-25T00:00:01.032Z"}]}"#;
+        let orderbook = &parse_l2_topk(EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 5);
+        assert_eq!(orderbook.bids.len(), 5);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            EXCHANGE_NAME,
+            MarketType::Spot,
+            MessageType::L2TopK,
+            "BETH/ETH".to_string(),
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap(),
+            orderbook,
+            raw_msg,
+        );
+        assert_eq!(
+            "BETH-ETH",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1645747201032,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+
+        assert_eq!(orderbook.timestamp, 1645747201032);
+        assert_eq!(orderbook.seq_id, None);
+        assert_eq!(orderbook.prev_seq_id, None);
+
+        assert_eq!(orderbook.bids[0].price, 0.9768);
+        assert_eq!(orderbook.bids[0].quantity_base, 0.605755);
+        assert_eq!(orderbook.bids[0].quantity_quote, 0.9768 * 0.605755);
+        assert_eq!(orderbook.bids[0].quantity_contract, None);
+
+        assert_eq!(orderbook.bids[4].price, 0.9748);
+        assert_eq!(orderbook.bids[4].quantity_base, 0.001);
+        assert_eq!(orderbook.bids[4].quantity_quote, round(0.9748 * 0.001));
+        assert_eq!(orderbook.bids[4].quantity_contract, None);
+
+        assert_eq!(orderbook.asks[0].price, 0.9788);
+        assert_eq!(orderbook.asks[0].quantity_base, 0.001);
+        assert_eq!(orderbook.asks[0].quantity_quote, 0.001 * 0.9788);
+        assert_eq!(orderbook.asks[0].quantity_contract, None);
+
+        assert_eq!(orderbook.asks[4].price, 0.98);
+        assert_eq!(orderbook.asks[4].quantity_base, 31.459918);
+        assert_eq!(orderbook.asks[4].quantity_quote, round(31.459918 * 0.98));
+        assert_eq!(orderbook.asks[4].quantity_contract, None);
+    }
+
+    #[test]
     fn inverse_future() {
         let raw_msg = r#"{"arg":{"channel":"books5","instId":"BTC-USD-220624"},"data":[{"asks":[["31835.7","690","0","2"],["31841.2","5","0","1"],["31841.5","148","0","1"],["31841.8","5","0","1"],["31843.4","10","0","1"]],"bids":[["31835.6","6","0","2"],["31834","1","0","1"],["31833.2","23","0","1"],["31833.1","403","0","2"],["31832.9","5","0","1"]],"instId":"BTC-USD-220624","ts":"1653997473120"}]}"#;
         let orderbook =

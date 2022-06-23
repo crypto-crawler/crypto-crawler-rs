@@ -37,8 +37,8 @@ struct RawTradeMsg {
 struct RawOrderbookMsg {
     instrument_id: String,
     timestamp: String,
-    asks: Vec<[String; 4]>,
-    bids: Vec<[String; 4]>,
+    asks: Vec<Vec<String>>, // spot length 3; other length 4
+    bids: Vec<Vec<String>>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -64,12 +64,7 @@ struct WebsocketMsg<T: Sized> {
 }
 
 pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
-            msg
-        ))
-    })?;
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(SimpleError::from)?;
     let symbols = ws_msg
         .data
         .iter()
@@ -83,12 +78,7 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
 }
 
 pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
-            msg
-        ))
-    })?;
+    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(SimpleError::from)?;
     if ws_msg.table == "swap/funding_rate" {
         return Ok(None);
     }
@@ -270,7 +260,7 @@ pub(super) fn parse_l2(
             let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
             let timestamp = DateTime::parse_from_rfc3339(&raw_orderbook.timestamp).unwrap();
 
-            let parse_order = |raw_order: &[String; 4]| -> Order {
+            let parse_order = |raw_order: &[String]| -> Order {
                 let price = raw_order[0].parse::<f64>().unwrap();
                 let quantity = raw_order[1].parse::<f64>().unwrap();
                 let (quantity_base, quantity_quote, quantity_contract) =
