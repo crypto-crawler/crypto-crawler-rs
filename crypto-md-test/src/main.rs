@@ -33,6 +33,7 @@ lazy_static! {
         m.insert("crypto", 1);
         m.insert("ftx", 2);
         m.insert("binance", 3);
+        m.insert("huobi", 8);
         m.insert("okx", 11);
         m
     };
@@ -133,6 +134,60 @@ fn encode_num_to_bytes(mut value: String) -> [i8; 5] {
     result
 }
 
+
+fn encode_num_to_10_bytes(mut value: String) -> [i8; 10] {
+    let mut result: [i8; 10] = [0; 10];
+    let mut e = 0;
+
+    // if value.find("E-") != Some(0) {
+    //     let split: Vec<&str> = value.split("E-").collect();
+    //     let a = split[1];
+    //     e = a.parse().unwrap();
+    //     value = split[0].to_string();
+    // }
+
+    result[9] = match value.find(".") {
+        Some(_index) => value.len() - _index - 1 + e,
+        None => 0,
+    } as i8;
+
+    value = value.replace(".", "");
+    let hex_str = long_to_hex(value.parse().unwrap());
+    let hex_byte = hex_to_byte(hex_str);
+    let length = hex_byte.len();
+    
+    if hex_byte.len() > 0 {
+        result[8] = *hex_byte.get(length - 1).unwrap();
+    }
+    if hex_byte.len() > 1 {
+        result[7] = *hex_byte.get(length - 2).unwrap();
+    }
+    if hex_byte.len() > 2 {
+        result[6] = *hex_byte.get(length - 3).unwrap();
+    }
+    if hex_byte.len() > 3 {
+        result[5] = *hex_byte.get(length - 4).unwrap();
+    }
+    if hex_byte.len() > 4 {
+        result[4] = *hex_byte.get(length - 5).unwrap();
+    }
+    if hex_byte.len() > 5 {
+        result[3] = *hex_byte.get(length - 6).unwrap();
+    }
+    if hex_byte.len() > 6 {
+        result[2] = *hex_byte.get(length - 7).unwrap();
+    }
+    if hex_byte.len() > 7 {
+        result[1] = *hex_byte.get(length - 8).unwrap();
+    }
+    if hex_byte.len() > 8 {
+        result[0] = *hex_byte.get(length - 9).unwrap();
+    }
+
+    result
+}
+
+
 fn roundtrip(data: &[u8]) {
     // Compress the input
     let compressed = compress_to_vec(data, 6);
@@ -145,6 +200,26 @@ fn roundtrip(data: &[u8]) {
 
 #[tokio::main(flavor = "multi_thread")]
 async fn main() {
+
+    let price_bytes = encode_num_to_10_bytes("98565.62696625".to_string());
+    // volume
+    let data_byte_index = 0;
+    let mut quant_array = [0i8; 16];
+    quant_array[0..]
+        .copy_from_slice(&price_bytes[data_byte_index..data_byte_index + 9]);
+    let quant_array = unsafe { std::mem::transmute::<[i8; 16], [u8; 16]>(quant_array) };
+    let quant_int = i128::from_be_bytes(quant_array);
+
+    let quant_hex_p = price_bytes[data_byte_index + 9];
+    let quant_hex_p_array = [quant_hex_p];
+    let mut quant_p_array = [0i8; 4];
+    quant_p_array[3] = quant_hex_p_array[0];
+    let quant_p_array = unsafe { std::mem::transmute::<[i8; 4], [u8; 4]>(quant_p_array) };
+    let quant_p_int = u32::from_be_bytes(quant_p_array);
+
+    // let quant = Decimal::new(quant_int, quant_p_int);
+    // let volume_pricef = quant.to_f64();
+        
 
     let mut candles = RandomCandles::new();
     let mut macd = MACD::default();
@@ -231,7 +306,7 @@ async fn main() {
 
             // let bbo = Arc::new(tokio::task::spawn_blocking(move || {
             //     parse_bbo(
-            //         "huobi",
+            //         "binance",
             //         MarketType::Spot,
             //         &(msg as Message).json,
             //         Some(received_at),
@@ -245,7 +320,7 @@ async fn main() {
             let kline = Arc::new(tokio::task::spawn_blocking(move || {
                 parse_candlestick(
                     "binance",
-                    MarketType::Spot,
+                    MarketType::LinearSwap,
                     &(msg as Message).json,
                     MessageType::Candlestick,
                 )
@@ -274,6 +349,12 @@ async fn main() {
             //         .await
             //         .unwrap());
 
+            let kline_for_encode = kline.clone();
+            let kline_bytes =
+                Arc::new(tokio::task::spawn_blocking(move || encode_kline(&kline_for_encode))
+                    .await
+                    .unwrap());
+
             // decode
             // let order_book_bytes_decode = order_book_bytes.clone();
             // let order_book_decode = 
@@ -293,6 +374,11 @@ async fn main() {
             //     .await
             //     .unwrap();
 
+            let kline_bytes_decode = kline_bytes.clone();
+            let kline_decode = 
+                tokio::task::spawn_blocking(move || decode_kline(kline_bytes_decode.to_vec()))
+                .await
+                .unwrap();
 
             // caculate diff    
             // if let Some(ref old) = o {
@@ -313,18 +399,18 @@ async fn main() {
         }
     });
 
-    let symbols_vec = &vec!["btcusdt".to_string()];
+    let symbols_vec = &vec!["BTCUSDT".to_string()];
     let symbols_opt: Option<&[String]> = Some(symbols_vec);
 
     // Crawl realtime trades for all symbols of binance inverse_swap markets
     // crawl_trade("okx", MarketType::Spot, symbols_opt, tx).await;
     // crawl_l2_event("huobi", MarketType::Spot, symbols_opt, tx).await;
     // crawl_l2_topk("okx", MarketType::Spot, symbols_opt, tx).await;
-    // crawl_bbo("huobi", MarketType::Spot, symbols_opt, tx).await;
+    // crawl_bbo("binance", MarketType::Spot, symbols_opt, tx).await;
     
     let symbol_interval_list: &[(String, usize)] = &vec![("BTCUSDT".to_string(), 60usize)];
     let symbol_interval_list = Some(symbol_interval_list);
-    crawl_candlestick("binance", MarketType::Spot, symbol_interval_list, tx).await;
+    crawl_candlestick("binance", MarketType::LinearSwap, symbol_interval_list, tx).await;
 
     // crawl_funding_rate("binance", MarketType::InverseSwap, None, tx).await;
 
@@ -696,6 +782,8 @@ fn decode_orderbook(payload: Vec<i8>) -> OrderBookMsg {
         1 => "crypto",
         2 => "ftx",
         3 => "binance",
+        3 => "huobi",
+        11 => "okx",
         _ => "unknow",
     };
 
@@ -941,6 +1029,7 @@ fn decode_trade(payload: Vec<i8>) -> TradeMsg {
         1 => "crypto",
         2 => "ftx",
         3 => "binance",
+        3 => "huobi",
         11 => "okx",
         _ => "unknow",
     };
@@ -1161,6 +1250,7 @@ fn decode_bbo(payload: Vec<i8>) -> BboMsg {
         1 => "crypto",
         2 => "ftx",
         3 => "binance",
+        3 => "huobi",
         11 => "okx",
         _ => "unknow",
     };
@@ -1394,10 +1484,10 @@ pub fn encode_kline(orderbook: &KlineMsg) -> Vec<i8> {
     let price_bytes = encode_num_to_bytes(price.to_string());
     orderbook_bytes.extend_from_slice(&price_bytes);
 
-    //13、volume
-    let price = orderbook.quote_volume;
-    let price_bytes = encode_num_to_bytes(price.unwrap().to_string());
-    orderbook_bytes.extend_from_slice(&price_bytes);
+    //13、quote_volume
+    // let price = orderbook.quote_volume;
+    // let price_bytes = encode_num_to_bytes(price.unwrap().to_string());
+    // orderbook_bytes.extend_from_slice(&price_bytes);
 
 
     orderbook_bytes
@@ -1431,6 +1521,7 @@ fn decode_kline(payload: Vec<i8>) -> KlineMsg {
         1 => "crypto",
         2 => "ftx",
         3 => "binance",
+        3 => "huobi",
         11 => "okx",
         _ => "unknow",
     };
@@ -1585,21 +1676,21 @@ fn decode_kline(payload: Vec<i8>) -> KlineMsg {
     let volume_pricef = quant.to_f64();
 
     // quote_volume
-    let mut quant_array = [0i8; 8];
-    quant_array[4..]
-        .copy_from_slice(&payload[data_byte_index..data_byte_index + 4]);
-    let quant_array = unsafe { std::mem::transmute::<[i8; 8], [u8; 8]>(quant_array) };
-    let quant_int = i64::from_be_bytes(quant_array);
+    // let mut quant_array = [0i8; 8];
+    // quant_array[4..]
+    //     .copy_from_slice(&payload[data_byte_index..data_byte_index + 4]);
+    // let quant_array = unsafe { std::mem::transmute::<[i8; 8], [u8; 8]>(quant_array) };
+    // let quant_int = i64::from_be_bytes(quant_array);
 
-    let quant_hex_p = payload[data_byte_index + 4];
-    let quant_hex_p_array = [quant_hex_p];
-    let mut quant_p_array = [0i8; 4];
-    quant_p_array[3] = quant_hex_p_array[0];
-    let quant_p_array = unsafe { std::mem::transmute::<[i8; 4], [u8; 4]>(quant_p_array) };
-    let quant_p_int = u32::from_be_bytes(quant_p_array);
+    // let quant_hex_p = payload[data_byte_index + 4];
+    // let quant_hex_p_array = [quant_hex_p];
+    // let mut quant_p_array = [0i8; 4];
+    // quant_p_array[3] = quant_hex_p_array[0];
+    // let quant_p_array = unsafe { std::mem::transmute::<[i8; 4], [u8; 4]>(quant_p_array) };
+    // let quant_p_int = u32::from_be_bytes(quant_p_array);
 
-    let quant = Decimal::new(quant_int, quant_p_int);
-    let quote_volume_pricef = quant.to_f64();
+    // let quant = Decimal::new(quant_int, quant_p_int);
+    // let quote_volume_pricef = quant.to_f64();
 
     let kline = KlineMsg {
         exchange: exchange_name.to_string(),
@@ -1617,7 +1708,7 @@ fn decode_kline(payload: Vec<i8>) -> KlineMsg {
         /// m, minute; H, hour; D, day; W, week; M, month; Y, year
         period: period_name.to_string(),
         /// quote volume
-        quote_volume: quote_volume_pricef,
+        quote_volume: None,
         json: "".to_string(),
     };
 
