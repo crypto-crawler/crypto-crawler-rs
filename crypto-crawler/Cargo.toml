@@ -1,6 +1,6 @@
 [package]
 name = "crypto-crawler"
-version = "4.4.4"
+version = "4.4.5"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "A rock-solid cryprocurrency crawler."
@@ -9,11 +9,11 @@ repository = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/cryp
 keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
-crypto-markets = "1.2.7"
+crypto-markets = "1.2.8"
 crypto-market-type = "1.1.0"
-crypto-msg-parser = "2.4.10"
+crypto-msg-parser = "2.5.4"
 crypto-msg-type = "1.0.7"
-crypto-pair = "2.2.9"
+crypto-pair = "2.2.10"
 crypto-rest-client = "0.9.2"
 crypto-ws-client = "4.11.4"
 fslock = "0.2.1"
