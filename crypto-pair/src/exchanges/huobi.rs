@@ -11,8 +11,8 @@ use std::collections::HashMap;
 static SPOT_QUOTES: Lazy<HashSet<String>> = Lazy::new(|| {
     // offline data, in case the network is down
     let mut set: HashSet<String> = vec![
-        "brl", "btc", "eth", "eur", "gbp", "ht", "husd", "rub", "try", "uah", "usdc", "usdd",
-        "usdt", "ust", "ustc",
+        "brl", "btc", "eth", "eur", "gbp", "ht", "husd", "rub", "trx", "try", "uah", "usdc",
+        "usdd", "usdt", "ust", "ustc",
     ]
     .into_iter()
     .map(|x| x.to_string())
@@ -112,5 +112,7 @@ mod tests {
     #[test]
     fn test_normalize_pair() {
         assert_eq!("MIR/UST", super::normalize_pair("mirust").unwrap());
+
+        assert_eq!("BTT/TRX", super::normalize_pair("btttrx").unwrap());
     }
 }
