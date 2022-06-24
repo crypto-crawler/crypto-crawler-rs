@@ -201,23 +201,24 @@ fn roundtrip(data: &[u8]) {
 #[tokio::main(flavor = "multi_thread")]
 async fn main() {
 
-    let price_bytes = encode_num_to_10_bytes("98565.62696625".to_string());
-    // volume
-    let data_byte_index = 0;
-    let mut quant_array = [0i8; 16];
-    quant_array[0..]
-        .copy_from_slice(&price_bytes[data_byte_index..data_byte_index + 9]);
-    let quant_array = unsafe { std::mem::transmute::<[i8; 16], [u8; 16]>(quant_array) };
-    let quant_int = i128::from_be_bytes(quant_array);
+    // let price_bytes = encode_num_to_10_bytes("98565.62696625".to_string());
 
-    let quant_hex_p = price_bytes[data_byte_index + 9];
-    let quant_hex_p_array = [quant_hex_p];
-    let mut quant_p_array = [0i8; 4];
-    quant_p_array[3] = quant_hex_p_array[0];
-    let quant_p_array = unsafe { std::mem::transmute::<[i8; 4], [u8; 4]>(quant_p_array) };
-    let quant_p_int = u32::from_be_bytes(quant_p_array);
+    // let data_byte_index = 0;
+    // // volume
+    // let mut quant_array = [0i8; 16];
+    // quant_array[7..]
+    //     .copy_from_slice(&price_bytes[data_byte_index..data_byte_index + 9]);
+    // let quant_array = unsafe { std::mem::transmute::<[i8; 16], [u8; 16]>(quant_array) };
+    // let quant_int = i128::from_be_bytes(quant_array);
 
-    // let quant = Decimal::new(quant_int, quant_p_int);
+    // let quant_hex_p = price_bytes[data_byte_index + 9];
+    // let quant_hex_p_array = [quant_hex_p];
+    // let mut quant_p_array = [0i8; 4];
+    // quant_p_array[3] = quant_hex_p_array[0];
+    // let quant_p_array = unsafe { std::mem::transmute::<[i8; 4], [u8; 4]>(quant_p_array) };
+    // let quant_p_int = u32::from_be_bytes(quant_p_array);
+
+    // let quant = Decimal::new(quant_int as i64, quant_p_int);
     // let volume_pricef = quant.to_f64();
         
 
@@ -1481,7 +1482,7 @@ pub fn encode_kline(orderbook: &KlineMsg) -> Vec<i8> {
 
     //12、volume
     let price = orderbook.volume;
-    let price_bytes = encode_num_to_bytes(price.to_string());
+    let price_bytes = encode_num_to_10_bytes(price.to_string());
     orderbook_bytes.extend_from_slice(&price_bytes);
 
     //13、quote_volume
@@ -1659,20 +1660,20 @@ fn decode_kline(payload: Vec<i8>) -> KlineMsg {
     data_byte_index += 5;
 
     // volume
-    let mut quant_array = [0i8; 8];
-    quant_array[4..]
-        .copy_from_slice(&payload[data_byte_index..data_byte_index + 4]);
-    let quant_array = unsafe { std::mem::transmute::<[i8; 8], [u8; 8]>(quant_array) };
-    let quant_int = i64::from_be_bytes(quant_array);
+    let mut quant_array = [0i8; 16];
+    quant_array[7..]
+        .copy_from_slice(&payload[data_byte_index..data_byte_index + 9]);
+    let quant_array = unsafe { std::mem::transmute::<[i8; 16], [u8; 16]>(quant_array) };
+    let quant_int = i128::from_be_bytes(quant_array);
 
-    let quant_hex_p = payload[data_byte_index + 4];
+    let quant_hex_p = payload[data_byte_index + 9];
     let quant_hex_p_array = [quant_hex_p];
     let mut quant_p_array = [0i8; 4];
     quant_p_array[3] = quant_hex_p_array[0];
     let quant_p_array = unsafe { std::mem::transmute::<[i8; 4], [u8; 4]>(quant_p_array) };
     let quant_p_int = u32::from_be_bytes(quant_p_array);
 
-    let quant = Decimal::new(quant_int, quant_p_int);
+    let quant = Decimal::new(quant_int as i64, quant_p_int);
     let volume_pricef = quant.to_f64();
 
     // quote_volume
