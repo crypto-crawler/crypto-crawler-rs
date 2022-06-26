@@ -222,6 +222,8 @@ pub fn parse_bbo(
 ) -> Result<BboMsg, SimpleError> {
     match exchange {
         "binance" => exchanges::binance::parse_bbo(market_type, msg, received_at),
+        "gate" => exchanges::gate::parse_bbo(market_type, msg, received_at),
+        "okx" => exchanges::okx::parse_bbo(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
 }

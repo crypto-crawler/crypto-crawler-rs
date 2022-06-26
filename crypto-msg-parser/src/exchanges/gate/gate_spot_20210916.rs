@@ -7,8 +7,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
 use std::collections::HashMap;
-
-const EXCHANGE_NAME: &str = "gate";
+use super::EXCHANGE_NAME;
 
 // https://www.gate.io/docs/websocket/index.html#trades-subscription
 #[derive(Serialize, Deserialize)]
