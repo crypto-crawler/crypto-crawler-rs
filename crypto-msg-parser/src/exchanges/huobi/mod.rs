@@ -1,4 +1,5 @@
 mod funding_rate;
+mod huobi_all;
 mod huobi_inverse;
 mod huobi_linear;
 mod huobi_spot;
@@ -9,12 +10,14 @@ use std::collections::HashMap;
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crate::{FundingRateMsg, OrderBookMsg, TradeMsg};
+use crate::{FundingRateMsg, OrderBookMsg, TradeMsg, BboMsg, KlineMsg};
 
 use serde_json::Value;
 use simple_error::SimpleError;
 
 use message::WebsocketMsg;
+
+const EXCHANGE_NAME: &str = "huobi";
 
 pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     let json_obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
@@ -140,4 +143,29 @@ pub(crate) fn parse_l2_topk(
     msg: &str,
 ) -> Result<Vec<OrderBookMsg>, SimpleError> {
     parse_l2(market_type, msg)
+}
+
+pub(crate) fn parse_bbo(
+    market_type: MarketType,
+    msg: &str,
+    received_at: Option<i64>,
+) -> Result<BboMsg, SimpleError> {
+    match market_type {
+        MarketType::EuropeanOption => Err(SimpleError::new("Not implemented")),
+        MarketType::Spot => huobi_all::parse_bbo_stop(market_type, msg, received_at),
+        _ => huobi_all::parse_bbo(market_type, msg, received_at)
+    }
+}
+
+
+pub(crate) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+    message_type: MessageType
+) -> Result<KlineMsg, SimpleError> {
+    if market_type == MarketType::EuropeanOption {
+        Err(SimpleError::new("Not implemented"))
+    } else {
+        huobi_all::parse_candlestick(market_type, msg, message_type)
+    }
 }

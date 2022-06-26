@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crate::{BboMsg, FundingRateMsg, OrderBookMsg, TradeMsg};
+use crate::{BboMsg, FundingRateMsg, OrderBookMsg, TradeMsg, KlineMsg};
 
 use serde_json::Value;
 use simple_error::SimpleError;
@@ -173,5 +173,17 @@ pub(crate) fn parse_bbo(
         Err(SimpleError::new("Not implemented"))
     } else {
         binance_all::parse_bbo(market_type, msg, received_at)
+    }
+}
+
+pub(crate) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+    message_type: MessageType
+) -> Result<KlineMsg, SimpleError> {
+    if market_type == MarketType::EuropeanOption {
+        Err(SimpleError::new("Not implemented"))
+    } else {
+        binance_all::parse_candlestick(market_type, msg, message_type)
     }
 }

@@ -1007,11 +1007,12 @@ mod l2_topk {
 mod bbo {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_bbo};
+    use crypto_msg_type::MessageType;
 
     #[test]
     fn spot() {
-        let raw_msg = r#"{"ch":"market.btcusdt.bbo","ts":1654031600066,"tick":{"seqId":155441231856,"ask":31764.09,"askSize":0.794873,"bid":31764.08,"bidSize":4.378544,"quoteTime":1654031600064,"symbol":"btcusdt"}}"#;
+        let raw_msg = r#"{"ch":"market.btcusdt.bbo","ts":1654031600066,"tick":{"seqId":155441231856,"ask": 29010.91000000,"askSize":3.99953000,"bid":29010.90000000,"bidSize":13.94302000,"quoteTime":1654031600064,"symbol":"btcusdt"}}"#;
 
         assert_eq!(
             1654031600066,
@@ -1023,6 +1024,24 @@ mod bbo {
             "btcusdt",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
+
+        let received_at = 1651122265862;
+        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, Some(received_at)).unwrap();
+
+        assert_eq!(MessageType::BBO, bbo_msg.msg_type);
+        assert_eq!("btcusdt", bbo_msg.symbol);
+        assert_eq!(received_at, bbo_msg.timestamp);
+        assert_eq!(Some(155441231856), bbo_msg.id);
+
+        assert_eq!(29010.91, bbo_msg.ask_price);
+        assert_eq!(3.99953, bbo_msg.ask_quantity_base);
+        assert_eq!(29010.91 * 3.99953, bbo_msg.ask_quantity_quote);
+        assert_eq!(None, bbo_msg.ask_quantity_contract);
+
+        assert_eq!(29010.9, bbo_msg.bid_price);
+        assert_eq!(13.94302, bbo_msg.bid_quantity_base);
+        assert_eq!(29010.9 * 13.94302, bbo_msg.bid_quantity_quote);
+        assert_eq!(None, bbo_msg.bid_quantity_contract);
     }
 
     #[test]
@@ -1055,6 +1074,26 @@ mod bbo {
             "BTC-USD",
             extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
         );
+
+
+        let received_at = 1651122265862;
+        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, Some(received_at)).unwrap();
+
+        assert_eq!(MessageType::BBO, bbo_msg.msg_type);
+        assert_eq!("BTC-USD", bbo_msg.symbol);
+        assert_eq!(1654031818692, bbo_msg.timestamp);
+        assert_eq!(Some(1654031818), bbo_msg.id);
+
+        assert_eq!(31753.3, bbo_msg.ask_price);
+        assert_eq!(0.7841704641722278, bbo_msg.ask_quantity_base);
+        assert_eq!(31753.3 * 0.7841704641722278, bbo_msg.ask_quantity_quote);
+        assert_eq!(Some(249.0), bbo_msg.ask_quantity_contract);
+
+        assert_eq!(31753.2, bbo_msg.bid_price);
+        assert_eq!(7.857475781968431, bbo_msg.bid_quantity_base);
+        assert_eq!(31753.2 * 7.857475781968431, bbo_msg.bid_quantity_quote);
+        assert_eq!(Some(2495.0), bbo_msg.bid_quantity_contract);
+
     }
 
     #[test]
@@ -1078,11 +1117,12 @@ mod bbo {
 mod candlestick {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_candlestick};
+    use crypto_msg_type::MessageType;
 
     #[test]
     fn spot() {
-        let raw_msg = r#"{"ch":"market.btcusdt.kline.1min","ts":1654081322624,"tick":{"id":1654081320,"open":31545.71,"close":31545.72,"low":31545.71,"high":31545.72,"amount":0.015443758717188892,"vol":487.1844552,"count":4}}"#;
+        let raw_msg = r#"{"ch":"market.btcusdt.kline.15mon","ts":1654081322624,"tick":{"id":1654081320,"open":31545.71,"close":31545.72,"low":31545.71,"high":31545.72,"amount":0.015443758717188892,"vol":487.1844552,"count":4}}"#;
 
         assert_eq!(
             1654081322624,
@@ -1094,6 +1134,11 @@ mod candlestick {
             "btcusdt",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
+
+        let data = parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg, MessageType::L2TopK).unwrap();
+
+        assert_eq!(1654081322624, data.timestamp);
+        assert_eq!("1M", data.period);
     }
 
     #[test]

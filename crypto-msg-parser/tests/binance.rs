@@ -1190,7 +1190,8 @@ mod ticker {
 mod candlestick {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_candlestick};
+    use crypto_msg_type::MessageType;
 
     #[test]
     fn spot() {
@@ -1207,6 +1208,9 @@ mod candlestick {
                 .unwrap()
                 .unwrap()
         );
+        let data = parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg, MessageType::L2TopK).unwrap();
+        let a = data.exchange;
+        
     }
 
     #[test]
