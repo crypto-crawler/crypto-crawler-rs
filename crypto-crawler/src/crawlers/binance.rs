@@ -91,7 +91,8 @@ pub(crate) async fn crawl_ticker(
             tx,
         );
         let commands =
-            vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!ticker@arr"]}"#.to_string()];
+            // vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!ticker@arr"]}"#.to_string()];
+            vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!ticker@depth5@100ms"]}"#.to_string()];
 
         match market_type {
             MarketType::Spot => {
@@ -114,7 +115,8 @@ pub(crate) async fn crawl_ticker(
             }
             MarketType::EuropeanOption => {
                 let commands = vec![
-                    r#"{"id":9527,"method":"SUBSCRIBE","params":["BTCUSDT@TICKER_ALL"]}"#
+                    // r#"{"id":9527,"method":"SUBSCRIBE","params":["BTCUSDT@TICKER_ALL"]}"#
+                    r#"{"id":9527,"method":"SUBSCRIBE","params":["BTCUSDT@depth5@100ms"]}"#
                         .to_string(),
                 ];
                 let ws_client = BinanceLinearWSClient::new(tx, None).await;
@@ -152,6 +154,7 @@ pub(crate) async fn crawl_funding_rate(
 
     if symbols.is_none() || symbols.unwrap().is_empty() {
         let commands =
+            // vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!markPrice@arr"]}"#.to_string()];
             vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!markPrice@arr"]}"#.to_string()];
         ws_client.send(&commands).await;
     } else {
