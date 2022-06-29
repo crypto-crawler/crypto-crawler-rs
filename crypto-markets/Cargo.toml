@@ -10,8 +10,8 @@ keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
 chrono = "0.4.19"
-crypto-market-type = "1.1.0"
-crypto-pair = "2.2.9"
+crypto-market-type = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
+crypto-pair = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
 reqwest = { version = "0.11.10", features = ["blocking", "gzip", "socks"] }
 serde = { version = "1.0.137", features = ["derive"] }
 serde_json = "1.0.81"

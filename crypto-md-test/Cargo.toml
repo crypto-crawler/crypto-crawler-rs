@@ -14,14 +14,14 @@ miniz_oxide = "0.5.3"
 
 yata = "0.6"
 
-crypto-crawler = "4.3.4"
-crypto-markets = "1.2.5"
-crypto-market-type = "1.1.0"
-crypto-msg-parser = "2.2.7"
-crypto-msg-type = "1.0.6"
-crypto-pair = "2.2.7"
-crypto-rest-client = "0.9.0"
-crypto-ws-client = "4.11.3"
+crypto-crawler = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
+crypto-markets = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
+crypto-market-type = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
+crypto-msg-parser = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
+crypto-msg-type = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
+crypto-pair = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
+crypto-rest-client = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
+crypto-ws-client = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
 tokio = { version = "1.18.2", features = ["macros", "rt-multi-thread", "sync", "time"] }
 chrono = "0.4.19"
 rust_decimal = "1.23.1"
