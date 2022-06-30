@@ -951,21 +951,6 @@ mod bbo {
             "BTC-USD-220624-50000-C",
             extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
         );
-        // let bbo_msg = &parse_bbo(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap();
-        
-        // assert_eq!(MessageType::BBO, bbo_msg.msg_type);
-        // assert_eq!("BTC-USD-220624-50000-C", bbo_msg.symbol);
-        // assert_eq!(1654033343415, bbo_msg.timestamp);
-
-        // assert_eq!(0.0015, bbo_msg.ask_price);
-        // assert_eq!(8.0 * 100.0 / 0.0015, bbo_msg.ask_quantity_base);
-        // assert_eq!(8.0 * 100.0, bbo_msg.ask_quantity_quote);
-        // assert_eq!(Some(8.0), bbo_msg.ask_quantity_contract);
-
-        // assert_eq!(31769.8, bbo_msg.bid_price);
-        // assert_eq!(38.0 * 100.0 / 31769.8, bbo_msg.bid_quantity_base);
-        // assert_eq!(38.0 * 100.0, bbo_msg.bid_quantity_quote);
-        // assert_eq!(Some(38.0), bbo_msg.bid_quantity_contract);
     }
 }
 
@@ -973,7 +958,8 @@ mod bbo {
 mod candlestick {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_candlestick};
+    use crypto_msg_type::MessageType;
 
     #[test]
     fn spot() {
@@ -989,6 +975,11 @@ mod candlestick {
             "BTC-USDT",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
+
+        let data = parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg, MessageType::L2TopK).unwrap();
+
+        assert_eq!(1654154580000, data.timestamp);
+        assert_eq!("1m", data.period);
     }
 
     #[test]

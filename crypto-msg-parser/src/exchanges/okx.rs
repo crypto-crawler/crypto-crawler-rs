@@ -2,12 +2,12 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
 use super::utils::calc_quantity_and_volume;
-use crate::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{KlineMsg, BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
-use std::collections::HashMap;
+use std::{collections::HashMap};
 
 const EXCHANGE_NAME: &str = "okx";
 
@@ -37,6 +37,30 @@ struct RawOrderbookMsg {
 }
 
 // https://www.okx.com/docs-v5/en/#rest-api-market-data-get-ticker
+// {
+// 	"arg": {
+// 		"channel": "tickers",
+// 		"instId": "BTC-USD-SWAP"
+// 	},
+// 	"data": [{
+// 		"instType": "SWAP",
+// 		"instId": "BTC-USD-SWAP",
+// 		"last": "31771.6",
+// 		"lastSz": "16",
+// 		"askPx": "31771.6",
+// 		"askSz": "16",
+// 		"bidPx": "31771.5",
+// 		"bidSz": "1967",
+// 		"open24h": "31648.1",
+// 		"high24h": "32398.1",
+// 		"low24h": "31202.4",
+// 		"sodUtc0": "31717.3",
+// 		"sodUtc8": "32038.6",
+// 		"volCcy24h": "13760.6923",
+// 		"vol24h": "4364424",
+// 		"ts": "1654033212805"
+// 	}]
+// }
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct RawBboSwapMsg {
@@ -104,6 +128,28 @@ struct RestfulMsg<T: Sized> {
     data: Vec<T>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
+}
+
+/// https://www.okx.com/docs-v5/en/#websocket-api-public-channel-candlesticks-channel
+// {
+// 	"arg": {
+// 		"channel": "candle1m",
+// 		"instId": "BTC-USDT"
+// 	},
+// 	"data": [
+// 		["1654154580000", "29930.7", "29936.3", "29930.7", "29936.3", "0.0111536", "333.86246417"]
+// 	]
+// }
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawKlineMsg {
+    ts: String,         // Data generation time, Unix timestamp format in milliseconds, e.g. 1597026383085
+    open: String,       // Open price
+    high: String,       // highest price
+    low: String,        // Lowest price
+    close: String,      // Close price
+    vol: String,        // Trading volume, with a unit of contact.
+    volCcy: String,     // Trading volume, with a unit of currency.
 }
 
 pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
@@ -520,4 +566,133 @@ pub(crate) fn parse_bbo_book(
     };
 
     Ok(bbo_msg) 
+}
+
+pub(crate) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+    message_type: MessageType
+) -> Result<KlineMsg, SimpleError> {
+    if market_type == MarketType::EuropeanOption {
+        Err(SimpleError::new("Not implemented"))
+    } else if market_type == MarketType::InverseSwap {
+        swap_candlestick(market_type, msg, message_type)
+    } else {
+        kline_candlestick(market_type, msg, message_type)
+    }
+}
+pub(super) fn swap_candlestick(
+    market_type: MarketType,
+    msg: &str,
+    msg_type: MessageType
+) -> Result<KlineMsg, SimpleError> {
+    let mut obj = serde_json::from_str::<WebBboMsg<RawBboSwapMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebBboMsg<RawBboSwapMsg>",
+            msg
+        ))
+    })?;
+
+    let symbol = obj.arg.instId.to_string();
+    // candle1Y
+    // candle6M candle3M candle1M
+    // candle1W
+    // candle1D candle2D candle3D candle5D
+    // candle12H candle6H candle4H candle2H candle1H
+    // candle30m candle15m candle5m candle3m candle1m
+    let s_period = obj.arg.channel.to_string().replace("utc", "");
+    let period = &s_period[6..s_period.len()];
+    // 1m, 3m, 5m, 15m, 30m, 1H, 1D, 1M, 1W, 1Y
+    let len = period.len();
+
+    let period = match &period[len-1..] {
+        "m" => format!("{}m", &period[..len-1]),
+        "M" => format!("{}M", &period[..len-1]),
+        "D" => format!("{}D", &period[..len-1]),
+        "Y" => format!("{}Y", &period[..len-1]),
+        "W" => format!("{}W", &period[..len-1]),
+        "H" => format!("{}H", &period[..len-1]),
+        _ => format!("{}N", &period[..len-1])
+    };
+
+
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+    let ojb_data = obj.data.get_mut(0).unwrap();
+
+    let kline_msg = KlineMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol,
+        pair,
+        msg_type,
+        timestamp: ojb_data.ts.parse::<i64>().unwrap(),
+        json: msg.to_string(),
+        open: ojb_data.open.parse::<f64>().unwrap(),
+        high: ojb_data.high.parse::<f64>().unwrap(),
+        low: ojb_data.low.parse::<f64>().unwrap(),
+        close: ojb_data.close.parse::<f64>().unwrap(),
+        volume: ojb_data.vol.parse::<f64>().unwrap(),
+        period,
+        quote_volume: None,
+    };
+
+    Ok(kline_msg)
+}
+
+pub(super) fn kline_candlestick(
+    market_type: MarketType,
+    msg: &str,
+    msg_type: MessageType
+) -> Result<KlineMsg, SimpleError> {
+    let mut obj = serde_json::from_str::<WebBboMsg<RawKlineMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebBboMsg<RawKlineMsg>",
+            msg
+        ))
+    })?;
+
+    let symbol = obj.arg.instId.to_string();
+    // candle1Y
+    // candle6M candle3M candle1M
+    // candle1W
+    // candle1D candle2D candle3D candle5D
+    // candle12H candle6H candle4H candle2H candle1H
+    // candle30m candle15m candle5m candle3m candle1m
+    let s_period = obj.arg.channel.to_string().replace("utc", "");
+    let period = &s_period[6..s_period.len()];
+    // 1m, 3m, 5m, 15m, 30m, 1H, 1D, 1M, 1W, 1Y
+    let len = period.len();
+
+    let period = match &period[len-1..] {
+        "m" => format!("{}m", &period[..len-1]),
+        "M" => format!("{}M", &period[..len-1]),
+        "D" => format!("{}D", &period[..len-1]),
+        "Y" => format!("{}Y", &period[..len-1]),
+        "W" => format!("{}W", &period[..len-1]),
+        "H" => format!("{}H", &period[..len-1]),
+        _ => format!("{}N", &period[..len-1])
+    };
+
+
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+    let ojb_data = obj.data.get_mut(0).unwrap();
+
+    let kline_msg = KlineMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol,
+        pair,
+        msg_type,
+        timestamp: ojb_data.ts.parse::<i64>().unwrap(),
+        json: msg.to_string(),
+        open: ojb_data.open.parse::<f64>().unwrap(),
+        high: ojb_data.high.parse::<f64>().unwrap(),
+        low: ojb_data.low.parse::<f64>().unwrap(),
+        close: ojb_data.close.parse::<f64>().unwrap(),
+        volume: ojb_data.vol.parse::<f64>().unwrap(),
+        period,
+        quote_volume: None,
+    };
+
+    Ok(kline_msg)
 }

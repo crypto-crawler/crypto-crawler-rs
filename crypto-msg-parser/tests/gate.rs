@@ -800,7 +800,8 @@ mod bbo {
 mod candlestick {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_candlestick};
+    use crypto_msg_type::MessageType;
 
     #[test]
     fn spot() {
@@ -816,6 +817,11 @@ mod candlestick {
             "BTC_USDT",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
+
+        let data = parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg, MessageType::L2TopK).unwrap();
+
+        assert_eq!(1654080050, data.timestamp);
+        assert_eq!("10s", data.period);
     }
 
     #[test]
@@ -864,6 +870,11 @@ mod candlestick {
             "BTC_USD",
             extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
         );
+
+        let data = parse_candlestick(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, MessageType::L2TopK).unwrap();
+
+        assert_eq!(1654080880, data.timestamp);
+        assert_eq!("10s", data.period);
     }
 
     #[test]

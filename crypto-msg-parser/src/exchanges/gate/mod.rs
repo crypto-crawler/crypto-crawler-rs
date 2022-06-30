@@ -4,8 +4,9 @@ mod gate_spot_current;
 mod gate_swap;
 mod messages;
 
+use crypto_msg_type::MessageType;
 use crypto_market_type::MarketType;
-use crate::{BboMsg, OrderBookMsg, TradeMsg};
+use crate::{BboMsg, KlineMsg, OrderBookMsg, TradeMsg};
 use simple_error::SimpleError;
 
 const EXCHANGE_NAME: &str = "gate";
@@ -66,5 +67,19 @@ pub(crate) fn parse_bbo(
         gate_swap::parse_bbo(market_type, msg, received_at)
     } else {
         Err(SimpleError::new("Not implemented"))
+    }
+}
+
+pub(crate) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+    message_type: MessageType
+) -> Result<KlineMsg, SimpleError> {
+    if market_type == MarketType::EuropeanOption {
+        Err(SimpleError::new("Not implemented"))
+    } else if market_type == MarketType::InverseSwap {
+        gate_swap::parse_candlestick(market_type, msg, message_type)
+    } else {
+        gate_spot_current::parse_candlestick(market_type, msg, message_type)
     }
 }

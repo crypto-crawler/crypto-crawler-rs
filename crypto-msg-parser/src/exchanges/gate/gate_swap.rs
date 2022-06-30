@@ -1,9 +1,9 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use super::{super::utils::calc_quantity_and_volume, messages::WebsocketMsg};
+use super::{super::utils::calc_quantity_and_volume, messages::{WebsocketCandlest, WebsocketMsg}};
 
-use crate::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide, KlineMsg};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -585,4 +585,75 @@ pub(super) fn parse_bbo(
         json: msg.to_string(),
     };
     Ok(bbo_msg)
+}
+
+
+// https://www.gateio.pro/docs/developers/apiv4/zh_CN/#%E5%90%88%E7%BA%A6%E5%B8%82%E5%9C%BA-k-%E7%BA%BF%E5%9B%BE-3
+// {
+// 	"time": 1654080889,
+// 	"channel": "futures.candlesticks",
+// 	"event": "update",
+// 	"result": [{
+// 		"t": 1654080880,
+// 		"v": 0,
+// 		"c": "31509.2",
+// 		"h": "31509.2",
+// 		"l": "31509.2",
+// 		"o": "31509.2",
+// 		"a": "0",
+// 		"n": "10s_BTC_USD"
+// 	}]
+// }
+
+#[derive(Serialize, Deserialize)]
+struct RawKlineMsg {
+    t: i64,          // 秒 s 精度的 Unix 时间戳
+    v: f64,          // integer交易量，只有市场行情的 K 线数据里有该值
+    c: String,          // 收盘价
+    h: String,          // 最高价
+    l: String,          // 最低价
+    o: String,          // 开盘价
+    a: String,          //基础货币交易量
+    n: String,
+    
+}
+
+pub(super) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+    msg_type: MessageType
+) -> Result<KlineMsg, SimpleError> {
+    let mut obj = serde_json::from_str::<WebsocketCandlest<Vec<RawKlineMsg>>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketCandlest<RawKlineMsg>",
+            msg
+        ))
+    })?;
+
+    let vec_result = obj.result.get_mut(0).unwrap();
+    let ch: Vec<&str>= vec_result.n.split("_").collect();
+    let symbol = [ch[1].to_string(), ch[2].to_string()].join("_");
+    //10s 1m, 5m, 15m, 30m, 1h, 4h, 8h, 1d, 7d, 30d
+    let period = ch[0].to_string();
+
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+
+    let kline_msg = KlineMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol,
+        pair,
+        msg_type,
+        timestamp: vec_result.t,
+        json: msg.to_string(),
+        open: vec_result.o.parse::<f64>().unwrap(),
+        high: vec_result.h.parse::<f64>().unwrap(),
+        low: vec_result.l.parse::<f64>().unwrap(),
+        close: vec_result.c.parse::<f64>().unwrap(),
+        volume: vec_result.v,
+        period,
+        quote_volume: None
+    };
+
+    Ok(kline_msg)
 }

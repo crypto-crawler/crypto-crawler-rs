@@ -1,8 +1,8 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use super::messages::WebsocketMsg;
-use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
+use super::messages::{WebsocketCandlest, WebsocketMsg};
+use crate::{Order, OrderBookMsg, TradeMsg, TradeSide, KlineMsg};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
@@ -272,4 +272,73 @@ fn parse_l2_snapshot(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
     };
 
     Ok(vec![orderbook])
+}
+
+// https://www.gateio.pro/docs/developers/apiv4/zh_CN/#%E5%90%88%E7%BA%A6%E5%B8%82%E5%9C%BA-k-%E7%BA%BF%E5%9B%BE-3
+// {
+// 	"time": 1654080052,
+// 	"channel": "spot.candlesticks",
+// 	"event": "update",
+// 	"result": {
+// 		"t": "1654080050",
+// 		"v": "0",
+// 		"c": "31555.75",
+// 		"h": "31555.75",
+// 		"l": "31555.75",
+// 		"o": "31555.75",
+// 		"n": "10s_BTC_USDT",
+// 		"a": "0"
+// 	}
+// }
+
+#[derive(Serialize, Deserialize)]
+struct RawKlineMsg {
+    t: String,          // 秒 s 精度的 Unix 时间戳
+    v: String,          // integer交易量，只有市场行情的 K 线数据里有该值
+    c: String,          // 收盘价
+    h: String,          // 最高价
+    l: String,          // 最低价
+    o: String,          // 开盘价
+    n: String,
+    a: String,          //基础货币交易量
+}
+
+
+pub(super) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+    msg_type: MessageType
+) -> Result<KlineMsg, SimpleError> {
+    let obj = serde_json::from_str::<WebsocketCandlest<RawKlineMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketCandlest<RawKlineMsg>",
+            msg
+        ))
+    })?;
+
+    let ch: Vec<&str>= obj.result.n.split("_").collect();
+    let symbol = [ch[1].to_string(), ch[2].to_string()].join("_");
+    //10s 1m, 5m, 15m, 30m, 1h, 4h, 8h, 1d, 7d, 30d
+    let period = ch[0].to_string();
+
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+
+    let kline_msg = KlineMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol,
+        pair,
+        msg_type,
+        timestamp: obj.result.t.parse::<i64>().unwrap(),
+        json: msg.to_string(),
+        open: obj.result.o.parse::<f64>().unwrap(),
+        high: obj.result.h.parse::<f64>().unwrap(),
+        low: obj.result.l.parse::<f64>().unwrap(),
+        close: obj.result.c.parse::<f64>().unwrap(),
+        volume: obj.result.v.parse::<f64>().unwrap(),
+        period,
+        quote_volume: None
+    };
+
+    Ok(kline_msg)
 }
