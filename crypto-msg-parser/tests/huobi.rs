@@ -1187,6 +1187,11 @@ mod candlestick {
             "BTC-USDT",
             extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
         );
+
+        let data = parse_candlestick(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, MessageType::L2TopK).unwrap();
+
+        assert_eq!(1654081448870, data.timestamp);
+        assert_eq!("1m", data.period);
     }
 }
 
