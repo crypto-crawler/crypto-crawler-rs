@@ -111,7 +111,7 @@ impl<const URL: char> WSClient for BinanceWSClient<URL> {
     async fn subscribe_orderbook_topk(&self, symbols: &[String]) {
         let topics = symbols
             .iter()
-            .map(|symbol| ("depth5@100ms".to_string(), symbol.to_string()))
+            .map(|symbol| ("depth20@100ms".to_string(), symbol.to_string()))
             .collect::<Vec<(String, String)>>();
         self.subscribe(&topics).await;
     }

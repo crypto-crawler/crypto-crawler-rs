@@ -44,8 +44,9 @@ impl<H: MessageHandler> WSClientInternal<H> {
             tokio::sync::mpsc::Receiver<Message>,
             std::sync::mpsc::Sender<String>,
         )>();
-
-        let (message_rx, command_tx) = super::connect_async::connect_async(url, uplink_limit)
+        
+        let url = format!("{}@-exchange-@{}", &url, &exchange);
+        let (message_rx, command_tx) = super::connect_async::connect_async(url.as_str(), uplink_limit)
             .await
             .expect("Failed to connect to websocket");
         let _ = params_tx.send((handler, message_rx, tx));

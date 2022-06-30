@@ -13,15 +13,14 @@ lazy_static = "1.4.0"
 miniz_oxide = "0.5.3"
 
 yata = "0.6"
-
-crypto-crawler = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
-crypto-markets = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
-crypto-market-type = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
-crypto-msg-parser = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
-crypto-msg-type = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
-crypto-pair = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
-crypto-rest-client = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
-crypto-ws-client = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
+crypto-crawler = { path="../crypto-crawler" }
+crypto-markets = { path="../crypto-markets" }
+crypto-market-type = { path="../crypto-market-type" }
+crypto-msg-parser = { path="../crypto-msg-parser" }
+crypto-msg-type = { path="../crypto-msg-type" }
+crypto-pair = { path="../crypto-pair" }
+crypto-rest-client = { path="../crypto-rest-client" }
+crypto-ws-client = { path="../crypto-ws-client" }
 tokio = { version = "1.18.2", features = ["macros", "rt-multi-thread", "sync", "time"] }
 chrono = "0.4.19"
 rust_decimal = "1.23.1"
