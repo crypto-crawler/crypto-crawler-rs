@@ -587,7 +587,7 @@ pub(super) fn swap_candlestick(
     msg: &str,
     msg_type: MessageType
 ) -> Result<KlineMsg, SimpleError> {
-    let mut obj = serde_json::from_str::<WebBboMsg<RawKlineMsg>>(msg).map_err(|_e| {
+    let mut obj = serde_json::from_str::<WebBboMsg<RawBboSwapMsg>>(msg).map_err(|_e| {
         SimpleError::new(format!(
             "Failed to deserialize {} to WebBboMsg<RawBboSwapMsg>",
             msg
