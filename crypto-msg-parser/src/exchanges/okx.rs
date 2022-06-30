@@ -581,6 +581,7 @@ pub(crate) fn parse_candlestick(
         kline_candlestick(market_type, msg, message_type)
     }
 }
+
 pub(super) fn swap_candlestick(
     market_type: MarketType,
     msg: &str,
@@ -627,11 +628,11 @@ pub(super) fn swap_candlestick(
         msg_type,
         timestamp: ojb_data.ts.parse::<i64>().unwrap(),
         json: msg.to_string(),
-        open: ojb_data.open.parse::<f64>().unwrap(),
-        high: ojb_data.high.parse::<f64>().unwrap(),
-        low: ojb_data.low.parse::<f64>().unwrap(),
-        close: ojb_data.close.parse::<f64>().unwrap(),
-        volume: ojb_data.vol.parse::<f64>().unwrap(),
+        open: ojb_data.open24h.parse::<f64>().unwrap(),
+        high: ojb_data.high24h.parse::<f64>().unwrap(),
+        low: ojb_data.low24h.parse::<f64>().unwrap(),
+        close: ojb_data.volCcy24h.parse::<f64>().unwrap(),
+        volume: ojb_data.vol24h.parse::<f64>().unwrap(),
         period,
         quote_volume: None,
     };
