@@ -1,6 +1,6 @@
 [package]
 name = "crypto-markets"
-version = "1.2.8"
+version = "1.2.9"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "Fetch trading markets from a cryptocurrency exchange"
@@ -10,11 +10,11 @@ keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
 chrono = "0.4.19"
-crypto-market-type = "1.1.0"
-crypto-pair = "2.2.10"
+crypto-market-type = "1.1.1"
+crypto-pair = "2.2.11"
 reqwest = { version = "0.11.11", features = ["blocking", "gzip", "socks"] }
-serde = { version = "1.0.137", features = ["derive"] }
-serde_json = "1.0.81"
+serde = { version = "1.0.138", features = ["derive"] }
+serde_json = "1.0.82"
 
 [dev_dependencies]
 crypto-contract-value = "1.4.7"
