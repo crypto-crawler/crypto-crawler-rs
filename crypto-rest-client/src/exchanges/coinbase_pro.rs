@@ -2,16 +2,16 @@ use super::utils::http_get;
 use crate::error::Result;
 use std::collections::BTreeMap;
 
-const BASE_URL: &str = "https://api.pro.coinbase.com";
+const BASE_URL: &str = "https://api.exchange.coinbase.com";
 
 /// The REST client for CoinbasePro.
 ///
 /// CoinbasePro has only Spot market.
 ///
-///   * REST API doc: <https://docs.pro.coinbase.com/#market-data>
+///   * REST API doc: <https://docs.cloud.coinbase.com/exchange/reference>
 ///   * Trading at: <https://pro.coinbase.com/>
-///   * Rate Limits: <https://docs.pro.coinbase.com/#rate-limits>
-///     * We throttle public endpoints by IP: 10 requests per second, up to 15 requests per second in bursts.
+///   * Rate Limits: <https://docs.cloud.coinbase.com/exchange/reference/exchangerestapi_getaccounts#rate-limits>
+///   * This endpoint has a custom rate limit by profile ID: 25 requests per second, up to 50 requests per second in bursts
 pub struct CoinbaseProRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
