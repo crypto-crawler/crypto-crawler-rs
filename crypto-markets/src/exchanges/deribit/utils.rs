@@ -179,8 +179,10 @@ fn to_market(raw_market: &Instrument) -> Market {
             lot_size: raw_market.min_trade_amount,
         },
         quantity_limit: Some(QuantityLimit {
-            min: raw_market.min_trade_amount,
+            min: Some(raw_market.min_trade_amount),
             max: None,
+            notional_min: None,
+            notional_max: None,
         }),
         contract_value: Some(raw_market.contract_size),
         delivery_date: if market_type == MarketType::InverseSwap {

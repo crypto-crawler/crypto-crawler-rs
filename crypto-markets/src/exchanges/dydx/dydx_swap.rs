@@ -88,8 +88,10 @@ pub(super) fn fetch_linear_swap_markets() -> Result<Vec<Market>> {
                     lot_size: m.stepSize.parse::<f64>().unwrap(),
                 },
                 quantity_limit: Some(QuantityLimit {
-                    min: m.minOrderSize.parse::<f64>().unwrap(),
+                    min: m.minOrderSize.parse::<f64>().ok(),
                     max: None,
+                    notional_min: None,
+                    notional_max: None,
                 }),
                 contract_value: Some(1.0),
                 delivery_date: None,

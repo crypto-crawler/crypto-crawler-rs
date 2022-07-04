@@ -89,8 +89,10 @@ pub(super) fn fetch_option_markets() -> Result<Vec<Market>> {
                     lot_size: 1.0 / (10_i64.pow(m.quantityScale as u32) as f64),
                 },
                 quantity_limit: Some(QuantityLimit {
-                    min: m.minQty.parse::<f64>().unwrap(),
+                    min: m.minQty.parse::<f64>().ok(),
                     max: Some(m.maxQty.parse::<f64>().unwrap()),
+                    notional_min: None,
+                    notional_max: None,
                 }),
                 contract_value: Some(1.0),
                 delivery_date: Some(m.expiryDate),

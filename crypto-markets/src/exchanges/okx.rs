@@ -158,8 +158,10 @@ impl RawMarket {
                 lot_size: self.lotSz.parse::<f64>().unwrap(),
             },
             quantity_limit: Some(QuantityLimit {
-                min: self.minSz.parse::<f64>().unwrap(),
+                min: self.minSz.parse::<f64>().ok(),
                 max: None,
+                notional_min: None,
+                notional_max: None,
             }),
             contract_value: if self.instType == "SPOT" {
                 None

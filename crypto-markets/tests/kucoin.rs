@@ -78,7 +78,7 @@ fn fetch_spot_markets() {
     assert_eq!(btc_usdt.precision.tick_size, 0.1);
     assert_eq!(btc_usdt.precision.lot_size, 0.00000001);
     let quantity_limit = btc_usdt.quantity_limit.unwrap();
-    assert_eq!(quantity_limit.min, 0.00001);
+    assert_eq!(quantity_limit.min.unwrap(), 0.00001);
     assert_eq!(quantity_limit.max, Some(10000000000.0));
 }
 

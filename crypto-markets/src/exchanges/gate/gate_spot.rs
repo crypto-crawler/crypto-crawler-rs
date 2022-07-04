@@ -78,8 +78,10 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 quantity_limit: raw_market
                     .min_base_amount
                     .map(|min_base_amount| QuantityLimit {
-                        min: min_base_amount.parse::<f64>().unwrap(),
+                        min: min_base_amount.parse::<f64>().ok(),
                         max: None,
+                        notional_min: None,
+                        notional_max: None,
                     }),
                 contract_value: None,
                 delivery_date: None,

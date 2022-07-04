@@ -97,8 +97,10 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                     lot_size: m.baseIncrement.parse::<f64>().unwrap(),
                 },
                 quantity_limit: Some(QuantityLimit {
-                    min: m.baseMinSize.parse::<f64>().unwrap(),
+                    min: m.baseMinSize.parse::<f64>().ok(),
                     max: Some(m.baseMaxSize.parse::<f64>().unwrap()),
+                    notional_min: None,
+                    notional_max: None,
                 }),
                 contract_value: None,
                 delivery_date: None,

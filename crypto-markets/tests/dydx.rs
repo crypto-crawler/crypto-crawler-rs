@@ -40,7 +40,7 @@ fn fetch_linear_swap_markets() {
     assert_eq!(btcusd.precision.tick_size, 1.0);
     assert_eq!(btcusd.precision.lot_size, 0.0001);
     let quantity_limit = btcusd.quantity_limit.unwrap();
-    assert_eq!(quantity_limit.min, 0.001);
+    assert_eq!(quantity_limit.min.unwrap(), 0.001);
     assert_eq!(quantity_limit.max, None);
 }
 
