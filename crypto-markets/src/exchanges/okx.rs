@@ -165,12 +165,8 @@ impl RawMarket {
             }),
             contract_value: if self.instType == "SPOT" {
                 None
-            } else if self.instType == "FUTURES" || self.instType == "SWAP" {
-                Some(self.ctVal.parse::<f64>().unwrap())
-            } else if self.instType == "OPTION" {
-                Some(self.ctMult.parse::<f64>().unwrap())
             } else {
-                panic!("Unknown instType: {}", self.instType);
+                Some(self.ctVal.parse::<f64>().unwrap())
             },
             delivery_date: if self.instType == "FUTURES" || self.instType == "OPTION" {
                 Some(self.expTime.parse::<u64>().unwrap())
