@@ -105,7 +105,7 @@ mod ftx_move {
         gen_test_code!(
             FtxWSClient,
             subscribe_trade,
-            &vec!["BTC-MOVE-2022Q3".to_string()]
+            &vec!["BTC-MOVE-2022Q4".to_string()]
         );
     }
 
@@ -114,7 +114,7 @@ mod ftx_move {
         gen_test_code!(
             FtxWSClient,
             subscribe_bbo,
-            &vec!["BTC-MOVE-2022Q3".to_string()]
+            &vec!["BTC-MOVE-2022Q4".to_string()]
         );
     }
 
@@ -123,7 +123,7 @@ mod ftx_move {
         gen_test_code!(
             FtxWSClient,
             subscribe_orderbook,
-            &vec!["BTC-MOVE-2022Q3".to_string()]
+            &vec!["BTC-MOVE-2022Q4".to_string()]
         );
     }
 }
