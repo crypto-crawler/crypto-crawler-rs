@@ -18,9 +18,18 @@ pub struct Precision {
 
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
 pub struct QuantityLimit {
-    pub min: f64,
+    /// Minimum base quantity
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub min: Option<f64>,
+    /// Maximum base quantity
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max: Option<f64>,
+    /// Notional minimum size
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notional_min: Option<f64>,
+    /// Notional maximum size
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notional_max: Option<f64>,
 }
 
 /// Market contains all information about a market

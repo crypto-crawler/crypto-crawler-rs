@@ -160,8 +160,10 @@ fn fetch_futures_markets() -> Result<Vec<Market>> {
                     lot_size: 1.0,
                 },
                 quantity_limit: Some(QuantityLimit {
-                    min: 1.0,
+                    min: Some(1.0),
                     max: None,
+                    notional_min: None,
+                    notional_max: None,
                 }),
                 contract_value: Some(m.contractSize),
                 delivery_date: m

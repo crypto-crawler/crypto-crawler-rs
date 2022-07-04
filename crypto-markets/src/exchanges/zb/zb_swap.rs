@@ -103,8 +103,10 @@ fn to_market(raw_market: &SwapMarket) -> Market {
             lot_size: 1.0 / (10_i64.pow(raw_market.amountDecimal) as f64),
         },
         quantity_limit: Some(QuantityLimit {
-            min: raw_market.minAmount.parse::<f64>().unwrap(),
+            min: raw_market.minAmount.parse::<f64>().ok(),
             max: Some(raw_market.maxAmount.parse::<f64>().unwrap()),
+            notional_min: None,
+            notional_max: None,
         }),
         contract_value: Some(1.0),
         delivery_date: None,

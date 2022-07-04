@@ -76,7 +76,7 @@ fn fetch_inverse_future_markets() {
     assert_eq!(btcusd.precision.tick_size, 0.5);
     assert_eq!(btcusd.precision.lot_size, 10.0);
     let quantity_limit = btcusd.quantity_limit.unwrap();
-    assert_eq!(quantity_limit.min, 10.0);
+    assert_eq!(quantity_limit.min.unwrap(), 10.0);
     assert_eq!(quantity_limit.max, None);
 }
 
@@ -90,7 +90,7 @@ fn fetch_inverse_swap_markets() {
     assert_eq!(btcusd.precision.tick_size, 0.5);
     assert_eq!(btcusd.precision.lot_size, 10.0);
     let quantity_limit = btcusd.quantity_limit.unwrap();
-    assert_eq!(quantity_limit.min, 10.0);
+    assert_eq!(quantity_limit.min.unwrap(), 10.0);
     assert_eq!(quantity_limit.max, None);
 }
 
@@ -104,7 +104,7 @@ fn fetch_option_markets() {
     assert_eq!(btcusd.precision.tick_size, 0.0005);
     assert_eq!(btcusd.precision.lot_size, 0.1);
     let quantity_limit = btcusd.quantity_limit.unwrap();
-    assert_eq!(quantity_limit.min, 0.1);
+    assert_eq!(quantity_limit.min.unwrap(), 0.1);
     assert_eq!(quantity_limit.max, None);
 }
 

@@ -181,8 +181,10 @@ fn to_market(raw_market: &BybitMarket) -> Market {
             lot_size: raw_market.lot_size_filter.qty_step,
         },
         quantity_limit: Some(QuantityLimit {
-            min: raw_market.lot_size_filter.min_trading_qty,
+            min: Some(raw_market.lot_size_filter.min_trading_qty),
             max: Some(raw_market.lot_size_filter.max_trading_qty),
+            notional_min: None,
+            notional_max: None,
         }),
         contract_value: Some(1.0),
         delivery_date,
