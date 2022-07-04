@@ -41,9 +41,9 @@ struct SpotMarket {
     extra: HashMap<String, Value>,
 }
 
-// see <https://docs.pro.coinbase.com/#products>
+// see <https://docs.cloud.coinbase.com/exchange/reference/exchangerestapi_getproducts>
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
-    let txt = http_get("https://api.pro.coinbase.com/products", None)?;
+    let txt = http_get("https://api.exchange.coinbase.com/products", None)?;
     let markets = serde_json::from_str::<Vec<SpotMarket>>(&txt)?;
     Ok(markets)
 }
