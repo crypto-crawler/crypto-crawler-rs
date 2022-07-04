@@ -18,7 +18,7 @@ async fn test_crawl_trade_all(market_type: MarketType) {
     test_all_symbols!(crawl_trade, EXCHANGE_NAME, market_type, MessageType::Trade)
 }
 
-#[test_case(MarketType::InverseFuture, "BTCUSDM22")]
+#[test_case(MarketType::InverseFuture, "BTCUSDU22")]
 #[test_case(MarketType::InverseSwap, "BTCUSD")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 #[tokio::test(flavor = "multi_thread")]
@@ -32,7 +32,7 @@ async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     )
 }
 
-#[test_case(MarketType::InverseFuture, "BTCUSDM22")]
+#[test_case(MarketType::InverseFuture, "BTCUSDU22")]
 #[test_case(MarketType::InverseSwap, "BTCUSD")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 #[tokio::test(flavor = "multi_thread")]
@@ -46,7 +46,7 @@ async fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
     )
 }
 
-#[test_case(MarketType::InverseFuture, "BTCUSDM22")]
+#[test_case(MarketType::InverseFuture, "BTCUSDU22")]
 #[test_case(MarketType::InverseSwap, "BTCUSD")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
@@ -71,7 +71,7 @@ fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
     )
 }
 
-#[test_case(MarketType::InverseFuture, "BTCUSDM22")]
+#[test_case(MarketType::InverseFuture, "BTCUSDU22")]
 #[test_case(MarketType::InverseSwap, "BTCUSD")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 #[tokio::test(flavor = "multi_thread")]
@@ -93,7 +93,7 @@ async fn test_crawl_candlestick(market_type: MarketType) {
     gen_test_crawl_candlestick!(EXCHANGE_NAME, market_type)
 }
 
-// #[test_case(MarketType::InverseFuture, "BTCUSDM22")]
+// #[test_case(MarketType::InverseFuture, "BTCUSDU22")]
 // #[test_case(MarketType::InverseSwap, "BTCUSD")]
 // #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 // fn test_subscribe_symbol(market_type: MarketType, symbol: &str) {
