@@ -5,7 +5,7 @@ use crypto_rest_client::{fetch_l2_snapshot, fetch_long_short_ratio, fetch_open_i
 use serde_json::Value;
 use test_case::test_case;
 
-#[test_case(MarketType::InverseFuture, "BTCUSDM22")]
+#[test_case(MarketType::InverseFuture, "BTCUSDU22")]
 #[test_case(MarketType::InverseSwap, "BTCUSD")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
@@ -18,7 +18,7 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     assert_eq!(result.as_array().unwrap().len(), 50);
 }
 
-#[test_case(MarketType::InverseFuture, "BTCUSDM22")]
+#[test_case(MarketType::InverseFuture, "BTCUSDU22")]
 #[test_case(MarketType::InverseSwap, "BTCUSD")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 fn test_open_interest(market_type: MarketType, symbol: &str) {
@@ -30,7 +30,7 @@ fn test_open_interest(market_type: MarketType, symbol: &str) {
     assert!(!result.is_empty());
 }
 
-#[test_case(MarketType::InverseFuture, "BTCUSDM22")]
+#[test_case(MarketType::InverseFuture, "BTCUSDU22")]
 #[test_case(MarketType::InverseSwap, "BTCUSD")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 fn test_long_short_ratio(market_type: MarketType, symbol: &str) {
