@@ -23,8 +23,8 @@ async fn test_crawl_trade_all(market_type: MarketType) {
 #[test_case(MarketType::Spot, "BTC_USDT")]
 #[test_case(MarketType::InverseSwap, "BTC_USD")]
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
-// #[test_case(MarketType::InverseFuture, "BTC_USD_20220624"; "ignore")]
-// #[test_case(MarketType::LinearFuture, "BTC_USDT_20220624"; "ignore")]
+// #[test_case(MarketType::InverseFuture, "BTC_USD_20220930"; "ignore")]
+// #[test_case(MarketType::LinearFuture, "BTC_USDT_20220930"; "ignore")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
@@ -39,8 +39,8 @@ async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::Spot, "BTC_USDT")]
 #[test_case(MarketType::InverseSwap, "BTC_USD")]
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
-#[test_case(MarketType::InverseFuture, "BTC_USD_20220624")]
-#[test_case(MarketType::LinearFuture, "BTC_USDT_20220624")]
+#[test_case(MarketType::InverseFuture, "BTC_USD_20220930")]
+#[test_case(MarketType::LinearFuture, "BTC_USDT_20220930")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
@@ -69,8 +69,8 @@ async fn test_crawl_bbo(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::Spot, "BTC_USDT")]
 #[test_case(MarketType::InverseSwap, "BTC_USD")]
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
-#[test_case(MarketType::InverseFuture, "BTC_USD_20220624")]
-#[test_case(MarketType::LinearFuture, "BTC_USDT_20220624")]
+#[test_case(MarketType::InverseFuture, "BTC_USD_20220930")]
+#[test_case(MarketType::LinearFuture, "BTC_USDT_20220930")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     test_crawl_restful!(
         crawl_l2_snapshot,
@@ -98,8 +98,8 @@ fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
 #[test_case(MarketType::Spot, "BTC_USDT")]
 #[test_case(MarketType::InverseSwap, "BTC_USD")]
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
-#[test_case(MarketType::InverseFuture, "BTC_USD_20220624")]
-#[test_case(MarketType::LinearFuture, "BTC_USDT_20220624")]
+#[test_case(MarketType::InverseFuture, "BTC_USD_20220930")]
+#[test_case(MarketType::LinearFuture, "BTC_USDT_20220930")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
