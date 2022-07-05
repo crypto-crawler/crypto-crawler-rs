@@ -533,7 +533,8 @@ mod l2_topk {
 mod bbo {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_bbo};
+    use crypto_msg_type::MessageType;
 
     #[test]
     fn inverse_future() {
@@ -565,6 +566,24 @@ mod bbo {
             "BTC-PERPETUAL",
             extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
         );
+
+        let received_at = 1654012882984;
+        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, Some(received_at)).unwrap();
+
+        assert_eq!(MessageType::BBO, bbo_msg.msg_type);
+        assert_eq!("BTC-PERPETUAL", bbo_msg.symbol);
+        assert_eq!(1654012882984, bbo_msg.timestamp);
+        assert_eq!(None, bbo_msg.id);
+
+        assert_eq!(32143.5, bbo_msg.ask_price);
+        assert_eq!(0.006222097780266617, bbo_msg.ask_quantity_base);
+        assert_eq!(32143.5 * 0.006222097780266617, bbo_msg.ask_quantity_quote);
+        assert_eq!(Some(20.0), bbo_msg.ask_quantity_contract);
+
+        assert_eq!(32143.0, bbo_msg.bid_price);
+        assert_eq!(55.98730672308123, bbo_msg.bid_quantity_base);
+        assert_eq!(32143.0 * 55.98730672308123, bbo_msg.bid_quantity_quote);
+        assert_eq!(Some(179960.0), bbo_msg.bid_quantity_contract);
     }
 }
 
