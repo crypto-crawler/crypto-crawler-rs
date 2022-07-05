@@ -62,7 +62,7 @@ mod ftx_linear_swap {
         gen_test_code!(
             FtxWSClient,
             subscribe_orderbook,
-            &vec!["BTC-PERP".to_string()]
+            &vec!["BTC-PERP".to_string(), "ETH-PERP".to_string()]
         );
     }
 }
@@ -82,7 +82,11 @@ mod ftx_linear_future {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(FtxWSClient, subscribe_bbo, &vec!["BTC-0930".to_string()]);
+        gen_test_code!(
+            FtxWSClient,
+            subscribe_bbo,
+            &vec!["BTC-0930".to_string(), "ETH-0930".to_string()]
+        );
     }
 
     #[tokio::test(flavor = "multi_thread")]
