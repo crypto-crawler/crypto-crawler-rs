@@ -669,7 +669,7 @@ pub(crate) fn parse_funding_rate(
 /// https://www.bitmex.com/app/wsAPI#OrderBookL2
 /// price = (100000000 * symbolIdx - ID) * tickSize
 pub fn id_to_price(symbol: &str, id: usize) -> f64 {
-    let (index, tick_size) = SYMBOL_INDEX_AND_TICK_SIZE_MAP.get(symbol).unwrap();
+    let (index, tick_size) = SYMBOL_INDEX_AND_TICK_SIZE_MAP.get(symbol).expect(symbol);
     let (index, tick_size) = (*index, *tick_size);
     round((100000000.0 * index as f64 - id as f64) * tick_size)
 }
@@ -678,7 +678,7 @@ pub fn id_to_price(symbol: &str, id: usize) -> f64 {
 /// https://www.bitmex.com/app/wsAPI#OrderBookL2
 /// ID = (100000000 * symbolIdx) - (price / tickSize)
 pub fn price_to_id(symbol: &str, price: f64) -> usize {
-    let (index, tick_size) = SYMBOL_INDEX_AND_TICK_SIZE_MAP.get(symbol).unwrap();
+    let (index, tick_size) = SYMBOL_INDEX_AND_TICK_SIZE_MAP.get(symbol).expect(symbol);
     let (index, tick_size) = (*index, *tick_size);
 
     (100000000.0 * index as f64 - price / tick_size) as usize
