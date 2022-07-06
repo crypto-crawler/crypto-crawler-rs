@@ -6,7 +6,7 @@ const BASE_URL: &str = "https://api-futures.kucoin.com";
 
 /// The RESTful client for KuCoin Future and Swap markets.
 ///
-/// * RESTful API doc: <https://docs.kucoin.cc/futures>
+/// * RESTful API doc: <https://docs.kucoin.com/futures>
 /// * Trading at: <https://futures.kucoin.com/>
 /// * Rate Limits: <https://docs.kucoin.cc/futures/#request-rate-limit>
 pub struct KuCoinSwapRestClient {
