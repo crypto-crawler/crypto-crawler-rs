@@ -4,8 +4,10 @@ use governor::{Quota, RateLimiter};
 use log::*;
 use nonzero_ext::*;
 use reqwest::Url;
+use tokio::time::interval;
 use std::cell::RefCell;
 use std::sync::Arc;
+use std::time::Duration;
 use std::{env, rc::Rc};
 use std::num::NonZeroU32;
 use tokio::{
@@ -41,7 +43,7 @@ pub async fn connect_async(
     let url = url.to_string();
     let mut index = 1;
 
-    println!("linking exchange: {}", exchange);
+    info!("linking exchange: {}", exchange);
     if let Ok(proxy_env) = env::var("https_proxy").or_else(|_| env::var("http_proxy")) {
       let url = url.to_string();
       let mut command_buf = None;
@@ -71,7 +73,7 @@ pub async fn connect_async(
           let ret = tokio_tungstenite::client_async_tls(connect_url, proxy_stream).await;
 
           if let Err(e) = ret {
-            println!("index:{} {}", index, e);
+            error!("index:{} {}", index, e);
             index += 1;
             continue;
           }
@@ -81,13 +83,14 @@ pub async fn connect_async(
           let command_rx = command_rx.get_mut();
           if let Some(command) = command_buf {
             if let Err(msg) = command_tx_clone.send(command).await {
-              println!("command err: {}", msg);
+              error!("command err: {}", msg);
               break;
             };
           }
           command_buf = connect_async_internal(ws_stream, uplink_limit, command_rx, message_tx).await;
-          println!("link out; exchange: {}\nurl: {}", exchange, url);
+          warn!("link out; exchange: {}\nurl: {}", exchange, url);
         }
+        error!("link out; exchange: {}\nurl: {}", exchange, url);
       });
     } else {
       let mut command_buf = None;
@@ -97,7 +100,7 @@ pub async fn connect_async(
         while 5 > index {
           let ret = tokio_tungstenite::connect_async(url.as_str()).await;
           if let Err(e) = ret {
-            println!("exchange: {} index:{} - msg:{}", 
+            warn!("exchange: {} index:{} - msg:{}", 
               exchange, 
               index, 
               e
@@ -112,14 +115,15 @@ pub async fn connect_async(
 
           if let Some(command) = command_buf {
             if let Err(msg) = command_tx_clone.send(command).await {
-              println!("command err: {}", msg);
+              info!("command err: {}", msg);
               break;
             };
           }
 
           command_buf = connect_async_internal(ws_stream, uplink_limit, command_rx, message_tx).await;
-          println!("link out; exchange: {}\nurl: {}", exchange, url);
+          warn!("link out; exchange: {}\nurl: {}", exchange, url);
         }
+        error!("link out; exchange: {}\nurl: {}", exchange, url);
       });
     }
     Ok((message_rx, command_tx.clone()))
@@ -142,12 +146,17 @@ async fn connect_async_internal<S: AsyncRead + AsyncWrite + Unpin + Send + 'stat
         RateLimiter::direct(Quota::per_second(nonzero!(u32::max_value())))
     };
 
+    let mut clock = interval(Duration::from_secs(5));
+    let mut data_zone_num = 1;
+    clock.reset();
+    let mut flag = true;
+
     loop {
         tokio::select! {
           command = command_rx.recv() => {
             match command {
               Some(command) => {
-                println!("commad send: {}", command);
+                info!("commad send: {}", command);
                 if let None = message {
                   message = Some(command.clone())
                 }
@@ -168,14 +177,15 @@ async fn connect_async_internal<S: AsyncRead + AsyncWrite + Unpin + Send + 'stat
                 break;
               }
             }
-          }
+          },
           msg = read.next() => match msg {
             Some(Ok(msg)) => {
-              // let flag = msg.len() > 30;
-              let _= message_tx.send(msg).await;
-              // if flag {
-              //   break;
-              // }
+              clock.reset();
+              if let Message::Close(_v) = msg {
+                warn!("Received a CloseFrame");
+                break;
+              }
+              let _ = message_tx.send(msg).await;
             }
             Some(Err(err)) => {
               error!("Failed to read, error: {}", err);
@@ -184,6 +194,14 @@ async fn connect_async_internal<S: AsyncRead + AsyncWrite + Unpin + Send + 'stat
             None => {
               debug!("message_tx closed");
               break;
+            }
+          },
+          _ = clock.tick() => {
+            warn!("recv data timeout {}", data_zone_num);
+            if data_zone_num > 3 {
+              break;
+            } else {
+              data_zone_num += 1;
             }
           }
         };
