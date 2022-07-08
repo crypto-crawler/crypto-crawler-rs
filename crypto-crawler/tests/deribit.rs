@@ -20,7 +20,7 @@ async fn test_crawl_trade_all(market_type: MarketType) {
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
 // #[test_case(MarketType::InverseFuture, "BTC-30SEP22")]
-// #[test_case(MarketType::EuropeanOption, "BTC-24JUN22-40000-C")]
+// #[test_case(MarketType::EuropeanOption, "BTC-29JUL22-20000-C")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
@@ -34,7 +34,7 @@ async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
 #[test_case(MarketType::InverseFuture, "BTC-30SEP22")]
-#[test_case(MarketType::EuropeanOption, "BTC-24JUN22-40000-C")]
+#[test_case(MarketType::EuropeanOption, "BTC-29JUL22-20000-C")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
@@ -48,7 +48,7 @@ async fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
 #[test_case(MarketType::InverseFuture, "BTC-30SEP22")]
-#[test_case(MarketType::EuropeanOption, "BTC-24JUN22-40000-C")]
+#[test_case(MarketType::EuropeanOption, "BTC-29JUL22-20000-C")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_bbo(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
@@ -62,7 +62,7 @@ async fn test_crawl_bbo(market_type: MarketType, symbol: &str) {
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
 #[test_case(MarketType::InverseFuture, "BTC-30SEP22")]
-#[test_case(MarketType::EuropeanOption, "BTC-24JUN22-40000-C")]
+#[test_case(MarketType::EuropeanOption, "BTC-29JUL22-20000-C")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_l2_topk(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
@@ -76,7 +76,7 @@ async fn test_crawl_l2_topk(market_type: MarketType, symbol: &str) {
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
 #[test_case(MarketType::InverseFuture, "BTC-30SEP22")]
-#[test_case(MarketType::EuropeanOption, "BTC-24JUN22-40000-C")]
+#[test_case(MarketType::EuropeanOption, "BTC-29JUL22-20000-C")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     test_crawl_restful!(
         crawl_l2_snapshot,
@@ -101,7 +101,7 @@ fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
 
 #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
 #[test_case(MarketType::InverseFuture, "BTC-30SEP22")]
-#[test_case(MarketType::EuropeanOption, "BTC-24JUN22-40000-C")]
+#[test_case(MarketType::EuropeanOption, "BTC-29JUL22-20000-C")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
@@ -123,7 +123,7 @@ async fn test_crawl_candlestick(market_type: MarketType) {
 
 // #[test_case(MarketType::InverseSwap, "BTC-PERPETUAL")]
 // #[test_case(MarketType::InverseFuture, "BTC-30SEP22")]
-// #[test_case(MarketType::EuropeanOption, "BTC-24JUN22-40000-C")]
+// #[test_case(MarketType::EuropeanOption, "BTC-29JUL22-20000-C")]
 // fn test_subscribe_symbol(market_type: MarketType, symbol: &str) {
 //     gen_test_subscribe_symbol!(EXCHANGE_NAME, market_type, symbol)
 // }

@@ -2,7 +2,7 @@ use chrono::DateTime;
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

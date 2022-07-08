@@ -1,5 +1,6 @@
-use crate::{exchanges::utils::calc_quantity_and_volume, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crate::exchanges::utils::calc_quantity_and_volume;
 use crypto_market_type::MarketType;
+use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
 use crypto_msg_type::MessageType;
 
 use serde_json::Value;
@@ -23,7 +24,7 @@ pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     } else if channel == "candles" {
         let key = &(obj["key"].as_str().unwrap())["trade:".len()..];
         let pos = key.find(':').unwrap();
-        Ok((&key[pos + 1..]).to_string())
+        Ok((key[pos + 1..]).to_string())
     } else {
         Err(SimpleError::new(format!(
             "Failed to extract symbol from {}",

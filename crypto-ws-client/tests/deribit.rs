@@ -35,7 +35,7 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_trade,
-            &vec!["BTC-24JUN22".to_string(), "BTC-30SEP22".to_string()]
+            &vec!["BTC-26AUG22".to_string(), "BTC-30SEP22".to_string()]
         );
     }
 
@@ -158,8 +158,8 @@ mod deribit_option {
     use crypto_ws_client::{DeribitWSClient, WSClient};
 
     const SYMBOLS: &'static [&str] = &[
-        "BTC-24JUN22-50000-C",
-        "BTC-24JUN22-60000-C",
+        "BTC-26AUG22-23000-C",
+        "BTC-26AUG22-45000-C",
         "BTC-30SEP22-40000-C",
         "BTC-30SEP22-60000-C",
     ];

@@ -111,8 +111,10 @@ mod tests {
     #[test]
     fn spot_quotes() {
         let map = fetch_spot_quotes();
-        for quote in map {
-            println!("\"{}\",", quote);
+        for quote in map.iter() {
+            if !super::SPOT_QUOTES.contains(quote) {
+                println!("\"{}\",", quote);
+            }
         }
     }
 

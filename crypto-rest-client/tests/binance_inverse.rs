@@ -33,7 +33,7 @@ mod inverse_future {
     #[test]
     fn test_agg_trades() {
         let text =
-            BinanceInverseRestClient::fetch_agg_trades("BTCUSD_220624", None, None, None).unwrap();
+            BinanceInverseRestClient::fetch_agg_trades("BTCUSD_220930", None, None, None).unwrap();
         assert!(text.starts_with("[{"));
     }
 
@@ -42,7 +42,7 @@ mod inverse_future {
         let text = fetch_l2_snapshot(
             "binance",
             MarketType::InverseFuture,
-            "BTCUSD_220624",
+            "BTCUSD_220930",
             Some(3),
         )
         .unwrap();
@@ -51,7 +51,7 @@ mod inverse_future {
 
     #[test]
     fn test_open_interest() {
-        let text = fetch_open_interest("binance", MarketType::InverseFuture, Some("BTCUSD_220624"))
+        let text = fetch_open_interest("binance", MarketType::InverseFuture, Some("BTCUSD_220930"))
             .unwrap();
         assert!(text.starts_with("{"));
     }

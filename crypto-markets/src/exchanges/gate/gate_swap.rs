@@ -113,8 +113,10 @@ fn to_market(raw_market: &SwapMarket) -> Market {
             lot_size: quanto_multiplier,
         },
         quantity_limit: Some(QuantityLimit {
-            min: raw_market.order_size_min,
+            min: Some(raw_market.order_size_min),
             max: Some(raw_market.order_size_max),
+            notional_min: None,
+            notional_max: None,
         }),
         contract_value: Some(quanto_multiplier),
         delivery_date: None,

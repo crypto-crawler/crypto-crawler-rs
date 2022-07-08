@@ -1,15 +1,14 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use super::utils::calc_quantity_and_volume;
-use crate::{KlineMsg, BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
+use super::super::utils::calc_quantity_and_volume;
+use crypto_message::{KlineMsg, BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
+use super::EXCHANGE_NAME;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
 use std::{collections::HashMap};
-
-const EXCHANGE_NAME: &str = "okx";
 
 // https://www.okx.com/docs-v5/en/#websocket-api-public-channel-trades-channel
 #[derive(Serialize, Deserialize)]
@@ -152,7 +151,7 @@ struct RawKlineMsg {
     volCcy: String,     // Trading volume, with a unit of currency.
 }
 
-pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
+pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
         Ok(ws_msg.arg.instId)
     } else if let Ok(rest_msg) = serde_json::from_str::<RestfulMsg<HashMap<String, Value>>>(msg) {
@@ -180,10 +179,7 @@ pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<Stri
     }
 }
 
-pub(crate) fn extract_timestamp(
-    _market_type: MarketType,
-    msg: &str,
-) -> Result<Option<i64>, SimpleError> {
+pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
     if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
         if ws_msg.arg.channel == "funding-rate" {
             return Ok(None);
@@ -226,7 +222,7 @@ pub(crate) fn extract_timestamp(
     }
 }
 
-pub(crate) fn get_msg_type(msg: &str) -> MessageType {
+pub(super) fn get_msg_type(msg: &str) -> MessageType {
     if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
         let channel = ws_msg.arg.channel.as_str();
         match channel {
@@ -249,7 +245,7 @@ pub(crate) fn get_msg_type(msg: &str) -> MessageType {
     }
 }
 
-pub(crate) fn parse_trade(
+pub(super) fn parse_trade(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<TradeMsg>, SimpleError> {
@@ -305,7 +301,7 @@ pub(crate) fn parse_trade(
     trades.into_iter().collect()
 }
 
-pub(crate) fn parse_funding_rate(
+pub(super) fn parse_funding_rate(
     market_type: MarketType,
     msg: &str,
     received_at: i64,
@@ -343,7 +339,7 @@ pub(crate) fn parse_funding_rate(
     Ok(rates)
 }
 
-pub(crate) fn parse_l2(
+pub(super) fn parse_l2(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<OrderBookMsg>, SimpleError> {

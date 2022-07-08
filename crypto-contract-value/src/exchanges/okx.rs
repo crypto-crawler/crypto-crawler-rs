@@ -244,9 +244,10 @@ pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<
         MarketType::InverseSwap | MarketType::InverseFuture => {
             Some(if pair.starts_with("BTC") { 100.0 } else { 10.0 })
         }
-        MarketType::LinearSwap | MarketType::LinearFuture | MarketType::EuropeanOption => {
+        MarketType::LinearSwap | MarketType::LinearFuture => {
             Some(CONTRACT_VALUES[&market_type][pair])
         }
+        MarketType::EuropeanOption => Some(1.0),
         _ => None,
     }
 }

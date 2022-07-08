@@ -22,8 +22,8 @@ async fn test_crawl_trade_all(market_type: MarketType) {
 
 #[test_case(MarketType::Spot, "BTC/USD")]
 #[test_case(MarketType::LinearSwap, "BTC-PERP")]
-#[test_case(MarketType::LinearFuture, "BTC-0624")]
-// #[test_case(MarketType::Move, "BTC-MOVE-2022Q2")]
+#[test_case(MarketType::LinearFuture, "BTC-0930")]
+// #[test_case(MarketType::Move, "BTC-MOVE-2022Q3")]
 // #[test_case(MarketType::BVOL, "BVOL/USD")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
@@ -38,8 +38,8 @@ async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
 
 #[test_case(MarketType::Spot, "BTC/USD")]
 #[test_case(MarketType::LinearSwap, "BTC-PERP")]
-#[test_case(MarketType::LinearFuture, "BTC-0624")]
-#[test_case(MarketType::Move, "BTC-MOVE-2022Q2")]
+#[test_case(MarketType::LinearFuture, "BTC-0930")]
+#[test_case(MarketType::Move, "BTC-MOVE-2022Q3")]
 #[test_case(MarketType::BVOL, "BVOL/USD")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
@@ -54,8 +54,8 @@ async fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 
 #[test_case(MarketType::Spot, "BTC/USD")]
 #[test_case(MarketType::LinearSwap, "BTC-PERP")]
-#[test_case(MarketType::LinearFuture, "BTC-0624")]
-#[test_case(MarketType::Move, "BTC-MOVE-2022Q2")]
+#[test_case(MarketType::LinearFuture, "BTC-0930")]
+#[test_case(MarketType::Move, "BTC-MOVE-2022Q3")]
 #[test_case(MarketType::BVOL, "BVOL/USD")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_bbo(market_type: MarketType, symbol: &str) {
@@ -70,8 +70,8 @@ async fn test_crawl_bbo(market_type: MarketType, symbol: &str) {
 
 #[test_case(MarketType::Spot, "BTC/USD")]
 #[test_case(MarketType::LinearSwap, "BTC-PERP")]
-#[test_case(MarketType::LinearFuture, "BTC-0624")]
-#[test_case(MarketType::Move, "BTC-MOVE-2022Q2")]
+#[test_case(MarketType::LinearFuture, "BTC-0930")]
+#[test_case(MarketType::Move, "BTC-MOVE-2022Q3")]
 #[test_case(MarketType::BVOL, "BVOL/USD")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     test_crawl_restful!(
@@ -99,7 +99,7 @@ fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
 
 // #[test_case(MarketType::Spot, "BTC/USD")]
 // #[test_case(MarketType::LinearSwap, "BTC-PERP")]
-// #[test_case(MarketType::LinearFuture, "BTC-0624")]
+// #[test_case(MarketType::LinearFuture, "BTC-0930")]
 // fn test_subscribe_symbol(market_type: MarketType, symbol: &str) {
 //     gen_test_subscribe_symbol!(EXCHANGE_NAME, market_type, symbol)
 // }

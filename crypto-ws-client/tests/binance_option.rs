@@ -3,6 +3,7 @@ use crypto_ws_client::{BinanceOptionWSClient, WSClient};
 #[macro_use]
 mod utils;
 
+#[ignore]
 #[tokio::test(flavor = "multi_thread")]
 async fn subscribe() {
     gen_test_code!(
@@ -42,6 +43,7 @@ async fn subscribe_ticker() {
     );
 }
 
+#[ignore]
 #[tokio::test(flavor = "multi_thread")]
 async fn subscribe_ticker_all() {
     gen_test_code!(

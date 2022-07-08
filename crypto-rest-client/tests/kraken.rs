@@ -29,7 +29,7 @@ fn test_restful_accepts_two_symbols() {
 
 #[test_case(MarketType::Spot, "XBTUSD")]
 #[test_case(MarketType::Spot, "XBT/USD")]
-#[test_case(MarketType::InverseFuture, "FI_XBTUSD_220624")]
+#[test_case(MarketType::InverseFuture, "FI_XBTUSD_220930")]
 #[test_case(MarketType::InverseSwap, "PI_XBTUSD")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     let text = fetch_l2_snapshot("kraken", market_type, symbol, None).unwrap();

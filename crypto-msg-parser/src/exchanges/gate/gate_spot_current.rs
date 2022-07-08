@@ -2,7 +2,7 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
 use super::messages::{WebsocketCandlest, WebsocketMsg};
-use crate::{Order, OrderBookMsg, TradeMsg, TradeSide, KlineMsg};
+use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide, KlineMsg};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;

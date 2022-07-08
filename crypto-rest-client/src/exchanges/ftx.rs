@@ -8,7 +8,7 @@ const BASE_URL: &str = "https://ftx.com/api";
 ///
 /// FTX has Spot, LinearFuture, LinearSwap, Option, Move and BVOL markets.
 ///
-/// * RESTful API doc: <https://docs.ftx.com/?python#rest-api>
+/// * RESTful API doc: <https://docs.ftx.com/#rest-api>
 /// * Trading at <https://ftx.com/markets>
 /// * Rate Limits: <https://docs.ftx.com/?python#rate-limits>
 ///   * Non-order placement requests do not count towards rate limits.

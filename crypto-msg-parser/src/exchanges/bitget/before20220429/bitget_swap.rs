@@ -2,7 +2,7 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
 use super::super::super::utils::calc_quantity_and_volume;
-use crate::{FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use super::super::EXCHANGE_NAME;
 use chrono::prelude::*;

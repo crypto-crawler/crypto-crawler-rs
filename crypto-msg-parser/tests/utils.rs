@@ -2,7 +2,8 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crypto_msg_parser::{get_msg_type, round, FundingRateMsg, OrderBookMsg, TradeMsg};
+use crypto_message::{FundingRateMsg, OrderBookMsg, TradeMsg};
+use crypto_msg_parser::{get_msg_type, round};
 
 pub fn check_trade_fields(
     exchange: &str,

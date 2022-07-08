@@ -1,10 +1,9 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crate::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide, KlineMsg};
+use crypto_message::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide, KlineMsg};
 
-use super::super::utils::calc_quantity_and_volume;
-use super::EXCHANGE_NAME;
+use super::{super::utils::calc_quantity_and_volume, EXCHANGE_NAME};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
@@ -64,7 +63,7 @@ struct RawOrderbookMsg {
     ps: Option<String>, // Pair, available to L2_TOPK
     U: u64,             // First update ID in event
     u: u64,             // Final update ID in event
-    pu: Option<u64>,    // Previous event update sequense ("u" of previous message)
+    pu: Option<i64>, // Previous event update sequense ("u" of previous message), -1 also means None
     b: Vec<RawOrder>,
     a: Vec<RawOrder>,
     #[serde(flatten)]
@@ -170,12 +169,8 @@ pub(super) fn parse_l2(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<OrderBookMsg>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<RawOrderbookMsg>",
-            msg
-        ))
-    })?;
+    let ws_msg =
+        serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(msg).map_err(SimpleError::from)?;
     let pair = crypto_pair::normalize_pair(&ws_msg.data.s, EXCHANGE_NAME).ok_or_else(|| {
         SimpleError::new(format!(
             "Failed to normalize {} from {}",
@@ -208,7 +203,15 @@ pub(super) fn parse_l2(
         msg_type: MessageType::L2Event,
         timestamp: ws_msg.data.E,
         seq_id: Some(ws_msg.data.u),
-        prev_seq_id: ws_msg.data.pu,
+        prev_seq_id: if let Some(id) = ws_msg.data.pu {
+            if id == -1 {
+                None
+            } else {
+                Some(id as u64)
+            }
+        } else {
+            None
+        },
         asks: ws_msg
             .data
             .a
