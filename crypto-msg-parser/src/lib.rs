@@ -1,6 +1,6 @@
 pub mod exchanges;
 use crypto_market_type::MarketType;
-use crypto_message::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg};
+use crypto_message::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, KlineMsg};
 use crypto_msg_type::MessageType;
 pub use exchanges::utils::round; // for test only
 use simple_error::SimpleError;

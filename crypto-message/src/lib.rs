@@ -7,6 +7,11 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use strum_macros::{Display, EnumString};
 
+#[deprecated(
+    note = "Use `CandlestickMsg` instead. This is an alias for `CandlestickMsg`."
+)]
+pub use self::CandlestickMsg as KlineMsg;
+
 /// Message represents multiple types of messages.
 #[derive(Eq, PartialEq)]
 pub enum Message {
