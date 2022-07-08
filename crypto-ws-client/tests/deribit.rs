@@ -9,8 +9,10 @@ async fn deribit_all_trades() {
         DeribitWSClient,
         subscribe,
         // https://docs.deribit.com/?javascript#trades-kind-currency-interval
-        &[("trades.future.SYMBOL.100ms".to_string(), "any".to_string()),
-            ("trades.option.SYMBOL.100ms".to_string(), "any".to_string())]
+        &[
+            ("trades.future.SYMBOL.100ms".to_string(), "any".to_string()),
+            ("trades.option.SYMBOL.100ms".to_string(), "any".to_string())
+        ]
     );
 }
 
@@ -66,11 +68,7 @@ mod deribit_inverse_future {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(
-            DeribitWSClient,
-            subscribe_bbo,
-            &["BTC-30SEP22".to_string()]
-        );
+        gen_test_code!(DeribitWSClient, subscribe_bbo, &["BTC-30SEP22".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -144,10 +142,7 @@ mod deribit_inverse_swap {
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(DeribitWSClient, &[("BTC-PERPETUAL".to_string(), 60)]);
-        gen_test_subscribe_candlestick!(
-            DeribitWSClient,
-            &[("BTC-PERPETUAL".to_string(), 86400)]
-        );
+        gen_test_subscribe_candlestick!(DeribitWSClient, &[("BTC-PERPETUAL".to_string(), 86400)]);
     }
 }
 

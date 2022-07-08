@@ -8,8 +8,10 @@ async fn subscribe() {
     gen_test_code!(
         CoinbaseProWSClient,
         subscribe,
-        &[("matches".to_string(), "BTC-USD".to_string()),
-            ("heartbeat".to_string(), "BTC-USD".to_string())]
+        &[
+            ("matches".to_string(), "BTC-USD".to_string()),
+            ("heartbeat".to_string(), "BTC-USD".to_string())
+        ]
     );
 }
 

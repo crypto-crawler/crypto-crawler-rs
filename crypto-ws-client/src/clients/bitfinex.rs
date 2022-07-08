@@ -315,10 +315,8 @@ mod tests {
     #[test]
     fn test_swap_command() {
         let translator = super::BitfinexCommandTranslator {};
-        let commands = translator.translate_to_commands(
-            true,
-            &[("trades".to_string(), "tBTCF0:USTF0".to_string())],
-        );
+        let commands = translator
+            .translate_to_commands(true, &[("trades".to_string(), "tBTCF0:USTF0".to_string())]);
 
         assert_eq!(1, commands.len());
         assert_eq!(

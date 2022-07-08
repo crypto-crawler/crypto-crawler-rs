@@ -8,8 +8,10 @@ async fn subscribe() {
     gen_test_code!(
         BitstampWSClient,
         subscribe,
-        &[("live_trades".to_string(), "btcusd".to_string()),
-            ("diff_order_book".to_string(), "btcusd".to_string())]
+        &[
+            ("live_trades".to_string(), "btcusd".to_string()),
+            ("diff_order_book".to_string(), "btcusd".to_string())
+        ]
     );
 }
 
@@ -18,8 +20,10 @@ async fn subscribe_raw_json() {
     gen_test_code!(
         BitstampWSClient,
         send,
-        &[r#"{"event":"bts:subscribe","data":{"channel":"live_trades_btcusd"}}"#.to_string(),
-            r#"{"event":"bts:subscribe","data":{"channel":"live_trades_ethusd"}}"#.to_string()]
+        &[
+            r#"{"event":"bts:subscribe","data":{"channel":"live_trades_btcusd"}}"#.to_string(),
+            r#"{"event":"bts:subscribe","data":{"channel":"live_trades_ethusd"}}"#.to_string()
+        ]
     );
 }
 

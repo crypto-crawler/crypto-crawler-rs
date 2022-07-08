@@ -25,11 +25,7 @@ mod zb_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            ZbSpotWSClient,
-            subscribe_trade,
-            &["btc_usdt".to_string()]
-        );
+        gen_test_code!(ZbSpotWSClient, subscribe_trade, &["btc_usdt".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -43,11 +39,7 @@ mod zb_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            ZbSpotWSClient,
-            subscribe_ticker,
-            &["btc_usdt".to_string()]
-        );
+        gen_test_code!(ZbSpotWSClient, subscribe_ticker, &["btc_usdt".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -66,8 +58,10 @@ mod zb_linear_swap {
         gen_test_code!(
             ZbSwapWSClient,
             subscribe,
-            &[("Trade".to_string(), "BTC_USDT".to_string()),
-                ("Depth".to_string(), "BTC_USDT".to_string())]
+            &[
+                ("Trade".to_string(), "BTC_USDT".to_string()),
+                ("Depth".to_string(), "BTC_USDT".to_string())
+            ]
         );
     }
 
@@ -76,8 +70,10 @@ mod zb_linear_swap {
         gen_test_code!(
             ZbSwapWSClient,
             send,
-            &[r#"{"action":"subscribe", "channel":"BTC_USDT.Trade", "size":100}"#.to_string(),
-                r#"{"action":"subscribe", "channel":"BTC_USDT.Depth", "size":200}"#.to_string()]
+            &[
+                r#"{"action":"subscribe", "channel":"BTC_USDT.Trade", "size":100}"#.to_string(),
+                r#"{"action":"subscribe", "channel":"BTC_USDT.Depth", "size":200}"#.to_string()
+            ]
         );
     }
 

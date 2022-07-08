@@ -142,8 +142,10 @@ mod tests {
         let translator = super::FtxCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &[("trades".to_string(), "BTC/USD".to_string()),
-                ("orderbook".to_string(), "BTC/USD".to_string())],
+            &[
+                ("trades".to_string(), "BTC/USD".to_string()),
+                ("orderbook".to_string(), "BTC/USD".to_string()),
+            ],
         );
 
         assert_eq!(2, commands.len());

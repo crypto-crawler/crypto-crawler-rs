@@ -21,8 +21,10 @@ mod bitmex_inverse_swap {
         gen_test_code!(
             BitmexWSClient,
             subscribe,
-            &[("trade".to_string(), "XBTUSD".to_string()),
-                ("quote".to_string(), "XBTUSD".to_string())]
+            &[
+                ("trade".to_string(), "XBTUSD".to_string()),
+                ("quote".to_string(), "XBTUSD".to_string())
+            ]
         );
     }
 
@@ -47,11 +49,7 @@ mod bitmex_inverse_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            BitmexWSClient,
-            subscribe_orderbook,
-            &["XBTUSD".to_string()]
-        );
+        gen_test_code!(BitmexWSClient, subscribe_orderbook, &["XBTUSD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -107,8 +105,10 @@ mod bitmex_inverse_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe,
-            &[("trade".to_string(), "XBTU22".to_string()),
-                ("quote".to_string(), "XBTU22".to_string())]
+            &[
+                ("trade".to_string(), "XBTU22".to_string()),
+                ("quote".to_string(), "XBTU22".to_string())
+            ]
         );
     }
 
@@ -177,11 +177,7 @@ mod bitmex_quanto_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            BitmexWSClient,
-            subscribe_orderbook,
-            &["ETHUSD".to_string()]
-        );
+        gen_test_code!(BitmexWSClient, subscribe_orderbook, &["ETHUSD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -219,9 +215,11 @@ mod bitmex_linear_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe_trade,
-            &["XBTUSDTU22".to_string(),
+            &[
+                "XBTUSDTU22".to_string(),
                 "ETHU22".to_string(),
-                "ETHUSDTU22".to_string()]
+                "ETHUSDTU22".to_string()
+            ]
         );
     }
 
@@ -232,11 +230,7 @@ mod bitmex_linear_future {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            BitmexWSClient,
-            subscribe_orderbook,
-            &["ETHU22".to_string()]
-        );
+        gen_test_code!(BitmexWSClient, subscribe_orderbook, &["ETHU22".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]

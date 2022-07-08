@@ -149,10 +149,8 @@ mod tests {
     #[tokio::test(flavor = "multi_thread")]
     async fn test_one_topic() {
         let translator = super::ZbgCommandTranslator::new().await;
-        let commands = translator.translate_to_commands(
-            true,
-            &[("future_tick".to_string(), "BTC_USDT".to_string())],
-        );
+        let commands = translator
+            .translate_to_commands(true, &[("future_tick".to_string(), "BTC_USDT".to_string())]);
 
         assert_eq!(1, commands.len());
         assert_eq!(
@@ -166,8 +164,10 @@ mod tests {
         let translator = super::ZbgCommandTranslator::new().await;
         let commands = translator.translate_to_commands(
             true,
-            &[("future_tick".to_string(), "BTC_USDT".to_string()),
-                ("future_snapshot_depth".to_string(), "ETH_USDT".to_string())],
+            &[
+                ("future_tick".to_string(), "BTC_USDT".to_string()),
+                ("future_snapshot_depth".to_string(), "ETH_USDT".to_string()),
+            ],
         );
 
         assert_eq!(2, commands.len());

@@ -10,10 +10,12 @@ mod kraken_spot {
         gen_test_code!(
             KrakenSpotWSClient,
             subscribe,
-            &[("trade".to_string(), "XBT/USD".to_string()),
+            &[
+                ("trade".to_string(), "XBT/USD".to_string()),
                 ("ticker".to_string(), "XBT/USD".to_string()),
                 ("spread".to_string(), "XBT/USD".to_string()),
-                ("book".to_string(), "XBT/USD".to_string())]
+                ("book".to_string(), "XBT/USD".to_string())
+            ]
         );
     }
 
@@ -22,8 +24,10 @@ mod kraken_spot {
         gen_test_code!(
             KrakenSpotWSClient,
             send,
-            &[r#"{"event":"subscribe","pair":["XBT/USD"],"subscription":{"name":"trade"}}"#
-                    .to_string()]
+            &[
+                r#"{"event":"subscribe","pair":["XBT/USD"],"subscription":{"name":"trade"}}"#
+                    .to_string()
+            ]
         );
     }
 
@@ -72,8 +76,10 @@ mod kraken_spot {
 
         gen_test_subscribe_candlestick!(
             KrakenSpotWSClient,
-            &[("XBT/USD".to_string(), 1296000),
-                ("ETH/USD".to_string(), 1296000)]
+            &[
+                ("XBT/USD".to_string(), 1296000),
+                ("ETH/USD".to_string(), 1296000)
+            ]
         );
     }
 }
@@ -128,8 +134,10 @@ mod kraken_inverse_future {
         gen_test_code!(
             KrakenFuturesWSClient,
             send,
-            &[r#"{"event":"subscribe","feed":"trade","product_ids":["FI_XBTUSD_220930"]}"#
-                    .to_string()]
+            &[
+                r#"{"event":"subscribe","feed":"trade","product_ids":["FI_XBTUSD_220930"]}"#
+                    .to_string()
+            ]
         );
     }
 

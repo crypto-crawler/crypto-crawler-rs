@@ -12,9 +12,11 @@ mod bitz_spot {
         gen_test_code!(
             BitzSpotWSClient,
             subscribe,
-            &[("market".to_string(), "btc_usdt".to_string()),
+            &[
+                ("market".to_string(), "btc_usdt".to_string()),
                 ("depth".to_string(), "btc_usdt".to_string()),
-                ("order".to_string(), "btc_usdt".to_string())]
+                ("order".to_string(), "btc_usdt".to_string())
+            ]
         );
     }
 
@@ -37,11 +39,7 @@ mod bitz_spot {
     #[tokio::test(flavor = "multi_thread")]
     #[ignore = "bitz.com has shutdown since October 2021"]
     async fn subscribe_trade() {
-        gen_test_code!(
-            BitzSpotWSClient,
-            subscribe_trade,
-            &["btc_usdt".to_string()]
-        );
+        gen_test_code!(BitzSpotWSClient, subscribe_trade, &["btc_usdt".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]

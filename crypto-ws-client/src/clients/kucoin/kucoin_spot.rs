@@ -132,8 +132,10 @@ mod tests {
 
         let commands = translator.translate_to_commands(
             true,
-            &[("/market/match".to_string(), "BTC-USDT".to_string()),
-                ("/market/match".to_string(), "ETH-USDT".to_string())],
+            &[
+                ("/market/match".to_string(), "BTC-USDT".to_string()),
+                ("/market/match".to_string(), "ETH-USDT".to_string()),
+            ],
         );
 
         assert_eq!(1, commands.len());
@@ -148,8 +150,10 @@ mod tests {
         let translator = super::KucoinCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &[("/market/match".to_string(), "BTC-USDT".to_string()),
-                ("/market/level2".to_string(), "ETH-USDT".to_string())],
+            &[
+                ("/market/match".to_string(), "BTC-USDT".to_string()),
+                ("/market/level2".to_string(), "ETH-USDT".to_string()),
+            ],
         );
 
         assert_eq!(2, commands.len());
@@ -164,10 +168,12 @@ mod tests {
 
         let commands = translator.translate_to_commands(
             true,
-            &[("/market/match".to_string(), "BTC-USDT".to_string()),
+            &[
+                ("/market/match".to_string(), "BTC-USDT".to_string()),
                 ("/market/match".to_string(), "ETH-USDT".to_string()),
                 ("/market/level2".to_string(), "BTC-USDT".to_string()),
-                ("/market/level2".to_string(), "ETH-USDT".to_string())],
+                ("/market/level2".to_string(), "ETH-USDT".to_string()),
+            ],
         );
 
         assert_eq!(2, commands.len());

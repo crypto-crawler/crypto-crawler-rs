@@ -166,8 +166,10 @@ mod tests {
         let translator = super::KrakenCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &[("trade".to_string(), "PI_XBTUSD".to_string()),
-                ("trade".to_string(), "PI_ETHUSD".to_string())],
+            &[
+                ("trade".to_string(), "PI_XBTUSD".to_string()),
+                ("trade".to_string(), "PI_ETHUSD".to_string()),
+            ],
         );
 
         assert_eq!(2, commands.len());

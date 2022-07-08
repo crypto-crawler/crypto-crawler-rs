@@ -166,8 +166,8 @@ mod tests {
     #[test]
     fn test_one_topic() {
         let translator = super::MexcCommandTranslator {};
-        let commands = translator
-            .translate_to_commands(true, &[("deal".to_string(), "BTC_USDT".to_string())]);
+        let commands =
+            translator.translate_to_commands(true, &[("deal".to_string(), "BTC_USDT".to_string())]);
 
         assert_eq!(1, commands.len());
         assert_eq!(r#"{"op":"sub.deal","symbol":"BTC_USDT"}"#, commands[0]);
@@ -178,8 +178,10 @@ mod tests {
         let translator = super::MexcCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &[("deal".to_string(), "BTC_USDT".to_string()),
-                ("depth".to_string(), "ETH_USDT".to_string())],
+            &[
+                ("deal".to_string(), "BTC_USDT".to_string()),
+                ("depth".to_string(), "ETH_USDT".to_string()),
+            ],
         );
 
         assert_eq!(2, commands.len());

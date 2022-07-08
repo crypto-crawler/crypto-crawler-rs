@@ -10,8 +10,10 @@ mod bitfinex_spot {
         gen_test_code!(
             BitfinexWSClient,
             subscribe,
-            &[("trades".to_string(), "tBTCUST".to_string()),
-                ("trades".to_string(), "tETHUST".to_string())]
+            &[
+                ("trades".to_string(), "tBTCUST".to_string()),
+                ("trades".to_string(), "tETHUST".to_string())
+            ]
         );
     }
 
@@ -36,20 +38,12 @@ mod bitfinex_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            BitfinexWSClient,
-            subscribe_ticker,
-            &["tBTCUST".to_string()]
-        );
+        gen_test_code!(BitfinexWSClient, subscribe_ticker, &["tBTCUST".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(
-            BitfinexWSClient,
-            subscribe_bbo,
-            &["tBTCUST".to_string()]
-        );
+        gen_test_code!(BitfinexWSClient, subscribe_bbo, &["tBTCUST".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -138,9 +132,6 @@ mod bitfinex_swap {
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(BitfinexWSClient, &[("tBTCF0:USTF0".to_string(), 60)]);
-        gen_test_subscribe_candlestick!(
-            BitfinexWSClient,
-            &[("tBTCF0:USTF0".to_string(), 2592000)]
-        );
+        gen_test_subscribe_candlestick!(BitfinexWSClient, &[("tBTCF0:USTF0".to_string(), 2592000)]);
     }
 }

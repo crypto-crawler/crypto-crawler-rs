@@ -131,8 +131,10 @@ mod tests {
         let translator = super::BithumbCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &[("TRADE".to_string(), "BTC-USDT".to_string()),
-                ("TRADE".to_string(), "ETH-USDT".to_string())],
+            &[
+                ("TRADE".to_string(), "BTC-USDT".to_string()),
+                ("TRADE".to_string(), "ETH-USDT".to_string()),
+            ],
         );
 
         assert_eq!(1, commands.len());
@@ -147,8 +149,10 @@ mod tests {
         let translator = super::BithumbCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &[("TRADE".to_string(), "BTC-USDT".to_string()),
-                ("ORDERBOOK".to_string(), "BTC-USDT".to_string())],
+            &[
+                ("TRADE".to_string(), "BTC-USDT".to_string()),
+                ("ORDERBOOK".to_string(), "BTC-USDT".to_string()),
+            ],
         );
 
         assert_eq!(1, commands.len());

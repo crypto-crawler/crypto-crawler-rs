@@ -311,8 +311,10 @@ mod tests {
         let translator = super::BinanceCommandTranslator { market_type: 'S' };
         let commands = translator.translate_to_commands(
             true,
-            &[("aggTrade".to_string(), "BTCUSDT".to_string()),
-                ("ticker".to_string(), "BTCUSDT".to_string())],
+            &[
+                ("aggTrade".to_string(), "BTCUSDT".to_string()),
+                ("ticker".to_string(), "BTCUSDT".to_string()),
+            ],
         );
 
         assert_eq!(1, commands.len());

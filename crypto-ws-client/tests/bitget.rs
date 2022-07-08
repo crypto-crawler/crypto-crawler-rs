@@ -72,11 +72,7 @@ mod bitget_inverse_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            BitgetSwapWSClient,
-            subscribe_trade,
-            &["BTCUSD".to_string()]
-        );
+        gen_test_code!(BitgetSwapWSClient, subscribe_trade, &["BTCUSD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]

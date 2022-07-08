@@ -131,14 +131,16 @@ mod tests {
 
         let commands = translator.translate_to_commands(
             true,
-            &[(
+            &[
+                (
                     "/contractMarket/execution".to_string(),
                     "BTC_USD".to_string(),
                 ),
                 (
                     "/contractMarket/execution".to_string(),
                     "ETH_USD".to_string(),
-                )],
+                ),
+            ],
         );
 
         assert_eq!(1, commands.len());
@@ -153,11 +155,13 @@ mod tests {
         let translator = super::KucoinCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &[(
+            &[
+                (
                     "/contractMarket/execution".to_string(),
                     "BTC_USD".to_string(),
                 ),
-                ("/contractMarket/level2".to_string(), "ETH_USD".to_string())],
+                ("/contractMarket/level2".to_string(), "ETH_USD".to_string()),
+            ],
         );
 
         assert_eq!(2, commands.len());
@@ -172,7 +176,8 @@ mod tests {
 
         let commands = translator.translate_to_commands(
             true,
-            &[(
+            &[
+                (
                     "/contractMarket/execution".to_string(),
                     "BTC_USD".to_string(),
                 ),
@@ -181,7 +186,8 @@ mod tests {
                     "ETH_USD".to_string(),
                 ),
                 ("/contractMarket/level2".to_string(), "BTC_USD".to_string()),
-                ("/contractMarket/level2".to_string(), "ETH_USD".to_string())],
+                ("/contractMarket/level2".to_string(), "ETH_USD".to_string()),
+            ],
         );
 
         assert_eq!(2, commands.len());

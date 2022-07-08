@@ -72,9 +72,11 @@ mod tests {
     #[test]
     fn test_multiple_channels() {
         let command = super::topics_to_command(
-            &[("trade".to_string(), "BTCUSD".to_string()),
+            &[
+                ("trade".to_string(), "BTCUSD".to_string()),
                 ("orderBookL2_25".to_string(), "BTCUSD".to_string()),
-                ("instrument_info.100ms".to_string(), "BTCUSD".to_string())],
+                ("instrument_info.100ms".to_string(), "BTCUSD".to_string()),
+            ],
             true,
         );
 

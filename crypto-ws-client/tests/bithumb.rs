@@ -9,8 +9,10 @@ async fn subscribe() {
     gen_test_code!(
         BithumbWSClient,
         subscribe,
-        &[("TRADE".to_string(), "BTC-USDT".to_string()),
-            ("TRADE".to_string(), "ETH-USDT".to_string())]
+        &[
+            ("TRADE".to_string(), "BTC-USDT".to_string()),
+            ("TRADE".to_string(), "ETH-USDT".to_string())
+        ]
     );
 }
 

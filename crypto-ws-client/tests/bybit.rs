@@ -112,10 +112,7 @@ mod bybit_inverse_swap {
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(BybitInverseWSClient, &[("BTCUSD".to_string(), 60)]);
-        gen_test_subscribe_candlestick!(
-            BybitInverseWSClient,
-            &[("BTCUSD".to_string(), 2592000)]
-        );
+        gen_test_subscribe_candlestick!(BybitInverseWSClient, &[("BTCUSD".to_string(), 2592000)]);
     }
 }
 
@@ -152,10 +149,7 @@ mod bybit_linear_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(
-            BybitLinearSwapWSClient,
-            &[("BTCUSDT".to_string(), 60)]
-        );
+        gen_test_subscribe_candlestick!(BybitLinearSwapWSClient, &[("BTCUSDT".to_string(), 60)]);
         gen_test_subscribe_candlestick!(
             BybitLinearSwapWSClient,
             &[("BTCUSDT".to_string(), 2592000)]

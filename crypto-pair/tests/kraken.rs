@@ -75,9 +75,8 @@ struct FuturesResponse<T: Sized> {
 fn fetch_futures_markets_raw() -> Vec<FuturesMarket> {
     let txt = http_get("https://futures.kraken.com/derivatives/api/v3/instruments").unwrap();
     let obj = serde_json::from_str::<FuturesResponse<FuturesMarket>>(&txt).unwrap();
-    
-    obj
-        .instruments
+
+    obj.instruments
         .into_iter()
         .filter(|x| x.tradeable)
         .filter(|m| m.symbol.starts_with("pi_") || m.symbol.starts_with("fi_"))

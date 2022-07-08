@@ -171,8 +171,10 @@ mod tests {
         let translator = super::ZbCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &[("trades".to_string(), "btc_usdt".to_string()),
-                ("depth".to_string(), "eth_usdt".to_string())],
+            &[
+                ("trades".to_string(), "btc_usdt".to_string()),
+                ("depth".to_string(), "eth_usdt".to_string()),
+            ],
         );
 
         assert_eq!(2, commands.len());

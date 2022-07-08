@@ -174,8 +174,10 @@ mod tests {
         let translator = super::BinanceOptionCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &[("trade".to_string(), "BTC-220429-50000-C".to_string()),
-                ("ticker".to_string(), "BTC-220429-50000-C".to_string())],
+            &[
+                ("trade".to_string(), "BTC-220429-50000-C".to_string()),
+                ("ticker".to_string(), "BTC-220429-50000-C".to_string()),
+            ],
         );
 
         assert_eq!(1, commands.len());

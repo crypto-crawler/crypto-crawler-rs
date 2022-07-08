@@ -35,11 +35,7 @@ mod ftx_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            FtxWSClient,
-            subscribe_orderbook,
-            &["BTC/USD".to_string()]
-        );
+        gen_test_code!(FtxWSClient, subscribe_orderbook, &["BTC/USD".to_string()]);
     }
 }
 
@@ -91,11 +87,7 @@ mod ftx_linear_future {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            FtxWSClient,
-            subscribe_orderbook,
-            &["BTC-0930".to_string()]
-        );
+        gen_test_code!(FtxWSClient, subscribe_orderbook, &["BTC-0930".to_string()]);
     }
 }
 
@@ -115,11 +107,7 @@ mod ftx_move {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(
-            FtxWSClient,
-            subscribe_bbo,
-            &["BTC-MOVE-2022Q4".to_string()]
-        );
+        gen_test_code!(FtxWSClient, subscribe_bbo, &["BTC-MOVE-2022Q4".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -149,10 +137,6 @@ mod ftx_bvol {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            FtxWSClient,
-            subscribe_orderbook,
-            &["BVOL/USD".to_string()]
-        );
+        gen_test_code!(FtxWSClient, subscribe_orderbook, &["BVOL/USD".to_string()]);
     }
 }

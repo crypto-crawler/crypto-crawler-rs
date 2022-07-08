@@ -10,8 +10,10 @@ mod gate_spot {
         gen_test_code!(
             GateSpotWSClient,
             subscribe,
-            &[("trades".to_string(), "BTC_USDT".to_string()),
-                ("trades".to_string(), "ETH_USDT".to_string())]
+            &[
+                ("trades".to_string(), "BTC_USDT".to_string()),
+                ("trades".to_string(), "ETH_USDT".to_string())
+            ]
         );
     }
 
@@ -26,11 +28,7 @@ mod gate_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            GateSpotWSClient,
-            subscribe_trade,
-            &["BTC_USDT".to_string()]
-        );
+        gen_test_code!(GateSpotWSClient, subscribe_trade, &["BTC_USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -53,11 +51,7 @@ mod gate_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(
-            GateSpotWSClient,
-            subscribe_bbo,
-            &["BTC_USDT".to_string()]
-        );
+        gen_test_code!(GateSpotWSClient, subscribe_bbo, &["BTC_USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -87,10 +81,12 @@ mod gate_inverse_swap {
         gen_test_code!(
             GateInverseSwapWSClient,
             subscribe,
-            &[("trades".to_string(), "BTC_USD".to_string()),
+            &[
+                ("trades".to_string(), "BTC_USD".to_string()),
                 ("trades".to_string(), "ETH_USD".to_string()),
                 ("trades".to_string(), "BNB_USD".to_string()),
-                ("trades".to_string(), "XRP_USD".to_string())]
+                ("trades".to_string(), "XRP_USD".to_string())
+            ]
         );
     }
 
@@ -154,10 +150,7 @@ mod gate_inverse_swap {
     #[ignore]
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(
-            GateInverseSwapWSClient,
-            &[("BTC_USD".to_string(), 10)]
-        );
+        gen_test_subscribe_candlestick!(GateInverseSwapWSClient, &[("BTC_USD".to_string(), 10)]);
         gen_test_subscribe_candlestick!(
             GateInverseSwapWSClient,
             &[("BTC_USD".to_string(), 604800)]
@@ -217,10 +210,7 @@ mod gate_linear_swap {
     #[ignore]
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(
-            GateLinearSwapWSClient,
-            &[("BTC_USDT".to_string(), 10)]
-        );
+        gen_test_subscribe_candlestick!(GateLinearSwapWSClient, &[("BTC_USDT".to_string(), 10)]);
         gen_test_subscribe_candlestick!(
             GateLinearSwapWSClient,
             &[("BTC_USDT".to_string(), 604800)]

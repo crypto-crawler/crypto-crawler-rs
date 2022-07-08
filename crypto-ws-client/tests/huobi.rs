@@ -25,11 +25,7 @@ mod huobi_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            HuobiSpotWSClient,
-            subscribe_trade,
-            &["btcusdt".to_string()]
-        );
+        gen_test_code!(HuobiSpotWSClient, subscribe_trade, &["btcusdt".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -43,11 +39,7 @@ mod huobi_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(
-            HuobiSpotWSClient,
-            subscribe_bbo,
-            &["btcusdt".to_string()]
-        );
+        gen_test_code!(HuobiSpotWSClient, subscribe_bbo, &["btcusdt".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -63,7 +55,9 @@ mod huobi_spot {
             ws_client.close();
         });
 
-        rx.into_iter().next().expect("should has at least 1 element");
+        rx.into_iter()
+            .next()
+            .expect("should has at least 1 element");
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -115,11 +109,7 @@ mod huobi_inverse_future {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(
-            HuobiFutureWSClient,
-            subscribe_bbo,
-            &["BTC_CQ".to_string()]
-        );
+        gen_test_code!(HuobiFutureWSClient, subscribe_bbo, &["BTC_CQ".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -143,10 +133,7 @@ mod huobi_inverse_future {
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(HuobiFutureWSClient, &[("BTC_CQ".to_string(), 60)]);
-        gen_test_subscribe_candlestick!(
-            HuobiFutureWSClient,
-            &[("BTC_CQ".to_string(), 2592000)]
-        );
+        gen_test_subscribe_candlestick!(HuobiFutureWSClient, &[("BTC_CQ".to_string(), 2592000)]);
     }
 }
 
@@ -210,10 +197,7 @@ mod huobi_linear_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(
-            HuobiLinearSwapWSClient,
-            &[("BTC-USDT".to_string(), 60)]
-        );
+        gen_test_subscribe_candlestick!(HuobiLinearSwapWSClient, &[("BTC-USDT".to_string(), 60)]);
         gen_test_subscribe_candlestick!(
             HuobiLinearSwapWSClient,
             &[("BTC-USDT".to_string(), 2592000)]
@@ -237,7 +221,9 @@ mod huobi_linear_swap {
             ws_client.close();
         });
 
-        rx.into_iter().next().expect("should has at least 1 element");
+        rx.into_iter()
+            .next()
+            .expect("should has at least 1 element");
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -257,7 +243,9 @@ mod huobi_linear_swap {
             ws_client.close();
         });
 
-        rx.into_iter().next().expect("should has at least 1 element");
+        rx.into_iter()
+            .next()
+            .expect("should has at least 1 element");
     }
 }
 
@@ -321,10 +309,7 @@ mod huobi_inverse_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(
-            HuobiInverseSwapWSClient,
-            &[("BTC-USD".to_string(), 60)]
-        );
+        gen_test_subscribe_candlestick!(HuobiInverseSwapWSClient, &[("BTC-USD".to_string(), 60)]);
         gen_test_subscribe_candlestick!(
             HuobiInverseSwapWSClient,
             &[("BTC-USD".to_string(), 2592000)]
@@ -346,7 +331,9 @@ mod huobi_inverse_swap {
             ws_client.close();
         });
 
-        rx.into_iter().next().expect("should has at least 1 element");
+        rx.into_iter()
+            .next()
+            .expect("should has at least 1 element");
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -364,7 +351,9 @@ mod huobi_inverse_swap {
             ws_client.close();
         });
 
-        rx.into_iter().next().expect("should has at least 1 element");
+        rx.into_iter()
+            .next()
+            .expect("should has at least 1 element");
     }
 
     #[tokio::test(flavor = "multi_thread")]

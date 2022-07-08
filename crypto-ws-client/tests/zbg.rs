@@ -25,11 +25,7 @@ mod zbg_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            ZbgSpotWSClient,
-            subscribe_trade,
-            &["btc_usdt".to_string()]
-        );
+        gen_test_code!(ZbgSpotWSClient, subscribe_trade, &["btc_usdt".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -43,11 +39,7 @@ mod zbg_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            ZbgSpotWSClient,
-            subscribe_ticker,
-            &["btc_usdt".to_string()]
-        );
+        gen_test_code!(ZbgSpotWSClient, subscribe_ticker, &["btc_usdt".to_string()]);
     }
 
     #[ignore]
@@ -77,8 +69,10 @@ mod zbg_inverse_swap {
         gen_test_code!(
             ZbgSwapWSClient,
             subscribe,
-            &[("future_tick".to_string(), "1000001".to_string()),
-                ("future_tick".to_string(), "1000003".to_string())]
+            &[
+                ("future_tick".to_string(), "1000001".to_string()),
+                ("future_tick".to_string(), "1000003".to_string())
+            ]
         );
     }
 
@@ -88,8 +82,10 @@ mod zbg_inverse_swap {
         gen_test_code!(
             ZbgSwapWSClient,
             send,
-            &[r#"{"action":"sub", "topic":"future_tick-1000001"}"#.to_string(),
-                r#"{"action":"sub", "topic":"future_tick-1000003"}"#.to_string()]
+            &[
+                r#"{"action":"sub", "topic":"future_tick-1000001"}"#.to_string(),
+                r#"{"action":"sub", "topic":"future_tick-1000003"}"#.to_string()
+            ]
         );
     }
 
@@ -142,8 +138,10 @@ mod zbg_inverse_swap {
         );
         gen_test_subscribe_candlestick!(
             ZbgSwapWSClient,
-            &[("BTC_USD-R".to_string(), 604800),
-                ("ETH_USD-R".to_string(), 604800)]
+            &[
+                ("BTC_USD-R".to_string(), 604800),
+                ("ETH_USD-R".to_string(), 604800)
+            ]
         );
     }
 }
@@ -158,8 +156,10 @@ mod zbg_linear_swap {
         gen_test_code!(
             ZbgSwapWSClient,
             subscribe,
-            &[("future_tick".to_string(), "1000000".to_string()),
-                ("future_tick".to_string(), "1000002".to_string())]
+            &[
+                ("future_tick".to_string(), "1000000".to_string()),
+                ("future_tick".to_string(), "1000002".to_string())
+            ]
         );
     }
 
@@ -169,8 +169,10 @@ mod zbg_linear_swap {
         gen_test_code!(
             ZbgSwapWSClient,
             send,
-            &[r#"{"action":"sub", "topic":"future_tick-1000000"}"#.to_string(),
-                r#"{"action":"sub", "topic":"future_tick-1000002"}"#.to_string()]
+            &[
+                r#"{"action":"sub", "topic":"future_tick-1000000"}"#.to_string(),
+                r#"{"action":"sub", "topic":"future_tick-1000002"}"#.to_string()
+            ]
         );
     }
 
@@ -223,8 +225,10 @@ mod zbg_linear_swap {
         );
         gen_test_subscribe_candlestick!(
             ZbgSwapWSClient,
-            &[("BTC_USDT".to_string(), 604800),
-                ("ETH_USDT".to_string(), 604800)]
+            &[
+                ("BTC_USDT".to_string(), 604800),
+                ("ETH_USDT".to_string(), 604800)
+            ]
         );
     }
 }
