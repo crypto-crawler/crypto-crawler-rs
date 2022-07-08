@@ -19,7 +19,7 @@ async fn test_crawl_trade_all(market_type: MarketType) {
 }
 
 #[test_case(MarketType::Spot, "XBT/USD")]
-#[test_case(MarketType::InverseFuture, "FI_XBTUSD_220624")]
+#[test_case(MarketType::InverseFuture, "FI_XBTUSD_220930")]
 #[test_case(MarketType::InverseSwap, "PI_XBTUSD")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
@@ -33,7 +33,7 @@ async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::Spot, "XBT/USD")]
-#[test_case(MarketType::InverseFuture, "FI_XBTUSD_220624")]
+#[test_case(MarketType::InverseFuture, "FI_XBTUSD_220930")]
 #[test_case(MarketType::InverseSwap, "PI_XBTUSD")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
@@ -59,7 +59,7 @@ async fn test_crawl_bbo(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::Spot, "XBT/USD")]
-#[test_case(MarketType::InverseFuture, "FI_XBTUSD_220624")]
+#[test_case(MarketType::InverseFuture, "FI_XBTUSD_220930")]
 #[test_case(MarketType::InverseSwap, "PI_XBTUSD")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     test_crawl_restful!(
@@ -84,7 +84,7 @@ fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
 }
 
 #[test_case(MarketType::Spot, "XBT/USD")]
-#[test_case(MarketType::InverseFuture, "FI_XBTUSD_220624")]
+#[test_case(MarketType::InverseFuture, "FI_XBTUSD_220930")]
 #[test_case(MarketType::InverseSwap, "PI_XBTUSD")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_ticker(market_type: MarketType, symbol: &str) {

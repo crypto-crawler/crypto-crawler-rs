@@ -6,7 +6,8 @@ const EXCHANGE_NAME: &str = "okx"; // V5 API
 mod trade {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, round, TradeSide};
+    use crypto_message::TradeSide;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, round};
 
     #[test]
     fn spot() {
@@ -192,8 +193,8 @@ mod trade {
         assert_eq!(trade.timestamp, 1646138219181);
         assert_eq!(trade.price, 0.001);
         assert_eq!(trade.quantity_contract, Some(85.0));
-        assert_eq!(trade.quantity_base, 85.0 * 0.1);
-        assert_eq!(trade.quantity_quote, 85.0 * 0.1 * 0.001);
+        assert_eq!(trade.quantity_base, 85.0);
+        assert_eq!(trade.quantity_quote, 85.0 * 0.001);
         assert_eq!(trade.side, TradeSide::Buy);
     }
 }
@@ -474,8 +475,8 @@ mod l2_event {
 
         assert_eq!(orderbook.asks[0].price, 0.0005);
         assert_eq!(orderbook.asks[0].quantity_contract, Some(305.0));
-        assert_eq!(orderbook.asks[0].quantity_base, 305.0 * 0.1);
-        assert_eq!(orderbook.asks[0].quantity_quote, 305.0 * 0.1 * 0.0005);
+        assert_eq!(orderbook.asks[0].quantity_base, 305.0);
+        assert_eq!(orderbook.asks[0].quantity_quote, 305.0 * 0.0005);
     }
 }
 
@@ -536,6 +537,60 @@ mod l2_topk {
         assert_eq!(orderbook.asks[4].price, 30225.6);
         assert_eq!(orderbook.asks[4].quantity_base, 1.64553107);
         assert_eq!(orderbook.asks[4].quantity_quote, 1.64553107 * 30225.6);
+        assert_eq!(orderbook.asks[4].quantity_contract, None);
+    }
+
+    #[test]
+    fn spot_2() {
+        let raw_msg = r#"{"table":"spot/depth5","data":[{"asks":[["0.9788","0.001","1"],["0.9789","0.944259","7"],["0.979","1.956785","1"],["0.9792","0.9401","1"],["0.98","31.459918","8"]],"bids":[["0.9768","0.605755","1"],["0.976","1.0532","1"],["0.9757","0.002","1"],["0.9752","0.720555","1"],["0.9748","0.001","1"]],"instrument_id":"BETH-ETH","timestamp":"2022-02-25T00:00:01.032Z"}]}"#;
+        let orderbook = &parse_l2_topk(EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 5);
+        assert_eq!(orderbook.bids.len(), 5);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            EXCHANGE_NAME,
+            MarketType::Spot,
+            MessageType::L2TopK,
+            "BETH/ETH".to_string(),
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap(),
+            orderbook,
+            raw_msg,
+        );
+        assert_eq!(
+            "BETH-ETH",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1645747201032,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+
+        assert_eq!(orderbook.timestamp, 1645747201032);
+        assert_eq!(orderbook.seq_id, None);
+        assert_eq!(orderbook.prev_seq_id, None);
+
+        assert_eq!(orderbook.bids[0].price, 0.9768);
+        assert_eq!(orderbook.bids[0].quantity_base, 0.605755);
+        assert_eq!(orderbook.bids[0].quantity_quote, 0.9768 * 0.605755);
+        assert_eq!(orderbook.bids[0].quantity_contract, None);
+
+        assert_eq!(orderbook.bids[4].price, 0.9748);
+        assert_eq!(orderbook.bids[4].quantity_base, 0.001);
+        assert_eq!(orderbook.bids[4].quantity_quote, round(0.9748 * 0.001));
+        assert_eq!(orderbook.bids[4].quantity_contract, None);
+
+        assert_eq!(orderbook.asks[0].price, 0.9788);
+        assert_eq!(orderbook.asks[0].quantity_base, 0.001);
+        assert_eq!(orderbook.asks[0].quantity_quote, 0.001 * 0.9788);
+        assert_eq!(orderbook.asks[0].quantity_contract, None);
+
+        assert_eq!(orderbook.asks[4].price, 0.98);
+        assert_eq!(orderbook.asks[4].quantity_base, 31.459918);
+        assert_eq!(orderbook.asks[4].quantity_quote, round(31.459918 * 0.98));
         assert_eq!(orderbook.asks[4].quantity_contract, None);
     }
 

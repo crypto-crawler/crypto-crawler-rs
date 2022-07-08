@@ -1,9 +1,27 @@
-use crate::order::Order;
+mod order;
+
+pub use crate::order::Order;
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use strum_macros::{Display, EnumString};
+
+#[deprecated(
+    note = "Use `CandlestickMsg` instead. This is an alias for `CandlestickMsg`."
+)]
+pub use self::CandlestickMsg as KlineMsg;
+
+/// Message represents multiple types of messages.
+#[derive(Eq, PartialEq)]
+pub enum Message {
+    Trade(TradeMsg),
+    Bbo(BboMsg),
+    L2Event(OrderBookMsg),
+    FundingRate(FundingRateMsg),
+    Candlestick(CandlestickMsg),
+    Ticker(TickerMsg),
+}
 
 macro_rules! add_common_fields {
     (
@@ -40,14 +58,8 @@ macro_rules! add_common_fields {
     };
 }
 
-add_common_fields!(
-    /// Parent struct for all messages
-    #[derive(Serialize, Deserialize)]
-    struct Msg {}
-);
-
 /// Which side is taker
-#[derive(Copy, Clone, PartialEq, Serialize, Deserialize, Display, Debug, EnumString)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Display, Debug, EnumString)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
 pub enum TradeSide {
@@ -78,10 +90,8 @@ pub struct TradeMsg {
     /// price
     pub price: f64,
     // Number of base coins
-    // #[serde(with = "crate::f64_limited_serde")]
     pub quantity_base: f64,
     // Number of quote coins(mostly USDT)
-    // #[serde(with = "crate::f64_limited_serde")]
     pub quantity_quote: f64,
     /// Number of contracts, always None for Spot
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -195,7 +205,7 @@ add_common_fields!(
 
 add_common_fields!(
     #[derive(Serialize, Deserialize)]
-    struct KlineMsg {
+    struct CandlestickMsg {
         open: f64,
         high: f64,
         low: f64,
@@ -211,6 +221,12 @@ add_common_fields!(
 
 // CSV utilities.
 
+const PRECISION: f64 = 1000000000.0; // 9 decimals
+
+fn round(f: f64) -> f64 {
+    (f * PRECISION).round() / PRECISION
+}
+
 impl TradeMsg {
     /// Convert to a CSV string.
     ///
@@ -222,10 +238,10 @@ impl TradeMsg {
             self.timestamp,
             self.side,
             self.price,
-            crate::exchanges::utils::round(self.quantity_base),
-            crate::exchanges::utils::round(self.quantity_quote),
+            round(self.quantity_base),
+            round(self.quantity_quote),
             if let Some(x) = self.quantity_contract {
-                crate::exchanges::utils::round(x).to_string()
+                round(x).to_string()
             } else {
                 "".to_string()
             },
@@ -337,8 +353,7 @@ impl OrderBookMsg {
 
 #[cfg(test)]
 mod tests {
-    use super::TradeSide;
-    use super::{Order, OrderBookMsg, TradeMsg};
+    use super::{Order, OrderBookMsg, TradeMsg, TradeSide};
     use crypto_market_type::MarketType;
     use crypto_msg_type::MessageType;
 
@@ -435,5 +450,245 @@ mod tests {
             serde_json::to_string(&orderbook_msg).unwrap(),
             serde_json::to_string(&orderbook_msg_restored).unwrap()
         );
+    }
+}
+
+// ##### impl Ord #####
+
+macro_rules! impl_partial_ord {
+    ($struct_name:ident) => {
+        impl PartialOrd for $struct_name {
+            fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+                Some(self.timestamp.cmp(&other.timestamp))
+            }
+        }
+    };
+}
+
+// TradeMsg
+impl PartialEq for TradeMsg {
+    fn eq(&self, other: &Self) -> bool {
+        self.exchange == other.exchange
+            && self.market_type == other.market_type
+            && self.symbol == other.symbol
+            && self.timestamp == other.timestamp
+            && self.trade_id == other.trade_id
+            && self.price == other.price
+            && self.quantity_base == other.quantity_base
+            && self.quantity_quote == other.quantity_quote
+            && self.quantity_contract == other.quantity_contract
+    }
+}
+
+impl Eq for TradeMsg {}
+
+impl_partial_ord!(TradeMsg);
+
+impl Ord for TradeMsg {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        let ret = self.timestamp.cmp(&other.timestamp);
+        if ret == std::cmp::Ordering::Equal {
+            self.trade_id.cmp(&other.trade_id)
+        } else {
+            ret
+        }
+    }
+}
+
+// OrderBookMsg
+impl PartialEq for OrderBookMsg {
+    fn eq(&self, other: &Self) -> bool {
+        self.exchange == other.exchange
+            && self.market_type == other.market_type
+            && self.symbol == other.symbol
+            && self.timestamp == other.timestamp
+            && self.asks == other.asks
+            && self.bids == other.bids
+    }
+}
+
+impl Eq for OrderBookMsg {}
+
+impl_partial_ord!(OrderBookMsg);
+
+impl Ord for OrderBookMsg {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        let ret = self.timestamp.cmp(&other.timestamp);
+        if ret == std::cmp::Ordering::Equal {
+            if self.seq_id.is_some() && other.seq_id.is_some() {
+                self.seq_id.unwrap().cmp(&(other.seq_id.unwrap()))
+            } else {
+                ret
+            }
+        } else {
+            ret
+        }
+    }
+}
+
+// BboMsg
+impl PartialEq for BboMsg {
+    fn eq(&self, other: &Self) -> bool {
+        self.exchange == other.exchange
+            && self.market_type == other.market_type
+            && self.symbol == other.symbol
+            && self.timestamp == other.timestamp
+            && self.bid_price == other.bid_price
+            && self.bid_quantity_base == other.bid_quantity_base
+            && self.bid_quantity_quote == other.bid_quantity_quote
+            && self.ask_price == other.ask_price
+            && self.ask_quantity_base == other.ask_quantity_base
+            && self.ask_quantity_quote == other.ask_quantity_quote
+            && self.id == other.id
+    }
+}
+
+impl Eq for BboMsg {}
+
+impl_partial_ord!(BboMsg);
+
+impl Ord for BboMsg {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.timestamp.cmp(&other.timestamp)
+    }
+}
+
+// TickerMsg
+impl PartialEq for TickerMsg {
+    fn eq(&self, other: &Self) -> bool {
+        self.exchange == other.exchange
+            && self.market_type == other.market_type
+            && self.symbol == other.symbol
+            && self.timestamp == other.timestamp
+            && self.open == other.open
+            && self.high == other.high
+            && self.close == other.close
+            && self.volume == other.volume
+            && self.quote_volume == other.quote_volume
+    }
+}
+
+impl Eq for TickerMsg {}
+
+impl_partial_ord!(TickerMsg);
+
+impl Ord for TickerMsg {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.timestamp.cmp(&other.timestamp)
+    }
+}
+
+// CandlestickMsg
+impl PartialEq for CandlestickMsg {
+    fn eq(&self, other: &Self) -> bool {
+        self.exchange == other.exchange
+            && self.market_type == other.market_type
+            && self.symbol == other.symbol
+            && self.timestamp == other.timestamp
+            && self.open == other.open
+            && self.high == other.high
+            && self.close == other.close
+            && self.volume == other.volume
+            && self.period == other.period
+    }
+}
+
+impl Eq for CandlestickMsg {}
+
+impl_partial_ord!(CandlestickMsg);
+
+impl Ord for CandlestickMsg {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.timestamp.cmp(&other.timestamp)
+    }
+}
+
+// FundingRateMsg
+impl PartialEq for FundingRateMsg {
+    fn eq(&self, other: &Self) -> bool {
+        self.exchange == other.exchange
+            && self.market_type == other.market_type
+            && self.symbol == other.symbol
+            && self.timestamp == other.timestamp
+            && self.funding_rate == other.funding_rate
+            && self.funding_time == other.funding_time
+    }
+}
+
+impl Eq for FundingRateMsg {}
+
+impl_partial_ord!(FundingRateMsg);
+
+impl Ord for FundingRateMsg {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        let ret = self.timestamp.cmp(&other.timestamp);
+        if ret == std::cmp::Ordering::Equal {
+            self.funding_time.cmp(&other.funding_time)
+        } else {
+            ret
+        }
+    }
+}
+
+// Message
+impl PartialOrd for Message {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match self {
+            Message::Trade(ref a) => match other {
+                Message::Trade(ref b) => Some(a.cmp(b)),
+                _ => None,
+            },
+            Message::L2Event(ref a) => match other {
+                Message::L2Event(ref b) => Some(a.cmp(b)),
+                _ => None,
+            },
+            Message::Bbo(ref a) => match other {
+                Message::Bbo(ref b) => Some(a.cmp(b)),
+                _ => None,
+            },
+            Message::Ticker(ref a) => match other {
+                Message::Ticker(ref b) => Some(a.cmp(b)),
+                _ => None,
+            },
+            Message::Candlestick(ref a) => match other {
+                Message::Candlestick(ref b) => Some(a.cmp(b)),
+                _ => None,
+            },
+            Message::FundingRate(ref a) => match other {
+                Message::FundingRate(ref b) => Some(a.cmp(b)),
+                _ => None,
+            },
+        }
+    }
+}
+
+impl Ord for Message {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        match self {
+            Message::Trade(ref a) => match other {
+                Message::Trade(ref b) => a.cmp(b),
+                _ => std::cmp::Ordering::Less,
+            },
+            Message::L2Event(ref a) => match other {
+                Message::L2Event(ref b) => a.cmp(b),
+                _ => std::cmp::Ordering::Less,
+            },
+            Message::Bbo(ref a) => match other {
+                Message::Bbo(ref b) => a.cmp(b),
+                _ => std::cmp::Ordering::Less,
+            },
+            Message::Ticker(ref a) => match other {
+                Message::Ticker(ref b) => a.cmp(b),
+                _ => std::cmp::Ordering::Less,
+            },
+            Message::Candlestick(ref a) => match other {
+                Message::Candlestick(ref b) => a.cmp(b),
+                _ => std::cmp::Ordering::Less,
+            },
+            Message::FundingRate(ref a) => match other {
+                Message::FundingRate(ref b) => a.cmp(b),
+                _ => std::cmp::Ordering::Less,
+            },
+        }
     }
 }

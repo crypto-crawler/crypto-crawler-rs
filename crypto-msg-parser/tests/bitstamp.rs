@@ -1,9 +1,8 @@
 mod utils;
 
 use crypto_market_type::MarketType;
-use crypto_msg_parser::{
-    extract_symbol, extract_timestamp, parse_l2, parse_l2_topk, parse_trade, TradeSide,
-};
+use crypto_message::TradeSide;
+use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_l2, parse_l2_topk, parse_trade};
 use crypto_msg_type::MessageType;
 
 const EXCHANGE_NAME: &str = "bitstamp";

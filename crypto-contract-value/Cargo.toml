@@ -1,6 +1,6 @@
 [package]
 name = "crypto-contract-value"
-version = "1.4.7"
+version = "1.5.1"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "Get contract value."
@@ -11,8 +11,8 @@ keywords = ["cryptocurrency", "blockchain", "trading"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-crypto-market-type = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
-crypto-pair = { git="https://github.com/wmjtyd/crypto-crawler-rs" }
+crypto-market-type = { path = "../crypto-market-type" }
+crypto-pair = { path = "../crypto-pair" }
 once_cell = "1.13.0"
 reqwest = { version = "0.11.11", features = ["blocking", "gzip"] }
 serde = { version = "1.0.138", features = ["derive"] }

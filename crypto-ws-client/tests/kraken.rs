@@ -137,7 +137,7 @@ mod kraken_inverse_future {
             KrakenFuturesWSClient,
             send,
             &vec![
-                r#"{"event":"subscribe","feed":"trade","product_ids":["FI_XBTUSD_220624"]}"#
+                r#"{"event":"subscribe","feed":"trade","product_ids":["FI_XBTUSD_220930"]}"#
                     .to_string()
             ]
         );
@@ -148,7 +148,7 @@ mod kraken_inverse_future {
         gen_test_code!(
             KrakenFuturesWSClient,
             subscribe_trade,
-            &vec!["FI_XBTUSD_220624".to_string()]
+            &vec!["FI_XBTUSD_220930".to_string()]
         );
     }
 
@@ -157,7 +157,7 @@ mod kraken_inverse_future {
         gen_test_code!(
             KrakenFuturesWSClient,
             subscribe_ticker,
-            &vec!["FI_XBTUSD_220624".to_string()]
+            &vec!["FI_XBTUSD_220930".to_string()]
         );
     }
 
@@ -166,7 +166,7 @@ mod kraken_inverse_future {
         gen_test_code!(
             KrakenFuturesWSClient,
             subscribe_orderbook,
-            &vec!["FI_XBTUSD_220624".to_string()]
+            &vec!["FI_XBTUSD_220930".to_string()]
         );
     }
 }

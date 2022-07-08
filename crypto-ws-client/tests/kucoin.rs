@@ -317,7 +317,7 @@ mod kucoin_inverse_future {
             subscribe,
             &vec![(
                 "/contractMarket/execution".to_string(),
-                "XBTMM22".to_string()
+                "XBTMU22".to_string()
             )]
         );
     }
@@ -328,7 +328,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             send,
-            &vec![r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/contractMarket/execution:XBTMM22","privateChannel":false,"response":true}"#.to_string()]
+            &vec![r#"{"id":"crypto-ws-client","type":"subscribe","topic":"/contractMarket/execution:XBTMU22","privateChannel":false,"response":true}"#.to_string()]
         );
     }
 
@@ -338,7 +338,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_trade,
-            &vec!["XBTMM22".to_string()]
+            &vec!["XBTMU22".to_string()]
         );
     }
 
@@ -348,7 +348,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_bbo,
-            &vec!["XBTMM22".to_string()]
+            &vec!["XBTMU22".to_string()]
         );
     }
 
@@ -357,7 +357,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_orderbook,
-            &vec!["XBTMM22".to_string()]
+            &vec!["XBTMU22".to_string()]
         );
     }
 
@@ -366,7 +366,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_l3_orderbook,
-            &vec!["XBTMM22".to_string()]
+            &vec!["XBTMU22".to_string()]
         );
     }
 
@@ -375,7 +375,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_orderbook_topk,
-            &vec!["XBTMM22".to_string()]
+            &vec!["XBTMU22".to_string()]
         );
     }
 
@@ -384,7 +384,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe_ticker,
-            &vec!["XBTMM22".to_string()]
+            &vec!["XBTMU22".to_string()]
         );
     }
 
@@ -393,7 +393,7 @@ mod kucoin_inverse_future {
     async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             KuCoinSwapWSClient,
-            &vec![("XBTMM22".to_string(), 60), ("XBTMM22".to_string(), 604800)]
+            &vec![("XBTMU22".to_string(), 60), ("XBTMU22".to_string(), 604800)]
         );
     }
 }

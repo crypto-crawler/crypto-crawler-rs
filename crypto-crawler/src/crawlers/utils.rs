@@ -804,8 +804,8 @@ pub(crate) async fn crawl_event(
         // split to chunks
         let mut chunks: Vec<Vec<String>> = Vec::new();
         for i in (0..real_symbols.len()).step_by(num_topics_per_connection) {
-            let chunk = (&real_symbols
-                [i..(std::cmp::min(i + num_topics_per_connection, real_symbols.len()))])
+            let chunk = real_symbols
+                [i..(std::cmp::min(i + num_topics_per_connection, real_symbols.len()))]
                 .to_vec();
             chunks.push(chunk);
         }
@@ -995,10 +995,8 @@ pub(crate) async fn crawl_candlestick_ext(
         let mut chunks: Vec<Vec<(String, usize)>> = Vec::new();
         {
             for i in (0..symbol_interval_list.len()).step_by(num_topics_per_connection) {
-                let chunk: Vec<(String, usize)> = (&symbol_interval_list[i..(std::cmp::min(
-                    i + num_topics_per_connection,
-                    symbol_interval_list.len(),
-                ))])
+                let chunk: Vec<(String, usize)> = symbol_interval_list
+                    [i..(std::cmp::min(i + num_topics_per_connection, symbol_interval_list.len()))]
                     .to_vec();
                 chunks.push(chunk);
             }

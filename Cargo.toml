@@ -2,13 +2,14 @@
 members = [
   "crypto-client",
   "crypto-contract-value",
-  "crypto-pair",
+  "crypto-crawler",
   "crypto-markets",
   "crypto-market-type",
+   "crypto-message",
   "crypto-msg-parser",
   "crypto-msg-type",
+  "crypto-pair",
   "crypto-rest-client",
   "crypto-ws-client",
   "crypto-crawler",
-  "crypto-md-test",
 ]

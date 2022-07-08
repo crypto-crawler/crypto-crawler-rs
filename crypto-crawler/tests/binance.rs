@@ -22,8 +22,8 @@ async fn test_crawl_trade_all(market_type: MarketType) {
 }
 
 #[test_case(MarketType::Spot, "BTCUSDT")]
-#[test_case(MarketType::InverseFuture, "BTCUSD_220624")]
-#[test_case(MarketType::LinearFuture, "BTCUSDT_220624")]
+#[test_case(MarketType::InverseFuture, "BTCUSD_220930")]
+#[test_case(MarketType::LinearFuture, "BTCUSDT_220930")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_PERP")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 // #[test_case(MarketType::EuropeanOption, "BTC-220610-30000-C"; "ignore")]
@@ -39,8 +39,8 @@ async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::Spot, "BTCUSDT")]
-#[test_case(MarketType::InverseFuture, "BTCUSD_220624")]
-#[test_case(MarketType::LinearFuture, "BTCUSDT_220624")]
+#[test_case(MarketType::InverseFuture, "BTCUSD_220930")]
+#[test_case(MarketType::LinearFuture, "BTCUSDT_220930")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_PERP")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 // #[test_case(MarketType::EuropeanOption, "BTC-220610-30000-C"; "ignore")]
@@ -56,8 +56,8 @@ async fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::Spot, "BTCUSDT")]
-#[test_case(MarketType::InverseFuture, "BTCUSD_220624")]
-#[test_case(MarketType::LinearFuture, "BTCUSDT_220624")]
+#[test_case(MarketType::InverseFuture, "BTCUSD_220930")]
+#[test_case(MarketType::LinearFuture, "BTCUSDT_220930")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_PERP")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 // #[test_case(MarketType::EuropeanOption, "BTC-220610-30000-C"; "ignore")]
@@ -73,8 +73,8 @@ async fn test_crawl_bbo(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::Spot, "BTCUSDT")]
-#[test_case(MarketType::InverseFuture, "BTCUSD_220624")]
-#[test_case(MarketType::LinearFuture, "BTCUSDT_220624")]
+#[test_case(MarketType::InverseFuture, "BTCUSD_220930")]
+#[test_case(MarketType::LinearFuture, "BTCUSDT_220930")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_PERP")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 // #[test_case(MarketType::EuropeanOption, "BTC-220610-30000-C"; "ignore")]
@@ -90,8 +90,8 @@ async fn test_crawl_l2_topk(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::Spot, "BTCUSDT")]
-#[test_case(MarketType::InverseFuture, "BTCUSD_220624")]
-#[test_case(MarketType::LinearFuture, "BTCUSDT_220624")]
+#[test_case(MarketType::InverseFuture, "BTCUSD_220930")]
+#[test_case(MarketType::LinearFuture, "BTCUSDT_220930")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_PERP")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 // #[test_case(MarketType::EuropeanOption, "BTC-220610-30000-C")]
@@ -110,7 +110,7 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::LinearFuture)]
 #[test_case(MarketType::InverseSwap)]
 #[test_case(MarketType::LinearSwap)]
-#[test_case(MarketType::EuropeanOption)]
+// #[test_case(MarketType::EuropeanOption)]
 fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
     test_crawl_restful_all_symbols!(
         crawl_l2_snapshot,
@@ -121,8 +121,8 @@ fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
 }
 
 #[test_case(MarketType::Spot, "BTCUSDT")]
-#[test_case(MarketType::InverseFuture, "BTCUSD_220624")]
-#[test_case(MarketType::LinearFuture, "BTCUSDT_220624")]
+#[test_case(MarketType::InverseFuture, "BTCUSD_220930")]
+#[test_case(MarketType::LinearFuture, "BTCUSDT_220930")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_PERP")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 // #[test_case(MarketType::EuropeanOption, "BTC-220610-30000-C"; "ignore")]
@@ -161,8 +161,8 @@ async fn test_crawl_candlestick(market_type: MarketType) {
 }
 
 // #[test_case(MarketType::Spot, "BTCUSDT")]
-// #[test_case(MarketType::InverseFuture, "BTCUSD_220624")]
-// #[test_case(MarketType::LinearFuture, "BTCUSDT_220624")]
+// #[test_case(MarketType::InverseFuture, "BTCUSD_220930")]
+// #[test_case(MarketType::LinearFuture, "BTCUSDT_220930")]
 // #[test_case(MarketType::InverseSwap, "BTCUSD_PERP")]
 // #[test_case(MarketType::LinearSwap, "BTCUSDT")]
 // #[test_case(MarketType::EuropeanOption, "BTC-220610-30000-C"; "ignore")]

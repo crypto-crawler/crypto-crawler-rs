@@ -110,7 +110,7 @@ fn fetch_spot_markets() {
     assert_eq!(btc_usdt.precision.tick_size, 0.1);
     assert_eq!(btc_usdt.precision.lot_size, 0.00000001);
     let quantity_limit = btc_usdt.quantity_limit.unwrap();
-    assert_eq!(quantity_limit.min, 0.00001);
+    assert_eq!(quantity_limit.min.unwrap(), 0.00001);
     assert_eq!(quantity_limit.max, None);
 }
 
@@ -127,7 +127,7 @@ fn fetch_inverse_future_markets() {
     assert_eq!(btc_usd.precision.tick_size, 0.1);
     assert_eq!(btc_usd.precision.lot_size, 1.0);
     let quantity_limit = btc_usd.quantity_limit.unwrap();
-    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.min.unwrap(), 1.0);
     assert_eq!(quantity_limit.max, None);
 }
 
@@ -144,7 +144,7 @@ fn fetch_linear_future_markets() {
     assert_eq!(btc_usdt.precision.tick_size, 0.1);
     assert_eq!(btc_usdt.precision.lot_size, 1.0);
     let quantity_limit = btc_usdt.quantity_limit.unwrap();
-    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.min.unwrap(), 1.0);
     assert_eq!(quantity_limit.max, None);
 }
 
@@ -161,7 +161,7 @@ fn fetch_inverse_swap_markets() {
     assert_eq!(btc_usd.precision.tick_size, 0.1);
     assert_eq!(btc_usd.precision.lot_size, 1.0);
     let quantity_limit = btc_usd.quantity_limit.unwrap();
-    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.min.unwrap(), 1.0);
     assert_eq!(quantity_limit.max, None);
 }
 
@@ -178,7 +178,7 @@ fn fetch_linear_swap_markets() {
     assert_eq!(btc_usdt.precision.tick_size, 0.1);
     assert_eq!(btc_usdt.precision.lot_size, 1.0);
     let quantity_limit = btc_usdt.quantity_limit.unwrap();
-    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.min.unwrap(), 1.0);
     assert_eq!(quantity_limit.max, None);
 }
 
@@ -195,14 +195,14 @@ fn fetch_option_markets() {
     assert_eq!(btc_usd.precision.tick_size, 0.0005);
     assert_eq!(btc_usd.precision.lot_size, 1.0);
     let quantity_limit = btc_usd.quantity_limit.unwrap();
-    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.min.unwrap(), 1.0);
     assert_eq!(quantity_limit.max, None);
 }
 
-#[test_case(MarketType::InverseFuture)]
-#[test_case(MarketType::LinearFuture)]
-#[test_case(MarketType::InverseSwap)]
-#[test_case(MarketType::LinearSwap)]
+// #[test_case(MarketType::InverseFuture)]
+// #[test_case(MarketType::LinearFuture)]
+// #[test_case(MarketType::InverseSwap)]
+// #[test_case(MarketType::LinearSwap)]
 #[test_case(MarketType::EuropeanOption)]
 fn test_contract_values(market_type: MarketType) {
     check_contract_values!(EXCHANGE_NAME, market_type);

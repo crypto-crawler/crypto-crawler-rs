@@ -7,7 +7,7 @@ pub(crate) fn get_market_type(symbol: &str) -> MarketType {
         MarketType::LinearSwap
     } else if symbol.ends_with("-C") || symbol.ends_with("-P") {
         MarketType::EuropeanOption
-    } else if (&symbol[(symbol.len() - 6)..]).parse::<i64>().is_ok() {
+    } else if symbol[(symbol.len() - 6)..].parse::<i64>().is_ok() {
         if symbol.contains("-USD-") {
             MarketType::InverseFuture
         } else if symbol.contains("-USDT-") {

@@ -18,13 +18,13 @@ use serde_json::Value;
 
 pub(super) const EXCHANGE_NAME: &str = "coinbase_pro";
 
-const WEBSOCKET_URL: &str = "wss://ws-feed.pro.coinbase.com";
+const WEBSOCKET_URL: &str = "wss://ws-feed.exchange.coinbase.com";
 
 /// The WebSocket client for CoinbasePro.
 ///
 /// CoinbasePro has only Spot market.
 ///
-///   * WebSocket API doc: <https://docs.pro.coinbase.com/#websocket-feed>
+///   * WebSocket API doc: <https://docs.cloud.coinbase.com/exchange/docs/websocket-overview>
 ///   * Trading at: <https://pro.coinbase.com/>
 pub struct CoinbaseProWSClient {
     client: WSClientInternal<CoinbaseProMessageHandler>,

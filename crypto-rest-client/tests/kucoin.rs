@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use test_case::test_case;
 
 #[test_case(MarketType::Spot, "BTC-USDT")]
-#[test_case(MarketType::InverseFuture, "XBTMM22")]
+#[test_case(MarketType::InverseFuture, "XBTMU22")]
 #[test_case(MarketType::InverseSwap, "XBTUSDM")]
 #[test_case(MarketType::LinearSwap, "XBTUSDTM")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
@@ -24,7 +24,7 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::Spot, "BTC-USDT"; "inconclusive")] // TODO: kucoin deprecated level2 and level3 snapshot APIs
-#[test_case(MarketType::InverseFuture, "XBTMM22")]
+#[test_case(MarketType::InverseFuture, "XBTMU22")]
 #[test_case(MarketType::InverseSwap, "XBTUSDM")]
 #[test_case(MarketType::LinearSwap, "XBTUSDTM")]
 fn test_l3_snapshot(market_type: MarketType, symbol: &str) {

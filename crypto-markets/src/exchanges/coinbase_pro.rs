@@ -1,7 +1,10 @@
+use std::collections::HashMap;
+
 use super::utils::http_get;
 use crate::{error::Result, Fees, Market, MarketType, Precision, QuantityLimit};
 
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
     match market_type {
@@ -22,13 +25,11 @@ struct SpotMarket {
     id: String,
     base_currency: String,
     quote_currency: String,
-    base_min_size: String,
-    base_max_size: String,
     quote_increment: String,
     base_increment: String,
     display_name: String,
-    min_market_funds: String,
-    max_market_funds: String,
+    min_market_funds: Option<String>,
+    max_market_funds: Option<String>,
     margin_enabled: bool,
     post_only: bool,
     limit_only: bool,
@@ -36,11 +37,13 @@ struct SpotMarket {
     trading_disabled: bool,
     status: String,
     status_message: String,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
 }
 
-// see <https://docs.pro.coinbase.com/#products>
+// see <https://docs.cloud.coinbase.com/exchange/reference/exchangerestapi_getproducts>
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
-    let txt = http_get("https://api.pro.coinbase.com/products", None)?;
+    let txt = http_get("https://api.exchange.coinbase.com/products", None)?;
     let markets = serde_json::from_str::<Vec<SpotMarket>>(&txt)?;
     Ok(markets)
 }
@@ -90,8 +93,10 @@ fn fetch_spot_markets() -> Result<Vec<Market>> {
                     lot_size: m.base_increment.parse::<f64>().unwrap(),
                 },
                 quantity_limit: Some(QuantityLimit {
-                    min: m.base_min_size.parse::<f64>().unwrap(),
-                    max: Some(m.base_max_size.parse::<f64>().unwrap()),
+                    min: None,
+                    max: None,
+                    notional_min: m.min_market_funds.map(|x| x.parse::<f64>().unwrap()),
+                    notional_max: m.max_market_funds.map(|x| x.parse::<f64>().unwrap()),
                 }),
                 contract_value: None,
                 delivery_date: None,

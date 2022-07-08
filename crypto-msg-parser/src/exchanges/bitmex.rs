@@ -1,11 +1,9 @@
 use crypto_market_type::MarketType;
+use crypto_message::{FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 use crypto_msg_type::MessageType;
 use crypto_pair::get_market_type;
 
-use crate::{
-    exchanges::utils::{calc_quantity_and_volume, http_get, round},
-    FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide,
-};
+use crate::exchanges::utils::{calc_quantity_and_volume, http_get, round};
 
 use chrono::DateTime;
 use once_cell::sync::Lazy;
@@ -42,6 +40,7 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("ADAU19", (339, 0.00000001)),
         ("ADAU20", (398, 0.00000001)),
         ("ADAU21", (570, 0.00000001)),
+        ("ADAU22", (891, 0.00000001)),
         ("ADAUSD", (676, 0.0001)),
         ("ADAUSDT", (521, 0.0001)),
         ("ADAUSDTH21", (463, 0.00001)),
@@ -151,6 +150,7 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("ETHU19", (335, 0.00001)),
         ("ETHU20", (394, 0.00001)),
         ("ETHU21", (566, 0.00001)),
+        ("ETHU22", (892, 0.00001)),
         ("ETHUSD", (297, 0.05)),
         ("ETHUSDH21", (462, 0.05)),
         ("ETHUSDH22", (762, 0.05)),
@@ -161,9 +161,11 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("ETHUSDT", (734, 0.05)),
         ("ETHUSDTH22", (764, 0.05)),
         ("ETHUSDTM22", (817, 0.05)),
+        ("ETHUSDTU22", (896, 0.05)),
         ("ETHUSDTZ21", (735, 0.05)),
         ("ETHUSDU20", (401, 0.05)),
         ("ETHUSDU21", (573, 0.05)),
+        ("ETHUSDU22", (894, 0.05)),
         ("ETHUSDU22_ETH", (885, 0.05)),
         ("ETHUSDZ20", (430, 0.05)),
         ("ETHUSDZ21", (641, 0.05)),
@@ -215,8 +217,8 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("LTCZ19", (346, 0.000005)),
         ("LTCZ20", (424, 0.000005)),
         ("LTCZ21", (635, 0.000001)),
-        ("LUNAUSD", (649, 0.001)),
-        ("LUNAUSDT", (809, 0.001)),
+        ("LUNAUSD", (649, 0.0001)),
+        ("LUNAUSDT", (809, 0.0001)),
         ("MANAUSDT", (781, 0.0001)),
         ("MATICUSDT", (588, 0.0001)),
         ("MATIC_USDT", (858, 0.0001)),
@@ -289,6 +291,7 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("XBTH20", (344, 0.5)),
         ("XBTH21", (422, 0.5)),
         ("XBTH22", (633, 0.5)),
+        ("XBTH23", (897, 0.5)),
         ("XBTJ15", (26, 0.01)),
         ("XBTJ22", (810, 0.5)),
         ("XBTK15", (27, 0.01)),
@@ -305,6 +308,7 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("XBTM21", (454, 0.5)),
         ("XBTM22", (758, 0.5)),
         ("XBTN15", (44, 0.01)),
+        ("XBTN22", (890, 0.5)),
         ("XBTQ15", (46, 0.01)),
         ("XBTU15", (39, 0.01)),
         ("XBTU15_Z15", (43, 0.01)),
@@ -321,6 +325,7 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("XBTUSDTM22", (816, 0.5)),
         ("XBTUSDTU22", (819, 0.5)),
         ("XBTUSDTZ21", (733, 0.5)),
+        ("XBTUSDTZ22", (895, 0.5)),
         ("XBTV15", (56, 0.01)),
         ("XBTV21", (650, 0.5)),
         ("XBTX21", (705, 0.5)),
@@ -381,6 +386,7 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("XRPU19", (337, 0.00000001)),
         ("XRPU20", (396, 0.00000001)),
         ("XRPU21", (568, 0.00000001)),
+        ("XRPU22", (893, 0.00000001)),
         ("XRPUSD", (377, 0.0001)),
         ("XRPUSDT", (736, 0.0001)),
         ("XRPZ17", (228, 0.00000001)),
@@ -669,7 +675,7 @@ pub(crate) fn parse_funding_rate(
 /// https://www.bitmex.com/app/wsAPI#OrderBookL2
 /// price = (100000000 * symbolIdx - ID) * tickSize
 pub fn id_to_price(symbol: &str, id: usize) -> f64 {
-    let (index, tick_size) = SYMBOL_INDEX_AND_TICK_SIZE_MAP.get(symbol).unwrap();
+    let (index, tick_size) = SYMBOL_INDEX_AND_TICK_SIZE_MAP.get(symbol).expect(symbol);
     let (index, tick_size) = (*index, *tick_size);
     round((100000000.0 * index as f64 - id as f64) * tick_size)
 }
@@ -678,7 +684,7 @@ pub fn id_to_price(symbol: &str, id: usize) -> f64 {
 /// https://www.bitmex.com/app/wsAPI#OrderBookL2
 /// ID = (100000000 * symbolIdx) - (price / tickSize)
 pub fn price_to_id(symbol: &str, price: f64) -> usize {
-    let (index, tick_size) = SYMBOL_INDEX_AND_TICK_SIZE_MAP.get(symbol).unwrap();
+    let (index, tick_size) = SYMBOL_INDEX_AND_TICK_SIZE_MAP.get(symbol).expect(symbol);
     let (index, tick_size) = (*index, *tick_size);
 
     (100000000.0 * index as f64 - price / tick_size) as usize

@@ -6,7 +6,8 @@ const EXCHANGE_NAME: &str = "binance";
 mod trade {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, round, TradeSide};
+    use crypto_message::TradeSide;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, round};
 
     #[test]
     fn spot() {
@@ -775,6 +776,46 @@ mod l2_topk {
         assert_eq!(orderbook.asks[2].quantity_base, 95300.0 / 29391.0);
         assert_eq!(orderbook.asks[2].quantity_quote, 95300.0);
         assert_eq!(orderbook.asks[2].quantity_contract.unwrap(), 953.0);
+    }
+
+    #[test]
+    fn inverse_swap_2() {
+        let raw_msg = r#"{"stream":"runeusd_perp@depth5","data":{"e":"depthUpdate","E":1648006221596,"T":1648006221340,"s":"RUNEUSD_PERP","ps":"RUNEUSD","U":395028983849,"u":395028983849,"pu":-1,"b":[],"a":[["8.4400","2"]]}}"#;
+        let orderbook =
+            &parse_l2_topk(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None).unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 1);
+        assert_eq!(orderbook.bids.len(), 0);
+        assert!(orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            EXCHANGE_NAME,
+            MarketType::InverseSwap,
+            MessageType::L2TopK,
+            "RUNE/USD".to_string(),
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap(),
+            orderbook,
+            raw_msg,
+        );
+        assert_eq!(
+            "RUNEUSD_PERP",
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
+        );
+        assert_eq!(
+            1648006221596,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+
+        assert_eq!(orderbook.timestamp, 1648006221596);
+        assert_eq!(orderbook.seq_id, Some(395028983849));
+        assert_eq!(orderbook.prev_seq_id, None);
+
+        assert_eq!(orderbook.asks[0].price, 8.4400);
+        assert_eq!(orderbook.asks[0].quantity_base, 2.0 * 10.0 / 8.4400);
+        assert_eq!(orderbook.asks[0].quantity_quote, 2.0 * 10.0);
+        assert_eq!(orderbook.asks[0].quantity_contract.unwrap(), 2.0);
     }
 
     #[test]

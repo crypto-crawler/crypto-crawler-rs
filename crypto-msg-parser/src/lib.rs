@@ -1,14 +1,8 @@
 pub mod exchanges;
-#[allow(dead_code)]
-mod f64_limited_serde;
-mod msg;
-mod order;
-
 use crypto_market_type::MarketType;
+use crypto_message::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, KlineMsg};
 use crypto_msg_type::MessageType;
 pub use exchanges::utils::round; // for test only
-pub use msg::*;
-pub use order::Order;
 use simple_error::SimpleError;
 
 /// Extract the symbol from the message.
@@ -38,8 +32,7 @@ pub fn extract_symbol(
         "kraken" => exchanges::kraken::extract_symbol(market_type, msg),
         "kucoin" => exchanges::kucoin::extract_symbol(msg),
         "mxc" | "mexc" => exchanges::mexc::extract_symbol(msg),
-        "okex" => exchanges::okex::extract_symbol(market_type, msg),
-        "okx" => exchanges::okx::extract_symbol(market_type, msg),
+        "okex" | "okx" => exchanges::okx::extract_symbol(market_type, msg),
         "zb" => exchanges::zb::extract_symbol(market_type, msg),
         "zbg" => exchanges::zbg::extract_symbol(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
@@ -70,8 +63,7 @@ pub fn extract_timestamp(
         "kraken" => exchanges::kraken::extract_timestamp(market_type, msg),
         "kucoin" => exchanges::kucoin::extract_timestamp(msg),
         "mxc" | "mexc" => exchanges::mexc::extract_timestamp(msg),
-        "okex" => exchanges::okex::extract_timestamp(market_type, msg),
-        "okx" => exchanges::okx::extract_timestamp(market_type, msg),
+        "okex" | "okx" => exchanges::okx::extract_timestamp(market_type, msg),
         "zb" => exchanges::zb::extract_timestamp(market_type, msg),
         "zbg" => exchanges::zbg::extract_timestamp(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
@@ -102,8 +94,7 @@ pub fn parse_trade(
         "kraken" => exchanges::kraken::parse_trade(market_type, msg),
         "kucoin" => exchanges::kucoin::parse_trade(market_type, msg),
         "mxc" | "mexc" => exchanges::mexc::parse_trade(market_type, msg),
-        "okex" => exchanges::okex::parse_trade(market_type, msg),
-        "okx" => exchanges::okx::parse_trade(market_type, msg),
+        "okex" | "okx" => exchanges::okx::parse_trade(market_type, msg),
         "zb" => exchanges::zb::parse_trade(market_type, msg),
         "zbg" => exchanges::zbg::parse_trade(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
@@ -147,8 +138,7 @@ pub fn parse_l2(
         "kraken" => exchanges::kraken::parse_l2(market_type, msg),
         "kucoin" => exchanges::kucoin::parse_l2(market_type, msg, received_at),
         "mxc" | "mexc" => exchanges::mexc::parse_l2(market_type, msg, received_at),
-        "okex" => exchanges::okex::parse_l2(market_type, msg),
-        "okx" => exchanges::okx::parse_l2(market_type, msg),
+        "okex" | "okx" => exchanges::okx::parse_l2(market_type, msg),
         "zb" => exchanges::zb::parse_l2(market_type, msg),
         "zbg" => exchanges::zbg::parse_l2(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
@@ -255,22 +245,15 @@ pub fn parse_funding_rate(
             received_at.expect("BitMEX funding rate messages don't have timestamp"),
         ),
         "huobi" => exchanges::huobi::parse_funding_rate(market_type, msg),
-        "okex" => exchanges::okex::parse_funding_rate(
+        "okex" | "okx" => exchanges::okx::parse_funding_rate(
             market_type,
             msg,
-            received_at.expect("OKEx funding rate messages don't have timestamp"),
+            received_at.expect("OKX funding rate messages don't have timestamp"),
         ),
-        "okx" => exchanges::okx::parse_funding_rate(
-            market_type,
-            msg,
-            received_at.expect("OKEx funding rate messages don't have timestamp"),
-        ),
-        _ => {
-            return Err(SimpleError::new(format!(
-                "{} does NOT have perpetual swap market",
-                exchange
-            )))
-        }
+        _ => Err(SimpleError::new(format!(
+            "{} does NOT have perpetual swap market",
+            exchange
+        ))),
     }
 }
 
@@ -317,8 +300,7 @@ pub fn get_msg_type(exchange: &str, msg: &str) -> MessageType {
         "ftx" => exchanges::ftx::get_msg_type(msg),
         "huobi" => exchanges::huobi::get_msg_type(msg),
         "kraken" => exchanges::kraken::get_msg_type(msg),
-        "okex" => exchanges::okex::get_msg_type(msg),
-        "okx" => exchanges::okx::get_msg_type(msg),
+        "okex" | "okx" => exchanges::okx::get_msg_type(msg),
         _ => MessageType::Other,
     }
 }

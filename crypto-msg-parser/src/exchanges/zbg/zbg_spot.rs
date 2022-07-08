@@ -4,7 +4,7 @@ use super::super::utils::{convert_timestamp, http_get};
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};

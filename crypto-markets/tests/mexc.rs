@@ -64,7 +64,7 @@ fn fetch_spot_markets() {
     assert_eq!(btc_usdt.precision.tick_size, 0.01);
     assert_eq!(btc_usdt.precision.lot_size, 0.000001);
     let quantity_limit = btc_usdt.quantity_limit.unwrap();
-    assert_eq!(quantity_limit.min, 5.0);
+    assert_eq!(quantity_limit.min.unwrap(), 5.0);
     assert_eq!(quantity_limit.max, Some(5000000.0));
 }
 
@@ -83,7 +83,7 @@ fn fetch_inverse_swap_markets() {
     assert_eq!(btcusd_perp.precision.tick_size, 0.5);
     assert_eq!(btcusd_perp.precision.lot_size, 1.0);
     let quantity_limit = btcusd_perp.quantity_limit.unwrap();
-    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.min.unwrap(), 1.0);
     assert_eq!(quantity_limit.max, Some(10000.0));
 }
 
@@ -102,7 +102,7 @@ fn fetch_linear_swap_markets() {
     assert_eq!(btcusdt.precision.tick_size, 0.5);
     assert_eq!(btcusdt.precision.lot_size, 1.0);
     let quantity_limit = btcusdt.quantity_limit.unwrap();
-    assert_eq!(quantity_limit.min, 1.0);
+    assert_eq!(quantity_limit.min.unwrap(), 1.0);
     assert_eq!(quantity_limit.max, Some(1000000.0));
 }
 

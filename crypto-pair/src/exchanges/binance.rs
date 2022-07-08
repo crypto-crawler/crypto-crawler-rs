@@ -60,7 +60,7 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
         let pos = symbol.find('-').unwrap();
         let base = &symbol[..pos];
         Some(format!("{}/USDT", base))
-    } else if symbol.len() > 7 && (&symbol[(symbol.len() - 6)..]).parse::<i64>().is_ok() {
+    } else if symbol.len() > 7 && (symbol[(symbol.len() - 6)..]).parse::<i64>().is_ok() {
         // linear and inverse future
         let remove_date = &symbol[..symbol.len() - 7];
         if remove_date.ends_with("USDT") {
@@ -83,7 +83,7 @@ pub(crate) fn get_market_type(symbol: &str, is_spot: Option<bool>) -> MarketType
         MarketType::InverseSwap
     } else if symbol.ends_with("-P") || symbol.ends_with("-C") {
         MarketType::EuropeanOption
-    } else if symbol.len() > 7 && (&symbol[(symbol.len() - 6)..]).parse::<i64>().is_ok() {
+    } else if symbol.len() > 7 && (symbol[(symbol.len() - 6)..]).parse::<i64>().is_ok() {
         // linear and inverse future
         let remove_date = &symbol[..symbol.len() - 7];
         if remove_date.ends_with("USDT") {
@@ -111,8 +111,10 @@ mod tests {
     #[test]
     fn spot_quotes() {
         let map = fetch_spot_quotes();
-        for quote in map {
-            println!("\"{}\",", quote);
+        for quote in map.iter() {
+            if !super::SPOT_QUOTES.contains(quote) {
+                println!("\"{}\",", quote);
+            }
         }
     }
 

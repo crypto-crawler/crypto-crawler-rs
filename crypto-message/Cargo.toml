@@ -1,0 +1,17 @@
+[package]
+name = "crypto-message"
+version = "1.0.2"
+edition = "2021"
+description = "Unified data structures for all cryptocurrency exchanges."
+license = "Apache-2.0"
+repository = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/crypto-message"
+keywords = ["cryptocurrency", "blockchain", "trading"]
+
+
+[dependencies]
+crypto-market-type = { path = "../crypto-market-type" }
+crypto-msg-type = { path = "../crypto-msg-type" }
+serde = { version = "1.0.138", features = ["derive"] }
+serde_json = "1.0.82"
+strum = "0.24.1"
+strum_macros = "0.24.2"

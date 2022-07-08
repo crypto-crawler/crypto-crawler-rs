@@ -123,8 +123,10 @@ fn to_market(m: SwapMarket) -> Market {
             lot_size: 1.0 / (10_i64.pow(m.volumePlace.parse::<u32>().unwrap()) as f64),
         },
         quantity_limit: Some(QuantityLimit {
-            min: m.minTradeNum.parse::<f64>().unwrap(),
+            min: m.minTradeNum.parse::<f64>().ok(),
             max: None,
+            notional_min: None,
+            notional_max: None,
         }),
         contract_value: Some(1.0), // TODO:
         delivery_date: None,

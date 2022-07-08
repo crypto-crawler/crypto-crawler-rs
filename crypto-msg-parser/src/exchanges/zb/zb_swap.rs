@@ -1,6 +1,6 @@
 use crypto_market_type::MarketType;
-
-use crate::{MessageType, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_msg_type::MessageType;
 
 use super::EXCHANGE_NAME;
 use crate::exchanges::utils::calc_quantity_and_volume;

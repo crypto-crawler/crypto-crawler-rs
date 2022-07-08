@@ -111,8 +111,10 @@ fn to_market(raw_market: &SwapMarket) -> Market {
             lot_size: raw_market.volUnit as f64,
         },
         quantity_limit: Some(QuantityLimit {
-            min: raw_market.minVol as f64,
+            min: Some(raw_market.minVol as f64),
             max: Some(raw_market.maxVol as f64),
+            notional_min: None,
+            notional_max: None,
         }),
         contract_value: Some(raw_market.contractSize),
         delivery_date: None,

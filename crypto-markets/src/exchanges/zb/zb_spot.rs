@@ -22,7 +22,7 @@ struct SpotMarket {
 
 // See https://zbgapi.github.io/docs/spot/v1/en/#public-get-all-supported-trading-symbols
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
-    let txt = http_get("https://api.zbex.site/data/v1/markets", None)?;
+    let txt = http_get("https://api.zb.com/data/v1/markets", None)?;
     let m = serde_json::from_str::<HashMap<String, SpotMarket>>(&txt)?;
     let mut markets = Vec::new();
     for (symbol, mut market) in m {
@@ -78,8 +78,10 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                     lot_size: 1.0 / (10_i64.pow(m.amountScale) as f64),
                 },
                 quantity_limit: Some(QuantityLimit {
-                    min: m.minAmount,
+                    min: Some(m.minAmount),
                     max: None,
+                    notional_min: None,
+                    notional_max: None,
                 }),
                 contract_value: None,
                 delivery_date: None,

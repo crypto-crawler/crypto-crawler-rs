@@ -7,8 +7,8 @@ use test_case::test_case;
 
 #[test_case(MarketType::Spot, "BTC/USD")]
 #[test_case(MarketType::LinearSwap, "BTC-PERP")]
-#[test_case(MarketType::LinearFuture, "BTC-0624")]
-#[test_case(MarketType::Move, "BTC-MOVE-2022Q2")]
+#[test_case(MarketType::LinearFuture, "BTC-0930")]
+#[test_case(MarketType::Move, "BTC-MOVE-2022Q3")]
 #[test_case(MarketType::BVOL, "BVOL/USD")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     let text = fetch_l2_snapshot("ftx", market_type, symbol, Some(3)).unwrap();
