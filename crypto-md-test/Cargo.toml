@@ -6,13 +6,13 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-serde_derive = "1.0.136"
-serde_json = "1.0"
-serde = { version = "1.0", features = ["derive"] }
+serde_derive = "1.0.138"
+serde_json = "1.0.82"
+serde = { version = "1.0.138", features = ["derive"] }
 lazy_static = "1.4.0"
 miniz_oxide = "0.5.3"
 
-yata = "0.6"
+yata = "0.6.1"
 crypto-crawler = { path="../crypto-crawler" }
 crypto-markets = { path="../crypto-markets" }
 crypto-market-type = { path="../crypto-market-type" }
@@ -21,7 +21,7 @@ crypto-msg-type = { path="../crypto-msg-type" }
 crypto-pair = { path="../crypto-pair" }
 crypto-rest-client = { path="../crypto-rest-client" }
 crypto-ws-client = { path="../crypto-ws-client" }
-tokio = { version = "1.18.2", features = ["macros", "rt-multi-thread", "sync", "time"] }
+tokio = { version = "1.19.2", features = ["macros", "rt-multi-thread", "sync", "time"] }
 chrono = "0.4.19"
-rust_decimal = "1.23.1"
-rust_decimal_macros = "1.23.1"
+rust_decimal = "1.25.0"
+rust_decimal_macros = "1.25.0"
