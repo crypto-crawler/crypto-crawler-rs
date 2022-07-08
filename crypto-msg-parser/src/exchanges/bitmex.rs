@@ -1,11 +1,9 @@
 use crypto_market_type::MarketType;
+use crypto_message::{FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 use crypto_msg_type::MessageType;
 use crypto_pair::get_market_type;
 
-use crate::{
-    exchanges::utils::{calc_quantity_and_volume, http_get, round},
-    FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide,
-};
+use crate::exchanges::utils::{calc_quantity_and_volume, http_get, round};
 
 use chrono::DateTime;
 use once_cell::sync::Lazy;

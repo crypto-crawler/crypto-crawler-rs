@@ -1,10 +1,9 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crate::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
-use super::super::utils::calc_quantity_and_volume;
-use super::EXCHANGE_NAME;
+use super::{super::utils::calc_quantity_and_volume, EXCHANGE_NAME};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;

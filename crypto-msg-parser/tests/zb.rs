@@ -6,7 +6,8 @@ const EXCHANGE_NAME: &str = "zb";
 mod trade {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, round, TradeSide};
+    use crypto_message::TradeSide;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, round};
 
     #[test]
     fn spot() {

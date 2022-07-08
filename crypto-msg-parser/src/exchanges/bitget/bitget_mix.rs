@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use super::EXCHANGE_NAME;
 use serde::{Deserialize, Serialize};

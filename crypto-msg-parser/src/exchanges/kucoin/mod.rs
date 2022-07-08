@@ -19,7 +19,7 @@ pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
         let symbol = ws_msg.topic.split(':').last().unwrap();
         if ws_msg.topic.contains("/candle") {
             let pos = symbol.rfind('_').unwrap();
-            Ok((&symbol[..pos]).to_string())
+            Ok((symbol[..pos]).to_string())
         } else if symbol == "all" {
             Ok("ALL".to_string())
         } else {

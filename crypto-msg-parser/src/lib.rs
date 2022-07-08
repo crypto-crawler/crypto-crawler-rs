@@ -1,14 +1,8 @@
 pub mod exchanges;
-#[allow(dead_code)]
-mod f64_limited_serde;
-mod msg;
-mod order;
-
 use crypto_market_type::MarketType;
+use crypto_message::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg};
 use crypto_msg_type::MessageType;
 pub use exchanges::utils::round; // for test only
-pub use msg::*;
-pub use order::Order;
 use simple_error::SimpleError;
 
 /// Extract the symbol from the message.
@@ -252,12 +246,10 @@ pub fn parse_funding_rate(
             msg,
             received_at.expect("OKX funding rate messages don't have timestamp"),
         ),
-        _ => {
-            return Err(SimpleError::new(format!(
-                "{} does NOT have perpetual swap market",
-                exchange
-            )))
-        }
+        _ => Err(SimpleError::new(format!(
+            "{} does NOT have perpetual swap market",
+            exchange
+        ))),
     }
 }
 

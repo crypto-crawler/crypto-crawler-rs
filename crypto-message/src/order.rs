@@ -16,6 +16,17 @@ pub struct Order {
     pub quantity_contract: Option<f64>,
 }
 
+impl PartialEq for Order {
+    fn eq(&self, other: &Self) -> bool {
+        self.price == other.price
+            && self.quantity_base == other.quantity_base
+            && self.quantity_quote == other.quantity_quote
+            && self.quantity_contract == other.quantity_contract
+    }
+}
+
+impl Eq for Order {}
+
 impl Serialize for Order {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

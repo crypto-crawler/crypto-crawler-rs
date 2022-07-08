@@ -1,5 +1,5 @@
-use crate::{Order, OrderBookMsg, TradeMsg, TradeSide};
 use crypto_market_type::MarketType;
+use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
 use crypto_msg_type::MessageType;
 use serde_json::Value;
 use simple_error::SimpleError;

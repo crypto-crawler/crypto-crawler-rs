@@ -6,7 +6,8 @@ const EXCHANGE_NAME: &str = "mexc";
 mod trade {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, round, TradeSide};
+    use crypto_message::TradeSide;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, round};
 
     #[test]
     fn spot() {
@@ -378,7 +379,8 @@ mod before_20220311 {
     mod trade {
         use super::super::EXCHANGE_NAME;
         use crypto_market_type::MarketType;
-        use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade, TradeSide};
+        use crypto_message::TradeSide;
+        use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_trade};
 
         #[test]
         fn spot() {

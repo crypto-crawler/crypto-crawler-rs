@@ -1,10 +1,8 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crate::{
-    exchanges::utils::{calc_quantity_and_volume, deserialize_null_default},
-    Order, OrderBookMsg, TradeMsg, TradeSide,
-};
+use crate::exchanges::utils::{calc_quantity_and_volume, deserialize_null_default};
+use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use super::message::WebsocketMsg;
 use serde::{Deserialize, Serialize};
