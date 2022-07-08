@@ -4,7 +4,7 @@ mod okx_v5;
 use simple_error::SimpleError;
 use std::collections::HashMap;
 
-use crate::{FundingRateMsg, OrderBookMsg, TradeMsg};
+use crate::{BboMsg, FundingRateMsg, OrderBookMsg, TradeMsg, KlineMsg};
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 use serde_json::Value;
@@ -117,4 +117,19 @@ pub(crate) fn parse_funding_rate(
     } else {
         panic!("Unknown msg format {}", msg)
     }
+}
+
+pub(crate) fn parse_bbo(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<BboMsg, SimpleError> {
+    okx_v5::parse_bbo(market_type, msg)
+}
+
+pub(crate) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+    message_type: MessageType
+) -> Result<KlineMsg, SimpleError> {
+    okx_v5::parse_candlestick(market_type, msg, message_type)
 }
