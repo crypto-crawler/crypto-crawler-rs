@@ -14,14 +14,14 @@ mod inverse_swap {
     fn test_l2_snapshot() {
         let text =
             fetch_l2_snapshot("binance", MarketType::InverseSwap, "BTCUSD_PERP", Some(3)).unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 
     #[test]
     fn test_open_interest() {
         let text =
             fetch_open_interest("binance", MarketType::InverseSwap, Some("BTCUSD_PERP")).unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 }
 
@@ -46,13 +46,13 @@ mod inverse_future {
             Some(3),
         )
         .unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 
     #[test]
     fn test_open_interest() {
         let text = fetch_open_interest("binance", MarketType::InverseFuture, Some("BTCUSD_220930"))
             .unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 }

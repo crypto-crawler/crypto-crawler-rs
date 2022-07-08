@@ -303,7 +303,7 @@ mod tests {
     fn test_spot_command() {
         let translator = super::BitfinexCommandTranslator {};
         let commands = translator
-            .translate_to_commands(true, &vec![("trades".to_string(), "tBTCUSD".to_string())]);
+            .translate_to_commands(true, &[("trades".to_string(), "tBTCUSD".to_string())]);
 
         assert_eq!(1, commands.len());
         assert_eq!(
@@ -317,7 +317,7 @@ mod tests {
         let translator = super::BitfinexCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![("trades".to_string(), "tBTCF0:USTF0".to_string())],
+            &[("trades".to_string(), "tBTCF0:USTF0".to_string())],
         );
 
         assert_eq!(1, commands.len());

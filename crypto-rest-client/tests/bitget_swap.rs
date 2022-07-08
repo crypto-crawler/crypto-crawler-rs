@@ -11,8 +11,8 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
 
     let data = obj.get("data").unwrap().as_object().unwrap();
-    assert!(data.get("asks").unwrap().as_array().unwrap().len() > 0);
-    assert!(data.get("bids").unwrap().as_array().unwrap().len() > 0);
+    assert!(!data.get("asks").unwrap().as_array().unwrap().is_empty());
+    assert!(!data.get("bids").unwrap().as_array().unwrap().is_empty());
 }
 
 #[test_case(MarketType::InverseSwap, "BTCUSD_DMCBL")]

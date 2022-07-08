@@ -852,10 +852,10 @@ mod tests {
     #[ignore]
     fn test_fetch_tick_sizes() {
         let mut tick_sizes = super::fetch_tick_sizes();
-        assert!(tick_sizes.len() > 0);
+        assert!(!tick_sizes.is_empty());
         for (symbol, t) in super::SYMBOL_INDEX_AND_TICK_SIZE_MAP.iter() {
             if !tick_sizes.contains_key(symbol) {
-                tick_sizes.insert(symbol.clone(), t.clone());
+                tick_sizes.insert(symbol.clone(), *t);
             }
         }
         for (symbol, tick_size) in tick_sizes {

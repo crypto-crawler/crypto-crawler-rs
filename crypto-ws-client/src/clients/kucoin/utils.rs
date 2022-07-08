@@ -165,7 +165,7 @@ mod tests {
     #[test]
     fn test_topics_to_commands() {
         let commands = super::topics_to_commands(
-            &vec![("/market/match".to_string(), "BTC-USDT".to_string())],
+            &[("/market/match".to_string(), "BTC-USDT".to_string())],
             true,
         );
         assert_eq!(1, commands.len());

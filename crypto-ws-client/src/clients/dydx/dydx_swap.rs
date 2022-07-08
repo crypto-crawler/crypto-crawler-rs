@@ -133,7 +133,7 @@ mod tests {
         let translator = super::DydxCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![("v3_trades".to_string(), "BTC-USD".to_string())],
+            &[("v3_trades".to_string(), "BTC-USD".to_string())],
         );
 
         assert_eq!(1, commands.len());
@@ -148,10 +148,8 @@ mod tests {
         let translator = super::DydxCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![
-                ("v3_trades".to_string(), "BTC-USD".to_string()),
-                ("v3_orderbook".to_string(), "BTC-USD".to_string()),
-            ],
+            &[("v3_trades".to_string(), "BTC-USD".to_string()),
+                ("v3_orderbook".to_string(), "BTC-USD".to_string())],
         );
 
         assert_eq!(2, commands.len());

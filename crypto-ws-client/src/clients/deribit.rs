@@ -187,7 +187,7 @@ mod tests {
         let translator = super::DeribitCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![("trades.SYMBOL.100ms".to_string(), "BTC-26MAR21".to_string())],
+            &[("trades.SYMBOL.100ms".to_string(), "BTC-26MAR21".to_string())],
         );
 
         assert_eq!(2, commands.len());
@@ -206,10 +206,8 @@ mod tests {
         let translator = super::DeribitCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![
-                ("trades.SYMBOL.100ms".to_string(), "BTC-26MAR21".to_string()),
-                ("ticker.SYMBOL.100ms".to_string(), "BTC-26MAR21".to_string()),
-            ],
+            &[("trades.SYMBOL.100ms".to_string(), "BTC-26MAR21".to_string()),
+                ("ticker.SYMBOL.100ms".to_string(), "BTC-26MAR21".to_string())],
         );
 
         assert_eq!(2, commands.len());

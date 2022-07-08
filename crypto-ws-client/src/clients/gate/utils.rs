@@ -214,19 +214,15 @@ mod tests {
             r#"{"channel":"spot.trades", "event":"subscribe", "payload":["BTC_USDT","ETH_USDT"]}"#,
             translator.translate_to_commands(
                 true,
-                &vec![
-                    ("trades".to_string(), "BTC_USDT".to_string()),
-                    ("trades".to_string(), "ETH_USDT".to_string())
-                ]
+                &[("trades".to_string(), "BTC_USDT".to_string()),
+                    ("trades".to_string(), "ETH_USDT".to_string())]
             )[0]
         );
 
         let commands = translator.translate_to_commands(
             true,
-            &vec![
-                ("order_book".to_string(), "BTC_USDT".to_string()),
-                ("order_book".to_string(), "ETH_USDT".to_string()),
-            ],
+            &[("order_book".to_string(), "BTC_USDT".to_string()),
+                ("order_book".to_string(), "ETH_USDT".to_string())],
         );
         assert_eq!(2, commands.len());
         assert_eq!(
@@ -240,10 +236,8 @@ mod tests {
 
         let commands = translator.translate_to_commands(
             true,
-            &vec![
-                ("order_book_update".to_string(), "BTC_USDT".to_string()),
-                ("order_book_update".to_string(), "ETH_USDT".to_string()),
-            ],
+            &[("order_book_update".to_string(), "BTC_USDT".to_string()),
+                ("order_book_update".to_string(), "ETH_USDT".to_string())],
         );
         assert_eq!(2, commands.len());
         assert_eq!(
@@ -264,19 +258,15 @@ mod tests {
             r#"{"channel":"futures.trades", "event":"subscribe", "payload":["BTC_USD","ETH_USD"]}"#,
             translator.translate_to_commands(
                 true,
-                &vec![
-                    ("trades".to_string(), "BTC_USD".to_string()),
-                    ("trades".to_string(), "ETH_USD".to_string())
-                ]
+                &[("trades".to_string(), "BTC_USD".to_string()),
+                    ("trades".to_string(), "ETH_USD".to_string())]
             )[0]
         );
 
         let commands = translator.translate_to_commands(
             true,
-            &vec![
-                ("order_book".to_string(), "BTC_USD".to_string()),
-                ("order_book".to_string(), "ETH_USD".to_string()),
-            ],
+            &[("order_book".to_string(), "BTC_USD".to_string()),
+                ("order_book".to_string(), "ETH_USD".to_string())],
         );
         assert_eq!(2, commands.len());
         assert_eq!(
@@ -290,10 +280,8 @@ mod tests {
 
         let commands = translator.translate_to_commands(
             true,
-            &vec![
-                ("order_book_update".to_string(), "BTC_USD".to_string()),
-                ("order_book_update".to_string(), "ETH_USD".to_string()),
-            ],
+            &[("order_book_update".to_string(), "BTC_USD".to_string()),
+                ("order_book_update".to_string(), "ETH_USD".to_string())],
         );
         assert_eq!(2, commands.len());
         assert_eq!(

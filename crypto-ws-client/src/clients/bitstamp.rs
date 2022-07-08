@@ -133,7 +133,7 @@ mod tests {
         let translator = super::BitstampCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![("live_trades".to_string(), "btcusd".to_string())],
+            &[("live_trades".to_string(), "btcusd".to_string())],
         );
 
         assert_eq!(1, commands.len());
@@ -148,10 +148,8 @@ mod tests {
         let translator = super::BitstampCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![
-                ("live_trades".to_string(), "btcusd".to_string()),
-                ("diff_order_book".to_string(), "btcusd".to_string()),
-            ],
+            &[("live_trades".to_string(), "btcusd".to_string()),
+                ("diff_order_book".to_string(), "btcusd".to_string())],
         );
 
         assert_eq!(2, commands.len());

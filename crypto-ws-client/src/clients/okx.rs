@@ -217,7 +217,7 @@ mod tests {
     fn test_one_topic() {
         let translator = super::OkxCommandTranslator {};
         let commands = translator
-            .translate_to_commands(true, &vec![("trades".to_string(), "BTC-USDT".to_string())]);
+            .translate_to_commands(true, &[("trades".to_string(), "BTC-USDT".to_string())]);
 
         assert_eq!(1, commands.len());
         assert_eq!(
@@ -231,10 +231,8 @@ mod tests {
         let translator = super::OkxCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![
-                ("trades".to_string(), "BTC-USDT".to_string()),
-                ("tickers".to_string(), "BTC-USDT".to_string()),
-            ],
+            &[("trades".to_string(), "BTC-USDT".to_string()),
+                ("tickers".to_string(), "BTC-USDT".to_string())],
         );
 
         assert_eq!(1, commands.len());

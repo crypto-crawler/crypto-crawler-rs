@@ -66,8 +66,8 @@ mod tests {
     #[test]
     fn single_msg_type_multiple_symbols() {
         let commands = get_ws_commands(
-            &vec![MessageType::Trade],
-            &vec!["BTCUSD".to_string(), "ETHUSD".to_string()],
+            &[MessageType::Trade],
+            &["BTCUSD".to_string(), "ETHUSD".to_string()],
             true,
             None,
         );
@@ -81,8 +81,8 @@ mod tests {
     #[test]
     fn multiple_msg_types_single_symbol() {
         let commands = get_ws_commands(
-            &vec![MessageType::Trade, MessageType::L2Event],
-            &vec!["BTCUSD".to_string()],
+            &[MessageType::Trade, MessageType::L2Event],
+            &["BTCUSD".to_string()],
             true,
             None,
         );
@@ -98,8 +98,8 @@ mod tests {
         let mut configs = HashMap::new();
         configs.insert("interval".to_string(), "1".to_string());
         let commands = get_ws_commands(
-            &vec![MessageType::Candlestick],
-            &vec!["BTCUSD".to_string(), "ETHUSD".to_string()],
+            &[MessageType::Candlestick],
+            &["BTCUSD".to_string(), "ETHUSD".to_string()],
             true,
             Some(&configs),
         );

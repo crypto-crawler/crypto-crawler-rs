@@ -335,7 +335,7 @@ mod tests {
         let translator = super::HuobiCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![("trade.detail".to_string(), "btcusdt".to_string())],
+            &[("trade.detail".to_string(), "btcusdt".to_string())],
         );
 
         assert_eq!(1, commands.len());
@@ -350,10 +350,8 @@ mod tests {
         let translator = super::HuobiCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![
-                ("trade.detail".to_string(), "btcusdt".to_string()),
-                ("bbo".to_string(), "btcusdt".to_string()),
-            ],
+            &[("trade.detail".to_string(), "btcusdt".to_string()),
+                ("bbo".to_string(), "btcusdt".to_string())],
         );
 
         assert_eq!(2, commands.len());

@@ -5,13 +5,13 @@ mod mexc_spot {
     #[test]
     fn test_trades() {
         let text = MexcSpotRestClient::fetch_trades("BTC_USDT").unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 
     #[test]
     fn test_l2_snapshot() {
         let text = MexcSpotRestClient::fetch_l2_snapshot("BTC_USDT").unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 }
 
@@ -23,12 +23,12 @@ mod mexc_swap {
     #[test]
     fn test_trades() {
         let text = MexcSwapRestClient::fetch_trades("BTC_USDT").unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 
     #[test]
     fn test_l2_snapshot() {
         let text = fetch_l2_snapshot("mexc", MarketType::LinearSwap, "BTC_USDT", Some(3)).unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 }

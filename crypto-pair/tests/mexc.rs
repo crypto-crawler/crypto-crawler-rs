@@ -7,7 +7,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use utils::http_get;
 
-const EXCHANGE_NAME: &'static str = "mexc";
+const EXCHANGE_NAME: &str = "mexc";
 
 #[test]
 fn verify_spot_symbols() {

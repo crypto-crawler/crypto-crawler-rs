@@ -162,10 +162,8 @@ mod tests {
         let translator = super::CoinbaseProCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![
-                ("matches".to_string(), "BTC-USD".to_string()),
-                ("matches".to_string(), "ETH-USD".to_string()),
-            ],
+            &[("matches".to_string(), "BTC-USD".to_string()),
+                ("matches".to_string(), "ETH-USD".to_string())],
         );
 
         assert_eq!(1, commands.len());
@@ -180,10 +178,8 @@ mod tests {
         let translator = super::CoinbaseProCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![
-                ("matches".to_string(), "BTC-USD".to_string()),
-                ("level2".to_string(), "BTC-USD".to_string()),
-            ],
+            &[("matches".to_string(), "BTC-USD".to_string()),
+                ("level2".to_string(), "BTC-USD".to_string())],
         );
 
         assert_eq!(1, commands.len());

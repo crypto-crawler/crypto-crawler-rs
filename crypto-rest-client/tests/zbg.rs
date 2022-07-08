@@ -25,8 +25,8 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     );
 
     let data = obj.get("datas").unwrap().as_object().unwrap();
-    assert!(data.get("asks").unwrap().as_array().unwrap().len() > 0);
-    assert!(data.get("bids").unwrap().as_array().unwrap().len() > 0);
+    assert!(!data.get("asks").unwrap().as_array().unwrap().is_empty());
+    assert!(!data.get("bids").unwrap().as_array().unwrap().is_empty());
 }
 
 #[test_case(MarketType::InverseSwap, "BTC_USD-R")]

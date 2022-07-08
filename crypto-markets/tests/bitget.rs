@@ -25,7 +25,7 @@ fn fetch_spot_symbols() {
         );
         assert_eq!(
             MarketType::Spot,
-            get_market_type(&symbol, EXCHANGE_NAME, None)
+            get_market_type(symbol, EXCHANGE_NAME, None)
         );
     }
 }
@@ -38,7 +38,7 @@ fn fetch_inverse_swap_symbols() {
         assert!(symbol.ends_with("USD_DMCBL"));
         assert_eq!(
             MarketType::InverseSwap,
-            get_market_type(&symbol, EXCHANGE_NAME, None)
+            get_market_type(symbol, EXCHANGE_NAME, None)
         );
     }
 }
@@ -51,7 +51,7 @@ fn fetch_linear_swap_symbols() {
         assert!(symbol.ends_with("USDT_UMCBL"));
         assert_eq!(
             MarketType::LinearSwap,
-            get_market_type(&symbol, EXCHANGE_NAME, None)
+            get_market_type(symbol, EXCHANGE_NAME, None)
         );
     }
 }

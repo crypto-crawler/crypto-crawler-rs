@@ -8,10 +8,8 @@ async fn subscribe() {
     gen_test_code!(
         CoinbaseProWSClient,
         subscribe,
-        &vec![
-            ("matches".to_string(), "BTC-USD".to_string()),
-            ("heartbeat".to_string(), "BTC-USD".to_string())
-        ]
+        &[("matches".to_string(), "BTC-USD".to_string()),
+            ("heartbeat".to_string(), "BTC-USD".to_string())]
     );
 }
 
@@ -21,7 +19,7 @@ async fn subscribe_illegal_symbol() {
     gen_test_code!(
         CoinbaseProWSClient,
         subscribe,
-        &vec![("matches".to_string(), "XXX-YYY".to_string())]
+        &[("matches".to_string(), "XXX-YYY".to_string())]
     );
 }
 
@@ -30,7 +28,7 @@ async fn subscribe_raw_json() {
     gen_test_code!(
         CoinbaseProWSClient,
         send,
-        &vec![r#"{
+        &[r#"{
                 "type":"subscribe",
                 "channels":[
                    {
@@ -56,7 +54,7 @@ async fn subscribe_trade() {
     gen_test_code!(
         CoinbaseProWSClient,
         subscribe_trade,
-        &vec!["BTC-USD".to_string(), "ETH-USD".to_string()]
+        &["BTC-USD".to_string(), "ETH-USD".to_string()]
     );
 }
 
@@ -65,7 +63,7 @@ async fn subscribe_ticker() {
     gen_test_code!(
         CoinbaseProWSClient,
         subscribe_ticker,
-        &vec!["BTC-USD".to_string(), "ETH-USD".to_string()]
+        &["BTC-USD".to_string(), "ETH-USD".to_string()]
     );
 }
 
@@ -74,7 +72,7 @@ async fn subscribe_orderbook() {
     gen_test_code!(
         CoinbaseProWSClient,
         subscribe_orderbook,
-        &vec!["BTC-USD".to_string()]
+        &["BTC-USD".to_string()]
     );
 }
 
@@ -83,6 +81,6 @@ async fn subscribe_l3_orderbook() {
     gen_test_code!(
         CoinbaseProWSClient,
         subscribe_l3_orderbook,
-        &vec!["BTC-USD".to_string()]
+        &["BTC-USD".to_string()]
     );
 }
