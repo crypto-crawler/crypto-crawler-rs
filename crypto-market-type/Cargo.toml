@@ -9,6 +9,6 @@ repository = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/cryp
 keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
-serde = { version = "1.0.137", features = ["derive"] }
-strum = "0.24.0"
-strum_macros = "0.24.0"
+serde = { version = "1.0.138", features = ["derive"] }
+strum = "0.24.1"
+strum_macros = "0.24.2"
