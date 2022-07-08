@@ -147,7 +147,7 @@ impl CommandTranslator for BitmexCommandTranslator {
         let n = topics.len();
         for i in (0..n).step_by(MAX_CHANNELS_PER_COMMAND) {
             let chunk: Vec<(String, String)> =
-                (&topics[i..(std::cmp::min(i + MAX_CHANNELS_PER_COMMAND, n))]).to_vec();
+                (topics[i..(std::cmp::min(i + MAX_CHANNELS_PER_COMMAND, n))]).to_vec();
             commands.push(Self::topics_to_command(&chunk, subscribe));
         }
 

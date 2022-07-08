@@ -5,13 +5,13 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
         let pos = symbol.find('_').unwrap();
         let pair = &symbol[..pos];
         if pair.ends_with("USDT") {
-            return Some(format!("{}/USDT", pair.strip_suffix("USDT").unwrap()));
+            Some(format!("{}/USDT", pair.strip_suffix("USDT").unwrap()))
         } else if pair.ends_with("USD") {
-            return Some(format!("{}/USD", pair.strip_suffix("USD").unwrap()));
+            Some(format!("{}/USD", pair.strip_suffix("USD").unwrap()))
         } else if pair.ends_with("ETH") {
-            return Some(format!("{}/ETH", pair.strip_suffix("ETH").unwrap()));
+            Some(format!("{}/ETH", pair.strip_suffix("ETH").unwrap()))
         } else if pair.ends_with("BTC") {
-            return Some(format!("{}/BTC", pair.strip_suffix("BTC").unwrap()));
+            Some(format!("{}/BTC", pair.strip_suffix("BTC").unwrap()))
         } else {
             panic!("Failed to parse {}", symbol);
         }

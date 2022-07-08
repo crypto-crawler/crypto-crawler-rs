@@ -661,3 +661,34 @@ impl PartialOrd for Message {
         }
     }
 }
+
+impl Ord for Message {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        match self {
+            Message::Trade(ref a) => match other {
+                Message::Trade(ref b) => a.cmp(b),
+                _ => std::cmp::Ordering::Less,
+            },
+            Message::L2Event(ref a) => match other {
+                Message::L2Event(ref b) => a.cmp(b),
+                _ => std::cmp::Ordering::Less,
+            },
+            Message::Bbo(ref a) => match other {
+                Message::Bbo(ref b) => a.cmp(b),
+                _ => std::cmp::Ordering::Less,
+            },
+            Message::Ticker(ref a) => match other {
+                Message::Ticker(ref b) => a.cmp(b),
+                _ => std::cmp::Ordering::Less,
+            },
+            Message::Candlestick(ref a) => match other {
+                Message::Candlestick(ref b) => a.cmp(b),
+                _ => std::cmp::Ordering::Less,
+            },
+            Message::FundingRate(ref a) => match other {
+                Message::FundingRate(ref b) => a.cmp(b),
+                _ => std::cmp::Ordering::Less,
+            },
+        }
+    }
+}

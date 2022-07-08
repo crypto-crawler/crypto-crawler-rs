@@ -9,7 +9,7 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
         // inverse swap
         let base = symbol.strip_suffix("USD").unwrap();
         (base, "USD")
-    } else if (&symbol[symbol.len() - 2..]).parse::<i64>().is_ok() {
+    } else if symbol[symbol.len() - 2..].parse::<i64>().is_ok() {
         // inverse future
         let base = &symbol[..symbol.len() - 6];
         (base, "USD")
@@ -24,7 +24,7 @@ pub(crate) fn get_market_type(symbol: &str) -> MarketType {
         MarketType::LinearSwap
     } else if symbol.ends_with("USD") {
         MarketType::InverseSwap
-    } else if (&symbol[symbol.len() - 2..]).parse::<i64>().is_ok() {
+    } else if symbol[symbol.len() - 2..].parse::<i64>().is_ok() {
         MarketType::InverseFuture
     } else {
         MarketType::Unknown

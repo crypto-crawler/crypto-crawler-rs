@@ -193,8 +193,8 @@ mod trade {
         assert_eq!(trade.timestamp, 1646138219181);
         assert_eq!(trade.price, 0.001);
         assert_eq!(trade.quantity_contract, Some(85.0));
-        assert_eq!(trade.quantity_base, 85.0 * 0.1);
-        assert_eq!(trade.quantity_quote, 85.0 * 0.1 * 0.001);
+        assert_eq!(trade.quantity_base, 85.0);
+        assert_eq!(trade.quantity_quote, 85.0 * 0.001);
         assert_eq!(trade.side, TradeSide::Buy);
     }
 }
@@ -475,8 +475,8 @@ mod l2_event {
 
         assert_eq!(orderbook.asks[0].price, 0.0005);
         assert_eq!(orderbook.asks[0].quantity_contract, Some(305.0));
-        assert_eq!(orderbook.asks[0].quantity_base, 305.0 * 0.1);
-        assert_eq!(orderbook.asks[0].quantity_quote, 305.0 * 0.1 * 0.0005);
+        assert_eq!(orderbook.asks[0].quantity_base, 305.0);
+        assert_eq!(orderbook.asks[0].quantity_quote, 305.0 * 0.0005);
     }
 }
 

@@ -290,7 +290,7 @@ fn fetch_linear_contract_sizes() -> BTreeMap<String, f64> {
 pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<f64> {
     match market_type {
         MarketType::InverseSwap => Some(if pair.starts_with("BTC") { 100.0 } else { 10.0 }),
-        MarketType::LinearSwap => Some(LINEAR_CONTRACT_VALUES.get(pair).expect(pair).clone()),
+        MarketType::LinearSwap => Some(*LINEAR_CONTRACT_VALUES.get(pair).expect(pair)),
         _ => None,
     }
 }

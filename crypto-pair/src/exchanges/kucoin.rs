@@ -32,7 +32,7 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
             symbol.strip_suffix("USDTM").unwrap().to_string(),
             "USDT".to_string(),
         )
-    } else if (&symbol[(symbol.len() - 2)..]).parse::<i64>().is_ok() {
+    } else if symbol[(symbol.len() - 2)..].parse::<i64>().is_ok() {
         // inverse future
         let base = &symbol[..symbol.len() - 4];
         (base.to_string(), "USD".to_string())
@@ -56,7 +56,7 @@ pub(crate) fn get_market_type(symbol: &str) -> MarketType {
         MarketType::InverseSwap
     } else if symbol.ends_with("USDTM") {
         MarketType::LinearSwap
-    } else if (&symbol[(symbol.len() - 2)..]).parse::<i64>().is_ok() {
+    } else if symbol[(symbol.len() - 2)..].parse::<i64>().is_ok() {
         MarketType::InverseFuture
     } else if symbol.contains('-') {
         MarketType::Spot

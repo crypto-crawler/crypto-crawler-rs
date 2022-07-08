@@ -106,7 +106,7 @@ fn fetch_inverse_future_symbols() -> Result<Vec<String>> {
     let symbols = fetch_markets_raw()?
         .into_iter()
         .filter(|m| {
-            m.quote_currency == "USD" && (&m.name[(m.name.len() - 2)..]).parse::<i64>().is_ok()
+            m.quote_currency == "USD" && m.name[(m.name.len() - 2)..].parse::<i64>().is_ok()
         })
         .map(|m| m.name)
         .collect::<Vec<String>>();
@@ -119,7 +119,7 @@ fn to_market(raw_market: &BybitMarket) -> Market {
         let v: Vec<&str> = pair.split('/').collect();
         (v[0].to_string(), v[1].to_string())
     };
-    let delivery_date: Option<u64> = if (&raw_market.name[(raw_market.name.len() - 2)..])
+    let delivery_date: Option<u64> = if raw_market.name[(raw_market.name.len() - 2)..]
         .parse::<i64>()
         .is_ok()
     {
@@ -218,7 +218,7 @@ fn fetch_inverse_future_markets() -> Result<Vec<Market>> {
     let markets = fetch_markets_raw()?
         .into_iter()
         .filter(|m| {
-            m.quote_currency == "USD" && (&m.name[(m.name.len() - 2)..]).parse::<i64>().is_ok()
+            m.quote_currency == "USD" && m.name[(m.name.len() - 2)..].parse::<i64>().is_ok()
         })
         .map(|m| to_market(&m))
         .collect::<Vec<Market>>();
