@@ -4,8 +4,7 @@ use governor::{Quota, RateLimiter};
 use log::*;
 use nonzero_ext::*;
 use reqwest::Url;
-use std::env;
-use std::num::NonZeroU32;
+use std::{env, num::NonZeroU32};
 use tokio::{
     io::{AsyncRead, AsyncWrite},
     sync::mpsc::{Receiver, Sender},

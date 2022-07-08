@@ -175,7 +175,7 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
     for x in swap.iter() {
         assert_eq!("FundingRate", x.fairMethod.as_str());
         assert!(x.expiry.is_none()); // TODO: BitMEX data is not correct, comment it for now
-        assert!((&x.symbol[x.symbol.len() - 1..]).parse::<i32>().is_err());
+        assert!(x.symbol[x.symbol.len() - 1..].parse::<i32>().is_err());
         if let Some(pos) = x.symbol.rfind('_') {
             // e.g., ETHUSD_ETH
             assert_eq!(
@@ -192,9 +192,9 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
         assert!(x.expiry.is_some());
         if let Some(pos) = x.symbol.rfind('_') {
             // e.g., ETHUSDM22_ETH
-            assert!((&x.symbol[pos - 2..pos]).parse::<i32>().is_ok());
+            assert!(x.symbol[pos - 2..pos].parse::<i32>().is_ok());
         } else {
-            assert!((&x.symbol[x.symbol.len() - 2..]).parse::<i32>().is_ok());
+            assert!(x.symbol[x.symbol.len() - 2..].parse::<i32>().is_ok());
         }
     }
     // Inverse

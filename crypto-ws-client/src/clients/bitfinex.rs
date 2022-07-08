@@ -257,7 +257,7 @@ impl MessageHandler for BitfinexMessageHandler {
             } else {
                 // replace CHANNEL_ID with meta info
                 let i = txt.find(',').unwrap(); // first comma, for example, te, tu, see https://blog.bitfinex.com/api/websocket-api-update/
-                let channel_id = (&txt[1..i]).parse::<i64>().unwrap();
+                let channel_id = (txt[1..i]).parse::<i64>().unwrap();
                 if let Some(channel_info) = self.channel_id_meta.get(&channel_id) {
                     let new_txt = format!("[{}{}", channel_info, &txt[i..]);
                     MiscMessage::Mutated(new_txt)

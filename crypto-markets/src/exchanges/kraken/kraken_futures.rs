@@ -130,7 +130,7 @@ fn fetch_futures_markets() -> Result<Vec<Market>> {
             };
             let (base_id, quote_id) = {
                 let pos = m.symbol.find("usd").unwrap();
-                ((&m.symbol[3..pos]).to_string(), "usd".to_string())
+                (m.symbol[3..pos].to_string(), "usd".to_string())
             };
             Market {
                 exchange: "kraken".to_string(),
