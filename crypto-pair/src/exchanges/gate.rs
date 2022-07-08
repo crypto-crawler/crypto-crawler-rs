@@ -21,7 +21,7 @@ pub(crate) fn get_market_type(symbol: &str, is_spot: Option<bool>) -> MarketType
         } else {
             MarketType::LinearSwap
         }
-    } else if symbol.len() > 8 && (&symbol[(symbol.len() - 8)..]).parse::<i64>().is_ok() {
+    } else if symbol.len() > 8 && symbol[(symbol.len() - 8)..].parse::<i64>().is_ok() {
         if symbol.contains("_USD_") {
             MarketType::InverseFuture
         } else if symbol.contains("_USDT_") {

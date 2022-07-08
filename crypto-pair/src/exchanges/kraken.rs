@@ -50,7 +50,7 @@ fn fetch_spot_quotes() -> BTreeSet<String> {
             .map(|m| m.quote)
             .map(|s| {
                 if s.len() > 3 && (s.starts_with('X') || s.starts_with('Z')) {
-                    (&s[1..]).to_string()
+                    s[1..].to_string()
                 } else {
                     s
                 }
@@ -104,7 +104,7 @@ pub(crate) fn normalize_pair(symbol: &str) -> Option<String> {
         } else {
             panic!("Can not find usd or USD in symbol: {}", symbol);
         };
-        let base = (&symbol[3..pos]).to_uppercase();
+        let base = symbol[3..pos].to_uppercase();
         Some(format!("{}/USD", normalize_currency(&base),))
     } else if SPOT_QUOTES.contains(&symbol[(symbol.len() - 4)..]) {
         let base = &symbol[..(symbol.len() - 4)];

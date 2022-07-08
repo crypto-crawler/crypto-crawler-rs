@@ -89,7 +89,7 @@ fn fetch_linear_future_symbols() -> Result<Vec<String>> {
             x.type_ == "future"
                 && !x.name.ends_with("-PERP")
                 && !x.name.contains("-MOVE-")
-                && (&x.name[(x.name.len() - 4)..]).parse::<u32>().is_ok()
+                && x.name[(x.name.len() - 4)..].parse::<u32>().is_ok()
                 && x.name.contains('-')
         })
         .map(|x| x.name)
@@ -140,7 +140,7 @@ fn to_market(raw_market: &FtxMarket) -> Market {
     } else {
         panic!("Unsupported type: {}", raw_market.type_);
     };
-    let delivery_date: Option<u64> = if (&raw_market.name[(raw_market.name.len() - 4)..])
+    let delivery_date: Option<u64> = if raw_market.name[(raw_market.name.len() - 4)..]
         .parse::<u32>()
         .is_ok()
     {
@@ -245,7 +245,7 @@ fn fetch_linear_future_markets() -> Result<Vec<Market>> {
             x.type_ == "future"
                 && !x.name.ends_with("-PERP")
                 && !x.name.contains("-MOVE-")
-                && (&x.name[(x.name.len() - 4)..]).parse::<u32>().is_ok()
+                && x.name[(x.name.len() - 4)..].parse::<u32>().is_ok()
                 && x.name.contains('-')
         })
         .map(|x| to_market(&x))
