@@ -8,7 +8,7 @@ use std::str::FromStr;
 use strum_macros::{Display, EnumString};
 
 /// Message represents multiple types of messages.
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Ord)]
 pub enum Message {
     Trade(TradeMsg),
     Bbo(BboMsg),
