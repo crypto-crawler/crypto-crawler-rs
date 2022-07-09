@@ -1,5 +1,5 @@
 mod order;
-mod proto;
+pub mod proto;
 
 pub use crate::order::Order;
 use crypto_market_type::MarketType;
