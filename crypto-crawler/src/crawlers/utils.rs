@@ -638,7 +638,7 @@ pub(crate) fn create_conversion_thread(
     tx: Sender<Message>,
 ) -> Sender<String> {
     let (tx_raw, rx_raw) = std::sync::mpsc::channel();
-    tokio::task::spawn_blocking( move || {
+    tokio::task::spawn_blocking(move || {
         for json in rx_raw {
             let msg = Message::new(exchange.clone(), market_type, msg_type, json);
             if tx.send(msg).is_err() {
