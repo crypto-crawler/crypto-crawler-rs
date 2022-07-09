@@ -1,4 +1,5 @@
 mod order;
+mod proto;
 
 pub use crate::order::Order;
 use crypto_market_type::MarketType;
@@ -284,6 +285,57 @@ impl TradeMsg {
             json: v[7].to_string(),
         }
     }
+
+    /// Convert to a protobuf message.
+    pub fn to_proto(&self) -> crate::proto::Trade {
+        let mut proto_msg = crate::proto::Trade::new();
+        let timestamp = proto_msg.timestamp.as_mut().unwrap();
+        timestamp.seconds = self.timestamp / 1000_i64;
+        timestamp.nanos = (self.timestamp % 1000 * 1000000) as i32;
+        proto_msg.side = self.side == TradeSide::Sell;
+        proto_msg.price = self.price as f32;
+        proto_msg.quantity_base = self.quantity_base as f32;
+        proto_msg.quantity_quote = self.quantity_quote as f32;
+        proto_msg.quantity_contract = self.quantity_contract.map(|x| x as f32);
+
+        proto_msg
+    }
+
+    /// Convert from a protobuf message.
+    pub fn from_proto(
+        exchange: &str,
+        market_type: &str,
+        msg_type: &str,
+        pair: &str,
+        symbol: &str,
+        proto_msg: &crate::proto::Trade,
+    ) -> Self {
+        let market_type = MarketType::from_str(market_type).unwrap();
+        let msg_type = MessageType::from_str(msg_type).unwrap();
+        let side = if proto_msg.side {
+            TradeSide::Sell
+        } else {
+            TradeSide::Buy
+        };
+        let timestamp =
+            proto_msg.timestamp.seconds * 1000 + (proto_msg.timestamp.nanos / 1000000) as i64;
+
+        TradeMsg {
+            exchange: exchange.to_string(),
+            market_type,
+            msg_type,
+            pair: pair.to_string(),
+            symbol: symbol.to_string(),
+            timestamp,
+            price: proto_msg.price as f64,
+            quantity_base: proto_msg.quantity_base as f64,
+            quantity_quote: proto_msg.quantity_quote as f64,
+            quantity_contract: proto_msg.quantity_contract.map(|x| x as f64),
+            side,
+            trade_id: "".to_string(),
+            json: "".to_string(),
+        }
+    }
 }
 
 impl OrderBookMsg {
@@ -341,6 +393,91 @@ impl OrderBookMsg {
             bids,
             seq_id,
             prev_seq_id,
+            json: "".to_string(),
+        }
+    }
+
+    /// Convert to a protobuf message.
+    pub fn to_proto(&self) -> crate::proto::Orderbook {
+        let mut proto_msg = crate::proto::Orderbook::new();
+        let timestamp = proto_msg.timestamp.as_mut().unwrap();
+        timestamp.seconds = self.timestamp / 1000_i64;
+        timestamp.nanos = (self.timestamp % 1000 * 1000000) as i32;
+        proto_msg.snapshot = self.snapshot;
+        proto_msg.asks = proto_msg
+            .asks
+            .iter()
+            .map(|order| {
+                let mut o = crate::proto::Order::new();
+                o.price = order.price as f32;
+                o.quantity_base = order.quantity_base as f32;
+                o.quantity_quote = order.quantity_quote as f32;
+                o.quantity_contract = order.quantity_contract.map(|x| x as f32);
+                o
+            })
+            .collect();
+        proto_msg.bids = proto_msg
+            .bids
+            .iter()
+            .map(|order| {
+                let mut o = crate::proto::Order::new();
+                o.price = order.price as f32;
+                o.quantity_base = order.quantity_base as f32;
+                o.quantity_quote = order.quantity_quote as f32;
+                o.quantity_contract = order.quantity_contract.map(|x| x as f32);
+                o
+            })
+            .collect();
+
+        proto_msg
+    }
+
+    /// Convert from a protobuf message.
+    pub fn from_proto(
+        exchange: &str,
+        market_type: &str,
+        msg_type: &str,
+        pair: &str,
+        symbol: &str,
+        proto_msg: &crate::proto::Orderbook,
+    ) -> Self {
+        let market_type = MarketType::from_str(market_type).unwrap();
+        let msg_type = MessageType::from_str(msg_type).unwrap();
+        let timestamp =
+            proto_msg.timestamp.seconds * 1000 + (proto_msg.timestamp.nanos / 1000000) as i64;
+        let asks = proto_msg
+            .asks
+            .iter()
+            .map(|order| Order {
+                price: order.price as f64,
+                quantity_base: order.quantity_base as f64,
+                quantity_quote: order.quantity_quote as f64,
+                quantity_contract: order.quantity_contract.map(|x| x as f64),
+            })
+            .collect();
+        let bids = proto_msg
+            .bids
+            .iter()
+            .map(|order| Order {
+                price: order.price as f64,
+                quantity_base: order.quantity_base as f64,
+                quantity_quote: order.quantity_quote as f64,
+                quantity_contract: order.quantity_contract.map(|x| x as f64),
+            })
+            .collect();
+
+        OrderBookMsg {
+            exchange: exchange.to_string(),
+            market_type,
+            msg_type,
+            pair: pair.to_string(),
+            symbol: symbol.to_string(),
+            timestamp,
+            snapshot: proto_msg.snapshot,
+            asks,
+            bids,
+            seq_id: None,
+            prev_seq_id: None,
             json: "".to_string(),
         }
     }

@@ -1,0 +1,72 @@
+syntax = "proto3";
+package crypto_crawler;
+
+import "google/protobuf/timestamp.proto";
+
+
+// Tick-by-tick trade message.
+message Trade {
+  google.protobuf.Timestamp timestamp = 1;
+  // Which side is taker? True, seller is taker; False, buyer is taker
+  bool side = 2;
+  float price = 3;
+  // Number of base coins, 0 means delete
+  float quantity_base = 4;
+  // Number of quote coins, 0 means delete
+  float quantity_quote = 5;
+  // Number of contracts, empty for spot markets
+  optional float quantity_contract = 6;
+}
+
+// Level2 orderbook.
+message Orderbook {
+  message Order {
+    float price = 1;
+    // Number of base coins, 0 means delete
+    float quantity_base = 2;
+    // Number of quote coins, 0 means delete
+    float quantity_quote = 3;
+    // Number of contracts, empty for spot markets
+    optional float quantity_contract = 4;
+  }
+  google.protobuf.Timestamp timestamp = 1;
+  // snapshot or updates
+  bool snapshot = 2;
+  // sorted in ascending order by price if snapshot=true, otherwise not sorted
+  repeated Order asks = 3;
+  // sorted in descending order by price if snapshot=true, otherwise not sorted
+  repeated Order bids = 4;
+}
+
+// Best bid and offer.
+message Bbo {
+  google.protobuf.Timestamp timestamp = 1;
+  float bid_price = 2;
+  float bid_quantity_base = 3;
+  float bid_quantity_quote = 4;
+  optional float bid_quantity_contract = 5;
+  float ask_price = 6;
+  float ask_quantity_base = 7;
+  float ask_quantity_quote = 8;
+  optional float ask_quantity_contract = 9;
+}
+
+// 24hr rolling window ticker.
+message Ticker {
+  google.protobuf.Timestamp timestamp = 1;
+  float open = 2;
+  float high = 3;
+  float low = 4;
+  float close = 5;
+  float volume = 6;
+  float quote_volume = 7;
+  optional float last_quantity = 8;
+  optional float best_bid_price = 9;
+  optional float best_bid_quantity = 10;
+  optional float best_ask_price = 11;
+  optional float best_ask_quantity = 12;
+  // availale in Futures and Swap markets
+  optional float open_interest = 13;
+  // availale in Futures and Swap markets
+  optional float open_interest_quote = 14;
+}
