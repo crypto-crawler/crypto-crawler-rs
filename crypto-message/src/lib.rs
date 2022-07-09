@@ -13,7 +13,7 @@ use strum_macros::{Display, EnumString};
 pub enum Message {
     Trade(TradeMsg),
     Bbo(BboMsg),
-    L2Event(OrderBookMsg),
+    Level2(OrderBookMsg), // Level2, L2TopK, L2Snapshot
     FundingRate(FundingRateMsg),
     Candlestick(CandlestickMsg),
     Ticker(TickerMsg),
@@ -531,7 +531,7 @@ mod tests {
             market_type: MarketType::LinearSwap,
             symbol: "BTCUSDT".to_string(),
             pair: "BTC/USDT".to_string(),
-            msg_type: MessageType::L2Event,
+            msg_type: MessageType::Level2,
             timestamp: 1648785270714,
             snapshot: false,
             asks: vec![
@@ -770,8 +770,8 @@ impl PartialOrd for Message {
                 Message::Trade(ref b) => Some(a.cmp(b)),
                 _ => None,
             },
-            Message::L2Event(ref a) => match other {
-                Message::L2Event(ref b) => Some(a.cmp(b)),
+            Message::Level2(ref a) => match other {
+                Message::Level2(ref b) => Some(a.cmp(b)),
                 _ => None,
             },
             Message::Bbo(ref a) => match other {
@@ -801,8 +801,8 @@ impl Ord for Message {
                 Message::Trade(ref b) => a.cmp(b),
                 _ => std::cmp::Ordering::Less,
             },
-            Message::L2Event(ref a) => match other {
-                Message::L2Event(ref b) => a.cmp(b),
+            Message::Level2(ref a) => match other {
+                Message::Level2(ref b) => a.cmp(b),
                 _ => std::cmp::Ordering::Less,
             },
             Message::Bbo(ref a) => match other {
