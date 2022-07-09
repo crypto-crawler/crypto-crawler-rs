@@ -12,7 +12,7 @@ use test_case::test_case;
 #[test_case(MarketType::EuropeanOption, "BTC-USD-220930-10000-P")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     let text = fetch_l2_snapshot("okx", market_type, symbol, Some(3)).unwrap();
-    assert!(text.starts_with("{"));
+    assert!(text.starts_with('{'));
 }
 
 #[test_case(MarketType::InverseFuture, "BTC-USD-220930")]
@@ -24,7 +24,7 @@ fn test_open_interest(market_type: MarketType, symbol: &str) {
     let text = fetch_open_interest("okx", market_type, Some(symbol)).unwrap();
     let json_obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
     let arr = json_obj.get("data").unwrap().as_array().unwrap();
-    assert!(arr.len() > 0);
+    assert!(!arr.is_empty());
 }
 
 #[cfg(test)]

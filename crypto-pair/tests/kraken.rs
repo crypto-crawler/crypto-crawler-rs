@@ -7,7 +7,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use utils::http_get;
 
-const EXCHANGE_NAME: &'static str = "kraken";
+const EXCHANGE_NAME: &str = "kraken";
 
 // https://docs.kraken.com/rest/#operation/getTradableAssetPairs
 #[derive(Clone, Serialize, Deserialize)]
@@ -75,13 +75,12 @@ struct FuturesResponse<T: Sized> {
 fn fetch_futures_markets_raw() -> Vec<FuturesMarket> {
     let txt = http_get("https://futures.kraken.com/derivatives/api/v3/instruments").unwrap();
     let obj = serde_json::from_str::<FuturesResponse<FuturesMarket>>(&txt).unwrap();
-    let markets = obj
-        .instruments
+
+    obj.instruments
         .into_iter()
         .filter(|x| x.tradeable)
         .filter(|m| m.symbol.starts_with("pi_") || m.symbol.starts_with("fi_"))
-        .collect::<Vec<FuturesMarket>>();
-    markets
+        .collect::<Vec<FuturesMarket>>()
 }
 
 #[test]

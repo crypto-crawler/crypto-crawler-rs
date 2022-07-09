@@ -250,8 +250,8 @@ mod tests {
     #[test]
     fn test_one_symbol() {
         let translator = super::KrakenCommandTranslator {};
-        let commands = translator
-            .translate_to_commands(true, &vec![("trade".to_string(), "XBT/USD".to_string())]);
+        let commands =
+            translator.translate_to_commands(true, &[("trade".to_string(), "XBT/USD".to_string())]);
 
         assert_eq!(1, commands.len());
         assert_eq!(
@@ -265,7 +265,7 @@ mod tests {
         let translator = super::KrakenCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![
+            &[
                 ("trade".to_string(), "XBT/USD".to_string()),
                 ("trade".to_string(), "ETH/USD".to_string()),
             ],

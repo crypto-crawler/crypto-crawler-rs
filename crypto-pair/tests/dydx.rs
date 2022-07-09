@@ -7,7 +7,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use utils::http_get;
 
-const EXCHANGE_NAME: &'static str = "dydx";
+const EXCHANGE_NAME: &str = "dydx";
 
 #[derive(Clone, Serialize, Deserialize)]
 #[allow(non_snake_case)]

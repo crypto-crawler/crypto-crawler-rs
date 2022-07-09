@@ -7,7 +7,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use utils::http_get;
 
-const EXCHANGE_NAME: &'static str = "zb";
+const EXCHANGE_NAME: &str = "zb";
 
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
@@ -32,7 +32,7 @@ fn fetch_swap_markets(url: &str) -> Vec<SwapMarket> {
     let txt = http_get(url).unwrap();
     let resp = serde_json::from_str::<Response>(&txt).unwrap();
     if resp.code == 1000 {
-        return resp.data;
+        resp.data
     } else {
         Vec::new()
     }

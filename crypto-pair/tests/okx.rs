@@ -7,7 +7,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use utils::http_get;
 
-const EXCHANGE_NAME: &'static str = "okx";
+const EXCHANGE_NAME: &str = "okx";
 
 // see <https://www.okx.com/docs-v5/en/#rest-api-public-data-get-instruments>
 #[derive(Serialize, Deserialize)]
@@ -38,7 +38,7 @@ fn fetch_raw_markets_raw(inst_type: &str) -> Vec<RawMarket> {
             let data = json_obj.get("data").unwrap().as_array().unwrap()[0]
                 .as_array()
                 .unwrap();
-            data.into_iter()
+            data.iter()
                 .map(|x| x.as_str().unwrap().to_string())
                 .collect::<Vec<String>>()
         };

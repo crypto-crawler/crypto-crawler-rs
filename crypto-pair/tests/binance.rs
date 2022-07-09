@@ -7,7 +7,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use utils::http_get;
 
-const EXCHANGE_NAME: &'static str = "binance";
+const EXCHANGE_NAME: &str = "binance";
 #[derive(Serialize, Deserialize)]
 struct BinanceResponse<T: Sized> {
     symbols: Vec<T>,

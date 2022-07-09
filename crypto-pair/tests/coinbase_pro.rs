@@ -5,7 +5,7 @@ use crypto_pair::{get_market_type, normalize_currency, normalize_pair};
 use serde::{Deserialize, Serialize};
 use utils::http_get;
 
-const EXCHANGE_NAME: &'static str = "coinbase_pro";
+const EXCHANGE_NAME: &str = "coinbase_pro";
 
 #[derive(Serialize, Deserialize)]
 struct SpotMarket {

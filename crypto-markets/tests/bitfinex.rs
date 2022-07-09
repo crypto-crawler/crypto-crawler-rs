@@ -21,7 +21,7 @@ fn fetch_spot_symbols() {
         assert!(symbol.starts_with('t'));
         assert_eq!(
             MarketType::Spot,
-            get_market_type(&symbol, EXCHANGE_NAME, None)
+            get_market_type(symbol, EXCHANGE_NAME, None)
         );
     }
 }
@@ -39,7 +39,7 @@ fn fetch_linear_swap_symbols() {
         );
         assert_eq!(
             MarketType::LinearSwap,
-            get_market_type(&symbol, EXCHANGE_NAME, None)
+            get_market_type(symbol, EXCHANGE_NAME, None)
         );
     }
 }

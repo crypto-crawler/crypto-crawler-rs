@@ -7,7 +7,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use utils::http_get;
 
-const EXCHANGE_NAME: &'static str = "bybit";
+const EXCHANGE_NAME: &str = "bybit";
 
 #[derive(Serialize, Deserialize)]
 struct BybitMarket {

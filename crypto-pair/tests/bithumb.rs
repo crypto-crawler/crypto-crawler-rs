@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 use crypto_pair::{get_market_type, normalize_pair};
 
-const EXCHANGE_NAME: &'static str = "bithumb";
+const EXCHANGE_NAME: &str = "bithumb";
 
 #[test]
 fn verify_spot_symbols() {

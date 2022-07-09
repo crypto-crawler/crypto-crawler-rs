@@ -6,7 +6,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use utils::http_get;
 
-const EXCHANGE_NAME: &'static str = "ftx";
+const EXCHANGE_NAME: &str = "ftx";
 
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
@@ -43,9 +43,7 @@ fn verify_all_symbols() {
             // spot
             market.name.clone()
         } else if market.type_ == "future" {
-            if market.name.ends_with("-PERP") {
-                format!("{}/USD", market.underlying.clone().unwrap())
-            } else if market.name.contains("-MOVE-") {
+            if market.name.ends_with("-PERP") || market.name.contains("-MOVE-") {
                 format!("{}/USD", market.underlying.clone().unwrap())
             } else if market.name.contains("BVOL/") {
                 format!(

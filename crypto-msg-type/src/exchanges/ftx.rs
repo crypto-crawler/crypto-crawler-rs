@@ -48,8 +48,8 @@ mod tests {
     #[test]
     fn single_msg_type_multiple_symbols() {
         let commands = get_ws_commands(
-            &vec![MessageType::Trade],
-            &vec!["BTC/USD".to_string(), "BTC-PERP".to_string()],
+            &[MessageType::Trade],
+            &["BTC/USD".to_string(), "BTC-PERP".to_string()],
             true,
             None,
         );
@@ -68,8 +68,8 @@ mod tests {
     #[test]
     fn multiple_msg_types_single_symbol() {
         let commands = get_ws_commands(
-            &vec![MessageType::Trade, MessageType::L2Event],
-            &vec!["BTC-PERP".to_string()],
+            &[MessageType::Trade, MessageType::L2Event],
+            &["BTC-PERP".to_string()],
             true,
             None,
         );

@@ -7,7 +7,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use utils::http_get;
 
-const EXCHANGE_NAME: &'static str = "gate";
+const EXCHANGE_NAME: &str = "gate";
 
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
@@ -89,7 +89,7 @@ fn verify_future_symbols() {
     let markets = fetch_future_markets_raw("usdt");
     for market in markets.iter() {
         let pair = normalize_pair(&market.name, EXCHANGE_NAME).unwrap();
-        let pair_expected = market.underlying.replace("_", "/");
+        let pair_expected = market.underlying.replace('_', "/");
 
         assert_eq!(pair, pair_expected);
 

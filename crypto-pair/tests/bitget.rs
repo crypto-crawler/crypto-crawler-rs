@@ -7,7 +7,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use utils::http_get;
 
-const EXCHANGE_NAME: &'static str = "bitget";
+const EXCHANGE_NAME: &str = "bitget";
 
 // See https://bitgetlimited.github.io/apidoc/en/spot/#get-all-instruments
 #[derive(Clone, Serialize, Deserialize)]

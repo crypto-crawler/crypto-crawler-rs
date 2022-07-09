@@ -7,7 +7,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use utils::http_get;
 
-const EXCHANGE_NAME: &'static str = "bitstamp";
+const EXCHANGE_NAME: &str = "bitstamp";
 
 #[derive(Serialize, Deserialize)]
 struct SpotMarket {

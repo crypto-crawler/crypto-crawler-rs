@@ -22,7 +22,7 @@ fn fetch_spot_symbols() {
         assert_eq!(symbol.to_string(), symbol.to_uppercase());
         assert_eq!(
             MarketType::Spot,
-            get_market_type(&symbol, EXCHANGE_NAME, None)
+            get_market_type(symbol, EXCHANGE_NAME, None)
         );
     }
 }

@@ -157,8 +157,8 @@ mod tests {
     #[test]
     fn test_one_topic() {
         let translator = super::BitgetCommandTranslator::<'S'> {};
-        let commands = translator
-            .translate_to_commands(true, &vec![("trade".to_string(), "BTCUSDT".to_string())]);
+        let commands =
+            translator.translate_to_commands(true, &[("trade".to_string(), "BTCUSDT".to_string())]);
 
         assert_eq!(1, commands.len());
         assert_eq!(
@@ -172,7 +172,7 @@ mod tests {
         let translator = super::BitgetCommandTranslator::<'S'> {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![
+            &[
                 ("trade".to_string(), "BTCUSDT".to_string()),
                 ("books".to_string(), "ETHUSDT".to_string()),
             ],
@@ -190,7 +190,7 @@ mod tests {
         let translator = super::BitgetCommandTranslator::<'S'> {};
         let commands = translator.translate_to_candlestick_commands(
             true,
-            &vec![("BTCUSDT".to_string(), 60), ("ETHUSDT".to_string(), 300)],
+            &[("BTCUSDT".to_string(), 60), ("ETHUSDT".to_string(), 300)],
         );
 
         assert_eq!(1, commands.len());

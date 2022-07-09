@@ -11,7 +11,7 @@ fn test_trades() {
     assert_eq!(obj.get("code").unwrap().as_str().unwrap(), "0");
 
     let data = obj.get("data").unwrap().as_array().unwrap();
-    assert!(data.len() > 0);
+    assert!(!data.is_empty());
 }
 
 #[test]
@@ -23,6 +23,6 @@ fn test_l2_snapshot() {
     let data = obj.get("data").unwrap().as_object().unwrap();
     let buy = data.get("b").unwrap().as_array().unwrap();
     let sell = data.get("s").unwrap().as_array().unwrap();
-    assert!(buy.len() > 0);
-    assert!(sell.len() > 0);
+    assert!(!buy.is_empty());
+    assert!(!sell.is_empty());
 }

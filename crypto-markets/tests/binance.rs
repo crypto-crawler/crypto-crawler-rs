@@ -21,7 +21,7 @@ fn fetch_spot_symbols() {
         assert_eq!(symbol.to_uppercase(), symbol.to_string());
         assert_eq!(
             MarketType::Spot,
-            get_market_type(&symbol, EXCHANGE_NAME, Some(true))
+            get_market_type(symbol, EXCHANGE_NAME, Some(true))
         );
     }
 }
@@ -39,7 +39,7 @@ fn fetch_inverse_future_symbols() {
         assert_eq!(quote, "USD");
         assert_eq!(
             MarketType::InverseFuture,
-            get_market_type(&symbol, EXCHANGE_NAME, None)
+            get_market_type(symbol, EXCHANGE_NAME, None)
         );
     }
 }
@@ -57,7 +57,7 @@ fn fetch_linear_future_symbols() {
         assert_eq!(quote, "USDT");
         assert_eq!(
             MarketType::LinearFuture,
-            get_market_type(&symbol, EXCHANGE_NAME, None)
+            get_market_type(symbol, EXCHANGE_NAME, None)
         );
     }
 }
@@ -71,7 +71,7 @@ fn fetch_inverse_swap_symbols() {
         assert!(symbol.ends_with("USD_PERP"));
         assert_eq!(
             MarketType::InverseSwap,
-            get_market_type(&symbol, EXCHANGE_NAME, None)
+            get_market_type(symbol, EXCHANGE_NAME, None)
         );
     }
 }
@@ -85,7 +85,7 @@ fn fetch_linear_swap_symbols() {
         assert!(symbol.ends_with("USDT") || symbol.ends_with("BUSD"));
         assert_eq!(
             MarketType::LinearSwap,
-            get_market_type(&symbol, EXCHANGE_NAME, None)
+            get_market_type(symbol, EXCHANGE_NAME, None)
         );
     }
 }
@@ -100,7 +100,7 @@ fn fetch_option_symbols() {
         assert!(symbol.ends_with("-P") || symbol.ends_with("-C"));
         assert_eq!(
             MarketType::EuropeanOption,
-            get_market_type(&symbol, EXCHANGE_NAME, None)
+            get_market_type(symbol, EXCHANGE_NAME, None)
         );
     }
 }

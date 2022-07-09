@@ -65,14 +65,14 @@ mod tests {
     #[test]
     fn test_one_channel() {
         let command =
-            super::topics_to_command(&vec![("trade".to_string(), "BTCUSD".to_string())], true);
+            super::topics_to_command(&[("trade".to_string(), "BTCUSD".to_string())], true);
         assert_eq!(r#"{"op":"subscribe","args":["trade.BTCUSD"]}"#, command);
     }
 
     #[test]
     fn test_multiple_channels() {
         let command = super::topics_to_command(
-            &vec![
+            &[
                 ("trade".to_string(), "BTCUSD".to_string()),
                 ("orderBookL2_25".to_string(), "BTCUSD".to_string()),
                 ("instrument_info.100ms".to_string(), "BTCUSD".to_string()),
