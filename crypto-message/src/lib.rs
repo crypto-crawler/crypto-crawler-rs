@@ -289,9 +289,11 @@ impl TradeMsg {
     /// Convert to a protobuf message.
     pub fn to_proto(&self) -> crate::proto::Trade {
         let mut proto_msg = crate::proto::Trade::new();
-        let timestamp = proto_msg.timestamp.as_mut().unwrap();
+        let mut timestamp = protobuf::well_known_types::timestamp::Timestamp::new();
         timestamp.seconds = self.timestamp / 1000_i64;
         timestamp.nanos = (self.timestamp % 1000 * 1000000) as i32;
+        proto_msg.timestamp = protobuf::MessageField::some(timestamp);
+
         proto_msg.side = self.side == TradeSide::Sell;
         proto_msg.price = self.price as f32;
         proto_msg.quantity_base = self.quantity_base as f32;
@@ -400,11 +402,13 @@ impl OrderBookMsg {
     /// Convert to a protobuf message.
     pub fn to_proto(&self) -> crate::proto::Orderbook {
         let mut proto_msg = crate::proto::Orderbook::new();
-        let timestamp = proto_msg.timestamp.as_mut().unwrap();
+        let mut timestamp = protobuf::well_known_types::timestamp::Timestamp::new();
         timestamp.seconds = self.timestamp / 1000_i64;
         timestamp.nanos = (self.timestamp % 1000 * 1000000) as i32;
+        proto_msg.timestamp = protobuf::MessageField::some(timestamp);
+
         proto_msg.snapshot = self.snapshot;
-        proto_msg.asks = proto_msg
+        proto_msg.asks = self
             .asks
             .iter()
             .map(|order| {
@@ -416,7 +420,7 @@ impl OrderBookMsg {
                 o
             })
             .collect();
-        proto_msg.bids = proto_msg
+        proto_msg.bids = self
             .bids
             .iter()
             .map(|order| {
@@ -531,7 +535,7 @@ mod tests {
             market_type: MarketType::LinearSwap,
             symbol: "BTCUSDT".to_string(),
             pair: "BTC/USDT".to_string(),
-            msg_type: MessageType::Level2,
+            msg_type: MessageType::L2Event,
             timestamp: 1648785270714,
             snapshot: false,
             asks: vec![

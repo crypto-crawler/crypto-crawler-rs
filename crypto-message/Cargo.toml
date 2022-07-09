@@ -1,6 +1,6 @@
 [package]
 name = "crypto-message"
-version = "1.0.5"
+version = "1.0.7"
 edition = "2021"
 description = "Unified data structures for all cryptocurrency exchanges."
 license = "Apache-2.0"
