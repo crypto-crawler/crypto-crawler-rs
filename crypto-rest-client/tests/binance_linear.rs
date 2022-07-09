@@ -13,13 +13,13 @@ mod linear_swap {
     fn test_l2_snapshot() {
         let text =
             fetch_l2_snapshot("binance", MarketType::LinearSwap, "BTCUSDT", Some(3)).unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 
     #[test]
     fn test_open_interest() {
         let text = fetch_open_interest("binance", MarketType::LinearSwap, Some("BTCUSDT")).unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 }
 
@@ -44,13 +44,13 @@ mod linear_future {
             Some(3),
         )
         .unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 
     #[test]
     fn test_open_interest() {
         let text = fetch_open_interest("binance", MarketType::LinearFuture, Some("BTCUSDT_220930"))
             .unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 }

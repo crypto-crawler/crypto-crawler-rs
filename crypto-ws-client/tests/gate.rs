@@ -10,7 +10,7 @@ mod gate_spot {
         gen_test_code!(
             GateSpotWSClient,
             subscribe,
-            &vec![
+            &[
                 ("trades".to_string(), "BTC_USDT".to_string()),
                 ("trades".to_string(), "ETH_USDT".to_string())
             ]
@@ -22,19 +22,13 @@ mod gate_spot {
         gen_test_code!(
             GateSpotWSClient,
             send,
-            &vec![
-                r#"{"channel":"spot.trades", "event":"subscribe", "payload":["BTC_USDT","ETH_USDT"]}"#.to_string()
-            ]
+            &[r#"{"channel":"spot.trades", "event":"subscribe", "payload":["BTC_USDT","ETH_USDT"]}"#.to_string()]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            GateSpotWSClient,
-            subscribe_trade,
-            &vec!["BTC_USDT".to_string()]
-        );
+        gen_test_code!(GateSpotWSClient, subscribe_trade, &["BTC_USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -42,7 +36,7 @@ mod gate_spot {
         gen_test_code!(
             GateSpotWSClient,
             subscribe_orderbook,
-            &vec!["BTC_USDT".to_string()]
+            &["BTC_USDT".to_string()]
         );
     }
 
@@ -51,17 +45,13 @@ mod gate_spot {
         gen_test_code!(
             GateSpotWSClient,
             subscribe_orderbook_topk,
-            &vec!["BTC_USDT".to_string()]
+            &["BTC_USDT".to_string()]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(
-            GateSpotWSClient,
-            subscribe_bbo,
-            &vec!["BTC_USDT".to_string()]
-        );
+        gen_test_code!(GateSpotWSClient, subscribe_bbo, &["BTC_USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -69,15 +59,15 @@ mod gate_spot {
         gen_test_code!(
             GateSpotWSClient,
             subscribe_ticker,
-            &vec!["BTC_USDT".to_string()]
+            &["BTC_USDT".to_string()]
         );
     }
 
     #[ignore = "too slow"]
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(GateSpotWSClient, &vec![("BTC_USDT".to_string(), 10)]);
-        gen_test_subscribe_candlestick!(GateSpotWSClient, &vec![("BTC_USDT".to_string(), 604800)]);
+        gen_test_subscribe_candlestick!(GateSpotWSClient, &[("BTC_USDT".to_string(), 10)]);
+        gen_test_subscribe_candlestick!(GateSpotWSClient, &[("BTC_USDT".to_string(), 604800)]);
     }
 }
 
@@ -91,7 +81,7 @@ mod gate_inverse_swap {
         gen_test_code!(
             GateInverseSwapWSClient,
             subscribe,
-            &vec![
+            &[
                 ("trades".to_string(), "BTC_USD".to_string()),
                 ("trades".to_string(), "ETH_USD".to_string()),
                 ("trades".to_string(), "BNB_USD".to_string()),
@@ -106,10 +96,8 @@ mod gate_inverse_swap {
         gen_test_code!(
             GateInverseSwapWSClient,
             send,
-            &vec![
-                r#"{"channel":"futures.trades", "event":"subscribe", "payload":["BTC_USD","ETH_USD","BNB_USD","XRP_USD"]}"#
-                    .to_string()
-            ]
+            &[r#"{"channel":"futures.trades", "event":"subscribe", "payload":["BTC_USD","ETH_USD","BNB_USD","XRP_USD"]}"#
+                    .to_string()]
         );
     }
 
@@ -119,7 +107,7 @@ mod gate_inverse_swap {
         gen_test_code!(
             GateInverseSwapWSClient,
             subscribe_trade,
-            &vec!["BTC_USD".to_string(), "ETH_USD".to_string()]
+            &["BTC_USD".to_string(), "ETH_USD".to_string()]
         );
     }
 
@@ -128,7 +116,7 @@ mod gate_inverse_swap {
         gen_test_code!(
             GateInverseSwapWSClient,
             subscribe_orderbook,
-            &vec!["BTC_USD".to_string()]
+            &["BTC_USD".to_string()]
         );
     }
 
@@ -137,7 +125,7 @@ mod gate_inverse_swap {
         gen_test_code!(
             GateInverseSwapWSClient,
             subscribe_orderbook_topk,
-            &vec!["BTC_USD".to_string()]
+            &["BTC_USD".to_string()]
         );
     }
 
@@ -146,7 +134,7 @@ mod gate_inverse_swap {
         gen_test_code!(
             GateInverseSwapWSClient,
             subscribe_bbo,
-            &vec!["BTC_USD".to_string()]
+            &["BTC_USD".to_string()]
         );
     }
 
@@ -155,20 +143,17 @@ mod gate_inverse_swap {
         gen_test_code!(
             GateInverseSwapWSClient,
             subscribe_ticker,
-            &vec!["BTC_USD".to_string()]
+            &["BTC_USD".to_string()]
         );
     }
 
     #[ignore]
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
+        gen_test_subscribe_candlestick!(GateInverseSwapWSClient, &[("BTC_USD".to_string(), 10)]);
         gen_test_subscribe_candlestick!(
             GateInverseSwapWSClient,
-            &vec![("BTC_USD".to_string(), 10)]
-        );
-        gen_test_subscribe_candlestick!(
-            GateInverseSwapWSClient,
-            &vec![("BTC_USD".to_string(), 604800)]
+            &[("BTC_USD".to_string(), 604800)]
         );
     }
 }
@@ -182,7 +167,7 @@ mod gate_linear_swap {
         gen_test_code!(
             GateLinearSwapWSClient,
             subscribe_trade,
-            &vec!["BTC_USDT".to_string()]
+            &["BTC_USDT".to_string()]
         );
     }
 
@@ -191,7 +176,7 @@ mod gate_linear_swap {
         gen_test_code!(
             GateLinearSwapWSClient,
             subscribe_orderbook,
-            &vec!["BTC_USDT".to_string()]
+            &["BTC_USDT".to_string()]
         );
     }
 
@@ -200,7 +185,7 @@ mod gate_linear_swap {
         gen_test_code!(
             GateLinearSwapWSClient,
             subscribe_orderbook_topk,
-            &vec!["BTC_USDT".to_string()]
+            &["BTC_USDT".to_string()]
         );
     }
 
@@ -209,7 +194,7 @@ mod gate_linear_swap {
         gen_test_code!(
             GateLinearSwapWSClient,
             subscribe_bbo,
-            &vec!["BTC_USDT".to_string()]
+            &["BTC_USDT".to_string()]
         );
     }
 
@@ -218,20 +203,17 @@ mod gate_linear_swap {
         gen_test_code!(
             GateLinearSwapWSClient,
             subscribe_ticker,
-            &vec!["BTC_USDT".to_string()]
+            &["BTC_USDT".to_string()]
         );
     }
 
     #[ignore]
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
+        gen_test_subscribe_candlestick!(GateLinearSwapWSClient, &[("BTC_USDT".to_string(), 10)]);
         gen_test_subscribe_candlestick!(
             GateLinearSwapWSClient,
-            &vec![("BTC_USDT".to_string(), 10)]
-        );
-        gen_test_subscribe_candlestick!(
-            GateLinearSwapWSClient,
-            &vec![("BTC_USDT".to_string(), 604800)]
+            &[("BTC_USDT".to_string(), 604800)]
         );
     }
 }
@@ -246,7 +228,7 @@ mod gate_inverse_future {
         gen_test_code!(
             GateInverseFutureWSClient,
             subscribe_trade,
-            &vec!["BTC_USD_20220930".to_string()]
+            &["BTC_USD_20220930".to_string()]
         );
     }
 
@@ -255,7 +237,7 @@ mod gate_inverse_future {
         gen_test_code!(
             GateInverseFutureWSClient,
             subscribe_orderbook,
-            &vec!["BTC_USD_20220930".to_string()]
+            &["BTC_USD_20220930".to_string()]
         );
     }
 
@@ -264,7 +246,7 @@ mod gate_inverse_future {
         gen_test_code!(
             GateInverseFutureWSClient,
             subscribe_ticker,
-            &vec!["BTC_USD_20220930".to_string()]
+            &["BTC_USD_20220930".to_string()]
         );
     }
 
@@ -273,11 +255,11 @@ mod gate_inverse_future {
     async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             GateInverseFutureWSClient,
-            &vec![("BTC_USD_20220930".to_string(), 10)]
+            &[("BTC_USD_20220930".to_string(), 10)]
         );
         gen_test_subscribe_candlestick!(
             GateInverseFutureWSClient,
-            &vec![("BTC_USD_20220930".to_string(), 604800)]
+            &[("BTC_USD_20220930".to_string(), 604800)]
         );
     }
 }
@@ -292,7 +274,7 @@ mod gate_linear_future {
         gen_test_code!(
             GateLinearFutureWSClient,
             subscribe_trade,
-            &vec!["BTC_USDT_20220930".to_string()]
+            &["BTC_USDT_20220930".to_string()]
         );
     }
 
@@ -302,7 +284,7 @@ mod gate_linear_future {
         gen_test_code!(
             GateLinearFutureWSClient,
             subscribe_orderbook,
-            &vec!["BTC_USDT_20220930".to_string()]
+            &["BTC_USDT_20220930".to_string()]
         );
     }
 
@@ -311,7 +293,7 @@ mod gate_linear_future {
         gen_test_code!(
             GateLinearFutureWSClient,
             subscribe_ticker,
-            &vec!["BTC_USDT_20220930".to_string()]
+            &["BTC_USDT_20220930".to_string()]
         );
     }
 
@@ -320,11 +302,11 @@ mod gate_linear_future {
     async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             GateLinearFutureWSClient,
-            &vec![("BTC_USDT_20220930".to_string(), 10)]
+            &[("BTC_USDT_20220930".to_string(), 10)]
         );
         gen_test_subscribe_candlestick!(
             GateLinearFutureWSClient,
-            &vec![("BTC_USDT_20220930".to_string(), 604800)]
+            &[("BTC_USDT_20220930".to_string(), 604800)]
         );
     }
 }

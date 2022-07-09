@@ -10,7 +10,7 @@ mod dydx_linear_swap {
         gen_test_code!(
             DydxSwapWSClient,
             send,
-            &vec![
+            &[
                 r#"{"type": "subscribe", "channel": "v3_trades", "id": "BTC-USD"}"#.to_string(),
                 r#"{"type": "subscribe", "channel": "v3_trades", "id": "ETH-USD"}"#.to_string()
             ]
@@ -22,7 +22,7 @@ mod dydx_linear_swap {
         gen_test_code!(
             DydxSwapWSClient,
             subscribe_trade,
-            &vec!["BTC-USD".to_string(), "ETH-USD".to_string()]
+            &["BTC-USD".to_string(), "ETH-USD".to_string()]
         );
     }
 
@@ -31,7 +31,7 @@ mod dydx_linear_swap {
         gen_test_code!(
             DydxSwapWSClient,
             subscribe_orderbook,
-            &vec!["BTC-USD".to_string(), "ETH-USD".to_string()]
+            &["BTC-USD".to_string(), "ETH-USD".to_string()]
         );
     }
 }

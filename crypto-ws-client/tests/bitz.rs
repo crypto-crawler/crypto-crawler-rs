@@ -12,10 +12,10 @@ mod bitz_spot {
         gen_test_code!(
             BitzSpotWSClient,
             subscribe,
-            &vec![
+            &[
                 ("market".to_string(), "btc_usdt".to_string()),
                 ("depth".to_string(), "btc_usdt".to_string()),
-                ("order".to_string(), "btc_usdt".to_string()),
+                ("order".to_string(), "btc_usdt".to_string())
             ]
         );
     }
@@ -26,7 +26,7 @@ mod bitz_spot {
         gen_test_code!(
             BitzSpotWSClient,
             send,
-            &vec![format!(
+            &[format!(
                 r#"{{"action":"Topic.sub", "data":{{"symbol":"btc_usdt", "type":"market,depth,order", "_CDID":"100002", "dataType":"1"}}, "msg_id":{}}}"#,
                 SystemTime::now()
                     .duration_since(UNIX_EPOCH)
@@ -39,11 +39,7 @@ mod bitz_spot {
     #[tokio::test(flavor = "multi_thread")]
     #[ignore = "bitz.com has shutdown since October 2021"]
     async fn subscribe_trade() {
-        gen_test_code!(
-            BitzSpotWSClient,
-            subscribe_trade,
-            &vec!["btc_usdt".to_string()]
-        );
+        gen_test_code!(BitzSpotWSClient, subscribe_trade, &["btc_usdt".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -52,7 +48,7 @@ mod bitz_spot {
         gen_test_code!(
             BitzSpotWSClient,
             subscribe_orderbook,
-            &vec!["btc_usdt".to_string()]
+            &["btc_usdt".to_string()]
         );
     }
 
@@ -62,14 +58,14 @@ mod bitz_spot {
         gen_test_code!(
             BitzSpotWSClient,
             subscribe_ticker,
-            &vec!["btc_usdt".to_string()]
+            &["btc_usdt".to_string()]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     #[ignore = "bitz.com has shutdown since October 2021"]
     async fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(BitzSpotWSClient, &vec![("btc_usdt".to_string(), 60)]);
-        gen_test_subscribe_candlestick!(BitzSpotWSClient, &vec![("btc_usdt".to_string(), 2592000)]);
+        gen_test_subscribe_candlestick!(BitzSpotWSClient, &[("btc_usdt".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(BitzSpotWSClient, &[("btc_usdt".to_string(), 2592000)]);
     }
 }

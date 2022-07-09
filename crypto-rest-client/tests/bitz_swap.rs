@@ -14,8 +14,8 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     assert_eq!(obj.get("status").unwrap().as_i64().unwrap(), 200);
 
     let data = obj.get("data").unwrap().as_object().unwrap();
-    assert!(data.get("asks").unwrap().as_array().unwrap().len() > 0);
-    assert!(data.get("bids").unwrap().as_array().unwrap().len() > 0);
+    assert!(!data.get("asks").unwrap().as_array().unwrap().is_empty());
+    assert!(!data.get("bids").unwrap().as_array().unwrap().is_empty());
 }
 
 #[test_case(MarketType::InverseSwap; "inconclusive 1")]

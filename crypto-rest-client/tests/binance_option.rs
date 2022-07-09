@@ -5,7 +5,7 @@ use crypto_rest_client::{fetch_l2_snapshot, BinanceOptionRestClient};
 #[test]
 fn test_agg_trades() {
     let text = BinanceOptionRestClient::fetch_trades("BTC-220610-30000-C", None).unwrap();
-    assert!(text.starts_with("{"));
+    assert!(text.starts_with('{'));
 }
 
 #[ignore]
@@ -18,5 +18,5 @@ fn test_l2_snapshot() {
         Some(3),
     )
     .unwrap();
-    assert!(text.starts_with("{"));
+    assert!(text.starts_with('{'));
 }

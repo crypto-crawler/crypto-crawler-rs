@@ -11,7 +11,7 @@ use test_case::test_case;
 #[test_case(MarketType::EuropeanOption, "BTC-USDT-210625-P-27000"; "inconclusive")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     let text = fetch_l2_snapshot("huobi", market_type, symbol, Some(3)).unwrap();
-    assert!(text.starts_with("{"));
+    assert!(text.starts_with('{'));
 
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
     assert_eq!("ok", obj.get("status").unwrap().as_str().unwrap());
@@ -56,7 +56,7 @@ mod huobi_spot {
     #[test]
     fn test_trades() {
         let text = HuobiSpotRestClient::fetch_trades("btcusdt").unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 }
 
@@ -67,7 +67,7 @@ mod huobi_future {
     #[test]
     fn test_trades() {
         let text = HuobiFutureRestClient::fetch_trades("BTC_CQ").unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 }
 
@@ -78,7 +78,7 @@ mod huobi_linear_swap {
     #[test]
     fn test_trades() {
         let text = HuobiLinearSwapRestClient::fetch_trades("BTC-USDT").unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 }
 
@@ -89,7 +89,7 @@ mod huobi_inverse_swap {
     #[test]
     fn test_trades() {
         let text = HuobiInverseSwapRestClient::fetch_trades("BTC-USD").unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 }
 
@@ -101,6 +101,6 @@ mod huobi_option {
     #[ignore]
     fn test_trades() {
         let text = HuobiOptionRestClient::fetch_trades("BTC-USDT-210625-P-27000").unwrap();
-        assert!(text.starts_with("{"));
+        assert!(text.starts_with('{'));
     }
 }

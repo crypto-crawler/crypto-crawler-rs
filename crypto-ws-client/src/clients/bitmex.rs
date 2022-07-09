@@ -177,8 +177,8 @@ mod tests {
     #[test]
     fn test_one_topic() {
         let translator = super::BitmexCommandTranslator {};
-        let commands = translator
-            .translate_to_commands(true, &vec![("trade".to_string(), "XBTUSD".to_string())]);
+        let commands =
+            translator.translate_to_commands(true, &[("trade".to_string(), "XBTUSD".to_string())]);
 
         assert_eq!(1, commands.len());
         assert_eq!(r#"{"op":"subscribe","args":["trade:XBTUSD"]}"#, commands[0]);
@@ -189,7 +189,7 @@ mod tests {
         let translator = super::BitmexCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![
+            &[
                 ("trade".to_string(), "XBTUSD".to_string()),
                 ("quote".to_string(), "XBTUSD".to_string()),
                 ("orderBookL2_25".to_string(), "XBTUSD".to_string()),

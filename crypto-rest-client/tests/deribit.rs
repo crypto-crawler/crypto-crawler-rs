@@ -35,7 +35,7 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
 fn test_open_interest(market_type: MarketType) {
     let text = fetch_open_interest("deribit", market_type, None).unwrap();
     for line in text.lines() {
-        let obj = serde_json::from_str::<HashMap<String, Value>>(&line).unwrap();
+        let obj = serde_json::from_str::<HashMap<String, Value>>(line).unwrap();
         let arr = obj.get("result").unwrap().as_array().unwrap();
         assert!(!arr.is_empty());
     }

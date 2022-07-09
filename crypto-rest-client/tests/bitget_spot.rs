@@ -11,6 +11,6 @@ fn test_l2_snapshot() {
     assert_eq!(obj.get("msg").unwrap().as_str().unwrap(), "success");
 
     let data = obj.get("data").unwrap().as_object().unwrap();
-    assert!(data.get("asks").unwrap().as_array().unwrap().len() > 0);
-    assert!(data.get("bids").unwrap().as_array().unwrap().len() > 0);
+    assert!(!data.get("asks").unwrap().as_array().unwrap().is_empty());
+    assert!(!data.get("bids").unwrap().as_array().unwrap().is_empty());
 }

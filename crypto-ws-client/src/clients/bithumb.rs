@@ -131,7 +131,7 @@ mod tests {
         let translator = super::BithumbCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![
+            &[
                 ("TRADE".to_string(), "BTC-USDT".to_string()),
                 ("TRADE".to_string(), "ETH-USDT".to_string()),
             ],
@@ -149,7 +149,7 @@ mod tests {
         let translator = super::BithumbCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![
+            &[
                 ("TRADE".to_string(), "BTC-USDT".to_string()),
                 ("ORDERBOOK".to_string(), "BTC-USDT".to_string()),
             ],

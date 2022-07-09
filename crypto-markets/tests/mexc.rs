@@ -14,7 +14,7 @@ fn fetch_spot_symbols() {
     assert!(!symbols.is_empty());
 
     for symbol in symbols.iter() {
-        assert!(symbol.contains("_"));
+        assert!(symbol.contains('_'));
         assert_eq!(symbol.to_uppercase(), symbol.to_string());
         assert_eq!(
             MarketType::Spot,

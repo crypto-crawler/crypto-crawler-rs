@@ -10,7 +10,7 @@ mod ftx_spot {
         gen_test_code!(
             FtxWSClient,
             subscribe,
-            &vec![("trades".to_string(), "BTC/USD".to_string())]
+            &[("trades".to_string(), "BTC/USD".to_string())]
         );
     }
 
@@ -19,27 +19,23 @@ mod ftx_spot {
         gen_test_code!(
             FtxWSClient,
             send,
-            &vec![r#"{"op":"subscribe","channel":"trades","market":"BTC/USD"}"#.to_string()]
+            &[r#"{"op":"subscribe","channel":"trades","market":"BTC/USD"}"#.to_string()]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(FtxWSClient, subscribe_trade, &vec!["BTC/USD".to_string()]);
+        gen_test_code!(FtxWSClient, subscribe_trade, &["BTC/USD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(FtxWSClient, subscribe_bbo, &vec!["BTC/USD".to_string()]);
+        gen_test_code!(FtxWSClient, subscribe_bbo, &["BTC/USD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            FtxWSClient,
-            subscribe_orderbook,
-            &vec!["BTC/USD".to_string()]
-        );
+        gen_test_code!(FtxWSClient, subscribe_orderbook, &["BTC/USD".to_string()]);
     }
 }
 
@@ -49,12 +45,12 @@ mod ftx_linear_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(FtxWSClient, subscribe_trade, &vec!["BTC-PERP".to_string()]);
+        gen_test_code!(FtxWSClient, subscribe_trade, &["BTC-PERP".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(FtxWSClient, subscribe_bbo, &vec!["BTC-PERP".to_string()]);
+        gen_test_code!(FtxWSClient, subscribe_bbo, &["BTC-PERP".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -62,7 +58,7 @@ mod ftx_linear_swap {
         gen_test_code!(
             FtxWSClient,
             subscribe_orderbook,
-            &vec!["BTC-PERP".to_string(), "ETH-PERP".to_string()]
+            &["BTC-PERP".to_string(), "ETH-PERP".to_string()]
         );
     }
 }
@@ -76,7 +72,7 @@ mod ftx_linear_future {
         gen_test_code!(
             FtxWSClient,
             subscribe_trade,
-            &vec!["BTC-0930".to_string(), "ETH-0930".to_string()]
+            &["BTC-0930".to_string(), "ETH-0930".to_string()]
         );
     }
 
@@ -85,17 +81,13 @@ mod ftx_linear_future {
         gen_test_code!(
             FtxWSClient,
             subscribe_bbo,
-            &vec!["BTC-0930".to_string(), "ETH-0930".to_string()]
+            &["BTC-0930".to_string(), "ETH-0930".to_string()]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            FtxWSClient,
-            subscribe_orderbook,
-            &vec!["BTC-0930".to_string()]
-        );
+        gen_test_code!(FtxWSClient, subscribe_orderbook, &["BTC-0930".to_string()]);
     }
 }
 
@@ -109,17 +101,13 @@ mod ftx_move {
         gen_test_code!(
             FtxWSClient,
             subscribe_trade,
-            &vec!["BTC-MOVE-2022Q4".to_string()]
+            &["BTC-MOVE-2022Q4".to_string()]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(
-            FtxWSClient,
-            subscribe_bbo,
-            &vec!["BTC-MOVE-2022Q4".to_string()]
-        );
+        gen_test_code!(FtxWSClient, subscribe_bbo, &["BTC-MOVE-2022Q4".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -127,7 +115,7 @@ mod ftx_move {
         gen_test_code!(
             FtxWSClient,
             subscribe_orderbook,
-            &vec!["BTC-MOVE-2022Q4".to_string()]
+            &["BTC-MOVE-2022Q4".to_string()]
         );
     }
 }
@@ -139,20 +127,16 @@ mod ftx_bvol {
     #[test]
     #[ignore]
     fn subscribe_trade() {
-        gen_test_code!(FtxWSClient, subscribe_trade, &vec!["BVOL/USD".to_string()]);
+        gen_test_code!(FtxWSClient, subscribe_trade, &["BVOL/USD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(FtxWSClient, subscribe_bbo, &vec!["BVOL/USD".to_string()]);
+        gen_test_code!(FtxWSClient, subscribe_bbo, &["BVOL/USD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            FtxWSClient,
-            subscribe_orderbook,
-            &vec!["BVOL/USD".to_string()]
-        );
+        gen_test_code!(FtxWSClient, subscribe_orderbook, &["BVOL/USD".to_string()]);
     }
 }

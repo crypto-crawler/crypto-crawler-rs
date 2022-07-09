@@ -178,7 +178,7 @@ mod tests {
     async fn test_one_topic() {
         let translator = super::ZbCommandTranslator {};
         let commands = translator
-            .translate_to_commands(true, &vec![("Trade".to_string(), "BTC_USDT".to_string())]);
+            .translate_to_commands(true, &[("Trade".to_string(), "BTC_USDT".to_string())]);
 
         assert_eq!(1, commands.len());
         assert_eq!(
@@ -192,7 +192,7 @@ mod tests {
         let translator = super::ZbCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &vec![
+            &[
                 ("Trade".to_string(), "BTC_USDT".to_string()),
                 ("Depth".to_string(), "ETH_USDT".to_string()),
             ],
@@ -213,7 +213,7 @@ mod tests {
     async fn test_candlestick() {
         let translator = super::ZbCommandTranslator {};
         let commands =
-            translator.translate_to_candlestick_commands(true, &vec![("BTC_USDT".to_string(), 60)]);
+            translator.translate_to_candlestick_commands(true, &[("BTC_USDT".to_string(), 60)]);
 
         assert_eq!(1, commands.len());
         assert_eq!(
