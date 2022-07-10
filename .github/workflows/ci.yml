@@ -32,8 +32,11 @@ jobs:
             - uses: taiki-e/install-action@nextest
             - uses: actions-rs/cargo@v1
               with:
+                  command: build
+            - uses: actions-rs/cargo@v1
+              with:
                   command: nextest
-                  args: run
+                  args: run -j1
 
     doc-test:
         name: Cargo doctest
