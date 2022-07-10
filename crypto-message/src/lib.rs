@@ -19,6 +19,19 @@ pub enum Message {
     Ticker(TickerMsg),
 }
 
+impl Message {
+    pub fn get_timestamp(&self) -> i64 {
+        match self {
+            Message::Trade(trade) => trade.timestamp,
+            Message::Bbo(bbo) => bbo.timestamp,
+            Message::Level2(level2) => level2.timestamp,
+            Message::FundingRate(funding_rate) => funding_rate.timestamp,
+            Message::Candlestick(candlestick) => candlestick.timestamp,
+            Message::Ticker(ticker) => ticker.timestamp,
+        }
+    }
+}
+
 macro_rules! add_common_fields {
     (
         $(#[$outer:meta])*
@@ -800,31 +813,8 @@ impl PartialOrd for Message {
 
 impl Ord for Message {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        match self {
-            Message::Trade(ref a) => match other {
-                Message::Trade(ref b) => a.cmp(b),
-                _ => std::cmp::Ordering::Less,
-            },
-            Message::Level2(ref a) => match other {
-                Message::Level2(ref b) => a.cmp(b),
-                _ => std::cmp::Ordering::Less,
-            },
-            Message::Bbo(ref a) => match other {
-                Message::Bbo(ref b) => a.cmp(b),
-                _ => std::cmp::Ordering::Less,
-            },
-            Message::Ticker(ref a) => match other {
-                Message::Ticker(ref b) => a.cmp(b),
-                _ => std::cmp::Ordering::Less,
-            },
-            Message::Candlestick(ref a) => match other {
-                Message::Candlestick(ref b) => a.cmp(b),
-                _ => std::cmp::Ordering::Less,
-            },
-            Message::FundingRate(ref a) => match other {
-                Message::FundingRate(ref b) => a.cmp(b),
-                _ => std::cmp::Ordering::Less,
-            },
-        }
+        let this_timestamp = self.get_timestamp();
+        let other_timestamp = other.get_timestamp();
+        this_timestamp.cmp(&other_timestamp)
     }
 }
