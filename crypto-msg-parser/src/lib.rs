@@ -216,7 +216,6 @@ pub fn parse_bbo(
         "okx" => exchanges::okx::parse_bbo(market_type, msg),
         "huobi" => exchanges::huobi::parse_bbo(market_type, msg, received_at),
         "deribit" => exchanges::deribit::parse_bbo(market_type, msg, received_at),
-        "kraken" => exchanges::kraken::parse_bbo(market_type, msg, received_at),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
 }
