@@ -527,7 +527,13 @@ mod l2_topk {
 mod bbo {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_bbo};
+
+    const PRECISION: f64 = 1000000000.0; // 9 decimals
+                                         // temp copy from exchanges::utils, maybe find a way to import without copy past
+    pub fn round(f: f64) -> f64 {
+        (f * PRECISION).round() / PRECISION
+    }
 
     #[test]
     fn spot() {
@@ -543,6 +549,20 @@ mod bbo {
             "BTC-USDT",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
+
+        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap();
+
+        assert_eq!("BTC-USDT", bbo_msg.symbol);
+
+        assert_eq!(31785.3, bbo_msg.ask_price);
+        assert_eq!(1.0455757, bbo_msg.ask_quantity_base);
+        assert_eq!(round(31785.3 * 1.0455757), bbo_msg.ask_quantity_quote);
+        assert_eq!(None, bbo_msg.ask_quantity_contract);
+
+        assert_eq!(31785.2, bbo_msg.bid_price);
+        assert_eq!(0.4645037, bbo_msg.bid_quantity_base);
+        assert_eq!(round(31785.2 * 0.4645037), bbo_msg.bid_quantity_quote);
+        assert_eq!(None, bbo_msg.bid_quantity_contract);
     }
 
     #[test]
@@ -685,7 +705,8 @@ mod l3_event {
 mod candlestick {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_candlestick};
+    use crypto_msg_type::MessageType;
 
     #[test]
     fn spot() {
@@ -701,6 +722,17 @@ mod candlestick {
             "BTC-USDT",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
+
+        let data = parse_candlestick(
+            EXCHANGE_NAME,
+            MarketType::Spot,
+            raw_msg,
+            MessageType::L2TopK,
+        )
+        .unwrap();
+
+        assert_eq!(1654081935182, data.timestamp);
+        assert_eq!("1week", data.period);
     }
 
     #[test]

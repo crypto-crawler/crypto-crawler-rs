@@ -5,9 +5,10 @@ mod message;
 use std::collections::HashMap;
 
 use crypto_market_type::MarketType;
+use crypto_message::CandlestickMsg;
+use crypto_msg_type::MessageType;
 
-use crate::{OrderBookMsg, TradeMsg};
-
+use crate::{BboMsg, OrderBookMsg, TradeMsg};
 use serde_json::Value;
 use simple_error::SimpleError;
 
@@ -151,4 +152,20 @@ pub(crate) fn parse_l2_topk(
     } else {
         kucoin_swap::parse_l2_topk(market_type, msg)
     }
+}
+
+pub(crate) fn parse_bbo(
+    market_type: MarketType,
+    msg: &str,
+    received_at: Option<i64>,
+) -> Result<BboMsg, SimpleError> {
+    kucoin_spot::parse_ticker(market_type, msg, received_at)
+}
+
+pub(crate) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+    msg_type: MessageType,
+) -> Result<CandlestickMsg, SimpleError> {
+    kucoin_spot::parse_candlestick(market_type, msg, msg_type)
 }
