@@ -782,32 +782,9 @@ impl Ord for FundingRateMsg {
 // Message
 impl PartialOrd for Message {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        match self {
-            Message::Trade(ref a) => match other {
-                Message::Trade(ref b) => Some(a.cmp(b)),
-                _ => None,
-            },
-            Message::Level2(ref a) => match other {
-                Message::Level2(ref b) => Some(a.cmp(b)),
-                _ => None,
-            },
-            Message::Bbo(ref a) => match other {
-                Message::Bbo(ref b) => Some(a.cmp(b)),
-                _ => None,
-            },
-            Message::Ticker(ref a) => match other {
-                Message::Ticker(ref b) => Some(a.cmp(b)),
-                _ => None,
-            },
-            Message::Candlestick(ref a) => match other {
-                Message::Candlestick(ref b) => Some(a.cmp(b)),
-                _ => None,
-            },
-            Message::FundingRate(ref a) => match other {
-                Message::FundingRate(ref b) => Some(a.cmp(b)),
-                _ => None,
-            },
-        }
+        let this_timestamp = self.get_timestamp();
+        let other_timestamp = other.get_timestamp();
+        Some(this_timestamp.cmp(&other_timestamp))
     }
 }
 
