@@ -10,7 +10,7 @@ Parse exchange-specific symbols to unified format.
 ## Usage
 
 ```rust
-use crypto_pair::fetch_markets;
+use crypto_pair::normalize_pair;
 
 fn main() {
     assert_eq!(Some("BTC/USD".to_string()), normalize_pair("XBTH21", "BitMEX"));
