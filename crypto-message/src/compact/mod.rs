@@ -1,3 +1,3 @@
 mod message;
 
-pub use message::{BboMsg, Exchange, Message, OrderBookMsg, TickerMsg, TradeMsg};
+pub use message::{calculate_hash, BboMsg, Exchange, Message, OrderBookMsg, TickerMsg, TradeMsg};
