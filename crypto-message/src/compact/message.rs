@@ -1,13 +1,10 @@
 pub use crate::order::Order;
 use crate::TradeSide;
+use ahash::{CallHasher, RandomState};
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 use serde::{Deserialize, Serialize};
-use std::{
-    collections::hash_map::DefaultHasher,
-    hash::{Hash, Hasher},
-    str::FromStr,
-};
+use std::str::FromStr;
 
 use strum_macros::{Display, EnumString};
 
@@ -223,10 +220,9 @@ add_common_fields!(
 /// Convers a string to u64 hash.
 ///
 /// Exported for unit test purpose.
-pub fn calculate_hash(value: &str) -> u64 {
-    let mut s = DefaultHasher::new();
-    value.hash(&mut s);
-    s.finish()
+pub fn calculate_hash(s: &str) -> u64 {
+    let build_hasher = RandomState::with_seeds(1, 2, 3, 4);
+    str::get_hash(s, &build_hasher)
 }
 
 impl TradeMsg {
@@ -510,5 +506,16 @@ impl Ord for Message {
         let this_timestamp = self.get_timestamp();
         let other_timestamp = other.get_timestamp();
         this_timestamp.cmp(&other_timestamp)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::calculate_hash;
+
+    #[test]
+    fn test_calculate_hash() {
+        let hash = calculate_hash("BTCUSDT");
+        assert_eq!(12658250145686044913, hash);
     }
 }
