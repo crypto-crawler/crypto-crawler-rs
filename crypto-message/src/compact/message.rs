@@ -77,8 +77,6 @@ macro_rules! add_common_fields {
             pub market_type: MarketType,
             /// Exchange-specific trading symbol or id, recognized by RESTful API
             pub symbol: u64,
-            /// Unified pair, base/quote, e.g., BTC/USDT
-            pub pair: u64,
             /// Message type
             pub msg_type: MessageType,
             /// Unix timestamp, in milliseconds
@@ -101,8 +99,6 @@ pub struct TradeMsg {
     pub market_type: MarketType,
     /// Message type
     pub msg_type: MessageType,
-    /// Unified pair, base/quote, e.g., BTC/USDT
-    pub pair: u64,
     /// Exchange-specific trading symbol or id, recognized by RESTful API
     pub symbol: u64,
     /// Unix timestamp, in milliseconds
@@ -130,8 +126,6 @@ pub struct OrderBookMsg {
     pub market_type: MarketType,
     /// Exchange-specific trading symbol or id, recognized by RESTful API
     pub symbol: u64,
-    /// Unified pair, base/quote, e.g., BTC/USDT
-    pub pair: u64,
     /// Message type
     pub msg_type: MessageType,
     /// Unix timestamp, in milliseconds
@@ -153,8 +147,6 @@ pub struct FundingRateMsg {
     pub market_type: MarketType,
     /// Exchange-specific trading symbol or id, recognized by RESTful API
     pub symbol: u64,
-    /// Unified pair, base/quote, e.g., BTC/USDT
-    pub pair: u64,
     /// Message type
     pub msg_type: MessageType,
     /// Unix timestamp, in milliseconds
@@ -228,9 +220,12 @@ add_common_fields!(
 
 // Convert from parsed message in lib.rs.
 
-fn calculate_hash<T: Hash>(t: &T) -> u64 {
+/// Convers a string to u64 hash.
+///
+/// Exported for unit test purpose.
+pub fn calculate_hash(value: &str) -> u64 {
     let mut s = DefaultHasher::new();
-    t.hash(&mut s);
+    value.hash(&mut s);
     s.finish()
 }
 
@@ -242,7 +237,6 @@ impl TradeMsg {
             exchange,
             market_type: msg.market_type,
             msg_type: msg.msg_type,
-            pair: calculate_hash(&msg.pair),
             symbol: calculate_hash(&msg.symbol),
             timestamp: msg.timestamp,
             price: msg.price,
@@ -262,7 +256,6 @@ impl OrderBookMsg {
             exchange,
             market_type: msg.market_type,
             msg_type: msg.msg_type,
-            pair: calculate_hash(&msg.pair),
             symbol: calculate_hash(&msg.symbol),
             timestamp: msg.timestamp,
             snapshot: msg.snapshot,
@@ -280,7 +273,6 @@ impl BboMsg {
             exchange,
             market_type: msg.market_type,
             msg_type: msg.msg_type,
-            pair: calculate_hash(&msg.pair),
             symbol: calculate_hash(&msg.symbol),
             timestamp: msg.timestamp,
             bid_price: msg.bid_price,
@@ -302,7 +294,6 @@ impl TickerMsg {
             exchange,
             market_type: msg.market_type,
             msg_type: msg.msg_type,
-            pair: calculate_hash(&msg.pair),
             symbol: calculate_hash(&msg.symbol),
             timestamp: msg.timestamp,
             open: msg.open,
@@ -329,7 +320,6 @@ impl CandlestickMsg {
             exchange,
             market_type: msg.market_type,
             msg_type: msg.msg_type,
-            pair: calculate_hash(&msg.pair),
             symbol: calculate_hash(&msg.symbol),
             timestamp: msg.timestamp,
             open: msg.open,
@@ -351,7 +341,6 @@ impl FundingRateMsg {
             exchange,
             market_type: msg.market_type,
             msg_type: msg.msg_type,
-            pair: calculate_hash(&msg.pair),
             symbol: calculate_hash(&msg.symbol),
             timestamp: msg.timestamp,
             funding_rate: msg.funding_rate,
