@@ -1,4 +1,4 @@
-pub use crate::order::Order;
+pub use crate::compact::{Order, QuantityChoice};
 use crate::TradeSide;
 use ahash::{CallHasher, RandomState};
 use crypto_market_type::MarketType;
@@ -105,13 +105,8 @@ pub struct TradeMsg {
     pub side: TradeSide,
     /// price
     pub price: f64,
-    // Number of base coins
-    pub quantity_base: f64,
-    // Number of quote coins(mostly USDT)
-    pub quantity_quote: f64,
-    /// Number of contracts, always None for Spot
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub quantity_contract: Option<f64>,
+    /// quantity, comes from one of quantity_base, quantity_quote and quantity_contract.
+    pub quantity: f64,
 }
 
 /// Level2 orderbook message.
@@ -188,14 +183,10 @@ add_common_fields!(
     #[derive(Serialize, Deserialize)]
     struct BboMsg {
         bid_price: f64,
-        bid_quantity_base: f64,
-        bid_quantity_quote: f64,
-        bid_quantity_contract: Option<f64>,
+        bid_quantity: f64,
 
         ask_price: f64,
-        ask_quantity_base: f64,
-        ask_quantity_quote: f64,
-        ask_quantity_contract: Option<f64>,
+        ask_quantity: f64,
     }
 );
 
@@ -206,12 +197,9 @@ add_common_fields!(
         high: f64,
         low: f64,
         close: f64,
-        /// base volume
         volume: f64,
         /// m, minute; H, hour; D, day; W, week; M, month; Y, year
         period: String,
-        /// quote volume
-        quote_volume: Option<f64>,
     }
 );
 
@@ -226,7 +214,7 @@ pub fn calculate_hash(s: &str) -> u64 {
 }
 
 impl TradeMsg {
-    pub fn from_json(msg: &crate::TradeMsg) -> Self {
+    pub fn from_json(msg: &crate::TradeMsg, quantity_choice: QuantityChoice) -> Self {
         let exchange = Exchange::from_str(&msg.exchange).unwrap();
 
         TradeMsg {
@@ -236,16 +224,29 @@ impl TradeMsg {
             symbol: calculate_hash(&msg.symbol),
             timestamp: msg.timestamp,
             price: msg.price,
-            quantity_base: msg.quantity_base,
-            quantity_quote: msg.quantity_quote,
-            quantity_contract: msg.quantity_contract,
+            quantity: match quantity_choice {
+                QuantityChoice::Base => msg.quantity_base,
+                QuantityChoice::Quote => msg.quantity_quote,
+                QuantityChoice::Contract => msg.quantity_contract.unwrap(),
+            },
             side: msg.side,
         }
     }
 }
 
+fn convert_order(order: &crate::Order, quantity_choice: QuantityChoice) -> Order {
+    Order {
+        price: order.price,
+        quantity: match quantity_choice {
+            QuantityChoice::Base => order.quantity_base,
+            QuantityChoice::Quote => order.quantity_quote,
+            QuantityChoice::Contract => order.quantity_contract.unwrap(),
+        },
+    }
+}
+
 impl OrderBookMsg {
-    pub fn from_json(msg: &crate::OrderBookMsg) -> Self {
+    pub fn from_json(msg: &crate::OrderBookMsg, quantity_choice: QuantityChoice) -> Self {
         let exchange = Exchange::from_str(&msg.exchange).unwrap();
 
         OrderBookMsg {
@@ -255,14 +256,22 @@ impl OrderBookMsg {
             symbol: calculate_hash(&msg.symbol),
             timestamp: msg.timestamp,
             snapshot: msg.snapshot,
-            asks: msg.asks.clone(),
-            bids: msg.bids.clone(),
+            asks: msg
+                .asks
+                .iter()
+                .map(|order| convert_order(order, quantity_choice))
+                .collect(),
+            bids: msg
+                .bids
+                .iter()
+                .map(|order| convert_order(order, quantity_choice))
+                .collect(),
         }
     }
 }
 
 impl BboMsg {
-    pub fn from_json(msg: &crate::BboMsg) -> Self {
+    pub fn from_json(msg: &crate::BboMsg, quantity_choice: QuantityChoice) -> Self {
         let exchange = Exchange::from_str(&msg.exchange).unwrap();
 
         BboMsg {
@@ -272,13 +281,17 @@ impl BboMsg {
             symbol: calculate_hash(&msg.symbol),
             timestamp: msg.timestamp,
             bid_price: msg.bid_price,
-            bid_quantity_base: msg.bid_quantity_base,
-            bid_quantity_quote: msg.bid_quantity_quote,
-            bid_quantity_contract: msg.bid_quantity_contract,
+            bid_quantity: match quantity_choice {
+                QuantityChoice::Base => msg.bid_quantity_base,
+                QuantityChoice::Quote => msg.bid_quantity_quote,
+                QuantityChoice::Contract => msg.bid_quantity_contract.unwrap(),
+            },
             ask_price: msg.ask_price,
-            ask_quantity_base: msg.ask_quantity_base,
-            ask_quantity_quote: msg.ask_quantity_quote,
-            ask_quantity_contract: msg.ask_quantity_contract,
+            ask_quantity: match quantity_choice {
+                QuantityChoice::Base => msg.ask_quantity_base,
+                QuantityChoice::Quote => msg.ask_quantity_quote,
+                QuantityChoice::Contract => msg.ask_quantity_contract.unwrap(),
+            },
         }
     }
 }
@@ -324,7 +337,6 @@ impl CandlestickMsg {
             close: msg.close,
             volume: msg.volume,
             period: msg.period.clone(),
-            quote_volume: msg.quote_volume,
         }
     }
 }
@@ -376,9 +388,7 @@ impl PartialEq for TradeMsg {
             && self.symbol == other.symbol
             && self.timestamp == other.timestamp
             && self.price == other.price
-            && self.quantity_base == other.quantity_base
-            && self.quantity_quote == other.quantity_quote
-            && self.quantity_contract == other.quantity_contract
+            && self.quantity == other.quantity
     }
 }
 
@@ -412,11 +422,9 @@ impl PartialEq for BboMsg {
             && self.symbol == other.symbol
             && self.timestamp == other.timestamp
             && self.bid_price == other.bid_price
-            && self.bid_quantity_base == other.bid_quantity_base
-            && self.bid_quantity_quote == other.bid_quantity_quote
+            && self.bid_quantity == other.bid_quantity
             && self.ask_price == other.ask_price
-            && self.ask_quantity_base == other.ask_quantity_base
-            && self.ask_quantity_quote == other.ask_quantity_quote
+            && self.ask_quantity == other.ask_quantity
     }
 }
 
