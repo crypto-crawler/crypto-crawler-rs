@@ -3,9 +3,11 @@ use serde::{
     ser::{SerializeSeq, Serializer},
     Deserialize, Serialize,
 };
+use strum_macros::{Display, EnumString};
 
 /// Choose which field to use as the quantity.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Display, EnumString)]
+#[strum(serialize_all = "snake_case")]
 pub enum QuantityChoice {
     /// quantity_base
     Base,
