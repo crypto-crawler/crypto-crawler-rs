@@ -33,10 +33,14 @@ jobs:
             - uses: actions-rs/cargo@v1
               with:
                   command: build
-            - uses: actions-rs/cargo@v1
-              with:
-                  command: nextest
-                  args: run -j1
+            - name: Run cargo nextest
+              run: |
+                # Run all tests except '*bitmex*' binaries, as
+                # bitmex limited the request rate.
+                cargo nextest run -E 'all() - binary(~bitmex)'
+
+                # Run the '*bitmex*' tests in -j1.
+                cargo nextest run -E 'binary(~bitmex)' -j1
 
     doc-test:
         name: Cargo doctest
