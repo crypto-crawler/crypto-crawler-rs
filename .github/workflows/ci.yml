@@ -2,6 +2,9 @@ name: CI
 
 on: [push, pull_request]
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
   build:
     name: Cargo build
@@ -16,8 +19,31 @@ jobs:
         with:
           command: build
           args: --release --all-features
+
   test:
     name: Cargo test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+      - uses: taiki-e/install-action@nextest
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+      - name: Run cargo nextest
+        run: |
+          # Run all tests except '*bitmex*' binaries, as
+          # bitmex limited the request rate.
+          cargo nextest run -E 'all() - binary(~bitmex)'
+
+          # Run the '*bitmex*' tests in -j1.
+          cargo nextest run -E 'binary(~bitmex)' -j1
+
+  doc-test:
+    name: Cargo doctest
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -28,6 +54,8 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
+          args: --doc
+
   fmt:
     name: Cargo fmt
     runs-on: ubuntu-latest
