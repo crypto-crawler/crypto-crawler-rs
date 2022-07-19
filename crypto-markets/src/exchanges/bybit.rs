@@ -148,7 +148,7 @@ fn to_market(raw_market: &BybitMarket) -> Market {
     };
     Market {
         exchange: "bybit".to_string(),
-        market_type: if raw_market.name == raw_market.alias {
+        market_type: if raw_market.name != raw_market.alias {
             MarketType::InverseFuture
         } else if raw_market.quote_currency == "USDT" {
             MarketType::LinearSwap

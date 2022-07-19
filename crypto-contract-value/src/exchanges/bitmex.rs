@@ -131,6 +131,9 @@ fn fetch_contract_values() -> BTreeMap<String, i64> {
 }
 
 pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<f64> {
+    if market_type == MarketType::Unknown {
+        panic!("Must be a specific market type");
+    }
     let key = market_type.to_string() + "." + pair;
     if CONTRACT_VALUES.contains_key(key.as_str()) {
         Some(CONTRACT_VALUES[&key] as f64 * 1e-8)
