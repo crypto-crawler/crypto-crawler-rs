@@ -111,7 +111,7 @@ async fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
     )
 }
 
-#[test_case(MarketType::Spot; "inconclusive due to too many symbols")]
+// #[test_case(MarketType::Spot; "inconclusive due to too many symbols")]
 #[test_case(MarketType::InverseSwap)]
 #[test_case(MarketType::LinearSwap)]
 #[test_case(MarketType::InverseFuture)]
