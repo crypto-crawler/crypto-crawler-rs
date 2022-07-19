@@ -2,7 +2,7 @@ use super::super::utils::http_get;
 use crate::error::Result;
 use std::collections::BTreeMap;
 
-const BASE_URL: &str = "https://api.zbex.site";
+const BASE_URL: &str = "https://api.zb.com";
 
 /// The RESTful client for ZB spot market.
 ///
