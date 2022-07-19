@@ -1,7 +1,6 @@
-use crypto_market_type::{get_market_types, MarketType};
+use crypto_market_type::MarketType;
 use crypto_markets::{fetch_markets, fetch_symbols};
 use crypto_pair::get_market_type;
-use test_case::test_case;
 
 #[macro_use]
 mod utils;
@@ -10,16 +9,12 @@ const EXCHANGE_NAME: &str = "bitmex";
 
 #[test]
 fn fetch_all_symbols() {
-    gen_all_symbols!();
-}
-
-#[test]
-fn fetch_all_symbols_via_unknown() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::Unknown).unwrap();
     assert!(!symbols.is_empty());
 }
 
 #[test]
+#[ignore = "to avoid 429 Too Many Requests"]
 fn fetch_inverse_swap_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
     assert!(!symbols.is_empty());
@@ -34,6 +29,7 @@ fn fetch_inverse_swap_symbols() {
 }
 
 #[test]
+#[ignore = "to avoid 429 Too Many Requests"]
 fn fetch_linear_swap_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
     assert!(!symbols.is_empty());
@@ -47,6 +43,7 @@ fn fetch_linear_swap_symbols() {
 }
 
 #[test]
+#[ignore = "to avoid 429 Too Many Requests"]
 fn fetch_quanto_swap_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::QuantoSwap).unwrap();
     assert!(!symbols.is_empty());
@@ -60,6 +57,7 @@ fn fetch_quanto_swap_symbols() {
 }
 
 #[test]
+#[ignore = "to avoid 429 Too Many Requests"]
 fn fetch_inverse_future_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
     assert!(!symbols.is_empty());
@@ -80,6 +78,7 @@ fn fetch_inverse_future_symbols() {
 }
 
 #[test]
+#[ignore = "to avoid 429 Too Many Requests"]
 fn fetch_quanto_future_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::QuantoFuture).unwrap();
     assert!(!symbols.is_empty());
@@ -102,6 +101,7 @@ fn fetch_quanto_future_symbols() {
 }
 
 #[test]
+#[ignore = "to avoid 429 Too Many Requests"]
 fn fetch_linear_future_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::LinearFuture).unwrap();
     assert!(!symbols.is_empty());
@@ -127,11 +127,7 @@ fn fetch_inverse_swap_markets() {
     assert!(xbtusd.quantity_limit.is_none());
 }
 
-#[test_case(MarketType::InverseSwap)]
-#[test_case(MarketType::QuantoSwap)]
-#[test_case(MarketType::InverseFuture)]
-#[test_case(MarketType::QuantoFuture)]
-#[test_case(MarketType::LinearFuture)]
-fn test_contract_values(market_type: MarketType) {
-    check_contract_values!(EXCHANGE_NAME, market_type);
+#[test]
+fn test_contract_values() {
+    check_contract_values!(EXCHANGE_NAME, MarketType::Unknown);
 }

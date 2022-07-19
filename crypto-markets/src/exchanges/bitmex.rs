@@ -8,6 +8,7 @@ use crate::{
 };
 
 use chrono::DateTime;
+use crypto_pair::get_market_type;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -39,7 +40,11 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
 
             Market {
                 exchange: "bitmex".to_string(),
-                market_type,
+                market_type: if market_type == MarketType::Unknown {
+                    get_market_type(&x.symbol, "bitmex", None)
+                } else {
+                    market_type
+                },
                 symbol: x.symbol,
                 base_id,
                 quote_id,

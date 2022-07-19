@@ -57,6 +57,9 @@ fn fetch_inverse_future_symbols() {
 fn fetch_inverse_swap_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
     assert!(!markets.is_empty());
+    for market in markets.iter() {
+        assert!(market.delivery_date.is_none());
+    }
 
     let btcusd = markets
         .iter()
@@ -74,6 +77,9 @@ fn fetch_inverse_swap_markets() {
 fn fetch_linear_swap_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
     assert!(!markets.is_empty());
+    for market in markets.iter() {
+        assert!(market.delivery_date.is_none());
+    }
 
     let btcusdt = markets
         .iter()
@@ -91,6 +97,9 @@ fn fetch_linear_swap_markets() {
 fn fetch_inverse_future_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
     assert!(!markets.is_empty());
+    for market in markets.iter() {
+        assert!(market.delivery_date.is_some());
+    }
 
     let btcusd = markets
         .iter()
