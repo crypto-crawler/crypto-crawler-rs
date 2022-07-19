@@ -21,7 +21,7 @@ macro_rules! check_contract_values {
         for market in markets {
             let contract_value = crypto_contract_value::get_contract_value(
                 &market.exchange,
-                $market_type,
+                market.market_type,
                 format!("{}/{}", market.base, market.quote).as_str(),
             );
             assert_eq!(market.contract_value, contract_value);
@@ -41,10 +41,10 @@ macro_rules! check_contract_values {
                 crypto_pair::normalize_currency(market.settle_id.unwrap().as_str(), $exchange)
             );
             // assert!(market.margin);
-            if $market_type == MarketType::InverseFuture
-                || $market_type == MarketType::LinearFuture
-                || $market_type == MarketType::QuantoFuture
-                || $market_type == MarketType::EuropeanOption
+            if market.market_type == MarketType::InverseFuture
+                || market.market_type == MarketType::LinearFuture
+                || market.market_type == MarketType::QuantoFuture
+                || market.market_type == MarketType::EuropeanOption
             {
                 assert!(market.delivery_date.is_some());
             } else {
