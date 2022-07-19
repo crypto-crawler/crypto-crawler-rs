@@ -3,69 +3,69 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-    build:
-        name: Cargo build
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
-            - uses: actions-rs/toolchain@v1
-              with:
-                  toolchain: nightly
-                  override: true
-            - uses: actions-rs/cargo@v1
-              with:
-                  command: build
-                  args: --release --all-features
-    test:
-        name: Cargo test
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
-            - uses: actions-rs/toolchain@v1
-              with:
-                  toolchain: nightly
-                  override: true
-            - uses: actions-rs/cargo@v1
-              with:
-                  command: test
-    fmt:
-        name: Cargo fmt
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
-            - uses: actions-rs/toolchain@v1
-              with:
-                  toolchain: nightly
-                  override: true
-                  components: rustfmt
-            - uses: actions-rs/cargo@v1
-              with:
-                  command: fmt
-                  args: -- --check
+  build:
+    name: Cargo build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features
+  test:
+    name: Cargo test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+  fmt:
+    name: Cargo fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+          components: rustfmt
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: -- --check
 
-    check:
-        name: Cargo check
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
-            - uses: actions-rs/toolchain@v1
-              with:
-                  toolchain: nightly
-                  override: true
-            - uses: actions-rs/cargo@v1
-              with:
-                  command: check
+  check:
+    name: Cargo check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
 
-    clippy:
-        name: Cargo clippy
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
-            - uses: actions-rs/toolchain@v1
-              with:
-                  toolchain: nightly
-                  override: true
-                  components: clippy
-            - uses: actions-rs/cargo@v1
-              with:
-                  command: clippy
+  clippy:
+    name: Cargo clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+          components: clippy
+      - uses: actions-rs/cargo@v1
+        with:
+          command: clippy
