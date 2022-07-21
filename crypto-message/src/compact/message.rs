@@ -8,6 +8,8 @@ use std::str::FromStr;
 
 use strum_macros::{Display, EnumString};
 
+use super::order::Float;
+
 /// Cryptocurrency exchanges.
 #[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Display, Debug, EnumString)]
 #[serde(rename_all = "snake_case")]
@@ -236,12 +238,12 @@ impl TradeMsg {
 
 fn convert_order(order: &crate::Order, quantity_choice: QuantityChoice) -> Order {
     Order {
-        price: order.price,
-        quantity: match quantity_choice {
+        price: order.price as Float,
+        quantity: (match quantity_choice {
             QuantityChoice::Base => order.quantity_base,
             QuantityChoice::Quote => order.quantity_quote,
             QuantityChoice::Contract => order.quantity_contract.unwrap(),
-        },
+        }) as Float,
     }
 }
 

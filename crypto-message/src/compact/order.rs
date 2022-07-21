@@ -17,13 +17,18 @@ pub enum QuantityChoice {
     Contract,
 }
 
+#[cfg(feature = "f32")]
+pub type Float = f32;
+#[cfg(not(feature = "f32"))]
+pub type Float = f64;
+
 /// An order in the orderbook asks or bids array.
 #[derive(Copy, Clone)]
 pub struct Order {
     /// price
-    pub price: f64,
+    pub price: Float,
     // quantity, comes from one of quantity_base, quantity_quote and quantity_contract.
-    pub quantity: f64,
+    pub quantity: Float,
 }
 
 impl PartialEq for Order {
@@ -73,8 +78,8 @@ impl<'de> Visitor<'de> for OrderVisitor {
         }
 
         let order = Order {
-            price: vec[0],
-            quantity: vec[1],
+            price: vec[0] as Float,
+            quantity: vec[1] as Float,
         };
 
         Ok(order)
