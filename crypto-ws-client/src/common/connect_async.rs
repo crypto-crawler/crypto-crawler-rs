@@ -44,20 +44,12 @@ pub async fn connect_async(
         )
         .await
         .unwrap();
-        let ret = tokio_tungstenite::client_async_tls(connect_url, proxy_stream).await;
+        let (ws_stream, _) = tokio_tungstenite::client_async_tls(connect_url, proxy_stream).await?;
         // replaced
         // let ret = tokio_tungstenite::connect_async(url).await;
-        if let Err(e) = ret {
-            return Err(e);
-        }
-        let (ws_stream, _) = ret.unwrap();
         connect_async_internal(ws_stream, uplink_limit).await
     } else {
-        let ret = tokio_tungstenite::connect_async(url).await;
-        if let Err(e) = ret {
-            return Err(e);
-        }
-        let (ws_stream, _) = ret.unwrap();
+        let (ws_stream, _) = tokio_tungstenite::connect_async(url).await?;
 
         connect_async_internal(ws_stream, uplink_limit).await
     }
