@@ -165,6 +165,49 @@ mod l2_event {
     }
 
     #[test]
+    fn spot_sample_2() {
+        let raw_msg = r#"{"type":"message","topic":"/market/level2:RUNE-USDC","subject":"trade.l2update","data":{"changes":{"asks":[],"bids":[["3.0037","267.7895","4197479"]]},"sequenceEnd":4197479,"sequenceStart":4197479,"symbol":"RUNE-USDC","time":1658449800752}}"#;
+        let orderbook = &parse_l2(
+            EXCHANGE_NAME,
+            MarketType::Spot,
+            raw_msg,
+            Some(1625097804231_i64),
+        )
+        .unwrap()[0];
+
+        assert_eq!(orderbook.asks.len(), 0);
+        assert_eq!(orderbook.bids.len(), 1);
+        assert!(!orderbook.snapshot);
+
+        crate::utils::check_orderbook_fields(
+            EXCHANGE_NAME,
+            MarketType::Spot,
+            MessageType::L2Event,
+            "RUNE/USDC".to_string(),
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap(),
+            orderbook,
+            raw_msg,
+        );
+        assert_eq!(
+            1658449800752,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "RUNE-USDC",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+
+        assert_eq!(orderbook.timestamp, 1658449800752);
+        assert_eq!(orderbook.seq_id, Some(4197479));
+
+        assert_eq!(orderbook.bids[0].price, 3.0037);
+        assert_eq!(orderbook.bids[0].quantity_base, 267.7895);
+        assert_eq!(orderbook.bids[0].quantity_quote, 3.0037 * 267.7895);
+    }
+
+    #[test]
     fn inverse_swap_update() {
         let raw_msg = r#"{"data":{"sequence":1617852459594,"change":"39069.0,buy,23960","timestamp":1622718985044},"subject":"level2","topic":"/contractMarket/level2:XBTUSDM","type":"message"}"#;
         let orderbook =
