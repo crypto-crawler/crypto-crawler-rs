@@ -425,6 +425,18 @@ mod ticker {
     }
 
     #[test]
+    fn spot_sample_2() {
+        let raw_msg = r#"{"trade_statistic":[["472","0.000045","0","0","0","0","[]","0.000011","0.000057","0"]]}"#;
+
+        assert!(extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).is_err());
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
     fn inverse_swap() {
         let raw_msg = r#"["future_snapshot_indicator",{"tt":"1335.2544","pp":"30117","lui":1621326625165456,"symbol":"BTC_USD-R","tv":"40286903","c24t":6083.218113,"lp":"29860.5","pv":"12762468","w24pc":"474","orderLimit":"150000","dp":"0","osp":"29860.5","uf":0,"indexPrice":"29883.127199","mq":"2218","mt":4,"ip":"29883.127199","ai":2,"tav":"0","w24pcr":"0.01612985554591394","basis":"0.08%","pcr24":0.0146,"hgp24":30732,"fb":"-0.00059234518798245","pfr":"-0.000059683363091459","pc24":431.0,"volumeUsd24h":"597787","tbv":"0","fr":"-0.000059683363091459","sb":"BTC/USD-R","currencyName":"btc","op24":29429.5,"sl":0,"contractUnit":"1","pcr":"-0.008533244791234332","op":"30117.5","hph":"69159","hpl":"0.5","ci":1000001,"ppi":"-0.000559683363091459","u24t":183544142.552353,"openInterestUSD":"12762468","cp":"29895.8998627","lwp24":29032,"td":20220518,"cs":2,"te":1652804557693495,"pc":"-257","ph":"30154","contractId":"1000001","pi":"-0.001792462854748013","pl":"29855","obp":"29837.5","ts":0,"commodityName":"usd","fundingRate":"-0.0059683363091459%"}]"#;
 

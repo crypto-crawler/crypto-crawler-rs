@@ -191,6 +191,7 @@ static SYMBOL_MAP: Lazy<HashMap<i64, String>> = Lazy::new(|| {
         (5392, "entc_usdt"),
         (5393, "sch_usdt"),
         (5394, "gotg_usdt"),
+        (5396, "laeeb_usdt"),
     ]
     .into_iter()
     .map(|x| (x.0, x.1.to_string()))
@@ -270,7 +271,13 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
                 .unwrap()
                 .parse::<i64>()
                 .unwrap();
-            Ok(SYMBOL_MAP.get(&symbol_id).expect(msg).clone())
+            if let Some(symbol) = SYMBOL_MAP.get(&symbol_id) {
+                Ok(symbol.to_string())
+            } else {
+                Err(SimpleError::new(format!(
+                    "{symbol_id} NOT found in SYMBOL_MAP"
+                )))
+            }
         };
         return ret;
     }
