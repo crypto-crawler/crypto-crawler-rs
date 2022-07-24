@@ -854,6 +854,20 @@ mod ticker {
     }
 
     #[test]
+    fn spot_sample_2() {
+        let raw_msg = r#"{"method": "ticker.update", "params": ["BTC_USDT", {"period": 86400, "open": "45366", "close": "44681", "high": "46433.56", "low": "44336.17", "last": "44681", "change": "-1.54", "quoteVolume": "780.195181207", "baseVolume": "35527977.73407791947245739827"}], "id": null}"#;
+
+        assert_eq!(
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+        assert_eq!(
+            "BTC_USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
     fn inverse_future() {
         let raw_msg = r#"{"time":1654162230,"channel":"futures.tickers","event":"update","error":null,"result":[{"total_size":"9999","volume_24h_quote":"265260","volume_24h_settle":"8","change_percentage":"-5.42","last":"29954.9","mark_price":"29955.64","volume_24h_base":"8","contract":"BTC_USD_20220624","volume_24h":"265260","settle_price":"0","basis_value":"-19.5","basis_rate":"-0.010791","high_24h":"31884.4","low_24h":"29336.9","index_price":"29975.14","quanto_base_rate":""}]}"#;
 

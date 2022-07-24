@@ -44,7 +44,7 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     let ws_msg = serde_json::from_str::<SpotWebsocketMsg>(msg).map_err(|_e| {
         SimpleError::new(format!("Failed to deserialize {} to SpotWebsocketMsg", msg))
     })?;
-    if ws_msg.method == "trades.update" {
+    if ws_msg.method == "trades.update" || ws_msg.method == "ticker.update" {
         Ok(ws_msg.params[0].as_str().unwrap().to_string())
     } else if ws_msg.method == "depth.update" {
         Ok(ws_msg.params[2].as_str().unwrap().to_string())
@@ -68,7 +68,7 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
         } else {
             Ok(timestamp)
         }
-    } else if ws_msg.method == "depth.update" {
+    } else if ws_msg.method == "depth.update" || ws_msg.method == "ticker.update" {
         Ok(None)
     } else {
         Err(SimpleError::new(format!("Unknown message format: {}", msg)))
