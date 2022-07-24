@@ -72,6 +72,8 @@ pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
                 Ok(Some(t.as_i64().unwrap()))
             } else if topic.starts_with("/market/candles:") {
                 Ok(Some(t.as_i64().unwrap() / 1000000))
+            } else if topic.starts_with("/market/level2:") {
+                Ok(Some(t.as_i64().unwrap()))
             } else {
                 Err(SimpleError::new(format!(
                     "Failed to extract timestamp from {}",

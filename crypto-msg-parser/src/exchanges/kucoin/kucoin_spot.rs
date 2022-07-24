@@ -38,6 +38,7 @@ struct SpotOrderbookMsg {
     symbol: String,
     changes: Changes,
     sequenceEnd: i64,
+    time: Option<i64>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -125,7 +126,7 @@ pub(super) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>, S
         symbol,
         pair,
         msg_type: MessageType::L2Event,
-        timestamp,
+        timestamp: ws_msg.data.time.unwrap_or(timestamp),
         seq_id: Some(ws_msg.data.sequenceStart as u64),
         prev_seq_id: None,
         asks: ws_msg
