@@ -60,6 +60,11 @@ pub(crate) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
                     Ok(None)
                 }
             }
+            "push.kline" => {
+                let data = arr[1]["data"].as_object().unwrap();
+                let t = data["t"].as_i64().unwrap();
+                Ok(Some(t * 1000))
+            }
             _ => Err(SimpleError::new(format!(
                 "Unknown channel {} in {}",
                 channel, msg

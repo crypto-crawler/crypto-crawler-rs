@@ -65,15 +65,15 @@ struct WebsocketMsg<T: Sized> {
 
 pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(SimpleError::from)?;
-    let symbols = ws_msg
+    let symbol = ws_msg
         .data
         .iter()
         .map(|v| v["instrument_id"].as_str().unwrap())
-        .collect::<Vec<&str>>();
-    if symbols.is_empty() {
-        Err(SimpleError::new("empty array"))
+        .nth(0);
+    if let Some(symbol) = symbol {
+        Ok(symbol.to_string())
     } else {
-        Ok(symbols[0].to_string())
+        Err(SimpleError::new("empty array"))
     }
 }
 
@@ -86,9 +86,18 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
         .data
         .iter()
         .map(|x| {
-            DateTime::parse_from_rfc3339(x["timestamp"].as_str().unwrap())
-                .unwrap()
-                .timestamp_millis()
+            if let Some(timestamp) = x.get("timestamp") {
+                DateTime::parse_from_rfc3339(timestamp.as_str().unwrap())
+                    .unwrap()
+                    .timestamp_millis()
+            } else if let Some(candle) = x.get("candle") {
+                let arr = candle.as_array().unwrap();
+                DateTime::parse_from_rfc3339(arr[0].as_str().unwrap())
+                    .unwrap()
+                    .timestamp_millis()
+            } else {
+                panic!("Unknown message format: {}", msg);
+            }
         })
         .max();
 

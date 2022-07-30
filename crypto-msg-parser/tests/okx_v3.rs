@@ -552,3 +552,26 @@ mod l2_topk {
         assert_eq!(orderbook.bids[4].quantity_contract.unwrap(), 28.0);
     }
 }
+
+#[cfg(test)]
+mod candlestick {
+    use super::EXCHANGE_NAME;
+    use crypto_market_type::MarketType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+
+    #[test]
+    fn spot() {
+        let raw_msg = r#"{"table":"spot/candle60s","data":[{"candle":["2022-02-01T00:30:00.000Z","0.050209","0.050209","0.050209","0.050209","722.597549"],"instrument_id":"CELR-USDT"}]}"#;
+
+        assert_eq!(
+            1643675400000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "CELR-USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+}

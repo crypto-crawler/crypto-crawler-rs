@@ -605,6 +605,22 @@ mod candlestick {
     }
 
     #[test]
+    fn spot_sample_2() {
+        let raw_msg = r#"["push.kline",{"symbol":"DXGM_USDT","data":{"symbol":"DXGM_USDT","interval":"Min5","t":1638241800,"o":0.0268,"c":0.02456,"h":0.0273,"l":0.02286,"v":31416.3765539,"q":1264843.57},"symbol_display":"DXGM_USDT"}]"#;
+
+        assert_eq!(
+            1638241800000,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+                .unwrap()
+                .unwrap()
+        );
+        assert_eq!(
+            "DXGM_USDT",
+            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+        );
+    }
+
+    #[test]
     fn inverse_swap() {
         let raw_msg = r#"{"channel":"push.kline","data":{"a":8.0759087605568165,"c":31439.5,"h":31439.5,"interval":"Min1","l":31439,"o":31439.5,"q":2539,"rc":31439.5,"rh":31439.5,"rl":31439,"ro":31439.5,"symbol":"BTC_USD","t":1654083720},"symbol":"BTC_USD","ts":1654083763923}"#;
 
