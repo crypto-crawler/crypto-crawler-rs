@@ -343,7 +343,8 @@ mod l2_event {
 mod bbo {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    use crypto_msg_type::MessageType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_bbo};
 
     #[test]
     fn spot_snapshot() {
@@ -357,6 +358,25 @@ mod bbo {
             "tBTCUST",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
+
+        let received_at = 1651122265862;
+        let bbo_msg =
+            parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, Some(received_at)).unwrap();
+
+        assert_eq!(MessageType::BBO, bbo_msg.msg_type);
+        assert_eq!("tBTCUST", bbo_msg.symbol);
+        assert_eq!(received_at, bbo_msg.timestamp);
+        assert_eq!(None, bbo_msg.id);
+
+        assert_eq!(96064678342.0, bbo_msg.ask_price);
+        assert_eq!(31630.0, bbo_msg.ask_quantity_base);
+        assert_eq!(96064678342.0 * 31630.0, bbo_msg.ask_quantity_quote);
+        assert_eq!(None, bbo_msg.ask_quantity_contract);
+
+        assert_eq!(96063747304.0, bbo_msg.bid_price);
+        assert_eq!(31643.0, bbo_msg.bid_quantity_base);
+        assert_eq!(96063747304.0 * 31643.0, bbo_msg.bid_quantity_quote);
+        assert_eq!(None, bbo_msg.bid_quantity_contract);
     }
 
     #[test]
@@ -385,6 +405,24 @@ mod bbo {
             "tBTCF0:USTF0",
             extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
         );
+        let received_at = 1651122265862;
+        let bbo_msg =
+            parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, Some(received_at)).unwrap();
+
+        assert_eq!(MessageType::BBO, bbo_msg.msg_type);
+        assert_eq!("tBTCF0:USTF0", bbo_msg.symbol);
+        assert_eq!(received_at, bbo_msg.timestamp);
+        assert_eq!(None, bbo_msg.id);
+
+        assert_eq!(96065326882.0, bbo_msg.ask_price);
+        assert_eq!(31606.0, bbo_msg.ask_quantity_base);
+        assert_eq!(96065326882.0 * 31606.0, bbo_msg.ask_quantity_quote);
+        assert_eq!(None, bbo_msg.ask_quantity_contract);
+
+        assert_eq!(96065369152.0, bbo_msg.bid_price);
+        assert_eq!(31609.0, bbo_msg.bid_quantity_base);
+        assert_eq!(96065369152.0 * 31609.0, bbo_msg.bid_quantity_quote);
+        assert_eq!(None, bbo_msg.bid_quantity_contract);
     }
 
     #[test]
@@ -469,7 +507,8 @@ mod l3_event {
 mod candlestick {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    use crypto_msg_type::MessageType;
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_candlestick};
 
     #[test]
     fn spot_snapshot() {
@@ -501,6 +540,10 @@ mod candlestick {
             "tBTCUST",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
+        let data = parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg, MessageType::L2TopK).unwrap();
+
+        assert_eq!(1654075080000, data.timestamp);
+        assert_eq!("1m", data.period);
     }
 
     #[test]
@@ -533,6 +576,10 @@ mod candlestick {
             "tBTCF0:USTF0",
             extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
         );
+        let data = parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg, MessageType::L2TopK).unwrap();
+
+        assert_eq!(1654076040000, data.timestamp);
+        assert_eq!("1m", data.period);
     }
 }
 

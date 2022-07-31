@@ -1,7 +1,7 @@
-use crate::exchanges::utils::calc_quantity_and_volume;
+use crate::{BboMsg,KlineMsg,exchanges::utils::calc_quantity_and_volume, Order, OrderBookMsg, TradeMsg, TradeSide};
 use crypto_market_type::MarketType;
-use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
 use crypto_msg_type::MessageType;
+use serde::{Deserialize, Serialize};
 
 use serde_json::Value;
 use simple_error::SimpleError;
@@ -24,7 +24,7 @@ pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     } else if channel == "candles" {
         let key = &(obj["key"].as_str().unwrap())["trade:".len()..];
         let pos = key.find(':').unwrap();
-        Ok((key[pos + 1..]).to_string())
+        Ok((&key[pos + 1..]).to_string())
     } else {
         Err(SimpleError::new(format!(
             "Failed to extract symbol from {}",
@@ -232,4 +232,128 @@ pub(crate) fn parse_l2(
     }
 
     Ok(vec![orderbook])
+}
+
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawBboMsg {
+    len: String,
+    prec: String,
+    freq: String,
+    symbol: String,
+    channel: String,
+}
+// {"len":"1","prec":"R0","freq":"F0","symbol":"tBTCUST","channel":"book"}
+
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawCandlesMsg {
+    key: String,
+    channel: String,
+}
+//{"key":"trade:1m:tBTCUST","channel":"candles"}
+pub(crate) fn parse_bbo(
+    market_type: MarketType,
+    msg: &str,
+    received_at: Option<i64>,
+) -> Result<BboMsg, SimpleError> {
+    let ws_msg = serde_json::from_str::<(RawBboMsg,Vec<Vec<f64>>)>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<RawBboMsg>",
+            msg
+        ))
+    })?;
+
+
+
+
+    // debug_assert!(ws_msg.stream.ends_with("bookTicker"));
+    let timestamp = received_at.unwrap();
+
+
+
+    let symbol = ws_msg.0.symbol;
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+
+    let (ask_quantity_base, ask_quantity_quote, ask_quantity_contract) = calc_quantity_and_volume(
+        EXCHANGE_NAME,
+        market_type,
+        &pair,
+        ws_msg.1[0][0],
+        ws_msg.1[0][1],
+    );
+
+    let (bid_quantity_base, bid_quantity_quote, bid_quantity_contract) = calc_quantity_and_volume(
+        EXCHANGE_NAME,
+        market_type,
+        &pair,
+        ws_msg.1[1][0],
+        ws_msg.1[1][1],
+    );
+
+    let bbo_msg = BboMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: symbol.to_string(),
+        pair,
+        msg_type: MessageType::BBO,
+        timestamp,
+        ask_price: ws_msg.1[0][0],
+        ask_quantity_base,
+        ask_quantity_quote,
+        ask_quantity_contract,
+        bid_price: ws_msg.1[1][0],
+        bid_quantity_base,
+        bid_quantity_quote,
+        bid_quantity_contract,
+        id: None,
+        json: msg.to_string(),
+    };
+    Ok(bbo_msg)
+}
+
+pub(crate) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+    msg_type: MessageType
+) -> Result<KlineMsg, SimpleError> {
+    let obj = serde_json::from_str::<(RawCandlesMsg,Vec<f64>)>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to HashMap<String, Value>",
+            msg
+        ))
+    })?;
+    let tempKey:Vec<&str> = obj.0.key.split(":").collect();
+    let symbol = tempKey[2].to_string();
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+
+
+    let open: f64 = obj.1[1];
+    let high: f64 = obj.1[3];
+    let low: f64 = obj.1[4];
+    let close: f64 = obj.1[2];
+    let volume: f64 = obj.1[5];
+    // let quote_volume: f64 = obj.1[0][0];
+
+
+    // obj.data.k
+
+    let kline_msg = KlineMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol,
+        pair,
+        msg_type,
+        timestamp: obj.1[0] as i64,
+        json: msg.to_string(),
+        open,
+        high,
+        low,
+        close,
+        volume,
+        period: tempKey[1].to_string(),
+        quote_volume: None
+    };
+
+    Ok(kline_msg)
 }
