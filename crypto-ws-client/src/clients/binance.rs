@@ -111,7 +111,7 @@ impl<const URL: char> WSClient for BinanceWSClient<URL> {
     async fn subscribe_orderbook_topk(&self, symbols: &[String]) {
         let topics = symbols
             .iter()
-            .map(|symbol| ("depth5@100ms".to_string(), symbol.to_string()))
+            .map(|symbol| ("depth20@100ms".to_string(), symbol.to_string()))
             .collect::<Vec<(String, String)>>();
         self.subscribe(&topics).await;
     }
@@ -297,7 +297,7 @@ mod tests {
     fn test_one_topic() {
         let translator = super::BinanceCommandTranslator { market_type: 'S' };
         let commands = translator
-            .translate_to_commands(true, &[("aggTrade".to_string(), "BTCUSDT".to_string())]);
+            .translate_to_commands(true, &vec![("aggTrade".to_string(), "BTCUSDT".to_string())]);
 
         assert_eq!(1, commands.len());
         assert_eq!(
@@ -311,7 +311,7 @@ mod tests {
         let translator = super::BinanceCommandTranslator { market_type: 'S' };
         let commands = translator.translate_to_commands(
             true,
-            &[
+            &vec![
                 ("aggTrade".to_string(), "BTCUSDT".to_string()),
                 ("ticker".to_string(), "BTCUSDT".to_string()),
             ],
