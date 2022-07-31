@@ -69,7 +69,7 @@ pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
         .data
         .iter()
         .map(|v| v["instrument_id"].as_str().unwrap())
-        .nth(0);
+        .next();
     if let Some(symbol) = symbol {
         Ok(symbol.to_string())
     } else {
