@@ -48,7 +48,6 @@ pub(crate) async fn crawl_bbo(
         let tx =
             create_conversion_thread(EXCHANGE_NAME.to_string(), MessageType::BBO, market_type, tx);
         let commands =
-            // vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!bookTicker"]}"#.to_string()]; // All Book Tickers Stream
             vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!bookTicker"]}"#.to_string()]; // All Book Tickers Stream
         match market_type {
             MarketType::Spot => {
@@ -91,9 +90,9 @@ pub(crate) async fn crawl_ticker(
             market_type,
             tx,
         );
-        let commands =
-            // vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!ticker@arr"]}"#.to_string()];
-            vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!ticker@depth20@100ms"]}"#.to_string()];
+        let commands = vec![
+            r#"{"id":9527,"method":"SUBSCRIBE","params":["!ticker@depth20@100ms"]}"#.to_string(),
+        ];
 
         match market_type {
             MarketType::Spot => {
@@ -116,7 +115,6 @@ pub(crate) async fn crawl_ticker(
             }
             MarketType::EuropeanOption => {
                 let commands = vec![
-                    // r#"{"id":9527,"method":"SUBSCRIBE","params":["BTCUSDT@TICKER_ALL"]}"#
                     r#"{"id":9527,"method":"SUBSCRIBE","params":["BTCUSDT@depth5@100ms"]}"#
                         .to_string(),
                 ];
@@ -155,7 +153,6 @@ pub(crate) async fn crawl_funding_rate(
 
     if symbols.is_none() || symbols.unwrap().is_empty() {
         let commands =
-            // vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!markPrice@arr"]}"#.to_string()];
             vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!markPrice@arr"]}"#.to_string()];
         ws_client.send(&commands).await;
     } else {
