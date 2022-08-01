@@ -569,7 +569,13 @@ mod bbo {
         );
 
         let received_at = 1654012882984;
-        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, Some(received_at)).unwrap();
+        let bbo_msg = parse_bbo(
+            EXCHANGE_NAME,
+            MarketType::InverseSwap,
+            raw_msg,
+            Some(received_at),
+        )
+        .unwrap();
 
         assert_eq!(MessageType::BBO, bbo_msg.msg_type);
         assert_eq!("BTC-PERPETUAL", bbo_msg.symbol);

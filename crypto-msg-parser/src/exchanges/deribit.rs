@@ -338,7 +338,6 @@ pub(crate) fn parse_l2_topk(
     parse_l2(market_type, msg)
 }
 
-
 pub(crate) fn parse_bbo(
     market_type: MarketType,
     msg: &str,
@@ -347,15 +346,14 @@ pub(crate) fn parse_bbo(
     match market_type {
         MarketType::EuropeanOption => Err(SimpleError::new("Not implemented")),
         MarketType::InverseSwap => parse_bbo_inverse_swap(market_type, msg, received_at),
-        _ => unimplemented!()
+        _ => unimplemented!(),
     }
 }
-
 
 fn parse_bbo_inverse_swap(
     market_type: MarketType,
     msg: &str,
-    _received_at: Option<i64>
+    _received_at: Option<i64>,
 ) -> Result<BboMsg, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawBboMsgInverseSwap>>(msg).map_err(|_e| {
         SimpleError::new(format!(
@@ -375,7 +373,7 @@ fn parse_bbo_inverse_swap(
         market_type,
         &pair,
         ws_msg.params.data.best_ask_price,
-        ws_msg.params.data.best_ask_amount
+        ws_msg.params.data.best_ask_amount,
     );
 
     let (bid_quantity_base, bid_quantity_quote, bid_quantity_contract) = calc_quantity_and_volume(
@@ -383,7 +381,7 @@ fn parse_bbo_inverse_swap(
         market_type,
         &pair,
         ws_msg.params.data.best_bid_price,
-        ws_msg.params.data.best_bid_amount
+        ws_msg.params.data.best_bid_amount,
     );
 
     let bbo_msg = BboMsg {
@@ -406,5 +404,4 @@ fn parse_bbo_inverse_swap(
     };
 
     Ok(bbo_msg)
-
 }
