@@ -1,5 +1,5 @@
 use crate::{
-    exchanges::utils::calc_quantity_and_volume, BboMsg, KlineMsg, Order, OrderBookMsg, TradeMsg,
+    exchanges::utils::calc_quantity_and_volume, BboMsg, CandlestickMsg, Order, OrderBookMsg, TradeMsg,
     TradeSide,
 };
 use crypto_market_type::MarketType;
@@ -237,8 +237,18 @@ pub(crate) fn parse_l2(
     Ok(vec![orderbook])
 }
 
+/// # Example Response
+///
+/// ```json
+/// {
+///   "len": "1",
+///   "prec": "R0",
+///   "freq": "F0",
+///   "symbol": "tBTCUST",
+///   "channel": "book"
+/// }
+/// ```
 #[derive(Serialize, Deserialize)]
-#[allow(non_snake_case)]
 struct RawBboMsg {
     len: String,
     prec: String,
@@ -246,15 +256,22 @@ struct RawBboMsg {
     symbol: String,
     channel: String,
 }
-// {"len":"1","prec":"R0","freq":"F0","symbol":"tBTCUST","channel":"book"}
 
+/// # Example Response
+///
+/// ```json
+/// {
+///   "key": "trade:1m:tBTCUST",
+///   "channel": "candles"
+/// }
+/// ```
+/// ```
 #[derive(Serialize, Deserialize)]
-#[allow(non_snake_case)]
 struct RawCandlesMsg {
     key: String,
     channel: String,
 }
-//{"key":"trade:1m:tBTCUST","channel":"candles"}
+
 pub(crate) fn parse_bbo(
     market_type: MarketType,
     msg: &str,
@@ -267,7 +284,6 @@ pub(crate) fn parse_bbo(
         ))
     })?;
 
-    // debug_assert!(ws_msg.stream.ends_with("bookTicker"));
     let timestamp = received_at.unwrap();
 
     let symbol = ws_msg.0.symbol;
@@ -292,7 +308,7 @@ pub(crate) fn parse_bbo(
     let bbo_msg = BboMsg {
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
-        symbol: symbol.to_string(),
+        symbol,
         pair,
         msg_type: MessageType::BBO,
         timestamp,
@@ -314,15 +330,16 @@ pub(crate) fn parse_candlestick(
     market_type: MarketType,
     msg: &str,
     msg_type: MessageType,
-) -> Result<KlineMsg, SimpleError> {
+) -> Result<CandlestickMsg, SimpleError> {
     let obj = serde_json::from_str::<(RawCandlesMsg, Vec<f64>)>(msg).map_err(|_e| {
         SimpleError::new(format!(
             "Failed to deserialize {} to HashMap<String, Value>",
             msg
         ))
     })?;
-    let tempKey: Vec<&str> = obj.0.key.split(":").collect();
-    let symbol = tempKey[2].to_string();
+
+    let temp_key = obj.0.key.split(':').collect::<Vec<&str>>();
+    let symbol = temp_key[2].to_string();
     let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
 
     let open: f64 = obj.1[1];
@@ -330,11 +347,8 @@ pub(crate) fn parse_candlestick(
     let low: f64 = obj.1[4];
     let close: f64 = obj.1[2];
     let volume: f64 = obj.1[5];
-    // let quote_volume: f64 = obj.1[0][0];
 
-    // obj.data.k
-
-    let kline_msg = KlineMsg {
+    let candlestick_msg = CandlestickMsg {
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
         symbol,
@@ -347,9 +361,9 @@ pub(crate) fn parse_candlestick(
         low,
         close,
         volume,
-        period: tempKey[1].to_string(),
+        period: temp_key[1].to_string(),
         quote_volume: None,
     };
 
-    Ok(kline_msg)
+    Ok(candlestick_msg)
 }
