@@ -343,8 +343,8 @@ mod l2_event {
 mod bbo {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_type::MessageType;
     use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_bbo};
+    use crypto_msg_type::MessageType;
 
     #[test]
     fn spot_snapshot() {
@@ -507,8 +507,8 @@ mod l3_event {
 mod candlestick {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_type::MessageType;
     use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_candlestick};
+    use crypto_msg_type::MessageType;
 
     #[test]
     fn spot_snapshot() {
@@ -540,7 +540,13 @@ mod candlestick {
             "tBTCUST",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
-        let data = parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg, MessageType::L2TopK).unwrap();
+        let data = parse_candlestick(
+            EXCHANGE_NAME,
+            MarketType::Spot,
+            raw_msg,
+            MessageType::L2TopK,
+        )
+        .unwrap();
 
         assert_eq!(1654075080000, data.timestamp);
         assert_eq!("1m", data.period);
@@ -576,7 +582,13 @@ mod candlestick {
             "tBTCF0:USTF0",
             extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
         );
-        let data = parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg, MessageType::L2TopK).unwrap();
+        let data = parse_candlestick(
+            EXCHANGE_NAME,
+            MarketType::Spot,
+            raw_msg,
+            MessageType::L2TopK,
+        )
+        .unwrap();
 
         assert_eq!(1654076040000, data.timestamp);
         assert_eq!("1m", data.period);

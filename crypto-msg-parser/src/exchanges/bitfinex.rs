@@ -1,4 +1,7 @@
-use crate::{BboMsg,KlineMsg,exchanges::utils::calc_quantity_and_volume, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crate::{
+    exchanges::utils::calc_quantity_and_volume, BboMsg, KlineMsg, Order, OrderBookMsg, TradeMsg,
+    TradeSide,
+};
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 use serde::{Deserialize, Serialize};
@@ -257,20 +260,15 @@ pub(crate) fn parse_bbo(
     msg: &str,
     received_at: Option<i64>,
 ) -> Result<BboMsg, SimpleError> {
-    let ws_msg = serde_json::from_str::<(RawBboMsg,Vec<Vec<f64>>)>(msg).map_err(|_e| {
+    let ws_msg = serde_json::from_str::<(RawBboMsg, Vec<Vec<f64>>)>(msg).map_err(|_e| {
         SimpleError::new(format!(
             "Failed to deserialize {} to WebsocketMsg<RawBboMsg>",
             msg
         ))
     })?;
 
-
-
-
     // debug_assert!(ws_msg.stream.ends_with("bookTicker"));
     let timestamp = received_at.unwrap();
-
-
 
     let symbol = ws_msg.0.symbol;
     let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
@@ -315,18 +313,17 @@ pub(crate) fn parse_bbo(
 pub(crate) fn parse_candlestick(
     market_type: MarketType,
     msg: &str,
-    msg_type: MessageType
+    msg_type: MessageType,
 ) -> Result<KlineMsg, SimpleError> {
-    let obj = serde_json::from_str::<(RawCandlesMsg,Vec<f64>)>(msg).map_err(|_e| {
+    let obj = serde_json::from_str::<(RawCandlesMsg, Vec<f64>)>(msg).map_err(|_e| {
         SimpleError::new(format!(
             "Failed to deserialize {} to HashMap<String, Value>",
             msg
         ))
     })?;
-    let tempKey:Vec<&str> = obj.0.key.split(":").collect();
+    let tempKey: Vec<&str> = obj.0.key.split(":").collect();
     let symbol = tempKey[2].to_string();
     let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
-
 
     let open: f64 = obj.1[1];
     let high: f64 = obj.1[3];
@@ -334,7 +331,6 @@ pub(crate) fn parse_candlestick(
     let close: f64 = obj.1[2];
     let volume: f64 = obj.1[5];
     // let quote_volume: f64 = obj.1[0][0];
-
 
     // obj.data.k
 
@@ -352,7 +348,7 @@ pub(crate) fn parse_candlestick(
         close,
         volume,
         period: tempKey[1].to_string(),
-        quote_volume: None
+        quote_volume: None,
     };
 
     Ok(kline_msg)
