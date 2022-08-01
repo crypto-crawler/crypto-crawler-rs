@@ -1,6 +1,8 @@
 pub mod exchanges;
 use crypto_market_type::MarketType;
-use crypto_message::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, CandlestickMsg, TradeSide};
+use crypto_message::{
+    BboMsg, CandlestickMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide,
+};
 use crypto_msg_type::MessageType;
 pub use exchanges::utils::round; // for test only
 use simple_error::SimpleError;
@@ -258,7 +260,7 @@ pub fn parse_candlestick(
     exchange: &str,
     market_type: MarketType,
     msg: &str,
-    msg_type: MessageType
+    msg_type: MessageType,
 ) -> Result<CandlestickMsg, SimpleError> {
     match exchange {
         "bitfinex" => exchanges::bitfinex::parse_candlestick(market_type, msg, msg_type),

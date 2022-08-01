@@ -1,6 +1,6 @@
 use crate::{
-    exchanges::utils::calc_quantity_and_volume, BboMsg, CandlestickMsg, Order, OrderBookMsg, TradeMsg,
-    TradeSide,
+    exchanges::utils::calc_quantity_and_volume, BboMsg, CandlestickMsg, Order, OrderBookMsg,
+    TradeMsg, TradeSide,
 };
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
