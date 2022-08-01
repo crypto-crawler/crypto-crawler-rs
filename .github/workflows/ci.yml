@@ -5,6 +5,12 @@ on: [push, pull_request]
 env:
   CARGO_TERM_COLOR: always
 
+# Stop the previous CI tasks (which is deprecated)
+# to conserve the runner resource.
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Cargo build
