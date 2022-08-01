@@ -1,6 +1,6 @@
 pub mod exchanges;
 use crypto_market_type::MarketType;
-use crypto_message::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, CandlestickMsg};
+use crypto_message::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, CandlestickMsg, TradeSide};
 use crypto_msg_type::MessageType;
 pub use exchanges::utils::round; // for test only
 use simple_error::SimpleError;
@@ -212,6 +212,7 @@ pub fn parse_bbo(
 ) -> Result<BboMsg, SimpleError> {
     match exchange {
         "binance" => exchanges::binance::parse_bbo(market_type, msg, received_at),
+        "bitfinex" => exchanges::bitfinex::parse_bbo(market_type, msg, received_at),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
 }
@@ -260,6 +261,7 @@ pub fn parse_candlestick(
     msg_type: MessageType
 ) -> Result<CandlestickMsg, SimpleError> {
     match exchange {
+        "bitfinex" => exchanges::bitfinex::parse_candlestick(market_type, msg, msg_type),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
 }
