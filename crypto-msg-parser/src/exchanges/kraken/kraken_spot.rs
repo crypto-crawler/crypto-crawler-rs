@@ -1,8 +1,8 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide, BboMsg};
 use crate::exchanges::utils::calc_quantity_and_volume;
+use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -412,7 +412,6 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
     Ok(orderbooks)
 }
 
-
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct RawBboMsgSpot {
@@ -421,7 +420,6 @@ struct RawBboMsgSpot {
     timestamp: String,
     bidVolumn: String,
     askVolumn: String,
-
 }
 
 #[allow(non_snake_case)]
@@ -430,7 +428,6 @@ pub(super) fn parse_bbo_spot(
     msg: &str,
     received_at: Option<i64>,
 ) -> Result<BboMsg, SimpleError> {
-
     let ws_msg = serde_json::from_str::<Vec<Value>>(msg).map_err(|_e| {
         SimpleError::new(format!(
             "Failed to deserialize {} to WebsocketMsg<RawBboMsg>",
@@ -438,13 +435,15 @@ pub(super) fn parse_bbo_spot(
         ))
     })?;
     let idString = serde_json::to_string(&ws_msg[0]).ok().unwrap();
-    let id  = idString.parse::<u64>().unwrap();
+    let id = idString.parse::<u64>().unwrap();
     let rawBobMsgString = serde_json::to_string(&ws_msg[1]).ok().unwrap();
-    let rawBboMsgSpot = serde_json::from_str::<RawBboMsgSpot>(&rawBobMsgString).ok().unwrap();
+    let rawBboMsgSpot = serde_json::from_str::<RawBboMsgSpot>(&rawBobMsgString)
+        .ok()
+        .unwrap();
     let mut timestamp: i64 = 0;
     let timestamp_recv = received_at.unwrap();
     if timestamp_recv > 0 {
-        timestamp  = timestamp_recv;
+        timestamp = timestamp_recv;
     } else {
         timestamp = extract_timestamp(msg).unwrap().unwrap();
     }
@@ -490,4 +489,3 @@ pub(super) fn parse_bbo_spot(
 
     Ok(bbo_msg)
 }
-

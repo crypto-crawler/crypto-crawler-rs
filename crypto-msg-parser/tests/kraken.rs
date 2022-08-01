@@ -436,7 +436,6 @@ mod bbo {
     use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_bbo};
     use crypto_msg_type::MessageType;
 
-
     #[test]
     fn spot() {
         let raw_msg = r#"[341,["31760.00000","31760.10000","1654031976.197239","0.02167307","6.46761464"],"spread","XBT/USD"]"#;
@@ -452,7 +451,9 @@ mod bbo {
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
         let timestamp: Option<i64> = Some(1654081540967);
-        let bbo_msg =parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, timestamp).ok().unwrap();
+        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, timestamp)
+            .ok()
+            .unwrap();
 
         assert_eq!(MessageType::BBO, bbo_msg.msg_type);
         assert_eq!("XBT/USD", bbo_msg.symbol);
