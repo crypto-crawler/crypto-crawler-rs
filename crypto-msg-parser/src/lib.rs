@@ -1,6 +1,6 @@
 pub mod exchanges;
 use crypto_market_type::MarketType;
-use crypto_message::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg};
+use crypto_message::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, CandlestickMsg};
 use crypto_msg_type::MessageType;
 pub use exchanges::utils::round; // for test only
 use simple_error::SimpleError;
@@ -250,6 +250,17 @@ pub fn parse_funding_rate(
             "{} does NOT have perpetual swap market",
             exchange
         ))),
+    }
+}
+
+pub fn parse_candlestick(
+    exchange: &str,
+    market_type: MarketType,
+    msg: &str,
+    msg_type: MessageType
+) -> Result<CandlestickMsg, SimpleError> {
+    match exchange {
+        _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
 }
 
