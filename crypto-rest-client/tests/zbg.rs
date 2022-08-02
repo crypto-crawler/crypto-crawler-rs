@@ -12,17 +12,21 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     let text = fetch_l2_snapshot("zbg", market_type, symbol, Some(3)).unwrap();
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
 
-    assert_eq!(
-        obj.get("resMsg")
-            .unwrap()
-            .as_object()
-            .unwrap()
-            .get("code")
-            .unwrap()
-            .as_str()
-            .unwrap(),
-        "1"
-    );
+    let code = obj
+        .get("resMsg")
+        .unwrap()
+        .as_object()
+        .unwrap()
+        .get("code")
+        .unwrap()
+        .as_str()
+        .unwrap();
+    if code == "6001" || code == "6020" {
+        // system in maintainance
+        return;
+    }
+
+    assert_eq!("1", code);
 
     let data = obj.get("datas").unwrap().as_object().unwrap();
     assert!(!data.get("asks").unwrap().as_array().unwrap().is_empty());
