@@ -418,11 +418,11 @@ struct RawBboMsgSpot {
     bid_price: String,
     ask_price: String,
     timestamp: String,
-    bid_volumne: String,
-    ask_volumne: String,
+    bid_volume: String,
+    ask_volume: String,
 }
 
-pub(super) fn parse_bbo(msg: &str, received_at: Option<i64>) -> Result<BboMsg, SimpleError> {
+pub(super) fn parse_bbo(msg: &str, _received_at: Option<i64>) -> Result<BboMsg, SimpleError> {
     let ws_msg = serde_json::from_str::<Vec<Value>>(msg).map_err(|_e| {
         SimpleError::new(format!(
             "Failed to deserialize {} to WebsocketMsg<RawBboMsg>",
@@ -437,40 +437,40 @@ pub(super) fn parse_bbo(msg: &str, received_at: Option<i64>) -> Result<BboMsg, S
         .ok()
         .unwrap();
 
-    let timestamp = (ws_msg[1][2].parse::<f64>().unwrap() * 1000.0) as i64;
+    let timestamp = (ws_msg[1][2].as_f64().unwrap() * 1000.0) as i64;
 
-    let symbol = arr[arr.len() - 1].as_str().unwrap();
+    let symbol = ws_msg[ws_msg.len() - 1].as_str().unwrap();
 
-    let pair = crypto_pair::normalize_pair(symbol.as_str(), EXCHANGE_NAME).unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
 
     let (ask_quantity_base, ask_quantity_quote, ask_quantity_contract) = calc_quantity_and_volume(
         EXCHANGE_NAME,
         MarketType::Spot,
         &pair,
-        raw_bbo_msg_spot.ask.parse::<f64>().unwrap(),
-        raw_bbo_msg_spot.askVolumn.parse::<f64>().unwrap(),
+        raw_bbo_msg_spot.ask_price.parse::<f64>().unwrap(),
+        raw_bbo_msg_spot.ask_volume.parse::<f64>().unwrap(),
     );
 
     let (bid_quantity_base, bid_quantity_quote, bid_quantity_contract) = calc_quantity_and_volume(
         EXCHANGE_NAME,
         MarketType::Spot,
         &pair,
-        raw_bbo_msg_spot.bid.parse::<f64>().unwrap(),
-        raw_bbo_msg_spot.bidVolumn.parse::<f64>().unwrap(),
+        raw_bbo_msg_spot.bid_price.parse::<f64>().unwrap(),
+        raw_bbo_msg_spot.bid_volume.parse::<f64>().unwrap(),
     );
 
     let bbo_msg = BboMsg {
         exchange: EXCHANGE_NAME.to_string(),
         market_type: MarketType::Spot,
-        symbol,
+        symbol: symbol.to_string(),
         pair,
         msg_type: MessageType::BBO,
         timestamp,
-        ask_price: raw_bbo_msg_spot.ask.parse::<f64>().unwrap(),
+        ask_price: raw_bbo_msg_spot.ask_price.parse::<f64>().unwrap(),
         ask_quantity_base,
         ask_quantity_quote,
         ask_quantity_contract,
-        bid_price: raw_bbo_msg_spot.bid.parse::<f64>().unwrap(),
+        bid_price: raw_bbo_msg_spot.bid_price.parse::<f64>().unwrap(),
         bid_quantity_base,
         bid_quantity_quote,
         bid_quantity_contract,
