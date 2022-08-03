@@ -429,11 +429,7 @@ pub(super) fn parse_bbo(msg: &str, _received_at: Option<i64>) -> Result<BboMsg, 
         ))
     })?;
 
-    let raw_bbo_msg_str = serde_json::to_string(&ws_msg[1]).ok().unwrap();
-    let raw_bbo_msg_spot = serde_json::from_str::<RawBboMsgSpot>(&raw_bbo_msg_str)
-        .ok()
-        .unwrap();
-
+    let raw_bbo_msg_spot = serde_json::from_value::<RawBboMsgSpot>(ws_msg[1].clone()).unwrap();
     let timestamp = (ws_msg[1][2].as_str().unwrap().parse::<f64>().unwrap() * 1000.0) as i64;
 
     let symbol = ws_msg[ws_msg.len() - 1].as_str().unwrap();
