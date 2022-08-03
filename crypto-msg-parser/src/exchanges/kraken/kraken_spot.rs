@@ -422,12 +422,7 @@ struct RawBboMsgSpot {
 }
 
 pub(super) fn parse_bbo(msg: &str, _received_at: Option<i64>) -> Result<BboMsg, SimpleError> {
-    let ws_msg = serde_json::from_str::<Vec<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<RawBboMsg>",
-            msg
-        ))
-    })?;
+    let ws_msg = serde_json::from_str::<Vec<Value>>(msg).map_err(SimpleError::from)?;
 
     let raw_bbo_msg_spot = serde_json::from_value::<RawBboMsgSpot>(ws_msg[1].clone()).unwrap();
     let timestamp = (ws_msg[1][2].as_str().unwrap().parse::<f64>().unwrap() * 1000.0) as i64;
