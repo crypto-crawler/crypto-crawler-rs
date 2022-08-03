@@ -94,7 +94,7 @@ pub(crate) fn parse_bbo(
     received_at: Option<i64>,
 ) -> Result<BboMsg, SimpleError> {
     match market_type {
-        MarketType::Spot => kraken_spot::parse_bbo_spot(market_type, msg, received_at),
+        MarketType::Spot => kraken_spot::parse_bbo(msg, received_at),
         _ => Err(SimpleError::new("Not implemented")),
     }
 }

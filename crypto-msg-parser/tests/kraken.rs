@@ -450,15 +450,14 @@ mod bbo {
             "XBT/USD",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
-        let timestamp: Option<i64> = Some(1654081540967);
-        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, timestamp)
+        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, None)
             .ok()
             .unwrap();
 
         assert_eq!(MessageType::BBO, bbo_msg.msg_type);
         assert_eq!("XBT/USD", bbo_msg.symbol);
         assert_eq!(1654081540967, bbo_msg.timestamp);
-        assert_eq!(Some(341), bbo_msg.id);
+        assert_eq!(None, bbo_msg.id);
 
         assert_eq!(31760.1, bbo_msg.ask_price);
         assert_eq!(6.46761464, bbo_msg.ask_quantity_base);

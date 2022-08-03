@@ -422,11 +422,7 @@ struct RawBboMsgSpot {
     askVolumn: String,
 }
 
-pub(super) fn parse_bbo_spot(
-    market_type: MarketType,
-    msg: &str,
-    received_at: Option<i64>,
-) -> Result<BboMsg, SimpleError> {
+pub(super) fn parse_bbo(msg: &str, received_at: Option<i64>) -> Result<BboMsg, SimpleError> {
     let ws_msg = serde_json::from_str::<Vec<Value>>(msg).map_err(|_e| {
         SimpleError::new(format!(
             "Failed to deserialize {} to WebsocketMsg<RawBboMsg>",
@@ -454,7 +450,7 @@ pub(super) fn parse_bbo_spot(
 
     let (ask_quantity_base, ask_quantity_quote, ask_quantity_contract) = calc_quantity_and_volume(
         EXCHANGE_NAME,
-        market_type,
+        MarketType::Spot,
         &pair,
         raw_bbo_msg_spot.ask.parse::<f64>().unwrap(),
         raw_bbo_msg_spot.askVolumn.parse::<f64>().unwrap(),
@@ -462,7 +458,7 @@ pub(super) fn parse_bbo_spot(
 
     let (bid_quantity_base, bid_quantity_quote, bid_quantity_contract) = calc_quantity_and_volume(
         EXCHANGE_NAME,
-        market_type,
+        MarketType::Spot,
         &pair,
         raw_bbo_msg_spot.bid.parse::<f64>().unwrap(),
         raw_bbo_msg_spot.bidVolumn.parse::<f64>().unwrap(),
@@ -470,7 +466,7 @@ pub(super) fn parse_bbo_spot(
 
     let bbo_msg = BboMsg {
         exchange: EXCHANGE_NAME.to_string(),
-        market_type,
+        market_type: MarketType::Spot,
         symbol,
         pair,
         msg_type: MessageType::BBO,
