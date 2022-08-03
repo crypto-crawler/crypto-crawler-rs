@@ -456,7 +456,7 @@ mod bbo {
 
         assert_eq!(MessageType::BBO, bbo_msg.msg_type);
         assert_eq!("XBT/USD", bbo_msg.symbol);
-        assert_eq!(1654081540967, bbo_msg.timestamp);
+        assert_eq!(1654031976197, bbo_msg.timestamp);
         assert_eq!(None, bbo_msg.id);
 
         assert_eq!(31760.1, bbo_msg.ask_price);
