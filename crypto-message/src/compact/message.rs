@@ -35,7 +35,7 @@ pub enum Exchange {
 }
 
 /// Message represents multiple types of messages.
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Debug)]
 pub enum Message {
     Trade(TradeMsg),
     Bbo(BboMsg),
@@ -90,7 +90,7 @@ macro_rules! add_common_fields {
 }
 
 /// Realtime trade message.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct TradeMsg {
     /// The exchange name, unique for each exchage
     pub exchange: Exchange,
@@ -112,7 +112,7 @@ pub struct TradeMsg {
 }
 
 /// Level2 orderbook message.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct OrderBookMsg {
     /// The exchange name, unique for each exchage
     pub exchange: Exchange,
@@ -133,7 +133,7 @@ pub struct OrderBookMsg {
 }
 
 /// Funding rate message.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct FundingRateMsg {
     /// The exchange name, unique for each exchage
     pub exchange: Exchange,
@@ -157,7 +157,7 @@ pub struct FundingRateMsg {
 
 add_common_fields!(
     /// 24hr rolling window ticker
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Debug)]
     struct TickerMsg {
         open: f64,
         high: f64,
@@ -182,7 +182,7 @@ add_common_fields!(
 );
 
 add_common_fields!(
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Debug)]
     struct BboMsg {
         bid_price: f64,
         bid_quantity: f64,
@@ -193,7 +193,7 @@ add_common_fields!(
 );
 
 add_common_fields!(
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Debug)]
     struct CandlestickMsg {
         open: f64,
         high: f64,
