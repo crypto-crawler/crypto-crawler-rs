@@ -430,8 +430,6 @@ pub(super) fn parse_bbo(msg: &str, _received_at: Option<i64>) -> Result<BboMsg, 
         ))
     })?;
 
-    let id_str = serde_json::to_string(&ws_msg[0]).ok().unwrap();
-    let id = id_str.parse::<u64>().unwrap();
     let raw_bbo_msg_str = serde_json::to_string(&ws_msg[1]).ok().unwrap();
     let raw_bbo_msg_spot = serde_json::from_str::<RawBboMsgSpot>(&raw_bbo_msg_str)
         .ok()
