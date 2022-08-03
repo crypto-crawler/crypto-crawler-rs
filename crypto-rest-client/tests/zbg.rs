@@ -41,7 +41,7 @@ fn test_open_interest(market_type: MarketType, symbol: &str) {
         Ok(text) => {
             let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
             assert!(obj.contains_key("datas"));
-        },
+        }
         Err(e) => {
             eprintln!("Unable to connect to ZBG API: {e}")
         }
