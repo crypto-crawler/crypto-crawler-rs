@@ -472,7 +472,7 @@ pub(super) fn parse_bbo(msg: &str, _received_at: Option<i64>) -> Result<BboMsg, 
         bid_quantity_base,
         bid_quantity_quote,
         bid_quantity_contract,
-        id: Some(id),
+        id: None,
         json: msg.to_string(),
     };
 
