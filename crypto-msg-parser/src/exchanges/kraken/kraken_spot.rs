@@ -413,7 +413,6 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
 }
 
 #[derive(Serialize, Deserialize)]
-#[allow(non_snake_case)]
 struct RawBboMsgSpot {
     bid_price: String,
     ask_price: String,
