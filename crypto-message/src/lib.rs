@@ -56,7 +56,7 @@ pub enum TradeSide {
 }
 
 /// Realtime trade message.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct TradeMsg {
     /// The exchange name, unique for each exchage
     pub exchange: String,
@@ -89,7 +89,7 @@ pub struct TradeMsg {
 }
 
 /// Level2 orderbook message.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct OrderBookMsg {
     /// The exchange name, unique for each exchage
     pub exchange: String,
@@ -120,7 +120,7 @@ pub struct OrderBookMsg {
 }
 
 /// Funding rate message.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct FundingRateMsg {
     /// The exchange name, unique for each exchage
     pub exchange: String,
@@ -148,7 +148,7 @@ pub struct FundingRateMsg {
 
 add_common_fields!(
     /// 24hr rolling window ticker
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Debug)]
     struct TickerMsg {
         open: f64,
         high: f64,
@@ -173,7 +173,7 @@ add_common_fields!(
 );
 
 add_common_fields!(
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Debug)]
     struct BboMsg {
         bid_price: f64,
         bid_quantity_base: f64,
@@ -190,7 +190,7 @@ add_common_fields!(
 );
 
 add_common_fields!(
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Debug)]
     struct CandlestickMsg {
         open: f64,
         high: f64,
