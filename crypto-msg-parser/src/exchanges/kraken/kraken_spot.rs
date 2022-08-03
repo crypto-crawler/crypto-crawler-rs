@@ -437,14 +437,9 @@ pub(super) fn parse_bbo(msg: &str, received_at: Option<i64>) -> Result<BboMsg, S
         .ok()
         .unwrap();
 
-    let timestamp_recv = received_at.unwrap();
-    let timestamp = if timestamp_recv > 0 {
-        timestamp_recv
-    } else {
-        extract_timestamp(msg).unwrap().unwrap()
-    };
+    let timestamp = (ws_msg[1][2].parse::<f64>().unwrap() * 1000.0) as i64;
 
-    let symbol = extract_symbol(msg).unwrap();
+    let symbol = arr[arr.len() - 1].as_str().unwrap();
 
     let pair = crypto_pair::normalize_pair(symbol.as_str(), EXCHANGE_NAME).unwrap();
 
