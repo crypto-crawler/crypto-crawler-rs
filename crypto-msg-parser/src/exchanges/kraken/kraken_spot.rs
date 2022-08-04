@@ -1,7 +1,8 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
+use crate::exchanges::utils::calc_quantity_and_volume;
+use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -409,4 +410,61 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
     };
 
     Ok(orderbooks)
+}
+
+#[derive(Serialize, Deserialize)]
+struct RawBboMsgSpot {
+    bid_price: String,
+    ask_price: String,
+    timestamp: String,
+    bid_volume: String,
+    ask_volume: String,
+}
+
+pub(super) fn parse_bbo(msg: &str, _received_at: Option<i64>) -> Result<BboMsg, SimpleError> {
+    let ws_msg = serde_json::from_str::<Vec<Value>>(msg).map_err(SimpleError::from)?;
+
+    let raw_bbo_msg_spot = serde_json::from_value::<RawBboMsgSpot>(ws_msg[1].clone()).unwrap();
+    let timestamp = (ws_msg[1][2].as_str().unwrap().parse::<f64>().unwrap() * 1000.0) as i64;
+
+    let symbol = ws_msg[ws_msg.len() - 1].as_str().unwrap();
+
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+
+    let (ask_quantity_base, ask_quantity_quote, ask_quantity_contract) = calc_quantity_and_volume(
+        EXCHANGE_NAME,
+        MarketType::Spot,
+        &pair,
+        raw_bbo_msg_spot.ask_price.parse::<f64>().unwrap(),
+        raw_bbo_msg_spot.ask_volume.parse::<f64>().unwrap(),
+    );
+
+    let (bid_quantity_base, bid_quantity_quote, bid_quantity_contract) = calc_quantity_and_volume(
+        EXCHANGE_NAME,
+        MarketType::Spot,
+        &pair,
+        raw_bbo_msg_spot.bid_price.parse::<f64>().unwrap(),
+        raw_bbo_msg_spot.bid_volume.parse::<f64>().unwrap(),
+    );
+
+    let bbo_msg = BboMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type: MarketType::Spot,
+        symbol: symbol.to_string(),
+        pair,
+        msg_type: MessageType::BBO,
+        timestamp,
+        ask_price: raw_bbo_msg_spot.ask_price.parse::<f64>().unwrap(),
+        ask_quantity_base,
+        ask_quantity_quote,
+        ask_quantity_contract,
+        bid_price: raw_bbo_msg_spot.bid_price.parse::<f64>().unwrap(),
+        bid_quantity_base,
+        bid_quantity_quote,
+        bid_quantity_contract,
+        id: None,
+        json: msg.to_string(),
+    };
+
+    Ok(bbo_msg)
 }

@@ -433,7 +433,8 @@ mod l2_event {
 mod bbo {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_bbo};
+    use crypto_msg_type::MessageType;
 
     #[test]
     fn spot() {
@@ -449,6 +450,24 @@ mod bbo {
             "XBT/USD",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
+        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, None)
+            .ok()
+            .unwrap();
+
+        assert_eq!(MessageType::BBO, bbo_msg.msg_type);
+        assert_eq!("XBT/USD", bbo_msg.symbol);
+        assert_eq!(1654031976197, bbo_msg.timestamp);
+        assert_eq!(None, bbo_msg.id);
+
+        assert_eq!(31760.1, bbo_msg.ask_price);
+        assert_eq!(6.46761464, bbo_msg.ask_quantity_base);
+        assert_eq!(205412.087727864, bbo_msg.ask_quantity_quote);
+        assert_eq!(None, bbo_msg.ask_quantity_contract);
+
+        assert_eq!(31760.0, bbo_msg.bid_price);
+        assert_eq!(0.02167307, bbo_msg.bid_quantity_base);
+        assert_eq!(688.3367032, bbo_msg.bid_quantity_quote);
+        assert_eq!(None, bbo_msg.bid_quantity_contract);
     }
 }
 
