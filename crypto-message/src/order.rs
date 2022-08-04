@@ -5,7 +5,7 @@ use serde::{
 };
 
 /// An order in the orderbook asks or bids array.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Order {
     /// price
     pub price: f64,
