@@ -192,6 +192,8 @@ add_common_fields!(
 add_common_fields!(
     #[derive(Serialize, Deserialize, Debug)]
     struct CandlestickMsg {
+        /// Begin time of the candle cycle, in seconds
+        begin_time: i64,
         open: f64,
         high: f64,
         low: f64,
