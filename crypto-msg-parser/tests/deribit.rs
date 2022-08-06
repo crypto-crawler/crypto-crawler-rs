@@ -543,14 +543,31 @@ mod bbo {
 
         assert_eq!(
             1654012570801,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg)
                 .unwrap()
                 .unwrap()
         );
         assert_eq!(
             "BTC-30SEP22",
-            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+            extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap()
         );
+
+        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg, None).unwrap();
+
+        assert_eq!(MessageType::BBO, bbo_msg.msg_type);
+        assert_eq!("BTC-30SEP22", bbo_msg.symbol);
+        assert_eq!(1654012570801, bbo_msg.timestamp);
+        assert_eq!(None, bbo_msg.id);
+
+        assert_eq!(32503.5, bbo_msg.ask_price);
+        assert_eq!(0.7383820203978033, bbo_msg.ask_quantity_base);
+        assert_eq!(24000.0, bbo_msg.ask_quantity_quote);
+        assert_eq!(Some(2400.0), bbo_msg.ask_quantity_contract);
+
+        assert_eq!(32499.0, bbo_msg.bid_price);
+        assert_eq!(0.729253207791009, bbo_msg.bid_quantity_base);
+        assert_eq!(23700.0, bbo_msg.bid_quantity_quote);
+        assert_eq!(Some(2370.0), bbo_msg.bid_quantity_contract);
     }
 
     #[test]
@@ -568,14 +585,7 @@ mod bbo {
             extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
         );
 
-        let received_at = 1654012882984;
-        let bbo_msg = parse_bbo(
-            EXCHANGE_NAME,
-            MarketType::InverseSwap,
-            raw_msg,
-            Some(received_at),
-        )
-        .unwrap();
+        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None).unwrap();
 
         assert_eq!(MessageType::BBO, bbo_msg.msg_type);
         assert_eq!("BTC-PERPETUAL", bbo_msg.symbol);
@@ -584,12 +594,12 @@ mod bbo {
 
         assert_eq!(32143.5, bbo_msg.ask_price);
         assert_eq!(0.006222097780266617, bbo_msg.ask_quantity_base);
-        assert_eq!(32143.5 * 0.006222097780266617, bbo_msg.ask_quantity_quote);
+        assert_eq!(200.0, bbo_msg.ask_quantity_quote);
         assert_eq!(Some(20.0), bbo_msg.ask_quantity_contract);
 
         assert_eq!(32143.0, bbo_msg.bid_price);
         assert_eq!(55.98730672308123, bbo_msg.bid_quantity_base);
-        assert_eq!(32143.0 * 55.98730672308123, bbo_msg.bid_quantity_quote);
+        assert_eq!(1799600.0, bbo_msg.bid_quantity_quote);
         assert_eq!(Some(179960.0), bbo_msg.bid_quantity_contract);
     }
 }
