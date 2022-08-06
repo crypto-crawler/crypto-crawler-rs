@@ -340,69 +340,6 @@ mod l2_event {
 }
 
 #[cfg(test)]
-mod bbo {
-    use super::EXCHANGE_NAME;
-    use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
-
-    #[test]
-    fn spot_snapshot() {
-        let raw_msg = r#"[{"len":"1","prec":"R0","freq":"F0","symbol":"tBTCUST","channel":"book"},[[96064678342,31630,0.0007111],[96063747304,31643,-0.01576]]]"#;
-
-        assert_eq!(
-            None,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
-        );
-        assert_eq!(
-            "tBTCUST",
-            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
-        );
-    }
-
-    #[test]
-    fn spot_update() {
-        let raw_msg = r#"[{"len":"1","prec":"R0","freq":"F0","symbol":"tBTCUST","channel":"book"},[96064730405,31631,0.01581346]]"#;
-
-        assert_eq!(
-            None,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
-        );
-        assert_eq!(
-            "tBTCUST",
-            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
-        );
-    }
-
-    #[test]
-    fn linear_swap_snapshot() {
-        let raw_msg = r#"[{"channel":"book","freq":"F0","symbol":"tBTCF0:USTF0","prec":"R0","len":"1"},[[96065326882,31606,0.00339553],[96065369152,31609,-0.40545978]]]"#;
-
-        assert_eq!(
-            None,
-            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
-        );
-        assert_eq!(
-            "tBTCF0:USTF0",
-            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
-        );
-    }
-
-    #[test]
-    fn linear_swap_update() {
-        let raw_msg = r#"[{"channel":"book","freq":"F0","symbol":"tBTCF0:USTF0","prec":"R0","len":"1"},[96065371804,31609,-0.40545978]]"#;
-
-        assert_eq!(
-            None,
-            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
-        );
-        assert_eq!(
-            "tBTCF0:USTF0",
-            extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
-        );
-    }
-}
-
-#[cfg(test)]
 mod l3_event {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;

@@ -309,7 +309,7 @@ pub async fn crawl_bbo(
         "binance" => crawlers::binance::crawl_bbo(market_type, symbols, tx).await,
         "bitmex" => crawlers::bitmex::crawl_bbo(market_type, symbols, tx).await,
         "kucoin" => crawlers::kucoin::crawl_bbo(market_type, symbols, tx).await,
-        "bitfinex" | "deribit" | "ftx" | "gate" | "huobi" | "kraken" | "okx" => {
+        "deribit" | "ftx" | "gate" | "huobi" | "kraken" | "okx" => {
             crawlers::crawl_event(exchange, MessageType::BBO, market_type, symbols, tx).await
         }
         _ => panic!("{} does NOT have BBO websocket channel", exchange),
