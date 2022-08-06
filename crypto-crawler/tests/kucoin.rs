@@ -19,7 +19,7 @@ async fn test_crawl_trade_all(market_type: MarketType) {
 }
 
 #[test_case(MarketType::Spot, "BTC-USDT")]
-#[test_case(MarketType::InverseSwap, "XBTUSDM")]
+// #[test_case(MarketType::InverseSwap, "XBTUSDM")]
 #[test_case(MarketType::LinearSwap, "XBTUSDTM")]
 // #[test_case(MarketType::InverseFuture, "XBTMU22"; "ignore")]
 #[tokio::test(flavor = "multi_thread")]
