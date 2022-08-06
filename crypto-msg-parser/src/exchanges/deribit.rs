@@ -26,7 +26,7 @@ struct RawTradeMsg {
     extra: HashMap<String, Value>,
 }
 
-// https://docs.deribit.com/#book-instrument_name-group-depth-interval
+// https://docs.deribit.com/#book-instrument_name-interval
 #[derive(Serialize, Deserialize)]
 struct RawOrderbookMsg {
     #[serde(rename = "type")]
