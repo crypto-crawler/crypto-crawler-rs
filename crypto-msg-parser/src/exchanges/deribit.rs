@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -26,7 +26,7 @@ struct RawTradeMsg {
     extra: HashMap<String, Value>,
 }
 
-// https://docs.deribit.com/?javascript#book-instrument_name-interval
+// https://docs.deribit.com/#book-instrument_name-group-depth-interval
 #[derive(Serialize, Deserialize)]
 struct RawOrderbookMsg {
     #[serde(rename = "type")]
@@ -65,6 +65,18 @@ struct RestfulResp<T: Sized> {
     result: T,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
+}
+
+// See <https://docs.deribit.com/#quote-instrument_name>
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawBboMsg {
+    timestamp: i64,
+    instrument_name: String,
+    best_bid_price: f64,
+    best_bid_amount: f64,
+    best_ask_price: f64,
+    best_ask_amount: f64,
 }
 
 pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
@@ -325,4 +337,51 @@ pub(crate) fn parse_l2_topk(
     msg: &str,
 ) -> Result<Vec<OrderBookMsg>, SimpleError> {
     parse_l2(market_type, msg)
+}
+
+pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<BboMsg, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawBboMsg>>(msg).map_err(SimpleError::from)?;
+
+    debug_assert!(ws_msg.params.channel.starts_with("quote"));
+    let timestamp = ws_msg.params.data.timestamp;
+
+    let symbol = ws_msg.params.data.instrument_name.as_str();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+
+    let (ask_quantity_base, ask_quantity_quote, ask_quantity_contract) = calc_quantity_and_volume(
+        EXCHANGE_NAME,
+        market_type,
+        &pair,
+        ws_msg.params.data.best_ask_price,
+        ws_msg.params.data.best_ask_amount,
+    );
+
+    let (bid_quantity_base, bid_quantity_quote, bid_quantity_contract) = calc_quantity_and_volume(
+        EXCHANGE_NAME,
+        market_type,
+        &pair,
+        ws_msg.params.data.best_bid_price,
+        ws_msg.params.data.best_bid_amount,
+    );
+
+    let bbo_msg = BboMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: symbol.to_string(),
+        pair,
+        msg_type: MessageType::BBO,
+        timestamp,
+        ask_price: ws_msg.params.data.best_ask_price,
+        ask_quantity_base,
+        ask_quantity_quote,
+        ask_quantity_contract,
+        bid_price: ws_msg.params.data.best_bid_price,
+        bid_quantity_base,
+        bid_quantity_quote,
+        bid_quantity_contract,
+        id: None,
+        json: msg.to_string(),
+    };
+
+    Ok(bbo_msg)
 }

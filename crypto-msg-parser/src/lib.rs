@@ -215,6 +215,7 @@ pub fn parse_bbo(
     match exchange {
         "binance" => exchanges::binance::parse_bbo(market_type, msg, received_at),
         "bitfinex" => exchanges::bitfinex::parse_bbo(market_type, msg, received_at),
+        "deribit" => exchanges::deribit::parse_bbo(market_type, msg),
         "kraken" => exchanges::kraken::parse_bbo(market_type, msg, received_at),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
