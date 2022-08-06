@@ -18,7 +18,10 @@ macro_rules! gen_all_symbols {
 macro_rules! check_contract_values {
     ($exchange:expr, $market_type:expr) => {{
         let markets = fetch_markets($exchange, $market_type).unwrap();
-        for market in markets {
+        for market in markets
+            .into_iter()
+            .filter(|m| m.market_type != MarketType::Spot)
+        {
             let contract_value = crypto_contract_value::get_contract_value(
                 &market.exchange,
                 market.market_type,
