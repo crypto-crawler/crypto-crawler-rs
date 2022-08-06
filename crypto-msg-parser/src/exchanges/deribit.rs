@@ -26,7 +26,7 @@ struct RawTradeMsg {
     extra: HashMap<String, Value>,
 }
 
-// https://docs.deribit.com/?javascript#book-instrument_name-interval
+// https://docs.deribit.com/#book-instrument_name-group-depth-interval
 #[derive(Serialize, Deserialize)]
 struct RawOrderbookMsg {
     #[serde(rename = "type")]
@@ -67,10 +67,11 @@ struct RestfulResp<T: Sized> {
     extra: HashMap<String, Value>,
 }
 
+// See <https://docs.deribit.com/#quote-instrument_name>
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
-struct RawBboMsgInverseSwap {
-    timestamp: u64,
+struct RawBboMsg {
+    timestamp: i64,
     instrument_name: String,
     best_bid_price: f64,
     best_bid_amount: f64,
@@ -338,34 +339,13 @@ pub(crate) fn parse_l2_topk(
     parse_l2(market_type, msg)
 }
 
-pub(crate) fn parse_bbo(
-    market_type: MarketType,
-    msg: &str,
-    received_at: Option<i64>,
-) -> Result<BboMsg, SimpleError> {
-    match market_type {
-        MarketType::EuropeanOption => Err(SimpleError::new("Not implemented")),
-        MarketType::InverseSwap => parse_bbo_inverse_swap(market_type, msg, received_at),
-        _ => unimplemented!(),
-    }
-}
-
-fn parse_bbo_inverse_swap(
-    market_type: MarketType,
-    msg: &str,
-    _received_at: Option<i64>,
-) -> Result<BboMsg, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<RawBboMsgInverseSwap>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<RawBboMsg>",
-            msg
-        ))
-    })?;
+pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<BboMsg, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawBboMsg>>(msg).map_err(SimpleError::from)?;
 
     debug_assert!(ws_msg.params.channel.starts_with("quote"));
-    let timestamp = extract_timestamp(market_type, msg).unwrap().unwrap();
+    let timestamp = ws_msg.params.data.timestamp;
 
-    let symbol = &ws_msg.params.data.instrument_name.as_str();
+    let symbol = ws_msg.params.data.instrument_name.as_str();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
 
     let (ask_quantity_base, ask_quantity_quote, ask_quantity_contract) = calc_quantity_and_volume(
