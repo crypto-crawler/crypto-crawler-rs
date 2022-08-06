@@ -42,11 +42,6 @@ mod bitfinex_spot {
     }
 
     #[tokio::test(flavor = "multi_thread")]
-    async fn subscribe_bbo() {
-        gen_test_code!(BitfinexWSClient, subscribe_bbo, &["tBTCUST".to_string()]);
-    }
-
-    #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
         gen_test_code!(
             BitfinexWSClient,
@@ -98,15 +93,6 @@ mod bitfinex_swap {
         gen_test_code!(
             BitfinexWSClient,
             subscribe_ticker,
-            &["tBTCF0:USTF0".to_string()]
-        );
-    }
-
-    #[tokio::test(flavor = "multi_thread")]
-    async fn subscribe_bbo() {
-        gen_test_code!(
-            BitfinexWSClient,
-            subscribe_bbo,
             &["tBTCF0:USTF0".to_string()]
         );
     }
