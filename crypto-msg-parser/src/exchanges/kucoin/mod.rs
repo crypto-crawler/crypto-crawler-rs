@@ -6,7 +6,6 @@ use std::collections::HashMap;
 
 use crypto_market_type::MarketType;
 use crypto_message::CandlestickMsg;
-use crypto_msg_type::MessageType;
 
 use crate::{BboMsg, OrderBookMsg, TradeMsg};
 use serde_json::Value;
@@ -17,14 +16,18 @@ use self::message::{RestfulMsg, WebsocketMsg};
 pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     if let Ok(ws_msg) = serde_json::from_str::<WebsocketMsg<Value>>(msg) {
         // websocket
-        let symbol = ws_msg.topic.split(':').last().unwrap();
-        if ws_msg.topic.contains("/candle") {
-            let pos = symbol.rfind('_').unwrap();
-            Ok((symbol[..pos]).to_string())
-        } else if symbol == "all" {
-            Ok("ALL".to_string())
+        let topic = ws_msg.topic.as_str();
+        if topic == "/market/ticker:all" {
+            // spot all symbols ticker
+            Ok(ws_msg.subject.clone())
         } else {
-            Ok(symbol.to_string())
+            let symbol = topic.split(':').last().unwrap();
+            if topic.contains("/candle") {
+                let pos = symbol.rfind('_').unwrap();
+                Ok((symbol[..pos]).to_string())
+            } else {
+                Ok(symbol.to_string())
+            }
         }
     } else if let Ok(rest_msg) = serde_json::from_str::<RestfulMsg<HashMap<String, Value>>>(msg) {
         // RESTful
@@ -154,18 +157,21 @@ pub(crate) fn parse_l2_topk(
     }
 }
 
-pub(crate) fn parse_bbo(
-    market_type: MarketType,
-    msg: &str,
-    received_at: Option<i64>,
-) -> Result<BboMsg, SimpleError> {
-    kucoin_spot::parse_ticker(market_type, msg, received_at)
+pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<BboMsg, SimpleError> {
+    if market_type == MarketType::Spot {
+        kucoin_spot::parse_bbo(msg)
+    } else {
+        kucoin_swap::parse_bbo(market_type, msg)
+    }
 }
 
 pub(crate) fn parse_candlestick(
     market_type: MarketType,
     msg: &str,
-    msg_type: MessageType,
 ) -> Result<CandlestickMsg, SimpleError> {
-    kucoin_spot::parse_candlestick(market_type, msg, msg_type)
+    if market_type == MarketType::Spot {
+        kucoin_spot::parse_candlestick(msg)
+    } else {
+        kucoin_swap::parse_candlestick(market_type, msg)
+    }
 }
