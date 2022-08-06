@@ -21,7 +21,7 @@ async fn test_crawl_trade_all(market_type: MarketType) {
 }
 
 #[test_case(MarketType::Spot, "BTC_USDT")]
-#[test_case(MarketType::InverseSwap, "BTC_USD")]
+// #[test_case(MarketType::InverseSwap, "BTC_USD")]
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
 // #[test_case(MarketType::InverseFuture, "BTC_USD_20220930"; "ignore")]
 // #[test_case(MarketType::LinearFuture, "BTC_USDT_20220930"; "ignore")]
