@@ -37,14 +37,15 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
                 let v: Vec<&str> = pair.split('/').collect();
                 (v[0].to_string(), v[1].to_string())
             };
+            let market_type = if market_type == MarketType::Unknown {
+                get_market_type(&x.symbol, "bitmex", None)
+            } else {
+                market_type
+            };
 
             Market {
                 exchange: "bitmex".to_string(),
-                market_type: if market_type == MarketType::Unknown {
-                    get_market_type(&x.symbol, "bitmex", None)
-                } else {
-                    market_type
-                },
+                market_type,
                 symbol: x.symbol,
                 base_id,
                 quote_id,
@@ -66,7 +67,11 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
                     lot_size: x.lotSize,
                 },
                 quantity_limit: None,
-                contract_value: Some((x.multiplier.abs() as f64) * 1e-8),
+                contract_value: if market_type != MarketType::Spot {
+                    Some((x.multiplier.abs() as f64) * 1e-8)
+                } else {
+                    None
+                },
                 delivery_date: if let Some(expiry) = x.expiry {
                     let timestamp = DateTime::parse_from_rfc3339(&expiry).unwrap();
                     Some(timestamp.timestamp_millis() as u64)
@@ -163,9 +168,14 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
     let text = http_get("https://www.bitmex.com/api/v1/instrument/active", None)?;
     let instruments: Vec<Instrument> = serde_json::from_str::<Vec<Instrument>>(&text)?
         .into_iter()
-        .filter(|x| x.state == "Open" && x.hasLiquidity && x.openInterest > 0)
+        .filter(|x| x.state == "Open" && x.hasLiquidity && x.volume24h > 0 && x.turnover24h > 0)
         .collect();
 
+    let spot: Vec<Instrument> = instruments
+        .iter()
+        .filter(|x| x.typ == "IFXXXP")
+        .cloned()
+        .collect();
     let swap: Vec<Instrument> = instruments
         .iter()
         .filter(|x| x.typ == "FFWCSX")
@@ -176,10 +186,15 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
         .filter(|x| x.typ == "FFCCSX")
         .cloned()
         .collect();
+    // let fx: Vec<Instrument> = instruments
+    //     .iter()
+    //     .filter(|x| x.typ == "FFWCSF")
+    //     .cloned()
+    //     .collect();
 
     for x in swap.iter() {
         assert_eq!("FundingRate", x.fairMethod.as_str());
-        assert!(x.expiry.is_none()); // TODO: BitMEX data is not correct, comment it for now
+        assert!(x.expiry.is_none());
         assert!(x.symbol[x.symbol.len() - 1..].parse::<i32>().is_err());
         if let Some(pos) = x.symbol.rfind('_') {
             // e.g., ETHUSD_ETH
@@ -205,11 +220,6 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
     // Inverse
     for x in instruments.iter().filter(|x| x.isInverse) {
         assert!(x.multiplier < 0);
-        assert!(x.symbol.starts_with("XBT") || x.symbol.starts_with("ETH"));
-        assert!(x.underlying == "XBT" || x.underlying == "ETH");
-        // settled in XBT or ETH, quoted in USD or EUR
-        assert!(x.settlCurrency == "XBt" || x.settlCurrency == "Gwei");
-        assert!(x.quoteCurrency == "USD" || x.quoteCurrency == "EUR");
         assert_eq!(x.quoteCurrency, x.positionCurrency);
     }
     // Quanto
@@ -217,13 +227,21 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
         assert!(x.positionCurrency.is_empty());
         // settled in XBT, quoted in USD
         assert_eq!(x.settlCurrency.to_uppercase(), "XBT");
-        assert_eq!(x.quoteCurrency, "USD");
+        if x.typ != "FFWCSF" {
+            assert_eq!(x.quoteCurrency, "USD");
+        }
     }
-    for x in instruments.iter().filter(|x| x.positionCurrency.is_empty()) {
+    for x in instruments
+        .iter()
+        .filter(|x| x.positionCurrency.is_empty() && x.typ != "IFXXXP")
+    {
         assert!(x.isQuanto);
     }
     // Linear
-    for x in instruments.iter().filter(|x| !x.isQuanto && !x.isInverse) {
+    for x in instruments
+        .iter()
+        .filter(|x| !x.isQuanto && !x.isInverse && x.typ != "IFXXXP")
+    {
         // settled in XBT, qouted in XBT
         // or settled in USDT, qouted in USDT
         assert_eq!(x.settlCurrency.to_uppercase(), x.quoteCurrency);
@@ -231,6 +249,7 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
 
     let filtered: Vec<Instrument> = match market_type {
         MarketType::Unknown => instruments,
+        MarketType::Spot => spot,
         MarketType::LinearSwap => swap
             .iter()
             .filter(|x| !x.isQuanto && !x.isInverse)

@@ -15,6 +15,20 @@ fn fetch_all_symbols() {
 
 #[test]
 #[ignore = "to avoid 429 Too Many Requests"]
+fn fetch_spot_symbols() {
+    let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::Spot).unwrap();
+    assert!(!symbols.is_empty());
+    for symbol in symbols.iter() {
+        assert!(symbol.ends_with("_USDT"));
+        assert_eq!(
+            MarketType::Spot,
+            get_market_type(symbol, EXCHANGE_NAME, None)
+        );
+    }
+}
+
+#[test]
+#[ignore = "to avoid 429 Too Many Requests"]
 fn fetch_inverse_swap_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
     assert!(!symbols.is_empty());
