@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crate::{OrderBookMsg, TradeMsg};
+use crate::{BboMsg, OrderBookMsg, TradeMsg};
 
 use serde_json::Value;
 use simple_error::SimpleError;
@@ -85,5 +85,16 @@ pub(crate) fn parse_l2(
         MarketType::Spot => kraken_spot::parse_l2(msg),
         MarketType::InverseFuture | MarketType::InverseSwap => kraken_futures::parse_l2(msg),
         _ => panic!("Kraken unknown market_type: {}", market_type),
+    }
+}
+
+pub(crate) fn parse_bbo(
+    market_type: MarketType,
+    msg: &str,
+    received_at: Option<i64>,
+) -> Result<BboMsg, SimpleError> {
+    match market_type {
+        MarketType::Spot => kraken_spot::parse_bbo(msg, received_at),
+        _ => Err(SimpleError::new("Not implemented")),
     }
 }
