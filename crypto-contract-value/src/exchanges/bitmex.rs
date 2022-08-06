@@ -14,6 +14,7 @@ static CONTRACT_VALUES: Lazy<HashMap<String, i64>> = Lazy::new(|| {
         ("inverse_future.ETH/USD", 1000000000),
         ("inverse_swap.BTC/EUR", 100000000),
         ("inverse_swap.BTC/USD", 100000000),
+        ("inverse_swap.ETH/USD", 1000000000),
         ("linear_future.ADA/BTC", 1000000),
         ("linear_future.BTC/USDT", 1),
         ("linear_future.ETH/BTC", 1000),
@@ -40,17 +41,19 @@ static CONTRACT_VALUES: Lazy<HashMap<String, i64>> = Lazy::new(|| {
         ("linear_swap.LINK/USDT", 1000),
         ("linear_swap.LINK_/USDT", 1),
         ("linear_swap.LTC/USDT", 100),
-        ("linear_swap.LUNA/USDT", 100),
+        ("linear_swap.LUNA/USDT", 1000),
         ("linear_swap.MANA/USDT", 1000),
         ("linear_swap.MATIC/USDT", 10000),
         ("linear_swap.MATIC_/USDT", 1),
         ("linear_swap.METAMEXT/USDT", 100),
         ("linear_swap.NEAR/USDT", 1000),
+        ("linear_swap.OP/USDT", 1000),
         ("linear_swap.SAND/USDT", 1000),
         ("linear_swap.SHIB/USDT", 1000000),
         ("linear_swap.SOL/USDT", 100),
         ("linear_swap.TRX/USDT", 100000),
         ("linear_swap.UNI_/USDT", 1),
+        ("linear_swap.USDBRL/BTC", 10000),
         ("linear_swap.XBT_/USDT", 1),
         ("linear_swap.XRP/USDT", 10000),
         ("quanto_future.ETH/USD", 100),
@@ -64,14 +67,30 @@ static CONTRACT_VALUES: Lazy<HashMap<String, i64>> = Lazy::new(|| {
         ("quanto_swap.DOT/USD", 1000),
         ("quanto_swap.EOS/USD", 10000),
         ("quanto_swap.ETH/USD", 100),
+        ("quanto_swap.EUR/CHF", 10000),
+        ("quanto_swap.EUR/USD", 10000),
+        ("quanto_swap.EUR/USDT", 1000000),
         ("quanto_swap.GAL/USD", 10000),
         ("quanto_swap.GMT/USD", 10000),
         ("quanto_swap.LINK/USD", 1000),
         ("quanto_swap.LTC/USD", 200),
-        ("quanto_swap.LUNA/USD", 1000),
+        ("quanto_swap.LUNA/USD", 10000),
         ("quanto_swap.NEAR/USD", 10000),
+        ("quanto_swap.NZD/USDT", 1000000),
+        ("quanto_swap.OP/USD", 10000),
         ("quanto_swap.SOL/USD", 100),
         ("quanto_swap.TRX/USD", 100000),
+        ("quanto_swap.USD/CHF", 10000),
+        ("quanto_swap.USD/CNH", 10000),
+        ("quanto_swap.USD/INR", 10000),
+        ("quanto_swap.USD/SEK", 10000),
+        ("quanto_swap.USD/TRY", 10000),
+        ("quanto_swap.USDT/CHF", 1000000),
+        ("quanto_swap.USDT/CNH", 1000000),
+        ("quanto_swap.USDT/MXN", 1000000),
+        ("quanto_swap.USDT/SEK", 1000000),
+        ("quanto_swap.USDT/TRY", 1000000),
+        ("quanto_swap.USDT/ZAR", 1000000),
         ("quanto_swap.XRP/USD", 20000),
     ]
     .into_iter()
@@ -98,6 +117,10 @@ struct Instrument {
     isInverse: bool,
     hasLiquidity: bool,
     openInterest: i64,
+    volume: i64,
+    volume24h: i64,
+    turnover: i64,
+    turnover24h: i64,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -109,7 +132,7 @@ fn fetch_contract_values() -> BTreeMap<String, i64> {
         let instruments: Vec<Instrument> = serde_json::from_str::<Vec<Instrument>>(&text)
             .unwrap()
             .into_iter()
-            .filter(|x| x.state == "Open" && x.hasLiquidity && x.openInterest > 0)
+            .filter(|x| x.state == "Open" && x.hasLiquidity && x.volume24h > 0 && x.turnover24h > 0)
             .collect();
 
         for instrument in instruments.iter() {

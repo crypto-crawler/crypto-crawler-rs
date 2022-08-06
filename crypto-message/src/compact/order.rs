@@ -23,7 +23,7 @@ pub type Float = f32;
 pub type Float = f64;
 
 /// An order in the orderbook asks or bids array.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Order {
     /// price
     pub price: Float,
