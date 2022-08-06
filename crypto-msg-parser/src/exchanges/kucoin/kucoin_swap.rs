@@ -2,7 +2,7 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
 use crate::exchanges::{kucoin::message::WebsocketMsg, utils::calc_quantity_and_volume};
-use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{BboMsg, CandlestickMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
@@ -218,4 +218,15 @@ pub(super) fn parse_l2_topk(
     };
 
     Ok(vec![orderbook])
+}
+
+pub(super) fn parse_bbo(_market_type: MarketType, _msg: &str) -> Result<BboMsg, SimpleError> {
+    todo!()
+}
+
+pub(super) fn parse_candlestick(
+    _market_type: MarketType,
+    _msg: &str,
+) -> Result<CandlestickMsg, SimpleError> {
+    todo!()
 }

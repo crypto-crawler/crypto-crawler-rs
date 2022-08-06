@@ -1,8 +1,8 @@
 use crypto_market_type::MarketType;
+use crypto_message::{BboMsg, CandlestickMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 use crypto_msg_type::MessageType;
 
-use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
-
+use super::super::utils::calc_quantity_and_volume;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
@@ -30,6 +30,7 @@ struct Changes {
     asks: Vec<[String; 3]>, //price, size, sequence
     bids: Vec<[String; 3]>,
 }
+
 // https://docs.kucoin.com/#level-2-market-data
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
@@ -52,6 +53,28 @@ struct SpotL2TopKMsg {
     bids: Vec<[String; 2]>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
+}
+
+// See <https://docs.kucoin.com/#symbol-ticker>
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawBboMsg {
+    sequence: String,
+    price: String,
+    size: String,
+    bestAsk: String,
+    bestAskSize: String,
+    bestBid: String,
+    bestBidSize: String,
+    time: i64,
+}
+
+// See <https://docs.kucoin.com/#klines>
+#[derive(Serialize, Deserialize)]
+struct RawCandlestickMsg {
+    symbol: String,
+    time: i64,
+    candles: Vec<String>,
 }
 
 pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
@@ -191,4 +214,99 @@ pub(super) fn parse_l2_topk(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError>
     };
 
     Ok(vec![orderbook])
+}
+
+pub(super) fn parse_bbo(msg: &str) -> Result<BboMsg, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawBboMsg>>(msg).map_err(SimpleError::from)?;
+    let topic = ws_msg.topic.as_str();
+
+    let symbol = if topic == "/market/ticker:all" {
+        ws_msg.subject.as_str()
+    } else {
+        topic.split(':').last().unwrap()
+    };
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+
+    let (ask_quantity_base, ask_quantity_quote, ask_quantity_contract) = calc_quantity_and_volume(
+        EXCHANGE_NAME,
+        MarketType::Spot,
+        &pair,
+        ws_msg.data.bestAsk.parse::<f64>().unwrap(),
+        ws_msg.data.bestAskSize.parse::<f64>().unwrap(),
+    );
+
+    let (bid_quantity_base, bid_quantity_quote, bid_quantity_contract) = calc_quantity_and_volume(
+        EXCHANGE_NAME,
+        MarketType::Spot,
+        &pair,
+        ws_msg.data.bestBid.parse::<f64>().unwrap(),
+        ws_msg.data.bestBidSize.parse::<f64>().unwrap(),
+    );
+
+    let bbo_msg = BboMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type: MarketType::Spot,
+        symbol: symbol.to_string(),
+        pair,
+        msg_type: MessageType::BBO,
+        timestamp: ws_msg.data.time,
+        ask_price: ws_msg.data.bestAsk.parse::<f64>().unwrap(),
+        ask_quantity_base,
+        ask_quantity_quote,
+        ask_quantity_contract,
+        bid_price: ws_msg.data.bestBid.parse::<f64>().unwrap(),
+        bid_quantity_base,
+        bid_quantity_quote,
+        bid_quantity_contract,
+        id: Some(ws_msg.data.sequence.as_str().parse::<u64>().unwrap()),
+        json: msg.to_string(),
+    };
+    Ok(bbo_msg)
+}
+
+pub(super) fn parse_candlestick(msg: &str) -> Result<CandlestickMsg, SimpleError> {
+    let ws_msg =
+        serde_json::from_str::<WebsocketMsg<RawCandlestickMsg>>(msg).map_err(SimpleError::from)?;
+
+    let symbol = ws_msg.data.symbol.as_str();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+
+    let begin_time = ws_msg.data.candles[0].parse::<i64>().unwrap();
+    let open: f64 = ws_msg.data.candles[1].parse().unwrap();
+    let close: f64 = ws_msg.data.candles[2].parse().unwrap();
+    let high: f64 = ws_msg.data.candles[3].parse().unwrap();
+    let low: f64 = ws_msg.data.candles[4].parse().unwrap();
+    let volume: f64 = ws_msg.data.candles[5].parse().unwrap();
+    let quote_volume: f64 = ws_msg.data.candles[6].parse().unwrap();
+
+    let period = ws_msg
+        .topic
+        .split(':')
+        .last()
+        .unwrap()
+        .split('_')
+        .last()
+        .unwrap()
+        .to_string();
+
+    let kline_msg = CandlestickMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type: MarketType::Spot,
+        symbol: ws_msg.data.symbol.to_owned(),
+        pair,
+        msg_type: MessageType::Candlestick,
+        timestamp: ws_msg.data.time / 1000000,
+
+        begin_time,
+        open,
+        high,
+        low,
+        close,
+        volume,
+        quote_volume: Some(quote_volume),
+        period,
+        json: msg.to_string(),
+    };
+
+    Ok(kline_msg)
 }
