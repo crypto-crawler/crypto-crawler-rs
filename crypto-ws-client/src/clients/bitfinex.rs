@@ -46,6 +46,7 @@ impl_trait!(Trade, BitfinexWSClient, subscribe_trade, "trades");
 impl_trait!(Ticker, BitfinexWSClient, subscribe_ticker, "ticker");
 impl_candlestick!(BitfinexWSClient);
 
+panic_bbo!(BitfinexWSClient);
 panic_l2_topk!(BitfinexWSClient);
 
 #[async_trait]
@@ -55,23 +56,6 @@ impl OrderBook for BitfinexWSClient {
             .iter()
             .map(|symbol| {
                 format!(r#"{{"event": "subscribe","channel": "book","symbol": "{}","prec": "P0","frec": "F0","len":25}}"#,
-                    symbol,
-                )
-            })
-            .collect::<Vec<String>>();
-
-        self.send(&commands).await;
-    }
-}
-
-#[async_trait]
-impl BBO for BitfinexWSClient {
-    async fn subscribe_bbo(&self, symbols: &[String]) {
-        let commands = symbols
-            .iter()
-            .map(|symbol| {
-                format!(
-                    r#"{{"event": "subscribe","channel": "book","symbol": "{}","prec": "R0","len": 1}}"#,
                     symbol,
                 )
             })
