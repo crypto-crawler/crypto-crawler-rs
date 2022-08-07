@@ -214,7 +214,6 @@ pub fn parse_bbo(
 ) -> Result<BboMsg, SimpleError> {
     match exchange {
         "binance" => exchanges::binance::parse_bbo(market_type, msg, received_at),
-        "bitfinex" => exchanges::bitfinex::parse_bbo(market_type, msg, received_at),
         "kucoin" => exchanges::kucoin::parse_bbo(market_type, msg),
         "deribit" => exchanges::deribit::parse_bbo(market_type, msg),
         "kraken" => exchanges::kraken::parse_bbo(market_type, msg, received_at),
@@ -263,7 +262,7 @@ pub fn parse_candlestick(
     exchange: &str,
     market_type: MarketType,
     msg: &str,
-) -> Result<CandlestickMsg, SimpleError> {
+) -> Result<Vec<CandlestickMsg>, SimpleError> {
     match exchange {
         "bitfinex" => exchanges::bitfinex::parse_candlestick(market_type, msg),
         "kucoin" => exchanges::kucoin::parse_candlestick(market_type, msg),
