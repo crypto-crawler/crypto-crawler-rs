@@ -339,7 +339,7 @@ pub(crate) fn parse_l2_topk(
     parse_l2(market_type, msg)
 }
 
-pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<BboMsg, SimpleError> {
+pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawBboMsg>>(msg).map_err(SimpleError::from)?;
 
     debug_assert!(ws_msg.params.channel.starts_with("quote"));
@@ -383,5 +383,5 @@ pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<BboMsg, Si
         json: msg.to_string(),
     };
 
-    Ok(bbo_msg)
+    Ok(vec![bbo_msg])
 }

@@ -268,7 +268,7 @@ pub(super) fn parse_bbo(
     market_type: MarketType,
     msg: &str,
     received_at: Option<i64>,
-) -> Result<BboMsg, SimpleError> {
+) -> Result<Vec<BboMsg>, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawBboMsg>>(msg).map_err(|_e| {
         SimpleError::new(format!(
             "Failed to deserialize {} to WebsocketMsg<RawBboMsg>",
@@ -319,7 +319,7 @@ pub(super) fn parse_bbo(
         id: Some(ws_msg.data.u),
         json: msg.to_string(),
     };
-    Ok(bbo_msg)
+    Ok(vec![bbo_msg])
 }
 
 #[derive(Serialize, Deserialize)]

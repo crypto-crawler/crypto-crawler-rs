@@ -544,7 +544,7 @@ mod bbo {
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
 
-        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap();
+        let bbo_msg = &parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap()[0];
 
         assert_eq!("BTC-USDT", bbo_msg.symbol);
         assert_eq!(1654032320677, bbo_msg.timestamp);
@@ -575,7 +575,7 @@ mod bbo {
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
 
-        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap();
+        let bbo_msg = &parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap()[0];
 
         assert_eq!("DOT-USDT", bbo_msg.symbol);
         assert_eq!(1653955200018, bbo_msg.timestamp);

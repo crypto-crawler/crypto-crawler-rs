@@ -216,7 +216,7 @@ pub(super) fn parse_l2_topk(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError>
     Ok(vec![orderbook])
 }
 
-pub(super) fn parse_bbo(msg: &str) -> Result<BboMsg, SimpleError> {
+pub(super) fn parse_bbo(msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<RawBboMsg>>(msg).map_err(SimpleError::from)?;
     let topic = ws_msg.topic.as_str();
 
@@ -261,7 +261,7 @@ pub(super) fn parse_bbo(msg: &str) -> Result<BboMsg, SimpleError> {
         id: Some(ws_msg.data.sequence.as_str().parse::<u64>().unwrap()),
         json: msg.to_string(),
     };
-    Ok(bbo_msg)
+    Ok(vec![bbo_msg])
 }
 
 pub(super) fn parse_candlestick(msg: &str) -> Result<Vec<CandlestickMsg>, SimpleError> {

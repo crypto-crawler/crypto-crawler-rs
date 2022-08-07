@@ -893,7 +893,7 @@ mod bbo {
 
         let received_at = 1651122265862;
         let bbo_msg =
-            parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, Some(received_at)).unwrap();
+            &parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, Some(received_at)).unwrap()[0];
 
         assert_eq!(MessageType::BBO, bbo_msg.msg_type);
         assert_eq!("BTCUSDT", bbo_msg.symbol);
@@ -927,7 +927,8 @@ mod bbo {
                 .unwrap()
         );
 
-        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg, None).unwrap();
+        let bbo_msg =
+            &parse_bbo(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg, None).unwrap()[0];
 
         assert_eq!(MessageType::BBO, bbo_msg.msg_type);
         assert_eq!("XMRUSD_PERP", bbo_msg.symbol);
@@ -961,7 +962,8 @@ mod bbo {
                 .unwrap()
         );
 
-        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg, None).unwrap();
+        let bbo_msg =
+            &parse_bbo(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg, None).unwrap()[0];
 
         assert_eq!(MessageType::BBO, bbo_msg.msg_type);
         assert_eq!("BALUSDT", bbo_msg.symbol);
@@ -995,7 +997,7 @@ mod bbo {
                 .unwrap()
         );
 
-        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None).unwrap();
+        let bbo_msg = &parse_bbo(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(MessageType::BBO, bbo_msg.msg_type);
         assert_eq!("ETHUSD_PERP", bbo_msg.symbol);
@@ -1029,7 +1031,8 @@ mod bbo {
                 .unwrap()
         );
 
-        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg, None).unwrap();
+        let bbo_msg =
+            &parse_bbo(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg, None).unwrap()[0];
 
         assert_eq!(MessageType::BBO, bbo_msg.msg_type);
         assert_eq!("ETHUSDT", bbo_msg.symbol);

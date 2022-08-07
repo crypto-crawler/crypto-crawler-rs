@@ -220,7 +220,7 @@ pub(super) fn parse_l2_topk(
     Ok(vec![orderbook])
 }
 
-pub(super) fn parse_bbo(_market_type: MarketType, _msg: &str) -> Result<BboMsg, SimpleError> {
+pub(super) fn parse_bbo(_market_type: MarketType, _msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
     todo!()
 }
 

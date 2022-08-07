@@ -552,7 +552,8 @@ mod bbo {
             extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap()
         );
 
-        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg, None).unwrap();
+        let bbo_msg =
+            &parse_bbo(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg, None).unwrap()[0];
 
         assert_eq!(MessageType::BBO, bbo_msg.msg_type);
         assert_eq!("BTC-30SEP22", bbo_msg.symbol);
@@ -585,7 +586,7 @@ mod bbo {
             extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
         );
 
-        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None).unwrap();
+        let bbo_msg = &parse_bbo(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!(MessageType::BBO, bbo_msg.msg_type);
         assert_eq!("BTC-PERPETUAL", bbo_msg.symbol);

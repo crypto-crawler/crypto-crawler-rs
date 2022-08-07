@@ -168,7 +168,7 @@ pub(crate) fn parse_bbo(
     market_type: MarketType,
     msg: &str,
     received_at: Option<i64>,
-) -> Result<BboMsg, SimpleError> {
+) -> Result<Vec<BboMsg>, SimpleError> {
     if market_type == MarketType::EuropeanOption {
         Err(SimpleError::new("Not implemented"))
     } else {

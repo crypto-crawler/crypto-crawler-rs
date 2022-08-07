@@ -450,9 +450,9 @@ mod bbo {
             "XBT/USD",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
-        let bbo_msg = parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, None)
+        let bbo_msg = &parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, None)
             .ok()
-            .unwrap();
+            .unwrap()[0];
 
         assert_eq!(MessageType::BBO, bbo_msg.msg_type);
         assert_eq!("XBT/USD", bbo_msg.symbol);

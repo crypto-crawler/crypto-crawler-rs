@@ -421,7 +421,7 @@ struct RawBboMsgSpot {
     ask_volume: String,
 }
 
-pub(super) fn parse_bbo(msg: &str, _received_at: Option<i64>) -> Result<BboMsg, SimpleError> {
+pub(super) fn parse_bbo(msg: &str, _received_at: Option<i64>) -> Result<Vec<BboMsg>, SimpleError> {
     let ws_msg = serde_json::from_str::<Vec<Value>>(msg).map_err(SimpleError::from)?;
 
     let raw_bbo_msg_spot = serde_json::from_value::<RawBboMsgSpot>(ws_msg[1].clone()).unwrap();
@@ -466,5 +466,5 @@ pub(super) fn parse_bbo(msg: &str, _received_at: Option<i64>) -> Result<BboMsg, 
         json: msg.to_string(),
     };
 
-    Ok(bbo_msg)
+    Ok(vec![bbo_msg])
 }

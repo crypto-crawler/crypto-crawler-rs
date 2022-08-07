@@ -157,7 +157,7 @@ pub(crate) fn parse_l2_topk(
     }
 }
 
-pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<BboMsg, SimpleError> {
+pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
     if market_type == MarketType::Spot {
         kucoin_spot::parse_bbo(msg)
     } else {
