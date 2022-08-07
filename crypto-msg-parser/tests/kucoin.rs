@@ -732,7 +732,8 @@ mod candlestick {
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
 
-        let candlestick_msg = parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap();
+        let candlestick_msg =
+            &parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()[0];
 
         assert_eq!(1654081935182, candlestick_msg.timestamp);
         assert_eq!("BTC-USDT", candlestick_msg.symbol);

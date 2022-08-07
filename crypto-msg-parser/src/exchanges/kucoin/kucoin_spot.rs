@@ -264,7 +264,7 @@ pub(super) fn parse_bbo(msg: &str) -> Result<BboMsg, SimpleError> {
     Ok(bbo_msg)
 }
 
-pub(super) fn parse_candlestick(msg: &str) -> Result<CandlestickMsg, SimpleError> {
+pub(super) fn parse_candlestick(msg: &str) -> Result<Vec<CandlestickMsg>, SimpleError> {
     let ws_msg =
         serde_json::from_str::<WebsocketMsg<RawCandlestickMsg>>(msg).map_err(SimpleError::from)?;
 
@@ -308,5 +308,5 @@ pub(super) fn parse_candlestick(msg: &str) -> Result<CandlestickMsg, SimpleError
         json: msg.to_string(),
     };
 
-    Ok(kline_msg)
+    Ok(vec![kline_msg])
 }

@@ -227,6 +227,6 @@ pub(super) fn parse_bbo(_market_type: MarketType, _msg: &str) -> Result<BboMsg, 
 pub(super) fn parse_candlestick(
     _market_type: MarketType,
     _msg: &str,
-) -> Result<CandlestickMsg, SimpleError> {
+) -> Result<Vec<CandlestickMsg>, SimpleError> {
     todo!()
 }

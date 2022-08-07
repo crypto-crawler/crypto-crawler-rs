@@ -168,7 +168,7 @@ pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<BboMsg, Si
 pub(crate) fn parse_candlestick(
     market_type: MarketType,
     msg: &str,
-) -> Result<CandlestickMsg, SimpleError> {
+) -> Result<Vec<CandlestickMsg>, SimpleError> {
     if market_type == MarketType::Spot {
         kucoin_spot::parse_candlestick(msg)
     } else {
