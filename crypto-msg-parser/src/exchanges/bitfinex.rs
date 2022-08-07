@@ -1,10 +1,9 @@
 use crate::{
-    exchanges::utils::calc_quantity_and_volume, BboMsg, CandlestickMsg, Order, OrderBookMsg,
-    TradeMsg, TradeSide,
+    exchanges::utils::calc_quantity_and_volume, CandlestickMsg, Order, OrderBookMsg, TradeMsg,
+    TradeSide,
 };
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
-use serde::{Deserialize, Serialize};
 
 use serde_json::Value;
 use simple_error::SimpleError;
@@ -120,6 +119,7 @@ fn parse_one_trade(market_type: MarketType, symbol: &str, nums: &[f64]) -> Trade
     }
 }
 
+// See <https://docs.bitfinex.com/reference/ws-public-trades>
 pub(crate) fn parse_trade(
     market_type: MarketType,
     msg: &str,
@@ -160,6 +160,7 @@ pub(crate) fn parse_trade(
     }
 }
 
+// See <https://docs.bitfinex.com/reference/ws-public-books>
 pub(crate) fn parse_l2(
     market_type: MarketType,
     msg: &str,
@@ -237,133 +238,86 @@ pub(crate) fn parse_l2(
     Ok(vec![orderbook])
 }
 
-/// # Example Response
-///
-/// ```json
-/// {
-///   "len": "1",
-///   "prec": "R0",
-///   "freq": "F0",
-///   "symbol": "tBTCUST",
-///   "channel": "book"
-/// }
-/// ```
-#[derive(Serialize, Deserialize)]
-struct RawBboMsg {
-    len: String,
-    prec: String,
-    freq: String,
-    symbol: String,
-    channel: String,
-}
-
-/// # Example Response
-///
-/// ```json
-/// {
-///   "key": "trade:1m:tBTCUST",
-///   "channel": "candles"
-/// }
-/// ```
-/// ```
-#[derive(Serialize, Deserialize)]
-struct RawCandlesMsg {
-    key: String,
-    channel: String,
-}
-
-pub(crate) fn parse_bbo(
+fn parse_one_candle(
     market_type: MarketType,
-    msg: &str,
-    received_at: Option<i64>,
-) -> Result<BboMsg, SimpleError> {
-    let ws_msg = serde_json::from_str::<(RawBboMsg, Vec<Vec<f64>>)>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<RawBboMsg>",
-            msg
-        ))
-    })?;
+    symbol: &str,
+    pair: &str,
+    period: &str,
+    nums: &[f64; 6],
+) -> CandlestickMsg {
+    let begin_time = nums[0] as i64;
+    let open = nums[1];
+    let close = nums[2];
+    let high = nums[3];
+    let low = nums[4];
+    let volume = nums[5];
 
-    let timestamp = received_at.unwrap();
-
-    let symbol = ws_msg.0.symbol;
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
-
-    let (ask_quantity_base, ask_quantity_quote, ask_quantity_contract) = calc_quantity_and_volume(
-        EXCHANGE_NAME,
-        market_type,
-        &pair,
-        ws_msg.1[0][0],
-        ws_msg.1[0][1],
-    );
-
-    let (bid_quantity_base, bid_quantity_quote, bid_quantity_contract) = calc_quantity_and_volume(
-        EXCHANGE_NAME,
-        market_type,
-        &pair,
-        ws_msg.1[1][0],
-        ws_msg.1[1][1],
-    );
-
-    let bbo_msg = BboMsg {
+    CandlestickMsg {
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
-        symbol,
-        pair,
-        msg_type: MessageType::BBO,
-        timestamp,
-        ask_price: ws_msg.1[0][0],
-        ask_quantity_base,
-        ask_quantity_quote,
-        ask_quantity_contract,
-        bid_price: ws_msg.1[1][0],
-        bid_quantity_base,
-        bid_quantity_quote,
-        bid_quantity_contract,
-        id: None,
-        json: msg.to_string(),
-    };
-    Ok(bbo_msg)
-}
-
-pub(crate) fn parse_candlestick(
-    market_type: MarketType,
-    msg: &str,
-    msg_type: MessageType,
-) -> Result<CandlestickMsg, SimpleError> {
-    let obj = serde_json::from_str::<(RawCandlesMsg, Vec<f64>)>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to HashMap<String, Value>",
-            msg
-        ))
-    })?;
-
-    let temp_key = obj.0.key.split(':').collect::<Vec<&str>>();
-    let symbol = temp_key[2].to_string();
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
-
-    let open: f64 = obj.1[1];
-    let high: f64 = obj.1[3];
-    let low: f64 = obj.1[4];
-    let close: f64 = obj.1[2];
-    let volume: f64 = obj.1[5];
-
-    let candlestick_msg = CandlestickMsg {
-        exchange: EXCHANGE_NAME.to_string(),
-        market_type,
-        symbol,
-        pair,
-        msg_type,
-        timestamp: obj.1[0] as i64,
-        json: msg.to_string(),
+        symbol: symbol.to_string(),
+        pair: pair.to_string(),
+        msg_type: MessageType::Candlestick,
+        timestamp: begin_time,
+        begin_time,
         open,
         high,
         low,
         close,
         volume,
-        period: temp_key[1].to_string(),
+        period: period.to_string(),
         quote_volume: None,
+        json: "".to_string(),
+    }
+}
+
+/// See <https://docs.bitfinex.com/reference/ws-public-candles>
+///
+/// Samples:
+///
+/// * `[{"key":"trade:5m:tBTCF0:USTF0","channel":"candles"},[1656649200000,19578,19599,19599,19560,1.51796395]]`
+/// * `[{"key":"trade:1m:tBTCF0:USTF0","channel":"candles"},[[1656649380000,19590,19593,19593,19590,0.02779935],[1656649320000,19564,19588,19588,19560,0.7836714499999999]]]`
+pub(crate) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<CandlestickMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<Vec<Value>>(msg).map_err(SimpleError::from)?;
+
+    let (symbol, period) = {
+        let key = ws_msg[0].as_object().unwrap()["key"]
+            .as_str()
+            .unwrap()
+            .strip_prefix("trade:")
+            .unwrap();
+        let pos = key.find(":").unwrap();
+        let period = &key[..pos];
+        let symbol = &key[pos + 1..];
+        (symbol, period)
     };
 
-    Ok(candlestick_msg)
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+
+    let data = ws_msg[1].clone();
+    if data.as_array().unwrap().is_empty() {
+        return Ok(vec![]);
+    }
+
+    let snapshot = {
+        let arr = data.as_array().unwrap();
+        arr[0].is_array()
+    };
+
+    if snapshot {
+        let arr = data.as_array().unwrap();
+        let candles: Vec<CandlestickMsg> = arr
+            .into_iter()
+            .map(|v| serde_json::from_value::<[f64; 6]>(v.clone()).unwrap())
+            .map(|nums| parse_one_candle(market_type, symbol, &pair, period, &nums))
+            .collect();
+        Ok(candles)
+    } else {
+        let nums = serde_json::from_value::<[f64; 6]>(data).unwrap();
+        let candlestick_msg = parse_one_candle(market_type, symbol, &pair, period, &nums);
+        Ok(vec![candlestick_msg])
+    }
 }
