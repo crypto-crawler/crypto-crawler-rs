@@ -219,6 +219,7 @@ pub fn parse_bbo(
         "ftx" => exchanges::ftx::parse_bbo(market_type, msg),
         "kraken" => exchanges::kraken::parse_bbo(market_type, msg, received_at),
         "kucoin" => exchanges::kucoin::parse_bbo(market_type, msg),
+        "okx" => exchanges::okx::parse_bbo(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
 }

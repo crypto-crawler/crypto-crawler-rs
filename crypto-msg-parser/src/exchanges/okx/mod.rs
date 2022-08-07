@@ -1,6 +1,7 @@
 mod okx_v3;
 mod okx_v5;
 
+use crypto_message::BboMsg;
 use simple_error::SimpleError;
 use std::collections::HashMap;
 
@@ -114,6 +115,17 @@ pub(crate) fn parse_funding_rate(
         okx_v5::parse_funding_rate(market_type, msg, received_at)
     } else if obj.contains_key("table") && obj.contains_key("data") {
         okx_v3::parse_funding_rate(market_type, msg, received_at)
+    } else {
+        panic!("Unknown msg format {}", msg)
+    }
+}
+
+pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(SimpleError::from)?;
+    if obj.contains_key("arg") && obj.contains_key("data") {
+        okx_v5::parse_bbo(market_type, msg)
+    } else if obj.contains_key("table") && obj.contains_key("data") {
+        okx_v3::parse_bbo(market_type, msg)
     } else {
         panic!("Unknown msg format {}", msg)
     }

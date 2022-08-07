@@ -2,7 +2,7 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
 use super::super::utils::calc_quantity_and_volume;
-use crypto_message::{FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use super::EXCHANGE_NAME;
 use serde::{Deserialize, Serialize};
@@ -263,6 +263,20 @@ pub(super) fn parse_funding_rate(
     Ok(rates)
 }
 
+fn parse_order(market_type: MarketType, pair: &str, raw_order: &[String; 4]) -> Order {
+    let price = raw_order[0].parse::<f64>().unwrap();
+    let quantity = raw_order[1].parse::<f64>().unwrap();
+    let (quantity_base, quantity_quote, quantity_contract) =
+        calc_quantity_and_volume(EXCHANGE_NAME, market_type, pair, price, quantity);
+
+    Order {
+        price,
+        quantity_base,
+        quantity_quote,
+        quantity_contract,
+    }
+}
+
 pub(super) fn parse_l2(
     market_type: MarketType,
     msg: &str,
@@ -297,19 +311,6 @@ pub(super) fn parse_l2(
         .iter()
         .map(|raw_orderbook| {
             let timestamp = raw_orderbook.ts.parse::<i64>().unwrap();
-            let parse_order = |raw_order: &[String; 4]| -> Order {
-                let price = raw_order[0].parse::<f64>().unwrap();
-                let quantity = raw_order[1].parse::<f64>().unwrap();
-                let (quantity_base, quantity_quote, quantity_contract) =
-                    calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
-
-                Order {
-                    price,
-                    quantity_base,
-                    quantity_quote,
-                    quantity_contract,
-                }
-            };
 
             OrderBookMsg {
                 exchange: EXCHANGE_NAME.to_string(),
@@ -323,12 +324,12 @@ pub(super) fn parse_l2(
                 asks: raw_orderbook
                     .asks
                     .iter()
-                    .map(|x| parse_order(x))
+                    .map(|x| parse_order(market_type, &pair, x))
                     .collect::<Vec<Order>>(),
                 bids: raw_orderbook
                     .bids
                     .iter()
-                    .map(|x| parse_order(x))
+                    .map(|x| parse_order(market_type, &pair, x))
                     .collect::<Vec<Order>>(),
                 snapshot,
                 json: serde_json::to_string(raw_orderbook).unwrap(),
@@ -340,4 +341,48 @@ pub(super) fn parse_l2(
         orderbooks[0].json = msg.to_string();
     }
     Ok(orderbooks)
+}
+
+pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawOrderbookMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketMsg<RawOrderbookMsg>",
+            msg
+        ))
+    })?;
+
+    let channel = ws_msg.arg.channel.as_str();
+    debug_assert_eq!("bbo-tbt", channel);
+    debug_assert_eq!(1, ws_msg.data.len());
+
+    let raw_orderbook = &ws_msg.data[0];
+    debug_assert_eq!(1, raw_orderbook.asks.len());
+    debug_assert_eq!(1, raw_orderbook.bids.len());
+
+    let symbol = ws_msg.arg.instId.as_str();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+
+    let best_ask = parse_order(market_type, &pair, &raw_orderbook.asks[0]);
+    let best_bid = parse_order(market_type, &pair, &raw_orderbook.bids[0]);
+
+    let bbo_msg = BboMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: symbol.to_string(),
+        pair,
+        msg_type: MessageType::BBO,
+        timestamp: raw_orderbook.ts.parse::<i64>().unwrap(),
+        ask_price: best_ask.price,
+        ask_quantity_base: best_ask.quantity_base,
+        ask_quantity_quote: best_ask.quantity_quote,
+        ask_quantity_contract: best_ask.quantity_contract,
+        bid_price: best_bid.price,
+        bid_quantity_base: best_bid.quantity_base,
+        bid_quantity_quote: best_bid.quantity_quote,
+        bid_quantity_contract: best_bid.quantity_contract,
+        id: None,
+        json: msg.to_string(),
+    };
+
+    Ok(vec![bbo_msg])
 }
