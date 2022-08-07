@@ -26,7 +26,7 @@ pub(crate) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
     } else if channel == "candles" {
         let key = &(obj["key"].as_str().unwrap())["trade:".len()..];
         let pos = key.find(':').unwrap();
-        Ok((&key[pos + 1..]).to_string())
+        Ok(key[pos + 1..].to_string())
     } else {
         Err(SimpleError::new(format!(
             "Failed to extract symbol from {}",
@@ -289,7 +289,7 @@ pub(crate) fn parse_candlestick(
             .unwrap()
             .strip_prefix("trade:")
             .unwrap();
-        let pos = key.find(":").unwrap();
+        let pos = key.find(':').unwrap();
         let period = &key[..pos];
         let symbol = &key[pos + 1..];
         (symbol, period)
@@ -310,7 +310,7 @@ pub(crate) fn parse_candlestick(
     if snapshot {
         let arr = data.as_array().unwrap();
         let candles: Vec<CandlestickMsg> = arr
-            .into_iter()
+            .iter()
             .map(|v| serde_json::from_value::<[f64; 6]>(v.clone()).unwrap())
             .map(|nums| parse_one_candle(market_type, symbol, &pair, period, &nums))
             .collect();

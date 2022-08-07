@@ -924,7 +924,7 @@ pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg
                 exchange: EXCHANGE_NAME.to_string(),
                 market_type,
                 symbol: symbol.to_string(),
-                pair: pair.clone(),
+                pair,
                 msg_type: MessageType::BBO,
                 timestamp,
                 bid_price: raw_bbo.bidPrice,
