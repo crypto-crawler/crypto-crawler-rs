@@ -356,8 +356,10 @@ pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg
     debug_assert_eq!(1, ws_msg.data.len());
 
     let raw_orderbook = &ws_msg.data[0];
-    debug_assert_eq!(1, raw_orderbook.asks.len());
-    debug_assert_eq!(1, raw_orderbook.bids.len());
+    if raw_orderbook.asks.is_empty() || raw_orderbook.bids.is_empty() {
+        // Drop incomplete BBO
+        return Ok(vec![]);
+    }
 
     let symbol = ws_msg.arg.instId.as_str();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
