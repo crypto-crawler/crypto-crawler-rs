@@ -2,7 +2,7 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
 use crate::exchanges::utils::calc_quantity_and_volume;
-use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
@@ -31,6 +31,20 @@ struct RawOrderbookMsg {
     action: String, // partial, update
     bids: Vec<[f64; 2]>,
     asks: Vec<[f64; 2]>,
+    time: f64,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+// https://docs.ftx.com/#ticker
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawBboMsg {
+    bid: f64,
+    ask: f64,
+    bidSize: f64,
+    askSize: f64,
+    last: f64,
     time: f64,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
@@ -256,4 +270,51 @@ pub(crate) fn parse_l2(
     };
 
     Ok(vec![orderbook])
+}
+
+pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawBboMsg>>(msg).map_err(SimpleError::from)?;
+    debug_assert_eq!("ticker", ws_msg.channel);
+    debug_assert_eq!("update", ws_msg.type_);
+
+    let symbol = ws_msg.market.as_str();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let timestamp = (ws_msg.data.time * 1000.0) as i64;
+
+    let (ask_quantity_base, ask_quantity_quote, ask_quantity_contract) = calc_quantity_and_volume(
+        EXCHANGE_NAME,
+        market_type,
+        &pair,
+        ws_msg.data.ask,
+        ws_msg.data.askSize,
+    );
+
+    let (bid_quantity_base, bid_quantity_quote, bid_quantity_contract) = calc_quantity_and_volume(
+        EXCHANGE_NAME,
+        market_type,
+        &pair,
+        ws_msg.data.bid,
+        ws_msg.data.bidSize,
+    );
+
+    let bbo_msg = BboMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: symbol.to_string(),
+        pair,
+        msg_type: MessageType::BBO,
+        timestamp,
+        ask_price: ws_msg.data.ask,
+        ask_quantity_base,
+        ask_quantity_quote,
+        ask_quantity_contract,
+        bid_price: ws_msg.data.bid,
+        bid_quantity_base,
+        bid_quantity_quote,
+        bid_quantity_contract,
+        id: None,
+        json: msg.to_string(),
+    };
+
+    Ok(vec![bbo_msg])
 }

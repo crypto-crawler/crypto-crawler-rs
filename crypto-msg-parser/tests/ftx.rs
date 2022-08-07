@@ -393,7 +393,8 @@ mod l2_event {
 mod bbo {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_bbo, round};
+    use crypto_msg_type::MessageType;
 
     #[test]
     fn spot() {
@@ -409,6 +410,23 @@ mod bbo {
             "BTC/USD",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
+
+        let bbo_msg = &parse_bbo(EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap()[0];
+
+        assert_eq!(MessageType::BBO, bbo_msg.msg_type);
+        assert_eq!("BTC/USD", bbo_msg.symbol);
+        assert_eq!(1654029182690, bbo_msg.timestamp);
+        assert_eq!(None, bbo_msg.id);
+
+        assert_eq!(31680.0, bbo_msg.ask_price);
+        assert_eq!(1.1266, bbo_msg.ask_quantity_base);
+        assert_eq!(31680.0 * 1.1266, bbo_msg.ask_quantity_quote);
+        assert_eq!(None, bbo_msg.ask_quantity_contract);
+
+        assert_eq!(31679.0, bbo_msg.bid_price);
+        assert_eq!(1.8434, bbo_msg.bid_quantity_base);
+        assert_eq!(31679.0 * 1.8434, bbo_msg.bid_quantity_quote);
+        assert_eq!(None, bbo_msg.bid_quantity_contract);
     }
 
     #[test]
@@ -417,7 +435,7 @@ mod bbo {
 
         assert_eq!(
             1654029408920,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
                 .unwrap()
                 .unwrap()
         );
@@ -425,6 +443,23 @@ mod bbo {
             "BTC-PERP",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
+
+        let bbo_msg = &parse_bbo(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap()[0];
+
+        assert_eq!(MessageType::BBO, bbo_msg.msg_type);
+        assert_eq!("BTC-PERP", bbo_msg.symbol);
+        assert_eq!(1654029408920, bbo_msg.timestamp);
+        assert_eq!(None, bbo_msg.id);
+
+        assert_eq!(31700.0, bbo_msg.ask_price);
+        assert_eq!(4.6393, bbo_msg.ask_quantity_base);
+        assert_eq!(round(31700.0 * 4.6393), bbo_msg.ask_quantity_quote);
+        assert_eq!(Some(4.6393), bbo_msg.ask_quantity_contract);
+
+        assert_eq!(31699.0, bbo_msg.bid_price);
+        assert_eq!(14.9905, bbo_msg.bid_quantity_base);
+        assert_eq!(31699.0 * 14.9905, bbo_msg.bid_quantity_quote);
+        assert_eq!(Some(14.9905), bbo_msg.bid_quantity_contract);
     }
 
     #[test]
@@ -433,14 +468,32 @@ mod bbo {
 
         assert_eq!(
             1654029472207,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg)
                 .unwrap()
                 .unwrap()
         );
         assert_eq!(
             "BTC-0624",
-            extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
+            extract_symbol(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg).unwrap()
         );
+
+        let bbo_msg =
+            &parse_bbo(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg, None).unwrap()[0];
+
+        assert_eq!(MessageType::BBO, bbo_msg.msg_type);
+        assert_eq!("BTC-0624", bbo_msg.symbol);
+        assert_eq!(1654029472207, bbo_msg.timestamp);
+        assert_eq!(None, bbo_msg.id);
+
+        assert_eq!(31747.0, bbo_msg.ask_price);
+        assert_eq!(0.1, bbo_msg.ask_quantity_base);
+        assert_eq!(round(31747.0 * 0.1), bbo_msg.ask_quantity_quote);
+        assert_eq!(Some(0.1), bbo_msg.ask_quantity_contract);
+
+        assert_eq!(31746.0, bbo_msg.bid_price);
+        assert_eq!(1.0727, bbo_msg.bid_quantity_base);
+        assert_eq!(round(31746.0 * 1.0727), bbo_msg.bid_quantity_quote);
+        assert_eq!(Some(1.0727), bbo_msg.bid_quantity_contract);
     }
 }
 
