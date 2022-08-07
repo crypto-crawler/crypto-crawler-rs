@@ -406,7 +406,7 @@ mod l3_event {
 mod candlestick {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_candlestick};
 
     #[test]
     fn spot_snapshot() {
@@ -422,6 +422,21 @@ mod candlestick {
             "tBTCUST",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
+
+        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap();
+        assert_eq!(3, arr.len());
+
+        let candlestick_msg = &arr[0];
+
+        assert_eq!("tBTCUST", candlestick_msg.symbol);
+        assert_eq!(1654074480000, candlestick_msg.timestamp);
+        assert_eq!("1m", candlestick_msg.period);
+
+        assert_eq!(31636.0, candlestick_msg.open);
+        assert_eq!(31636.0, candlestick_msg.high);
+        assert_eq!(31636.0, candlestick_msg.low);
+        assert_eq!(31636.0, candlestick_msg.close);
+        assert_eq!(0.0001, candlestick_msg.volume);
     }
 
     #[test]
@@ -438,6 +453,18 @@ mod candlestick {
             "tBTCUST",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
+        let candlestick_msg =
+            &parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()[0];
+
+        assert_eq!("tBTCUST", candlestick_msg.symbol);
+        assert_eq!(1654075080000, candlestick_msg.timestamp);
+        assert_eq!("1m", candlestick_msg.period);
+
+        assert_eq!(31619.0, candlestick_msg.open);
+        assert_eq!(31619.0, candlestick_msg.high);
+        assert_eq!(31619.0, candlestick_msg.low);
+        assert_eq!(31619.0, candlestick_msg.close);
+        assert_eq!(0.00843875, candlestick_msg.volume);
     }
 
     #[test]
@@ -454,6 +481,21 @@ mod candlestick {
             "tBTCF0:USTF0",
             extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
         );
+
+        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap();
+        assert_eq!(3, arr.len());
+
+        let candlestick_msg = &arr[0];
+
+        assert_eq!("tBTCF0:USTF0", candlestick_msg.symbol);
+        assert_eq!(1654076100000, candlestick_msg.timestamp);
+        assert_eq!("1m", candlestick_msg.period);
+
+        assert_eq!(31672.0, candlestick_msg.open);
+        assert_eq!(31672.0, candlestick_msg.high);
+        assert_eq!(31667.0, candlestick_msg.low);
+        assert_eq!(31667.0, candlestick_msg.close);
+        assert_eq!(0.053312790000000006, candlestick_msg.volume);
     }
 
     #[test]
@@ -470,6 +512,19 @@ mod candlestick {
             "tBTCF0:USTF0",
             extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
         );
+
+        let candlestick_msg =
+            &parse_candlestick(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()[0];
+
+        assert_eq!("tBTCF0:USTF0", candlestick_msg.symbol);
+        assert_eq!(1654076040000, candlestick_msg.timestamp);
+        assert_eq!("1m", candlestick_msg.period);
+
+        assert_eq!(31672.0, candlestick_msg.open);
+        assert_eq!(31673.0, candlestick_msg.high);
+        assert_eq!(31667.0, candlestick_msg.low);
+        assert_eq!(31673.0, candlestick_msg.close);
+        assert_eq!(0.00118434, candlestick_msg.volume);
     }
 }
 
