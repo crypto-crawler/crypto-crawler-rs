@@ -41,7 +41,7 @@ pub(super) fn calc_quantity_and_volume(
     quantity: f64,
 ) -> (f64, f64, Option<f64>) {
     let contract_value =
-        crypto_contract_value::get_contract_value(exchange, market_type, pair).unwrap() as f64;
+        crypto_contract_value::get_contract_value(exchange, market_type, pair).unwrap();
     match market_type {
         MarketType::Spot => (quantity, round(quantity * price), None),
         MarketType::InverseSwap | MarketType::InverseFuture => {

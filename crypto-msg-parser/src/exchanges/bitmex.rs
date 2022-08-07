@@ -1,5 +1,5 @@
 use crypto_market_type::MarketType;
-use crypto_message::{FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 use crypto_msg_type::MessageType;
 use crypto_pair::get_market_type;
 
@@ -177,6 +177,10 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("ETHZ20", (423, 0.00001)),
         ("ETHZ21", (634, 0.00001)),
         ("ETH_USDT", (855, 0.05)),
+        ("EURCHF", (1010, 0.00001)),
+        ("EURTRY", (1011, 0.0001)),
+        ("EURUSD", (1008, 0.00001)),
+        ("EURUSDT", (1020, 0.00001)),
         ("FCT7D", (70, 0.000001)),
         ("FCTM17", (190, 0.000001)),
         ("FCTXBT", (93, 0.000001)),
@@ -227,6 +231,10 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("NEARUSDT", (850, 0.001)),
         ("NEOG18", (269, 0.000001)),
         ("NEOH18", (270, 0.000001)),
+        ("NZDUSD", (1017, 0.00001)),
+        ("NZDUSDT", (1027, 0.00001)),
+        ("OPUSD", (1040, 0.0001)),
+        ("OPUSDT", (1041, 0.0001)),
         ("QTUMU17", (195, 0.000001)),
         ("REP7D", (144, 0.000001)),
         ("SANDUSDT", (780, 0.0001)),
@@ -254,6 +262,22 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("TRXZ21", (640, 0.0000000001)),
         ("UNIUSDT", (520, 0.001)),
         ("UNI_USDT", (856, 0.001)),
+        ("USDBRL", (1015, 0.0001)),
+        ("USDCHF", (1009, 0.00001)),
+        ("USDCNH", (1018, 0.0001)),
+        ("USDINR", (1013, 0.001)),
+        ("USDMXN", (1016, 0.001)),
+        ("USDSEK", (1019, 0.0001)),
+        ("USDTBRL", (1025, 0.0001)),
+        ("USDTCHF", (1021, 0.00001)),
+        ("USDTCNH", (1028, 0.0001)),
+        ("USDTINR", (1023, 0.001)),
+        ("USDTMXN", (1026, 0.001)),
+        ("USDTRY", (1012, 0.0001)),
+        ("USDTSEK", (1029, 0.0001)),
+        ("USDTTRY", (1022, 0.0001)),
+        ("USDTZAR", (1024, 0.0001)),
+        ("USDZAR", (1014, 0.0001)),
         ("VETUSDT", (581, 0.00001)),
         ("WINZ16", (156, 0.000001)),
         ("XBCH17", (158, 0.1)),
@@ -310,6 +334,7 @@ static SYMBOL_INDEX_AND_TICK_SIZE_MAP: Lazy<HashMap<String, (usize, f64)>> = Laz
         ("XBTN15", (44, 0.01)),
         ("XBTN22", (890, 0.5)),
         ("XBTQ15", (46, 0.01)),
+        ("XBTQ22", (901, 0.5)),
         ("XBTU15", (39, 0.01)),
         ("XBTU15_Z15", (43, 0.01)),
         ("XBTU16", (71, 0.01)),
@@ -592,6 +617,7 @@ pub(crate) fn parse_trade(
             msg
         ))
     })?;
+    debug_assert_eq!("trade", ws_msg.table);
     let raw_trades = ws_msg.data;
     let mut trades: Vec<TradeMsg> = raw_trades
         .into_iter()
@@ -641,6 +667,7 @@ pub(crate) fn parse_funding_rate(
             msg
         ))
     })?;
+    debug_assert_eq!("funding", ws_msg.table);
     let mut rates: Vec<FundingRateMsg> = ws_msg
         .data
         .into_iter()
@@ -701,6 +728,7 @@ pub(crate) fn parse_l2(
             msg
         ))
     })?;
+    debug_assert!(ws_msg.table.starts_with("orderBookL2")); // orderBookL2, orderBookL2_25
     let snapshot = ws_msg.action == "partial";
     if ws_msg.data.is_empty() {
         return Ok(Vec::new());
@@ -782,6 +810,19 @@ struct OrderBook10Msg {
     extra: HashMap<String, Value>,
 }
 
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawBboMsg {
+    symbol: String,
+    timestamp: String,
+    askSize: f64,
+    askPrice: f64,
+    bidSize: f64,
+    bidPrice: f64,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
 pub(crate) fn parse_l2_topk(
     market_type: MarketType,
     msg: &str,
@@ -792,6 +833,7 @@ pub(crate) fn parse_l2_topk(
             msg
         ))
     })?;
+    debug_assert_eq!("orderBook10", ws_msg.table);
     if ws_msg.data.is_empty() {
         return Ok(Vec::new());
     }
@@ -844,6 +886,63 @@ pub(crate) fn parse_l2_topk(
         .collect();
     debug_assert_eq!(1, orderbooks.len());
     Ok(orderbooks)
+}
+
+pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawBboMsg>>(msg).map_err(SimpleError::from)?;
+    debug_assert_eq!("quote", ws_msg.table);
+    if ws_msg.data.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let bbo_messages: Vec<BboMsg> = ws_msg
+        .data
+        .iter()
+        .map(|raw_bbo| {
+            let symbol = raw_bbo.symbol.as_str();
+            let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+            let timestamp = DateTime::parse_from_rfc3339(raw_bbo.timestamp.as_str())
+                .unwrap()
+                .timestamp_millis();
+            let (ask_quantity_base, ask_quantity_quote, ask_quantity_contract) =
+                calc_quantity_and_volume(
+                    EXCHANGE_NAME,
+                    market_type,
+                    &pair,
+                    raw_bbo.askPrice,
+                    raw_bbo.askSize,
+                );
+            let (bid_quantity_base, bid_quantity_quote, bid_quantity_contract) =
+                calc_quantity_and_volume(
+                    EXCHANGE_NAME,
+                    market_type,
+                    &pair,
+                    raw_bbo.bidPrice,
+                    raw_bbo.bidSize,
+                );
+            BboMsg {
+                exchange: EXCHANGE_NAME.to_string(),
+                market_type,
+                symbol: symbol.to_string(),
+                pair: pair.clone(),
+                msg_type: MessageType::BBO,
+                timestamp,
+                bid_price: raw_bbo.bidPrice,
+                bid_quantity_base,
+                bid_quantity_quote,
+                bid_quantity_contract,
+
+                ask_price: raw_bbo.askPrice,
+                ask_quantity_base,
+                ask_quantity_quote,
+                ask_quantity_contract,
+                id: None,
+                json: msg.to_string(),
+            }
+        })
+        .collect();
+
+    Ok(bbo_messages)
 }
 
 #[cfg(test)]

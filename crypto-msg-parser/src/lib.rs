@@ -211,9 +211,10 @@ pub fn parse_bbo(
     market_type: MarketType,
     msg: &str,
     received_at: Option<i64>,
-) -> Result<BboMsg, SimpleError> {
+) -> Result<Vec<BboMsg>, SimpleError> {
     match exchange {
         "binance" => exchanges::binance::parse_bbo(market_type, msg, received_at),
+        "bitmex" => exchanges::bitmex::parse_bbo(market_type, msg),
         "kucoin" => exchanges::kucoin::parse_bbo(market_type, msg),
         "deribit" => exchanges::deribit::parse_bbo(market_type, msg),
         "kraken" => exchanges::kraken::parse_bbo(market_type, msg, received_at),
