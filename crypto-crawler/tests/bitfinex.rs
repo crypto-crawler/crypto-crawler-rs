@@ -45,19 +45,6 @@ async fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 
 #[test_case(MarketType::Spot, "tBTCUSD")]
 #[test_case(MarketType::LinearSwap, "tBTCF0:USTF0")]
-#[tokio::test(flavor = "multi_thread")]
-async fn test_crawl_bbo(market_type: MarketType, symbol: &str) {
-    test_one_symbol!(
-        crawl_bbo,
-        EXCHANGE_NAME,
-        market_type,
-        symbol,
-        MessageType::BBO
-    )
-}
-
-#[test_case(MarketType::Spot, "tBTCUSD")]
-#[test_case(MarketType::LinearSwap, "tBTCF0:USTF0")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     test_crawl_restful!(
         crawl_l2_snapshot,
