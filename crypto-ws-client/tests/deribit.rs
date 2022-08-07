@@ -20,6 +20,7 @@ async fn deribit_all_trades() {
 mod deribit_inverse_future {
     use crypto_ws_client::{DeribitWSClient, WSClient};
 
+    #[ignore = "lack of liquidity"]
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
         gen_test_code!(
