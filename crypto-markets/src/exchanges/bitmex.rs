@@ -68,7 +68,11 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
                 },
                 quantity_limit: None,
                 contract_value: if market_type != MarketType::Spot {
-                    Some((x.multiplier.abs() as f64) * 1e-8)
+                    if let Some(y) = x.underlyingToSettleMultiplier {
+                        Some(x.multiplier / y)
+                    } else {
+                        Some(x.multiplier / x.quoteToSettleMultiplier.unwrap())
+                    }
                 } else {
                     None
                 },
@@ -112,11 +116,11 @@ struct Instrument {
     maxPrice: f64,
     lotSize: f64,
     tickSize: f64,
-    multiplier: i64,
+    multiplier: f64,
     settlCurrency: String,
-    underlyingToPositionMultiplier: Option<i64>,
-    underlyingToSettleMultiplier: Option<i64>,
-    quoteToSettleMultiplier: Option<i64>,
+    underlyingToPositionMultiplier: Option<f64>,
+    underlyingToSettleMultiplier: Option<f64>,
+    quoteToSettleMultiplier: Option<f64>,
     isQuanto: bool,
     isInverse: bool,
     initMargin: f64,
@@ -219,7 +223,7 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
     }
     // Inverse
     for x in instruments.iter().filter(|x| x.isInverse) {
-        assert!(x.multiplier < 0);
+        assert!(x.multiplier < 0.0);
         assert_eq!(x.quoteCurrency, x.positionCurrency);
     }
     // Quanto
