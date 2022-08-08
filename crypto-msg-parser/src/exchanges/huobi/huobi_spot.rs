@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -35,6 +35,21 @@ struct SpotOrderbookMsg {
     prev_seq_num: Option<u64>, // None if L2TopK
     asks: Option<Vec<[f64; 2]>>,
     bids: Option<Vec<[f64; 2]>>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+// https://huobiapi.github.io/docs/spot/v1/en/#best-bid-offer
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawBboMsg {
+    seqId: Option<u64>,
+    ask: f64,
+    askSize: f64,
+    bid: f64,
+    bidSize: f64,
+    quoteTime: i64,
+    symbol: String,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -148,4 +163,35 @@ pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
     };
 
     Ok(vec![orderbook])
+}
+
+pub(super) fn parse_bbo(msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawBboMsg>>(msg).map_err(SimpleError::from)?;
+    debug_assert!(ws_msg.ch.ends_with(".bbo"));
+
+    let symbol = ws_msg.ch.split('.').nth(1).unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
+    let timestamp = ws_msg.ts;
+
+    let bbo_msg = BboMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type: MarketType::Spot,
+        symbol: symbol.to_string(),
+        pair,
+        msg_type: MessageType::BBO,
+        timestamp,
+        ask_price: ws_msg.tick.ask,
+        ask_quantity_base: ws_msg.tick.askSize,
+        ask_quantity_quote: ws_msg.tick.ask * ws_msg.tick.askSize,
+        ask_quantity_contract: None,
+        bid_price: ws_msg.tick.bid,
+        bid_quantity_base: ws_msg.tick.bidSize,
+        bid_quantity_quote: ws_msg.tick.bid * ws_msg.tick.bidSize,
+        bid_quantity_contract: None,
+        id: ws_msg.tick.seqId,
+        json: msg.to_string(),
+    };
+
+    Ok(vec![bbo_msg])
 }

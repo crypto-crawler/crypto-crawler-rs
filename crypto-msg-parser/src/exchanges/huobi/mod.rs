@@ -7,6 +7,7 @@ mod message;
 use std::collections::HashMap;
 
 use crypto_market_type::MarketType;
+use crypto_message::BboMsg;
 use crypto_msg_type::MessageType;
 
 use crate::{FundingRateMsg, OrderBookMsg, TradeMsg};
@@ -140,4 +141,20 @@ pub(crate) fn parse_l2_topk(
     msg: &str,
 ) -> Result<Vec<OrderBookMsg>, SimpleError> {
     parse_l2(market_type, msg)
+}
+
+pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
+    match market_type {
+        MarketType::Spot => huobi_spot::parse_bbo(msg),
+        MarketType::InverseFuture | MarketType::InverseSwap => {
+            huobi_inverse::parse_bbo(market_type, msg)
+        }
+        MarketType::LinearFuture | MarketType::LinearSwap | MarketType::EuropeanOption => {
+            huobi_inverse::parse_bbo(market_type, msg)
+        }
+        _ => Err(SimpleError::new(format!(
+            "Unknown huobi market type {}",
+            market_type
+        ))),
+    }
 }

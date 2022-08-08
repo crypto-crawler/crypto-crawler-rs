@@ -2,7 +2,7 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
 use crate::exchanges::utils::{calc_quantity_and_volume, deserialize_null_default};
-use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use super::message::WebsocketMsg;
 use serde::{Deserialize, Serialize};
@@ -32,6 +32,9 @@ struct InverseTradeMsg {
 // https://huobiapi.github.io/docs/coin_margined_swap/v1/en/#subscribe-incremental-market-depth-data
 // https://huobiapi.github.io/docs/usdt_swap/v1/en/#general-subscribe-market-depth-data
 // https://huobiapi.github.io/docs/usdt_swap/v1/en/#general-subscribe-incremental-market-depth-data
+// https://huobiapi.github.io/docs/dm/v1/en/#subscribe-market-bbo-data
+// https://huobiapi.github.io/docs/coin_margined_swap/v1/en/#subscribe-market-bbo-data-push
+// https://huobiapi.github.io/docs/usdt_swap/v1/en/#general-subscribe-market-bbo-data-push
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct InverseOrderbookMsg {
@@ -44,6 +47,23 @@ struct InverseOrderbookMsg {
     bids: Vec<[f64; 2]>,
     #[serde(default, deserialize_with = "deserialize_null_default")]
     asks: Vec<[f64; 2]>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+// https://huobiapi.github.io/docs/dm/v1/en/#subscribe-market-bbo-data
+// https://huobiapi.github.io/docs/coin_margined_swap/v1/en/#subscribe-market-bbo-data-push
+// https://huobiapi.github.io/docs/usdt_swap/v1/en/#general-subscribe-market-bbo-data-push
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawBboMsg {
+    id: u64,
+    ts: u64,
+    mrid: u64,
+    event: Option<String>, // snapshot, update, None if L2TopK
+    ch: String,
+    bid: [f64; 2],
+    ask: [f64; 2],
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
@@ -105,6 +125,20 @@ pub(crate) fn parse_trade(
     Ok(trades)
 }
 
+fn parse_order(market_type: MarketType, pair: &str, raw_order: &[f64; 2]) -> Order {
+    let price = raw_order[0];
+    let quantity = raw_order[1];
+
+    let (quantity_base, quantity_quote, quantity_contract) =
+        calc_quantity_and_volume(EXCHANGE_NAME, market_type, pair, price, quantity);
+    Order {
+        price,
+        quantity_base,
+        quantity_quote,
+        quantity_contract,
+    }
+}
+
 pub(crate) fn parse_l2(
     market_type: MarketType,
     msg: &str,
@@ -130,20 +164,6 @@ pub(crate) fn parse_l2(
         true
     };
 
-    let parse_order = |raw_order: &[f64; 2]| -> Order {
-        let price = raw_order[0];
-        let quantity = raw_order[1];
-
-        let (quantity_base, quantity_quote, quantity_contract) =
-            calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, price, quantity);
-        Order {
-            price,
-            quantity_base,
-            quantity_quote,
-            quantity_contract,
-        }
-    };
-
     let orderbook = OrderBookMsg {
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
@@ -153,11 +173,53 @@ pub(crate) fn parse_l2(
         timestamp,
         seq_id: Some(ws_msg.tick.mrid),
         prev_seq_id: None,
-        asks: ws_msg.tick.asks.iter().map(|x| parse_order(x)).collect(),
-        bids: ws_msg.tick.bids.iter().map(|x| parse_order(x)).collect(),
+        asks: ws_msg
+            .tick
+            .asks
+            .iter()
+            .map(|x| parse_order(market_type, &pair, x))
+            .collect(),
+        bids: ws_msg
+            .tick
+            .bids
+            .iter()
+            .map(|x| parse_order(market_type, &pair, x))
+            .collect(),
         snapshot,
         json: msg.to_string(),
     };
 
     Ok(vec![orderbook])
+}
+
+pub(super) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawBboMsg>>(msg).map_err(SimpleError::from)?;
+    debug_assert!(ws_msg.ch.ends_with(".bbo"));
+    let symbol = ws_msg.ch.split('.').nth(1).unwrap();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
+        .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
+
+    let best_ask = parse_order(market_type, &pair, &ws_msg.tick.ask);
+    let best_bid = parse_order(market_type, &pair, &ws_msg.tick.bid);
+
+    let bbo_msg = BboMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: symbol.to_string(),
+        pair,
+        msg_type: MessageType::BBO,
+        timestamp: ws_msg.ts,
+        ask_price: best_ask.price,
+        ask_quantity_base: best_ask.quantity_base,
+        ask_quantity_quote: best_ask.quantity_quote,
+        ask_quantity_contract: best_ask.quantity_contract,
+        bid_price: best_bid.price,
+        bid_quantity_base: best_bid.quantity_base,
+        bid_quantity_quote: best_bid.quantity_quote,
+        bid_quantity_contract: best_bid.quantity_contract,
+        id: Some(ws_msg.tick.mrid),
+        json: msg.to_string(),
+    };
+
+    Ok(vec![bbo_msg])
 }

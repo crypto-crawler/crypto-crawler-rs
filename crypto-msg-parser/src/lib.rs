@@ -218,6 +218,7 @@ pub fn parse_bbo(
         "deribit" => exchanges::deribit::parse_bbo(market_type, msg),
         "ftx" => exchanges::ftx::parse_bbo(market_type, msg),
         "gate" => exchanges::gate::parse_bbo(market_type, msg),
+        "huobi" => exchanges::huobi::parse_bbo(market_type, msg),
         "kraken" => exchanges::kraken::parse_bbo(market_type, msg, received_at),
         "kucoin" => exchanges::kucoin::parse_bbo(market_type, msg),
         "okx" => exchanges::okx::parse_bbo(market_type, msg),
