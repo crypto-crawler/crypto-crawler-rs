@@ -27,7 +27,7 @@ struct ResponseMsg {
     data: Vec<SwapMarket>,
 }
 
-// https://docs.kucoin.cc/futures/#execution-data
+// https://docs.kucoin.com/futures/#execution-data
 #[derive(Serialize, Deserialize)]
 struct ContractTradeMsg {
     symbol: String,
@@ -40,7 +40,7 @@ struct ContractTradeMsg {
     extra: HashMap<String, Value>,
 }
 
-// https://docs.kucoin.cc/futures/#level-2-market-data
+// https://docs.kucoin.com/futures/#level-2-market-data
 #[derive(Serialize, Deserialize)]
 struct ContractOrderbookMsg {
     sequence: i64,
