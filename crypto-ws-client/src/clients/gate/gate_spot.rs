@@ -13,8 +13,8 @@ const WEBSOCKET_URL: &str = "wss://api.gateio.ws/ws/v4/";
 
 /// The WebSocket client for Gate spot market.
 ///
-/// * WebSocket API doc: <https://www.gate.io/docs/apiv4/ws/en/index.html>
-/// * Trading at <https://www.gate.io/en/trade/BTC_USDT>
+/// * WebSocket API doc: <https://www.gate.io/docs/developers/apiv4/ws/en/>
+/// * Trading at <https://www.gate.io/trade/BTC_USDT>
 pub struct GateSpotWSClient {
     client: WSClientInternal<GateMessageHandler<'S'>>,
     translator: GateCommandTranslator<'S'>,
