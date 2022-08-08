@@ -2,7 +2,7 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
 use super::messages::WebsocketMsg;
-use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
@@ -10,7 +10,7 @@ use std::collections::HashMap;
 
 const EXCHANGE_NAME: &str = "gate";
 
-// https://www.gateio.pro/docs/apiv4/ws/en/#server-notification-2
+// https://www.gate.io/docs/developers/apiv4/ws/en/#server-notification-2
 #[derive(Serialize, Deserialize)]
 struct SpotTradeMsg {
     id: i64,
@@ -24,7 +24,7 @@ struct SpotTradeMsg {
     extra: HashMap<String, Value>,
 }
 
-// https://www.gateio.pro/docs/apiv4/ws/en/#changed-order-book-levels
+// https://www.gate.io/docs/developers/apiv4/ws/en/#changed-order-book-levels
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct SpotOrderbookUpdateMsg {
@@ -40,7 +40,7 @@ struct SpotOrderbookUpdateMsg {
     extra: HashMap<String, Value>,
 }
 
-// https://www.gateio.pro/docs/apiv4/ws/en/#limited-level-full-order-book-snapshot
+// https://www.gate.io/docs/developers/apiv4/ws/en/#limited-level-full-order-book-snapshot
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct SpotOrderbookSnapshotMsg {
@@ -60,6 +60,21 @@ struct SpotRestL2SnapshotMsg {
     update: i64,
     asks: Vec<[String; 2]>,
     bids: Vec<[String; 2]>,
+}
+
+// https://www.gate.io/docs/developers/apiv4/ws/en/#best-bid-or-ask-price
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawBboMsg {
+    t: i64,    // Order book update time in milliseconds
+    u: i64,    // Order book update ID
+    s: String, // Currency pair
+    b: String, // best bid price
+    B: String, // best bid amount
+    a: String, // best ask price
+    A: String, // best ask amount
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
 }
 
 pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
@@ -272,4 +287,41 @@ fn parse_l2_snapshot(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
     };
 
     Ok(vec![orderbook])
+}
+
+pub(super) fn parse_bbo(msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawBboMsg>>(msg).map_err(SimpleError::from)?;
+    debug_assert_eq!("spot.book_ticker", ws_msg.channel);
+    debug_assert_eq!("update", ws_msg.event);
+
+    let symbol = ws_msg.result.s.as_str();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let timestamp = ws_msg.result.t;
+
+    let ask_price = ws_msg.result.a.parse::<f64>().unwrap();
+    let ask_size = ws_msg.result.A.parse::<f64>().unwrap();
+
+    let bid_price = ws_msg.result.b.parse::<f64>().unwrap();
+    let bid_size = ws_msg.result.B.parse::<f64>().unwrap();
+
+    let bbo_msg = BboMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type: MarketType::Spot,
+        symbol: symbol.to_string(),
+        pair,
+        msg_type: MessageType::BBO,
+        timestamp,
+        ask_price,
+        ask_quantity_base: ask_size,
+        ask_quantity_quote: ask_price * ask_size,
+        ask_quantity_contract: None,
+        bid_price,
+        bid_quantity_base: bid_size,
+        bid_quantity_quote: bid_price * bid_size,
+        bid_quantity_contract: None,
+        id: None,
+        json: msg.to_string(),
+    };
+
+    Ok(vec![bbo_msg])
 }

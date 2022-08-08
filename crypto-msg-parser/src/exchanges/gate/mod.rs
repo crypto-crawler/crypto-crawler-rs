@@ -5,6 +5,7 @@ mod gate_swap;
 mod messages;
 
 use crypto_market_type::MarketType;
+use crypto_message::BboMsg;
 
 use crate::{OrderBookMsg, TradeMsg};
 
@@ -52,5 +53,13 @@ pub(crate) fn parse_l2(
         )
     } else {
         gate_swap::parse_l2(market_type, msg)
+    }
+}
+
+pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
+    if market_type == MarketType::Spot {
+        gate_spot::parse_bbo(msg)
+    } else {
+        gate_swap::parse_bbo(market_type, msg)
     }
 }

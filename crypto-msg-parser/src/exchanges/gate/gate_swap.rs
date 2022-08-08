@@ -3,7 +3,7 @@ use crypto_msg_type::MessageType;
 
 use super::{super::utils::calc_quantity_and_volume, messages::WebsocketMsg};
 
-use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -12,7 +12,7 @@ use std::{cell::RefCell, collections::HashMap};
 
 const EXCHANGE_NAME: &str = "gate";
 
-// https://www.gate.io/docs/delivery/ws/index.html#trades-subscription
+// https://www.gate.io/docs/developers/delivery/ws/en/#trades-notification
 #[derive(Serialize, Deserialize)]
 struct FutureTradeMsg {
     size: f64,
@@ -24,20 +24,21 @@ struct FutureTradeMsg {
     extra: HashMap<String, Value>,
 }
 
-// https://www.gate.io/docs/delivery/ws/index.html#order_book-api
-// https://www.gate.io/docs/futures/ws/index.html#legacy-order-book-notification
+// https://www.gate.io/docs/developers/delivery/ws/en/#order-book-notification
+// https://www.gate.io/docs/developers/futures/ws/en/#legacy-order-book-notification
 #[derive(Serialize, Deserialize)]
 struct RawOrderbookSnapshot {
     t: Option<i64>,
     contract: String,
     asks: Vec<RawOrderLegacy>,
     bids: Vec<RawOrderLegacy>,
+    id: Option<u64>,
     #[serde(flatten)]
     extra: HashMap<String, Value>,
 }
 
-// https://www.gate.io/docs/delivery/ws/index.html#order_book-api
-// https://www.gate.io/docs/futures/ws/index.html#legacy-order-book-notification
+// https://www.gate.io/docs/developers/delivery/ws/en/#order-book-notification
+// https://www.gate.io/docs/developers/futures/ws/en/#legacy-order-book-notification
 #[derive(Serialize, Deserialize)]
 struct RawOrderLegacy {
     p: String, // price
@@ -48,7 +49,7 @@ struct RawOrderLegacy {
     extra: HashMap<String, Value>,
 }
 
-// https://www.gate.io/docs/futures/ws/index.html#trades-subscription
+// https://www.gate.io/docs/developers/futures/ws/en/#trades-subscription
 #[derive(Serialize, Deserialize)]
 struct SwapTradeMsg {
     size: f64,
@@ -333,7 +334,7 @@ fn parse_l2_legacy(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMs
             timestamp,
             asks: raw_orderbook.asks.iter().map(|x| parse_order(x)).collect(),
             bids: raw_orderbook.bids.iter().map(|x| parse_order(x)).collect(),
-            seq_id: None,
+            seq_id: raw_orderbook.id,
             prev_seq_id: None,
             snapshot,
             json: msg.to_string(),
@@ -436,6 +437,21 @@ struct OrderbookUpdateMsg {
     pub extra: HashMap<String, Value>,
 }
 
+// https://www.gate.io/docs/developers/futures/ws/en/#best-ask-bid-notification
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawBboMsg {
+    t: i64,    // Order book update time in milliseconds
+    u: i64,    // Order book update ID
+    s: String, // Currency pair
+    b: String, // best bid price
+    B: f64,    // best bid amount
+    a: String, // best ask price
+    A: f64,    // best ask amount
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
 fn parse_order(market_type: MarketType, raw_order: &RawOrderNew, pair: &str) -> Order {
     let price = raw_order.p.parse::<f64>().unwrap();
     let quantity = raw_order.s;
@@ -512,4 +528,47 @@ pub(crate) fn parse_l2(
             ws_msg.channel, market_type
         )))
     }
+}
+
+pub(super) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
+    let ws_msg = serde_json::from_str::<WebsocketMsg<RawBboMsg>>(msg).map_err(SimpleError::from)?;
+    debug_assert_eq!("futures.book_ticker", ws_msg.channel);
+    debug_assert_eq!("update", ws_msg.event);
+
+    let symbol = ws_msg.result.s.as_str();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+    let timestamp = ws_msg.result.t;
+
+    let ask_price = ws_msg.result.a.parse::<f64>().unwrap();
+    let ask_size = ws_msg.result.A;
+
+    let bid_price = ws_msg.result.b.parse::<f64>().unwrap();
+    let bid_size = ws_msg.result.B;
+
+    let (ask_quantity_base, ask_quantity_quote, ask_quantity_contract) =
+        calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, ask_price, ask_size);
+
+    let (bid_quantity_base, bid_quantity_quote, bid_quantity_contract) =
+        calc_quantity_and_volume(EXCHANGE_NAME, market_type, &pair, bid_price, bid_size);
+
+    let bbo_msg = BboMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: symbol.to_string(),
+        pair,
+        msg_type: MessageType::BBO,
+        timestamp,
+        ask_price,
+        ask_quantity_base,
+        ask_quantity_quote,
+        ask_quantity_contract,
+        bid_price,
+        bid_quantity_base,
+        bid_quantity_quote,
+        bid_quantity_contract,
+        id: None,
+        json: msg.to_string(),
+    };
+
+    Ok(vec![bbo_msg])
 }

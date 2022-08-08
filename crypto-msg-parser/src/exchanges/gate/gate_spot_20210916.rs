@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -178,4 +178,8 @@ pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>, S
     };
 
     Ok(vec![orderbook])
+}
+
+pub(super) fn parse_bbo(_msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
+    todo!()
 }
