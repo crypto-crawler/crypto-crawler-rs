@@ -342,7 +342,7 @@ pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Ve
 
     // Get JSOn object from message
     let json_obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|e| {
-        println!("{}", e);
+        panic!("{}", e);
         SimpleError::new(format!(
             "Failed to deserialize {} to HashMap<String, Value>",
             msg
