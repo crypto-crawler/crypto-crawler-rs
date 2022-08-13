@@ -298,6 +298,45 @@ pub(crate) fn parse_trade(
 // Sample:
 // {"topic":"klineV2.5.BTCUSD","data":[{"start":1660414200,"end":1660414500,"open":24555.5,"close":24554,"high":24555.5,"low":24548,"volume":61397,"turnover":2.50100659,"confirm":false,"cross_seq":14996121952,"timestamp":1660414346404174}],"timestamp_e6":1660414346404174}
 
+// Example code that deserializes and serializes the model.
+// extern crate serde;
+// #[macro_use]
+// extern crate serde_derive;
+// extern crate serde_json;
+//
+// use generated_module::[object Object];
+//
+// fn main() {
+//     let json = r#"{"answer": 42}"#;
+//     let model: [object Object] = serde_json::from_str(&json).unwrap();
+// }
+
+
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct CandleStick {
+    pub topic: String,
+    pub data: Vec<Datum>,
+    pub timestamp_e6: i64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct Datum {
+    pub start: i64,
+    pub end: i64,
+    pub open: f64,
+    pub close: f64,
+    pub high: f64,
+    pub low: f64,
+    pub volume: f64,
+    pub turnover: f64,
+    pub confirm: bool,
+    pub cross_seq: i64,
+    pub timestamp: i64,
+}
+
+
+
+
 // Parse candlestick data from websocket message
 pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Vec<CandlestickMsg>, SimpleError> {
 
@@ -308,55 +347,32 @@ pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Ve
             msg
         ))
     })?;
-    // Convert JSON object to CandlestickMsg
+    // Convert JSON object to Candlestick
+    let candlestick: CandleStick = serde_json::from_value(json_obj.get("data").unwrap().clone())
+        .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to CandleStick", msg)))?;
+    
     // panic!("{}", msg);
     let candlestick_msg = CandlestickMsg {
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
-        // Get symbol from topic
-        symbol: json_obj
-            .get("topic")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .split('.')
-            .nth(1)
-            .unwrap()
-            .to_string(),
-       pair: crypto_pair::normalize_pair(
-            &json_obj
-                .get("topic")
-                .unwrap()
-                .as_str()
-                .unwrap()
-                .split('.')
-                .nth(1)
-                .unwrap(),
-            // json_obj.get("symbol").unwrap().as_str().unwrap(),
-            EXCHANGE_NAME,
-        )
-        .unwrap(),
+        symbol: candlestick.topic.split(".").nth(1).unwrap().to_string(),
+        pair: crypto_pair::normalize_pair(&candlestick.topic, EXCHANGE_NAME).unwrap(),
         msg_type: MessageType::Candlestick,
-        timestamp: json_obj.get("time_now").unwrap().as_str().unwrap().parse::<i64>().unwrap(),
-        open: json_obj.get("open").unwrap().as_f64().unwrap(),
-        high: json_obj.get("high").unwrap().as_f64().unwrap(),
-        low: json_obj.get("low").unwrap().as_f64().unwrap(),
-        close: json_obj.get("close").unwrap().as_f64().unwrap(),
-        volume: json_obj.get("volume").unwrap().as_f64().unwrap(),
-        begin_time: json_obj.get("start").unwrap().as_i64().unwrap(),
-        // Get period from start and end time
-        period: parse_candlestick_period(
-            json_obj.get("start").unwrap().as_i64().unwrap(),
-            json_obj.get("end").unwrap().as_i64().unwrap(),
-        ),
-        // end_time: json_obj.get("end").unwrap().as_i64().unwrap(),
-        quote_volume: None,
-        json: msg.to_string(),
+        timestamp: candlestick.timestamp_e6,
+        open : candlestick.data[0].open,
+        high : candlestick.data[0].high,
+        low : candlestick.data[0].low,
+        close : candlestick.data[0].close,
+        volume : candlestick.data[0].volume,
+        begin_time : candlestick.data[0].start,
+        period: parse_candlestick_period(candlestick.data[0].start, candlestick.data[0].end),
+        json: serde_json::to_string(&candlestick).unwrap(),
+        quote_volume : None,
     };
+    Ok(vec![candlestick_msg])
+    
+    }
 
-
-    unimplemented!();
-}
 // Parse start and end time from candle stick message and convert to string
 pub(crate) fn parse_candlestick_period(start: i64, end: i64) -> String {
     let period = (end - start) as u64;
