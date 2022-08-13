@@ -2,7 +2,7 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
 use crate::exchanges::utils::calc_quantity_and_volume;
-use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide, CandlestickMsg};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -292,6 +292,83 @@ pub(crate) fn parse_trade(
         ))),
     }
 }
+
+
+// See: https://www.bybit.com/data/basic/inverse/contract-detail?symbol=BTCUSD
+// Sample:
+// {"topic":"klineV2.5.BTCUSD","data":[{"start":1660414200,"end":1660414500,"open":24555.5,"close":24554,"high":24555.5,"low":24548,"volume":61397,"turnover":2.50100659,"confirm":false,"cross_seq":14996121952,"timestamp":1660414346404174}],"timestamp_e6":1660414346404174}
+
+// Parse candlestick data from websocket message
+pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Vec<CandlestickMsg>, SimpleError> {
+
+    // Get JSOn object from message
+    let json_obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to HashMap<String, Value>",
+            msg
+        ))
+    })?;
+    // Convert JSON object to CandlestickMsg
+    let candlestick_msg = CandlestickMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol: json_obj.get("symbol").unwrap().as_str().unwrap().to_string(),
+        pair: crypto_pair::normalize_pair(
+            json_obj.get("symbol").unwrap().as_str().unwrap(),
+            EXCHANGE_NAME,
+        )
+        .unwrap(),
+        msg_type: MessageType::Candlestick,
+        timestamp: json_obj.get("time_now").unwrap().as_str().unwrap().parse::<i64>().unwrap(),
+        open: json_obj.get("open").unwrap().as_f64().unwrap(),
+        high: json_obj.get("high").unwrap().as_f64().unwrap(),
+        low: json_obj.get("low").unwrap().as_f64().unwrap(),
+        close: json_obj.get("close").unwrap().as_f64().unwrap(),
+        volume: json_obj.get("volume").unwrap().as_f64().unwrap(),
+        begin_time: json_obj.get("start").unwrap().as_i64().unwrap(),
+        // Get period from start and end time
+        period: parse_candlestick_period(
+            json_obj.get("start").unwrap().as_i64().unwrap(),
+            json_obj.get("end").unwrap().as_i64().unwrap(),
+        ),
+        // end_time: json_obj.get("end").unwrap().as_i64().unwrap(),
+        // volume_quote: json_obj.get("volume_quote").unwrap().as_f64().unwrap(),
+        json: msg.to_string(),
+    };
+
+
+    unimplemented!();
+}
+// Parse start and end time from candle stick message and convert to string
+pub(crate) fn parse_candlestick_period(start: i64, end: i64) -> String {
+    let period = (end - start) as u64;
+    return match period/60 {
+        1 => "1m".to_string(),
+        3 => "3m".to_string(),
+        5 => "5m".to_string(),
+        15 => "15m".to_string(),
+        30 => "30m".to_string(),
+        60 => "1h".to_string(),
+        120 => "2h".to_string(),
+        240 => "4h".to_string(),
+        360 => "6h".to_string(),
+        480 => "8h".to_string(),
+        720 => "12h".to_string(),
+        1440 => "1d".to_string(),
+        2880 => "2d".to_string(),
+        4320 => "3d".to_string(),
+        5760 => "4d".to_string(),
+        7200 => "5d".to_string(),
+        8640 => "6d".to_string(),
+        10080 => "1w".to_string(),
+        _ => panic!("Unknown period {}", period),
+        // 1y => "1y",
+    };
+    
+    // period.to_string()
+}
+
+
 
 pub(crate) fn parse_l2(
     market_type: MarketType,

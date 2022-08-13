@@ -271,6 +271,7 @@ pub fn parse_candlestick(
     match exchange {
         "bitfinex" => exchanges::bitfinex::parse_candlestick(market_type, msg),
         "kucoin" => exchanges::kucoin::parse_candlestick(market_type, msg),
+        "bybit" => exchanges::bybit::parse_candlestick(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
 }
