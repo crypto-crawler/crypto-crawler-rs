@@ -309,11 +309,21 @@ pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Ve
         ))
     })?;
     // Convert JSON object to CandlestickMsg
-    panic!("{}", msg);
+    // panic!("{}", msg);
     let candlestick_msg = CandlestickMsg {
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
-        symbol: json_obj.get("symbol").unwrap().as_str().unwrap().to_string(),
+        // Get symbol from topic
+        symbol: json_obj
+            .get("topic")
+            .unwrap()
+            .as_str()
+            .unwrap()
+            .split('.')
+            .nth(1)
+            .unwrap()
+            .to_string(),
+        // symbol: json_obj.get("symbol").unwrap().as_str().unwrap().to_string(),
         pair: crypto_pair::normalize_pair(
             json_obj.get("symbol").unwrap().as_str().unwrap(),
             EXCHANGE_NAME,
