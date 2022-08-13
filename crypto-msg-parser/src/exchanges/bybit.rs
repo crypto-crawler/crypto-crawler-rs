@@ -332,7 +332,7 @@ pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Ve
             json_obj.get("end").unwrap().as_i64().unwrap(),
         ),
         // end_time: json_obj.get("end").unwrap().as_i64().unwrap(),
-        // volume_quote: json_obj.get("volume_quote").unwrap().as_f64().unwrap(),
+        quote_volume: None,
         json: msg.to_string(),
     };
 
