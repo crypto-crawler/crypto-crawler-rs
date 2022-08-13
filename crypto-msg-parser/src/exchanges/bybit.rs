@@ -323,9 +323,16 @@ pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Ve
             .nth(1)
             .unwrap()
             .to_string(),
-        // symbol: json_obj.get("symbol").unwrap().as_str().unwrap().to_string(),
-        pair: crypto_pair::normalize_pair(
-            json_obj.get("symbol").unwrap().as_str().unwrap(),
+       pair: crypto_pair::normalize_pair(
+            &json_obj
+                .get("topic")
+                .unwrap()
+                .as_str()
+                .unwrap()
+                .split('.')
+                .nth(1)
+                .unwrap(),
+            // json_obj.get("symbol").unwrap().as_str().unwrap(),
             EXCHANGE_NAME,
         )
         .unwrap(),
