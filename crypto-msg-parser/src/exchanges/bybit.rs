@@ -309,6 +309,7 @@ pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Ve
         ))
     })?;
     // Convert JSON object to CandlestickMsg
+    panic!("{}", msg);
     let candlestick_msg = CandlestickMsg {
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
