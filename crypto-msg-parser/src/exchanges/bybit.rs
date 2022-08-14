@@ -340,18 +340,14 @@ pub(crate) struct Datum {
 // Parse candlestick data from websocket message
 pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Vec<CandlestickMsg>, SimpleError> {
 
-    // Get JSOn object from message
-    let json_obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(|e| {
-        panic!("{}", e);
-        SimpleError::new(format!(
-            "Failed to deserialize {} to HashMap<String, Value>",
-            msg
-        ))
-    })?;
-    // panic!("{:?}", json_obj);
-    // Convert JSON object to Candlestick
-    let candlestick: CandleStick = serde_json::from_value(json_obj.get("data").unwrap().clone())
-        .map_err(|e| SimpleError::new(format!("Failed to deserialize {} to CandleStick with errror {}", msg, e )))?;
+    // Get CandleStick data from JSON message
+    let candlestick =
+        serde_json::from_str::<CandleStick>(msg).map_err(|_e| {
+            SimpleError::new(format!(
+                "Failed to deserialize {} to WebsocketMsg<CandleStick>",
+                msg
+            ))
+        })?;
     
     // panic!("{}", msg);
     let candlestick_msg = CandlestickMsg {
