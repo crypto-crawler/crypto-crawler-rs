@@ -348,6 +348,7 @@ pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Ve
             msg
         ))
     })?;
+    panic!("{:?}", json_obj);
     // Convert JSON object to Candlestick
     let candlestick: CandleStick = serde_json::from_value(json_obj.get("data").unwrap().clone())
         .map_err(|_e| SimpleError::new(format!("Failed to deserialize {} to CandleStick", msg)))?;
