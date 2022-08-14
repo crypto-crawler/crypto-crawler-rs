@@ -349,12 +349,20 @@ pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Ve
             ))
         })?;
     
+    // Symbol, period from topic
+    // Format: klineV2.5.BTCUSD
+    // APIVERSION.PERIOD.SYMBOL
+    let topic_parts: Vec<&str> = candlestick.topic.split(".").collect();
+    let symbol = topic_parts[2].to_string();
+    let period = topic_parts[1].to_string();
+
+    
     // panic!("{}", msg);
     let candlestick_msg = CandlestickMsg {
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
-        symbol: candlestick.topic.split(".").nth(1).unwrap().to_string(),
-        pair: crypto_pair::normalize_pair(&candlestick.topic, EXCHANGE_NAME).unwrap(),
+        symbol:   symbol.clone(),
+        pair: crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap(),
         msg_type: MessageType::Candlestick,
         timestamp: candlestick.timestamp_e6,
         open : candlestick.data[0].open,
@@ -363,42 +371,13 @@ pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Ve
         close : candlestick.data[0].close,
         volume : candlestick.data[0].volume,
         begin_time : candlestick.data[0].start,
-        period: parse_candlestick_period(candlestick.data[0].start, candlestick.data[0].end),
+        period: period.to_string(),
         json: serde_json::to_string(&candlestick).unwrap(),
         quote_volume : None,
     };
     Ok(vec![candlestick_msg])
     
     }
-
-// Parse start and end time from candle stick message and convert to string
-pub(crate) fn parse_candlestick_period(start: i64, end: i64) -> String {
-    let period = (end - start) as u64;
-    return match period/60 {
-        1 => "1m".to_string(),
-        3 => "3m".to_string(),
-        5 => "5m".to_string(),
-        15 => "15m".to_string(),
-        30 => "30m".to_string(),
-        60 => "1h".to_string(),
-        120 => "2h".to_string(),
-        240 => "4h".to_string(),
-        360 => "6h".to_string(),
-        480 => "8h".to_string(),
-        720 => "12h".to_string(),
-        1440 => "1d".to_string(),
-        2880 => "2d".to_string(),
-        4320 => "3d".to_string(),
-        5760 => "4d".to_string(),
-        7200 => "5d".to_string(),
-        8640 => "6d".to_string(),
-        10080 => "1w".to_string(),
-        _ => panic!("Unknown period {}", period),
-        // 1y => "1y",
-    };
-    
-    // period.to_string()
-}
 
 
 
