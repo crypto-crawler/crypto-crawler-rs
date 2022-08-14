@@ -298,20 +298,7 @@ pub(crate) fn parse_trade(
 // Sample:
 // {"topic":"klineV2.5.BTCUSD","data":[{"start":1660414200,"end":1660414500,"open":24555.5,"close":24554,"high":24555.5,"low":24548,"volume":61397,"turnover":2.50100659,"confirm":false,"cross_seq":14996121952,"timestamp":1660414346404174}],"timestamp_e6":1660414346404174}
 
-// Example code that deserializes and serializes the model.
-// extern crate serde;
-// #[macro_use]
-// extern crate serde_derive;
-// extern crate serde_json;
-//
-// use generated_module::[object Object];
-//
-// fn main() {
-//     let json = r#"{"answer": 42}"#;
-//     let model: [object Object] = serde_json::from_str(&json).unwrap();
-// }
-
-
+// Bybit candle format:
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct CandleStick {
     pub topic: String,
@@ -337,14 +324,14 @@ pub(crate) struct Datum {
 
 
 
-// Parse candlestick data from websocket message
+// Parse candlestick data from the websocket message.
 pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Vec<CandlestickMsg>, SimpleError> {
 
     // Get CandleStick data from JSON message
     let candlestick =
         serde_json::from_str::<CandleStick>(msg).map_err(|_e| {
             SimpleError::new(format!(
-                "Failed to deserialize {} to WebsocketMsg<CandleStick>",
+                "Failed to deserialize {} to CandleStick",
                 msg
             ))
         })?;
@@ -353,11 +340,16 @@ pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Ve
     // Format: klineV2.5.BTCUSD
     // APIVERSION.PERIOD.SYMBOL
     let topic_parts: Vec<&str> = candlestick.topic.split(".").collect();
+    if topic_parts.len() != 3 {
+        return Err(SimpleError::new(format!(
+            "Invalid topic format: {}",
+            candlestick.topic
+        )));
+    }
     let symbol = topic_parts[2].to_string();
     let period = topic_parts[1].to_string();
 
     
-    // panic!("{}", msg);
     let candlestick_msg = CandlestickMsg {
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
@@ -372,8 +364,8 @@ pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Ve
         volume : candlestick.data[0].volume,
         begin_time : candlestick.data[0].start,
         period: period.to_string(),
-        json: serde_json::to_string(&candlestick).unwrap(),
-        quote_volume : None,
+        json: msg.to_string(),
+        quote_volume : None, // Not sure if this is available from bybit
     };
     Ok(vec![candlestick_msg])
     
