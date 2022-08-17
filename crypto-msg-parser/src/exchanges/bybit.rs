@@ -2,7 +2,7 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
 use crate::exchanges::utils::calc_quantity_and_volume;
-use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide, CandlestickMsg};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -292,6 +292,86 @@ pub(crate) fn parse_trade(
         ))),
     }
 }
+
+
+// See: https://www.bybit.com/data/basic/inverse/contract-detail?symbol=BTCUSD
+// Sample:
+// {"topic":"klineV2.5.BTCUSD","data":[{"start":1660414200,"end":1660414500,"open":24555.5,"close":24554,"high":24555.5,"low":24548,"volume":61397,"turnover":2.50100659,"confirm":false,"cross_seq":14996121952,"timestamp":1660414346404174}],"timestamp_e6":1660414346404174}
+
+// Bybit candle format:
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct CandleStick {
+    pub topic: String,
+    pub data: Vec<Datum>,
+    pub timestamp_e6: i64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct Datum {
+    pub start: i64,
+    pub end: i64,
+    pub open: f64,
+    pub close: f64,
+    pub high: f64,
+    pub low: f64,
+    pub volume: f64,
+    pub turnover: f64,
+    pub confirm: bool,
+    pub cross_seq: i64,
+    pub timestamp: i64,
+}
+
+
+
+
+// Parse candlestick data from the websocket message.
+pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Vec<CandlestickMsg>, SimpleError> {
+
+    // Get CandleStick data from JSON message
+    let candlestick =
+        serde_json::from_str::<CandleStick>(msg).map_err(|_e| {
+            SimpleError::new(format!(
+                "Failed to deserialize {} to CandleStick",
+                msg
+            ))
+        })?;
+    
+    // Symbol, period from topic
+    // Format: klineV2.5.BTCUSD
+    // APIVERSION.PERIOD.SYMBOL
+    let topic_parts: Vec<&str> = candlestick.topic.split(".").collect();
+    if topic_parts.len() != 3 {
+        return Err(SimpleError::new(format!(
+            "Invalid topic format: {}",
+            candlestick.topic
+        )));
+    }
+    let symbol = topic_parts[2].to_string();
+    let period = topic_parts[1].to_string();
+
+    
+    let candlestick_msg = CandlestickMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol:   symbol.clone(),
+        pair: crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap(),
+        msg_type: MessageType::Candlestick,
+        timestamp: candlestick.timestamp_e6,
+        open : candlestick.data[0].open,
+        high : candlestick.data[0].high,
+        low : candlestick.data[0].low,
+        close : candlestick.data[0].close,
+        volume : candlestick.data[0].volume,
+        begin_time : candlestick.data[0].start,
+        period: period.to_string(),
+        json: msg.to_string(),
+        quote_volume : None, // Not sure if this is available from bybit
+    };
+    Ok(vec![candlestick_msg])
+    
+    }
+
+
 
 pub(crate) fn parse_l2(
     market_type: MarketType,
