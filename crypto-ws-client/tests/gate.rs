@@ -241,12 +241,13 @@ mod gate_inverse_future {
         );
     }
 
+    #[ignore = "lack of liquidity"]
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
         gen_test_code!(
             GateInverseFutureWSClient,
             subscribe_ticker,
-            &["BTC_USD_20220930".to_string()]
+            &["BTC_USD_20220930".to_string(),]
         );
     }
 
