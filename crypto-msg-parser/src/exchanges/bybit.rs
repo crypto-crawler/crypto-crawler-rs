@@ -2,7 +2,7 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
 use crate::exchanges::utils::calc_quantity_and_volume;
-use crypto_message::{Order, OrderBookMsg, TradeMsg, TradeSide, CandlestickMsg};
+use crypto_message::{CandlestickMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -45,6 +45,8 @@ struct LinearTradeMsg {
 struct WebsocketMsg<T: Sized> {
     topic: String,
     data: Vec<T>,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
 }
 
 // https://bybit-exchange.github.io/docs/inverse/#t-websocketorderbook25
@@ -78,6 +80,45 @@ struct RawOrderbookMsg {
     type_: String,
     data: Value,
     timestamp_e6: Value, // i64 or String
+}
+
+// See https://bybit-exchange.github.io/docs/linear/#t-websocketkline
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct RawCandlestickMsg {
+    start: i64,
+    end: i64,
+    period: String,
+    open: f64,
+    close: f64,
+    high: f64,
+    low: f64,
+    volume: String,
+    turnover: String,
+    confirm: bool,
+    cross_seq: i64,
+    timestamp: i64,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
+// See:
+// * https://bybit-exchange.github.io/docs/inverse/#t-websocketklinev2
+// * https://bybit-exchange.github.io/docs/inverse_futures/#t-websocketklinev2
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct RawCandlestickMsgV2 {
+    start: i64,
+    end: i64,
+    open: f64,
+    close: f64,
+    high: f64,
+    low: f64,
+    volume: f64,
+    turnover: f64,
+    confirm: bool,
+    cross_seq: i64,
+    timestamp: i64,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
 }
 
 pub(crate) fn extract_symbol(_market_type: MarketType, msg: &str) -> Result<String, SimpleError> {
@@ -293,86 +334,6 @@ pub(crate) fn parse_trade(
     }
 }
 
-
-// See: https://www.bybit.com/data/basic/inverse/contract-detail?symbol=BTCUSD
-// Sample:
-// {"topic":"klineV2.5.BTCUSD","data":[{"start":1660414200,"end":1660414500,"open":24555.5,"close":24554,"high":24555.5,"low":24548,"volume":61397,"turnover":2.50100659,"confirm":false,"cross_seq":14996121952,"timestamp":1660414346404174}],"timestamp_e6":1660414346404174}
-
-// Bybit candle format:
-#[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct CandleStick {
-    pub topic: String,
-    pub data: Vec<Datum>,
-    pub timestamp_e6: i64,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub(crate) struct Datum {
-    pub start: i64,
-    pub end: i64,
-    pub open: f64,
-    pub close: f64,
-    pub high: f64,
-    pub low: f64,
-    pub volume: f64,
-    pub turnover: f64,
-    pub confirm: bool,
-    pub cross_seq: i64,
-    pub timestamp: i64,
-}
-
-
-
-
-// Parse candlestick data from the websocket message.
-pub(crate) fn parse_candlestick(market_type: MarketType, msg: &str) -> Result<Vec<CandlestickMsg>, SimpleError> {
-
-    // Get CandleStick data from JSON message
-    let candlestick =
-        serde_json::from_str::<CandleStick>(msg).map_err(|_e| {
-            SimpleError::new(format!(
-                "Failed to deserialize {} to CandleStick",
-                msg
-            ))
-        })?;
-    
-    // Symbol, period from topic
-    // Format: klineV2.5.BTCUSD
-    // APIVERSION.PERIOD.SYMBOL
-    let topic_parts: Vec<&str> = candlestick.topic.split(".").collect();
-    if topic_parts.len() != 3 {
-        return Err(SimpleError::new(format!(
-            "Invalid topic format: {}",
-            candlestick.topic
-        )));
-    }
-    let symbol = topic_parts[2].to_string();
-    let period = topic_parts[1].to_string();
-
-    
-    let candlestick_msg = CandlestickMsg {
-        exchange: EXCHANGE_NAME.to_string(),
-        market_type,
-        symbol:   symbol.clone(),
-        pair: crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap(),
-        msg_type: MessageType::Candlestick,
-        timestamp: candlestick.timestamp_e6,
-        open : candlestick.data[0].open,
-        high : candlestick.data[0].high,
-        low : candlestick.data[0].low,
-        close : candlestick.data[0].close,
-        volume : candlestick.data[0].volume,
-        begin_time : candlestick.data[0].start,
-        period: period.to_string(),
-        json: msg.to_string(),
-        quote_volume : None, // Not sure if this is available from bybit
-    };
-    Ok(vec![candlestick_msg])
-    
-    }
-
-
-
 pub(crate) fn parse_l2(
     market_type: MarketType,
     msg: &str,
@@ -492,4 +453,85 @@ pub(crate) fn parse_l2(
         }
     }
     Ok(vec![orderbook])
+}
+
+pub(crate) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<CandlestickMsg>, SimpleError> {
+    match market_type {
+        MarketType::LinearSwap => {
+            let ws_msg = serde_json::from_str::<WebsocketMsg<RawCandlestickMsg>>(msg)
+                .map_err(SimpleError::from)?;
+            let symbol = ws_msg.topic.split('.').last().unwrap();
+            let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).ok_or_else(|| {
+                SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg))
+            })?;
+
+            let candlestick_messages = ws_msg
+                .data
+                .iter()
+                .map(|raw_candlestick| CandlestickMsg {
+                    exchange: EXCHANGE_NAME.to_string(),
+                    market_type,
+                    symbol: symbol.to_string(),
+                    pair: pair.clone(),
+                    msg_type: MessageType::Candlestick,
+                    timestamp: raw_candlestick.timestamp / 1000,
+                    begin_time: raw_candlestick.start,
+                    open: raw_candlestick.open,
+                    high: raw_candlestick.high,
+                    low: raw_candlestick.low,
+                    close: raw_candlestick.close,
+                    volume: raw_candlestick.volume.parse::<f64>().unwrap(),
+                    period: raw_candlestick.period.clone(),
+                    quote_volume: raw_candlestick.turnover.parse::<f64>().ok(),
+                    json: serde_json::to_string(&raw_candlestick).unwrap(),
+                })
+                .collect();
+            Ok(candlestick_messages)
+        }
+        MarketType::InverseFuture | MarketType::InverseSwap => {
+            let ws_msg = serde_json::from_str::<WebsocketMsg<RawCandlestickMsgV2>>(msg)
+                .map_err(SimpleError::from)?;
+
+            let (period, symbol) = {
+                let arr: Vec<&str> = ws_msg.topic.split('.').collect();
+                if arr.len() != 3 {
+                    return Err(SimpleError::new(format!("Invalid topic format: {}", msg)));
+                }
+                (arr[1], arr[2])
+            };
+            let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).ok_or_else(|| {
+                SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg))
+            })?;
+
+            let candlestick_messages = ws_msg
+                .data
+                .iter()
+                .map(|raw_candlestick| CandlestickMsg {
+                    exchange: EXCHANGE_NAME.to_string(),
+                    market_type,
+                    symbol: symbol.to_string(),
+                    pair: pair.clone(),
+                    msg_type: MessageType::Candlestick,
+                    timestamp: raw_candlestick.timestamp / 1000,
+                    begin_time: raw_candlestick.start,
+                    open: raw_candlestick.open,
+                    high: raw_candlestick.high,
+                    low: raw_candlestick.low,
+                    close: raw_candlestick.close,
+                    volume: raw_candlestick.turnover,
+                    period: period.to_string(),
+                    quote_volume: Some(raw_candlestick.volume),
+                    json: serde_json::to_string(&raw_candlestick).unwrap(),
+                })
+                .collect();
+            Ok(candlestick_messages)
+        }
+        _ => Err(SimpleError::new(format!(
+            "Unknown market type {}",
+            market_type
+        ))),
+    }
 }
