@@ -6,7 +6,7 @@ use std::collections::HashSet;
 static FIAT_CURRENCIES: Lazy<HashSet<String>> = Lazy::new(|| {
     // offline data, in case the network is down
     let set: HashSet<String> = vec![
-        "CHF", "CNH", "EUR", "INR", "MXN", "NZD", "SEK", "TRY", "TRY", "USD", "ZAR",
+        "BRL", "CHF", "CNH", "EUR", "INR", "MXN", "NZD", "SEK", "TRY", "TRY", "USD", "ZAR",
     ]
     .into_iter()
     .map(|x| x.to_string())
@@ -77,7 +77,13 @@ pub(crate) fn normalize_pair(mut symbol: &str) -> Option<String> {
         )
     } else {
         let base_symbol = symbol;
-        let quote_symbol = if base_symbol == "XBT" { "USD" } else { "XBT" };
+        let quote_symbol = if base_symbol == "XBT" {
+            "USD"
+        } else if base_symbol == "ETHPOW" {
+            "USDT"
+        } else {
+            "XBT"
+        };
         (base_symbol.to_string(), quote_symbol.to_string())
     };
 
@@ -122,7 +128,6 @@ pub(crate) fn get_market_type(symbol: &str) -> MarketType {
         2
     } else {
         // Settled in XBT, quoted in XBT
-        debug_assert_eq!(symbol.len(), 6);
         0
     };
 
@@ -171,6 +176,12 @@ mod tests {
         );
         assert_eq!(MarketType::QuantoSwap, super::get_market_type("EURUSD"));
         assert_eq!(MarketType::QuantoSwap, super::get_market_type("EURUSDT"));
+
+        assert_eq!(
+            MarketType::LinearFuture,
+            super::get_market_type("ETHPOWZ22")
+        );
+        assert_eq!(MarketType::LinearFuture, super::get_market_type("ETHZ22"));
     }
 
     #[test]
@@ -186,5 +197,8 @@ mod tests {
 
         assert_eq!("EUR/USD", super::normalize_pair("EURUSD").unwrap());
         assert_eq!("EUR/USDT", super::normalize_pair("EURUSDT").unwrap());
+
+        assert_eq!("ETHPOW/USDT", super::normalize_pair("ETHPOWZ22").unwrap());
+        assert_eq!("ETH/BTC", super::normalize_pair("ETHZ22").unwrap());
     }
 }

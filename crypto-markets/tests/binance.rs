@@ -200,7 +200,7 @@ fn fetch_option_markets() {
 #[test_case(MarketType::LinearFuture)]
 #[test_case(MarketType::InverseSwap)]
 #[test_case(MarketType::LinearSwap)]
-#[test_case(MarketType::EuropeanOption)]
+// #[test_case(MarketType::EuropeanOption)]
 fn test_contract_values(market_type: MarketType) {
     check_contract_values!(EXCHANGE_NAME, market_type);
 }

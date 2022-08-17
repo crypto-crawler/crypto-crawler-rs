@@ -1,6 +1,6 @@
 pub use crate::compact::{Order, QuantityChoice};
 use crate::TradeSide;
-use ahash::{CallHasher, RandomState};
+use ahash::RandomState;
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 use serde::{Deserialize, Serialize};
@@ -212,7 +212,7 @@ add_common_fields!(
 /// Exported for unit test purpose.
 pub fn calculate_hash(s: &str) -> u64 {
     let build_hasher = RandomState::with_seeds(1, 2, 3, 4);
-    str::get_hash(s, &build_hasher)
+    build_hasher.hash_one(s)
 }
 
 impl TradeMsg {

@@ -133,6 +133,7 @@ fn verify_linear_symbols() {
     }
 }
 
+#[ignore = "Binance has shutdown option markets"]
 #[test]
 fn verify_option_symbols() {
     let markets = fetch_option_markets_raw();

@@ -35,6 +35,6 @@ fn fetch_spot_markets() {
         .unwrap()
         .clone();
     assert_eq!(btcusd.precision.tick_size, 0.00000001);
-    assert_eq!(btcusd.precision.lot_size, 0.01);
+    assert_eq!(btcusd.precision.lot_size, 1.0);
     assert!(btcusd.quantity_limit.is_none());
 }
