@@ -10,7 +10,7 @@ use strum_macros::{Display, EnumString};
 /// L2Snapshot and L2TopK are very similar, the former is from RESTful API,
 /// the latter is from websocket.
 #[repr(C)]
-#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Display, Debug, EnumString)]
+#[derive(Copy, Clone, Eq, PartialEq, Serialize, Deserialize, Display, Debug, EnumString, Hash)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]
 pub enum MessageType {
