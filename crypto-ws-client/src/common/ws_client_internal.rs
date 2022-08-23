@@ -62,6 +62,11 @@ impl<H: MessageHandler> WSClientInternal<H> {
                     if resp.status() == StatusCode::TOO_MANY_REQUESTS {
                         if let Some(retry_after) = resp.headers().get("retry-after") {
                             let seconds = retry_after.to_str().unwrap().parse::<u64>().unwrap();
+                            error!(
+                                "The retry-after header value is {}, sleeping for {} seconds now",
+                                retry_after.to_str().unwrap(),
+                                seconds
+                            );
                             std::thread::sleep(Duration::from_secs(seconds));
                         }
                     }
