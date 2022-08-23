@@ -10,7 +10,8 @@ use std::{
 
 use flate2::read::{DeflateDecoder, GzDecoder};
 use log::*;
-use tokio_tungstenite::tungstenite::Message;
+use reqwest::StatusCode;
+use tokio_tungstenite::tungstenite::{Error, Message};
 
 use crate::common::message_handler::{MessageHandler, MiscMessage};
 
@@ -45,16 +46,29 @@ impl<H: MessageHandler> WSClientInternal<H> {
             std::sync::mpsc::Sender<String>,
         )>();
 
-        let (message_rx, command_tx) = super::connect_async::connect_async(url, uplink_limit)
-            .await
-            .expect("Failed to connect to websocket");
-        let _ = params_tx.send((handler, message_rx, tx));
+        match super::connect_async::connect_async(url, uplink_limit).await {
+            Ok((message_rx, command_tx)) => {
+                let _ = params_tx.send((handler, message_rx, tx));
 
-        WSClientInternal {
-            exchange,
-            url: url.to_string(),
-            params_rx: std::sync::Mutex::new(params_rx),
-            command_tx,
+                WSClientInternal {
+                    exchange,
+                    url: url.to_string(),
+                    params_rx: std::sync::Mutex::new(params_rx),
+                    command_tx,
+                }
+            }
+            Err(err) => match err {
+                Error::Http(resp) => {
+                    if resp.status() == StatusCode::TOO_MANY_REQUESTS {
+                        if let Some(retry_after) = resp.headers().get("retry-after") {
+                            let seconds = retry_after.to_str().unwrap().parse::<u64>().unwrap();
+                            std::thread::sleep(Duration::from_secs(seconds));
+                        }
+                    }
+                    panic!("Failed to connect to {} due to 429 too many requests", url)
+                }
+                _ => panic!("Failed to connect to {}, error: {}", url, err),
+            },
         }
     }
 
