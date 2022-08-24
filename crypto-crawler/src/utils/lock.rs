@@ -51,6 +51,7 @@ fn get_lock_file_name(exchange: &str, market_type: MarketType, prefix: &str) -> 
             MarketType::EuropeanOption => "binance_option.lock".to_string(),
             _ => panic!("Unknown market_type {} of {}", market_type, exchange),
         },
+        "bitfinex" => "bitfinex.lock".to_string(),
         "bitget" => match market_type {
             MarketType::InverseSwap | MarketType::LinearSwap => "bitget_swap.lock".to_string(),
             MarketType::Spot => "bitget_spot.lock".to_string(),
@@ -62,6 +63,19 @@ fn get_lock_file_name(exchange: &str, market_type: MarketType, prefix: &str) -> 
             MarketType::Spot => "bitz_spot.lock".to_string(),
             _ => panic!("Unknown market_type {} of {}", market_type, exchange),
         },
+        "bybit" => {
+            if prefix == "rest" {
+                "bybit.lock".to_string()
+            } else {
+                match market_type {
+                    MarketType::InverseSwap | MarketType::InverseFuture => {
+                        "bybit_inverse.lock".to_string()
+                    }
+                    MarketType::LinearSwap => "bybit_linear.lock".to_string(),
+                    _ => panic!("Unknown market_type {} of {}", market_type, exchange),
+                }
+            }
+        }
         "deribit" => "deribit.lock".to_string(),
         "ftx" => "ftx.lock".to_string(),
         "gate" => match market_type {
