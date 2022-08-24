@@ -84,10 +84,12 @@ impl MessageHandler for KrakenMessageHandler {
                             info!("Received {} from {}", msg, EXCHANGE_NAME)
                         }
                         "error" => {
-                            error!("Received {} from {}", msg, EXCHANGE_NAME);
                             let error_msg = obj.get("errorMessage").unwrap().as_str().unwrap();
-                            if error_msg.starts_with("Currency pair not") {
-                                panic!("Received {} from {}", msg, EXCHANGE_NAME)
+                            if error_msg.starts_with("Currency pair not supported") {
+                                // Sometimes currency pairs returned from RESTful API don't exist in WebSocket yet
+                                error!("Received {} from {}", msg, EXCHANGE_NAME)
+                            } else {
+                                panic!("Received {} from {}", msg, EXCHANGE_NAME);
                             }
                         }
                         _ => warn!("Received {} from {}", msg, EXCHANGE_NAME),
