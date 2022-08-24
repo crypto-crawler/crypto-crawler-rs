@@ -37,6 +37,7 @@ static CONTRACT_VALUES: Lazy<HashMap<MarketType, HashMap<String, f64>>> = Lazy::
             ("BTM/USDT", 100_f64),
             ("BTT/USDT", 1000000_f64),
             ("BZZ/USDT", 0.1_f64),
+            ("CEL/USDT", 10_f64),
             ("CELO/USDT", 1_f64),
             ("CFX/USDT", 10_f64),
             ("CHZ/USDT", 10_f64),
@@ -84,7 +85,6 @@ static CONTRACT_VALUES: Lazy<HashMap<MarketType, HashMap<String, f64>>> = Lazy::
             ("LPT/USDT", 0.1_f64),
             ("LRC/USDT", 10_f64),
             ("LTC/USDT", 1_f64),
-            ("LUNA/USDT", 0.1_f64),
             ("LUNA/USDT", 1_f64),
             ("MANA/USDT", 10_f64),
             ("MASK/USDT", 1_f64),
@@ -254,18 +254,24 @@ pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeMap;
+
     use crypto_market_type::MarketType;
 
     use super::fetch_contract_val;
 
     #[test]
     fn linear_swap() {
-        let mut mapping = fetch_contract_val("SWAP");
+        let new_data = fetch_contract_val("SWAP");
+
+        let mut mapping: BTreeMap<String, f64> = BTreeMap::new();
         for (key, value) in super::CONTRACT_VALUES[&MarketType::LinearSwap].iter() {
-            if !mapping.contains_key(key) {
-                mapping.insert(key.to_string(), *value);
-            }
+            mapping.insert(key.to_string(), *value);
         }
+        for (key, value) in new_data.iter() {
+            mapping.insert(key.to_string(), *value);
+        }
+
         for (pair, contract_value) in &mapping {
             println!("(\"{pair}\", {contract_value}_f64),");
         }
@@ -273,7 +279,16 @@ mod tests {
 
     #[test]
     fn linear_future() {
-        let mapping = fetch_contract_val("FUTURES");
+        let new_data = fetch_contract_val("FUTURES");
+
+        let mut mapping: BTreeMap<String, f64> = BTreeMap::new();
+        for (key, value) in super::CONTRACT_VALUES[&MarketType::LinearFuture].iter() {
+            mapping.insert(key.to_string(), *value);
+        }
+        for (key, value) in new_data.iter() {
+            mapping.insert(key.to_string(), *value);
+        }
+
         for (pair, contract_value) in &mapping {
             println!("(\"{pair}\", {contract_value}_f64),");
         }

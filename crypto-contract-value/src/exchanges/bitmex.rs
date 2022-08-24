@@ -11,12 +11,14 @@ static CONTRACT_VALUES: Lazy<HashMap<String, f64>> = Lazy::new(|| {
     // offline data, in case the network is down
     let mut m: HashMap<String, f64> = vec![
         ("inverse_future.BTC/USD", 1.0),
+        ("inverse_future.ETH/USD", 1.0),
         ("inverse_swap.BTC/EUR", 1.0),
         ("inverse_swap.BTC/USD", 1.0),
         ("inverse_swap.ETH/USD", 1.0),
         ("linear_future.ADA/BTC", 0.01),
         ("linear_future.ETH/BTC", 0.00001),
         ("linear_future.ETH/USDT", 0.00001),
+        ("linear_future.ETHPOW/USDT", 0.00001),
         ("linear_future.XRP/BTC", 0.01),
         ("linear_swap.ADA/USDT", 0.01),
         ("linear_swap.APE/USDT", 0.001),
@@ -44,6 +46,8 @@ static CONTRACT_VALUES: Lazy<HashMap<String, f64>> = Lazy::new(|| {
         ("linear_swap.SOL/USDT", 0.0001),
         ("linear_swap.TRX/USDT", 0.1),
         ("linear_swap.XRP/USDT", 0.01),
+        ("quanto_swap.EUR/USDT", 1.0),
+        ("quanto_swap.NZD/USDT", 1.0),
     ]
     .into_iter()
     .map(|x| (x.0.to_string(), x.1))

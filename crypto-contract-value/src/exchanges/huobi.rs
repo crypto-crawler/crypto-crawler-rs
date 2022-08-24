@@ -19,6 +19,7 @@ static CONTRACT_VALUES: Lazy<HashMap<MarketType, HashMap<String, f64>>> = Lazy::
             ("ALICE/USDT", 0.1_f64),
             ("ANC/USDT", 1_f64),
             ("ANKR/USDT", 10_f64),
+            ("ANT/USDT", 1_f64),
             ("APE/USDT", 1_f64),
             ("API3/USDT", 0.1_f64),
             ("AR/USDT", 0.1_f64),
@@ -41,6 +42,7 @@ static CONTRACT_VALUES: Lazy<HashMap<MarketType, HashMap<String, f64>>> = Lazy::
             ("BTS/USDT", 100_f64),
             ("BTT/USDT", 1000000_f64), // changed at 2022-02-28
             ("C98/USDT", 1_f64),
+            ("CEL/USDT", 1_f64),
             ("CELO/USDT", 0.1_f64),
             ("CELR/USDT", 10_f64),
             ("CHR/USDT", 10_f64),
@@ -122,7 +124,6 @@ static CONTRACT_VALUES: Lazy<HashMap<MarketType, HashMap<String, f64>>> = Lazy::
             ("PHA/USDT", 1_f64),
             ("OP/USDT", 0.1_f64),
             ("PEOPLE/USDT", 10_f64),
-            ("QNT/USDT", 0.01_f64),
             ("PHA/USDT", 1_f64),
             ("QNT/USDT", 0.01_f64),
             ("QTUM/USDT", 1_f64),
@@ -148,6 +149,7 @@ static CONTRACT_VALUES: Lazy<HashMap<MarketType, HashMap<String, f64>>> = Lazy::
             ("TRIBE/USDT", 10_f64),
             ("TRX/USDT", 100_f64),
             ("UMA/USDT", 0.1_f64),
+            ("UNFI/USDT", 0.1_f64),
             ("UNI/USDT", 1_f64),
             ("VET/USDT", 100_f64),
             ("VRA/USDT", 100_f64),
@@ -170,7 +172,7 @@ static CONTRACT_VALUES: Lazy<HashMap<MarketType, HashMap<String, f64>>> = Lazy::
             ("ZEN/USDT", 0.1_f64),
             ("ZIL/USDT", 100_f64),
             ("ZKS/USDT", 0.1_f64),
-            ("ZRX/USDT", 1.0),
+            ("ZRX/USDT", 1_f64),
         ]
         .into_iter()
         .map(|x| (x.0.to_string(), x.1))
@@ -254,11 +256,24 @@ pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeMap;
+
+    use crypto_market_type::MarketType;
+
     use super::{fetch_contract_size, LINEAR_OPTION_URL, LINEAR_SWAP_URL};
 
     #[test]
     fn linear_swap() {
-        let mapping = fetch_contract_size(LINEAR_SWAP_URL);
+        let new_data = fetch_contract_size(LINEAR_SWAP_URL);
+
+        let mut mapping: BTreeMap<String, f64> = BTreeMap::new();
+        for (key, value) in super::CONTRACT_VALUES[&MarketType::LinearSwap].iter() {
+            mapping.insert(key.to_string(), *value);
+        }
+        for (key, value) in new_data.iter() {
+            mapping.insert(key.to_string(), *value);
+        }
+
         for (pair, contract_value) in &mapping {
             println!("(\"{pair}\", {contract_value}_f64),");
         }

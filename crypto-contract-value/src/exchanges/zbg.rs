@@ -100,11 +100,22 @@ pub(crate) fn get_contract_value(market_type: MarketType, pair: &str) -> Option<
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeMap;
+
     use super::fetch_contract_val;
 
     #[test]
     fn print_contract_values() {
-        let mapping = fetch_contract_val();
+        let new_data = fetch_contract_val();
+
+        let mut mapping: BTreeMap<String, f64> = BTreeMap::new();
+        for (key, value) in super::SWAP_CONTRACT_VALUES.iter() {
+            mapping.insert(key.to_string(), *value);
+        }
+        for (key, value) in new_data.iter() {
+            mapping.insert(key.to_string(), *value);
+        }
+
         for (pair, contract_value) in &mapping {
             println!("(\"{pair}\", {contract_value}_f64),");
         }
