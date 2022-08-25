@@ -61,13 +61,14 @@ impl<H: MessageHandler> WSClientInternal<H> {
                 Error::Http(resp) => {
                     if resp.status() == StatusCode::TOO_MANY_REQUESTS {
                         if let Some(retry_after) = resp.headers().get("retry-after") {
-                            let seconds = retry_after.to_str().unwrap().parse::<u64>().unwrap();
+                            let mut seconds = retry_after.to_str().unwrap().parse::<u64>().unwrap();
+                            seconds += rand::random::<u64>() % 9 + 1; // add random seconds to avoid concurrent requests
                             error!(
                                 "The retry-after header value is {}, sleeping for {} seconds now",
                                 retry_after.to_str().unwrap(),
                                 seconds
                             );
-                            std::thread::sleep(Duration::from_secs(seconds));
+                            tokio::time::sleep(Duration::from_secs(seconds)).await;
                         }
                     }
                     panic!("Failed to connect to {} due to 429 too many requests", url)
