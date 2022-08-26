@@ -67,7 +67,7 @@ impl MessageHandler for BithumbMessageHandler {
                 0 => MiscMessage::Pong,
                 6 => {
                     let arr = obj.get("data").unwrap().as_array();
-                    if arr != None && arr.unwrap().is_empty() {
+                    if arr.is_some() && arr.unwrap().is_empty() {
                         // ignore empty data
                         MiscMessage::Other
                     } else {

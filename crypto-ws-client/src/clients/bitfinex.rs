@@ -1,5 +1,8 @@
 use async_trait::async_trait;
-use std::{collections::HashMap, time::Duration};
+use std::{
+    collections::{BTreeMap, HashMap},
+    time::Duration,
+};
 use tokio_tungstenite::tungstenite::Message;
 
 use crate::{
@@ -134,7 +137,7 @@ impl BitfinexCommandTranslator {
 impl MessageHandler for BitfinexMessageHandler {
     fn handle_message(&mut self, txt: &str) -> MiscMessage {
         if txt.starts_with('{') {
-            let mut obj = serde_json::from_str::<HashMap<String, Value>>(txt).unwrap();
+            let obj = serde_json::from_str::<HashMap<String, Value>>(txt).unwrap();
             let event = obj.get("event").unwrap().as_str().unwrap();
             match event {
                 "error" => {
@@ -213,12 +216,16 @@ impl MessageHandler for BitfinexMessageHandler {
                     MiscMessage::Other
                 }
                 "subscribed" => {
+                    let mut obj_sorted = BTreeMap::<String, Value>::new();
+                    for (key, value) in obj.iter() {
+                        obj_sorted.insert(key.to_string(), value.clone());
+                    }
                     let chan_id = obj.get("chanId").unwrap().as_i64().unwrap();
-                    obj.remove("event");
-                    obj.remove("chanId");
-                    obj.remove("pair");
+                    obj_sorted.remove("event");
+                    obj_sorted.remove("chanId");
+                    obj_sorted.remove("pair");
                     self.channel_id_meta
-                        .insert(chan_id, serde_json::to_string(&obj).unwrap());
+                        .insert(chan_id, serde_json::to_string(&obj_sorted).unwrap());
                     MiscMessage::Other
                 }
                 "unsubscribed" => {
