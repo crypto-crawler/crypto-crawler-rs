@@ -325,8 +325,8 @@ pub async fn crawl_l2_topk(
 ) {
     match exchange {
         "bitmex" => crawlers::bitmex::crawl_l2_topk(market_type, symbols, tx).await,
-        "binance" | "bitget" | "bybit" | "bitstamp" | "deribit" | "huobi" | "kucoin" | "mexc"
-        | "okx" | "zb" => {
+        "binance" | "bitget" | "bybit" | "bitstamp" | "deribit" | "gate" | "huobi" | "kucoin"
+        | "mexc" | "okx" | "zb" => {
             crawlers::crawl_event(exchange, MessageType::L2TopK, market_type, symbols, tx).await
         }
         _ => panic!(
