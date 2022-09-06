@@ -53,12 +53,13 @@ fn fetch_swap_markets_internal(url: &str) -> Result<Vec<SwapMarket>> {
 fn fetch_swap_markets_raw() -> Result<Vec<SwapMarket>> {
     let usdt_markets =
         fetch_swap_markets_internal("https://fapi.zb.com/Server/api/v2/config/marketList")?;
-    let qc_markets =
-        fetch_swap_markets_internal("https://fapi.zb.com/qc/Server/api/v2/config/marketList")?;
-    Ok(usdt_markets
-        .into_iter()
-        .chain(qc_markets.into_iter())
-        .collect())
+    Ok(usdt_markets)
+    // let qc_markets =
+    //     fetch_swap_markets_internal("https://fapi.zb.com/qc/Server/api/v2/config/marketList")?;
+    // Ok(usdt_markets
+    //     .into_iter()
+    //     .chain(qc_markets.into_iter())
+    //     .collect())
 }
 
 pub(super) fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
