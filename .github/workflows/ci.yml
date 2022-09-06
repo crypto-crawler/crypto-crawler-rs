@@ -41,9 +41,10 @@ jobs:
           command: build
       - name: Run cargo nextest
         run: |
-          # Run all tests except '*bitmex*' binaries, as
-          # bitmex limited the request rate.
-          cargo nextest run -E 'all() - binary(~bitmex)'
+          # Run all tests except:
+          # * bitmex, because bitmex has very low rate limit
+          # * zbg, due to the "invalid peer certificate: UnknownIssuer" error
+          cargo nextest run -E 'all() - binary(~bitmex) - binary(~zbg)'
 
           # Run the '*bitmex*' tests in -j1.
           cargo nextest run -E 'binary(~bitmex)' -j1 || true
