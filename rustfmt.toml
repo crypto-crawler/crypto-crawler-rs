@@ -1,3 +1,35 @@
 edition = "2021"
-imports_granularity="Crate"
+unstable_features = true
+
+## General
+newline_style = "Unix"
+
+## Format Scene
+format_code_in_doc_comments = true
+format_macro_matchers = true
+format_strings = true
+
+## Orders
+imports_granularity = "Crate"
 reorder_imports = true
+group_imports = "StdExternalCrate"
+reorder_impl_items = true
+
+## Style
+imports_layout = "HorizontalVertical"
+
+## Tokens
+binop_separator = "Front"
+overflow_delimited_expr = true
+
+## Simplification
+condense_wildcard_suffixes = true
+use_field_init_shorthand = true
+
+## Deprecations
+use_try_shorthand = true
+
+## Normalization
+normalize_comments = true
+normalize_doc_attributes = true
+wrap_comments = true
