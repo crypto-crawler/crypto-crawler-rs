@@ -7,7 +7,6 @@ license = "Apache-2.0"
 repository = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/crypto-message"
 keywords = ["cryptocurrency", "blockchain", "trading"]
 
-
 [dependencies]
 ahash = "0.8.0"
 crypto-market-type = "1.1.3"
