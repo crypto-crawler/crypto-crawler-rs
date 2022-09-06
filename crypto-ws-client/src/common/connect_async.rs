@@ -39,7 +39,7 @@ pub async fn connect_async(
         let proxy_stream = Socks5Stream::connect(
             proxy_addr.to_string(),
             connect_url.host_str().unwrap().to_string(),
-            connect_url.port().unwrap(),
+            connect_url.port_or_known_default().unwrap(),
             Config::default(),
         )
         .await
