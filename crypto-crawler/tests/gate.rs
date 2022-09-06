@@ -98,7 +98,7 @@ fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
 #[test_case(MarketType::Spot, "BTC_USDT")]
 #[test_case(MarketType::InverseSwap, "BTC_USD")]
 #[test_case(MarketType::LinearSwap, "BTC_USDT")]
-#[test_case(MarketType::InverseFuture, "BTC_USD_20220930")]
+// #[test_case(MarketType::InverseFuture, "BTC_USD_20220930")]
 #[test_case(MarketType::LinearFuture, "BTC_USDT_20220930")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
