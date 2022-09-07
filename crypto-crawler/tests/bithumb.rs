@@ -41,7 +41,6 @@ async fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::Spot, "BTC-USDT")]
-#[test_case(MarketType::Spot, "ETH-USDT")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
     test_crawl_restful!(
         crawl_l2_snapshot,
