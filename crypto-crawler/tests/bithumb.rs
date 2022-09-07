@@ -17,7 +17,6 @@ async fn test_crawl_trade_all(market_type: MarketType) {
 }
 
 #[test_case(MarketType::Spot, "BTC-USDT")]
-#[test_case(MarketType::Spot, "ETH-USDT")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
@@ -30,7 +29,6 @@ async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::Spot, "BTC-USDT")]
-#[test_case(MarketType::Spot, "ETH-USDT")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
@@ -65,7 +63,6 @@ fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
 }
 
 #[test_case(MarketType::Spot, "BTC-USDT")]
-#[test_case(MarketType::Spot, "ETH-USDT")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
     test_one_symbol!(
