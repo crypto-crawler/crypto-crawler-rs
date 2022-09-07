@@ -25,7 +25,15 @@ async fn http_get(url: &str) -> Result<String> {
 
 // See https://zbgapi.github.io/docs/spot/v1/en/#public-get-all-supported-trading-symbols
 pub(super) async fn fetch_symbol_id_map_spot() -> HashMap<String, String> {
-    let mut symbol_id_map: HashMap<String, String> = HashMap::new();
+    let mut symbol_id_map: HashMap<String, String> = vec![
+        ("btc_usdt", "329"),
+        ("eth_usdt", "330"),
+        ("eos_usdt", "333"),
+        ("zb_usdt", "321"),
+    ]
+    .into_iter()
+    .map(|x| (x.0.to_string(), x.1.to_string()))
+    .collect();
 
     if let Ok(txt) = http_get("https://www.zbg.com/exchange/api/v1/common/symbols").await {
         if let Ok(obj) = serde_json::from_str::<HashMap<String, Value>>(&txt) {
