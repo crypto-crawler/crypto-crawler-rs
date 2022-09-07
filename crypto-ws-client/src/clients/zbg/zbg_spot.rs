@@ -51,7 +51,7 @@ impl_ws_client_trait!(ZbgSpotWSClient);
 
 struct ZbgMessageHandler {}
 struct ZbgCommandTranslator {
-    symbol_id_map: HashMap<String, String>,
+    symbol_id_map: HashMap<String, i64>,
 }
 
 impl MessageHandler for ZbgMessageHandler {

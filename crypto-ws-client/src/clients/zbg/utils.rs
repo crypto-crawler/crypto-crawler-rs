@@ -24,15 +24,15 @@ async fn http_get(url: &str) -> Result<String> {
 }
 
 // See https://zbgapi.github.io/docs/spot/v1/en/#public-get-all-supported-trading-symbols
-pub(super) async fn fetch_symbol_id_map_spot() -> HashMap<String, String> {
-    let mut symbol_id_map: HashMap<String, String> = vec![
-        ("btc_usdt", "329"),
-        ("eth_usdt", "330"),
-        ("eos_usdt", "333"),
-        ("zb_usdt", "321"),
+pub(super) async fn fetch_symbol_id_map_spot() -> HashMap<String, i64> {
+    let mut symbol_id_map: HashMap<String, i64> = vec![
+        ("btc_usdt", 329),
+        ("eth_usdt", 330),
+        ("eos_usdt", 333),
+        ("zb_usdt", 321),
     ]
     .into_iter()
-    .map(|x| (x.0.to_string(), x.1.to_string()))
+    .map(|x| (x.0.to_string(), x.1))
     .collect();
 
     if let Ok(txt) = http_get("https://www.zbg.com/exchange/api/v1/common/symbols").await {
@@ -54,7 +54,7 @@ pub(super) async fn fetch_symbol_id_map_spot() -> HashMap<String, String> {
                     let symbol = obj.get("symbol").unwrap().as_str().unwrap();
                     let id = obj.get("id").unwrap().as_str().unwrap();
 
-                    symbol_id_map.insert(symbol.to_string(), id.to_string());
+                    symbol_id_map.insert(symbol.to_string(), id.parse::<i64>().unwrap());
                 }
             }
         }
@@ -65,7 +65,15 @@ pub(super) async fn fetch_symbol_id_map_spot() -> HashMap<String, String> {
 
 // See https://zbgapi.github.io/docs/future/v1/en/#public-get-contracts
 pub(super) async fn fetch_symbol_contract_id_map_swap() -> HashMap<String, i64> {
-    let mut symbol_contract_id_map: HashMap<String, i64> = HashMap::new();
+    let mut symbol_contract_id_map: HashMap<String, i64> = vec![
+        ("BTC_USDT", 1000000),
+        ("BTC_USD-R", 1000001),
+        ("ETH_USDT", 1000002),
+        ("ETH_USD-R", 1000003),
+    ]
+    .into_iter()
+    .map(|x| (x.0.to_string(), x.1))
+    .collect();
 
     if let Ok(txt) = http_get("https://www.zbg.com/exchange/api/v1/future/common/contracts").await {
         if let Ok(obj) = serde_json::from_str::<HashMap<String, Value>>(&txt) {
