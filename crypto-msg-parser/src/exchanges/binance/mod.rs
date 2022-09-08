@@ -5,6 +5,7 @@ mod binance_spot;
 use std::collections::HashMap;
 
 use crypto_market_type::MarketType;
+use crypto_message::CandlestickMsg;
 use crypto_msg_type::MessageType;
 
 use crate::{BboMsg, FundingRateMsg, OrderBookMsg, TradeMsg};
@@ -173,5 +174,15 @@ pub(crate) fn parse_bbo(
         Err(SimpleError::new("Not implemented"))
     } else {
         binance_all::parse_bbo(market_type, msg, received_at)
+    }
+}
+
+pub(crate) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<CandlestickMsg>, SimpleError> {
+    match market_type {
+        MarketType::Spot | MarketType::InverseSwap => binance_all::parse_candlestick(market_type, msg),
+        _ => Err(SimpleError::new("Not implemented"))
     }
 }
