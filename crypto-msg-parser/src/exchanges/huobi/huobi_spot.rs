@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide, CandlestickMsg};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -194,4 +194,74 @@ pub(super) fn parse_bbo(msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
     };
 
     Ok(vec![bbo_msg])
+}
+
+#[derive(Serialize, Deserialize)]
+struct RawKlineMsg {
+    id: u64,
+    open: f64,
+    close: f64,
+    low: f64,
+    high: f64,
+    amount: f64,
+    vol: f64,
+    count: u64
+}
+
+pub(super) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<CandlestickMsg>, SimpleError> {
+    let obj = serde_json::from_str::<WebsocketMsg<RawKlineMsg>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to HashMap<String, Value>",
+            msg
+        ))
+    })?;
+
+    let ch: Vec<&str>= obj.ch.split(".").collect();
+    let symbol = ch[1].to_string();
+    let period = ch[3].to_string();
+    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+
+    // m, minute; H, hour; D, day; W, week; M, month; Y, year
+    let (begin_time, period) = match period.as_str() {
+        "1min"  => (1  , "m"),
+        "5min"  => (5  , "m"),
+        "15min" => (6  , "m"),
+        "30min" => (30 , "m"),
+        "60min" => (60 , "m"),
+        "4hour" => (4  , "H"),
+        "1day"  => (1  , "D"),
+        "1mon"  => (1  , "M"),
+        "1week" => (1  , "W"),
+        "1year" => (1  , "Y"),
+        _ => return  Err(SimpleError::new(format!(
+            "Unknown huobi period error {}",
+            period
+        )))
+    };
+
+
+    // obj.data.k
+
+    let kline_msg = CandlestickMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        symbol,
+        msg_type: MessageType::Candlestick,
+        pair,
+        timestamp: obj.ts,
+        json: msg.to_string(),
+        open: obj.tick.open,
+        high: obj.tick.high,
+        low: obj.tick.low,
+        close: obj.tick.close,
+        volume: obj.tick.vol,
+        quote_volume: None,
+        period: period.to_string(),
+        begin_time,
+    };
+
+    Ok(vec![kline_msg])
 }
