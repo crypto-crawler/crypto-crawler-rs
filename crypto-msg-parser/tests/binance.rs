@@ -1235,7 +1235,6 @@ mod candlestick {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
     use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_candlestick};
-    
 
     #[test]
     fn spot() {
@@ -1273,7 +1272,6 @@ mod candlestick {
             "BTCUSD_220624",
             extract_symbol(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap()
         );
-
 
         assert_eq!(
             1653818854836,

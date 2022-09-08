@@ -182,7 +182,9 @@ pub(crate) fn parse_candlestick(
     msg: &str,
 ) -> Result<Vec<CandlestickMsg>, SimpleError> {
     match market_type {
-        MarketType::Spot | MarketType::InverseSwap => binance_all::parse_candlestick(market_type, msg),
-        _ => Err(SimpleError::new("Not implemented"))
+        MarketType::Spot | MarketType::InverseSwap => {
+            binance_all::parse_candlestick(market_type, msg)
+        }
+        _ => Err(SimpleError::new("Not implemented")),
     }
 }

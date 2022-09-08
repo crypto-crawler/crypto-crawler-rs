@@ -1,7 +1,9 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crypto_message::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide, CandlestickMsg};
+use crypto_message::{
+    BboMsg, CandlestickMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide,
+};
 
 use super::{super::utils::calc_quantity_and_volume, EXCHANGE_NAME};
 use serde::{Deserialize, Serialize};
@@ -388,40 +390,40 @@ pub(super) fn parse_funding_rate(
 
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
-struct Stream <T>{
+struct Stream<T> {
     stream: String,
-    data: T
+    data: T,
 }
 
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct StreamData {
-    e: String,  // Event type
-    E: i64,     // Event time
-    s: String,  // Symbol
-    k: RawKlineMsg
+    e: String, // Event type
+    E: i64,    // Event time
+    s: String, // Symbol
+    k: RawKlineMsg,
 }
 
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct RawKlineMsg {
-    t: u64,     // Kline start time
-    T: u64,     // Kline close time
-    s: String,  // Symbol
-    i: String,  // Interval
-    f: u64,     // First trade ID
-    L: u64,     // Last trade ID
-    o: String,  // Open price
-    c: String,  // Close price
-    h: String,  // High price
-    l: String,  // Low price
-    v: String,  // Base asset volume
-    n: u64,     // Number of trades
-    x: bool,    // Is this kline closed?
-    q: String,  // Quote asset volume
-    V: String,  // Taker buy base asset volume
-    Q: String,  // Taker buy quote asset volume
-    B: String   // Ignore
+    t: u64,    // Kline start time
+    T: u64,    // Kline close time
+    s: String, // Symbol
+    i: String, // Interval
+    f: u64,    // First trade ID
+    L: u64,    // Last trade ID
+    o: String, // Open price
+    c: String, // Close price
+    h: String, // High price
+    l: String, // Low price
+    v: String, // Base asset volume
+    n: u64,    // Number of trades
+    x: bool,   // Is this kline closed?
+    q: String, // Quote asset volume
+    V: String, // Taker buy base asset volume
+    Q: String, // Taker buy quote asset volume
+    B: String, // Ignore
 }
 
 pub(super) fn parse_candlestick(
@@ -438,7 +440,6 @@ pub(super) fn parse_candlestick(
     let symbol = obj.data.k.s;
     let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
 
-
     let open: f64 = obj.data.k.o.parse().unwrap();
     let high: f64 = obj.data.k.h.parse().unwrap();
     let low: f64 = obj.data.k.l.parse().unwrap();
@@ -448,27 +449,29 @@ pub(super) fn parse_candlestick(
 
     // m, minute; H, hour; D, day; W, week; M, month; Y, year
     let (begin_time, period) = match obj.data.k.i.as_str() {
-        "1s"  => (1 , "s"),
-        "1m"  => (1 , "m"),
-        "3m"  => (3 , "m"),
-        "5m"  => (5 , "m"),
+        "1s" => (1, "s"),
+        "1m" => (1, "m"),
+        "3m" => (3, "m"),
+        "5m" => (5, "m"),
         "15m" => (15, "m"),
         "30m" => (30, "m"),
-        "1h"  => (1 , "H"),
-        "2h"  => (2 , "H"),
-        "4h"  => (4 , "H"),
-        "6h"  => (6 , "H"),
-        "8h"  => (8 , "H"),
+        "1h" => (1, "H"),
+        "2h" => (2, "H"),
+        "4h" => (4, "H"),
+        "6h" => (6, "H"),
+        "8h" => (8, "H"),
         "12h" => (12, "H"),
-        "1d"  => (1 , "D"),
-        "3d"  => (3 , "D"),
-        "1w"  => (1 , "W"),
-        "1M"  => (1 , "M"),
+        "1d" => (1, "D"),
+        "3d" => (3, "D"),
+        "1w" => (1, "W"),
+        "1M" => (1, "M"),
 
-        _ => return  Err(SimpleError::new(format!(
-            "Failed to deserialize {} to HashMap<String, Value>",
-            msg
-        )))
+        _ => {
+            return Err(SimpleError::new(format!(
+                "Failed to deserialize {} to HashMap<String, Value>",
+                msg
+            )))
+        }
     };
 
     let kline_msg = CandlestickMsg {
