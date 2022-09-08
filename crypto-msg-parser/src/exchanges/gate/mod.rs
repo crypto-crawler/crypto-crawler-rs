@@ -46,13 +46,30 @@ pub(crate) fn parse_l2(
     msg: &str,
     timestamp: Option<i64>,
 ) -> Result<Vec<OrderBookMsg>, SimpleError> {
-    if market_type == MarketType::Spot {
-        gate_spot::parse_l2(
+    match market_type {
+        MarketType::Spot => gate_spot::parse_l2(
             msg,
             timestamp.expect("Gate spot orderbook messages don't have timestamp"),
-        )
+        ),
+        MarketType::InverseFuture | MarketType::LinearFuture => {
+            gate_swap::parse_l2_topk(market_type, msg)
+        }
+        MarketType::InverseSwap | MarketType::LinearSwap => gate_swap::parse_l2(market_type, msg),
+        _ => Err(SimpleError::new(format!(
+            "Unsupported market type: {:?}",
+            market_type
+        ))),
+    }
+}
+
+pub(crate) fn parse_l2_topk(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    if market_type == MarketType::Spot {
+        gate_spot::parse_l2_topk(msg)
     } else {
-        gate_swap::parse_l2(market_type, msg)
+        gate_swap::parse_l2_topk(market_type, msg)
     }
 }
 
