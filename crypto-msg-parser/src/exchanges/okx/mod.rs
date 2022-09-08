@@ -1,7 +1,7 @@
 mod okx_v3;
 mod okx_v5;
 
-use crypto_message::BboMsg;
+use crypto_message::{BboMsg, CandlestickMsg};
 use simple_error::SimpleError;
 use std::collections::HashMap;
 
@@ -128,5 +128,19 @@ pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg
         okx_v3::parse_bbo(market_type, msg)
     } else {
         panic!("Unknown msg format {}", msg)
+    }
+}
+
+pub(crate) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<CandlestickMsg>, SimpleError> {
+    match market_type {
+        MarketType::Spot => okx_v5::parse_candlestick_spot(market_type, msg),
+        MarketType::InverseSwap => okx_v5::parse_candlestick_inverse_swap(market_type, msg),
+        _ => Err(SimpleError::new(format!(
+            "Unknown okx market type {}",
+            market_type
+        ))),
     }
 }

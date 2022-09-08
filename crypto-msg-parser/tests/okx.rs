@@ -1016,7 +1016,7 @@ mod bbo {
 mod candlestick {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_candlestick};
 
     #[test]
     fn spot() {
@@ -1028,6 +1028,18 @@ mod candlestick {
                 .unwrap()
                 .unwrap()
         );
+
+        let kline = parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap();
+
+        assert_eq!(1, kline.len());
+
+        let tick = kline.get(0).unwrap();
+
+        assert_eq!(1654154580000, tick.timestamp);
+
+        assert_eq!(1, tick.begin_time);
+        assert_eq!("m", tick.period);
+
         assert_eq!(
             "BTC-USDT",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
@@ -1076,6 +1088,18 @@ mod candlestick {
                 .unwrap()
                 .unwrap()
         );
+
+        let kline = parse_candlestick(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap();
+
+        assert_eq!(1, kline.len());
+
+        let tick = kline.get(0).unwrap();
+
+        assert_eq!(1654033212805, tick.timestamp);
+
+        assert_eq!(24, tick.begin_time);
+        assert_eq!("H", tick.period);
+
         assert_eq!(
             "BTC-USD-SWAP",
             extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
