@@ -446,8 +446,30 @@ pub(super) fn parse_candlestick(
     let volume: f64 = obj.data.k.v.parse().unwrap();
     let quote_volume: f64 = obj.data.k.V.parse().unwrap();
 
+    // m, minute; H, hour; D, day; W, week; M, month; Y, year
+    let (begin_time, period) = match obj.data.k.i.as_str() {
+        "1s"  => (1 , "s"),
+        "1m"  => (1 , "m"),
+        "3m"  => (3 , "m"),
+        "5m"  => (5 , "m"),
+        "15m" => (15, "m"),
+        "30m" => (30, "m"),
+        "1h"  => (1 , "H"),
+        "2h"  => (2 , "H"),
+        "4h"  => (4 , "H"),
+        "6h"  => (6 , "H"),
+        "8h"  => (8 , "H"),
+        "12h" => (12, "H"),
+        "1d"  => (1 , "D"),
+        "3d"  => (3 , "D"),
+        "1w"  => (1 , "W"),
+        "1M"  => (1 , "M"),
 
-    // obj.data.k
+        _ => return  Err(SimpleError::new(format!(
+            "Failed to deserialize {} to HashMap<String, Value>",
+            msg
+        )))
+    };
 
     let kline_msg = CandlestickMsg {
         exchange: EXCHANGE_NAME.to_owned(),
@@ -462,9 +484,9 @@ pub(super) fn parse_candlestick(
         low,
         close,
         volume,
-        period: obj.data.k.i,
         quote_volume: Some(quote_volume),
-        begin_time: 0,
+        begin_time,
+        period: period.to_string(),
     };
 
     Ok(vec![kline_msg])
