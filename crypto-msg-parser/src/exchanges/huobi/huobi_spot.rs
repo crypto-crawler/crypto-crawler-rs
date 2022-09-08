@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide, CandlestickMsg};
+use crypto_message::{BboMsg, CandlestickMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -205,7 +205,7 @@ struct RawKlineMsg {
     high: f64,
     amount: f64,
     vol: f64,
-    count: u64
+    count: u64,
 }
 
 pub(super) fn parse_candlestick(
@@ -219,29 +219,30 @@ pub(super) fn parse_candlestick(
         ))
     })?;
 
-    let ch: Vec<&str>= obj.ch.split(".").collect();
+    let ch: Vec<&str> = obj.ch.split(".").collect();
     let symbol = ch[1].to_string();
     let period = ch[3].to_string();
     let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
 
     // m, minute; H, hour; D, day; W, week; M, month; Y, year
     let (begin_time, period) = match period.as_str() {
-        "1min"  => (1  , "m"),
-        "5min"  => (5  , "m"),
-        "15min" => (6  , "m"),
-        "30min" => (30 , "m"),
-        "60min" => (60 , "m"),
-        "4hour" => (4  , "H"),
-        "1day"  => (1  , "D"),
-        "1mon"  => (1  , "M"),
-        "1week" => (1  , "W"),
-        "1year" => (1  , "Y"),
-        _ => return  Err(SimpleError::new(format!(
-            "Unknown huobi period error {}",
-            period
-        )))
+        "1min" => (1, "m"),
+        "5min" => (5, "m"),
+        "15min" => (6, "m"),
+        "30min" => (30, "m"),
+        "60min" => (60, "m"),
+        "4hour" => (4, "H"),
+        "1day" => (1, "D"),
+        "1mon" => (1, "M"),
+        "1week" => (1, "W"),
+        "1year" => (1, "Y"),
+        _ => {
+            return Err(SimpleError::new(format!(
+                "Unknown huobi period error {}",
+                period
+            )))
+        }
     };
-
 
     // obj.data.k
 

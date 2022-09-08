@@ -1216,7 +1216,7 @@ mod candlestick {
 
         assert_eq!(1, tick.begin_time);
         assert_eq!("m", tick.period);
-        
+
         assert_eq!(
             "BTC-USD",
             extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
