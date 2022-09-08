@@ -1235,7 +1235,7 @@ mod candlestick {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
     use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_candlestick};
-    use crypto_msg_type::MessageType;
+    
 
     #[test]
     fn spot() {
