@@ -45,7 +45,7 @@ struct SpotOrderbookUpdateMsg {
 #[allow(non_snake_case)]
 struct SpotOrderbookSnapshotMsg {
     t: i64,
-    lastUpdateId: i64,
+    lastUpdateId: u64,
     s: String,
     asks: Option<Vec<[String; 2]>>,
     bids: Option<Vec<[String; 2]>>,
@@ -181,23 +181,7 @@ fn parse_order(raw_order: &[String; 2]) -> Order {
     }
 }
 
-pub(crate) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
-            msg
-        ))
-    })?;
-    if ws_msg.channel == "spot.order_book_update" {
-        parse_l2_update(msg)
-    } else if ws_msg.channel == "spot.order_book" {
-        parse_l2_snapshot(msg)
-    } else {
-        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
-    }
-}
-
-fn parse_l2_update(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
+pub(super) fn parse_l2(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
     let ws_msg =
         serde_json::from_str::<WebsocketMsg<SpotOrderbookUpdateMsg>>(msg).map_err(|_e| {
             SimpleError::new(format!(
@@ -237,7 +221,7 @@ fn parse_l2_update(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
     Ok(vec![orderbook])
 }
 
-fn parse_l2_snapshot(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
+pub(super) fn parse_l2_topk(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
     let ws_msg =
         serde_json::from_str::<WebsocketMsg<SpotOrderbookSnapshotMsg>>(msg).map_err(|_e| {
             SimpleError::new(format!(
@@ -268,9 +252,9 @@ fn parse_l2_snapshot(msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
         market_type: MarketType::Spot,
         symbol,
         pair,
-        msg_type: MessageType::L2Event,
+        msg_type: MessageType::L2TopK,
         timestamp: result.t,
-        seq_id: None,
+        seq_id: Some(result.lastUpdateId),
         prev_seq_id: None,
         asks: if let Some(asks) = result.asks {
             asks.iter().map(|x| parse_order(x)).collect()

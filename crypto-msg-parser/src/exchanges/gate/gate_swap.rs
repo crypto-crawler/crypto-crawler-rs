@@ -283,7 +283,10 @@ thread_local! {
     static PRICE_HASHMAP: RefCell<HashMap<String,HashMap<String, bool>>> = RefCell::new(HashMap::new());
 }
 
-fn parse_l2_legacy(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
+pub(super) fn parse_l2_topk(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
         SimpleError::new(format!(
             "Failed to deserialize {} to WebsocketMsg<Value>",
@@ -330,7 +333,13 @@ fn parse_l2_legacy(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMs
             market_type,
             symbol,
             pair: pair.to_string(),
-            msg_type: MessageType::L2Event,
+            msg_type: if market_type == MarketType::InverseSwap
+                || market_type == MarketType::LinearSwap
+            {
+                MessageType::L2TopK
+            } else {
+                MessageType::L2Event
+            },
             timestamp,
             asks: raw_orderbook.asks.iter().map(|x| parse_order(x)).collect(),
             bids: raw_orderbook.bids.iter().map(|x| parse_order(x)).collect(),
@@ -466,7 +475,10 @@ fn parse_order(market_type: MarketType, raw_order: &RawOrderNew, pair: &str) -> 
     }
 }
 
-fn parse_l2_update(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
+pub(super) fn parse_l2(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<OrderBookMsg>, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<OrderbookUpdateMsg>>(msg).map_err(|_e| {
         SimpleError::new(format!(
             "Failed to deserialize {} to WebsocketMsg<OrderbookUpdateMsg>",
@@ -506,28 +518,6 @@ fn parse_l2_update(market_type: MarketType, msg: &str) -> Result<Vec<OrderBookMs
     };
 
     Ok(vec![orderbook])
-}
-
-pub(crate) fn parse_l2(
-    market_type: MarketType,
-    msg: &str,
-) -> Result<Vec<OrderBookMsg>, SimpleError> {
-    let ws_msg = serde_json::from_str::<WebsocketMsg<Value>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketMsg<Value>",
-            msg
-        ))
-    })?;
-    if ws_msg.channel == "futures.order_book" {
-        parse_l2_legacy(market_type, msg)
-    } else if ws_msg.channel == "futures.order_book_update" {
-        parse_l2_update(market_type, msg)
-    } else {
-        Err(SimpleError::new(format!(
-            "Unknown channel {} of gate {}",
-            ws_msg.channel, market_type
-        )))
-    }
 }
 
 pub(super) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg>, SimpleError> {

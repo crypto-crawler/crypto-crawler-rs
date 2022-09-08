@@ -178,6 +178,7 @@ pub fn parse_l2_topk(
         "bitmex" => exchanges::bitmex::parse_l2_topk(market_type, msg),
         "bitstamp" => exchanges::bitstamp::parse_l2_topk(market_type, msg),
         "deribit" => exchanges::deribit::parse_l2_topk(market_type, msg),
+        "gate" => exchanges::gate::parse_l2_topk(market_type, msg),
         "huobi" => exchanges::huobi::parse_l2_topk(market_type, msg),
         "kucoin" => exchanges::kucoin::parse_l2_topk(market_type, msg),
         "mexc" => exchanges::mexc::parse_l2_topk(market_type, msg, received_at),
