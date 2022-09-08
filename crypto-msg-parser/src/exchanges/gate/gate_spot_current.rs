@@ -1,8 +1,8 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use super::messages::{WebsocketMsg, WebsocketCandlest};
-use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide, CandlestickMsg};
+use super::messages::{WebsocketCandlest, WebsocketMsg};
+use crypto_message::{BboMsg, CandlestickMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use simple_error::SimpleError;
