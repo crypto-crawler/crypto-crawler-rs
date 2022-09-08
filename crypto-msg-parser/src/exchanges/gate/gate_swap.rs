@@ -1,9 +1,9 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use super::{super::utils::calc_quantity_and_volume, messages::WebsocketMsg};
+use super::{super::utils::calc_quantity_and_volume, messages::{WebsocketMsg, WebsocketCandlest}};
 
-use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide, CandlestickMsg};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -561,4 +561,78 @@ pub(super) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg
     };
 
     Ok(vec![bbo_msg])
+}
+
+#[derive(Serialize, Deserialize)]
+struct RawKlineMsg {
+    t: i64,    // 秒 s 精度的 Unix 时间戳
+    v: f64,    // integer交易量，只有市场行情的 K 线数据里有该值
+    c: String, // 收盘价
+    h: String, // 最高价
+    l: String, // 最低价
+    o: String, // 开盘价
+    n: String,
+    a: String, //基础货币交易量
+}
+
+pub(super) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<CandlestickMsg>, SimpleError> {
+    let obj = serde_json::from_str::<WebsocketCandlest<Vec<RawKlineMsg>>>(msg).map_err(|_e| {
+        SimpleError::new(format!(
+            "Failed to deserialize {} to WebsocketCandlest<RawKlineMsg>",
+            msg
+        ))
+    })?;
+
+    let mut kline_msgs = Vec::with_capacity(obj.result.len());
+
+    for kline in obj.result.iter() {
+        let ch: Vec<&str> = kline.n.split("_").collect();
+        let symbol = [ch[1].to_string(), ch[2].to_string()].join("_");
+
+        // m, minute; H, hour; D, day; W, week; M, month; Y, year
+        // interval	10s
+
+        // let period = ch[0].to_string();
+        let (begin_time, period) = match ch[0] {
+            "10s" => (10, "s"),
+            "1m" => (1, "m"),
+            "5m" => (5, "m"),
+            "15m" => (15, "m"),
+            "30m" => (30, "m"),
+            "1h" => (1, "H"),
+            "4h" => (4, "H"),
+            "8h" => (8, "H"),
+            "1d" => (1, "D"),
+            "7d" => (7, "D"),
+            _ => return Err(SimpleError::new("Unknown gate period format error {}")),
+        };
+
+        // begin_time
+        let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+
+        let kline_msg = CandlestickMsg {
+            exchange: EXCHANGE_NAME.to_string(),
+            market_type,
+            symbol,
+            pair,
+            msg_type: MessageType::Candlestick,
+            timestamp: kline.t,
+            json: msg.to_string(),
+            open: kline.o.parse::<f64>().unwrap(),
+            high: kline.h.parse::<f64>().unwrap(),
+            low: kline.l.parse::<f64>().unwrap(),
+            close: kline.c.parse::<f64>().unwrap(),
+            volume: kline.v,
+            quote_volume: None,
+            period: period.to_string(),
+            begin_time,
+        };
+
+        kline_msgs.push(kline_msg);
+    }
+
+    Ok(kline_msgs)
 }

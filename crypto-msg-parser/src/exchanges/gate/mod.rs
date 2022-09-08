@@ -5,7 +5,7 @@ mod gate_swap;
 mod messages;
 
 use crypto_market_type::MarketType;
-use crypto_message::BboMsg;
+use crypto_message::{BboMsg, CandlestickMsg};
 
 use crate::{OrderBookMsg, TradeMsg};
 
@@ -78,5 +78,19 @@ pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg
         gate_spot::parse_bbo(msg)
     } else {
         gate_swap::parse_bbo(market_type, msg)
+    }
+}
+
+pub(crate) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<CandlestickMsg>, SimpleError> {
+    match market_type {
+        MarketType::Spot => gate_spot_current::parse_candlestick(market_type, msg),
+        MarketType::InverseSwap => gate_swap::parse_candlestick(market_type, msg),
+        _ => Err(SimpleError::new(format!(
+            "Unknown huobi market type {}",
+            market_type
+        ))),
     }
 }

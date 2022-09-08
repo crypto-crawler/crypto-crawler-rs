@@ -270,6 +270,7 @@ pub fn parse_candlestick(
     msg: &str,
 ) -> Result<Vec<CandlestickMsg>, SimpleError> {
     match exchange {
+        "gate" => exchanges::gate::parse_candlestick(market_type, msg),
         "bitfinex" => exchanges::bitfinex::parse_candlestick(market_type, msg),
         "kucoin" => exchanges::kucoin::parse_candlestick(market_type, msg),
         "bybit" => exchanges::bybit::parse_candlestick(market_type, msg),
