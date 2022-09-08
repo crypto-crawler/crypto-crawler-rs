@@ -180,6 +180,10 @@ pub(crate) fn parse_l2(msg: &str, timestamp: i64) -> Result<Vec<OrderBookMsg>, S
     Ok(vec![orderbook])
 }
 
+pub(super) fn parse_l2_topk(_msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError> {
+    todo!()
+}
+
 pub(super) fn parse_bbo(_msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
     todo!()
 }
