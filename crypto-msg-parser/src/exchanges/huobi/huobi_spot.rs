@@ -244,8 +244,6 @@ pub(super) fn parse_candlestick(
         }
     };
 
-    // obj.data.k
-
     let kline_msg = CandlestickMsg {
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
