@@ -272,6 +272,7 @@ pub fn parse_candlestick(
     match exchange {
         "binance" => exchanges::binance::parse_candlestick(market_type, msg),
         "bitfinex" => exchanges::bitfinex::parse_candlestick(market_type, msg),
+        "huobi" => exchanges::huobi::parse_candlestick(market_type, msg),
         "kucoin" => exchanges::kucoin::parse_candlestick(market_type, msg),
         "bybit" => exchanges::bybit::parse_candlestick(market_type, msg),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
