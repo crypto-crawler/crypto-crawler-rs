@@ -390,24 +390,21 @@ pub(super) fn parse_funding_rate(
 
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
-struct Stream<T> {
-    stream: String,
-    data: T,
-}
-
-#[derive(Serialize, Deserialize)]
-#[allow(non_snake_case)]
-struct StreamData {
+struct RawKlineMsgWithTime {
     e: String, // Event type
     E: i64,    // Event time
     s: String, // Symbol
     k: RawKlineMsg,
 }
 
+// See:
+// * https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-streams
+// * https://binance-docs.github.io/apidocs/futures/en/#kline-candlestick-streams
+// * https://binance-docs.github.io/apidocs/delivery/en/#kline-candlestick-streams
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct RawKlineMsg {
-    t: u64,    // Kline start time
+    t: i64,    // Kline start time
     T: u64,    // Kline close time
     s: String, // Symbol
     i: String, // Interval
@@ -430,66 +427,41 @@ pub(super) fn parse_candlestick(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<CandlestickMsg>, SimpleError> {
-    let obj = serde_json::from_str::<Stream<StreamData>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to HashMap<String, Value>",
-            msg
-        ))
-    })?;
+    let obj = serde_json::from_str::<WebsocketMsg<RawKlineMsgWithTime>>(msg)
+        .map_err(SimpleError::from)?;
 
-    let symbol = obj.data.k.s;
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
+    let symbol = obj.data.k.s.as_str();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
 
-    let open: f64 = obj.data.k.o.parse().unwrap();
-    let high: f64 = obj.data.k.h.parse().unwrap();
-    let low: f64 = obj.data.k.l.parse().unwrap();
-    let close: f64 = obj.data.k.c.parse().unwrap();
-    let volume: f64 = obj.data.k.v.parse().unwrap();
-    let quote_volume: f64 = obj.data.k.V.parse().unwrap();
-
-    // m, minute; H, hour; D, day; W, week; M, month; Y, year
-    let (begin_time, period) = match obj.data.k.i.as_str() {
-        "1s" => (1, "s"),
-        "1m" => (1, "m"),
-        "3m" => (3, "m"),
-        "5m" => (5, "m"),
-        "15m" => (15, "m"),
-        "30m" => (30, "m"),
-        "1h" => (1, "H"),
-        "2h" => (2, "H"),
-        "4h" => (4, "H"),
-        "6h" => (6, "H"),
-        "8h" => (8, "H"),
-        "12h" => (12, "H"),
-        "1d" => (1, "D"),
-        "3d" => (3, "D"),
-        "1w" => (1, "W"),
-        "1M" => (1, "M"),
-
-        _ => {
-            return Err(SimpleError::new(format!(
-                "Failed to deserialize {} to HashMap<String, Value>",
-                msg
-            )))
-        }
+    let v = obj.data.k.v.parse::<f64>().unwrap();
+    let q = obj.data.k.q.parse::<f64>().unwrap();
+    let (volume, quote_volume) = if market_type == MarketType::InverseFuture
+        || market_type == MarketType::InverseSwap
+    {
+        let contract_value =
+            crypto_contract_value::get_contract_value(EXCHANGE_NAME, market_type, &pair).unwrap();
+        let quote_volume = v * contract_value;
+        (q, quote_volume)
+    } else {
+        (v, q)
     };
 
     let kline_msg = CandlestickMsg {
-        exchange: EXCHANGE_NAME.to_owned(),
+        exchange: EXCHANGE_NAME.to_string(),
         market_type,
         msg_type: MessageType::Candlestick,
-        symbol: obj.data.s,
+        symbol: symbol.to_string(),
         pair,
         timestamp: obj.data.E,
-        json: msg.to_owned(),
-        open,
-        high,
-        low,
-        close,
+        period: obj.data.k.i,
+        begin_time: obj.data.k.t / 1000,
+        open: obj.data.k.o.parse().unwrap(),
+        high: obj.data.k.h.parse().unwrap(),
+        low: obj.data.k.l.parse().unwrap(),
+        close: obj.data.k.c.parse().unwrap(),
         volume,
         quote_volume: Some(quote_volume),
-        begin_time,
-        period: period.to_string(),
+        json: msg.to_string(),
     };
 
     Ok(vec![kline_msg])
