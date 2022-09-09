@@ -7,7 +7,7 @@ mod message;
 use std::collections::HashMap;
 
 use crypto_market_type::MarketType;
-use crypto_message::BboMsg;
+use crypto_message::{BboMsg, CandlestickMsg};
 use crypto_msg_type::MessageType;
 
 use crate::{FundingRateMsg, OrderBookMsg, TradeMsg};
@@ -152,6 +152,23 @@ pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg
         MarketType::LinearFuture | MarketType::LinearSwap | MarketType::EuropeanOption => {
             huobi_inverse::parse_bbo(market_type, msg)
         }
+        _ => Err(SimpleError::new(format!(
+            "Unknown huobi market type {}",
+            market_type
+        ))),
+    }
+}
+
+pub(crate) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<CandlestickMsg>, SimpleError> {
+    match market_type {
+        MarketType::Spot => huobi_spot::parse_candlestick(market_type, msg),
+        MarketType::InverseSwap | MarketType::InverseFuture => {
+            huobi_inverse::parse_candlestick(market_type, msg)
+        }
+        MarketType::LinearSwap => huobi_linear::parse_candlestick(market_type, msg),
         _ => Err(SimpleError::new(format!(
             "Unknown huobi market type {}",
             market_type
