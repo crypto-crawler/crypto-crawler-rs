@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{BboMsg, CandlestickMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -59,6 +59,22 @@ struct TradeTick {
     id: i64,
     ts: i64,
     data: Vec<SpotTradeMsg>,
+}
+
+// https://huobiapi.github.io/docs/spot/v1/en/#market-candlestick
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawCandlestickMsg {
+    id: i64,
+    open: f64,
+    close: f64,
+    low: f64,
+    high: f64,
+    amount: f64,
+    vol: f64,
+    count: u64,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
 }
 
 pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
@@ -172,7 +188,6 @@ pub(super) fn parse_bbo(msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
     let symbol = ws_msg.ch.split('.').nth(1).unwrap();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
         .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
-    let timestamp = ws_msg.ts;
 
     let bbo_msg = BboMsg {
         exchange: EXCHANGE_NAME.to_string(),
@@ -180,7 +195,7 @@ pub(super) fn parse_bbo(msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
         symbol: symbol.to_string(),
         pair,
         msg_type: MessageType::BBO,
-        timestamp,
+        timestamp: ws_msg.ts,
         ask_price: ws_msg.tick.ask,
         ask_quantity_base: ws_msg.tick.askSize,
         ask_quantity_quote: ws_msg.tick.ask * ws_msg.tick.askSize,
@@ -194,4 +209,41 @@ pub(super) fn parse_bbo(msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
     };
 
     Ok(vec![bbo_msg])
+}
+
+pub(super) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<CandlestickMsg>, SimpleError> {
+    let ws_msg =
+        serde_json::from_str::<WebsocketMsg<RawCandlestickMsg>>(msg).map_err(SimpleError::from)?;
+    debug_assert!(ws_msg.ch.contains(".kline."));
+
+    let (symbol, period) = {
+        let arr: Vec<&str> = ws_msg.ch.split('.').collect();
+        let symbol = arr[1];
+        let period = arr[3];
+        (symbol, period)
+    };
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+
+    let kline_msg = CandlestickMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        msg_type: MessageType::Candlestick,
+        symbol: symbol.to_string(),
+        pair,
+        timestamp: ws_msg.ts,
+        begin_time: ws_msg.tick.id,
+        open: ws_msg.tick.open,
+        high: ws_msg.tick.high,
+        low: ws_msg.tick.low,
+        close: ws_msg.tick.close,
+        volume: ws_msg.tick.amount,
+        quote_volume: Some(ws_msg.tick.vol),
+        period: period.to_string(),
+        json: msg.to_string(),
+    };
+
+    Ok(vec![kline_msg])
 }
