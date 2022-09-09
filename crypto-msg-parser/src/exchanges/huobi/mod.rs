@@ -164,9 +164,11 @@ pub(crate) fn parse_candlestick(
     msg: &str,
 ) -> Result<Vec<CandlestickMsg>, SimpleError> {
     match market_type {
-        MarketType::Spot | MarketType::InverseSwap => {
-            huobi_spot::parse_candlestick(market_type, msg)
+        MarketType::Spot => huobi_spot::parse_candlestick(market_type, msg),
+        MarketType::InverseSwap | MarketType::InverseFuture => {
+            huobi_inverse::parse_candlestick(market_type, msg)
         }
+        MarketType::LinearSwap => huobi_linear::parse_candlestick(market_type, msg),
         _ => Err(SimpleError::new(format!(
             "Unknown huobi market type {}",
             market_type

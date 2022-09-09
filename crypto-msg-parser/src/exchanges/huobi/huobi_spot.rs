@@ -61,6 +61,22 @@ struct TradeTick {
     data: Vec<SpotTradeMsg>,
 }
 
+// https://huobiapi.github.io/docs/spot/v1/en/#market-candlestick
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawCandlestickMsg {
+    id: i64,
+    open: f64,
+    close: f64,
+    low: f64,
+    high: f64,
+    amount: f64,
+    vol: f64,
+    count: u64,
+    #[serde(flatten)]
+    extra: HashMap<String, Value>,
+}
+
 pub(super) fn parse_trade(msg: &str) -> Result<Vec<TradeMsg>, SimpleError> {
     let ws_msg = serde_json::from_str::<WebsocketMsg<TradeTick>>(msg).map_err(|_e| {
         SimpleError::new(format!(
@@ -172,7 +188,6 @@ pub(super) fn parse_bbo(msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
     let symbol = ws_msg.ch.split('.').nth(1).unwrap();
     let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME)
         .ok_or_else(|| SimpleError::new(format!("Failed to normalize {} from {}", symbol, msg)))?;
-    let timestamp = ws_msg.ts;
 
     let bbo_msg = BboMsg {
         exchange: EXCHANGE_NAME.to_string(),
@@ -180,7 +195,7 @@ pub(super) fn parse_bbo(msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
         symbol: symbol.to_string(),
         pair,
         msg_type: MessageType::BBO,
-        timestamp,
+        timestamp: ws_msg.ts,
         ask_price: ws_msg.tick.ask,
         ask_quantity_base: ws_msg.tick.askSize,
         ask_quantity_quote: ws_msg.tick.ask * ws_msg.tick.askSize,
@@ -196,70 +211,38 @@ pub(super) fn parse_bbo(msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
     Ok(vec![bbo_msg])
 }
 
-#[derive(Serialize, Deserialize)]
-struct RawKlineMsg {
-    id: u64,
-    open: f64,
-    close: f64,
-    low: f64,
-    high: f64,
-    amount: f64,
-    vol: f64,
-    count: u64,
-}
-
 pub(super) fn parse_candlestick(
     market_type: MarketType,
     msg: &str,
 ) -> Result<Vec<CandlestickMsg>, SimpleError> {
-    let obj = serde_json::from_str::<WebsocketMsg<RawKlineMsg>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to HashMap<String, Value>",
-            msg
-        ))
-    })?;
+    let ws_msg =
+        serde_json::from_str::<WebsocketMsg<RawCandlestickMsg>>(msg).map_err(SimpleError::from)?;
+    debug_assert!(ws_msg.ch.contains(".kline."));
 
-    let ch: Vec<&str> = obj.ch.split(".").collect();
-    let symbol = ch[1].to_string();
-    let period = ch[3].to_string();
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
-
-    // m, minute; H, hour; D, day; W, week; M, month; Y, year
-    let (begin_time, period) = match period.as_str() {
-        "1min" => (1, "m"),
-        "5min" => (5, "m"),
-        "15min" => (6, "m"),
-        "30min" => (30, "m"),
-        "60min" => (60, "m"),
-        "4hour" => (4, "H"),
-        "1day" => (1, "D"),
-        "1mon" => (1, "M"),
-        "1week" => (1, "W"),
-        "1year" => (1, "Y"),
-        _ => {
-            return Err(SimpleError::new(format!(
-                "Unknown huobi period error {}",
-                period
-            )))
-        }
+    let (symbol, period) = {
+        let arr: Vec<&str> = ws_msg.ch.split('.').collect();
+        let symbol = arr[1];
+        let period = arr[3];
+        (symbol, period)
     };
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
 
     let kline_msg = CandlestickMsg {
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
-        symbol,
         msg_type: MessageType::Candlestick,
+        symbol: symbol.to_string(),
         pair,
-        timestamp: obj.ts,
-        json: msg.to_string(),
-        open: obj.tick.open,
-        high: obj.tick.high,
-        low: obj.tick.low,
-        close: obj.tick.close,
-        volume: obj.tick.vol,
-        quote_volume: None,
+        timestamp: ws_msg.ts,
+        begin_time: ws_msg.tick.id,
+        open: ws_msg.tick.open,
+        high: ws_msg.tick.high,
+        low: ws_msg.tick.low,
+        close: ws_msg.tick.close,
+        volume: ws_msg.tick.amount,
+        quote_volume: Some(ws_msg.tick.vol),
         period: period.to_string(),
-        begin_time,
+        json: msg.to_string(),
     };
 
     Ok(vec![kline_msg])
