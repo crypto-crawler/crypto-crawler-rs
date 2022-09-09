@@ -313,13 +313,13 @@ pub(super) fn parse_bbo(msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
 #[derive(Serialize, Deserialize)]
 struct RawKlineMsg {
     t: String, // 秒 s 精度的 Unix 时间戳
-    v: String, // integer交易量，只有市场行情的 K 线数据里有该值
+    v: String, // integer 交易量，只有市场行情的 K 线数据里有该值
     c: String, // 收盘价
     h: String, // 最高价
     l: String, // 最低价
     o: String, // 开盘价
     n: String,
-    a: String, //基础货币交易量
+    a: String, // 基础货币交易量
 }
 
 pub(super) fn parse_candlestick(
@@ -336,10 +336,6 @@ pub(super) fn parse_candlestick(
     let ch: Vec<&str> = obj.result.n.split("_").collect();
     let symbol = [ch[1].to_string(), ch[2].to_string()].join("_");
 
-    // m, minute; H, hour; D, day; W, week; M, month; Y, year
-    // interval	10s
-
-    // let period = ch[0].to_string();
     let (begin_time, period) = match ch[0] {
         "10s" => (10, "s"),
         "1m" => (1, "m"),
@@ -351,7 +347,7 @@ pub(super) fn parse_candlestick(
         "8h" => (8, "H"),
         "1d" => (1, "D"),
         "7d" => (7, "D"),
-        _ => return Err(SimpleError::new("Unknown gate period format error {}")),
+        _ => return Err(SimpleError::new("Unknown gate period format error")),
     };
 
     // begin_time
