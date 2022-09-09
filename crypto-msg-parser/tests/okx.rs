@@ -1016,86 +1016,183 @@ mod bbo {
 mod candlestick {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_candlestick};
 
     #[test]
     fn spot() {
         let raw_msg = r#"{"arg":{"channel":"candle1m","instId":"BTC-USDT"},"data":[["1654154580000","29930.7","29936.3","29930.7","29936.3","0.0111536","333.86246417"]]}"#;
+        let received_at = 1654154580017;
 
         assert_eq!(
-            1654154580000,
-            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg)
-                .unwrap()
-                .unwrap()
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
+
         assert_eq!(
             "BTC-USDT",
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
+
+        let arr =
+            parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg, Some(received_at)).unwrap();
+        assert_eq!(1, arr.len());
+        let candlestick_msg = &arr[0];
+
+        assert_eq!("BTC-USDT", candlestick_msg.symbol);
+        assert_eq!(received_at, candlestick_msg.timestamp);
+        assert_eq!("1m", candlestick_msg.period);
+        assert_eq!(1654154580, candlestick_msg.begin_time);
+
+        assert_eq!(29930.7, candlestick_msg.open);
+        assert_eq!(29936.3, candlestick_msg.high);
+        assert_eq!(29930.7, candlestick_msg.low);
+        assert_eq!(29936.3, candlestick_msg.close);
+        assert_eq!(0.0111536, candlestick_msg.volume);
+        assert_eq!(Some(333.86246417), candlestick_msg.quote_volume);
     }
 
     #[test]
     fn inverse_future() {
         let raw_msg = r#"{"arg":{"channel":"candle1m","instId":"BTC-USD-220624"},"data":[["1654154580000","29901.6","29921.2","29901.6","29921.2","166","0.554"]]}"#;
-
+        let received_at = 1654154580017;
         assert_eq!(
-            1654154580000,
-            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
-                .unwrap()
-                .unwrap()
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
         );
         assert_eq!(
             "BTC-USD-220624",
             extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
         );
+
+        let arr = parse_candlestick(
+            EXCHANGE_NAME,
+            MarketType::InverseFuture,
+            raw_msg,
+            Some(received_at),
+        )
+        .unwrap();
+        assert_eq!(1, arr.len());
+        let candlestick_msg = &arr[0];
+
+        assert_eq!("BTC-USD-220624", candlestick_msg.symbol);
+        assert_eq!(received_at, candlestick_msg.timestamp);
+        assert_eq!("1m", candlestick_msg.period);
+        assert_eq!(1654154580, candlestick_msg.begin_time);
+
+        assert_eq!(29901.6, candlestick_msg.open);
+        assert_eq!(29921.2, candlestick_msg.high);
+        assert_eq!(29901.6, candlestick_msg.low);
+        assert_eq!(29921.2, candlestick_msg.close);
+        assert_eq!(0.554, candlestick_msg.volume);
+        assert_eq!(Some(16600.0), candlestick_msg.quote_volume);
     }
 
     #[test]
     fn linear_future() {
         let raw_msg = r#"{"arg":{"channel":"candle1m","instId":"BTC-USDT-220624"},"data":[["1654154520000","29963.4","29971.2","29958.8","29970.3","133","1.33"]]}"#;
-
+        let received_at = 1654154520017;
         assert_eq!(
-            1654154520000,
-            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
-                .unwrap()
-                .unwrap()
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
         );
         assert_eq!(
             "BTC-USDT-220624",
             extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
         );
+
+        let arr = parse_candlestick(
+            EXCHANGE_NAME,
+            MarketType::LinearFuture,
+            raw_msg,
+            Some(received_at),
+        )
+        .unwrap();
+        assert_eq!(1, arr.len());
+        let candlestick_msg = &arr[0];
+
+        assert_eq!("BTC-USDT-220624", candlestick_msg.symbol);
+        assert_eq!(received_at, candlestick_msg.timestamp);
+        assert_eq!("1m", candlestick_msg.period);
+        assert_eq!(1654154520, candlestick_msg.begin_time);
+
+        assert_eq!(29963.4, candlestick_msg.open);
+        assert_eq!(29971.2, candlestick_msg.high);
+        assert_eq!(29958.8, candlestick_msg.low);
+        assert_eq!(29970.3, candlestick_msg.close);
+        assert_eq!(1.33, candlestick_msg.volume);
+        assert_eq!(None, candlestick_msg.quote_volume);
     }
 
     #[test]
     fn inverse_swap() {
-        let raw_msg = r#"{"arg":{"channel":"tickers","instId":"BTC-USD-SWAP"},"data":[{"instType":"SWAP","instId":"BTC-USD-SWAP","last":"31771.6","lastSz":"16","askPx":"31771.6","askSz":"16","bidPx":"31771.5","bidSz":"1967","open24h":"31648.1","high24h":"32398.1","low24h":"31202.4","sodUtc0":"31717.3","sodUtc8":"32038.6","volCcy24h":"13760.6923","vol24h":"4364424","ts":"1654033212805"}]}"#;
-
+        let raw_msg = r#"{"arg":{"channel":"candle1m","instId":"BTC-USD-SWAP"},"data":[["1662716640000","20713.4","20721.5","20711.1","20721.5","1400","6.7561"]]}"#;
+        let received_at = 1662716640017;
         assert_eq!(
-            1654033212805,
-            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg)
-                .unwrap()
-                .unwrap()
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
         );
         assert_eq!(
             "BTC-USD-SWAP",
             extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
         );
+
+        let arr = parse_candlestick(
+            EXCHANGE_NAME,
+            MarketType::InverseSwap,
+            raw_msg,
+            Some(received_at),
+        )
+        .unwrap();
+        assert_eq!(1, arr.len());
+        let candlestick_msg = &arr[0];
+
+        assert_eq!("BTC-USD-SWAP", candlestick_msg.symbol);
+        assert_eq!(received_at, candlestick_msg.timestamp);
+        assert_eq!("1m", candlestick_msg.period);
+        assert_eq!(1662716640, candlestick_msg.begin_time);
+
+        assert_eq!(20713.4, candlestick_msg.open);
+        assert_eq!(20721.5, candlestick_msg.high);
+        assert_eq!(20711.1, candlestick_msg.low);
+        assert_eq!(20721.5, candlestick_msg.close);
+        assert_eq!(6.7561, candlestick_msg.volume);
+        assert_eq!(Some(140000.0), candlestick_msg.quote_volume);
     }
 
     #[test]
     fn linear_swap() {
-        let raw_msg = r#"{"arg":{"channel":"tickers","instId":"BTC-USDT-SWAP"},"data":[{"instType":"SWAP","instId":"BTC-USDT-SWAP","last":"31807.4","lastSz":"3","askPx":"31807.4","askSz":"4","bidPx":"31807.3","bidSz":"482","open24h":"31671.1","high24h":"32450","low24h":"31234.8","sodUtc0":"31743.6","sodUtc8":"32052.7","volCcy24h":"122143.88","vol24h":"12214388","ts":"1654033232461"}]}"#;
-
+        let raw_msg = r#"{"arg":{"channel":"candle1m","instId":"BTC-USDT-SWAP"},"data":[["1662716640000","20702.4","20710","20702.3","20703.8","4070","40.7"]]}"#;
+        let received_at = 1662716640017;
         assert_eq!(
-            1654033232461,
-            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg)
-                .unwrap()
-                .unwrap()
+            None,
+            extract_timestamp(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
         );
         assert_eq!(
             "BTC-USDT-SWAP",
             extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
         );
+
+        let arr = parse_candlestick(
+            EXCHANGE_NAME,
+            MarketType::LinearSwap,
+            raw_msg,
+            Some(received_at),
+        )
+        .unwrap();
+        assert_eq!(1, arr.len());
+        let candlestick_msg = &arr[0];
+
+        assert_eq!("BTC-USDT-SWAP", candlestick_msg.symbol);
+        assert_eq!(received_at, candlestick_msg.timestamp);
+        assert_eq!("1m", candlestick_msg.period);
+        assert_eq!(1662716640, candlestick_msg.begin_time);
+
+        assert_eq!(20702.4, candlestick_msg.open);
+        assert_eq!(20710.0, candlestick_msg.high);
+        assert_eq!(20702.3, candlestick_msg.low);
+        assert_eq!(20703.8, candlestick_msg.close);
+        assert_eq!(40.7, candlestick_msg.volume);
+        assert_eq!(None, candlestick_msg.quote_volume);
     }
 
     #[test]

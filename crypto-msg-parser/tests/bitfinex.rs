@@ -423,7 +423,7 @@ mod candlestick {
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
 
-        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap();
+        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap();
         assert_eq!(3, arr.len());
 
         let candlestick_msg = &arr[0];
@@ -454,7 +454,7 @@ mod candlestick {
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
         let candlestick_msg =
-            &parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()[0];
+            &parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap()[0];
 
         assert_eq!("tBTCUST", candlestick_msg.symbol);
         assert_eq!(1654075080000, candlestick_msg.timestamp);
@@ -482,7 +482,7 @@ mod candlestick {
             extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
         );
 
-        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap();
+        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap();
         assert_eq!(3, arr.len());
 
         let candlestick_msg = &arr[0];
@@ -514,7 +514,7 @@ mod candlestick {
         );
 
         let candlestick_msg =
-            &parse_candlestick(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()[0];
+            &parse_candlestick(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap()[0];
 
         assert_eq!("tBTCF0:USTF0", candlestick_msg.symbol);
         assert_eq!(1654076040000, candlestick_msg.timestamp);

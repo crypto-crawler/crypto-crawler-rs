@@ -2,7 +2,9 @@ use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
 use super::super::utils::calc_quantity_and_volume;
-use crypto_message::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{
+    BboMsg, CandlestickMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide,
+};
 
 use super::EXCHANGE_NAME;
 use chrono::DateTime;
@@ -314,6 +316,13 @@ pub(super) fn parse_l2(
     Ok(orderbooks)
 }
 
-pub(crate) fn parse_bbo(_market_type: MarketType, _msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
+pub(super) fn parse_bbo(_market_type: MarketType, _msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
     todo!()
+}
+
+pub(super) fn parse_candlestick(
+    _market_type: MarketType,
+    _msg: &str,
+) -> Result<Vec<CandlestickMsg>, SimpleError> {
+    todo!("not implemented")
 }

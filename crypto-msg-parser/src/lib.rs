@@ -268,6 +268,7 @@ pub fn parse_candlestick(
     exchange: &str,
     market_type: MarketType,
     msg: &str,
+    received_at: Option<i64>,
 ) -> Result<Vec<CandlestickMsg>, SimpleError> {
     match exchange {
         "binance" => exchanges::binance::parse_candlestick(market_type, msg),
@@ -275,6 +276,11 @@ pub fn parse_candlestick(
         "huobi" => exchanges::huobi::parse_candlestick(market_type, msg),
         "kucoin" => exchanges::kucoin::parse_candlestick(market_type, msg),
         "bybit" => exchanges::bybit::parse_candlestick(market_type, msg),
+        "okx" => exchanges::okx::parse_candlestick(
+            market_type,
+            msg,
+            received_at.expect("OKX candlestick messages don't have timestamp"),
+        ),
         _ => Err(SimpleError::new(format!("Unknown exchange {}", exchange))),
     }
 }
