@@ -1,7 +1,9 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crypto_message::{BboMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{
+    BboMsg, CandlestickMsg, FundingRateMsg, Order, OrderBookMsg, TradeMsg, TradeSide,
+};
 
 use super::{super::utils::calc_quantity_and_volume, EXCHANGE_NAME};
 use serde::{Deserialize, Serialize};
@@ -384,4 +386,83 @@ pub(super) fn parse_funding_rate(
         funding_rates[0].json = msg.to_string();
     }
     Ok(funding_rates)
+}
+
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawKlineMsgWithTime {
+    e: String, // Event type
+    E: i64,    // Event time
+    s: String, // Symbol
+    k: RawKlineMsg,
+}
+
+// See:
+// * https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-streams
+// * https://binance-docs.github.io/apidocs/futures/en/#kline-candlestick-streams
+// * https://binance-docs.github.io/apidocs/delivery/en/#kline-candlestick-streams
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawKlineMsg {
+    t: i64,    // Kline start time
+    T: u64,    // Kline close time
+    s: String, // Symbol
+    i: String, // Interval
+    f: u64,    // First trade ID
+    L: u64,    // Last trade ID
+    o: String, // Open price
+    c: String, // Close price
+    h: String, // High price
+    l: String, // Low price
+    v: String, // Base asset volume
+    n: u64,    // Number of trades
+    x: bool,   // Is this kline closed?
+    q: String, // Quote asset volume
+    V: String, // Taker buy base asset volume
+    Q: String, // Taker buy quote asset volume
+    B: String, // Ignore
+}
+
+pub(super) fn parse_candlestick(
+    market_type: MarketType,
+    msg: &str,
+) -> Result<Vec<CandlestickMsg>, SimpleError> {
+    let obj = serde_json::from_str::<WebsocketMsg<RawKlineMsgWithTime>>(msg)
+        .map_err(SimpleError::from)?;
+
+    let symbol = obj.data.k.s.as_str();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+
+    let v = obj.data.k.v.parse::<f64>().unwrap();
+    let q = obj.data.k.q.parse::<f64>().unwrap();
+    let (volume, quote_volume) = if market_type == MarketType::InverseFuture
+        || market_type == MarketType::InverseSwap
+    {
+        let contract_value =
+            crypto_contract_value::get_contract_value(EXCHANGE_NAME, market_type, &pair).unwrap();
+        let quote_volume = v * contract_value;
+        (q, quote_volume)
+    } else {
+        (v, q)
+    };
+
+    let kline_msg = CandlestickMsg {
+        exchange: EXCHANGE_NAME.to_string(),
+        market_type,
+        msg_type: MessageType::Candlestick,
+        symbol: symbol.to_string(),
+        pair,
+        timestamp: obj.data.E,
+        period: obj.data.k.i,
+        begin_time: obj.data.k.t / 1000,
+        open: obj.data.k.o.parse().unwrap(),
+        high: obj.data.k.h.parse().unwrap(),
+        low: obj.data.k.l.parse().unwrap(),
+        close: obj.data.k.c.parse().unwrap(),
+        volume,
+        quote_volume: Some(quote_volume),
+        json: msg.to_string(),
+    };
+
+    Ok(vec![kline_msg])
 }
