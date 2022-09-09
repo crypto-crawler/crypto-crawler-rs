@@ -1234,7 +1234,7 @@ mod ticker {
 mod candlestick {
     use super::EXCHANGE_NAME;
     use crypto_market_type::MarketType;
-    use crypto_msg_parser::{extract_symbol, extract_timestamp};
+    use crypto_msg_parser::{extract_symbol, extract_timestamp, parse_candlestick};
 
     #[test]
     fn spot() {
@@ -1251,6 +1251,22 @@ mod candlestick {
                 .unwrap()
                 .unwrap()
         );
+
+        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap();
+        assert_eq!(1, arr.len());
+        let candlestick_msg = &arr[0];
+
+        assert_eq!("BTCUSDT", candlestick_msg.symbol);
+        assert_eq!(1653818762502, candlestick_msg.timestamp);
+        assert_eq!("1m", candlestick_msg.period);
+        assert_eq!(1653818760, candlestick_msg.begin_time);
+
+        assert_eq!(29038.46, candlestick_msg.open);
+        assert_eq!(29038.47, candlestick_msg.high);
+        assert_eq!(29038.46, candlestick_msg.low);
+        assert_eq!(29038.47, candlestick_msg.close);
+        assert_eq!(0.20926, candlestick_msg.volume);
+        assert_eq!(Some(6076.5891832), candlestick_msg.quote_volume);
     }
 
     #[test]
@@ -1268,6 +1284,22 @@ mod candlestick {
                 .unwrap()
                 .unwrap()
         );
+
+        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap();
+        assert_eq!(1, arr.len());
+        let candlestick_msg = &arr[0];
+
+        assert_eq!("BTCUSD_220624", candlestick_msg.symbol);
+        assert_eq!(1653818854836, candlestick_msg.timestamp);
+        assert_eq!("1m", candlestick_msg.period);
+        assert_eq!(1653818820, candlestick_msg.begin_time);
+
+        assert_eq!(29105.5, candlestick_msg.open);
+        assert_eq!(29107.9, candlestick_msg.high);
+        assert_eq!(29096.9, candlestick_msg.low);
+        assert_eq!(29107.9, candlestick_msg.close);
+        assert_eq!(0.65623556, candlestick_msg.volume);
+        assert_eq!(Some(19100.0), candlestick_msg.quote_volume);
     }
 
     #[test]
@@ -1285,6 +1317,22 @@ mod candlestick {
                 .unwrap()
                 .unwrap()
         );
+
+        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::LinearFuture, raw_msg).unwrap();
+        assert_eq!(1, arr.len());
+        let candlestick_msg = &arr[0];
+
+        assert_eq!("BTCUSDT_220624", candlestick_msg.symbol);
+        assert_eq!(1653818905630, candlestick_msg.timestamp);
+        assert_eq!("1m", candlestick_msg.period);
+        assert_eq!(1653818880, candlestick_msg.begin_time);
+
+        assert_eq!(29135.9, candlestick_msg.open);
+        assert_eq!(29149.9, candlestick_msg.high);
+        assert_eq!(29135.9, candlestick_msg.low);
+        assert_eq!(29141.5, candlestick_msg.close);
+        assert_eq!(1.447, candlestick_msg.volume);
+        assert_eq!(Some(42169.8708), candlestick_msg.quote_volume);
     }
 
     #[test]
@@ -1302,6 +1350,22 @@ mod candlestick {
                 .unwrap()
                 .unwrap()
         );
+
+        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap();
+        assert_eq!(1, arr.len());
+        let candlestick_msg = &arr[0];
+
+        assert_eq!("ETHUSD_PERP", candlestick_msg.symbol);
+        assert_eq!(1653818962599, candlestick_msg.timestamp);
+        assert_eq!("1m", candlestick_msg.period);
+        assert_eq!(1653818940, candlestick_msg.begin_time);
+
+        assert_eq!(1786.56, candlestick_msg.open);
+        assert_eq!(1789.24, candlestick_msg.high);
+        assert_eq!(1785.25, candlestick_msg.low);
+        assert_eq!(1788.67, candlestick_msg.close);
+        assert_eq!(2246.59444657, candlestick_msg.volume);
+        assert_eq!(Some(4016010.0), candlestick_msg.quote_volume);
     }
 
     #[test]
@@ -1319,6 +1383,22 @@ mod candlestick {
                 .unwrap()
                 .unwrap()
         );
+
+        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap();
+        assert_eq!(1, arr.len());
+        let candlestick_msg = &arr[0];
+
+        assert_eq!("BTCUSDT", candlestick_msg.symbol);
+        assert_eq!(1653819041520, candlestick_msg.timestamp);
+        assert_eq!("1M", candlestick_msg.period);
+        assert_eq!(1651363200, candlestick_msg.begin_time);
+
+        assert_eq!(37614.40, candlestick_msg.open);
+        assert_eq!(40071.70, candlestick_msg.high);
+        assert_eq!(26631.0, candlestick_msg.low);
+        assert_eq!(29075.5, candlestick_msg.close);
+        assert_eq!(13431981.671, candlestick_msg.volume);
+        assert_eq!(Some(423075730671.12853), candlestick_msg.quote_volume);
     }
 }
 
