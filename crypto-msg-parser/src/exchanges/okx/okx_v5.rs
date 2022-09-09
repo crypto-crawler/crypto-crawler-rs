@@ -50,6 +50,19 @@ struct RawFundingRateMsg {
     extra: HashMap<String, Value>,
 }
 
+// https://www.okx.com/docs-v5/en/#websocket-api-public-channel-candlesticks-channel
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawCandlestickMsg {
+    ts: String,     // Opening time of the candlestick
+    open: String,   // Open price
+    high: String,   // Gighest price
+    low: String,    // Lowest price
+    close: String,  // Close price
+    vol: String,    // Trading volume, with a unit of contract
+    volCcy: String, // Trading volume, with a unit of currency
+}
+
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct Arg {
@@ -111,24 +124,20 @@ pub(super) fn extract_timestamp(msg: &str) -> Result<Option<i64>, SimpleError> {
             return Ok(None);
         }
         let channel = ws_msg.arg.channel.as_str();
-        let timestamp = ws_msg
-            .data
-            .iter()
-            .map(|x| {
-                (if channel.starts_with("candle") {
-                    x[0].as_str().unwrap()
-                } else {
-                    x["ts"].as_str().unwrap()
-                })
-                .parse::<i64>()
-                .unwrap()
-            })
-            .max();
-
-        if timestamp.is_none() {
-            Err(SimpleError::new(format!("data is empty in {}", msg)))
+        if channel.starts_with("candle") {
+            Ok(None)
         } else {
-            Ok(timestamp)
+            let timestamp = ws_msg
+                .data
+                .iter()
+                .map(|x| x["ts"].as_str().unwrap().parse::<i64>().unwrap())
+                .max();
+
+            if timestamp.is_none() {
+                Err(SimpleError::new(format!("data is empty in {}", msg)))
+            } else {
+                Ok(timestamp)
+            }
         }
     } else if let Ok(rest_msg) = serde_json::from_str::<RestfulMsg<HashMap<String, Value>>>(msg) {
         if rest_msg.code != "0" {
@@ -396,130 +405,63 @@ struct WebKlineMsg<T: Sized> {
     arg: Arg,
     data: Vec<T>,
 }
-#[derive(Serialize, Deserialize)]
-#[allow(non_snake_case)]
-struct RawKlineStopMsg {
-    ts: String, // Data generation time, Unix timestamp format in milliseconds, e.g. 1597026383085
-    open: String, // Open price
-    high: String, // highest price
-    low: String, // Lowest price
-    close: String, // Close price
-    vol: String, // Trading volume, with a unit of contact.
-    volCcy: String, // Trading volume, with a unit of currency.
-}
-#[derive(Serialize, Deserialize)]
-#[allow(non_snake_case)]
-struct RawKlineSwapMsg {
-    instType: String,
-    instId: String,
-    last: String,
-    lastSz: String,
-    askPx: String,
-    askSz: String,
-    bidPx: String,
-    bidSz: String,
-    open24h: String,
-    high24h: String,
-    low24h: String,
-    sodUtc0: String,
-    sodUtc8: String,
-    volCcy24h: String,
-    vol24h: String,
-    ts: String,
-    #[serde(flatten)]
-    extra: HashMap<String, Value>,
-}
 
-pub(super) fn parse_candlestick_spot(
+pub(super) fn parse_candlestick(
     market_type: MarketType,
     msg: &str,
+    received_at: i64,
 ) -> Result<Vec<CandlestickMsg>, SimpleError> {
-    let mut obj = serde_json::from_str::<WebKlineMsg<RawKlineStopMsg>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebBboMsg<RawKlineMsg>",
-            msg
-        ))
-    })?;
+    let ws_msg =
+        serde_json::from_str::<WebKlineMsg<RawCandlestickMsg>>(msg).map_err(SimpleError::from)?;
 
-    let symbol = obj.arg.instId.to_string();
-    // candle1Y
-    // candle6M candle3M candle1M
-    // candle1W
-    // candle1D candle2D candle3D candle5D
-    // candle12H candle6H candle4H candle2H candle1H
-    // candle30m candle15m candle5m candle3m candle1m
-    let s_period = obj.arg.channel.to_string().replace("utc", "");
-    let period = &s_period[6..s_period.len()];
-    // 1m, 3m, 5m, 15m, 30m, 1H, 1D, 1M, 1W, 1Y
-    let len = period.len();
+    let channel = ws_msg.arg.channel.as_str();
+    debug_assert!(channel.starts_with("candle"));
+    debug_assert_eq!(1, ws_msg.data.len());
+    let obj = &ws_msg.data[0];
 
-    let (period, begin_time) = match &period[len - 1..] {
-        "m" => ("m", &period[..len - 1]),
-        "M" => ("M", &period[..len - 1]),
-        "D" => ("D", &period[..len - 1]),
-        "Y" => ("Y", &period[..len - 1]),
-        "W" => ("W", &period[..len - 1]),
-        "H" => ("H", &period[..len - 1]),
-        _ => return Err(SimpleError::new("Unknown okx period format error")),
+    let symbol = ws_msg.arg.instId.as_str();
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
+
+    let period = if let Some(tmp) = channel.strip_suffix("utc") {
+        tmp.strip_prefix("candle").unwrap()
+    } else {
+        channel.strip_prefix("candle").unwrap()
     };
 
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
-    let ojb_data = obj.data.get_mut(0).unwrap();
+    let (volume, quote_volume) = match market_type {
+        MarketType::Spot => (obj.vol.parse().unwrap(), Some(obj.volCcy.parse().unwrap())),
+        MarketType::InverseFuture | MarketType::InverseSwap => {
+            let vol = obj.vol.parse::<f64>().unwrap();
+            let vol_ccy = obj.volCcy.parse::<f64>().unwrap();
+            let contract_value =
+                crypto_contract_value::get_contract_value(EXCHANGE_NAME, market_type, &pair)
+                    .unwrap();
+            (vol_ccy, Some(vol * contract_value))
+        }
+        MarketType::LinearFuture | MarketType::LinearSwap => (obj.volCcy.parse().unwrap(), None),
+        _ => Err(SimpleError::new(format!(
+            "Unknown market type: {} of {}",
+            market_type, EXCHANGE_NAME
+        )))?,
+    };
 
-    let kline_msg = CandlestickMsg {
+    let candlestick_msg = CandlestickMsg {
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
-        symbol,
-        pair,
         msg_type: MessageType::Candlestick,
-        timestamp: ojb_data.ts.parse().unwrap(),
-        json: msg.to_string(),
-        open: ojb_data.open.parse().unwrap(),
-        high: ojb_data.high.parse().unwrap(),
-        low: ojb_data.low.parse().unwrap(),
-        close: ojb_data.close.parse().unwrap(),
-        volume: ojb_data.vol.parse().unwrap(),
-        quote_volume: None,
-        period: period.to_string(),
-        begin_time: begin_time.parse().unwrap(),
-    };
-
-    Ok(vec![kline_msg])
-}
-
-pub(super) fn parse_candlestick_inverse_swap(
-    market_type: MarketType,
-    msg: &str,
-) -> Result<Vec<CandlestickMsg>, SimpleError> {
-    let mut obj = serde_json::from_str::<WebKlineMsg<RawKlineSwapMsg>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebBboMsg<RawBboSwapMsg>",
-            msg
-        ))
-    })?;
-
-    let symbol = obj.arg.instId.to_string();
-
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
-    let ojb_data = obj.data.get_mut(0).unwrap();
-
-    let kline_msg = CandlestickMsg {
-        exchange: EXCHANGE_NAME.to_string(),
-        market_type,
         symbol: symbol.to_string(),
         pair,
-        msg_type: MessageType::Candlestick,
-        timestamp: ojb_data.ts.parse().unwrap(),
+        timestamp: received_at,
+        period: period.to_string(),
+        begin_time: obj.ts.parse::<i64>().unwrap() / 1000,
+        open: obj.open.parse().unwrap(),
+        high: obj.high.parse().unwrap(),
+        low: obj.low.parse().unwrap(),
+        close: obj.close.parse().unwrap(),
+        volume,
+        quote_volume,
         json: msg.to_string(),
-        open: ojb_data.open24h.parse().unwrap(),
-        high: ojb_data.high24h.parse().unwrap(),
-        low: ojb_data.low24h.parse().unwrap(),
-        close: ojb_data.volCcy24h.parse().unwrap(),
-        volume: ojb_data.vol24h.parse().unwrap(),
-        quote_volume: None,
-        period: "H".to_string(),
-        begin_time: 24,
     };
 
-    Ok(vec![kline_msg])
+    Ok(vec![candlestick_msg])
 }

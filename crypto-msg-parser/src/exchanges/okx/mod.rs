@@ -134,13 +134,14 @@ pub(crate) fn parse_bbo(market_type: MarketType, msg: &str) -> Result<Vec<BboMsg
 pub(crate) fn parse_candlestick(
     market_type: MarketType,
     msg: &str,
+    received_at: i64,
 ) -> Result<Vec<CandlestickMsg>, SimpleError> {
-    match market_type {
-        MarketType::Spot => okx_v5::parse_candlestick_spot(market_type, msg),
-        MarketType::InverseSwap => okx_v5::parse_candlestick_inverse_swap(market_type, msg),
-        _ => Err(SimpleError::new(format!(
-            "Unknown okx market type {}",
-            market_type
-        ))),
+    let obj = serde_json::from_str::<HashMap<String, Value>>(msg).map_err(SimpleError::from)?;
+    if obj.contains_key("arg") && obj.contains_key("data") {
+        okx_v5::parse_candlestick(market_type, msg, received_at)
+    } else if obj.contains_key("table") && obj.contains_key("data") {
+        okx_v3::parse_candlestick(market_type, msg)
+    } else {
+        panic!("Unknown msg format {}", msg)
     }
 }

@@ -1167,7 +1167,7 @@ mod candlestick {
             extract_symbol(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap()
         );
 
-        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg).unwrap();
+        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::Spot, raw_msg, None).unwrap();
         assert_eq!(1, arr.len());
         let candlestick_msg = &arr[0];
 
@@ -1199,7 +1199,8 @@ mod candlestick {
             extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
         );
 
-        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg).unwrap();
+        let arr =
+            parse_candlestick(EXCHANGE_NAME, MarketType::InverseFuture, raw_msg, None).unwrap();
         assert_eq!(1, arr.len());
         let candlestick_msg = &arr[0];
 
@@ -1234,7 +1235,7 @@ mod candlestick {
             extract_symbol(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap()
         );
 
-        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg).unwrap();
+        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::InverseSwap, raw_msg, None).unwrap();
         assert_eq!(1, arr.len());
         let candlestick_msg = &arr[0];
 
@@ -1266,7 +1267,7 @@ mod candlestick {
             extract_symbol(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap()
         );
 
-        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg).unwrap();
+        let arr = parse_candlestick(EXCHANGE_NAME, MarketType::LinearSwap, raw_msg, None).unwrap();
         assert_eq!(1, arr.len());
         let candlestick_msg = &arr[0];
 
