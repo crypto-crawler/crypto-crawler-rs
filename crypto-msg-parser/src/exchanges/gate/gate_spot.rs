@@ -1,6 +1,4 @@
-use crate::{OrderBookMsg, TradeMsg};
-
-use crypto_message::BboMsg;
+use crypto_message::{BboMsg, CandlestickMsg, OrderBookMsg, TradeMsg};
 use serde_json::Value;
 use simple_error::SimpleError;
 use std::collections::HashMap;
@@ -99,6 +97,19 @@ pub(super) fn parse_bbo(msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
         gate_spot_20210916::parse_bbo(msg)
     } else if json_obj.contains_key("result") {
         gate_spot_current::parse_bbo(msg)
+    } else {
+        Err(SimpleError::new(format!("Unknown message format: {}", msg)))
+    }
+}
+
+pub(super) fn parse_candlestick(msg: &str) -> Result<Vec<CandlestickMsg>, SimpleError> {
+    let json_obj =
+        serde_json::from_str::<HashMap<String, Value>>(msg).map_err(SimpleError::from)?;
+    if json_obj.contains_key("params") {
+        #[allow(deprecated)]
+        gate_spot_20210916::parse_candlestick(msg)
+    } else if json_obj.contains_key("result") {
+        gate_spot_current::parse_candlestick(msg)
     } else {
         Err(SimpleError::new(format!("Unknown message format: {}", msg)))
     }

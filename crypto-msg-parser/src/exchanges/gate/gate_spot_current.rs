@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use super::messages::{WebsocketCandlest, WebsocketMsg};
+use super::messages::WebsocketMsg;
 use crypto_message::{BboMsg, CandlestickMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -75,6 +75,20 @@ struct RawBboMsg {
     A: String, // best ask amount
     #[serde(flatten)]
     extra: HashMap<String, Value>,
+}
+
+// https://www.gate.io/docs/developers/apiv4/ws/en/#candlesticks-channel
+#[derive(Serialize, Deserialize)]
+#[allow(non_snake_case)]
+struct RawCandlestickMsg {
+    t: String, // Unix timestamp in seconds
+    v: String, // Total volume
+    c: String, // Close price
+    h: String, // Highest price
+    l: String, // Lowest price
+    o: String, // Open price
+    n: String, // Name of the subscription, in the format of <interval>_<cp>
+    a: String, // Total volume in quote currency
 }
 
 pub(super) fn extract_symbol(msg: &str) -> Result<String, SimpleError> {
@@ -310,66 +324,36 @@ pub(super) fn parse_bbo(msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
     Ok(vec![bbo_msg])
 }
 
-#[derive(Serialize, Deserialize)]
-struct RawKlineMsg {
-    t: String, // 秒 s 精度的 Unix 时间戳
-    v: String, // integer 交易量，只有市场行情的 K 线数据里有该值
-    c: String, // 收盘价
-    h: String, // 最高价
-    l: String, // 最低价
-    o: String, // 开盘价
-    n: String,
-    a: String, // 基础货币交易量
-}
+pub(super) fn parse_candlestick(msg: &str) -> Result<Vec<CandlestickMsg>, SimpleError> {
+    let ws_msg =
+        serde_json::from_str::<WebsocketMsg<RawCandlestickMsg>>(msg).map_err(SimpleError::from)?;
+    debug_assert_eq!(ws_msg.channel, "spot.candlesticks");
+    debug_assert_eq!(ws_msg.event, "update");
+    let result = ws_msg.result;
 
-pub(super) fn parse_candlestick(
-    market_type: MarketType,
-    msg: &str,
-) -> Result<Vec<CandlestickMsg>, SimpleError> {
-    let obj = serde_json::from_str::<WebsocketCandlest<RawKlineMsg>>(msg).map_err(|_e| {
-        SimpleError::new(format!(
-            "Failed to deserialize {} to WebsocketCandlest<RawKlineMsg>",
-            msg
-        ))
-    })?;
-
-    let ch: Vec<&str> = obj.result.n.split("_").collect();
-    let symbol = [ch[1].to_string(), ch[2].to_string()].join("_");
-
-    let (begin_time, period) = match ch[0] {
-        "10s" => (10, "s"),
-        "1m" => (1, "m"),
-        "5m" => (5, "m"),
-        "15m" => (15, "m"),
-        "30m" => (30, "m"),
-        "1h" => (1, "H"),
-        "4h" => (4, "H"),
-        "8h" => (8, "H"),
-        "1d" => (1, "D"),
-        "7d" => (7, "D"),
-        _ => return Err(SimpleError::new("Unknown gate period format error")),
+    let (period, symbol) = {
+        let pos = result.n.find('_').unwrap();
+        (&result.n[..pos], &result.n[pos + 1..])
     };
+    let pair = crypto_pair::normalize_pair(symbol, EXCHANGE_NAME).unwrap();
 
-    // begin_time
-    let pair = crypto_pair::normalize_pair(&symbol, EXCHANGE_NAME).unwrap();
-
-    let kline_msg = CandlestickMsg {
+    let candlestick_msg = CandlestickMsg {
         exchange: EXCHANGE_NAME.to_string(),
-        market_type,
-        symbol,
-        pair,
+        market_type: MarketType::Spot,
         msg_type: MessageType::Candlestick,
-        timestamp: obj.result.t.parse::<i64>().unwrap(),
-        json: msg.to_string(),
-        open: obj.result.o.parse::<f64>().unwrap(),
-        high: obj.result.h.parse::<f64>().unwrap(),
-        low: obj.result.l.parse::<f64>().unwrap(),
-        close: obj.result.c.parse::<f64>().unwrap(),
-        volume: obj.result.v.parse::<f64>().unwrap(),
-        quote_volume: None,
+        symbol: symbol.to_string(),
+        pair,
+        timestamp: ws_msg.time * 1000,
         period: period.to_string(),
-        begin_time,
+        begin_time: result.t.parse().unwrap(),
+        open: result.o.parse().unwrap(),
+        high: result.h.parse().unwrap(),
+        low: result.l.parse().unwrap(),
+        close: result.c.parse().unwrap(),
+        volume: result.a.parse().unwrap(),
+        quote_volume: result.v.parse().ok(),
+        json: msg.to_string(),
     };
 
-    Ok(vec![kline_msg])
+    Ok(vec![candlestick_msg])
 }

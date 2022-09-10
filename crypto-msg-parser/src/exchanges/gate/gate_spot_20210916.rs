@@ -1,7 +1,7 @@
 use crypto_market_type::MarketType;
 use crypto_msg_type::MessageType;
 
-use crypto_message::{BboMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
+use crypto_message::{BboMsg, CandlestickMsg, Order, OrderBookMsg, TradeMsg, TradeSide};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -185,5 +185,9 @@ pub(super) fn parse_l2_topk(_msg: &str) -> Result<Vec<OrderBookMsg>, SimpleError
 }
 
 pub(super) fn parse_bbo(_msg: &str) -> Result<Vec<BboMsg>, SimpleError> {
+    todo!()
+}
+
+pub(super) fn parse_candlestick(_msg: &str) -> Result<Vec<CandlestickMsg>, SimpleError> {
     todo!()
 }
