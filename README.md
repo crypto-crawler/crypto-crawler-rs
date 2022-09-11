@@ -9,9 +9,9 @@ A rock-solid cryprocurrency crawler.
 
 ## Quickstart
 
-Use the [carbonbot](https://github.com/crypto-crawler/carbonbot) command line tool to crawl data.
+Use the [carbonbot](https://github.com/crypto-crawler/carbonbot) binary to crawl data.
 
-If you need more control and customization, you can use the [crypto-crawler](./crypto-crawler) library.
+If you need more control and customization, use this [crypto-crawler](./crypto-crawler) library.
 
 ## Architecture
 
@@ -27,6 +27,6 @@ If you need more control and customization, you can use the [crypto-crawler](./c
 
 ## How to parse raw messages
 
-You can use the [crypto-msg-parser](https://github.com/crypto-crawler/crypto-msg-parser) library to parse raw messages.
+Use the [crypto-msg-parser](https://github.com/crypto-crawler/crypto-msg-parser) library to parse raw messages.
 
 Crawlers should always preserve the original data without any parsing.
