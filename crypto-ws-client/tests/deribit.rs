@@ -36,7 +36,7 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_trade,
-            &["BTC-26AUG22".to_string(), "BTC-30SEP22".to_string()]
+            &["BTC-26AUG22".to_string(), "BTC-30DEC22".to_string()]
         );
     }
 
@@ -45,7 +45,7 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_ticker,
-            &["BTC-30SEP22".to_string()]
+            &["BTC-30DEC22".to_string()]
         );
     }
 
@@ -54,7 +54,7 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_orderbook,
-            &["BTC-30SEP22".to_string()]
+            &["BTC-30DEC22".to_string()]
         );
     }
 
@@ -63,19 +63,19 @@ mod deribit_inverse_future {
         gen_test_code!(
             DeribitWSClient,
             subscribe_orderbook_topk,
-            &["BTC-30SEP22".to_string()]
+            &["BTC-30DEC22".to_string()]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(DeribitWSClient, subscribe_bbo, &["BTC-30SEP22".to_string()]);
+        gen_test_code!(DeribitWSClient, subscribe_bbo, &["BTC-30DEC22".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(DeribitWSClient, &[("BTC-30SEP22".to_string(), 60)]);
-        gen_test_subscribe_candlestick!(DeribitWSClient, &[("BTC-30SEP22".to_string(), 86400)]);
+        gen_test_subscribe_candlestick!(DeribitWSClient, &[("BTC-30DEC22".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(DeribitWSClient, &[("BTC-30DEC22".to_string(), 86400)]);
     }
 }
 
@@ -154,8 +154,8 @@ mod deribit_option {
     const SYMBOLS: &[&str] = &[
         "BTC-26AUG22-23000-C",
         "BTC-26AUG22-45000-C",
-        "BTC-30SEP22-40000-C",
-        "BTC-30SEP22-60000-C",
+        "BTC-30DEC22-40000-C",
+        "BTC-30DEC22-60000-C",
     ];
 
     #[ignore = "lack of liquidity"]

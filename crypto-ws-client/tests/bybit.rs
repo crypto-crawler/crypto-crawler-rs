@@ -10,7 +10,7 @@ mod bybit_inverse_future {
         gen_test_code!(
             BybitInverseWSClient,
             subscribe,
-            &[("trade".to_string(), "BTCUSDU22".to_string())]
+            &[("trade".to_string(), "BTCUSDZ22".to_string())]
         );
     }
 
@@ -19,7 +19,7 @@ mod bybit_inverse_future {
         gen_test_code!(
             BybitInverseWSClient,
             send,
-            &[r#"{"op":"subscribe","args":["trade.BTCUSDU22"]}"#.to_string()]
+            &[r#"{"op":"subscribe","args":["trade.BTCUSDZ22"]}"#.to_string()]
         );
     }
 
@@ -28,7 +28,7 @@ mod bybit_inverse_future {
         gen_test_code!(
             BybitInverseWSClient,
             subscribe_trade,
-            &["BTCUSDU22".to_string()]
+            &["BTCUSDZ22".to_string()]
         );
     }
 
@@ -37,7 +37,7 @@ mod bybit_inverse_future {
         gen_test_code!(
             BybitInverseWSClient,
             subscribe_orderbook,
-            &["BTCUSDU22".to_string()]
+            &["BTCUSDZ22".to_string()]
         );
     }
 
@@ -46,16 +46,16 @@ mod bybit_inverse_future {
         gen_test_code!(
             BybitInverseWSClient,
             subscribe_ticker,
-            &["BTCUSDU22".to_string()]
+            &["BTCUSDZ22".to_string()]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
-        gen_test_subscribe_candlestick!(BybitInverseWSClient, &[("BTCUSDU22".to_string(), 60)]);
+        gen_test_subscribe_candlestick!(BybitInverseWSClient, &[("BTCUSDZ22".to_string(), 60)]);
         gen_test_subscribe_candlestick!(
             BybitInverseWSClient,
-            &[("BTCUSDU22".to_string(), 2592000)]
+            &[("BTCUSDZ22".to_string(), 2592000)]
         );
     }
 }

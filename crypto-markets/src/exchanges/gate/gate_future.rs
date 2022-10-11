@@ -122,7 +122,7 @@ fn to_market(raw_market: &FutureMarket) -> Market {
             notional_max: None,
         }),
         contract_value: Some(quanto_multiplier),
-        delivery_date: Some((raw_market.expire_time * 1000) as u64),
+        delivery_date: Some(raw_market.expire_time * 1000),
         info: serde_json::to_value(raw_market)
             .unwrap()
             .as_object()

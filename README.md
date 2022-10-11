@@ -11,7 +11,7 @@ A rock-solid cryprocurrency crawler.
 
 Use the [carbonbot](https://github.com/crypto-crawler/carbonbot) binary to crawl data.
 
-If you need more control and customization, use this [crypto-crawler](./crypto-crawler) library.
+If you need more control and customization, use this library.
 
 ## Architecture
 

@@ -84,7 +84,7 @@ fn fetch_inverse_swap_markets() {
     assert_eq!(btcusd_perp.precision.lot_size, 1.0);
     let quantity_limit = btcusd_perp.quantity_limit.unwrap();
     assert_eq!(quantity_limit.min.unwrap(), 1.0);
-    assert_eq!(quantity_limit.max, Some(30000.0));
+    assert_eq!(quantity_limit.max, Some(50000.0));
 }
 
 #[test]
@@ -103,7 +103,7 @@ fn fetch_linear_swap_markets() {
     assert_eq!(btcusdt.precision.lot_size, 1.0);
     let quantity_limit = btcusdt.quantity_limit.unwrap();
     assert_eq!(quantity_limit.min.unwrap(), 1.0);
-    assert_eq!(quantity_limit.max, Some(2000000.0));
+    assert_eq!(quantity_limit.max, Some(5000000.0));
 }
 
 #[test_case(MarketType::InverseSwap)]

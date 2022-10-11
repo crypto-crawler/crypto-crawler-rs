@@ -31,7 +31,7 @@ mod linear_future {
     #[test]
     fn test_agg_trades() {
         let text =
-            BinanceLinearRestClient::fetch_agg_trades("BTCUSDT_220930", None, None, None).unwrap();
+            BinanceLinearRestClient::fetch_agg_trades("BTCUSDT_221230", None, None, None).unwrap();
         assert!(text.starts_with("[{"));
     }
 
@@ -40,7 +40,7 @@ mod linear_future {
         let text = fetch_l2_snapshot(
             "binance",
             MarketType::LinearFuture,
-            "BTCUSDT_220930",
+            "BTCUSDT_221230",
             Some(3),
         )
         .unwrap();
@@ -49,7 +49,7 @@ mod linear_future {
 
     #[test]
     fn test_open_interest() {
-        let text = fetch_open_interest("binance", MarketType::LinearFuture, Some("BTCUSDT_220930"))
+        let text = fetch_open_interest("binance", MarketType::LinearFuture, Some("BTCUSDT_221230"))
             .unwrap();
         assert!(text.starts_with('{'));
     }
