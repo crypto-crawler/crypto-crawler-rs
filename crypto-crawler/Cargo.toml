@@ -1,6 +1,6 @@
 [package]
 name = "crypto-crawler"
-version = "4.6.10"
+version = "4.6.11"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "A rock-solid cryprocurrency crawler."
@@ -11,19 +11,19 @@ keywords = ["cryptocurrency", "blockchain", "trading"]
 [dependencies]
 crypto-markets = "1.3.8"
 crypto-market-type = "1.1.3"
-crypto-msg-parser = "2.7.5"
+crypto-msg-parser = "2.7.11"
 crypto-msg-type = "1.0.10"
-crypto-pair = "2.3.3"
+crypto-pair = "2.3.4"
 crypto-rest-client = "0.9.7"
-crypto-ws-client = "4.12.6"
+crypto-ws-client = "4.12.7"
 fslock = "0.2.1"
-once_cell = "1.14.0"
+once_cell = "1.15.0"
 log = "0.4.17"
 rand = "0.8.5"
-reqwest = { version = "0.11.11", features = ["blocking", "gzip"] }
-serde = { version = "1.0.144", features = ["derive"] }
-serde_json = "1.0.85"
-tokio = { version = "1.21.0", features = ["macros", "rt-multi-thread", "sync", "time"] }
+reqwest = { version = "0.11.12", features = ["blocking", "gzip"] }
+serde = { version = "1.0.145", features = ["derive"] }
+serde_json = "1.0.86"
+tokio = { version = "1.21.2", features = ["macros", "rt-multi-thread", "sync", "time"] }
 
 [dev_dependencies]
 env_logger = "0.9"

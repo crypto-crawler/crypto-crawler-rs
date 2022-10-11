@@ -56,10 +56,10 @@ impl_trait!(OrderBook, KuCoinSpotWSClient, subscribe_orderbook, "/market/level2"
 impl_trait!(OrderBookTopK, KuCoinSpotWSClient, subscribe_orderbook_topk, "/spotMarket/level2Depth5");
 #[rustfmt::skip]
 impl_trait!(Ticker, KuCoinSpotWSClient, subscribe_ticker, "/market/snapshot");
-#[rustfmt::skip]
-impl_trait!(Level3OrderBook, KuCoinSpotWSClient, subscribe_l3_orderbook, "/spotMarket/level3");
 
 impl_candlestick!(KuCoinSpotWSClient);
+
+panic_l3_orderbook!(KuCoinSpotWSClient);
 
 impl_ws_client_trait!(KuCoinSpotWSClient);
 
