@@ -50,7 +50,7 @@ fn fetch_linear_future_symbols() {
         let date = &symbol[(symbol.len() - 6)..];
         assert!(date.parse::<i64>().is_ok());
 
-        assert!(symbol.contains("-USDT-"));
+        assert!(symbol.contains("-USDT-") || symbol.contains("-USDC-"));
         assert_eq!(
             MarketType::LinearFuture,
             get_market_type(symbol, EXCHANGE_NAME, None)
@@ -76,7 +76,7 @@ fn fetch_linear_swap_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
-        assert!(symbol.ends_with("-USDT-SWAP"));
+        assert!(symbol.ends_with("-USDT-SWAP") || symbol.ends_with("-USDC-SWAP"));
         assert_eq!(
             MarketType::LinearSwap,
             get_market_type(symbol, EXCHANGE_NAME, None)

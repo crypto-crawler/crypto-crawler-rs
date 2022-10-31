@@ -10,7 +10,7 @@ use crypto_market_type::MarketType;
 pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result<String> {
     let func = match market_type {
         MarketType::Spot => bitget_spot::BitgetSpotRestClient::fetch_l2_snapshot,
-        MarketType::InverseSwap | MarketType::LinearSwap => {
+        MarketType::InverseFuture | MarketType::InverseSwap | MarketType::LinearSwap => {
             bitget_swap::BitgetSwapRestClient::fetch_l2_snapshot
         }
         _ => panic!("Bitget unknown market_type: {}", market_type),
@@ -21,7 +21,7 @@ pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result
 
 pub(crate) fn fetch_open_interest(market_type: MarketType, symbol: &str) -> Result<String> {
     let func = match market_type {
-        MarketType::InverseSwap | MarketType::LinearSwap => {
+        MarketType::InverseFuture | MarketType::InverseSwap | MarketType::LinearSwap => {
             bitget_swap::BitgetSwapRestClient::fetch_open_interest
         }
         _ => panic!("Bitget {} does not have open interest", market_type),

@@ -78,7 +78,7 @@ fn fetch_spot_markets() {
         .clone();
     assert_eq!(btc_usdt.market_type, MarketType::Spot);
     assert!(btc_usdt.contract_value.is_none());
-    assert_eq!(btc_usdt.precision.tick_size, 0.01);
+    assert_eq!(btc_usdt.precision.tick_size, 0.1);
     assert_eq!(btc_usdt.precision.lot_size, 0.0001);
     let quantity_limit = btc_usdt.quantity_limit.unwrap();
     assert_eq!(quantity_limit.min.unwrap(), 0.0001);

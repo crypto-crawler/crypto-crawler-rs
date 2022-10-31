@@ -157,8 +157,8 @@ fn fetch_bvol_markets() {
         .unwrap()
         .clone();
     assert_eq!(btcusd.contract_value, None);
-    assert_eq!(btcusd.precision.tick_size, 0.05);
-    assert_eq!(btcusd.precision.lot_size, 0.0001);
+    assert_eq!(btcusd.precision.tick_size, 0.025);
+    assert_eq!(btcusd.precision.lot_size, 0.001);
     assert!(btcusd.quantity_limit.is_none());
     assert!(btcusd.delivery_date.is_none());
 }

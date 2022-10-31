@@ -6,6 +6,7 @@ use crate::{
     Fees, Market, Precision, QuantityLimit,
 };
 
+use chrono::DateTime;
 use crypto_market_type::MarketType;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -66,21 +67,47 @@ pub(super) fn fetch_inverse_swap_symbols() -> Result<Vec<String>> {
     let symbols = fetch_swap_markets_raw("dmcbl")?
         .into_iter()
         .map(|m| m.symbol)
+        .filter(|symbol| symbol.ends_with("_DMCBL"))
+        .collect::<Vec<String>>();
+    Ok(symbols)
+}
+
+pub(super) fn fetch_inverse_future_symbols() -> Result<Vec<String>> {
+    let symbols = fetch_swap_markets_raw("dmcbl")?
+        .into_iter()
+        .map(|m| m.symbol)
+        .filter(|symbol| !symbol.ends_with("_DMCBL"))
         .collect::<Vec<String>>();
     Ok(symbols)
 }
 
 pub(super) fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_swap_markets_raw("umcbl")?
+    // see https://bitgetlimited.github.io/apidoc/en/mix/#producttype
+    let mut usdt_symbols = fetch_swap_markets_raw("umcbl")?
         .into_iter()
         .map(|m| m.symbol)
         .collect::<Vec<String>>();
-    Ok(symbols)
+    let usdc_symbols = fetch_swap_markets_raw("cmcbl")?
+        .into_iter()
+        .map(|m| m.symbol)
+        .collect::<Vec<String>>();
+    usdt_symbols.extend(usdc_symbols);
+    Ok(usdt_symbols)
 }
 
 pub(super) fn fetch_inverse_swap_markets() -> Result<Vec<Market>> {
     let markets = fetch_swap_markets_raw("dmcbl")?
         .into_iter()
+        .filter(|market| market.symbol.ends_with("_DMCBL"))
+        .map(to_market)
+        .collect::<Vec<Market>>();
+    Ok(markets)
+}
+
+pub(super) fn fetch_inverse_future_markets() -> Result<Vec<Market>> {
+    let markets = fetch_swap_markets_raw("dmcbl")?
+        .into_iter()
+        .filter(|market| !market.symbol.ends_with("_DMCBL"))
         .map(to_market)
         .collect::<Vec<Market>>();
     Ok(markets)
@@ -99,9 +126,29 @@ fn to_market(m: SwapMarket) -> Market {
         MarketType::LinearSwap
     } else if m.symbol.ends_with("_DMCBL") {
         MarketType::InverseSwap
+    } else if m.symbol.contains("_UMCBL_") {
+        MarketType::LinearFuture
+    } else if m.symbol.contains("_DMCBL_") {
+        MarketType::InverseFuture
     } else {
         panic!("unexpected symbol: {}", m.symbol);
     };
+    let delivery_time =
+        if market_type == MarketType::InverseFuture || market_type == MarketType::LinearFuture {
+            let date = m.symbol.split('_').last().unwrap();
+            debug_assert_eq!(date.len(), 6); // e.g., 230331
+            let year = &date[..2];
+            let month = &date[2..4];
+            let day = &date[4..];
+            let delivery_time = DateTime::parse_from_rfc3339(
+                format!("20{}-{}-{}T00:00:00+00:00", year, month, day).as_str(),
+            )
+            .unwrap()
+            .timestamp_millis() as u64;
+            Some(delivery_time)
+        } else {
+            None
+        };
     Market {
         exchange: EXCHANGE_NAME.to_string(),
         market_type,
@@ -129,7 +176,7 @@ fn to_market(m: SwapMarket) -> Market {
             notional_max: None,
         }),
         contract_value: Some(1.0), // TODO:
-        delivery_date: None,
+        delivery_date: delivery_time,
         info: serde_json::to_value(&m)
             .unwrap()
             .as_object()

@@ -53,7 +53,9 @@ fn get_lock_file_name(exchange: &str, market_type: MarketType, prefix: &str) -> 
         },
         "bitfinex" => "bitfinex.lock".to_string(),
         "bitget" => match market_type {
-            MarketType::InverseSwap | MarketType::LinearSwap => "bitget_swap.lock".to_string(),
+            MarketType::InverseFuture | MarketType::InverseSwap | MarketType::LinearSwap => {
+                "bitget_swap.lock".to_string()
+            }
             MarketType::Spot => "bitget_spot.lock".to_string(),
             _ => panic!("Unknown market_type {} of {}", market_type, exchange),
         },

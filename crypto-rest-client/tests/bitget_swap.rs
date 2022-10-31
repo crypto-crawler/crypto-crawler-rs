@@ -4,6 +4,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use test_case::test_case;
 
+#[test_case(MarketType::InverseFuture, "BTCUSD_DMCBL_221230")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_DMCBL")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT_UMCBL")]
 fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
@@ -15,6 +16,7 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     assert!(!data.get("bids").unwrap().as_array().unwrap().is_empty());
 }
 
+#[test_case(MarketType::InverseFuture, "BTCUSD_DMCBL_221230")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_DMCBL")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT_UMCBL")]
 fn test_open_interest(market_type: MarketType, symbol: &str) {

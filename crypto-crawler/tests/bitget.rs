@@ -10,6 +10,7 @@ use utils::parse;
 
 const EXCHANGE_NAME: &str = "bitget";
 
+// #[test_case(MarketType::InverseFuture)]
 #[test_case(MarketType::InverseSwap)]
 #[test_case(MarketType::LinearSwap)]
 #[tokio::test(flavor = "multi_thread", worker_threads = 8)]
@@ -17,6 +18,7 @@ async fn test_crawl_trade_all(market_type: MarketType) {
     test_all_symbols!(crawl_trade, EXCHANGE_NAME, market_type, MessageType::Trade)
 }
 
+// #[test_case(MarketType::InverseFuture, "BTCUSD_DMCBL_221230")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_DMCBL")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT_UMCBL")]
 #[tokio::test(flavor = "multi_thread")]
@@ -30,6 +32,7 @@ async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
     )
 }
 
+// #[test_case(MarketType::InverseFuture, "BTCUSD_DMCBL_221230")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_DMCBL")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT_UMCBL")]
 #[tokio::test(flavor = "multi_thread")]
@@ -43,6 +46,7 @@ async fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
     )
 }
 
+// #[test_case(MarketType::InverseFuture, "BTCUSD_DMCBL_221230")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_DMCBL")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT_UMCBL")]
 #[tokio::test(flavor = "multi_thread")]
@@ -57,6 +61,7 @@ async fn test_crawl_l2_topk(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::Spot, "BTCUSDT_SPBL")]
+#[test_case(MarketType::InverseFuture, "BTCUSD_DMCBL_221230")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_DMCBL")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT_UMCBL")]
 fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
@@ -70,6 +75,7 @@ fn test_crawl_l2_snapshot(market_type: MarketType, symbol: &str) {
 }
 
 #[test_case(MarketType::Spot)]
+#[test_case(MarketType::InverseFuture)]
 #[test_case(MarketType::InverseSwap)]
 #[test_case(MarketType::LinearSwap)]
 fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
@@ -81,6 +87,7 @@ fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
     )
 }
 
+// #[test_case(MarketType::InverseFuture, "BTCUSD_DMCBL_221230")]
 #[test_case(MarketType::InverseSwap, "BTCUSD_DMCBL")]
 #[test_case(MarketType::LinearSwap, "BTCUSDT_UMCBL")]
 #[tokio::test(flavor = "multi_thread")]
@@ -94,6 +101,7 @@ async fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
     )
 }
 
+// #[test_case(MarketType::InverseFuture)]
 #[test_case(MarketType::InverseSwap)]
 #[test_case(MarketType::LinearSwap)]
 #[tokio::test(flavor = "multi_thread", worker_threads = 16)]
