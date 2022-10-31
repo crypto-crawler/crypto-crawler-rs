@@ -63,6 +63,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::Spot,
             MarketType::InverseSwap, // TODO: Bitget's coin-margined swap market is a kind of mixed contract
             MarketType::LinearSwap,
+            MarketType::InverseFuture,
         ],
         "bithumb" => vec![MarketType::Spot],
         // BitMEX only handles Bitcoin. All profit and loss is in Bitcoin
