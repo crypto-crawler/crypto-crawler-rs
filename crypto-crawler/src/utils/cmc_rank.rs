@@ -270,7 +270,11 @@ pub(crate) static CMC_RANKS: Lazy<HashMap<String, u64>> = Lazy::new(|| {
     .collect();
     let online = get_cmc_ranks(1024);
 
-    if online.is_empty() {offline} else {online}
+    if online.is_empty() {
+        offline
+    } else {
+        online
+    }
 });
 
 fn http_get(url: &str) -> Result<String, reqwest::Error> {
