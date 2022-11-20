@@ -2,7 +2,7 @@
 
 [![](https://img.shields.io/github/workflow/status/crypto-crawler/crypto-crawler-rs/CI/main)](https://github.com/crypto-crawler/crypto-crawler-rs/actions?query=branch%3Amain)
 [![](https://img.shields.io/crates/v/crypto-crawler.svg)](https://crates.io/crates/crypto-crawler)
-[![](https://docs.rs/crypto-crawler/badge.svg)](https://docs.rs/crypto-crawler)
+[![](https://docs.rs/crypto-crawler/badge.svg)](https://docs.rs/crypto-crawler) [![Discord](https://img.shields.io/discord/1043987684164649020?logo=discord)](https://discord.gg/Vych8DNZU2)
 ==========
 
 A rock-solid cryprocurrency crawler.
