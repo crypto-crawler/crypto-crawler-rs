@@ -122,14 +122,14 @@ fn get_lock_file_name(exchange: &str, market_type: MarketType, prefix: &str) -> 
 }
 
 fn create_lock_file(filename: &str) -> LockFile {
-    let mut dir = if std::env::var("DATA_DIR").is_ok() {
+    let dir = if std::env::var("DATA_DIR").is_ok() {
         std::path::Path::new(std::env::var("DATA_DIR").unwrap().as_str()).join("locks")
     } else {
         std::env::temp_dir().join("locks")
     };
     let _ = std::fs::create_dir_all(&dir);
-    dir.push(filename);
-    LockFile::open(dir.as_path()).unwrap()
+    let file_path = dir.join(filename);
+    LockFile::open(file_path.as_path()).expect(file_path.to_str().unwrap())
 }
 
 fn create_all_lock_files_rest(
