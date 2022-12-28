@@ -28,10 +28,7 @@ mod bitz_spot {
             send,
             &[format!(
                 r#"{{"action":"Topic.sub", "data":{{"symbol":"btc_usdt", "type":"market,depth,order", "_CDID":"100002", "dataType":"1"}}, "msg_id":{}}}"#,
-                SystemTime::now()
-                    .duration_since(UNIX_EPOCH)
-                    .unwrap()
-                    .as_millis()
+                SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis()
             )]
         );
     }
@@ -45,21 +42,13 @@ mod bitz_spot {
     #[tokio::test(flavor = "multi_thread")]
     #[ignore = "bitz.com has shutdown since October 2021"]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            BitzSpotWSClient,
-            subscribe_orderbook,
-            &["btc_usdt".to_string()]
-        );
+        gen_test_code!(BitzSpotWSClient, subscribe_orderbook, &["btc_usdt".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     #[ignore = "bitz.com has shutdown since October 2021"]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            BitzSpotWSClient,
-            subscribe_ticker,
-            &["btc_usdt".to_string()]
-        );
+        gen_test_code!(BitzSpotWSClient, subscribe_ticker, &["btc_usdt".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]

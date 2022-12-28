@@ -8,18 +8,10 @@ fn msg_type_symbol_to_command(
     subscribe: bool,
     configs: Option<&HashMap<String, String>>,
 ) -> String {
-    let sub_or_unsub = if subscribe {
-        "subscribe"
-    } else {
-        "unsubscribe"
-    };
+    let sub_or_unsub = if subscribe { "subscribe" } else { "unsubscribe" };
     match msg_type {
         MessageType::Trade | MessageType::Ticker => {
-            let channel = if msg_type == MessageType::Trade {
-                "trades"
-            } else {
-                "ticker"
-            };
+            let channel = if msg_type == MessageType::Trade { "trades" } else { "ticker" };
             format!(
                 r#"{{"event":"{}", "channel":"{}", "symbol":"{}"}}"#,
                 sub_or_unsub, channel, symbol
@@ -33,11 +25,7 @@ fn msg_type_symbol_to_command(
             r#"{{"event":"{}", "channel":"book", "symbol": "{}", "prec":"R0", "len": {}}}"#,
             sub_or_unsub,
             symbol,
-            if msg_type == MessageType::L3Event {
-                25
-            } else {
-                1
-            }
+            if msg_type == MessageType::L3Event { 25 } else { 1 }
         ),
         MessageType::Candlestick => format!(
             r#"{{"event":"{}", "channel":"candles", "key":"trade:{}:{}"}}"#,
@@ -78,14 +66,8 @@ mod tests {
             None,
         );
         assert_eq!(commands.len(), 2);
-        assert_eq!(
-            r#"{"event":"subscribe", "channel":"trades", "symbol":"tBTCUST"}"#,
-            commands[0]
-        );
-        assert_eq!(
-            r#"{"event":"subscribe", "channel":"trades", "symbol":"tETHUST"}"#,
-            commands[1]
-        );
+        assert_eq!(r#"{"event":"subscribe", "channel":"trades", "symbol":"tBTCUST"}"#, commands[0]);
+        assert_eq!(r#"{"event":"subscribe", "channel":"trades", "symbol":"tETHUST"}"#, commands[1]);
     }
 
     #[test]
@@ -97,10 +79,7 @@ mod tests {
             None,
         );
         assert_eq!(commands.len(), 2);
-        assert_eq!(
-            r#"{"event":"subscribe", "channel":"trades", "symbol":"tBTCUST"}"#,
-            commands[0]
-        );
+        assert_eq!(r#"{"event":"subscribe", "channel":"trades", "symbol":"tBTCUST"}"#, commands[0]);
         assert_eq!(
             r#"{"event":"subscribe", "channel":"book", "symbol":"tBTCUST", "prec":"P0", "frec":"F0", "len":25}"#,
             commands[1]

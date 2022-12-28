@@ -15,13 +15,7 @@ const EXCHANGE_NAME: &str = "bitz";
 // #[test_case(MarketType::LinearSwap, "BTC_USDT")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
-    test_one_symbol!(
-        crawl_trade,
-        EXCHANGE_NAME,
-        market_type,
-        symbol,
-        MessageType::Trade
-    )
+    test_one_symbol!(crawl_trade, EXCHANGE_NAME, market_type, symbol, MessageType::Trade)
 }
 
 #[test_case(MarketType::Spot, "btc_usdt"; "inconclusive")]
@@ -29,13 +23,7 @@ async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
 // #[test_case(MarketType::LinearSwap, "BTC_USDT")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
-    test_one_symbol!(
-        crawl_l2_event,
-        EXCHANGE_NAME,
-        market_type,
-        symbol,
-        MessageType::L2Event
-    )
+    test_one_symbol!(crawl_l2_event, EXCHANGE_NAME, market_type, symbol, MessageType::L2Event)
 }
 
 #[test_case(MarketType::Spot, "btc_usdt"; "inconclusive spot")]
@@ -68,13 +56,7 @@ fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
 // #[test_case(MarketType::LinearSwap, "BTC_USDT")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
-    test_one_symbol!(
-        crawl_ticker,
-        EXCHANGE_NAME,
-        market_type,
-        symbol,
-        MessageType::Ticker
-    )
+    test_one_symbol!(crawl_ticker, EXCHANGE_NAME, market_type, symbol, MessageType::Ticker)
 }
 
 #[test_case(MarketType::Spot; "inconclusive")]

@@ -18,12 +18,7 @@ pub fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<Strin
         .parse::<i64>()
         .unwrap();
     let cooldown_time = get_cooldown_time_per_request(exchange, market_type);
-    let lock = REST_LOCKS
-        .get(exchange)
-        .unwrap()
-        .get(&market_type)
-        .unwrap()
-        .clone();
+    let lock = REST_LOCKS.get(exchange).unwrap().get(&market_type).unwrap().clone();
     let mut symbols = Vec::<String>::new();
     let mut backoff_factor = 1;
     for i in 0..retry_count {
@@ -65,11 +60,8 @@ pub(super) fn check_args(exchange: &str, market_type: MarketType, symbols: &[Str
     }
 
     let valid_symbols = fetch_symbols_retry(exchange, market_type);
-    let invalid_symbols: Vec<String> = symbols
-        .iter()
-        .filter(|symbol| !valid_symbols.contains(symbol))
-        .cloned()
-        .collect();
+    let invalid_symbols: Vec<String> =
+        symbols.iter().filter(|symbol| !valid_symbols.contains(symbol)).cloned().collect();
     if !invalid_symbols.is_empty() {
         panic!(
             "Invalid symbols: {}, {} {} available trading symbols are {}",
@@ -85,16 +77,20 @@ fn get_cooldown_time_per_request(exchange: &str, market_type: MarketType) -> Dur
     let millis = match exchange {
         "binance" => 500,      // spot weitht 1200, contract weight 2400
         "bitget" => 100,       // 20 requests per 2 seconds
-        "bithumb" => 8 * 10, // 135 requests per 1 second for public APIs, multiplied by 10 to reduce its frequency
-        "bitmex" => 2000, // 60 requests per minute on all routes (reduced to 30 when unauthenticated)
-        "bitstamp" => 75 * 10, // 8000 requests per 10 minutes, but bitstamp orderbook is too big, need to reduce its frequency
+        "bithumb" => 8 * 10,   /* 135 requests per 1 second for public APIs, multiplied by 10 to
+                                 * reduce its frequency */
+        "bitmex" => 2000, /* 60 requests per minute on all routes (reduced to 30 when
+                            * unauthenticated) */
+        "bitstamp" => 75 * 10, /* 8000 requests per 10 minutes, but bitstamp orderbook is too
+                                 * big, need to reduce its frequency */
         "bitz" => 34,          // no more than 30 times within 1 second
-        "bybit" => 20 * 10, // 50 requests per second continuously for 2 minutes, multiplied by 10 to reduce its frequency
+        "bybit" => 20 * 10,    /* 50 requests per second continuously for 2 minutes, multiplied
+                                 * by 10 to reduce its frequency */
         "coinbase_pro" => 100, //  10 requests per second
-        "deribit" => 50,    // 20 requests per second
-        "dydx" => 100,      // 100 requests per 10 seconds
-        "gate" => 4,        // 300 read operations per IP per second
-        "huobi" => 2,       // 800 times/second for one IP
+        "deribit" => 50,       // 20 requests per second
+        "dydx" => 100,         // 100 requests per 10 seconds
+        "gate" => 4,           // 300 read operations per IP per second
+        "huobi" => 2,          // 800 times/second for one IP
         "kucoin" => match market_type {
             MarketType::Spot => 300, // 3x to avoid 429
             _ => 100,                // 30 times/3s
@@ -128,12 +124,7 @@ pub(crate) fn crawl_snapshot(
 
     let cooldown_time = get_cooldown_time_per_request(exchange, market_type);
 
-    let lock = REST_LOCKS
-        .get(exchange)
-        .unwrap()
-        .get(&market_type)
-        .unwrap()
-        .clone();
+    let lock = REST_LOCKS.get(exchange).unwrap().get(&market_type).unwrap().clone();
     'outer: loop {
         let mut real_symbols = if is_empty {
             if market_type == MarketType::Spot {
@@ -215,12 +206,7 @@ pub(crate) fn crawl_snapshot(
 pub(crate) fn crawl_open_interest(exchange: &str, market_type: MarketType, tx: Sender<Message>) {
     let cooldown_time = get_cooldown_time_per_request(exchange, market_type);
 
-    let lock = REST_LOCKS
-        .get(exchange)
-        .unwrap()
-        .get(&market_type)
-        .unwrap()
-        .clone();
+    let lock = REST_LOCKS.get(exchange).unwrap().get(&market_type).unwrap().clone();
     'outer: loop {
         match exchange {
             "bitz" | "deribit" | "dydx" | "ftx" | "huobi" | "kucoin" | "okx" => {
@@ -343,20 +329,18 @@ async fn subscribe_with_lock(
         MessageType::L3Event => ws_client.subscribe_l3_orderbook(&symbols).await,
         MessageType::L2TopK => ws_client.subscribe_orderbook_topk(&symbols).await,
         MessageType::Ticker => ws_client.subscribe_ticker(&symbols).await,
-        _ => panic!(
-            "{} {} does NOT have {} websocket channel",
-            exchange, market_type, msg_type
-        ),
+        _ => panic!("{} {} does NOT have {} websocket channel", exchange, market_type, msg_type),
     };
 }
 
 fn get_connection_interval_ms(exchange: &str, _market_type: MarketType) -> Option<u64> {
     match exchange {
-        "bitfinex" => Some(3000), // you cannot open more than 20 connections per minute, see https://docs.bitfinex.com/docs/requirements-and-limitations#websocket-rate-limits
+        "bitfinex" => Some(3000), /* you cannot open more than 20 connections per minute, see https://docs.bitfinex.com/docs/requirements-and-limitations#websocket-rate-limits */
         // "bitmex" => Some(9000), // 40 per hour
-        "bitz" => Some(100), // `cat crawler-trade-bitz-spot-error-12.log` has many "429 Too Many Requests"
-        "kucoin" => Some(2000), //  Connection Limit: 30 per minute, see https://docs.kucoin.com/#connection-times
-        "okx" => Some(1000), // Connection limit: 1 time per second, https://www.okx.com/docs-v5/en/#websocket-api-connect
+        "bitz" => Some(100), /* `cat crawler-trade-bitz-spot-error-12.log` has many "429 Too
+                               * Many Requests" */
+        "kucoin" => Some(2000), /*  Connection Limit: 30 per minute, see https://docs.kucoin.com/#connection-times */
+        "okx" => Some(1000), /* Connection limit: 1 time per second, https://www.okx.com/docs-v5/en/#websocket-api-connect */
         _ => None,
     }
 }
@@ -374,9 +358,10 @@ fn get_num_subscriptions_per_connection(exchange: &str, market_type: MarketType)
                 200
             }
         } // https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
-        // All websocket connections have a limit of 30 subscriptions to public market data feed channels
+        // All websocket connections have a limit of 30 subscriptions to public market data feed
+        // channels
         "bitfinex" => 30, // https://docs.bitfinex.com/docs/ws-general#subscribe-to-channels
-        "kucoin" => 300, // Subscription limit for each connection: 300 topics, see https://docs.kucoin.com/#topic-subscription-limit
+        "kucoin" => 300, /* Subscription limit for each connection: 300 topics, see https://docs.kucoin.com/#topic-subscription-limit */
         "okx" => 256,    // okx spot l2_event throws many ResetWithoutClosingHandshake errors
         _ => usize::MAX, // usize::MAX means unlimited
     }
@@ -490,12 +475,7 @@ async fn create_ws_client(
 ) -> Arc<dyn WSClient + Send + Sync> {
     let tx = create_conversion_thread(exchange.to_string(), msg_type, market_type, tx);
     if let Some(interval) = get_connection_interval_ms(exchange, market_type) {
-        let lock = WS_LOCKS
-            .get(exchange)
-            .unwrap()
-            .get(&market_type)
-            .unwrap()
-            .clone();
+        let lock = WS_LOCKS.get(exchange).unwrap().get(&market_type).unwrap().clone();
         let mut lock = lock.lock().await;
         let mut i = 0;
         while !lock.owns_lock() {
@@ -617,15 +597,10 @@ fn create_new_symbol_receiver_thread_candlestick(
             let new_symbol_interval_list = new_symbols
                 .iter()
                 .flat_map(|symbol| {
-                    intervals
-                        .clone()
-                        .into_iter()
-                        .map(move |interval| (symbol.clone(), interval))
+                    intervals.clone().into_iter().map(move |interval| (symbol.clone(), interval))
                 })
                 .collect::<Vec<(String, usize)>>();
-            ws_client
-                .subscribe_candlestick(&new_symbol_interval_list)
-                .await;
+            ws_client.subscribe_candlestick(&new_symbol_interval_list).await;
         }
     })
 }
@@ -712,14 +687,8 @@ async fn crawl_event_one_chunk(
         let exchange_clone = exchange.to_string();
         let ws_client_clone = ws_client.clone();
         tokio::task::spawn(async move {
-            subscribe_with_lock(
-                exchange_clone,
-                market_type,
-                msg_type,
-                symbols,
-                ws_client_clone,
-            )
-            .await;
+            subscribe_with_lock(exchange_clone, market_type, msg_type, symbols, ws_client_clone)
+                .await;
         });
     }
 
@@ -809,12 +778,7 @@ pub(crate) async fn crawl_event(
                 .to_vec();
             chunks.push(chunk);
         }
-        debug!(
-            "{} {} {}",
-            real_symbols.len(),
-            num_topics_per_connection,
-            chunks.len(),
-        );
+        debug!("{} {} {}", real_symbols.len(), num_topics_per_connection, chunks.len(),);
         assert!(chunks.len() > 1);
 
         let mut last_ws_client = None;
@@ -904,9 +868,7 @@ async fn crawl_candlestick_one_chunk(
         // fire and forget
         let ws_client_clone = ws_client.clone();
         tokio::task::spawn(async move {
-            ws_client_clone
-                .subscribe_candlestick(&symbol_interval_list)
-                .await;
+            ws_client_clone.subscribe_candlestick(&symbol_interval_list).await;
         });
     }
 
@@ -944,10 +906,7 @@ pub(crate) async fn crawl_candlestick_ext(
         symbols
             .iter()
             .flat_map(|symbol| {
-                intervals
-                    .clone()
-                    .into_iter()
-                    .map(move |interval| (symbol.clone(), interval))
+                intervals.clone().into_iter().map(move |interval| (symbol.clone(), interval))
             })
             .collect::<Vec<(String, usize)>>()
     } else {
@@ -1001,12 +960,7 @@ pub(crate) async fn crawl_candlestick_ext(
                 chunks.push(chunk);
             }
         }
-        debug!(
-            "{} {} {}",
-            symbol_interval_list.len(),
-            num_topics_per_connection,
-            chunks.len(),
-        );
+        debug!("{} {} {}", symbol_interval_list.len(), num_topics_per_connection, chunks.len(),);
         assert!(chunks.len() > 1);
 
         let mut last_ws_client = None;

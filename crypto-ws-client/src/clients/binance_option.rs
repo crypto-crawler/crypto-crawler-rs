@@ -60,11 +60,7 @@ impl BinanceOptionCommandTranslator {
             .collect::<Vec<String>>();
         format!(
             r#"{{"id":9527,"method":"{}","params":{}}}"#,
-            if subscribe {
-                "SUBSCRIBE"
-            } else {
-                "UNSUBSCRIBE"
-            },
+            if subscribe { "SUBSCRIBE" } else { "UNSUBSCRIBE" },
             serde_json::to_string(&raw_topics).unwrap()
         )
     }
@@ -121,9 +117,10 @@ impl MessageHandler for BinanceOptionMessageHandler {
 
     fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // https://binance-docs.github.io/apidocs/voptions/en/#push-websocket-account-info
-        // The client will send a ping frame every 2 minutes. If the websocket server does not
-        // receive a ping frame back from the connection within a 2 minute period, the
-        // connection will be disconnected. Unsolicited ping frames are allowed.
+        // The client will send a ping frame every 2 minutes. If the websocket server
+        // does not receive a ping frame back from the connection within a 2
+        // minute period, the connection will be disconnected. Unsolicited ping
+        // frames are allowed.
         Some((Message::Text(r#"{"event":"ping"}"#.to_string()), 120))
     }
 }

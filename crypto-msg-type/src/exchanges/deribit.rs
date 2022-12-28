@@ -12,11 +12,9 @@ fn msg_type_symbol_to_topic(
         MessageType::L2Event => format!("book.{}.100ms", symbol),
         MessageType::L2TopK => format!("book.{}.5.10.100ms", symbol),
         MessageType::BBO => format!("quote.{}", symbol),
-        MessageType::Candlestick => format!(
-            "chart.trades.{}.{}",
-            symbol,
-            configs.unwrap().get("interval").unwrap()
-        ),
+        MessageType::Candlestick => {
+            format!("chart.trades.{}.{}", symbol, configs.unwrap().get("interval").unwrap())
+        }
         MessageType::Ticker => format!("ticker.{}.100ms", symbol),
         _ => panic!("Unknown message type {}", msg_type),
     }
@@ -25,11 +23,7 @@ fn msg_type_symbol_to_topic(
 fn topics_to_command(topics: &[String], subscribe: bool) -> String {
     format!(
         r#"{{"method":"public/{}", "params":{{"channels":{}}}}}"#,
-        if subscribe {
-            "subscribe"
-        } else {
-            "unsubscribe"
-        },
+        if subscribe { "subscribe" } else { "unsubscribe" },
         serde_json::to_string(topics).unwrap()
     )
 }
@@ -43,9 +37,7 @@ pub(crate) fn get_ws_commands(
     let topics = msg_types
         .iter()
         .flat_map(|msg_type| {
-            symbols
-                .iter()
-                .map(|symbol| msg_type_symbol_to_topic(*msg_type, symbol, configs))
+            symbols.iter().map(|symbol| msg_type_symbol_to_topic(*msg_type, symbol, configs))
         })
         .collect::<Vec<String>>();
     vec![topics_to_command(&topics, subscribe)]

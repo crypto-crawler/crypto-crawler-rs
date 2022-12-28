@@ -56,11 +56,7 @@ struct ZbgCommandTranslator {
 
 impl MessageHandler for ZbgMessageHandler {
     fn handle_message(&mut self, msg: &str) -> MiscMessage {
-        if msg.contains(r#"action":"PING"#) {
-            MiscMessage::Pong
-        } else {
-            MiscMessage::Normal
-        }
+        if msg.contains(r#"action":"PING"#) { MiscMessage::Pong } else { MiscMessage::Normal }
     }
 
     fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
@@ -104,12 +100,7 @@ impl ZbgCommandTranslator {
             .get(symbol.to_lowercase().as_str())
             .unwrap_or_else(|| panic!("Failed to find symbol_id for {}", symbol));
 
-        format!(
-            "{}_KLINE_{}_{}",
-            symbol_id,
-            interval_str,
-            symbol.to_uppercase()
-        )
+        format!("{}_KLINE_{}_{}", symbol_id, interval_str, symbol.to_uppercase())
     }
 }
 
@@ -156,10 +147,7 @@ mod tests {
             .translate_to_commands(true, &[("TRADE".to_string(), "btc_usdt".to_string())]);
 
         assert_eq!(1, commands.len());
-        assert_eq!(
-            r#"{"action":"ADD", "dataType":329_TRADE_BTC_USDT}"#,
-            commands[0]
-        );
+        assert_eq!(r#"{"action":"ADD", "dataType":329_TRADE_BTC_USDT}"#, commands[0]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -174,14 +162,8 @@ mod tests {
         );
 
         assert_eq!(2, commands.len());
-        assert_eq!(
-            r#"{"action":"ADD", "dataType":329_TRADE_BTC_USDT}"#,
-            commands[0]
-        );
-        assert_eq!(
-            r#"{"action":"ADD", "dataType":330_ENTRUST_ADD_ETH_USDT}"#,
-            commands[1]
-        );
+        assert_eq!(r#"{"action":"ADD", "dataType":329_TRADE_BTC_USDT}"#, commands[0]);
+        assert_eq!(r#"{"action":"ADD", "dataType":330_ENTRUST_ADD_ETH_USDT}"#, commands[1]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -191,9 +173,6 @@ mod tests {
             translator.translate_to_candlestick_commands(true, &[("btc_usdt".to_string(), 60)]);
 
         assert_eq!(1, commands.len());
-        assert_eq!(
-            r#"{"action":"ADD", "dataType":329_KLINE_1M_BTC_USDT}"#,
-            commands[0]
-        );
+        assert_eq!(r#"{"action":"ADD", "dataType":329_KLINE_1M_BTC_USDT}"#, commands[0]);
     }
 }

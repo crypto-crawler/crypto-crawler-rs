@@ -31,7 +31,8 @@ mod binance_spot {
         gen_test_code!(
             BinanceSpotWSClient,
             send,
-            &[r#"{"id":9527,"method":"SUBSCRIBE","params":["btcusdt@aggTrade","btcusdt@ticker"]}"#.to_string()]
+            &[r#"{"id":9527,"method":"SUBSCRIBE","params":["btcusdt@aggTrade","btcusdt@ticker"]}"#
+                .to_string()]
         );
     }
 
@@ -97,10 +98,7 @@ mod binance_spot {
         );
         gen_test_subscribe_candlestick!(
             BinanceSpotWSClient,
-            &[
-                ("BTCUSDT".to_string(), 2592000),
-                ("ETHUSDT".to_string(), 2592000)
-            ]
+            &[("BTCUSDT".to_string(), 2592000), ("ETHUSDT".to_string(), 2592000)]
         );
     }
 }
@@ -309,17 +307,11 @@ mod binance_linear_future {
     async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceLinearWSClient,
-            &[
-                ("BTCUSDT_221230".to_string(), 60),
-                ("ETHUSDT_221230".to_string(), 60)
-            ]
+            &[("BTCUSDT_221230".to_string(), 60), ("ETHUSDT_221230".to_string(), 60)]
         );
         gen_test_subscribe_candlestick!(
             BinanceLinearWSClient,
-            &[
-                ("BTCUSDT_221230".to_string(), 2592000),
-                ("ETHUSDT_221230".to_string(), 2592000)
-            ]
+            &[("BTCUSDT_221230".to_string(), 2592000), ("ETHUSDT_221230".to_string(), 2592000)]
         );
     }
 }
@@ -404,17 +396,11 @@ mod binance_inverse_swap {
     async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             BinanceInverseWSClient,
-            &[
-                ("btcusd_perp".to_string(), 60),
-                ("ethusd_perp".to_string(), 60)
-            ]
+            &[("btcusd_perp".to_string(), 60), ("ethusd_perp".to_string(), 60)]
         );
         gen_test_subscribe_candlestick!(
             BinanceInverseWSClient,
-            &[
-                ("btcusd_perp".to_string(), 2592000),
-                ("ethusd_perp".to_string(), 2592000)
-            ]
+            &[("btcusd_perp".to_string(), 2592000), ("ethusd_perp".to_string(), 2592000)]
         );
     }
 
@@ -521,10 +507,7 @@ mod binance_linear_swap {
         );
         gen_test_subscribe_candlestick!(
             BinanceLinearWSClient,
-            &[
-                ("BTCUSDT".to_string(), 2592000),
-                ("ETHUSDT".to_string(), 2592000)
-            ]
+            &[("BTCUSDT".to_string(), 2592000), ("ETHUSDT".to_string(), 2592000)]
         );
     }
 

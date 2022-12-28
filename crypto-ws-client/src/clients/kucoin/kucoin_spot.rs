@@ -102,10 +102,7 @@ impl CommandTranslator for KucoinCommandTranslator {
         let topics = symbol_interval_list
             .iter()
             .map(|(symbol, interval)| {
-                (
-                    "/market/candles".to_string(),
-                    Self::to_candlestick_channel(symbol, *interval),
-                )
+                ("/market/candles".to_string(), Self::to_candlestick_channel(symbol, *interval))
             })
             .collect::<Vec<(String, String)>>();
         self.translate_to_commands(subscribe, &topics)
@@ -119,10 +116,8 @@ mod tests {
     #[test]
     fn test_one_channel() {
         let translator = super::KucoinCommandTranslator {};
-        let commands = translator.translate_to_commands(
-            true,
-            &[("/market/match".to_string(), "BTC-USDT".to_string())],
-        );
+        let commands = translator
+            .translate_to_commands(true, &[("/market/match".to_string(), "BTC-USDT".to_string())]);
 
         assert_eq!(1, commands.len());
         assert_eq!(

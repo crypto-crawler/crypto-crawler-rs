@@ -11,7 +11,8 @@ const BASE_URL: &str = "https://api.exchange.coinbase.com";
 ///   * REST API doc: <https://docs.cloud.coinbase.com/exchange/reference>
 ///   * Trading at: <https://pro.coinbase.com/>
 ///   * Rate Limits: <https://docs.cloud.coinbase.com/exchange/reference/exchangerestapi_getaccounts#rate-limits>
-///   * This endpoint has a custom rate limit by profile ID: 25 requests per second, up to 50 requests per second in bursts
+///   * This endpoint has a custom rate limit by profile ID: 25 requests per
+///     second, up to 50 requests per second in bursts
 pub struct CoinbaseProRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
@@ -19,10 +20,7 @@ pub struct CoinbaseProRestClient {
 
 impl CoinbaseProRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        CoinbaseProRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        CoinbaseProRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// List the latest trades for a product.

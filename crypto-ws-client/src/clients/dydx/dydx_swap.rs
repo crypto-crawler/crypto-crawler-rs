@@ -96,11 +96,7 @@ impl DydxCommandTranslator {
     fn topic_to_command(topic: &(String, String), subscribe: bool) -> String {
         format!(
             r#"{{"type": "{}", "channel": "{}", "id": "{}"}}"#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
+            if subscribe { "subscribe" } else { "unsubscribe" },
             topic.0,
             topic.1,
         )
@@ -109,10 +105,7 @@ impl DydxCommandTranslator {
 
 impl CommandTranslator for DydxCommandTranslator {
     fn translate_to_commands(&self, subscribe: bool, topics: &[(String, String)]) -> Vec<String> {
-        topics
-            .iter()
-            .map(|t| Self::topic_to_command(t, subscribe))
-            .collect()
+        topics.iter().map(|t| Self::topic_to_command(t, subscribe)).collect()
     }
 
     fn translate_to_candlestick_commands(

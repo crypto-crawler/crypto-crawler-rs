@@ -129,11 +129,7 @@ impl<const URL: char> WSClient for HuobiWSClient<URL> {
     }
 
     async fn subscribe_orderbook_topk(&self, symbols: &[String]) {
-        let channel = if URL == 'S' {
-            "depth.step1"
-        } else {
-            "depth.step7"
-        };
+        let channel = if URL == 'S' { "depth.step1" } else { "depth.step7" };
         let topics = symbols
             .iter()
             .map(|symbol| (channel.to_string(), symbol.to_string()))
@@ -142,10 +138,7 @@ impl<const URL: char> WSClient for HuobiWSClient<URL> {
     }
 
     async fn subscribe_l3_orderbook(&self, _symbols: &[String]) {
-        panic!(
-            "{} does NOT have the level3 websocket channel",
-            EXCHANGE_NAME
-        );
+        panic!("{} does NOT have the level3 websocket channel", EXCHANGE_NAME);
     }
 
     async fn subscribe_ticker(&self, symbols: &[String]) {
@@ -165,9 +158,8 @@ impl<const URL: char> WSClient for HuobiWSClient<URL> {
     }
 
     async fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
-        let commands = self
-            .translator
-            .translate_to_candlestick_commands(true, symbol_interval_list);
+        let commands =
+            self.translator.translate_to_candlestick_commands(true, symbol_interval_list);
         self.client.send(&commands).await;
     }
 
@@ -337,10 +329,7 @@ mod tests {
             .translate_to_commands(true, &[("trade.detail".to_string(), "btcusdt".to_string())]);
 
         assert_eq!(1, commands.len());
-        assert_eq!(
-            r#"{"sub":"market.btcusdt.trade.detail","id":"crypto-ws-client"}"#,
-            commands[0]
-        );
+        assert_eq!(r#"{"sub":"market.btcusdt.trade.detail","id":"crypto-ws-client"}"#, commands[0]);
     }
 
     #[test]
@@ -355,13 +344,7 @@ mod tests {
         );
 
         assert_eq!(2, commands.len());
-        assert_eq!(
-            r#"{"sub":"market.btcusdt.trade.detail","id":"crypto-ws-client"}"#,
-            commands[0]
-        );
-        assert_eq!(
-            r#"{"sub":"market.btcusdt.bbo","id":"crypto-ws-client"}"#,
-            commands[1]
-        );
+        assert_eq!(r#"{"sub":"market.btcusdt.trade.detail","id":"crypto-ws-client"}"#, commands[0]);
+        assert_eq!(r#"{"sub":"market.btcusdt.bbo","id":"crypto-ws-client"}"#, commands[1]);
     }
 }

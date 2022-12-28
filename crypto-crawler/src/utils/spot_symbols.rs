@@ -24,11 +24,7 @@ pub fn get_hot_spot_symbols(exchange: &str, spot_symbols: &[String]) -> Vec<Stri
             || *cmc_ranks.get(base_coin).unwrap_or(&u64::max_value()) <= 100
     };
 
-    spot_symbols
-        .iter()
-        .cloned()
-        .filter(|symbol| is_hot(symbol))
-        .collect()
+    spot_symbols.iter().cloned().filter(|symbol| is_hot(symbol)).collect()
 }
 
 #[cfg(test)]

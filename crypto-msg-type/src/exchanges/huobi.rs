@@ -30,11 +30,7 @@ fn msg_type_symbol_to_topic(
         _ => panic!("Unknown message type {}", msg_type),
     };
     if msg_type == MessageType::Candlestick {
-        format!(
-            "market.{}.kline.{}",
-            symbol,
-            configs.unwrap().get("interval").unwrap()
-        )
+        format!("market.{}.kline.{}", symbol, configs.unwrap().get("interval").unwrap())
     } else {
         format!("market.{}.{}", symbol, channel)
     }
@@ -65,9 +61,7 @@ pub(crate) fn get_ws_commands(
     msg_types
         .iter()
         .flat_map(|msg_type| {
-            symbols
-                .iter()
-                .map(|symbol| msg_type_symbol_to_topic(*msg_type, symbol, configs))
+            symbols.iter().map(|symbol| msg_type_symbol_to_topic(*msg_type, symbol, configs))
         })
         .map(|topic| topic_to_command(&topic, subscribe))
         .collect()
@@ -86,14 +80,8 @@ mod tests {
             None,
         );
         assert_eq!(commands.len(), 2);
-        assert_eq!(
-            r#"{"sub":"market.BTC-USD.trade.detail","id":"crypto-ws-client"}"#,
-            commands[0]
-        );
-        assert_eq!(
-            r#"{"sub":"market.ETH-USD.trade.detail","id":"crypto-ws-client"}"#,
-            commands[1]
-        );
+        assert_eq!(r#"{"sub":"market.BTC-USD.trade.detail","id":"crypto-ws-client"}"#, commands[0]);
+        assert_eq!(r#"{"sub":"market.ETH-USD.trade.detail","id":"crypto-ws-client"}"#, commands[1]);
     }
 
     #[test]
@@ -105,10 +93,7 @@ mod tests {
             None,
         );
         assert_eq!(commands.len(), 2);
-        assert_eq!(
-            r#"{"sub":"market.BTC-USD.trade.detail","id":"crypto-ws-client"}"#,
-            commands[0]
-        );
+        assert_eq!(r#"{"sub":"market.BTC-USD.trade.detail","id":"crypto-ws-client"}"#, commands[0]);
         assert_eq!(
             r#"{"sub": "market.BTC-USD.depth.size_20.high_freq","data_type":"incremental","id": "crypto-ws-client"}"#,
             commands[1]
@@ -126,13 +111,7 @@ mod tests {
             Some(&configs),
         );
         assert_eq!(commands.len(), 2);
-        assert_eq!(
-            r#"{"sub":"market.BTC-USD.kline.1m","id":"crypto-ws-client"}"#,
-            commands[0]
-        );
-        assert_eq!(
-            r#"{"sub":"market.ETH-USD.kline.1m","id":"crypto-ws-client"}"#,
-            commands[1]
-        );
+        assert_eq!(r#"{"sub":"market.BTC-USD.kline.1m","id":"crypto-ws-client"}"#, commands[0]);
+        assert_eq!(r#"{"sub":"market.ETH-USD.kline.1m","id":"crypto-ws-client"}"#, commands[1]);
     }
 }

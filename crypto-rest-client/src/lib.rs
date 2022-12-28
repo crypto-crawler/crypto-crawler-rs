@@ -81,10 +81,7 @@ pub fn fetch_l3_snapshot_internal(
         "bitstamp" => exchanges::bitstamp::BitstampRestClient::fetch_l3_snapshot(symbol),
         "coinbase_pro" => exchanges::coinbase_pro::CoinbaseProRestClient::fetch_l3_snapshot(symbol),
         "kucoin" => exchanges::kucoin::fetch_l3_snapshot(market_type, symbol),
-        _ => panic!(
-            "{} {} does NOT provide level3 orderbook data",
-            exchange, market_type
-        ),
+        _ => panic!("{} {} does NOT provide level3 orderbook data", exchange, market_type),
     };
     match ret {
         Ok(s) => Ok(s.trim().to_string()),
@@ -128,10 +125,7 @@ pub fn fetch_long_short_ratio(
 ) -> Result<String> {
     let ret = match exchange {
         "bybit" => exchanges::bybit::BybitRestClient::fetch_long_short_ratio(symbol),
-        _ => panic!(
-            "{} {} does NOT provide level3 orderbook data",
-            exchange, market_type
-        ),
+        _ => panic!("{} {} does NOT provide level3 orderbook data", exchange, market_type),
     };
     match ret {
         Ok(s) => Ok(s.trim().to_string()),
@@ -141,41 +135,32 @@ pub fn fetch_long_short_ratio(
 
 /// Fetch level2 orderbook snapshot.
 ///
-/// `retry` None means no retry; Some(0) means retry unlimited times; Some(n) means retry n times.
+/// `retry` None means no retry; Some(0) means retry unlimited times; Some(n)
+/// means retry n times.
 pub fn fetch_l2_snapshot(
     exchange: &str,
     market_type: MarketType,
     symbol: &str,
     retry: Option<u64>,
 ) -> Result<String> {
-    retriable(
-        exchange,
-        market_type,
-        symbol,
-        fetch_l2_snapshot_internal,
-        retry,
-    )
+    retriable(exchange, market_type, symbol, fetch_l2_snapshot_internal, retry)
 }
 
 /// Fetch level3 orderbook snapshot.
 ///
-/// `retry` None means no retry; Some(0) means retry unlimited times; Some(n) means retry n times.
+/// `retry` None means no retry; Some(0) means retry unlimited times; Some(n)
+/// means retry n times.
 pub fn fetch_l3_snapshot(
     exchange: &str,
     market_type: MarketType,
     symbol: &str,
     retry: Option<u64>,
 ) -> Result<String> {
-    retriable(
-        exchange,
-        market_type,
-        symbol,
-        fetch_l3_snapshot_internal,
-        retry,
-    )
+    retriable(exchange, market_type, symbol, fetch_l3_snapshot_internal, retry)
 }
 
-// `retry` None means no retry; Some(0) means retry unlimited times; Some(n) means retry n times.
+// `retry` None means no retry; Some(0) means retry unlimited times; Some(n)
+// means retry n times.
 fn retriable(
     exchange: &str,
     market_type: MarketType,
@@ -185,11 +170,7 @@ fn retriable(
 ) -> Result<String> {
     let retry_count = {
         let count = retry.unwrap_or(1);
-        if count == 0 {
-            u64::MAX
-        } else {
-            count
-        }
+        if count == 0 { u64::MAX } else { count }
     };
     if retry_count == 1 {
         return crawl_func(exchange, market_type, symbol);
@@ -201,10 +182,9 @@ fn retriable(
         match resp {
             Ok(msg) => return Ok(msg),
             Err(err) => {
-                let current_timestamp = SystemTime::now()
-                    .duration_since(SystemTime::UNIX_EPOCH)
-                    .unwrap()
-                    .as_millis() as u64;
+                let current_timestamp =
+                    SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_millis()
+                        as u64;
                 warn!(
                     "{} {} {} {} {}, error: {}, back off for {} milliseconds",
                     current_timestamp,

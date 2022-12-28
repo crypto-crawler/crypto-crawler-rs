@@ -43,11 +43,7 @@ fn check_error_in_body(resp: String) -> Result<String> {
     match obj.unwrap().get("error") {
         Some(err) => {
             let arr = err.as_array().unwrap();
-            if arr.is_empty() {
-                Ok(resp)
-            } else {
-                Err(Error(resp))
-            }
+            if arr.is_empty() { Ok(resp) } else { Err(Error(resp)) }
         }
         None => Ok(resp),
     }
@@ -78,10 +74,8 @@ fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
 }
 
 pub(super) fn fetch_spot_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_spot_markets_raw()?
-        .into_iter()
-        .filter_map(|m| m.wsname)
-        .collect::<Vec<String>>();
+    let symbols =
+        fetch_spot_markets_raw()?.into_iter().filter_map(|m| m.wsname).collect::<Vec<String>>();
     Ok(symbols)
 }
 
@@ -89,11 +83,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
     let markets = fetch_spot_markets_raw()?
         .into_iter()
         .map(|m| {
-            let info = serde_json::to_value(&m)
-                .unwrap()
-                .as_object()
-                .unwrap()
-                .clone();
+            let info = serde_json::to_value(&m).unwrap().as_object().unwrap().clone();
             let symbol = m.wsname.unwrap();
             let pair = crypto_pair::normalize_pair(&symbol, "kraken").unwrap();
             let (base, quote) = {
@@ -113,10 +103,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 active: true,
                 margin: false,
                 // see https://support.kraken.com/hc/en-us/articles/360000526126-What-are-Maker-and-Taker-fees-
-                fees: Fees {
-                    maker: 0.0016,
-                    taker: 0.0026,
-                },
+                fees: Fees { maker: 0.0016, taker: 0.0026 },
                 precision: Precision {
                     tick_size: 1.0 / (10_i64.pow(m.pair_decimals as u32) as f64),
                     lot_size: 1.0 / (10_i64.pow(m.lot_decimals as u32) as f64),

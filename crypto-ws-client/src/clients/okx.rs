@@ -100,11 +100,7 @@ impl OkxCommandTranslator {
             .collect::<Vec<BTreeMap<String, String>>>();
         format!(
             r#"{{"op":"{}","args":{}}}"#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
+            if subscribe { "subscribe" } else { "unsubscribe" },
             serde_json::to_string(&arr).unwrap(),
         )
     }
@@ -148,16 +144,12 @@ impl MessageHandler for OkxMessageHandler {
         if let Some(event) = obj.get("event") {
             match event.as_str().unwrap() {
                 "error" => {
-                    let error_code = obj
-                        .get("code")
-                        .unwrap()
-                        .as_str()
-                        .unwrap()
-                        .parse::<i64>()
-                        .unwrap();
+                    let error_code =
+                        obj.get("code").unwrap().as_str().unwrap().parse::<i64>().unwrap();
                     match error_code {
                         30040 => {
-                            // channel doesn't exist, ignore because some symbols don't exist in websocket while they exist in `/v3/instruments`
+                            // channel doesn't exist, ignore because some symbols don't exist in
+                            // websocket while they exist in `/v3/instruments`
                             error!("Received {} from {}", msg, EXCHANGE_NAME);
                         }
                         _ => panic!("Received {} from {}", msg, EXCHANGE_NAME),
@@ -184,13 +176,7 @@ impl MessageHandler for OkxMessageHandler {
 
 impl CommandTranslator for OkxCommandTranslator {
     fn translate_to_commands(&self, subscribe: bool, topics: &[(String, String)]) -> Vec<String> {
-        ensure_frame_size(
-            topics,
-            subscribe,
-            Self::topics_to_command,
-            WS_FRAME_SIZE,
-            None,
-        )
+        ensure_frame_size(topics, subscribe, Self::topics_to_command, WS_FRAME_SIZE, None)
     }
 
     fn translate_to_candlestick_commands(

@@ -71,18 +71,10 @@ async fn subscribe_ticker() {
 
 #[tokio::test(flavor = "multi_thread")]
 async fn subscribe_orderbook() {
-    gen_test_code!(
-        CoinbaseProWSClient,
-        subscribe_orderbook,
-        &["BTC-USD".to_string()]
-    );
+    gen_test_code!(CoinbaseProWSClient, subscribe_orderbook, &["BTC-USD".to_string()]);
 }
 
 #[tokio::test(flavor = "multi_thread")]
 async fn subscribe_l3_orderbook() {
-    gen_test_code!(
-        CoinbaseProWSClient,
-        subscribe_l3_orderbook,
-        &["BTC-USD".to_string()]
-    );
+    gen_test_code!(CoinbaseProWSClient, subscribe_l3_orderbook, &["BTC-USD".to_string()]);
 }

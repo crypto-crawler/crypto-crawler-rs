@@ -19,10 +19,7 @@ pub struct KrakenSpotRestClient {
 
 impl KrakenSpotRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        KrakenSpotRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        KrakenSpotRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get most recent trades.

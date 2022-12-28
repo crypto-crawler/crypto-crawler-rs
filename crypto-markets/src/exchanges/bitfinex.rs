@@ -35,24 +35,18 @@ fn fetch_raw_markets() -> Result<Vec<RawMarket>> {
     // can NOT use v2 API due to https://github.com/bitfinexcom/bitfinex-api-py/issues/95
     let text = http_get("https://api.bitfinex.com/v1/symbols_details", None)?;
     let markets = serde_json::from_str::<Vec<RawMarket>>(&text)?;
-    let markets = markets
-        .into_iter()
-        .filter(|m| !m.pair.starts_with("test"))
-        .collect::<Vec<RawMarket>>();
+    let markets =
+        markets.into_iter().filter(|m| !m.pair.starts_with("test")).collect::<Vec<RawMarket>>();
     Ok(markets)
 }
 
 pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
     let raw_markets = fetch_raw_markets()?;
     let raw_markets: Vec<RawMarket> = match market_type {
-        MarketType::Spot => raw_markets
-            .into_iter()
-            .filter(|x| !x.pair.ends_with("f0"))
-            .collect(),
-        MarketType::LinearSwap => raw_markets
-            .into_iter()
-            .filter(|x| x.pair.ends_with("f0"))
-            .collect(),
+        MarketType::Spot => raw_markets.into_iter().filter(|x| !x.pair.ends_with("f0")).collect(),
+        MarketType::LinearSwap => {
+            raw_markets.into_iter().filter(|x| x.pair.ends_with("f0")).collect()
+        }
         _ => panic!("Unsupported market_type: {}", market_type),
     };
     let markets: Vec<Market> = raw_markets
@@ -68,10 +62,7 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
                 let v: Vec<&str> = symbol.split(':').collect();
                 (v[0].to_string(), v[1].to_string())
             } else {
-                (
-                    symbol[..(symbol.len() - 3)].to_string(),
-                    symbol[(symbol.len() - 3)..].to_string(),
-                )
+                (symbol[..(symbol.len() - 3)].to_string(), symbol[(symbol.len() - 3)..].to_string())
             };
             Market {
                 exchange: "bitfinex".to_string(),
@@ -86,24 +77,14 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
                 },
                 base,
                 quote: quote.clone(),
-                settle: if market_type == MarketType::LinearSwap {
-                    Some(quote)
-                } else {
-                    None
-                },
+                settle: if market_type == MarketType::LinearSwap { Some(quote) } else { None },
                 active: true,
                 margin: m.margin,
                 // see https://www.bitfinex.com/fees
                 fees: if market_type == MarketType::Spot {
-                    Fees {
-                        maker: 0.001,
-                        taker: 0.002,
-                    }
+                    Fees { maker: 0.001, taker: 0.002 }
                 } else {
-                    Fees {
-                        maker: -0.0002,
-                        taker: 0.00075,
-                    }
+                    Fees { maker: -0.0002, taker: 0.00075 }
                 },
                 precision: Precision {
                     tick_size: 1.0 / (10_i64.pow(m.price_precision as u32) as f64),
@@ -115,17 +96,9 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
                     notional_min: None,
                     notional_max: None,
                 }),
-                contract_value: if market_type == MarketType::Spot {
-                    None
-                } else {
-                    Some(1.0)
-                },
+                contract_value: if market_type == MarketType::Spot { None } else { Some(1.0) },
                 delivery_date: None,
-                info: serde_json::to_value(&m)
-                    .unwrap()
-                    .as_object()
-                    .unwrap()
-                    .clone(),
+                info: serde_json::to_value(&m).unwrap().as_object().unwrap().clone(),
             }
         })
         .collect();
@@ -134,10 +107,7 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
 
 // see <https://docs.bitfinex.com/reference#rest-public-conf>
 fn fetch_spot_symbols() -> Result<Vec<String>> {
-    let text = http_get(
-        "https://api-pub.bitfinex.com/v2/conf/pub:list:pair:exchange",
-        None,
-    )?;
+    let text = http_get("https://api-pub.bitfinex.com/v2/conf/pub:list:pair:exchange", None)?;
     let pairs = serde_json::from_str::<Vec<Vec<String>>>(&text)?;
     let symbols = pairs[0]
         .iter()
@@ -149,10 +119,7 @@ fn fetch_spot_symbols() -> Result<Vec<String>> {
 
 // see <https://docs.bitfinex.com/reference#rest-public-conf>
 fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
-    let text = http_get(
-        "https://api-pub.bitfinex.com/v2/conf/pub:list:pair:futures",
-        None,
-    )?;
+    let text = http_get("https://api-pub.bitfinex.com/v2/conf/pub:list:pair:futures", None)?;
     let pairs = serde_json::from_str::<Vec<Vec<String>>>(&text)?;
     let symbols = pairs[0]
         .iter()
@@ -205,7 +172,8 @@ mod tests {
             .collect();
         symbols1.sort();
         symbols3.sort();
-        // assert_eq!(symbols1, symbols3); // sometimes symbols3 has extra symbols that don't exist in symbols1
+        // assert_eq!(symbols1, symbols3); // sometimes symbols3 has extra
+        // symbols that don't exist in symbols1
     }
 
     #[test]

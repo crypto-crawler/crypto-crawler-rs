@@ -39,27 +39,31 @@ pub struct Market {
     pub exchange: String,
     /// Market type
     pub market_type: MarketType,
-    /// exchange-specific trading symbol, recognized by RESTful API, equivalent to ccxt's Market.id.
+    /// exchange-specific trading symbol, recognized by RESTful API, equivalent
+    /// to ccxt's Market.id.
     pub symbol: String,
     /// exchange-specific base currency
     pub base_id: String,
     /// exchange-specific quote currency
     pub quote_id: String,
-    /// exchange-specific settlement currency, i.e., collateral currency, always None for spot markets
+    /// exchange-specific settlement currency, i.e., collateral currency, always
+    /// None for spot markets
     #[serde(skip_serializing_if = "Option::is_none")]
     pub settle_id: Option<String>,
     /// unified uppercase string of base fiat or crypto currency
     pub base: String,
     /// unified uppercase string of quote fiat or crypto currency
     pub quote: String,
-    /// settlement currency, i.e., collateral currency, always None for spot markets
+    /// settlement currency, i.e., collateral currency, always None for spot
+    /// markets
     #[serde(skip_serializing_if = "Option::is_none")]
     pub settle: Option<String>,
     /// market status
     pub active: bool,
     /// Margin enabled.
     ///
-    /// * All contract markets are margin enabled, including future, swap and option.
+    /// * All contract markets are margin enabled, including future, swap and
+    ///   option.
     /// * Only a few exchanges have spot market with margin enabled.
     pub margin: bool,
     pub fees: Fees,
@@ -71,7 +75,8 @@ pub struct Market {
     // The value of one contract, not applicable to sport markets
     #[serde(skip_serializing_if = "Option::is_none")]
     pub contract_value: Option<f64>,
-    /// Delivery date, unix timestamp in milliseconds, only applicable for future and option markets.
+    /// Delivery date, unix timestamp in milliseconds, only applicable for
+    /// future and option markets.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delivery_date: Option<u64>,
     /// the original JSON string retrieved from the exchange

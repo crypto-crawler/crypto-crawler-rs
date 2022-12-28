@@ -65,11 +65,7 @@ impl BitmexCommandTranslator {
             .collect::<Vec<String>>();
         format!(
             r#"{{"op":"{}","args":{}}}"#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
+            if subscribe { "subscribe" } else { "unsubscribe" },
             serde_json::to_string(&raw_channels).unwrap()
         )
     }

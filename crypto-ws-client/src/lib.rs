@@ -38,8 +38,8 @@
 //!
 //! ## Low Level APIs
 //!
-//! Sometimes high-level APIs can NOT meet users' requirements, this package provides three
-//! low-level APIs:
+//! Sometimes high-level APIs can NOT meet users' requirements, this package
+//! provides three low-level APIs:
 //!
 //! * `subscribe(&self, topics: &[(String, String)])`
 //! * `unsubscribe(&self, topics: &[(String, String)])`
@@ -54,7 +54,8 @@
 //! | Updated per Tick     | Inremental Level2 | Level3         |
 //! | Updated per Interval | Snapshot Level2   | Not Usefull    |
 //!
-//! * Level1 data is non-aggregated, updated per tick, top 1 bid & ask from the original orderbook.
+//! * Level1 data is non-aggregated, updated per tick, top 1 bid & ask from the
+//!   original orderbook.
 //! * Level2 data is aggregated by price level, updated per tick.
 //! * Level3 data is the original orderbook, which is not aggregated.
 

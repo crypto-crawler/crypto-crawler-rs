@@ -17,10 +17,7 @@ pub struct GateSpotRestClient {
 
 impl GateSpotRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        GateSpotRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        GateSpotRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get the latest Level2 snapshot of orderbook.
@@ -29,9 +26,6 @@ impl GateSpotRestClient {
     ///
     /// For example: <https://api.gateio.ws/api/v4/spot/order_book?currency_pair=BTC_USDT&limit=1000>,
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!(
-            "/spot/order_book?currency_pair={}&limit=1000",
-            symbol
-        ))
+        gen_api!(format!("/spot/order_book?currency_pair={}&limit=1000", symbol))
     }
 }

@@ -44,19 +44,12 @@ struct Response {
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
     let txt = huobi_http_get("https://api.huobi.pro/v1/common/symbols")?;
     let resp = serde_json::from_str::<Response>(&txt)?;
-    let result: Vec<SpotMarket> = resp
-        .data
-        .into_iter()
-        .filter(|m| m.state == "online")
-        .collect();
+    let result: Vec<SpotMarket> = resp.data.into_iter().filter(|m| m.state == "online").collect();
     Ok(result)
 }
 
 pub(super) fn fetch_spot_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_spot_markets_raw()?
-        .into_iter()
-        .map(|m| m.symbol)
-        .collect::<Vec<String>>();
+    let symbols = fetch_spot_markets_raw()?.into_iter().map(|m| m.symbol).collect::<Vec<String>>();
     Ok(symbols)
 }
 
@@ -64,11 +57,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
     let markets = fetch_spot_markets_raw()?
         .into_iter()
         .map(|m| {
-            let info = serde_json::to_value(&m)
-                .unwrap()
-                .as_object()
-                .unwrap()
-                .clone();
+            let info = serde_json::to_value(&m).unwrap().as_object().unwrap().clone();
             let pair = crypto_pair::normalize_pair(&m.symbol, "huobi").unwrap();
             let (base, quote) = {
                 let v: Vec<&str> = pair.split('/').collect();
@@ -87,10 +76,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 active: m.state == "online",
                 margin: true,
                 // see https://www.huobi.com/en-us/fee/
-                fees: Fees {
-                    maker: 0.002,
-                    taker: 0.002,
-                },
+                fees: Fees { maker: 0.002, taker: 0.002 },
                 precision: Precision {
                     tick_size: 1.0 / (10_i64.pow(m.price_precision as u32) as f64),
                     lot_size: 1.0 / (10_i64.pow(m.amount_precision as u32) as f64),

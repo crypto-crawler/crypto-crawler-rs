@@ -19,11 +19,7 @@ fn channel_symbol_to_topic(
     configs: Option<&HashMap<String, String>>,
 ) -> String {
     if channel == "candle" {
-        format!(
-            "candle{}:{}",
-            configs.unwrap().get("interval").unwrap(),
-            symbol
-        )
+        format!("candle{}:{}", configs.unwrap().get("interval").unwrap(), symbol)
     } else {
         format!("{}:{}", channel, symbol)
     }
@@ -44,11 +40,7 @@ fn topics_to_command(topics: &[String], subscribe: bool) -> String {
         .collect::<Vec<BTreeMap<String, String>>>();
     format!(
         r#"{{"op":"{}","args":{}}}"#,
-        if subscribe {
-            "subscribe"
-        } else {
-            "unsubscribe"
-        },
+        if subscribe { "subscribe" } else { "unsubscribe" },
         serde_json::to_string(&arr).unwrap(),
     )
 }
@@ -63,9 +55,7 @@ pub(crate) fn get_ws_commands(
         .iter()
         .map(|msg_type| msg_type_to_channel(*msg_type))
         .flat_map(|channel| {
-            symbols
-                .iter()
-                .map(|symbol| channel_symbol_to_topic(channel, symbol, configs))
+            symbols.iter().map(|symbol| channel_symbol_to_topic(channel, symbol, configs))
         })
         .collect::<Vec<String>>();
     vec![topics_to_command(&topics, subscribe)]

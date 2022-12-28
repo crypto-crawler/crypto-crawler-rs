@@ -48,19 +48,12 @@ struct Response {
 // product_type: umcbl, LinearSwap; dmcbl, InverseSwap;
 fn fetch_swap_markets_raw(product_type: &str) -> Result<Vec<SwapMarket>> {
     let txt = http_get(
-        format!(
-            "https://api.bitget.com/api/mix/v1/market/contracts?productType={}",
-            product_type
-        )
-        .as_str(),
+        format!("https://api.bitget.com/api/mix/v1/market/contracts?productType={}", product_type)
+            .as_str(),
         None,
     )?;
     let resp = serde_json::from_str::<Response>(&txt)?;
-    if resp.msg != "success" {
-        Err(Error(txt))
-    } else {
-        Ok(resp.data)
-    }
+    if resp.msg != "success" { Err(Error(txt)) } else { Ok(resp.data) }
 }
 
 pub(super) fn fetch_inverse_swap_symbols() -> Result<Vec<String>> {
@@ -83,14 +76,10 @@ pub(super) fn fetch_inverse_future_symbols() -> Result<Vec<String>> {
 
 pub(super) fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
     // see https://bitgetlimited.github.io/apidoc/en/mix/#producttype
-    let mut usdt_symbols = fetch_swap_markets_raw("umcbl")?
-        .into_iter()
-        .map(|m| m.symbol)
-        .collect::<Vec<String>>();
-    let usdc_symbols = fetch_swap_markets_raw("cmcbl")?
-        .into_iter()
-        .map(|m| m.symbol)
-        .collect::<Vec<String>>();
+    let mut usdt_symbols =
+        fetch_swap_markets_raw("umcbl")?.into_iter().map(|m| m.symbol).collect::<Vec<String>>();
+    let usdc_symbols =
+        fetch_swap_markets_raw("cmcbl")?.into_iter().map(|m| m.symbol).collect::<Vec<String>>();
     usdt_symbols.extend(usdc_symbols);
     Ok(usdt_symbols)
 }
@@ -114,10 +103,8 @@ pub(super) fn fetch_inverse_future_markets() -> Result<Vec<Market>> {
 }
 
 pub(super) fn fetch_linear_swap_markets() -> Result<Vec<Market>> {
-    let markets = fetch_swap_markets_raw("umcbl")?
-        .into_iter()
-        .map(to_market)
-        .collect::<Vec<Market>>();
+    let markets =
+        fetch_swap_markets_raw("umcbl")?.into_iter().map(to_market).collect::<Vec<Market>>();
     Ok(markets)
 }
 
@@ -177,10 +164,6 @@ fn to_market(m: SwapMarket) -> Market {
         }),
         contract_value: Some(1.0), // TODO:
         delivery_date: delivery_time,
-        info: serde_json::to_value(&m)
-            .unwrap()
-            .as_object()
-            .unwrap()
-            .clone(),
+        info: serde_json::to_value(&m).unwrap().as_object().unwrap().clone(),
     }
 }

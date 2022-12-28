@@ -20,10 +20,7 @@ fn fetch_spot_symbols() {
     for symbol in symbols.iter() {
         assert!(symbol.contains('_'));
         assert_eq!(symbol.to_string(), symbol.to_lowercase());
-        assert_eq!(
-            MarketType::Spot,
-            get_market_type(symbol, EXCHANGE_NAME, None)
-        );
+        assert_eq!(MarketType::Spot, get_market_type(symbol, EXCHANGE_NAME, None));
     }
 }
 
@@ -33,10 +30,7 @@ fn fetch_inverse_swap_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("_USD-R"));
-        assert_eq!(
-            MarketType::InverseSwap,
-            get_market_type(symbol, EXCHANGE_NAME, None)
-        );
+        assert_eq!(MarketType::InverseSwap, get_market_type(symbol, EXCHANGE_NAME, None));
     }
 }
 
@@ -46,10 +40,7 @@ fn fetch_linear_swap_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("_USDT") || symbol.ends_with("_ZUSD"));
-        assert_eq!(
-            MarketType::LinearSwap,
-            get_market_type(symbol, EXCHANGE_NAME, None)
-        );
+        assert_eq!(MarketType::LinearSwap, get_market_type(symbol, EXCHANGE_NAME, None));
     }
 }
 
@@ -58,11 +49,7 @@ fn fetch_spot_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::Spot).unwrap();
     assert!(!markets.is_empty());
 
-    let btc_usdt = markets
-        .iter()
-        .find(|m| m.symbol == "btc_usdt")
-        .unwrap()
-        .clone();
+    let btc_usdt = markets.iter().find(|m| m.symbol == "btc_usdt").unwrap().clone();
     assert_eq!(btc_usdt.market_type, MarketType::Spot);
     assert!(btc_usdt.contract_value.is_none());
     assert_eq!(btc_usdt.precision.tick_size, 0.1);
@@ -77,11 +64,7 @@ fn fetch_inverse_swap_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
     assert!(!markets.is_empty());
 
-    let btcusd_perp = markets
-        .iter()
-        .find(|m| m.symbol == "BTC_USD-R")
-        .unwrap()
-        .clone();
+    let btcusd_perp = markets.iter().find(|m| m.symbol == "BTC_USD-R").unwrap().clone();
     assert_eq!(btcusd_perp.market_type, MarketType::InverseSwap);
     assert_eq!(btcusd_perp.contract_value, Some(1.0));
     assert_eq!(btcusd_perp.precision.tick_size, 0.5);
@@ -94,11 +77,7 @@ fn fetch_linear_swap_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
     assert!(!markets.is_empty());
 
-    let btcusdt = markets
-        .iter()
-        .find(|m| m.symbol == "BTC_USDT")
-        .unwrap()
-        .clone();
+    let btcusdt = markets.iter().find(|m| m.symbol == "BTC_USDT").unwrap().clone();
     assert_eq!(btcusdt.market_type, MarketType::LinearSwap);
     assert_eq!(btcusdt.contract_value, Some(0.01));
     assert_eq!(btcusdt.precision.tick_size, 0.5);

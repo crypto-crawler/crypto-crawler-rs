@@ -11,7 +11,8 @@ const BASE_URL: &str = "https://www.bitstamp.net/api";
 /// * REST API doc: <https://www.bitstamp.net/api/>
 /// * Trading at: <https://www.bitstamp.net/market/tradeview/>
 /// * Rate Limits: <https://www.bitstamp.net/api/#what-is-api>
-///   * Do not make more than 8000 requests per 10 minutes or we will ban your IP address.
+///   * Do not make more than 8000 requests per 10 minutes or we will ban your
+///     IP address.
 pub struct BitstampRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
@@ -19,10 +20,7 @@ pub struct BitstampRestClient {
 
 impl BitstampRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        BitstampRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        BitstampRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get trades.

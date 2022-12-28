@@ -43,11 +43,8 @@ struct FutureMarket {
 fn fetch_inverse_markets_raw() -> Result<Vec<FutureMarket>> {
     let txt = binance_http_get("https://dapi.binance.com/dapi/v1/exchangeInfo")?;
     let resp = serde_json::from_str::<BinanceResponse<FutureMarket>>(&txt)?;
-    let symbols: Vec<FutureMarket> = resp
-        .symbols
-        .into_iter()
-        .filter(|m| m.contractStatus == "TRADING")
-        .collect();
+    let symbols: Vec<FutureMarket> =
+        resp.symbols.into_iter().filter(|m| m.contractStatus == "TRADING").collect();
     Ok(symbols)
 }
 
@@ -91,22 +88,15 @@ fn fetch_future_markets_internal() -> Result<Vec<Market>> {
                 active: m.contractStatus == "TRADING",
                 margin: true,
                 // see https://www.binance.com/en/fee/futureFee
-                fees: Fees {
-                    maker: 0.00015,
-                    taker: 0.0004,
-                },
+                fees: Fees { maker: 0.00015, taker: 0.0004 },
                 precision: Precision {
                     tick_size: 1.0 / (10_i64.pow(m.pricePrecision as u32) as f64),
                     lot_size: 1.0 / (10_i64.pow(m.quantityPrecision as u32) as f64),
                 },
                 quantity_limit: Some(QuantityLimit {
-                    min: parse_filter(&m.filters, "LOT_SIZE", "minQty")
-                        .parse::<f64>()
-                        .ok(),
+                    min: parse_filter(&m.filters, "LOT_SIZE", "minQty").parse::<f64>().ok(),
                     max: Some(
-                        parse_filter(&m.filters, "LOT_SIZE", "maxQty")
-                            .parse::<f64>()
-                            .unwrap(),
+                        parse_filter(&m.filters, "LOT_SIZE", "maxQty").parse::<f64>().unwrap(),
                     ),
                     notional_min: None,
                     notional_max: None,
@@ -117,11 +107,7 @@ fn fetch_future_markets_internal() -> Result<Vec<Market>> {
                 } else {
                     Some(m.deliveryDate)
                 },
-                info: serde_json::to_value(&m)
-                    .unwrap()
-                    .as_object()
-                    .unwrap()
-                    .clone(),
+                info: serde_json::to_value(&m).unwrap().as_object().unwrap().clone(),
             }
         })
         .collect::<Vec<Market>>();

@@ -35,10 +35,5 @@ pub(super) fn parse_filter<'a>(
     filter_type: &'a str,
     field: &'static str,
 ) -> &'a str {
-    filters
-        .iter()
-        .find(|x| x["filterType"] == filter_type)
-        .unwrap()[field]
-        .as_str()
-        .unwrap()
+    filters.iter().find(|x| x["filterType"] == filter_type).unwrap()[field].as_str().unwrap()
 }

@@ -86,7 +86,8 @@ impl MessageHandler for KrakenMessageHandler {
                         "error" => {
                             let error_msg = obj.get("errorMessage").unwrap().as_str().unwrap();
                             if error_msg.starts_with("Currency pair not supported") {
-                                // Sometimes currency pairs returned from RESTful API don't exist in WebSocket yet
+                                // Sometimes currency pairs returned from RESTful API don't exist in
+                                // WebSocket yet
                                 error!("Received {} from {}", msg, EXCHANGE_NAME)
                             } else {
                                 panic!("Received {} from {}", msg, EXCHANGE_NAME);
@@ -101,10 +102,7 @@ impl MessageHandler for KrakenMessageHandler {
                     let status = obj.get("status").unwrap().as_str().unwrap();
                     match status {
                         "maintenance" | "cancel_only" => {
-                            warn!(
-                                "Received {}, which means Kraken is in maintenance mode",
-                                msg
-                            );
+                            warn!("Received {}, which means Kraken is in maintenance mode", msg);
                             std::thread::sleep(std::time::Duration::from_secs(20));
                             MiscMessage::Reconnect
                         }
@@ -136,22 +134,14 @@ impl KrakenCommandTranslator {
         if name == "book" {
             format!(
                 r#"{{"event":"{}","pair":{},"subscription":{{"name":"{}","depth":25}}}}"#,
-                if subscribe {
-                    "subscribe"
-                } else {
-                    "unsubscribe"
-                },
+                if subscribe { "subscribe" } else { "unsubscribe" },
                 serde_json::to_string(symbols).unwrap(),
                 name
             )
         } else {
             format!(
                 r#"{{"event":"{}","pair":{},"subscription":{{"name":"{}"}}}}"#,
-                if subscribe {
-                    "subscribe"
-                } else {
-                    "unsubscribe"
-                },
+                if subscribe { "subscribe" } else { "unsubscribe" },
                 serde_json::to_string(symbols).unwrap(),
                 name
             )
@@ -200,10 +190,8 @@ impl CommandTranslator for KrakenCommandTranslator {
         subscribe: bool,
         symbol_interval_list: &[(String, usize)],
     ) -> Vec<String> {
-        let valid_set: Vec<usize> = vec![1, 5, 15, 30, 60, 240, 1440, 10080, 21600]
-            .into_iter()
-            .map(|x| x * 60)
-            .collect();
+        let valid_set: Vec<usize> =
+            vec![1, 5, 15, 30, 60, 240, 1440, 10080, 21600].into_iter().map(|x| x * 60).collect();
         let invalid_intervals = symbol_interval_list
             .iter()
             .map(|(_, interval)| *interval)
@@ -217,11 +205,7 @@ impl CommandTranslator for KrakenCommandTranslator {
                     .map(|x| x.to_string())
                     .collect::<Vec<String>>()
                     .join(","),
-                valid_set
-                    .into_iter()
-                    .map(|x| x.to_string())
-                    .collect::<Vec<String>>()
-                    .join(",")
+                valid_set.into_iter().map(|x| x.to_string()).collect::<Vec<String>>().join(",")
             );
         }
         let symbols_interval_list = Self::convert_symbol_interval_list(symbol_interval_list);
@@ -230,11 +214,7 @@ impl CommandTranslator for KrakenCommandTranslator {
             .map(|(symbols, interval)| {
                 format!(
                     r#"{{"event":"{}","pair":{},"subscription":{{"name":"ohlc", "interval":{}}}}}"#,
-                    if subscribe {
-                        "subscribe"
-                    } else {
-                        "unsubscribe"
-                    },
+                    if subscribe { "subscribe" } else { "unsubscribe" },
                     serde_json::to_string(&symbols).unwrap(),
                     interval / 60
                 )

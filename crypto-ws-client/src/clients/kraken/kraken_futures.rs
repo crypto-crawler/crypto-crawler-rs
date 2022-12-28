@@ -59,11 +59,7 @@ impl KrakenCommandTranslator {
     fn channel_symbols_to_command(channel: &str, symbols: &[String], subscribe: bool) -> String {
         format!(
             r#"{{"event":"{}","feed":"{}","product_ids":{}}}"#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
+            if subscribe { "subscribe" } else { "unsubscribe" },
             channel,
             serde_json::to_string(symbols).unwrap(),
         )
@@ -125,9 +121,7 @@ impl CommandTranslator for KrakenCommandTranslator {
         }
 
         for (channel, symbols) in channel_symbols.iter() {
-            commands.push(Self::channel_symbols_to_command(
-                channel, symbols, subscribe,
-            ));
+            commands.push(Self::channel_symbols_to_command(channel, symbols, subscribe));
         }
         commands.push(r#"{"event":"subscribe","feed":"heartbeat"}"#.to_string());
 

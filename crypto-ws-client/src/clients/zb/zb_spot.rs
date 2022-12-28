@@ -79,10 +79,7 @@ impl MessageHandler for ZbMessageHandler {
     }
 
     fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
-        Some((
-            Message::Text(r#"{"channel":"ping","event":"addChannel"}"#.to_string()),
-            3,
-        ))
+        Some((Message::Text(r#"{"channel":"ping","event":"addChannel"}"#.to_string()), 3))
     }
 }
 
@@ -102,7 +99,9 @@ impl ZbCommandTranslator {
             86400 => "1day",
             259200 => "3day",
             604800 => "1week",
-            _ => panic!("ZB spot available intervals: 1week, 3day, 1day, 12hour, 6hour, 4hour, 2hour, 1hour, 30min, 15min, 5min, 3min, 1min"),
+            _ => panic!(
+                "ZB spot available intervals: 1week, 3day, 1day, 12hour, 6hour, 4hour, 2hour, 1hour, 30min, 15min, 5min, 3min, 1min"
+            ),
         };
         format!("{}_kline_{}", symbol.replace('_', ""), interval_str,)
     }
@@ -115,11 +114,7 @@ impl CommandTranslator for ZbCommandTranslator {
             .map(|(channel, symbol)| {
                 format!(
                     r#"{{"event":"{}","channel":"{}_{}"}}"#,
-                    if subscribe {
-                        "addChannel"
-                    } else {
-                        "removeChannel"
-                    },
+                    if subscribe { "addChannel" } else { "removeChannel" },
                     symbol.replace('_', ""),
                     channel,
                 )
@@ -137,11 +132,7 @@ impl CommandTranslator for ZbCommandTranslator {
             .map(|(symbol, interval)| {
                 format!(
                     r#"{{"event":"{}","channel":"{}"}}"#,
-                    if subscribe {
-                        "addChannel"
-                    } else {
-                        "removeChannel"
-                    },
+                    if subscribe { "addChannel" } else { "removeChannel" },
                     self.to_candlestick_raw_channel(symbol, *interval),
                 )
             })
@@ -160,10 +151,7 @@ mod tests {
             .translate_to_commands(true, &[("trades".to_string(), "btc_usdt".to_string())]);
 
         assert_eq!(1, commands.len());
-        assert_eq!(
-            r#"{"event":"addChannel","channel":"btcusdt_trades"}"#,
-            commands[0]
-        );
+        assert_eq!(r#"{"event":"addChannel","channel":"btcusdt_trades"}"#, commands[0]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -178,14 +166,8 @@ mod tests {
         );
 
         assert_eq!(2, commands.len());
-        assert_eq!(
-            r#"{"event":"addChannel","channel":"btcusdt_trades"}"#,
-            commands[0]
-        );
-        assert_eq!(
-            r#"{"event":"addChannel","channel":"ethusdt_depth"}"#,
-            commands[1]
-        );
+        assert_eq!(r#"{"event":"addChannel","channel":"btcusdt_trades"}"#, commands[0]);
+        assert_eq!(r#"{"event":"addChannel","channel":"ethusdt_depth"}"#, commands[1]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -195,9 +177,6 @@ mod tests {
             translator.translate_to_candlestick_commands(true, &[("btc_usdt".to_string(), 60)]);
 
         assert_eq!(1, commands.len());
-        assert_eq!(
-            r#"{"event":"addChannel","channel":"btcusdt_kline_1min"}"#,
-            commands[0]
-        );
+        assert_eq!(r#"{"event":"addChannel","channel":"btcusdt_kline_1min"}"#, commands[0]);
     }
 }

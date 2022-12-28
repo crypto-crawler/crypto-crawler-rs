@@ -69,15 +69,11 @@ struct KucoinCommandTranslator {}
 
 impl KucoinCommandTranslator {
     fn to_candlestick_channel(symbol: &str, interval: usize) -> String {
-        let valid_set: Vec<usize> = vec![
-            60, 300, 900, 1800, 3600, 7200, 14400, 28800, 43200, 86400, 604800,
-        ];
+        let valid_set: Vec<usize> =
+            vec![60, 300, 900, 1800, 3600, 7200, 14400, 28800, 43200, 86400, 604800];
         if !valid_set.contains(&interval) {
-            let joined = valid_set
-                .into_iter()
-                .map(|x| x.to_string())
-                .collect::<Vec<String>>()
-                .join(",");
+            let joined =
+                valid_set.into_iter().map(|x| x.to_string()).collect::<Vec<String>>().join(",");
             panic!("KuCoin Swap available intervals {}", joined);
         }
         format!("{}_{}", symbol, interval / 60)
@@ -117,10 +113,7 @@ mod tests {
         let translator = super::KucoinCommandTranslator {};
         let commands = translator.translate_to_commands(
             true,
-            &[(
-                "/contractMarket/execution".to_string(),
-                "BTC_USD".to_string(),
-            )],
+            &[("/contractMarket/execution".to_string(), "BTC_USD".to_string())],
         );
 
         assert_eq!(1, commands.len());
@@ -132,14 +125,8 @@ mod tests {
         let commands = translator.translate_to_commands(
             true,
             &[
-                (
-                    "/contractMarket/execution".to_string(),
-                    "BTC_USD".to_string(),
-                ),
-                (
-                    "/contractMarket/execution".to_string(),
-                    "ETH_USD".to_string(),
-                ),
+                ("/contractMarket/execution".to_string(), "BTC_USD".to_string()),
+                ("/contractMarket/execution".to_string(), "ETH_USD".to_string()),
             ],
         );
 
@@ -156,10 +143,7 @@ mod tests {
         let commands = translator.translate_to_commands(
             true,
             &[
-                (
-                    "/contractMarket/execution".to_string(),
-                    "BTC_USD".to_string(),
-                ),
+                ("/contractMarket/execution".to_string(), "BTC_USD".to_string()),
                 ("/contractMarket/level2".to_string(), "ETH_USD".to_string()),
             ],
         );
@@ -177,14 +161,8 @@ mod tests {
         let commands = translator.translate_to_commands(
             true,
             &[
-                (
-                    "/contractMarket/execution".to_string(),
-                    "BTC_USD".to_string(),
-                ),
-                (
-                    "/contractMarket/execution".to_string(),
-                    "ETH_USD".to_string(),
-                ),
+                ("/contractMarket/execution".to_string(), "BTC_USD".to_string()),
+                ("/contractMarket/execution".to_string(), "ETH_USD".to_string()),
                 ("/contractMarket/level2".to_string(), "BTC_USD".to_string()),
                 ("/contractMarket/level2".to_string(), "ETH_USD".to_string()),
             ],

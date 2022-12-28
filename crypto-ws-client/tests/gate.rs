@@ -33,20 +33,12 @@ mod gate_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            GateSpotWSClient,
-            subscribe_orderbook,
-            &["BTC_USDT".to_string()]
-        );
+        gen_test_code!(GateSpotWSClient, subscribe_orderbook, &["BTC_USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            GateSpotWSClient,
-            subscribe_orderbook_topk,
-            &["BTC_USDT".to_string()]
-        );
+        gen_test_code!(GateSpotWSClient, subscribe_orderbook_topk, &["BTC_USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -56,11 +48,7 @@ mod gate_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            GateSpotWSClient,
-            subscribe_ticker,
-            &["BTC_USDT".to_string()]
-        );
+        gen_test_code!(GateSpotWSClient, subscribe_ticker, &["BTC_USDT".to_string()]);
     }
 
     #[ignore = "too slow"]
@@ -113,38 +101,22 @@ mod gate_inverse_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            GateInverseSwapWSClient,
-            subscribe_orderbook,
-            &["BTC_USD".to_string()]
-        );
+        gen_test_code!(GateInverseSwapWSClient, subscribe_orderbook, &["BTC_USD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            GateInverseSwapWSClient,
-            subscribe_orderbook_topk,
-            &["BTC_USD".to_string()]
-        );
+        gen_test_code!(GateInverseSwapWSClient, subscribe_orderbook_topk, &["BTC_USD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(
-            GateInverseSwapWSClient,
-            subscribe_bbo,
-            &["BTC_USD".to_string()]
-        );
+        gen_test_code!(GateInverseSwapWSClient, subscribe_bbo, &["BTC_USD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            GateInverseSwapWSClient,
-            subscribe_ticker,
-            &["BTC_USD".to_string()]
-        );
+        gen_test_code!(GateInverseSwapWSClient, subscribe_ticker, &["BTC_USD".to_string()]);
     }
 
     #[ignore]
@@ -164,47 +136,27 @@ mod gate_linear_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            GateLinearSwapWSClient,
-            subscribe_trade,
-            &["BTC_USDT".to_string()]
-        );
+        gen_test_code!(GateLinearSwapWSClient, subscribe_trade, &["BTC_USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            GateLinearSwapWSClient,
-            subscribe_orderbook,
-            &["BTC_USDT".to_string()]
-        );
+        gen_test_code!(GateLinearSwapWSClient, subscribe_orderbook, &["BTC_USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            GateLinearSwapWSClient,
-            subscribe_orderbook_topk,
-            &["BTC_USDT".to_string()]
-        );
+        gen_test_code!(GateLinearSwapWSClient, subscribe_orderbook_topk, &["BTC_USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(
-            GateLinearSwapWSClient,
-            subscribe_bbo,
-            &["BTC_USDT".to_string()]
-        );
+        gen_test_code!(GateLinearSwapWSClient, subscribe_bbo, &["BTC_USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            GateLinearSwapWSClient,
-            subscribe_ticker,
-            &["BTC_USDT".to_string()]
-        );
+        gen_test_code!(GateLinearSwapWSClient, subscribe_ticker, &["BTC_USDT".to_string()]);
     }
 
     #[ignore]

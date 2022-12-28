@@ -68,10 +68,7 @@ pub(crate) async fn crawl_bbo(
                 ws_client.run().await;
                 ws_client.close();
             }
-            _ => panic!(
-                "Binance {} market does NOT have the BBO channel",
-                market_type
-            ),
+            _ => panic!("Binance {} market does NOT have the BBO channel", market_type),
         }
     } else {
         crawl_event(EXCHANGE_NAME, MessageType::BBO, market_type, symbols, tx).await;
@@ -122,10 +119,7 @@ pub(crate) async fn crawl_ticker(
                 ws_client.run().await;
                 ws_client.close();
             }
-            _ => panic!(
-                "Binance {} market does NOT have the ticker channel",
-                market_type
-            ),
+            _ => panic!("Binance {} market does NOT have the ticker channel", market_type),
         }
     } else {
         crawl_event(EXCHANGE_NAME, MessageType::Ticker, market_type, symbols, tx).await;

@@ -15,10 +15,7 @@ pub struct BinanceOptionRestClient {
 
 impl BinanceOptionRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        BinanceOptionRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        BinanceOptionRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get most recent trades.

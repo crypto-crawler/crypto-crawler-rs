@@ -45,7 +45,8 @@ pub(super) trait Level3OrderBook {
 pub(super) trait Candlestick {
     /// Subscribes to candlestick channels which send OHLCV messages.
     ///
-    /// `symbol_interval_list` is a list of symbols and intervals of candlesticks in seconds.
+    /// `symbol_interval_list` is a list of symbols and intervals of
+    /// candlesticks in seconds.
     async fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]);
 }
 
@@ -69,9 +70,8 @@ macro_rules! impl_candlestick {
         #[async_trait]
         impl Candlestick for $struct_name {
             async fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
-                let commands = self
-                    .translator
-                    .translate_to_candlestick_commands(true, symbol_interval_list);
+                let commands =
+                    self.translator.translate_to_candlestick_commands(true, symbol_interval_list);
                 self.client.send(&commands).await;
             }
         }
@@ -83,10 +83,7 @@ macro_rules! panic_ticker {
         #[async_trait]
         impl Ticker for $struct_name {
             async fn subscribe_ticker(&self, _symbols: &[String]) {
-                panic!(
-                    "{} does NOT have the ticker websocket channel",
-                    EXCHANGE_NAME
-                );
+                panic!("{} does NOT have the ticker websocket channel", EXCHANGE_NAME);
             }
         }
     };
@@ -108,10 +105,7 @@ macro_rules! panic_l2 {
         #[async_trait]
         impl OrderBook for $struct_name {
             async fn subscribe_orderbook(&self, _symbols: &[String]) {
-                panic!(
-                    "{} does NOT have the incremental level2 websocket channel",
-                    EXCHANGE_NAME
-                );
+                panic!("{} does NOT have the incremental level2 websocket channel", EXCHANGE_NAME);
             }
         }
     };
@@ -136,10 +130,7 @@ macro_rules! panic_l3_orderbook {
         #[async_trait]
         impl Level3OrderBook for $struct_name {
             async fn subscribe_l3_orderbook(&self, _symbols: &[String]) {
-                panic!(
-                    "{} does NOT have the level3 websocket channel",
-                    EXCHANGE_NAME
-                );
+                panic!("{} does NOT have the level3 websocket channel", EXCHANGE_NAME);
             }
         }
     };
@@ -150,10 +141,7 @@ macro_rules! panic_candlestick {
         #[async_trait]
         impl Candlestick for $struct_name {
             async fn subscribe_candlestick(&self, _symbol_interval_list: &[(String, usize)]) {
-                panic!(
-                    "{} does NOT have the candlestick websocket channel",
-                    EXCHANGE_NAME
-                );
+                panic!("{} does NOT have the candlestick websocket channel", EXCHANGE_NAME);
             }
         }
     };

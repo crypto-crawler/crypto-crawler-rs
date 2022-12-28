@@ -46,11 +46,8 @@ fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
     if resp.code != "200000" {
         Err(Error(txt))
     } else {
-        let markets = resp
-            .data
-            .into_iter()
-            .filter(|x| x.enableTrading)
-            .collect::<Vec<SpotMarket>>();
+        let markets =
+            resp.data.into_iter().filter(|x| x.enableTrading).collect::<Vec<SpotMarket>>();
         Ok(markets)
     }
 }
@@ -65,11 +62,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
     let markets: Vec<Market> = fetch_spot_markets_raw()?
         .into_iter()
         .map(|m| {
-            let info = serde_json::to_value(&m)
-                .unwrap()
-                .as_object()
-                .unwrap()
-                .clone();
+            let info = serde_json::to_value(&m).unwrap().as_object().unwrap().clone();
             let pair = crypto_pair::normalize_pair(&m.symbol, "kucoin").unwrap();
             let (base, quote) = {
                 let v: Vec<&str> = pair.split('/').collect();
@@ -88,10 +81,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 active: m.enableTrading,
                 margin: m.isMarginEnabled,
                 // see https://www.bitstamp.net/fee-schedule/
-                fees: Fees {
-                    maker: 0.005,
-                    taker: 0.005,
-                },
+                fees: Fees { maker: 0.005, taker: 0.005 },
                 precision: Precision {
                     tick_size: m.priceIncrement.parse::<f64>().unwrap(),
                     lot_size: m.baseIncrement.parse::<f64>().unwrap(),

@@ -44,16 +44,9 @@ struct Response {
 
 // See https://zbgapi.github.io/docs/future/v1/en/#public-get-contracts
 fn fetch_swap_markets_raw() -> Result<Vec<SwapMarket>> {
-    let txt = http_get(
-        "https://www.zbg.com/exchange/api/v1/future/common/contracts",
-        None,
-    )?;
+    let txt = http_get("https://www.zbg.com/exchange/api/v1/future/common/contracts", None)?;
     let resp = serde_json::from_str::<Response>(&txt)?;
-    if resp.resMsg.code != "1" {
-        Err(Error(txt))
-    } else {
-        Ok(resp.datas)
-    }
+    if resp.resMsg.code != "1" { Err(Error(txt)) } else { Ok(resp.datas) }
 }
 
 pub(super) fn fetch_inverse_swap_symbols() -> Result<Vec<String>> {
@@ -125,11 +118,7 @@ fn to_market(raw_market: &SwapMarket) -> Market {
         quantity_limit: None,
         contract_value: Some(raw_market.contractUnit.parse::<f64>().unwrap()),
         delivery_date: None,
-        info: serde_json::to_value(raw_market)
-            .unwrap()
-            .as_object()
-            .unwrap()
-            .clone(),
+        info: serde_json::to_value(raw_market).unwrap().as_object().unwrap().clone(),
     }
 }
 

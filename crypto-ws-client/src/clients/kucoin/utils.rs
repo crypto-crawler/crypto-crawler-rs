@@ -28,10 +28,7 @@ pub(super) struct WebsocketToken {
 
 async fn http_post(url: &str) -> Result<String> {
     let mut headers = header::HeaderMap::new();
-    headers.insert(
-        header::CONTENT_TYPE,
-        header::HeaderValue::from_static("application/json"),
-    );
+    headers.insert(header::CONTENT_TYPE, header::HeaderValue::from_static("application/json"));
 
     let client = reqwest::Client::builder()
          .default_headers(headers)
@@ -48,9 +45,7 @@ async fn http_post(url: &str) -> Result<String> {
 
 // See <https://docs.kucoin.com/#apply-connect-token>
 pub(super) async fn fetch_ws_token() -> WebsocketToken {
-    let txt = http_post("https://openapi-v2.kucoin.com/api/v1/bullet-public")
-        .await
-        .unwrap();
+    let txt = http_post("https://openapi-v2.kucoin.com/api/v1/bullet-public").await.unwrap();
     let obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();
     let code = obj.get("code").unwrap().as_str().unwrap();
     if code != "200000" {
@@ -63,23 +58,14 @@ pub(super) async fn fetch_ws_token() -> WebsocketToken {
 
     WebsocketToken {
         token: token.to_string(),
-        endpoint: server
-            .get("endpoint")
-            .unwrap()
-            .as_str()
-            .unwrap()
-            .to_string(),
+        endpoint: server.get("endpoint").unwrap().as_str().unwrap().to_string(),
     }
 }
 
 fn channel_symbols_to_command(channel: &str, symbols: &[String], subscribe: bool) -> String {
     format!(
         r#"{{"id":"crypto-ws-client","type":"{}","topic":"{}:{}","privateChannel":false,"response":true}}"#,
-        if subscribe {
-            "subscribe"
-        } else {
-            "unsubscribe"
-        },
+        if subscribe { "subscribe" } else { "unsubscribe" },
         channel,
         symbols.join(",")
     )
@@ -146,11 +132,9 @@ impl MessageHandler for KucoinMessageHandler {
         // - https://docs.kucoin.com/#ping
         // - https://docs.kucoin.cc/futures/#ping
         //
-        // If the server has not received the ping from the client for 60 seconds , the connection will be disconnected.
-        Some((
-            Message::Text(r#"{"type":"ping", "id": "crypto-ws-client"}"#.to_string()),
-            60,
-        ))
+        // If the server has not received the ping from the client for 60 seconds , the
+        // connection will be disconnected.
+        Some((Message::Text(r#"{"type":"ping", "id": "crypto-ws-client"}"#.to_string()), 60))
     }
 }
 

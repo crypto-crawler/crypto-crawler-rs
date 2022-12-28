@@ -20,10 +20,7 @@ pub struct BitzSwapRestClient {
 
 impl BitzSwapRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        BitzSwapRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        BitzSwapRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get the latest Level2 snapshot of orderbook.
@@ -34,16 +31,10 @@ impl BitzSwapRestClient {
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         let symbol_id_map = get_symbol_id_map()?;
         if !symbol_id_map.contains_key(symbol) {
-            return Err(Error(format!(
-                "Can NOT find contractId for the pair {}",
-                symbol
-            )));
+            return Err(Error(format!("Can NOT find contractId for the pair {}", symbol)));
         }
         let contract_id = symbol_id_map.get(symbol).unwrap();
-        gen_api!(format!(
-            "/V2/Market/getContractOrderBook?contractId={}&depth=100",
-            contract_id
-        ))
+        gen_api!(format!("/V2/Market/getContractOrderBook?contractId={}&depth=100", contract_id))
     }
 
     /// Get open interest.
@@ -53,16 +44,10 @@ impl BitzSwapRestClient {
         if let Some(symbol) = symbol {
             let symbol_id_map = get_symbol_id_map()?;
             if !symbol_id_map.contains_key(symbol) {
-                return Err(Error(format!(
-                    "Can NOT find contractId for the pair {}",
-                    symbol
-                )));
+                return Err(Error(format!("Can NOT find contractId for the pair {}", symbol)));
             }
             let contract_id = symbol_id_map.get(symbol).unwrap();
-            gen_api!(format!(
-                "/V2/Market/getContractTickers?contractId={}",
-                contract_id
-            ))
+            gen_api!(format!("/V2/Market/getContractTickers?contractId={}", contract_id))
         } else {
             gen_api!("/V2/Market/getContractTickers")
         }

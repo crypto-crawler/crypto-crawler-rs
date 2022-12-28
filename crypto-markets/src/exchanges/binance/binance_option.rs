@@ -54,10 +54,8 @@ fn fetch_option_markets_raw() -> Result<Vec<OptionMarket>> {
 }
 
 pub(super) fn fetch_option_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_option_markets_raw()?
-        .into_iter()
-        .map(|m| m.symbol)
-        .collect::<Vec<String>>();
+    let symbols =
+        fetch_option_markets_raw()?.into_iter().map(|m| m.symbol).collect::<Vec<String>>();
     Ok(symbols)
 }
 
@@ -96,11 +94,7 @@ pub(super) fn fetch_option_markets() -> Result<Vec<Market>> {
                 }),
                 contract_value: Some(1.0),
                 delivery_date: Some(m.expiryDate),
-                info: serde_json::to_value(&m)
-                    .unwrap()
-                    .as_object()
-                    .unwrap()
-                    .clone(),
+                info: serde_json::to_value(&m).unwrap().as_object().unwrap().clone(),
             }
         })
         .collect::<Vec<Market>>();

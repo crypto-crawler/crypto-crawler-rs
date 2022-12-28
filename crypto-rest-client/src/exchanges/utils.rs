@@ -18,10 +18,7 @@ pub(super) fn http_get_raw(url: &str, params: &BTreeMap<String, String>) -> Resu
     // println!("{}", full_url);
 
     let mut headers = header::HeaderMap::new();
-    headers.insert(
-        header::CONTENT_TYPE,
-        header::HeaderValue::from_static("application/json"),
-    );
+    headers.insert(header::CONTENT_TYPE, header::HeaderValue::from_static("application/json"));
 
     let client = reqwest::blocking::Client::builder()
          .default_headers(headers)

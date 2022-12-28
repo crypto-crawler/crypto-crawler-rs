@@ -26,10 +26,7 @@ fn fetch_spot_symbols() {
                 || symbol.ends_with("_btc")
         );
         assert_eq!(symbol.to_string(), symbol.to_lowercase());
-        assert_eq!(
-            MarketType::Spot,
-            get_market_type(symbol, EXCHANGE_NAME, None)
-        );
+        assert_eq!(MarketType::Spot, get_market_type(symbol, EXCHANGE_NAME, None));
     }
 }
 
@@ -40,10 +37,7 @@ fn fetch_linear_swap_symbols() {
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("_USDT"));
         // assert!(symbol.ends_with("_USDT") || symbol.ends_with("_QC"));
-        assert_eq!(
-            MarketType::LinearSwap,
-            get_market_type(symbol, EXCHANGE_NAME, None)
-        );
+        assert_eq!(MarketType::LinearSwap, get_market_type(symbol, EXCHANGE_NAME, None));
     }
 }
 
@@ -52,11 +46,7 @@ fn fetch_spot_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::Spot).unwrap();
     assert!(!markets.is_empty());
 
-    let btc_usdt = markets
-        .iter()
-        .find(|m| m.symbol == "btc_usdt")
-        .unwrap()
-        .clone();
+    let btc_usdt = markets.iter().find(|m| m.symbol == "btc_usdt").unwrap().clone();
     assert_eq!(btc_usdt.market_type, MarketType::Spot);
     assert!(btc_usdt.contract_value.is_none());
     assert_eq!(btc_usdt.precision.tick_size, 0.01);
@@ -71,11 +61,7 @@ fn fetch_linear_swap_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
     assert!(!markets.is_empty());
 
-    let btc_usdt = markets
-        .iter()
-        .find(|m| m.symbol == "BTC_USDT")
-        .unwrap()
-        .clone();
+    let btc_usdt = markets.iter().find(|m| m.symbol == "BTC_USDT").unwrap().clone();
     assert_eq!(btc_usdt.market_type, MarketType::LinearSwap);
     assert_eq!(btc_usdt.contract_value, Some(1.0));
     assert_eq!(btc_usdt.precision.tick_size, 0.01);

@@ -30,11 +30,7 @@ mod zb_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            ZbSpotWSClient,
-            subscribe_orderbook_topk,
-            &["btc_usdt".to_string()]
-        );
+        gen_test_code!(ZbSpotWSClient, subscribe_orderbook_topk, &["btc_usdt".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]

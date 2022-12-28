@@ -67,7 +67,9 @@ impl BybitInverseCommandTranslator {
             86400 => "D",
             604800 => "W",
             2592000 => "M",
-            _ => panic!("Bybit InverseFuture has intervals 1min,5min,15min,30min,60min,4hour,1day,1week,1mon"),
+            _ => panic!(
+                "Bybit InverseFuture has intervals 1min,5min,15min,30min,60min,4hour,1day,1week,1mon"
+            ),
         };
         format!("klineV2.{}", interval_str)
     }

@@ -15,10 +15,7 @@ pub struct MexcSwapRestClient {
 
 impl MexcSwapRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        MexcSwapRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        MexcSwapRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get most recent trades.

@@ -12,11 +12,7 @@ use std::collections::HashMap;
 
 fn check_error_in_body(body: String) -> Result<String> {
     let obj = serde_json::from_str::<HashMap<String, Value>>(&body).unwrap();
-    if obj.contains_key("error") {
-        Err(Error(body))
-    } else {
-        Ok(body)
-    }
+    if obj.contains_key("error") { Err(Error(body)) } else { Ok(body) }
 }
 
 pub(super) fn deribit_http_get(url: &str) -> Result<String> {
@@ -120,10 +116,7 @@ fn fetch_symbols(kind: &str) -> Result<Vec<String>> {
 pub(super) fn fetch_inverse_future_symbols() -> Result<Vec<String>> {
     let result = fetch_symbols("future");
     match result {
-        Ok(symbols) => Ok(symbols
-            .into_iter()
-            .filter(|x| !x.ends_with("-PERPETUAL"))
-            .collect()),
+        Ok(symbols) => Ok(symbols.into_iter().filter(|x| !x.ends_with("-PERPETUAL")).collect()),
         Err(error) => Err(error),
     }
 }
@@ -131,10 +124,7 @@ pub(super) fn fetch_inverse_future_symbols() -> Result<Vec<String>> {
 pub(super) fn fetch_inverse_swap_symbols() -> Result<Vec<String>> {
     let result = fetch_symbols("future");
     match result {
-        Ok(symbols) => Ok(symbols
-            .into_iter()
-            .filter(|x| x.ends_with("-PERPETUAL"))
-            .collect()),
+        Ok(symbols) => Ok(symbols.into_iter().filter(|x| x.ends_with("-PERPETUAL")).collect()),
         Err(error) => Err(error),
     }
 }
@@ -170,10 +160,7 @@ fn to_market(raw_market: &Instrument) -> Market {
         settle: Some(base),
         active: raw_market.is_active,
         margin: true,
-        fees: Fees {
-            maker: raw_market.maker_commission,
-            taker: raw_market.taker_commission,
-        },
+        fees: Fees { maker: raw_market.maker_commission, taker: raw_market.taker_commission },
         precision: Precision {
             tick_size: raw_market.tick_size,
             lot_size: raw_market.min_trade_amount,
@@ -190,11 +177,7 @@ fn to_market(raw_market: &Instrument) -> Market {
         } else {
             Some(raw_market.expiration_timestamp)
         },
-        info: serde_json::to_value(raw_market)
-            .unwrap()
-            .as_object()
-            .unwrap()
-            .clone(),
+        info: serde_json::to_value(raw_market).unwrap().as_object().unwrap().clone(),
     }
 }
 

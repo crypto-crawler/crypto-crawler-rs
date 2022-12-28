@@ -39,11 +39,8 @@ struct Response {
 fn fetch_future_markets_raw() -> Result<Vec<FutureMarket>> {
     let txt = huobi_http_get("https://api.hbdm.com/api/v1/contract_contract_info")?;
     let resp = serde_json::from_str::<Response>(&txt)?;
-    let result: Vec<FutureMarket> = resp
-        .data
-        .into_iter()
-        .filter(|m| m.contract_status == 1)
-        .collect();
+    let result: Vec<FutureMarket> =
+        resp.data.into_iter().filter(|m| m.contract_status == 1).collect();
     Ok(result)
 }
 
@@ -94,22 +91,12 @@ pub(super) fn fetch_inverse_future_markets() -> Result<Vec<Market>> {
                 active: m.contract_status == 1,
                 margin: true,
                 // see https://futures.huobi.com/en-us/contract/fee_rate/
-                fees: Fees {
-                    maker: 0.0002,
-                    taker: 0.0004,
-                },
-                precision: Precision {
-                    tick_size: m.price_tick,
-                    lot_size: 1.0,
-                },
+                fees: Fees { maker: 0.0002, taker: 0.0004 },
+                precision: Precision { tick_size: m.price_tick, lot_size: 1.0 },
                 quantity_limit: None,
                 contract_value: Some(m.contract_size),
                 delivery_date: Some(m.delivery_time.parse::<u64>().unwrap()),
-                info: serde_json::to_value(&m)
-                    .unwrap()
-                    .as_object()
-                    .unwrap()
-                    .clone(),
+                info: serde_json::to_value(&m).unwrap().as_object().unwrap().clone(),
             }
         })
         .collect::<Vec<Market>>();

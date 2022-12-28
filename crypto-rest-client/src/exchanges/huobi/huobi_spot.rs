@@ -9,7 +9,8 @@ const BASE_URL: &str = "https://api.huobi.pro";
 /// * REST API doc: <https://huobiapi.github.io/docs/spot/v1/en/>
 /// * Trading at: <https://www.huobi.com/en-us/exchange/>
 /// * Rate Limits: <https://huobiapi.github.io/docs/spot/v1/en/#rate-limiting-rule>
-///   * If API Key is empty in request, then each IP is limited to 10 times per second
+///   * If API Key is empty in request, then each IP is limited to 10 times per
+///     second
 pub struct HuobiSpotRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,

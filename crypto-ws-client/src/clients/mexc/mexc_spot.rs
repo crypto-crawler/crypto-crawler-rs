@@ -196,9 +196,6 @@ mod tests {
             translator.translate_to_candlestick_commands(true, &[("BTC_USDT".to_string(), 60)]);
 
         assert_eq!(1, commands.len());
-        assert_eq!(
-            r#"{"op":"sub.kline","symbol":"BTC_USDT","interval":"Min1"}"#,
-            commands[0]
-        );
+        assert_eq!(r#"{"op":"sub.kline","symbol":"BTC_USDT","interval":"Min1"}"#, commands[0]);
     }
 }

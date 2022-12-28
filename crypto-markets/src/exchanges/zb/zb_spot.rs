@@ -42,11 +42,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
     let markets: Vec<Market> = fetch_spot_markets_raw()?
         .into_iter()
         .map(|m| {
-            let info = serde_json::to_value(&m)
-                .unwrap()
-                .as_object()
-                .unwrap()
-                .clone();
+            let info = serde_json::to_value(&m).unwrap().as_object().unwrap().clone();
             let (base_id, quote_id) = {
                 let v: Vec<&str> = m.symbol.split('_').collect();
                 (v[0].to_string(), v[1].to_string())
@@ -69,10 +65,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 active: true,
                 margin: false,
                 // see https://www.zb.com/help/rate/6
-                fees: Fees {
-                    maker: 0.002,
-                    taker: 0.002,
-                },
+                fees: Fees { maker: 0.002, taker: 0.002 },
                 precision: Precision {
                     tick_size: 1.0 / (10_i64.pow(m.priceScale) as f64),
                     lot_size: 1.0 / (10_i64.pow(m.amountScale) as f64),

@@ -14,10 +14,7 @@ use serde_json::Value;
 
 pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
     let instruments = fetch_instruments(market_type)?;
-    Ok(instruments
-        .into_iter()
-        .map(|x| x.symbol)
-        .collect::<Vec<String>>())
+    Ok(instruments.into_iter().map(|x| x.symbol).collect::<Vec<String>>())
 }
 
 pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
@@ -25,11 +22,7 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
     let markets: Vec<Market> = instruments
         .into_iter()
         .map(|x| {
-            let info = serde_json::to_value(&x)
-                .unwrap()
-                .as_object()
-                .unwrap()
-                .clone();
+            let info = serde_json::to_value(&x).unwrap().as_object().unwrap().clone();
             let base_id = x.underlying;
             let quote_id = x.quoteCurrency;
             let pair = crypto_pair::normalize_pair(&x.symbol, "bitmex").unwrap();
@@ -52,20 +45,11 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
                 settle_id: Some(x.settlCurrency.clone()),
                 base,
                 quote,
-                settle: Some(crypto_pair::normalize_currency(
-                    x.settlCurrency.as_str(),
-                    "bitmex",
-                )),
+                settle: Some(crypto_pair::normalize_currency(x.settlCurrency.as_str(), "bitmex")),
                 active: x.state == "Open",
                 margin: true,
-                fees: Fees {
-                    maker: x.makerFee,
-                    taker: x.takerFee,
-                },
-                precision: Precision {
-                    tick_size: x.tickSize,
-                    lot_size: x.lotSize,
-                },
+                fees: Fees { maker: x.makerFee, taker: x.takerFee },
+                precision: Precision { tick_size: x.tickSize, lot_size: x.lotSize },
                 quantity_limit: None,
                 contract_value: if market_type != MarketType::Spot {
                     if let Some(y) = x.underlyingToSettleMultiplier {
@@ -95,20 +79,22 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
 struct Instrument {
     symbol: String,     // The contract for this position.
     rootSymbol: String, // Root symbol for the instrument, used for grouping on the frontend.
-    state: String,      // State of the instrument, it can be `Open`Closed`Unlisted`Expired`Cleared.
-    typ: String,        // Type of the instrument (e.g. Futures, Perpetual Contracts).
+    state: String,      /* State of the instrument, it can be
+                         * `Open`Closed`Unlisted`Expired`Cleared. */
+    typ: String, // Type of the instrument (e.g. Futures, Perpetual Contracts).
     listing: String,
     front: Option<String>,
     expiry: Option<String>,
     settle: Option<String>,
     listedSettle: Option<String>,
     inverseLeg: Option<String>,
-    positionCurrency: String, // Currency for position of this contract. If not null, 1 contract = 1 positionCurrency.
-    underlying: String,       // Defines the underlying asset of the instrument (e.g.XBT).
-    quoteCurrency: String,    // Currency of the quote price.
+    positionCurrency: String, /* Currency for position of this contract. If not null, 1 contract
+                               * = 1 positionCurrency. */
+    underlying: String, // Defines the underlying asset of the instrument (e.g.XBT).
+    quoteCurrency: String, // Currency of the quote price.
     underlyingSymbol: String, // Symbol of the underlying asset.
-    reference: String,        // Venue of the reference symbol.
-    referenceSymbol: String,  // Symbol of index being referenced (e.g. .BXBT).
+    reference: String,  // Venue of the reference symbol.
+    referenceSymbol: String, // Symbol of index being referenced (e.g. .BXBT).
     calcInterval: Option<String>,
     publishInterval: Option<String>,
     publishTime: Option<String>,
@@ -175,21 +161,10 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
         .filter(|x| x.state == "Open" && x.hasLiquidity && x.volume24h > 0 && x.turnover24h > 0)
         .collect();
 
-    let spot: Vec<Instrument> = instruments
-        .iter()
-        .filter(|x| x.typ == "IFXXXP")
-        .cloned()
-        .collect();
-    let swap: Vec<Instrument> = instruments
-        .iter()
-        .filter(|x| x.typ == "FFWCSX")
-        .cloned()
-        .collect();
-    let futures: Vec<Instrument> = instruments
-        .iter()
-        .filter(|x| x.typ == "FFCCSX")
-        .cloned()
-        .collect();
+    let spot: Vec<Instrument> = instruments.iter().filter(|x| x.typ == "IFXXXP").cloned().collect();
+    let swap: Vec<Instrument> = instruments.iter().filter(|x| x.typ == "FFWCSX").cloned().collect();
+    let futures: Vec<Instrument> =
+        instruments.iter().filter(|x| x.typ == "FFCCSX").cloned().collect();
     // let fx: Vec<Instrument> = instruments
     //     .iter()
     //     .filter(|x| x.typ == "FFWCSF")
@@ -202,14 +177,12 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
         assert!(x.symbol[x.symbol.len() - 1..].parse::<i32>().is_err());
         if let Some(pos) = x.symbol.rfind('_') {
             // e.g., ETHUSD_ETH
-            assert_eq!(
-                &(x.symbol[..pos]),
-                format!("{}{}", x.underlying, x.quoteCurrency)
-            );
+            assert_eq!(&(x.symbol[..pos]), format!("{}{}", x.underlying, x.quoteCurrency));
         } else {
             assert_eq!(x.symbol, format!("{}{}", x.underlying, x.quoteCurrency));
         }
-        // println!("{}, {}, {}, {}, {}, {}", x.symbol, x.rootSymbol, x.quoteCurrency, x.settlCurrency, x.positionCurrency, x.underlying);
+        // println!("{}, {}, {}, {}, {}, {}", x.symbol, x.rootSymbol,
+        // x.quoteCurrency, x.settlCurrency, x.positionCurrency, x.underlying);
     }
     for x in futures.iter() {
         assert_eq!("ImpactMidPrice", x.fairMethod.as_str());
@@ -235,17 +208,11 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
             assert_eq!(x.quoteCurrency, "USD");
         }
     }
-    for x in instruments
-        .iter()
-        .filter(|x| x.positionCurrency.is_empty() && x.typ != "IFXXXP")
-    {
+    for x in instruments.iter().filter(|x| x.positionCurrency.is_empty() && x.typ != "IFXXXP") {
         assert!(x.isQuanto);
     }
     // Linear
-    for x in instruments
-        .iter()
-        .filter(|x| !x.isQuanto && !x.isInverse && x.typ != "IFXXXP")
-    {
+    for x in instruments.iter().filter(|x| !x.isQuanto && !x.isInverse && x.typ != "IFXXXP") {
         // settled in XBT, qouted in XBT
         // or settled in USDT, qouted in USDT
         assert_eq!(x.settlCurrency.to_uppercase(), x.quoteCurrency);
@@ -254,22 +221,16 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
     let filtered: Vec<Instrument> = match market_type {
         MarketType::Unknown => instruments,
         MarketType::Spot => spot,
-        MarketType::LinearSwap => swap
-            .iter()
-            .filter(|x| !x.isQuanto && !x.isInverse)
-            .cloned()
-            .collect(),
-        MarketType::InverseSwap => swap
-            .iter()
-            .filter(|x| !x.isQuanto && x.isInverse)
-            .cloned()
-            .collect(),
+        MarketType::LinearSwap => {
+            swap.iter().filter(|x| !x.isQuanto && !x.isInverse).cloned().collect()
+        }
+        MarketType::InverseSwap => {
+            swap.iter().filter(|x| !x.isQuanto && x.isInverse).cloned().collect()
+        }
         MarketType::QuantoSwap => swap.iter().filter(|x| x.isQuanto).cloned().collect(),
-        MarketType::LinearFuture => futures
-            .iter()
-            .filter(|x| !x.isInverse && !x.isQuanto)
-            .cloned()
-            .collect(),
+        MarketType::LinearFuture => {
+            futures.iter().filter(|x| !x.isInverse && !x.isQuanto).cloned().collect()
+        }
         MarketType::InverseFuture => futures.iter().filter(|x| x.isInverse).cloned().collect(),
         MarketType::QuantoFuture => futures.iter().filter(|x| x.isQuanto).cloned().collect(),
         _ => panic!("Unsupported market_type: {}", market_type),

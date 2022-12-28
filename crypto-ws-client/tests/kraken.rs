@@ -24,10 +24,8 @@ mod kraken_spot {
         gen_test_code!(
             KrakenSpotWSClient,
             send,
-            &[
-                r#"{"event":"subscribe","pair":["XBT/USD"],"subscription":{"name":"trade"}}"#
-                    .to_string()
-            ]
+            &[r#"{"event":"subscribe","pair":["XBT/USD"],"subscription":{"name":"trade"}}"#
+                .to_string()]
         );
     }
 
@@ -76,10 +74,7 @@ mod kraken_spot {
 
         gen_test_subscribe_candlestick!(
             KrakenSpotWSClient,
-            &[
-                ("XBT/USD".to_string(), 1296000),
-                ("ETH/USD".to_string(), 1296000)
-            ]
+            &[("XBT/USD".to_string(), 1296000), ("ETH/USD".to_string(), 1296000)]
         );
     }
 }
@@ -99,29 +94,17 @@ mod kraken_inverse_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            KrakenFuturesWSClient,
-            subscribe_trade,
-            &["PI_XBTUSD".to_string()]
-        );
+        gen_test_code!(KrakenFuturesWSClient, subscribe_trade, &["PI_XBTUSD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            KrakenFuturesWSClient,
-            subscribe_ticker,
-            &["PI_XBTUSD".to_string()]
-        );
+        gen_test_code!(KrakenFuturesWSClient, subscribe_ticker, &["PI_XBTUSD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            KrakenFuturesWSClient,
-            subscribe_orderbook,
-            &["PI_XBTUSD".to_string()]
-        );
+        gen_test_code!(KrakenFuturesWSClient, subscribe_orderbook, &["PI_XBTUSD".to_string()]);
     }
 }
 
@@ -134,29 +117,19 @@ mod kraken_inverse_future {
         gen_test_code!(
             KrakenFuturesWSClient,
             send,
-            &[
-                r#"{"event":"subscribe","feed":"trade","product_ids":["FI_XBTUSD_221230"]}"#
-                    .to_string()
-            ]
+            &[r#"{"event":"subscribe","feed":"trade","product_ids":["FI_XBTUSD_221230"]}"#
+                .to_string()]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            KrakenFuturesWSClient,
-            subscribe_trade,
-            &["FI_XBTUSD_221230".to_string()]
-        );
+        gen_test_code!(KrakenFuturesWSClient, subscribe_trade, &["FI_XBTUSD_221230".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            KrakenFuturesWSClient,
-            subscribe_ticker,
-            &["FI_XBTUSD_221230".to_string()]
-        );
+        gen_test_code!(KrakenFuturesWSClient, subscribe_ticker, &["FI_XBTUSD_221230".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]

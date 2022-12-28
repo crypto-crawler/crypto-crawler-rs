@@ -39,9 +39,7 @@ impl_new_constructor!(
     BitfinexWSClient,
     EXCHANGE_NAME,
     WEBSOCKET_URL,
-    BitfinexMessageHandler {
-        channel_id_meta: HashMap::new()
-    },
+    BitfinexMessageHandler { channel_id_meta: HashMap::new() },
     BitfinexCommandTranslator {}
 );
 
@@ -95,11 +93,7 @@ impl BitfinexCommandTranslator {
     fn topic_to_command(channel: &str, symbol: &str, subscribe: bool) -> String {
         format!(
             r#"{{"event": "{}", "channel": "{}", "symbol": "{}"}}"#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
+            if subscribe { "subscribe" } else { "unsubscribe" },
             channel,
             symbol
         )
@@ -123,11 +117,7 @@ impl BitfinexCommandTranslator {
 
         format!(
             r#"{{"event": "{}","channel": "candles","key": "trade:{}:{}"}}"#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
+            if subscribe { "subscribe" } else { "unsubscribe" },
             interval_str,
             symbol
         )
@@ -189,8 +179,9 @@ impl MessageHandler for BitfinexMessageHandler {
                                 MiscMessage::Reconnect // fail fast, pm2 will restart
                             }
                             20060 => {
-                                // Entering in Maintenance mode. Please pause any activity and resume
-                                // after receiving the info message 20061 (it should take 120 seconds
+                                // Entering in Maintenance mode. Please pause any activity and
+                                // resume after receiving the info
+                                // message 20061 (it should take 120 seconds
                                 // at most).
                                 std::thread::sleep(Duration::from_secs(15));
                                 MiscMessage::Other
@@ -260,8 +251,8 @@ impl MessageHandler for BitfinexMessageHandler {
     }
 
     fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
-        // If there is no activity in the channel for 15 seconds, the Websocket server will send
-        // you a heartbeat message, see https://docs.bitfinex.com/docs/ws-general#heartbeating
+        // If there is no activity in the channel for 15 seconds, the Websocket server
+        // will send you a heartbeat message, see https://docs.bitfinex.com/docs/ws-general#heartbeating
         None
     }
 }

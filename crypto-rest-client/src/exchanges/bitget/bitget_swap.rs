@@ -15,10 +15,7 @@ pub struct BitgetSwapRestClient {
 
 impl BitgetSwapRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        BitgetSwapRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        BitgetSwapRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get the latest Level2 snapshot of orderbook.
@@ -27,10 +24,7 @@ impl BitgetSwapRestClient {
     ///
     /// Rate Limit：20 requests per 2 seconds
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!(
-            "/api/mix/v1/market/depth?symbol={}&limit=100",
-            symbol
-        ))
+        gen_api!(format!("/api/mix/v1/market/depth?symbol={}&limit=100", symbol))
     }
 
     /// Get open interest.
@@ -39,9 +33,6 @@ impl BitgetSwapRestClient {
     ///
     /// - <https://api.bitget.com/api/mix/v1/market/open-interest?symbol=BTCUSDT_UMCBL>
     pub fn fetch_open_interest(symbol: &str) -> Result<String> {
-        gen_api!(format!(
-            "/api/mix/v1/market/open-interest?symbol={}",
-            symbol
-        ))
+        gen_api!(format!("/api/mix/v1/market/open-interest?symbol={}", symbol))
     }
 }

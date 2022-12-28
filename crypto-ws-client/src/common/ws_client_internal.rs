@@ -15,7 +15,8 @@ use tokio_tungstenite::tungstenite::{Error, Message};
 
 use crate::common::message_handler::{MessageHandler, MiscMessage};
 
-// `WSClientInternal` should be Sync + Send so that it can be put into Arc directly.
+// `WSClientInternal` should be Sync + Send so that it can be put into Arc
+// directly.
 pub(crate) struct WSClientInternal<H: MessageHandler> {
     exchange: &'static str, // Eexchange name
     pub(crate) url: String, // Websocket base url
@@ -80,8 +81,9 @@ impl<H: MessageHandler> WSClientInternal<H> {
 
     fn get_send_interval_ms(&self) -> Option<u64> {
         match self.exchange {
-            "binance" => Some(100), // WebSocket connections have a limit of 10 incoming messages per second
-            "kucoin" => Some(100),  //  Message limit sent to the server: 100 per 10 seconds
+            "binance" => Some(100), /* WebSocket connections have a limit of 10 incoming
+                                      * messages per second */
+            "kucoin" => Some(100), //  Message limit sent to the server: 100 per 10 seconds
             _ => None,
         }
     }
@@ -89,12 +91,7 @@ impl<H: MessageHandler> WSClientInternal<H> {
     pub async fn send(&self, commands: &[String]) {
         for command in commands {
             debug!("{}", command);
-            if self
-                .command_tx
-                .send(Message::Text(command.to_string()))
-                .await
-                .is_err()
-            {
+            if self.command_tx.send(Message::Text(command.to_string())).await.is_err() {
                 break; // break the loop if there is no receiver
             }
             if let Some(interval) = self.get_send_interval_ms() {
@@ -221,8 +218,9 @@ impl<H: MessageHandler> WSClientInternal<H> {
                             num_unanswered_ping.load(Ordering::Acquire)
                         );
                     }
-                    MiscMessage::Reconnect => break, // fail fast, pm2 will restart, restart is reconnect
-                    MiscMessage::Other => (),        // ignore
+                    MiscMessage::Reconnect => break, /* fail fast, pm2 will restart, restart is
+                                                       * reconnect */
+                    MiscMessage::Other => (), // ignore
                 }
             }
         }

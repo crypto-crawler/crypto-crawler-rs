@@ -63,10 +63,7 @@ fn fetch_swap_markets_raw() -> Result<Vec<SwapMarket>> {
 }
 
 pub(super) fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_swap_markets_raw()?
-        .into_iter()
-        .map(|m| m.symbol)
-        .collect::<Vec<String>>();
+    let symbols = fetch_swap_markets_raw()?.into_iter().map(|m| m.symbol).collect::<Vec<String>>();
     Ok(symbols)
 }
 
@@ -95,10 +92,7 @@ fn to_market(raw_market: &SwapMarket) -> Market {
         active: true,
         margin: true,
         // see https://www.zb.com/help/rate/20
-        fees: Fees {
-            maker: 0.0005,
-            taker: 0.00075,
-        },
+        fees: Fees { maker: 0.0005, taker: 0.00075 },
         precision: Precision {
             tick_size: 1.0 / (10_i64.pow(raw_market.priceDecimal) as f64),
             lot_size: 1.0 / (10_i64.pow(raw_market.amountDecimal) as f64),
@@ -111,18 +105,12 @@ fn to_market(raw_market: &SwapMarket) -> Market {
         }),
         contract_value: Some(1.0),
         delivery_date: None,
-        info: serde_json::to_value(raw_market)
-            .unwrap()
-            .as_object()
-            .unwrap()
-            .clone(),
+        info: serde_json::to_value(raw_market).unwrap().as_object().unwrap().clone(),
     }
 }
 
 pub(super) fn fetch_linear_swap_markets() -> Result<Vec<Market>> {
-    let markets = fetch_swap_markets_raw()?
-        .into_iter()
-        .map(|m| to_market(&m))
-        .collect::<Vec<Market>>();
+    let markets =
+        fetch_swap_markets_raw()?.into_iter().map(|m| to_market(&m)).collect::<Vec<Market>>();
     Ok(markets)
 }

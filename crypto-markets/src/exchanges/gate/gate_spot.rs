@@ -28,10 +28,7 @@ struct SpotMarket {
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
     let txt = http_get("https://api.gateio.ws/api/v4/spot/currency_pairs", None)?;
     let markets = serde_json::from_str::<Vec<SpotMarket>>(&txt)?;
-    Ok(markets
-        .into_iter()
-        .filter(|x| x.trade_status == "tradable")
-        .collect::<Vec<SpotMarket>>())
+    Ok(markets.into_iter().filter(|x| x.trade_status == "tradable").collect::<Vec<SpotMarket>>())
 }
 
 pub(super) fn fetch_spot_symbols() -> Result<Vec<String>> {
@@ -44,11 +41,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
     let markets: Vec<Market> = fetch_spot_markets_raw()?
         .into_iter()
         .map(|raw_market| {
-            let info = serde_json::to_value(&raw_market)
-                .unwrap()
-                .as_object()
-                .unwrap()
-                .clone();
+            let info = serde_json::to_value(&raw_market).unwrap().as_object().unwrap().clone();
             let pair = crypto_pair::normalize_pair(&raw_market.id, "gate").unwrap();
             let (base, quote) = {
                 let v: Vec<&str> = pair.split('/').collect();
@@ -75,14 +68,12 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                     tick_size: 1.0 / (10_i64.pow(raw_market.precision as u32) as f64),
                     lot_size: 1.0 / (10_i64.pow(raw_market.amount_precision as u32) as f64),
                 },
-                quantity_limit: raw_market
-                    .min_base_amount
-                    .map(|min_base_amount| QuantityLimit {
-                        min: min_base_amount.parse::<f64>().ok(),
-                        max: None,
-                        notional_min: None,
-                        notional_max: None,
-                    }),
+                quantity_limit: raw_market.min_base_amount.map(|min_base_amount| QuantityLimit {
+                    min: min_base_amount.parse::<f64>().ok(),
+                    max: None,
+                    notional_min: None,
+                    notional_max: None,
+                }),
                 contract_value: None,
                 delivery_date: None,
                 info,

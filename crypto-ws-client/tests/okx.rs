@@ -18,11 +18,7 @@ mod okx_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe() {
-        gen_test_code!(
-            OkxWSClient,
-            subscribe,
-            &[("trades".to_string(), "BTC-USDT".to_string())]
-        );
+        gen_test_code!(OkxWSClient, subscribe, &[("trades".to_string(), "BTC-USDT".to_string())]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -30,10 +26,8 @@ mod okx_spot {
         gen_test_code!(
             OkxWSClient,
             send,
-            &[
-                r#"{"op":"subscribe","args":[{"channel":"trades","instId":"BTC-USDT"}]}"#
-                    .to_string()
-            ]
+            &[r#"{"op":"subscribe","args":[{"channel":"trades","instId":"BTC-USDT"}]}"#
+                .to_string()]
         );
     }
 
@@ -59,11 +53,7 @@ mod okx_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            OkxWSClient,
-            subscribe_orderbook_topk,
-            &["BTC-USDT".to_string()]
-        );
+        gen_test_code!(OkxWSClient, subscribe_orderbook_topk, &["BTC-USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -88,20 +78,12 @@ mod okx_future {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            OkxWSClient,
-            subscribe_trade,
-            &["BTC-USDT-221230".to_string()]
-        );
+        gen_test_code!(OkxWSClient, subscribe_trade, &["BTC-USDT-221230".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            OkxWSClient,
-            subscribe_ticker,
-            &["BTC-USDT-221230".to_string()]
-        );
+        gen_test_code!(OkxWSClient, subscribe_ticker, &["BTC-USDT-221230".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -111,20 +93,12 @@ mod okx_future {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            OkxWSClient,
-            subscribe_orderbook,
-            &["BTC-USDT-221230".to_string()]
-        );
+        gen_test_code!(OkxWSClient, subscribe_orderbook, &["BTC-USDT-221230".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            OkxWSClient,
-            subscribe_orderbook_topk,
-            &["BTC-USDT-221230".to_string()]
-        );
+        gen_test_code!(OkxWSClient, subscribe_orderbook_topk, &["BTC-USDT-221230".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -154,11 +128,7 @@ mod okx_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            OkxWSClient,
-            subscribe_ticker,
-            &["BTC-USDT-SWAP".to_string()]
-        );
+        gen_test_code!(OkxWSClient, subscribe_ticker, &["BTC-USDT-SWAP".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -168,20 +138,12 @@ mod okx_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            OkxWSClient,
-            subscribe_orderbook,
-            &["BTC-USDT-SWAP".to_string()]
-        );
+        gen_test_code!(OkxWSClient, subscribe_orderbook, &["BTC-USDT-SWAP".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            OkxWSClient,
-            subscribe_orderbook_topk,
-            &["BTC-USDT-SWAP".to_string()]
-        );
+        gen_test_code!(OkxWSClient, subscribe_orderbook_topk, &["BTC-USDT-SWAP".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -207,38 +169,22 @@ mod okx_option {
     #[tokio::test(flavor = "multi_thread")]
     #[ignore = "lack of liquidity"]
     async fn subscribe_trade() {
-        gen_test_code!(
-            OkxWSClient,
-            subscribe_trade,
-            &["BTC-USD-221230-50000-C".to_string()]
-        );
+        gen_test_code!(OkxWSClient, subscribe_trade, &["BTC-USD-221230-50000-C".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            OkxWSClient,
-            subscribe_ticker,
-            &["BTC-USD-221230-50000-C".to_string()]
-        );
+        gen_test_code!(OkxWSClient, subscribe_ticker, &["BTC-USD-221230-50000-C".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(
-            OkxWSClient,
-            subscribe_bbo,
-            &["BTC-USD-221230-50000-C".to_string()]
-        );
+        gen_test_code!(OkxWSClient, subscribe_bbo, &["BTC-USD-221230-50000-C".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            OkxWSClient,
-            subscribe_orderbook,
-            &["BTC-USD-221230-50000-C".to_string()]
-        );
+        gen_test_code!(OkxWSClient, subscribe_orderbook, &["BTC-USD-221230-50000-C".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]

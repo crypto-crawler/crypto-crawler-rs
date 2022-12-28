@@ -42,12 +42,8 @@ fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
     if resp.status != 200 {
         Err(Error(txt))
     } else {
-        let markets = resp
-            .data
-            .values()
-            .cloned()
-            .filter(|x| x.status == "1")
-            .collect::<Vec<SpotMarket>>();
+        let markets =
+            resp.data.values().cloned().filter(|x| x.status == "1").collect::<Vec<SpotMarket>>();
         Ok(markets)
     }
 }

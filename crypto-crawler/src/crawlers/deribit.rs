@@ -27,14 +27,8 @@ pub(crate) async fn crawl_trade(
             }
             MarketType::InverseSwap => {
                 vec![
-                    (
-                        "trades.SYMBOL.100ms".to_string(),
-                        "BTC-PERPETUAL".to_string(),
-                    ),
-                    (
-                        "trades.SYMBOL.100ms".to_string(),
-                        "ETH-PERPETUAL".to_string(),
-                    ),
+                    ("trades.SYMBOL.100ms".to_string(), "BTC-PERPETUAL".to_string()),
+                    ("trades.SYMBOL.100ms".to_string(), "ETH-PERPETUAL".to_string()),
                 ]
             }
             MarketType::EuropeanOption => {

@@ -15,10 +15,7 @@ pub struct ZbSpotRestClient {
 
 impl ZbSpotRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        ZbSpotRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        ZbSpotRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get the latest Level2 snapshot of orderbook.

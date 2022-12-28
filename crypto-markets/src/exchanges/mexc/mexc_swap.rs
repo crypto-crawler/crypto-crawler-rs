@@ -51,11 +51,7 @@ struct Response {
 fn fetch_swap_markets_raw() -> Result<Vec<SwapMarket>> {
     let txt = mexc_http_get("https://contract.mexc.com/api/v1/contract/detail")?;
     let resp = serde_json::from_str::<Response>(&txt)?;
-    Ok(resp
-        .data
-        .into_iter()
-        .filter(|m| m.state == 0 && !m.isHidden)
-        .collect())
+    Ok(resp.data.into_iter().filter(|m| m.state == 0 && !m.isHidden).collect())
 }
 
 pub(super) fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
@@ -102,10 +98,7 @@ fn to_market(raw_market: &SwapMarket) -> Market {
         settle: Some(raw_market.settleCoin.to_string()),
         active: raw_market.state == 0 && !raw_market.isHidden,
         margin: true,
-        fees: Fees {
-            maker: raw_market.makerFeeRate,
-            taker: raw_market.takerFeeRate,
-        },
+        fees: Fees { maker: raw_market.makerFeeRate, taker: raw_market.takerFeeRate },
         precision: Precision {
             tick_size: raw_market.priceUnit,
             lot_size: raw_market.volUnit as f64,
@@ -118,11 +111,7 @@ fn to_market(raw_market: &SwapMarket) -> Market {
         }),
         contract_value: Some(raw_market.contractSize),
         delivery_date: None,
-        info: serde_json::to_value(raw_market)
-            .unwrap()
-            .as_object()
-            .unwrap()
-            .clone(),
+        info: serde_json::to_value(raw_market).unwrap().as_object().unwrap().clone(),
     }
 }
 

@@ -13,11 +13,7 @@ fn check_code_in_body(resp: String) -> Result<String> {
     match obj.unwrap().get("code") {
         Some(code) => {
             let code_int = code.as_i64().unwrap();
-            if code_int == 0 || code_int == 200 {
-                Ok(resp)
-            } else {
-                Err(Error(resp))
-            }
+            if code_int == 0 || code_int == 200 { Ok(resp) } else { Err(Error(resp)) }
         }
         None => Ok(resp),
     }

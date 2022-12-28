@@ -118,11 +118,7 @@ fn fetch_futures_markets() -> Result<Vec<Market>> {
         .into_iter()
         .filter(|m| m.symbol.starts_with("pi_") || m.symbol.starts_with("fi_")) // TODO: Multi-Collateral, e.g., pf_xbtusd
         .map(|m| {
-            let info = serde_json::to_value(&m)
-                .unwrap()
-                .as_object()
-                .unwrap()
-                .clone();
+            let info = serde_json::to_value(&m).unwrap().as_object().unwrap().clone();
             let pair = crypto_pair::normalize_pair(&m.symbol, "kraken").unwrap();
             let (base, quote) = {
                 let v: Vec<&str> = pair.split('/').collect();
@@ -151,14 +147,8 @@ fn fetch_futures_markets() -> Result<Vec<Market>> {
                 active: m.tradeable,
                 margin: true,
                 // see https://futures.kraken.com/derivatives/api/v3/feeschedules
-                fees: Fees {
-                    maker: 0.0002,
-                    taker: 0.0005,
-                },
-                precision: Precision {
-                    tick_size: m.tickSize,
-                    lot_size: 1.0,
-                },
+                fees: Fees { maker: 0.0002, taker: 0.0005 },
+                precision: Precision { tick_size: m.tickSize, lot_size: 1.0 },
                 quantity_limit: Some(QuantityLimit {
                     min: Some(1.0),
                     max: None,

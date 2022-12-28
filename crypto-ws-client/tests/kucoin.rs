@@ -48,39 +48,24 @@ mod kucoin_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            KuCoinSpotWSClient,
-            subscribe_orderbook,
-            &["BTC-USDT".to_string()]
-        );
+        gen_test_code!(KuCoinSpotWSClient, subscribe_orderbook, &["BTC-USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            KuCoinSpotWSClient,
-            subscribe_orderbook_topk,
-            &["BTC-USDT".to_string()]
-        );
+        gen_test_code!(KuCoinSpotWSClient, subscribe_orderbook_topk, &["BTC-USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            KuCoinSpotWSClient,
-            subscribe_ticker,
-            &["BTC-USDT".to_string()]
-        );
+        gen_test_code!(KuCoinSpotWSClient, subscribe_ticker, &["BTC-USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_candlestick() {
         gen_test_subscribe_candlestick!(
             KuCoinSpotWSClient,
-            &[
-                ("BTC-USDT".to_string(), 60),
-                ("BTC-USDT".to_string(), 604800)
-            ]
+            &[("BTC-USDT".to_string(), 60), ("BTC-USDT".to_string(), 604800)]
         );
     }
 }
@@ -95,22 +80,10 @@ mod kucoin_inverse_swap {
             KuCoinSwapWSClient,
             subscribe,
             &[
-                (
-                    "/contractMarket/execution".to_string(),
-                    "XBTUSDM".to_string()
-                ),
-                (
-                    "/contractMarket/execution".to_string(),
-                    "ETHUSDM".to_string()
-                ),
-                (
-                    "/contractMarket/execution".to_string(),
-                    "DOTUSDM".to_string()
-                ),
-                (
-                    "/contractMarket/execution".to_string(),
-                    "XRPUSDM".to_string()
-                )
+                ("/contractMarket/execution".to_string(), "XBTUSDM".to_string()),
+                ("/contractMarket/execution".to_string(), "ETHUSDM".to_string()),
+                ("/contractMarket/execution".to_string(), "DOTUSDM".to_string()),
+                ("/contractMarket/execution".to_string(), "XRPUSDM".to_string())
             ]
         );
     }
@@ -145,29 +118,17 @@ mod kucoin_inverse_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            KuCoinSwapWSClient,
-            subscribe_orderbook,
-            &["XBTUSDM".to_string()]
-        );
+        gen_test_code!(KuCoinSwapWSClient, subscribe_orderbook, &["XBTUSDM".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            KuCoinSwapWSClient,
-            subscribe_orderbook_topk,
-            &["XBTUSDM".to_string()]
-        );
+        gen_test_code!(KuCoinSwapWSClient, subscribe_orderbook_topk, &["XBTUSDM".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            KuCoinSwapWSClient,
-            subscribe_ticker,
-            &["XBTUSDM".to_string()]
-        );
+        gen_test_code!(KuCoinSwapWSClient, subscribe_ticker, &["XBTUSDM".to_string()]);
     }
 
     #[ignore]
@@ -194,10 +155,7 @@ mod kucoin_linear_swap {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe,
-            &[(
-                "/contractMarket/execution".to_string(),
-                "XBTUSDTM".to_string()
-            )]
+            &[("/contractMarket/execution".to_string(), "XBTUSDTM".to_string())]
         );
     }
 
@@ -212,11 +170,7 @@ mod kucoin_linear_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            KuCoinSwapWSClient,
-            subscribe_trade,
-            &["XBTUSDTM".to_string()]
-        );
+        gen_test_code!(KuCoinSwapWSClient, subscribe_trade, &["XBTUSDTM".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -226,29 +180,17 @@ mod kucoin_linear_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            KuCoinSwapWSClient,
-            subscribe_orderbook,
-            &["XBTUSDTM".to_string()]
-        );
+        gen_test_code!(KuCoinSwapWSClient, subscribe_orderbook, &["XBTUSDTM".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            KuCoinSwapWSClient,
-            subscribe_orderbook_topk,
-            &["XBTUSDTM".to_string()]
-        );
+        gen_test_code!(KuCoinSwapWSClient, subscribe_orderbook_topk, &["XBTUSDTM".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            KuCoinSwapWSClient,
-            subscribe_ticker,
-            &["XBTUSDTM".to_string()]
-        );
+        gen_test_code!(KuCoinSwapWSClient, subscribe_ticker, &["XBTUSDTM".to_string()]);
     }
 
     #[ignore]
@@ -276,10 +218,7 @@ mod kucoin_inverse_future {
         gen_test_code!(
             KuCoinSwapWSClient,
             subscribe,
-            &[(
-                "/contractMarket/execution".to_string(),
-                "XBTMZ22".to_string()
-            )]
+            &[("/contractMarket/execution".to_string(), "XBTMZ22".to_string())]
         );
     }
 
@@ -296,11 +235,7 @@ mod kucoin_inverse_future {
     #[ignore]
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            KuCoinSwapWSClient,
-            subscribe_trade,
-            &["XBTMZ22".to_string()]
-        );
+        gen_test_code!(KuCoinSwapWSClient, subscribe_trade, &["XBTMZ22".to_string()]);
     }
 
     #[ignore]
@@ -311,29 +246,17 @@ mod kucoin_inverse_future {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            KuCoinSwapWSClient,
-            subscribe_orderbook,
-            &["XBTMZ22".to_string()]
-        );
+        gen_test_code!(KuCoinSwapWSClient, subscribe_orderbook, &["XBTMZ22".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            KuCoinSwapWSClient,
-            subscribe_orderbook_topk,
-            &["XBTMZ22".to_string()]
-        );
+        gen_test_code!(KuCoinSwapWSClient, subscribe_orderbook_topk, &["XBTMZ22".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            KuCoinSwapWSClient,
-            subscribe_ticker,
-            &["XBTMZ22".to_string()]
-        );
+        gen_test_code!(KuCoinSwapWSClient, subscribe_ticker, &["XBTMZ22".to_string()]);
     }
 
     #[ignore]

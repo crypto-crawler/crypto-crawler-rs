@@ -76,10 +76,7 @@ impl MessageHandler for BitstampMessageHandler {
                 panic!("Received {} from {}", msg, EXCHANGE_NAME);
             }
             "bts:request_reconnect" => {
-                warn!(
-                    "Received {}, which means Bitstamp is under maintenance",
-                    msg
-                );
+                warn!("Received {}, which means Bitstamp is under maintenance", msg);
                 std::thread::sleep(std::time::Duration::from_secs(20));
                 MiscMessage::Reconnect
             }
@@ -89,10 +86,7 @@ impl MessageHandler for BitstampMessageHandler {
 
     fn get_ping_msg_and_interval(&self) -> Option<(Message, u64)> {
         // See "Heartbeat" at https://www.bitstamp.net/websocket/v2/
-        Some((
-            Message::Text(r#"{"event": "bts:heartbeat"}"#.to_string()),
-            10,
-        ))
+        Some((Message::Text(r#"{"event": "bts:heartbeat"}"#.to_string()), 10))
     }
 }
 
@@ -103,11 +97,7 @@ impl CommandTranslator for BitstampCommandTranslator {
             .map(|(channel, symbol)| {
                 format!(
                     r#"{{"event":"bts:{}","data":{{"channel":"{}_{}"}}}}"#,
-                    if subscribe {
-                        "subscribe"
-                    } else {
-                        "unsubscribe"
-                    },
+                    if subscribe { "subscribe" } else { "unsubscribe" },
                     channel,
                     symbol,
                 )

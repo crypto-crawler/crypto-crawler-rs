@@ -11,7 +11,8 @@ const BASE_URL: &str = "https://api.hbdm.com";
 /// * REST API doc: <https://huobiapi.github.io/docs/coin_margined_swap/v1/en/>
 /// * Trading at: <https://futures.huobi.com/en-us/swap/exchange/>
 /// * Rate Limits: <https://huobiapi.github.io/docs/coin_margined_swap/v1/en/#api-rate-limit-illustration>
-///  * For restful interfaces：all products(futures, coin margined swap, usdt margined swap) 800 times/second for one IP at most
+///  * For restful interfaces：all products(futures, coin margined swap, usdt
+///    margined swap) 800 times/second for one IP at most
 pub struct HuobiInverseSwapRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
@@ -26,10 +27,7 @@ impl HuobiInverseSwapRestClient {
     ///
     /// For example: <https://api.hbdm.com/swap-ex/market/depth?contract_code=BTC-USD&type=step0>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!(
-            "/swap-ex/market/depth?contract_code={}&type=step0",
-            symbol
-        ))
+        gen_api!(format!("/swap-ex/market/depth?contract_code={}&type=step0", symbol))
     }
 
     /// Get open interest.
@@ -37,10 +35,7 @@ impl HuobiInverseSwapRestClient {
     /// For example: <https://api.hbdm.com/swap-api/v1/swap_open_interest?contract_code=BTC-USD>
     pub fn fetch_open_interest(symbol: Option<&str>) -> Result<String> {
         if let Some(symbol) = symbol {
-            gen_api!(format!(
-                "/swap-api/v1/swap_open_interest?contract_code={}",
-                symbol
-            ))
+            gen_api!(format!("/swap-api/v1/swap_open_interest?contract_code={}", symbol))
         } else {
             gen_api!("/swap-api/v1/swap_open_interest")
         }

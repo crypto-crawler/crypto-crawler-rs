@@ -68,17 +68,10 @@ struct DeribitCommandTranslator {}
 
 impl DeribitCommandTranslator {
     fn topics_to_command(topics: &[(String, String)], subscribe: bool) -> String {
-        let raw_channels = topics
-            .iter()
-            .map(topic_to_raw_channel)
-            .collect::<Vec<String>>();
+        let raw_channels = topics.iter().map(topic_to_raw_channel).collect::<Vec<String>>();
         format!(
             r#"{{"method": "public/{}", "params": {{"channels": {}}}}}"#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
+            if subscribe { "subscribe" } else { "unsubscribe" },
             serde_json::to_string(&raw_channels).unwrap()
         )
     }
@@ -151,13 +144,8 @@ impl MessageHandler for DeribitMessageHandler {
 
 impl CommandTranslator for DeribitCommandTranslator {
     fn translate_to_commands(&self, subscribe: bool, topics: &[(String, String)]) -> Vec<String> {
-        let mut all_commands: Vec<String> = ensure_frame_size(
-            topics,
-            subscribe,
-            Self::topics_to_command,
-            WS_FRAME_SIZE,
-            None,
-        );
+        let mut all_commands: Vec<String> =
+            ensure_frame_size(topics, subscribe, Self::topics_to_command, WS_FRAME_SIZE, None);
 
         all_commands
             .push(r#"{"method": "public/set_heartbeat", "params": {"interval": 10}}"#.to_string());

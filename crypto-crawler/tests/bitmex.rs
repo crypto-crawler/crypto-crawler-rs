@@ -93,13 +93,7 @@ async fn test_crawl_candlestick_rate_all() {
 #[test_case(MarketType::QuantoSwap, "ETHUSD")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
-    test_one_symbol!(
-        crawl_l2_event,
-        EXCHANGE_NAME,
-        market_type,
-        symbol,
-        MessageType::L2Event
-    )
+    test_one_symbol!(crawl_l2_event, EXCHANGE_NAME, market_type, symbol, MessageType::L2Event)
 }
 
 // #[test_case(MarketType::InverseSwap, "XBTUSD")]

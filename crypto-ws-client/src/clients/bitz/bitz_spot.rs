@@ -66,12 +66,7 @@ impl MessageHandler for BitzMessageHandler {
         let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
 
         if obj.contains_key("action")
-            && obj
-                .get("action")
-                .unwrap()
-                .as_str()
-                .unwrap()
-                .starts_with("Pushdata.")
+            && obj.get("action").unwrap().as_str().unwrap().starts_with("Pushdata.")
         {
             MiscMessage::Normal
         } else if obj.contains_key("status") {
@@ -112,10 +107,7 @@ impl BitzCommandTranslator {
             if subscribe { "sub" } else { "unsub" },
             pair,
             channels.join(","),
-            SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_millis(),
+            SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis(),
         )
     }
 
@@ -140,10 +132,7 @@ impl BitzCommandTranslator {
             if subscribe { "sub" } else { "unsub" },
             symbol,
             interval_str,
-            SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_millis(),
+            SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis(),
         )
     }
 }
@@ -163,9 +152,7 @@ impl CommandTranslator for BitzCommandTranslator {
         }
 
         for (symbol, channels) in symbol_channels.iter() {
-            commands.push(Self::symbol_channels_to_command(
-                symbol, channels, subscribe,
-            ));
+            commands.push(Self::symbol_channels_to_command(symbol, channels, subscribe));
         }
 
         commands

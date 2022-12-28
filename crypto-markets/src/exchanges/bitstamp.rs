@@ -36,17 +36,12 @@ struct SpotMarket {
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
     let txt = http_get("https://www.bitstamp.net/api/v2/trading-pairs-info/", None)?;
     let markets = serde_json::from_str::<Vec<SpotMarket>>(&txt)?;
-    Ok(markets
-        .into_iter()
-        .filter(|m| m.trading == "Enabled")
-        .collect())
+    Ok(markets.into_iter().filter(|m| m.trading == "Enabled").collect())
 }
 
 fn fetch_spot_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_spot_markets_raw()?
-        .into_iter()
-        .map(|m| m.url_symbol)
-        .collect::<Vec<String>>();
+    let symbols =
+        fetch_spot_markets_raw()?.into_iter().map(|m| m.url_symbol).collect::<Vec<String>>();
     Ok(symbols)
 }
 
@@ -54,11 +49,7 @@ fn fetch_spot_markets() -> Result<Vec<Market>> {
     let markets = fetch_spot_markets_raw()?
         .into_iter()
         .map(|m| {
-            let info = serde_json::to_value(&m)
-                .unwrap()
-                .as_object()
-                .unwrap()
-                .clone();
+            let info = serde_json::to_value(&m).unwrap().as_object().unwrap().clone();
             let pair = crypto_pair::normalize_pair(&m.url_symbol, "bitstamp").unwrap();
             let (base, quote) = {
                 let v: Vec<&str> = pair.split('/').collect();
@@ -81,10 +72,7 @@ fn fetch_spot_markets() -> Result<Vec<Market>> {
                 active: true,
                 margin: true,
                 // see https://www.bitstamp.net/fee-schedule/
-                fees: Fees {
-                    maker: 0.005,
-                    taker: 0.005,
-                },
+                fees: Fees { maker: 0.005, taker: 0.005 },
                 precision: Precision {
                     tick_size: 1.0 / (10_i64.pow(m.base_decimals as u32) as f64),
                     lot_size: 1.0 / (10_i64.pow(m.counter_decimals as u32) as f64),

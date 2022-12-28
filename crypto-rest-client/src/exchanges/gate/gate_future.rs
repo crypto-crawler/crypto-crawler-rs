@@ -15,10 +15,7 @@ pub struct GateFutureRestClient {
 
 impl GateFutureRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        GateFutureRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        GateFutureRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get the latest Level2 snapshot of orderbook.
@@ -38,9 +35,6 @@ impl GateFutureRestClient {
         } else {
             panic!("Unknown symbol {}", symbol);
         };
-        gen_api!(format!(
-            "/delivery/{}/order_book?contract={}&limit=50",
-            settle, symbol
-        ))
+        gen_api!(format!("/delivery/{}/order_book?contract={}&limit=50", settle, symbol))
     }
 }

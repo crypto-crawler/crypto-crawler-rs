@@ -18,10 +18,7 @@ pub struct BinanceSpotRestClient {
 
 impl BinanceSpotRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        BinanceSpotRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        BinanceSpotRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get compressed, aggregate trades.
@@ -38,14 +35,7 @@ impl BinanceSpotRestClient {
         check_symbol(symbol);
         let symbol = Some(symbol);
         let limit = Some(1000);
-        gen_api_binance!(
-            "/api/v3/aggTrades",
-            symbol,
-            from_id,
-            start_time,
-            end_time,
-            limit
-        )
+        gen_api_binance!("/api/v3/aggTrades", symbol, from_id, start_time, end_time, limit)
     }
 
     /// Get a Level2 snapshot of orderbook.

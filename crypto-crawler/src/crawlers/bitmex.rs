@@ -52,14 +52,7 @@ pub(crate) async fn crawl_l2_event(
         // crawl all symbols
         crawl_all(MessageType::L2Event, tx).await;
     } else {
-        crawl_event(
-            EXCHANGE_NAME,
-            MessageType::L2Event,
-            market_type,
-            symbols,
-            tx,
-        )
-        .await;
+        crawl_event(EXCHANGE_NAME, MessageType::L2Event, market_type, symbols, tx).await;
     }
 }
 
@@ -126,10 +119,8 @@ pub(crate) async fn crawl_funding_rate(
             tx,
         );
 
-        let topics: Vec<(String, String)> = real_symbols
-            .iter()
-            .map(|symbol| ("funding".to_string(), symbol.to_string()))
-            .collect();
+        let topics: Vec<(String, String)> =
+            real_symbols.iter().map(|symbol| ("funding".to_string(), symbol.to_string())).collect();
 
         match market_type {
             MarketType::InverseSwap | MarketType::QuantoSwap => {

@@ -16,10 +16,7 @@ pub struct KuCoinSwapRestClient {
 
 impl KuCoinSwapRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        KuCoinSwapRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        KuCoinSwapRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get the latest Level2 snapshot of orderbook.

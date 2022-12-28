@@ -16,26 +16,12 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
     assert_eq!("ok", obj.get("status").unwrap().as_str().unwrap());
 
-    let bids = obj
-        .get("tick")
-        .unwrap()
-        .as_object()
-        .unwrap()
-        .get("bids")
-        .unwrap()
-        .as_array()
-        .unwrap();
+    let bids =
+        obj.get("tick").unwrap().as_object().unwrap().get("bids").unwrap().as_array().unwrap();
     assert!(!bids.is_empty());
 
-    let asks = obj
-        .get("tick")
-        .unwrap()
-        .as_object()
-        .unwrap()
-        .get("asks")
-        .unwrap()
-        .as_array()
-        .unwrap();
+    let asks =
+        obj.get("tick").unwrap().as_object().unwrap().get("asks").unwrap().as_array().unwrap();
     assert!(!asks.is_empty());
 }
 

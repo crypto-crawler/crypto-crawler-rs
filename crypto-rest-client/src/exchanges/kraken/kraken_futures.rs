@@ -18,15 +18,13 @@ pub struct KrakenFuturesRestClient {
 
 impl KrakenFuturesRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        KrakenFuturesRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        KrakenFuturesRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get most recent trades.
     ///
-    /// If `lastTime` is provided, return trade data from the specified lastTime.
+    /// If `lastTime` is provided, return trade data from the specified
+    /// lastTime.
     ///
     /// For example: <https://futures.kraken.com/derivatives/api/v3/history?symbol=PI_XBTUSD>
     #[allow(non_snake_case)]

@@ -41,25 +41,18 @@ fn fetch_future_markets_raw(settle: &str) -> Result<Vec<FutureMarket>> {
         None,
     )?;
     let markets = serde_json::from_str::<Vec<FutureMarket>>(&txt)?;
-    Ok(markets
-        .into_iter()
-        .filter(|x| !x.in_delisting)
-        .collect::<Vec<FutureMarket>>())
+    Ok(markets.into_iter().filter(|x| !x.in_delisting).collect::<Vec<FutureMarket>>())
 }
 
 pub(super) fn fetch_inverse_future_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_future_markets_raw("btc")?
-        .into_iter()
-        .map(|m| m.name)
-        .collect::<Vec<String>>();
+    let symbols =
+        fetch_future_markets_raw("btc")?.into_iter().map(|m| m.name).collect::<Vec<String>>();
     Ok(symbols)
 }
 
 pub(super) fn fetch_linear_future_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_future_markets_raw("usdt")?
-        .into_iter()
-        .map(|m| m.name)
-        .collect::<Vec<String>>();
+    let symbols =
+        fetch_future_markets_raw("usdt")?.into_iter().map(|m| m.name).collect::<Vec<String>>();
     Ok(symbols)
 }
 
@@ -100,11 +93,7 @@ fn to_market(raw_market: &FutureMarket) -> Market {
         },
         base: base.clone(),
         quote: quote.clone(),
-        settle: if market_type == MarketType::InverseFuture {
-            Some(base)
-        } else {
-            Some(quote)
-        },
+        settle: if market_type == MarketType::InverseFuture { Some(base) } else { Some(quote) },
         active: !raw_market.in_delisting,
         margin: true,
         fees: Fees {
@@ -123,11 +112,7 @@ fn to_market(raw_market: &FutureMarket) -> Market {
         }),
         contract_value: Some(quanto_multiplier),
         delivery_date: Some(raw_market.expire_time * 1000),
-        info: serde_json::to_value(raw_market)
-            .unwrap()
-            .as_object()
-            .unwrap()
-            .clone(),
+        info: serde_json::to_value(raw_market).unwrap().as_object().unwrap().clone(),
     }
 }
 

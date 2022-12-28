@@ -20,10 +20,7 @@ pub struct BithumbRestClient {
 
 impl BithumbRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        BithumbRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        BithumbRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get most recent trades.

@@ -54,11 +54,7 @@ mod bitmex_inverse_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            BitmexWSClient,
-            subscribe_orderbook_topk,
-            &["XBTUSD".to_string()]
-        );
+        gen_test_code!(BitmexWSClient, subscribe_orderbook_topk, &["XBTUSD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -70,11 +66,7 @@ mod bitmex_inverse_swap {
     #[test]
     #[ignore]
     fn subscribe_funding_rate() {
-        gen_test_code!(
-            BitmexWSClient,
-            subscribe,
-            &[("funding".to_string(), "XBTUSD".to_string())]
-        );
+        gen_test_code!(BitmexWSClient, subscribe, &[("funding".to_string(), "XBTUSD".to_string())]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -182,11 +174,7 @@ mod bitmex_quanto_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            BitmexWSClient,
-            subscribe_orderbook_topk,
-            &["ETHUSD".to_string()]
-        );
+        gen_test_code!(BitmexWSClient, subscribe_orderbook_topk, &["ETHUSD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -198,11 +186,7 @@ mod bitmex_quanto_swap {
     #[test]
     #[ignore]
     fn subscribe_funding_rate() {
-        gen_test_code!(
-            BitmexWSClient,
-            subscribe,
-            &[("funding".to_string(), "ETHUSD".to_string())]
-        );
+        gen_test_code!(BitmexWSClient, subscribe, &[("funding".to_string(), "ETHUSD".to_string())]);
     }
 }
 
@@ -215,11 +199,7 @@ mod bitmex_linear_future {
         gen_test_code!(
             BitmexWSClient,
             subscribe_trade,
-            &[
-                "XBTUSDTZ22".to_string(),
-                "ETHZ22".to_string(),
-                "ETHUSDTZ22".to_string()
-            ]
+            &["XBTUSDTZ22".to_string(), "ETHZ22".to_string(), "ETHUSDTZ22".to_string()]
         );
     }
 
@@ -235,11 +215,7 @@ mod bitmex_linear_future {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            BitmexWSClient,
-            subscribe_orderbook_topk,
-            &["ETHZ22".to_string()]
-        );
+        gen_test_code!(BitmexWSClient, subscribe_orderbook_topk, &["ETHZ22".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]

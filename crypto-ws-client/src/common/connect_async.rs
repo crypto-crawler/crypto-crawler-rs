@@ -14,10 +14,11 @@ use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream,
 };
 
-/// Wraps a websocket client inside an event loop, returns a message_rx to receive messages and
-/// a command_tx to send commands to the websocket server.
+/// Wraps a websocket client inside an event loop, returns a message_rx to
+/// receive messages and a command_tx to send commands to the websocket server.
 ///
-/// To close the websocket connection, send a `Message::Close` message to the command_tx.
+/// To close the websocket connection, send a `Message::Close` message to the
+/// command_tx.
 ///
 /// `limit`, max number of uplink messsages, for example, 100 per 10 seconds
 pub async fn connect_async(

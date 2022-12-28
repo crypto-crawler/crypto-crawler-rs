@@ -20,10 +20,7 @@ fn fetch_spot_symbols() {
     for symbol in symbols.iter() {
         assert!(symbol.contains('-'));
         assert_eq!(symbol.to_string(), symbol.to_uppercase());
-        assert_eq!(
-            MarketType::Spot,
-            get_market_type(symbol, EXCHANGE_NAME, None)
-        );
+        assert_eq!(MarketType::Spot, get_market_type(symbol, EXCHANGE_NAME, None));
     }
 }
 
@@ -32,11 +29,7 @@ fn fetch_spot_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::Spot).unwrap();
     assert!(!markets.is_empty());
 
-    let btcusd = markets
-        .iter()
-        .find(|m| m.symbol == "BTC-USD")
-        .unwrap()
-        .clone();
+    let btcusd = markets.iter().find(|m| m.symbol == "BTC-USD").unwrap().clone();
     assert_eq!(btcusd.precision.tick_size, 0.01);
     assert_eq!(btcusd.precision.lot_size, 0.00000001);
     let quantity_limit = btcusd.quantity_limit.unwrap();

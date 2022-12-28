@@ -25,7 +25,8 @@ pub trait WSClient {
     /// these exchanges will panic.
     ///
     /// * Binance, BitMEX, Huobi and Kraken have BBO directly.
-    /// * Bitfinex uses `book` channel with `len=1` and `prec="R0"` to get BBO data.
+    /// * Bitfinex uses `book` channel with `len=1` and `prec="R0"` to get BBO
+    ///   data.
     async fn subscribe_bbo(&self, symbols: &[String]);
 
     /// Subscribes to incremental level2 orderbook channels.
@@ -33,8 +34,8 @@ pub trait WSClient {
     /// An incremental level2 orderbook channel sends a snapshot followed by
     /// tick-by-tick updates.
     ///
-    /// Level2 orderbook is the raw orderbook(Level3) aggregated by price level, it is
-    /// also refered to as "market by price level" data.
+    /// Level2 orderbook is the raw orderbook(Level3) aggregated by price level,
+    /// it is also refered to as "market by price level" data.
     ///
     /// This function subscribes to exchange specific channels as the following:
     ///
@@ -43,7 +44,8 @@ pub trait WSClient {
     /// * BitMEX `orderBookL2_25`
     /// * Bitstamp `diff_order_book`, top 100
     /// * CoinbasePro `level2`
-    /// * Huobi `depth.size_20.high_freq` with `data_type=incremental` for contracts, `mbp.20` for Spot
+    /// * Huobi `depth.size_20.high_freq` with `data_type=incremental` for
+    ///   contracts, `mbp.20` for Spot
     /// * Kraken `book` with `depth=25`
     /// * MEXC `depth` for Swap, `symbol` for Spot
     /// * OKEx `depth_l2_tbt`, top 100
@@ -51,7 +53,8 @@ pub trait WSClient {
 
     /// Subscribes to level2 orderbook snapshot channels.
     ///
-    /// A level2 orderbook snapshot channel sends a complete snapshot every interval.
+    /// A level2 orderbook snapshot channel sends a complete snapshot every
+    /// interval.
     ///
     /// This function subscribes to exchange specific channels as the following:
     ///
@@ -62,13 +65,15 @@ pub trait WSClient {
     /// * CoinbasePro has no snapshot channel
     /// * Huobi `depth.step1` and `depth.step7`, top 20, every 1s
     /// * Kraken has no snapshot channel
-    /// * MEXC `depth.full` for Swap, top 20, every 100ms; `get.depth` for Spot, full, every 26s
+    /// * MEXC `depth.full` for Swap, top 20, every 100ms; `get.depth` for Spot,
+    ///   full, every 26s
     /// * OKEx `depth5`, top 5, every 100ms
     async fn subscribe_orderbook_topk(&self, symbols: &[String]);
 
     /// Subscribes to level3 orderebook channels.
     ///
-    /// **Only bitfinex, bitstamp, coinbase_pro and kucoin have level3 orderbook channels.**
+    /// **Only bitfinex, bitstamp, coinbase_pro and kucoin have level3 orderbook
+    /// channels.**
     ///
     /// The level3 orderbook is the orginal orderbook of an exchange, it is
     /// non-aggregated by price level and updated tick-by-tick.
@@ -87,7 +92,8 @@ pub trait WSClient {
     ///
     /// The candlestick channel sends OHLCV messages at interval.
     ///
-    /// `symbol_interval_list` is a list of symbols and intervals of candlesticks in seconds.
+    /// `symbol_interval_list` is a list of symbols and intervals of
+    /// candlesticks in seconds.
     ///
     /// Not all exchanges have candlestick channels, for example, Bitstamp
     /// and CoinbasePro.
@@ -95,19 +101,26 @@ pub trait WSClient {
 
     /// Subscribe to multiple topics.
     ///
-    /// topic = channel + symbol, a topic will be converted to an exchange-specific
-    /// channel(called `raw channel`).
+    /// topic = channel + symbol, a topic will be converted to an
+    /// exchange-specific channel(called `raw channel`).
     ///
     /// The channel string supports `SYMBOL` as a placeholder, for example,
-    /// `("market.SYMBOL.trade.detail", "btcusdt")` will be converted to a raw channel
-    /// `"market.btcusdt.trade.detail"`.
+    /// `("market.SYMBOL.trade.detail", "btcusdt")` will be converted to a raw
+    /// channel `"market.btcusdt.trade.detail"`.
     ///
     /// Examples:
     ///
-    /// * Binance: `vec![("aggTrade".to_string(), "BTCUSDT".to_string()),("ticker".to_string(), "BTCUSDT".to_string())]`
-    /// * Deribit: `vec![(trades.SYMBOL.100ms".to_string(),"BTC-PERPETUAL".to_string()),(trades.SYMBOL.100ms".to_string(),"ETH-PERPETUAL".to_string())]`
-    /// * Huobi: `vec![("trade.detail".to_string(), "btcusdt".to_string()),("trade.detail".to_string(), "ethusdt".to_string())]`
-    /// * OKX: `vec![("trades".to_string(), "BTC-USDT".to_string()),("trades".to_string(), "ETH-USDT".to_string())]`
+    /// * Binance: `vec![("aggTrade".to_string(),
+    ///   "BTCUSDT".to_string()),("ticker".to_string(), "BTCUSDT".to_string())]`
+    /// * Deribit: `vec![(trades.SYMBOL.100ms".to_string(),"BTC-PERPETUAL".
+    ///   to_string()),(trades.SYMBOL.100ms".to_string(),"ETH-PERPETUAL".
+    ///   to_string())]`
+    /// * Huobi: `vec![("trade.detail".to_string(),
+    ///   "btcusdt".to_string()),("trade.detail".to_string(),
+    ///   "ethusdt".to_string())]`
+    /// * OKX: `vec![("trades".to_string(),
+    ///   "BTC-USDT".to_string()),("trades".to_string(),
+    ///   "ETH-USDT".to_string())]`
     async fn subscribe(&self, topics: &[(String, String)]);
 
     /// Unsubscribes multiple topics.

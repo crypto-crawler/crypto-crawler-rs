@@ -15,10 +15,7 @@ pub struct BitgetSpotRestClient {
 
 impl BitgetSpotRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        BitgetSpotRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        BitgetSpotRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get the latest Level2 snapshot of orderbook.
@@ -27,9 +24,6 @@ impl BitgetSpotRestClient {
     ///
     /// For example: <https://api.bitget.com/api/spot/v1/market/depth?symbol=BTCUSDT_SPBL&type=step0>,
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!(
-            "/api/spot/v1/market/depth?symbol={}&type=step0",
-            symbol
-        ))
+        gen_api!(format!("/api/spot/v1/market/depth?symbol={}&type=step0", symbol))
     }
 }

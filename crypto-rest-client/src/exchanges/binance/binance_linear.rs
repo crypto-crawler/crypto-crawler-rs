@@ -17,10 +17,7 @@ pub struct BinanceLinearRestClient {
 
 impl BinanceLinearRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        BinanceLinearRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        BinanceLinearRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get compressed, aggregate trades.
@@ -40,14 +37,7 @@ impl BinanceLinearRestClient {
         check_symbol(symbol);
         let symbol = Some(symbol);
         let limit = Some(1000);
-        gen_api_binance!(
-            "/fapi/v1/aggTrades",
-            symbol,
-            from_id,
-            start_time,
-            end_time,
-            limit
-        )
+        gen_api_binance!("/fapi/v1/aggTrades", symbol, from_id, start_time, end_time, limit)
     }
 
     /// Get a Level2 snapshot of orderbook.

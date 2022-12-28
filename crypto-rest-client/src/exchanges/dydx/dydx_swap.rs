@@ -17,10 +17,7 @@ pub struct DydxSwapRestClient {
 
 impl DydxSwapRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        DydxSwapRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        DydxSwapRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get a Level2 orderbook snapshot.

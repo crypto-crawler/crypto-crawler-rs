@@ -46,20 +46,23 @@ struct RawMarket {
     category: String,  // Fee schedule
     baseCcy: String,   // Base currency, e.g. BTC inBTC-USDT. Only applicable to SPOT
     quoteCcy: String,  // Quote currency, e.g. USDT in BTC-USDT. Only applicable to SPOT
-    settleCcy: String, // Settlement and margin currency, e.g. BTC. Only applicable to FUTURES/SWAP/OPTION
-    ctVal: String,     // Contract value. Only applicable to FUTURES/SWAP/OPTION
-    ctMult: String,    // Contract multiplier. Only applicable to FUTURES/SWAP/OPTION
-    ctValCcy: String,  // Contract value currency. Only applicable to FUTURES/SWAP/OPTION
-    optType: String,   // Option type, C: Call P: put. Only applicable to OPTION
-    stk: String,       // Strike price. Only applicable to OPTION
-    listTime: String,  // Listing time, Unix timestamp format in milliseconds, e.g. 1597026383085
-    expTime: String, // Expiry time, Unix timestamp format in milliseconds, e.g. 1597026383085. Only applicable to FUTURES/OPTION
-    lever: String,   // Max Leverage. Not applicable to SPOT、OPTION
-    tickSz: String,  // Tick size, e.g. 0.0001
-    lotSz: String,   // Lot size, e.g. BTC-USDT-SWAP: 1
-    minSz: String,   // Minimum order size
-    ctType: String,  // Contract type, linear, inverse. Only applicable to FUTURES/SWAP
-    alias: String, // Alias, this_week, next_week, quarter, next_quarter. Only applicable to FUTURES
+    settleCcy: String, /* Settlement and margin currency, e.g. BTC. Only applicable to
+                        * FUTURES/SWAP/OPTION */
+    ctVal: String,    // Contract value. Only applicable to FUTURES/SWAP/OPTION
+    ctMult: String,   // Contract multiplier. Only applicable to FUTURES/SWAP/OPTION
+    ctValCcy: String, // Contract value currency. Only applicable to FUTURES/SWAP/OPTION
+    optType: String,  // Option type, C: Call P: put. Only applicable to OPTION
+    stk: String,      // Strike price. Only applicable to OPTION
+    listTime: String, // Listing time, Unix timestamp format in milliseconds, e.g. 1597026383085
+    expTime: String,  /* Expiry time, Unix timestamp format in milliseconds, e.g. 1597026383085.
+                       * Only applicable to FUTURES/OPTION */
+    lever: String,  // Max Leverage. Not applicable to SPOT、OPTION
+    tickSz: String, // Tick size, e.g. 0.0001
+    lotSz: String,  // Lot size, e.g. BTC-USDT-SWAP: 1
+    minSz: String,  // Minimum order size
+    ctType: String, // Contract type, linear, inverse. Only applicable to FUTURES/SWAP
+    alias: String,  /* Alias, this_week, next_week, quarter, next_quarter. Only applicable to
+                     * FUTURES */
     state: String, // Instrument status, live, suspend, preopen, settlement
     #[serde(flatten)]
     extra: HashMap<String, Value>,
@@ -73,49 +76,25 @@ impl RawMarket {
             (v[0].to_string(), v[1].to_string())
         };
         let (market_type, base_id, quote_id) = if self.instType == "SPOT" {
-            (
-                MarketType::Spot,
-                self.baseCcy.clone(),
-                self.quoteCcy.clone(),
-            )
+            (MarketType::Spot, self.baseCcy.clone(), self.quoteCcy.clone())
         } else if self.instType == "FUTURES" {
             if self.ctType == "linear" {
-                (
-                    MarketType::LinearFuture,
-                    self.ctValCcy.clone(),
-                    self.settleCcy.clone(),
-                )
+                (MarketType::LinearFuture, self.ctValCcy.clone(), self.settleCcy.clone())
             } else if self.ctType == "inverse" {
-                (
-                    MarketType::InverseFuture,
-                    self.settleCcy.clone(),
-                    self.ctValCcy.clone(),
-                )
+                (MarketType::InverseFuture, self.settleCcy.clone(), self.ctValCcy.clone())
             } else {
                 panic!("Unsupported ctType: {}", self.ctType);
             }
         } else if self.instType == "SWAP" {
             if self.ctType == "linear" {
-                (
-                    MarketType::LinearSwap,
-                    self.ctValCcy.clone(),
-                    self.settleCcy.clone(),
-                )
+                (MarketType::LinearSwap, self.ctValCcy.clone(), self.settleCcy.clone())
             } else if self.ctType == "inverse" {
-                (
-                    MarketType::InverseSwap,
-                    self.settleCcy.clone(),
-                    self.ctValCcy.clone(),
-                )
+                (MarketType::InverseSwap, self.settleCcy.clone(), self.ctValCcy.clone())
             } else {
                 panic!("Unsupported ctType: {}", self.ctType);
             }
         } else if self.instType == "OPTION" {
-            (
-                MarketType::EuropeanOption,
-                self.settleCcy.clone(),
-                "USD".to_string(),
-            )
+            (MarketType::EuropeanOption, self.settleCcy.clone(), "USD".to_string())
         } else {
             panic!("Unsupported market_type: {}", self.instType);
         };
@@ -126,32 +105,16 @@ impl RawMarket {
             symbol: self.instId.to_string(),
             base_id,
             quote_id,
-            settle_id: if self.instType == "SPOT" {
-                None
-            } else {
-                Some(self.settleCcy.clone())
-            },
+            settle_id: if self.instType == "SPOT" { None } else { Some(self.settleCcy.clone()) },
             base,
             quote,
-            settle: if self.instType == "SPOT" {
-                None
-            } else {
-                Some(self.settleCcy.clone())
-            },
+            settle: if self.instType == "SPOT" { None } else { Some(self.settleCcy.clone()) },
             active: self.state == "live",
             margin: !self.lever.is_empty(),
             // see https://www.okx.com/fees.html
             fees: Fees {
-                maker: if self.instType == "SPOT" {
-                    0.0008
-                } else {
-                    0.0002
-                },
-                taker: if self.instType == "SPOT" {
-                    0.001
-                } else {
-                    0.0005
-                },
+                maker: if self.instType == "SPOT" { 0.0008 } else { 0.0002 },
+                taker: if self.instType == "SPOT" { 0.001 } else { 0.0005 },
             },
             precision: Precision {
                 tick_size: self.tickSz.parse::<f64>().unwrap(),
@@ -173,11 +136,7 @@ impl RawMarket {
             } else {
                 None
             },
-            info: serde_json::to_value(self)
-                .unwrap()
-                .as_object()
-                .unwrap()
-                .clone(),
+            info: serde_json::to_value(self).unwrap().as_object().unwrap().clone(),
         }
     }
 }
@@ -189,17 +148,11 @@ impl RawMarket {
 fn fetch_raw_markets_raw(inst_type: &str) -> Result<Vec<RawMarket>> {
     let markets = if inst_type == "OPTION" {
         let underlying_indexes = {
-            let txt = http_get(
-                "https://www.okx.com/api/v5/public/underlying?instType=OPTION",
-                None,
-            )?;
+            let txt =
+                http_get("https://www.okx.com/api/v5/public/underlying?instType=OPTION", None)?;
             let json_obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();
-            let data = json_obj.get("data").unwrap().as_array().unwrap()[0]
-                .as_array()
-                .unwrap();
-            data.iter()
-                .map(|x| x.as_str().unwrap().to_string())
-                .collect::<Vec<String>>()
+            let data = json_obj.get("data").unwrap().as_array().unwrap()[0].as_array().unwrap();
+            data.iter().map(|x| x.as_str().unwrap().to_string()).collect::<Vec<String>>()
         };
 
         let mut markets = Vec::<RawMarket>::new();
@@ -219,10 +172,7 @@ fn fetch_raw_markets_raw(inst_type: &str) -> Result<Vec<RawMarket>> {
 
         markets
     } else {
-        let url = format!(
-            "https://www.okx.com/api/v5/public/instruments?instType={}",
-            inst_type
-        );
+        let url = format!("https://www.okx.com/api/v5/public/instruments?instType={}", inst_type);
         let txt = {
             let txt = http_get(url.as_str(), None)?;
             let json_obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();
@@ -234,10 +184,8 @@ fn fetch_raw_markets_raw(inst_type: &str) -> Result<Vec<RawMarket>> {
 }
 
 fn fetch_spot_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_raw_markets_raw("SPOT")?
-        .into_iter()
-        .map(|m| m.instId)
-        .collect::<Vec<String>>();
+    let symbols =
+        fetch_raw_markets_raw("SPOT")?.into_iter().map(|m| m.instId).collect::<Vec<String>>();
     Ok(symbols)
 }
 
@@ -278,18 +226,14 @@ fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
 }
 
 fn fetch_option_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_raw_markets_raw("OPTION")?
-        .into_iter()
-        .map(|m| m.instId)
-        .collect::<Vec<String>>();
+    let symbols =
+        fetch_raw_markets_raw("OPTION")?.into_iter().map(|m| m.instId).collect::<Vec<String>>();
     Ok(symbols)
 }
 
 fn fetch_spot_markets() -> Result<Vec<Market>> {
-    let markets = fetch_raw_markets_raw("SPOT")?
-        .into_iter()
-        .map(|m| m.to_market())
-        .collect::<Vec<Market>>();
+    let markets =
+        fetch_raw_markets_raw("SPOT")?.into_iter().map(|m| m.to_market()).collect::<Vec<Market>>();
     Ok(markets)
 }
 

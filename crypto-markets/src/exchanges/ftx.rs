@@ -124,11 +124,7 @@ fn to_market(raw_market: &FtxMarket) -> Market {
         (v[0].to_string(), v[1].to_string())
     };
     let market_type = if raw_market.type_ == "spot" {
-        if raw_market.name.contains("BVOL/") {
-            MarketType::BVOL
-        } else {
-            MarketType::Spot
-        }
+        if raw_market.name.contains("BVOL/") { MarketType::BVOL } else { MarketType::Spot }
     } else if raw_market.type_ == "future" {
         if raw_market.name.ends_with("-PERP") {
             MarketType::LinearSwap
@@ -140,33 +136,31 @@ fn to_market(raw_market: &FtxMarket) -> Market {
     } else {
         panic!("Unsupported type: {}", raw_market.type_);
     };
-    let delivery_date: Option<u64> = if raw_market.name[(raw_market.name.len() - 4)..]
-        .parse::<u32>()
-        .is_ok()
-    {
-        let n = raw_market.name.len();
-        let s = raw_market.name.as_str();
-        let month = &s[(n - 4)..(n - 2)];
-        let day = &s[(n - 2)..];
-        let now = Utc::now();
-        let year = Utc::now().year();
-        let delivery_time = DateTime::parse_from_rfc3339(
-            format!("{}-{}-{}T00:00:00+00:00", year, month, day).as_str(),
-        )
-        .unwrap();
-        let delivery_time = if delivery_time > now {
-            delivery_time
-        } else {
-            DateTime::parse_from_rfc3339(
-                format!("{}-{}-{}T00:00:00+00:00", year + 1, month, day).as_str(),
+    let delivery_date: Option<u64> =
+        if raw_market.name[(raw_market.name.len() - 4)..].parse::<u32>().is_ok() {
+            let n = raw_market.name.len();
+            let s = raw_market.name.as_str();
+            let month = &s[(n - 4)..(n - 2)];
+            let day = &s[(n - 2)..];
+            let now = Utc::now();
+            let year = Utc::now().year();
+            let delivery_time = DateTime::parse_from_rfc3339(
+                format!("{}-{}-{}T00:00:00+00:00", year, month, day).as_str(),
             )
-            .unwrap()
+            .unwrap();
+            let delivery_time = if delivery_time > now {
+                delivery_time
+            } else {
+                DateTime::parse_from_rfc3339(
+                    format!("{}-{}-{}T00:00:00+00:00", year + 1, month, day).as_str(),
+                )
+                .unwrap()
+            };
+            assert!(delivery_time > now);
+            Some(delivery_time.timestamp_millis() as u64)
+        } else {
+            None
         };
-        assert!(delivery_time > now);
-        Some(delivery_time.timestamp_millis() as u64)
-    } else {
-        None
-    };
     Market {
         exchange: "ftx".to_string(),
         market_type,
@@ -181,41 +175,22 @@ fn to_market(raw_market: &FtxMarket) -> Market {
         } else {
             "USD".to_string()
         },
-        settle_id: if raw_market.type_ == "spot" {
-            None
-        } else {
-            Some("USD".to_string())
-        },
+        settle_id: if raw_market.type_ == "spot" { None } else { Some("USD".to_string()) },
         base,
         quote,
-        settle: if raw_market.type_ == "spot" {
-            None
-        } else {
-            Some("USD".to_string())
-        },
+        settle: if raw_market.type_ == "spot" { None } else { Some("USD".to_string()) },
         active: raw_market.enabled,
         margin: true,
         // see https://help.ftx.com/hc/en-us/articles/360024479432-Fees
-        fees: Fees {
-            maker: 0.0002,
-            taker: 0.0007,
-        },
+        fees: Fees { maker: 0.0002, taker: 0.0007 },
         precision: Precision {
             tick_size: raw_market.priceIncrement,
             lot_size: raw_market.sizeIncrement,
         },
         quantity_limit: None,
-        contract_value: if raw_market.type_ == "spot" {
-            None
-        } else {
-            Some(1.0)
-        },
+        contract_value: if raw_market.type_ == "spot" { None } else { Some(1.0) },
         delivery_date,
-        info: serde_json::to_value(raw_market)
-            .unwrap()
-            .as_object()
-            .unwrap()
-            .clone(),
+        info: serde_json::to_value(raw_market).unwrap().as_object().unwrap().clone(),
     }
 }
 

@@ -23,13 +23,7 @@ async fn test_crawl_trade_all(market_type: MarketType) {
 #[test_case(MarketType::InverseSwap, "PI_XBTUSD")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
-    test_one_symbol!(
-        crawl_trade,
-        EXCHANGE_NAME,
-        market_type,
-        symbol,
-        MessageType::Trade
-    )
+    test_one_symbol!(crawl_trade, EXCHANGE_NAME, market_type, symbol, MessageType::Trade)
 }
 
 #[test_case(MarketType::Spot, "XBT/USD")]
@@ -37,25 +31,13 @@ async fn test_crawl_trade(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::InverseSwap, "PI_XBTUSD")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_l2_event(market_type: MarketType, symbol: &str) {
-    test_one_symbol!(
-        crawl_l2_event,
-        EXCHANGE_NAME,
-        market_type,
-        symbol,
-        MessageType::L2Event
-    )
+    test_one_symbol!(crawl_l2_event, EXCHANGE_NAME, market_type, symbol, MessageType::L2Event)
 }
 
 #[test_case(MarketType::Spot, "XBT/USD")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_bbo(market_type: MarketType, symbol: &str) {
-    test_one_symbol!(
-        crawl_bbo,
-        EXCHANGE_NAME,
-        market_type,
-        symbol,
-        MessageType::BBO
-    )
+    test_one_symbol!(crawl_bbo, EXCHANGE_NAME, market_type, symbol, MessageType::BBO)
 }
 
 #[test_case(MarketType::Spot, "XBT/USD")]
@@ -88,13 +70,7 @@ fn test_crawl_l2_snapshot_without_symbol(market_type: MarketType) {
 #[test_case(MarketType::InverseSwap, "PI_XBTUSD")]
 #[tokio::test(flavor = "multi_thread")]
 async fn test_crawl_ticker(market_type: MarketType, symbol: &str) {
-    test_one_symbol!(
-        crawl_ticker,
-        EXCHANGE_NAME,
-        market_type,
-        symbol,
-        MessageType::Ticker
-    )
+    test_one_symbol!(crawl_ticker, EXCHANGE_NAME, market_type, symbol, MessageType::Ticker)
 }
 
 #[test_case(MarketType::Spot)]

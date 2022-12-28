@@ -57,19 +57,13 @@ struct Response {
 
 // See https://docs.kucoin.com/#get-symbols-list
 fn fetch_swap_markets_raw() -> Result<Vec<SwapMarket>> {
-    let txt = http_get(
-        "https://api-futures.kucoin.com/api/v1/contracts/active",
-        None,
-    )?;
+    let txt = http_get("https://api-futures.kucoin.com/api/v1/contracts/active", None)?;
     let resp = serde_json::from_str::<Response>(&txt)?;
     if resp.code != "200000" {
         Err(Error(txt))
     } else {
-        let markets = resp
-            .data
-            .into_iter()
-            .filter(|x| x.status == "Open")
-            .collect::<Vec<SwapMarket>>();
+        let markets =
+            resp.data.into_iter().filter(|x| x.status == "Open").collect::<Vec<SwapMarket>>();
         Ok(markets)
     }
 }
@@ -136,29 +130,15 @@ fn to_market(raw_market: &SwapMarket) -> Market {
         },
         base: base.clone(),
         quote: quote.clone(),
-        settle: if raw_market.isInverse {
-            Some(base)
-        } else {
-            Some(quote)
-        },
+        settle: if raw_market.isInverse { Some(base) } else { Some(quote) },
         active: raw_market.status == "Open",
         margin: true,
-        fees: Fees {
-            maker: raw_market.makerFeeRate,
-            taker: raw_market.takerFeeRate,
-        },
-        precision: Precision {
-            tick_size: raw_market.tickSize,
-            lot_size: raw_market.lotSize,
-        },
+        fees: Fees { maker: raw_market.makerFeeRate, taker: raw_market.takerFeeRate },
+        precision: Precision { tick_size: raw_market.tickSize, lot_size: raw_market.lotSize },
         quantity_limit: None,
         contract_value: Some(raw_market.multiplier.abs()),
         delivery_date: raw_market.expireDate,
-        info: serde_json::to_value(raw_market)
-            .unwrap()
-            .as_object()
-            .unwrap()
-            .clone(),
+        info: serde_json::to_value(raw_market).unwrap().as_object().unwrap().clone(),
     }
 }
 

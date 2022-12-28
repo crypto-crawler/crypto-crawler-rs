@@ -1,4 +1,5 @@
-/// Ensure that length of a websocket message does not exceed the max size or the number of topics does not exceed the threshold.
+/// Ensure that length of a websocket message does not exceed the max size or
+/// the number of topics does not exceed the threshold.
 pub(crate) fn ensure_frame_size(
     topics: &[(String, String)],
     subscribe: bool,

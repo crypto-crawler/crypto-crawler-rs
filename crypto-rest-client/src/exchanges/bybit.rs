@@ -26,10 +26,7 @@ pub struct BybitRestClient {
 
 impl BybitRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        BybitRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        BybitRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get the latest Level2 snapshot of orderbook.
@@ -49,10 +46,7 @@ impl BybitRestClient {
     /// - <https://api.bybit.com/v2/public/open-interest?symbol=BTCUSDT&period=5min&limit=200>
     /// - <https://api.bybit.com/v2/public/open-interest?symbol=BTCUSDU22&period=5min&limit=200>
     pub fn fetch_open_interest(symbol: &str) -> Result<String> {
-        gen_api!(format!(
-            "/public/open-interest?symbol={}&period=5min&limit=200",
-            symbol
-        ))
+        gen_api!(format!("/public/open-interest?symbol={}&period=5min&limit=200", symbol))
     }
 
     /// Get long-short ratio.
@@ -63,9 +57,6 @@ impl BybitRestClient {
     /// - <https://api.bybit.com/v2/public/account-ratio?symbol=BTCUSDT&period=5min&limit=500>
     /// - <https://api.bybit.com/v2/public/account-ratio?symbol=BTCUSDU22&period=5min&limit=500>
     pub fn fetch_long_short_ratio(symbol: &str) -> Result<String> {
-        gen_api!(format!(
-            "/public/account-ratio?symbol={}&period=5min&limit=200",
-            symbol
-        ))
+        gen_api!(format!("/public/account-ratio?symbol={}&period=5min&limit=200", symbol))
     }
 }

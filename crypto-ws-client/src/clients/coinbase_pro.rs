@@ -116,11 +116,7 @@ impl CommandTranslator for CoinbaseProCommandTranslator {
             command.push_str(
                 format!(
                     r#"{{"type":"{}","channels": ["#,
-                    if subscribe {
-                        "subscribe"
-                    } else {
-                        "unsubscribe"
-                    }
+                    if subscribe { "subscribe" } else { "unsubscribe" }
                 )
                 .as_str(),
             );

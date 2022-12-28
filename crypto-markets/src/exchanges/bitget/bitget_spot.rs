@@ -98,11 +98,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
             }),
             contract_value: None,
             delivery_date: None,
-            info: serde_json::to_value(&m)
-                .unwrap()
-                .as_object()
-                .unwrap()
-                .clone(),
+            info: serde_json::to_value(&m).unwrap().as_object().unwrap().clone(),
         })
         .collect();
     Ok(markets)

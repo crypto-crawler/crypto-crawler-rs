@@ -19,10 +19,7 @@ fn fetch_spot_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert_eq!(symbol.to_lowercase(), symbol.to_string());
-        assert_eq!(
-            MarketType::Spot,
-            get_market_type(symbol, EXCHANGE_NAME, None)
-        );
+        assert_eq!(MarketType::Spot, get_market_type(symbol, EXCHANGE_NAME, None));
     }
 }
 
@@ -37,10 +34,7 @@ fn fetch_inverse_future_symbols() {
                 || symbol.ends_with("_CQ")
                 || symbol.ends_with("_NQ")
         );
-        assert_eq!(
-            MarketType::InverseFuture,
-            get_market_type(symbol, EXCHANGE_NAME, None)
-        );
+        assert_eq!(MarketType::InverseFuture, get_market_type(symbol, EXCHANGE_NAME, None));
     }
 }
 
@@ -50,10 +44,7 @@ fn fetch_inverse_swap_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("-USD"));
-        assert_eq!(
-            MarketType::InverseSwap,
-            get_market_type(symbol, EXCHANGE_NAME, None)
-        );
+        assert_eq!(MarketType::InverseSwap, get_market_type(symbol, EXCHANGE_NAME, None));
     }
 }
 
@@ -63,10 +54,7 @@ fn fetch_linear_swap_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("-USDT"));
-        assert_eq!(
-            MarketType::LinearSwap,
-            get_market_type(symbol, EXCHANGE_NAME, None)
-        );
+        assert_eq!(MarketType::LinearSwap, get_market_type(symbol, EXCHANGE_NAME, None));
     }
 }
 
@@ -77,10 +65,7 @@ fn fetch_option_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.contains("-C-") || symbol.contains("-P-"));
-        assert_eq!(
-            MarketType::EuropeanOption,
-            get_market_type(symbol, EXCHANGE_NAME, None)
-        );
+        assert_eq!(MarketType::EuropeanOption, get_market_type(symbol, EXCHANGE_NAME, None));
     }
 }
 
@@ -89,11 +74,7 @@ fn fetch_spot_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::Spot).unwrap();
     assert!(!markets.is_empty());
 
-    let btc_usdt = markets
-        .iter()
-        .find(|m| m.symbol == "btcusdt")
-        .unwrap()
-        .clone();
+    let btc_usdt = markets.iter().find(|m| m.symbol == "btcusdt").unwrap().clone();
     assert_eq!(btc_usdt.precision.tick_size, 0.01);
     assert_eq!(btc_usdt.precision.lot_size, 0.000001);
     let quantity_limit = btc_usdt.quantity_limit.unwrap();
@@ -106,11 +87,7 @@ fn fetch_inverse_future_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
     assert!(!markets.is_empty());
 
-    let btc_usd = markets
-        .iter()
-        .find(|m| m.symbol == "BTC_CW")
-        .unwrap()
-        .clone();
+    let btc_usd = markets.iter().find(|m| m.symbol == "BTC_CW").unwrap().clone();
     assert_eq!(btc_usd.precision.tick_size, 0.01);
     assert_eq!(btc_usd.precision.lot_size, 1.0);
     assert!(btc_usd.quantity_limit.is_none());
@@ -121,11 +98,7 @@ fn fetch_inverse_swap_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseSwap).unwrap();
     assert!(!markets.is_empty());
 
-    let btc_usd = markets
-        .iter()
-        .find(|m| m.symbol == "BTC-USD")
-        .unwrap()
-        .clone();
+    let btc_usd = markets.iter().find(|m| m.symbol == "BTC-USD").unwrap().clone();
     assert_eq!(btc_usd.precision.tick_size, 0.1);
     assert_eq!(btc_usd.precision.lot_size, 1.0);
     assert!(btc_usd.quantity_limit.is_none());
@@ -136,11 +109,7 @@ fn fetch_linear_swap_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
     assert!(!markets.is_empty());
 
-    let btc_usdt = markets
-        .iter()
-        .find(|m| m.symbol == "BTC-USDT")
-        .unwrap()
-        .clone();
+    let btc_usdt = markets.iter().find(|m| m.symbol == "BTC-USDT").unwrap().clone();
     assert_eq!(btc_usdt.precision.tick_size, 0.1);
     assert_eq!(btc_usdt.precision.lot_size, 1.0);
     assert!(btc_usdt.quantity_limit.is_none());

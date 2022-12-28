@@ -92,17 +92,11 @@ impl MessageHandler for BithumbMessageHandler {
 
 impl BithumbCommandTranslator {
     fn topics_to_command(topics: &[(String, String)], subscribe: bool) -> String {
-        let raw_channels: Vec<String> = topics
-            .iter()
-            .map(|(channel, symbol)| format!("{}:{}", channel, symbol))
-            .collect();
+        let raw_channels: Vec<String> =
+            topics.iter().map(|(channel, symbol)| format!("{}:{}", channel, symbol)).collect();
         format!(
             r#"{{"cmd":"{}","args":{}}}"#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
+            if subscribe { "subscribe" } else { "unsubscribe" },
             serde_json::to_string(&raw_channels).unwrap()
         )
     }

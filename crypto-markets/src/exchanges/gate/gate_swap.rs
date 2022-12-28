@@ -38,25 +38,18 @@ fn fetch_swap_markets_raw(settle: &str) -> Result<Vec<SwapMarket>> {
         None,
     )?;
     let markets = serde_json::from_str::<Vec<SwapMarket>>(&txt)?;
-    Ok(markets
-        .into_iter()
-        .filter(|x| !x.in_delisting)
-        .collect::<Vec<SwapMarket>>())
+    Ok(markets.into_iter().filter(|x| !x.in_delisting).collect::<Vec<SwapMarket>>())
 }
 
 pub(super) fn fetch_inverse_swap_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_swap_markets_raw("btc")?
-        .into_iter()
-        .map(|m| m.name)
-        .collect::<Vec<String>>();
+    let symbols =
+        fetch_swap_markets_raw("btc")?.into_iter().map(|m| m.name).collect::<Vec<String>>();
     Ok(symbols)
 }
 
 pub(super) fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_swap_markets_raw("usdt")?
-        .into_iter()
-        .map(|m| m.name)
-        .collect::<Vec<String>>();
+    let symbols =
+        fetch_swap_markets_raw("usdt")?.into_iter().map(|m| m.name).collect::<Vec<String>>();
     Ok(symbols)
 }
 
@@ -97,11 +90,7 @@ fn to_market(raw_market: &SwapMarket) -> Market {
         },
         base: base.clone(),
         quote: quote.clone(),
-        settle: if market_type == MarketType::InverseSwap {
-            Some(base)
-        } else {
-            Some(quote)
-        },
+        settle: if market_type == MarketType::InverseSwap { Some(base) } else { Some(quote) },
         active: !raw_market.in_delisting,
         margin: true,
         fees: Fees {
@@ -120,26 +109,18 @@ fn to_market(raw_market: &SwapMarket) -> Market {
         }),
         contract_value: Some(quanto_multiplier),
         delivery_date: None,
-        info: serde_json::to_value(raw_market)
-            .unwrap()
-            .as_object()
-            .unwrap()
-            .clone(),
+        info: serde_json::to_value(raw_market).unwrap().as_object().unwrap().clone(),
     }
 }
 
 pub(super) fn fetch_inverse_swap_markets() -> Result<Vec<Market>> {
-    let markets = fetch_swap_markets_raw("btc")?
-        .into_iter()
-        .map(|m| to_market(&m))
-        .collect::<Vec<Market>>();
+    let markets =
+        fetch_swap_markets_raw("btc")?.into_iter().map(|m| to_market(&m)).collect::<Vec<Market>>();
     Ok(markets)
 }
 
 pub(super) fn fetch_linear_swap_markets() -> Result<Vec<Market>> {
-    let markets = fetch_swap_markets_raw("usdt")?
-        .into_iter()
-        .map(|m| to_market(&m))
-        .collect::<Vec<Market>>();
+    let markets =
+        fetch_swap_markets_raw("usdt")?.into_iter().map(|m| to_market(&m)).collect::<Vec<Market>>();
     Ok(markets)
 }

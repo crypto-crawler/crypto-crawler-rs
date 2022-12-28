@@ -157,10 +157,7 @@ mod tests {
             translator.translate_to_commands(true, &[("deal".to_string(), "BTC_USDT".to_string())]);
 
         assert_eq!(1, commands.len());
-        assert_eq!(
-            r#"{"method":"sub.deal","param":{"symbol":"BTC_USDT"}}"#,
-            commands[0]
-        );
+        assert_eq!(r#"{"method":"sub.deal","param":{"symbol":"BTC_USDT"}}"#, commands[0]);
     }
 
     #[test]
@@ -175,14 +172,8 @@ mod tests {
         );
 
         assert_eq!(2, commands.len());
-        assert_eq!(
-            r#"{"method":"sub.deal","param":{"symbol":"BTC_USDT"}}"#,
-            commands[0]
-        );
-        assert_eq!(
-            r#"{"method":"sub.depth","param":{"symbol":"ETH_USDT"}}"#,
-            commands[1]
-        );
+        assert_eq!(r#"{"method":"sub.deal","param":{"symbol":"BTC_USDT"}}"#, commands[0]);
+        assert_eq!(r#"{"method":"sub.depth","param":{"symbol":"ETH_USDT"}}"#, commands[1]);
     }
 
     #[test]

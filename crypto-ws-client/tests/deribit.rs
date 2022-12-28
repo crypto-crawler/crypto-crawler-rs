@@ -42,29 +42,17 @@ mod deribit_inverse_future {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            DeribitWSClient,
-            subscribe_ticker,
-            &["BTC-30DEC22".to_string()]
-        );
+        gen_test_code!(DeribitWSClient, subscribe_ticker, &["BTC-30DEC22".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            DeribitWSClient,
-            subscribe_orderbook,
-            &["BTC-30DEC22".to_string()]
-        );
+        gen_test_code!(DeribitWSClient, subscribe_orderbook, &["BTC-30DEC22".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            DeribitWSClient,
-            subscribe_orderbook_topk,
-            &["BTC-30DEC22".to_string()]
-        );
+        gen_test_code!(DeribitWSClient, subscribe_orderbook_topk, &["BTC-30DEC22".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -88,56 +76,33 @@ mod deribit_inverse_swap {
         gen_test_code!(
             DeribitWSClient,
             subscribe,
-            &[(
-                "trades.SYMBOL.100ms".to_string(),
-                "BTC-PERPETUAL".to_string()
-            )]
+            &[("trades.SYMBOL.100ms".to_string(), "BTC-PERPETUAL".to_string())]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            DeribitWSClient,
-            subscribe_trade,
-            &["BTC-PERPETUAL".to_string()]
-        );
+        gen_test_code!(DeribitWSClient, subscribe_trade, &["BTC-PERPETUAL".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            DeribitWSClient,
-            subscribe_ticker,
-            &["BTC-PERPETUAL".to_string()]
-        );
+        gen_test_code!(DeribitWSClient, subscribe_ticker, &["BTC-PERPETUAL".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            DeribitWSClient,
-            subscribe_orderbook,
-            &["BTC-PERPETUAL".to_string()]
-        );
+        gen_test_code!(DeribitWSClient, subscribe_orderbook, &["BTC-PERPETUAL".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            DeribitWSClient,
-            subscribe_orderbook_topk,
-            &["BTC-PERPETUAL".to_string()]
-        );
+        gen_test_code!(DeribitWSClient, subscribe_orderbook_topk, &["BTC-PERPETUAL".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(
-            DeribitWSClient,
-            subscribe_bbo,
-            &["BTC-PERPETUAL".to_string()]
-        );
+        gen_test_code!(DeribitWSClient, subscribe_bbo, &["BTC-PERPETUAL".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -174,10 +139,7 @@ mod deribit_option {
         gen_test_code!(
             DeribitWSClient,
             subscribe_trade,
-            &SYMBOLS
-                .iter()
-                .map(|s| s.to_string())
-                .collect::<Vec<String>>()
+            &SYMBOLS.iter().map(|s| s.to_string()).collect::<Vec<String>>()
         );
     }
 
@@ -186,10 +148,7 @@ mod deribit_option {
         gen_test_code!(
             DeribitWSClient,
             subscribe_ticker,
-            &SYMBOLS
-                .iter()
-                .map(|s| s.to_string())
-                .collect::<Vec<String>>()
+            &SYMBOLS.iter().map(|s| s.to_string()).collect::<Vec<String>>()
         );
     }
 
@@ -199,10 +158,7 @@ mod deribit_option {
         gen_test_code!(
             DeribitWSClient,
             subscribe_orderbook,
-            &SYMBOLS
-                .iter()
-                .map(|s| s.to_string())
-                .collect::<Vec<String>>()
+            &SYMBOLS.iter().map(|s| s.to_string()).collect::<Vec<String>>()
         );
     }
 
@@ -212,10 +168,7 @@ mod deribit_option {
         gen_test_code!(
             DeribitWSClient,
             subscribe_orderbook_topk,
-            &SYMBOLS
-                .iter()
-                .map(|s| s.to_string())
-                .collect::<Vec<String>>()
+            &SYMBOLS.iter().map(|s| s.to_string()).collect::<Vec<String>>()
         );
     }
 
@@ -224,10 +177,7 @@ mod deribit_option {
         gen_test_code!(
             DeribitWSClient,
             subscribe_bbo,
-            &SYMBOLS
-                .iter()
-                .map(|s| s.to_string())
-                .collect::<Vec<String>>()
+            &SYMBOLS.iter().map(|s| s.to_string()).collect::<Vec<String>>()
         );
     }
 

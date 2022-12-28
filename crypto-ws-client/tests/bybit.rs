@@ -25,29 +25,17 @@ mod bybit_inverse_future {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            BybitInverseWSClient,
-            subscribe_trade,
-            &["BTCUSDZ22".to_string()]
-        );
+        gen_test_code!(BybitInverseWSClient, subscribe_trade, &["BTCUSDZ22".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            BybitInverseWSClient,
-            subscribe_orderbook,
-            &["BTCUSDZ22".to_string()]
-        );
+        gen_test_code!(BybitInverseWSClient, subscribe_orderbook, &["BTCUSDZ22".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            BybitInverseWSClient,
-            subscribe_ticker,
-            &["BTCUSDZ22".to_string()]
-        );
+        gen_test_code!(BybitInverseWSClient, subscribe_ticker, &["BTCUSDZ22".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -84,29 +72,17 @@ mod bybit_inverse_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            BybitInverseWSClient,
-            subscribe_trade,
-            &["BTCUSD".to_string()]
-        );
+        gen_test_code!(BybitInverseWSClient, subscribe_trade, &["BTCUSD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            BybitInverseWSClient,
-            subscribe_orderbook,
-            &["BTCUSD".to_string()]
-        );
+        gen_test_code!(BybitInverseWSClient, subscribe_orderbook, &["BTCUSD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            BybitInverseWSClient,
-            subscribe_ticker,
-            &["BTCUSD".to_string()]
-        );
+        gen_test_code!(BybitInverseWSClient, subscribe_ticker, &["BTCUSD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -122,29 +98,17 @@ mod bybit_linear_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            BybitLinearSwapWSClient,
-            subscribe_trade,
-            &["BTCUSDT".to_string()]
-        );
+        gen_test_code!(BybitLinearSwapWSClient, subscribe_trade, &["BTCUSDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            BybitLinearSwapWSClient,
-            subscribe_orderbook,
-            &["BTCUSDT".to_string()]
-        );
+        gen_test_code!(BybitLinearSwapWSClient, subscribe_orderbook, &["BTCUSDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            BybitLinearSwapWSClient,
-            subscribe_ticker,
-            &["BTCUSDT".to_string()]
-        );
+        gen_test_code!(BybitLinearSwapWSClient, subscribe_ticker, &["BTCUSDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]

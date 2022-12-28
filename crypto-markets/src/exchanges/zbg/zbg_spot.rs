@@ -48,11 +48,8 @@ fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
     if resp.resMsg.code != "1" {
         Err(Error(txt))
     } else {
-        let valid: Vec<SpotMarket> = resp
-            .datas
-            .into_iter()
-            .filter(|x| x.state == "online")
-            .collect();
+        let valid: Vec<SpotMarket> =
+            resp.datas.into_iter().filter(|x| x.state == "online").collect();
         Ok(valid)
     }
 }
@@ -67,11 +64,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
     let markets: Vec<Market> = fetch_spot_markets_raw()?
         .into_iter()
         .map(|m| {
-            let info = serde_json::to_value(&m)
-                .unwrap()
-                .as_object()
-                .unwrap()
-                .clone();
+            let info = serde_json::to_value(&m).unwrap().as_object().unwrap().clone();
             let pair = crypto_pair::normalize_pair(&m.symbol, "zbg").unwrap();
             let (base, quote) = {
                 let v: Vec<&str> = pair.split('/').collect();
@@ -90,10 +83,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
                 active: m.state == "online",
                 margin: false,
                 // TODO: need to find zbg spot fees
-                fees: Fees {
-                    maker: 0.002,
-                    taker: 0.002,
-                },
+                fees: Fees { maker: 0.002, taker: 0.002 },
                 precision: Precision {
                     tick_size: 1.0 / (10_i64.pow(m.price_precision as u32) as f64),
                     lot_size: 1.0 / (10_i64.pow(m.amount_precision as u32) as f64),

@@ -22,7 +22,8 @@ const WEBSOCKET_URL: &str = "wss://kline.zbg.com/exchange/v1/futurews";
 
 /// The WebSocket client for ZBG swap market.
 ///
-/// * WebSocket API doc: <https://www.zbgpro.com/docs/future/v1/cn/#300f34d976>, there is no English doc
+/// * WebSocket API doc: <https://www.zbgpro.com/docs/future/v1/cn/#300f34d976>,
+///   there is no English doc
 /// * Trading at: <https://futures.zbg.com/>
 pub struct ZbgSwapWSClient {
     client: WSClientInternal<ZbgMessageHandler>,
@@ -89,15 +90,11 @@ impl ZbgCommandTranslator {
     }
 
     fn to_candlestick_raw_channel(&self, pair: &str, interval: usize) -> String {
-        let valid_set: Vec<usize> = vec![
-            60, 180, 300, 900, 1800, 3600, 7200, 14400, 21600, 43200, 86400, 604800,
-        ];
+        let valid_set: Vec<usize> =
+            vec![60, 180, 300, 900, 1800, 3600, 7200, 14400, 21600, 43200, 86400, 604800];
         if !valid_set.contains(&interval) {
-            let joined = valid_set
-                .into_iter()
-                .map(|x| x.to_string())
-                .collect::<Vec<String>>()
-                .join(",");
+            let joined =
+                valid_set.into_iter().map(|x| x.to_string()).collect::<Vec<String>>().join(",");
             panic!("ZBG Swap available intervals {}", joined);
         }
 
@@ -153,10 +150,7 @@ mod tests {
             .translate_to_commands(true, &[("future_tick".to_string(), "BTC_USDT".to_string())]);
 
         assert_eq!(1, commands.len());
-        assert_eq!(
-            r#"{"action":"sub", "topic":"future_tick-1000000"}"#,
-            commands[0]
-        );
+        assert_eq!(r#"{"action":"sub", "topic":"future_tick-1000000"}"#, commands[0]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -171,14 +165,8 @@ mod tests {
         );
 
         assert_eq!(2, commands.len());
-        assert_eq!(
-            r#"{"action":"sub", "topic":"future_tick-1000000"}"#,
-            commands[0]
-        );
-        assert_eq!(
-            r#"{"action":"sub", "topic":"future_snapshot_depth-1000002"}"#,
-            commands[1]
-        );
+        assert_eq!(r#"{"action":"sub", "topic":"future_tick-1000000"}"#, commands[0]);
+        assert_eq!(r#"{"action":"sub", "topic":"future_snapshot_depth-1000002"}"#, commands[1]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -188,9 +176,6 @@ mod tests {
             translator.translate_to_candlestick_commands(true, &[("BTC_USDT".to_string(), 60)]);
 
         assert_eq!(1, commands.len());
-        assert_eq!(
-            r#"{"action":"sub", "topic":"future_kline-1000000-60000"}"#,
-            commands[0]
-        );
+        assert_eq!(r#"{"action":"sub", "topic":"future_kline-1000000-60000"}"#, commands[0]);
     }
 }

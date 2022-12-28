@@ -40,14 +40,7 @@ pub(crate) async fn crawl_l2_event(
         | MarketType::LinearSwap
         | MarketType::InverseSwap
         | MarketType::EuropeanOption => {
-            crawl_event(
-                EXCHANGE_NAME,
-                MessageType::L2Event,
-                market_type,
-                symbols,
-                tx,
-            )
-            .await
+            crawl_event(EXCHANGE_NAME, MessageType::L2Event, market_type, symbols, tx).await
         }
         _ => panic!("Huobi does NOT have the {} market type", market_type),
     }

@@ -25,10 +25,8 @@ pub(crate) async fn crawl_funding_rate(
     } else {
         symbols.unwrap().to_vec()
     };
-    let topics: Vec<(String, String)> = symbols
-        .into_iter()
-        .map(|symbol| ("funding-rate".to_string(), symbol))
-        .collect();
+    let topics: Vec<(String, String)> =
+        symbols.into_iter().map(|symbol| ("funding-rate".to_string(), symbol)).collect();
 
     match market_type {
         MarketType::InverseSwap | MarketType::LinearSwap => {
@@ -41,10 +39,7 @@ pub(crate) async fn crawl_funding_rate(
     }
 }
 
-#[deprecated(
-    since = "4.1.2",
-    note = "OKX open interest is fetched via HTTP for now"
-)]
+#[deprecated(since = "4.1.2", note = "OKX open interest is fetched via HTTP for now")]
 #[allow(dead_code)]
 pub(crate) async fn crawl_open_interest(
     market_type: MarketType,
@@ -67,10 +62,8 @@ pub(crate) async fn crawl_open_interest(
     } else {
         tokio::task::block_in_place(move || fetch_symbols_retry(EXCHANGE_NAME, market_type))
     };
-    let topics: Vec<(String, String)> = symbols
-        .into_iter()
-        .map(|symbol| ("open-interest".to_string(), symbol))
-        .collect();
+    let topics: Vec<(String, String)> =
+        symbols.into_iter().map(|symbol| ("open-interest".to_string(), symbol)).collect();
 
     if market_type != MarketType::Spot {
         let ws_client = OkxWSClient::new(tx, None).await;

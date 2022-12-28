@@ -99,11 +99,7 @@ impl CommandTranslator for FtxCommandTranslator {
             .map(|(channel, symbol)| {
                 format!(
                     r#"{{"op":"{}","channel":"{}","market":"{}"}}"#,
-                    if subscribe {
-                        "subscribe"
-                    } else {
-                        "unsubscribe"
-                    },
+                    if subscribe { "subscribe" } else { "unsubscribe" },
                     channel,
                     symbol
                 )
@@ -131,10 +127,7 @@ mod tests {
             .translate_to_commands(true, &[("trades".to_string(), "BTC/USD".to_string())]);
 
         assert_eq!(1, commands.len());
-        assert_eq!(
-            r#"{"op":"subscribe","channel":"trades","market":"BTC/USD"}"#,
-            commands[0]
-        );
+        assert_eq!(r#"{"op":"subscribe","channel":"trades","market":"BTC/USD"}"#, commands[0]);
     }
 
     #[test]
@@ -149,13 +142,7 @@ mod tests {
         );
 
         assert_eq!(2, commands.len());
-        assert_eq!(
-            r#"{"op":"subscribe","channel":"trades","market":"BTC/USD"}"#,
-            commands[0]
-        );
-        assert_eq!(
-            r#"{"op":"subscribe","channel":"orderbook","market":"BTC/USD"}"#,
-            commands[1]
-        );
+        assert_eq!(r#"{"op":"subscribe","channel":"trades","market":"BTC/USD"}"#, commands[0]);
+        assert_eq!(r#"{"op":"subscribe","channel":"orderbook","market":"BTC/USD"}"#, commands[1]);
     }
 }

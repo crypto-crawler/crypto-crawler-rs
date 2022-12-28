@@ -17,10 +17,7 @@ pub struct GateSwapRestClient {
 
 impl GateSwapRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        GateSwapRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        GateSwapRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get the latest Level2 snapshot of orderbook.
@@ -39,10 +36,7 @@ impl GateSwapRestClient {
         } else {
             panic!("Unknown symbol {}", symbol);
         };
-        gen_api!(format!(
-            "/futures/{}/order_book?contract={}&limit=200",
-            settle, symbol
-        ))
+        gen_api!(format!("/futures/{}/order_book?contract={}&limit=200", settle, symbol))
     }
 
     /// Get open interest.
@@ -58,9 +52,6 @@ impl GateSwapRestClient {
         } else {
             panic!("Unknown symbol {}", symbol);
         };
-        gen_api!(format!(
-            "/futures/{}/contract_stats?contract={}&interval=5m",
-            settle, symbol
-        ))
+        gen_api!(format!("/futures/{}/contract_stats?contract={}&interval=5m", settle, symbol))
     }
 }

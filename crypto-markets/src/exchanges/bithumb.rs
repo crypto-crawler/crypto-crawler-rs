@@ -75,24 +75,14 @@ struct Response {
 
 // see https://github.com/bithumb-pro/bithumb.pro-official-api-docs/blob/master/rest-api.md#2-config-detail
 fn fetch_spot_coing() -> Result<Data> {
-    let txt = http_get(
-        "https://global-openapi.bithumb.pro/openapi/v1/spot/config",
-        None,
-    )?;
+    let txt = http_get("https://global-openapi.bithumb.pro/openapi/v1/spot/config", None)?;
     let resp = serde_json::from_str::<Response>(&txt)?;
-    if resp.code != "0" {
-        Err(Error(txt))
-    } else {
-        Ok(resp.data)
-    }
+    if resp.code != "0" { Err(Error(txt)) } else { Ok(resp.data) }
 }
 
 fn fetch_spot_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_spot_coing()?
-        .spotConfig
-        .into_iter()
-        .map(|m| m.symbol)
-        .collect::<Vec<String>>();
+    let symbols =
+        fetch_spot_coing()?.spotConfig.into_iter().map(|m| m.symbol).collect::<Vec<String>>();
     Ok(symbols)
 }
 
@@ -101,11 +91,7 @@ fn fetch_spot_markets() -> Result<Vec<Market>> {
         .spotConfig
         .into_iter()
         .map(|m| {
-            let info = serde_json::to_value(&m)
-                .unwrap()
-                .as_object()
-                .unwrap()
-                .clone();
+            let info = serde_json::to_value(&m).unwrap().as_object().unwrap().clone();
             let pair = crypto_pair::normalize_pair(&m.symbol, "bithumb").unwrap();
             let (base, quote) = {
                 let v: Vec<&str> = pair.split('/').collect();
@@ -128,10 +114,7 @@ fn fetch_spot_markets() -> Result<Vec<Market>> {
                 active: true,
                 margin: false,
                 // see https://www.bitglobal.com/en-us/fee
-                fees: Fees {
-                    maker: 0.001,
-                    taker: 0.001,
-                },
+                fees: Fees { maker: 0.001, taker: 0.001 },
                 precision: Precision {
                     tick_size: 1.0 / (10_i64.pow(m.accuracy[0].parse::<u32>().unwrap()) as f64),
                     lot_size: 1.0 / (10_i64.pow(m.accuracy[1].parse::<u32>().unwrap()) as f64),

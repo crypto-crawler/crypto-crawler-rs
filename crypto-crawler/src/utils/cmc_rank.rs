@@ -270,19 +270,12 @@ pub(crate) static CMC_RANKS: Lazy<HashMap<String, u64>> = Lazy::new(|| {
     .collect();
     let online = get_cmc_ranks(1024);
 
-    if online.is_empty() {
-        offline
-    } else {
-        online
-    }
+    if online.is_empty() { offline } else { online }
 });
 
 fn http_get(url: &str) -> Result<String, reqwest::Error> {
     let mut headers = header::HeaderMap::new();
-    headers.insert(
-        header::CONTENT_TYPE,
-        header::HeaderValue::from_static("application/json"),
-    );
+    headers.insert(header::CONTENT_TYPE, header::HeaderValue::from_static("application/json"));
 
     let client = reqwest::blocking::Client::builder()
          .default_headers(headers)
@@ -300,7 +293,10 @@ fn http_get(url: &str) -> Result<String, reqwest::Error> {
 // Returns a map of coin to cmcRank.
 fn get_cmc_ranks(limit: i64) -> HashMap<String, u64> {
     let mut mapping: HashMap<String, u64> = HashMap::new();
-    let url = format!("https://api.coinmarketcap.com/data-api/v3/cryptocurrency/listing?start=1&limit={}&sortBy=market_cap&sortType=desc&convert=USD&cryptoType=all&tagType=all&audited=false", limit);
+    let url = format!(
+        "https://api.coinmarketcap.com/data-api/v3/cryptocurrency/listing?start=1&limit={}&sortBy=market_cap&sortType=desc&convert=USD&cryptoType=all&tagType=all&audited=false",
+        limit
+    );
     if let Ok(txt) = http_get(&url) {
         if let Ok(json_obj) = serde_json::from_str::<HashMap<String, Value>>(&txt) {
             if let Some(data) = json_obj.get("data") {

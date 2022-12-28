@@ -14,11 +14,7 @@ fn msg_type_to_channel(msg_type: MessageType) -> &'static str {
 fn channel_symbol_to_command(channel: &str, symbol: &str, subscribe: bool) -> String {
     format!(
         r#"{{"op":"{}","channel":"{}","market":"{}"}}"#,
-        if subscribe {
-            "subscribe"
-        } else {
-            "unsubscribe"
-        },
+        if subscribe { "subscribe" } else { "unsubscribe" },
         channel,
         symbol,
     )
@@ -34,9 +30,7 @@ pub(crate) fn get_ws_commands(
         .iter()
         .map(|msg_type| msg_type_to_channel(*msg_type))
         .flat_map(|channel| {
-            symbols
-                .iter()
-                .map(|symbol| channel_symbol_to_command(channel, symbol, subscribe))
+            symbols.iter().map(|symbol| channel_symbol_to_command(channel, symbol, subscribe))
         })
         .collect::<Vec<String>>()
 }
@@ -55,14 +49,8 @@ mod tests {
         );
         assert_eq!(commands.len(), 2);
         println!("{}", commands[0]);
-        assert_eq!(
-            r#"{"op":"subscribe","channel":"trades","market":"BTC/USD"}"#,
-            commands[0]
-        );
-        assert_eq!(
-            r#"{"op":"subscribe","channel":"trades","market":"BTC-PERP"}"#,
-            commands[1]
-        );
+        assert_eq!(r#"{"op":"subscribe","channel":"trades","market":"BTC/USD"}"#, commands[0]);
+        assert_eq!(r#"{"op":"subscribe","channel":"trades","market":"BTC-PERP"}"#, commands[1]);
     }
 
     #[test]
@@ -74,13 +62,7 @@ mod tests {
             None,
         );
         assert_eq!(commands.len(), 2);
-        assert_eq!(
-            r#"{"op":"subscribe","channel":"trades","market":"BTC-PERP"}"#,
-            commands[0]
-        );
-        assert_eq!(
-            r#"{"op":"subscribe","channel":"orderbook","market":"BTC-PERP"}"#,
-            commands[1]
-        );
+        assert_eq!(r#"{"op":"subscribe","channel":"trades","market":"BTC-PERP"}"#, commands[0]);
+        assert_eq!(r#"{"op":"subscribe","channel":"orderbook","market":"BTC-PERP"}"#, commands[1]);
     }
 }

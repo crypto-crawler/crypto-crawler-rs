@@ -31,18 +31,11 @@ struct Response {
 fn fetch_spot_markets_raw() -> Result<Vec<SpotMarket>> {
     let txt = mexc_http_get("https://www.mexc.com/open/api/v2/market/symbols")?;
     let resp = serde_json::from_str::<Response>(&txt)?;
-    Ok(resp
-        .data
-        .into_iter()
-        .filter(|m| m.state == "ENABLED" && !m.limited)
-        .collect())
+    Ok(resp.data.into_iter().filter(|m| m.state == "ENABLED" && !m.limited).collect())
 }
 
 pub(super) fn fetch_spot_symbols() -> Result<Vec<String>> {
-    let symbols = fetch_spot_markets_raw()?
-        .into_iter()
-        .map(|m| m.symbol)
-        .collect::<Vec<String>>();
+    let symbols = fetch_spot_markets_raw()?.into_iter().map(|m| m.symbol).collect::<Vec<String>>();
     Ok(symbols)
 }
 
@@ -50,11 +43,7 @@ pub(super) fn fetch_spot_markets() -> Result<Vec<Market>> {
     let markets = fetch_spot_markets_raw()?
         .into_iter()
         .map(|m| {
-            let info = serde_json::to_value(&m)
-                .unwrap()
-                .as_object()
-                .unwrap()
-                .clone();
+            let info = serde_json::to_value(&m).unwrap().as_object().unwrap().clone();
             let pair = crypto_pair::normalize_pair(&m.symbol, super::EXCHANGE_NAME).unwrap();
             let (base, quote) = {
                 let v: Vec<&str> = pair.split('/').collect();

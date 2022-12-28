@@ -227,8 +227,9 @@ pub use utils::get_hot_spot_symbols;
 
 /// Crawl realtime trades.
 ///
-/// If `symbols` is None or empty, this API will crawl realtime trades for all symbols in the `market_type`
-/// market, and launch a thread to discover new symbols every hour. And so forth for all other APIs.
+/// If `symbols` is None or empty, this API will crawl realtime trades for all
+/// symbols in the `market_type` market, and launch a thread to discover new
+/// symbols every hour. And so forth for all other APIs.
 pub async fn crawl_trade(
     exchange: &str,
     market_type: MarketType,
@@ -263,10 +264,7 @@ pub async fn crawl_l2_event(
         | "okx" | "zb" | "zbg" => {
             crawlers::crawl_event(exchange, MessageType::L2Event, market_type, symbols, tx).await
         }
-        _ => panic!(
-            "{} does NOT have the incremental level2 websocket channel",
-            exchange
-        ),
+        _ => panic!("{} does NOT have the incremental level2 websocket channel", exchange),
     }
 }
 
@@ -281,10 +279,7 @@ pub async fn crawl_l3_event(
         "bitfinex" | "bitstamp" | "coinbase_pro" | "kucoin" => {
             crawlers::crawl_event(exchange, MessageType::L3Event, market_type, symbols, tx).await
         }
-        _ => panic!(
-            "{} does NOT have the incremental level3 websocket channel",
-            exchange
-        ),
+        _ => panic!("{} does NOT have the incremental level3 websocket channel", exchange),
     }
 }
 
@@ -329,10 +324,7 @@ pub async fn crawl_l2_topk(
         | "mexc" | "okx" | "zb" => {
             crawlers::crawl_event(exchange, MessageType::L2TopK, market_type, symbols, tx).await
         }
-        _ => panic!(
-            "{} does NOT have the level2 top-k snapshot websocket channel",
-            exchange
-        ),
+        _ => panic!("{} does NOT have the level2 top-k snapshot websocket channel", exchange),
     }
 }
 
@@ -386,8 +378,8 @@ pub async fn crawl_funding_rate(
 
 /// Crawl candlestick(i.e., OHLCV) data.
 ///
-/// If `symbol_interval_list` is None or empty, this API will crawl candlesticks from
-/// 10 seconds to 3 minutes(if available) for all symbols.
+/// If `symbol_interval_list` is None or empty, this API will crawl candlesticks
+/// from 10 seconds to 3 minutes(if available) for all symbols.
 pub async fn crawl_candlestick(
     exchange: &str,
     market_type: MarketType,
@@ -402,10 +394,7 @@ pub async fn crawl_candlestick(
         | "kraken" | "kucoin" | "mexc" | "okx" | "zb" | "zbg" => {
             crawlers::crawl_candlestick_ext(exchange, market_type, symbol_interval_list, tx).await
         }
-        _ => panic!(
-            "{} does NOT have the candlestick websocket channel",
-            exchange
-        ),
+        _ => panic!("{} does NOT have the candlestick websocket channel", exchange),
     };
 }
 

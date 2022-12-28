@@ -61,11 +61,7 @@ fn fetch_spot_markets() -> Result<Vec<Market>> {
     let markets = fetch_spot_markets_raw()?
         .into_iter()
         .map(|m| {
-            let info = serde_json::to_value(&m)
-                .unwrap()
-                .as_object()
-                .unwrap()
-                .clone();
+            let info = serde_json::to_value(&m).unwrap().as_object().unwrap().clone();
             let pair = crypto_pair::normalize_pair(&m.id, "coinbase_pro").unwrap();
             let (base, quote) = {
                 let v: Vec<&str> = pair.split('/').collect();
@@ -84,10 +80,7 @@ fn fetch_spot_markets() -> Result<Vec<Market>> {
                 active: !m.trading_disabled && m.status == "online" && !m.cancel_only,
                 margin: m.margin_enabled,
                 // // see https://pro.coinbase.com/fees, https://pro.coinbase.com/orders/fees
-                fees: Fees {
-                    maker: 0.005,
-                    taker: 0.005,
-                },
+                fees: Fees { maker: 0.005, taker: 0.005 },
                 precision: Precision {
                     tick_size: m.quote_increment.parse::<f64>().unwrap(),
                     lot_size: m.base_increment.parse::<f64>().unwrap(),

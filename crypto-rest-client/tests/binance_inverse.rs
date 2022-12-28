@@ -39,13 +39,9 @@ mod inverse_future {
 
     #[test]
     fn test_l2_snapshot() {
-        let text = fetch_l2_snapshot(
-            "binance",
-            MarketType::InverseFuture,
-            "BTCUSD_221230",
-            Some(3),
-        )
-        .unwrap();
+        let text =
+            fetch_l2_snapshot("binance", MarketType::InverseFuture, "BTCUSD_221230", Some(3))
+                .unwrap();
         assert!(text.starts_with('{'));
     }
 

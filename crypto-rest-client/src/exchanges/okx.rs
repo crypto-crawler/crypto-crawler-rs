@@ -23,10 +23,7 @@ pub struct OkxRestClient {
 
 impl OkxRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        OkxRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        OkxRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get most recent trades.
@@ -58,13 +55,9 @@ impl OkxRestClient {
             &BTreeMap::new(),
         )?;
         let json_obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();
-        let data = json_obj.get("data").unwrap().as_array().unwrap()[0]
-            .as_array()
-            .unwrap();
-        let underlying_indexes = data
-            .iter()
-            .map(|x| x.as_str().unwrap().to_string())
-            .collect::<Vec<String>>();
+        let data = json_obj.get("data").unwrap().as_array().unwrap()[0].as_array().unwrap();
+        let underlying_indexes =
+            data.iter().map(|x| x.as_str().unwrap().to_string()).collect::<Vec<String>>();
         Ok(underlying_indexes)
     }
 
@@ -90,10 +83,7 @@ impl OkxRestClient {
                 inst_type, inst_id,
             ))
         } else {
-            gen_api!(format!(
-                "/api/v5/public/open-interest?instType={}",
-                inst_type
-            ))
+            gen_api!(format!("/api/v5/public/open-interest?instType={}", inst_type))
         }
     }
 }

@@ -30,11 +30,7 @@ mod huobi_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            HuobiSpotWSClient,
-            subscribe_ticker,
-            &["btcusdt".to_string()]
-        );
+        gen_test_code!(HuobiSpotWSClient, subscribe_ticker, &["btcusdt".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -47,26 +43,18 @@ mod huobi_spot {
         let (tx, rx) = std::sync::mpsc::channel();
         tokio::task::spawn(async move {
             let ws_client = HuobiSpotWSClient::new(tx, Some("wss://api.huobi.pro/feed")).await;
-            ws_client
-                .subscribe_orderbook(&["btcusdt".to_string()])
-                .await;
+            ws_client.subscribe_orderbook(&["btcusdt".to_string()]).await;
             // run for 60 seconds at most
             let _ = tokio::time::timeout(std::time::Duration::from_secs(60), ws_client.run()).await;
             ws_client.close();
         });
 
-        rx.into_iter()
-            .next()
-            .expect("should has at least 1 element");
+        rx.into_iter().next().expect("should has at least 1 element");
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            HuobiSpotWSClient,
-            subscribe_orderbook_topk,
-            &["btcusdt".to_string()]
-        );
+        gen_test_code!(HuobiSpotWSClient, subscribe_orderbook_topk, &["btcusdt".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -91,20 +79,12 @@ mod huobi_inverse_future {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            HuobiFutureWSClient,
-            subscribe_trade,
-            &["BTC_CQ".to_string()]
-        );
+        gen_test_code!(HuobiFutureWSClient, subscribe_trade, &["BTC_CQ".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            HuobiFutureWSClient,
-            subscribe_ticker,
-            &["BTC_CQ".to_string()]
-        );
+        gen_test_code!(HuobiFutureWSClient, subscribe_ticker, &["BTC_CQ".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -114,20 +94,12 @@ mod huobi_inverse_future {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            HuobiFutureWSClient,
-            subscribe_orderbook,
-            &["BTC_CQ".to_string()]
-        );
+        gen_test_code!(HuobiFutureWSClient, subscribe_orderbook, &["BTC_CQ".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            HuobiFutureWSClient,
-            subscribe_orderbook_topk,
-            &["BTC_CQ".to_string()]
-        );
+        gen_test_code!(HuobiFutureWSClient, subscribe_orderbook_topk, &["BTC_CQ".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -152,38 +124,22 @@ mod huobi_linear_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            HuobiLinearSwapWSClient,
-            subscribe_trade,
-            &["BTC-USDT".to_string()]
-        );
+        gen_test_code!(HuobiLinearSwapWSClient, subscribe_trade, &["BTC-USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            HuobiLinearSwapWSClient,
-            subscribe_ticker,
-            &["BTC-USDT".to_string()]
-        );
+        gen_test_code!(HuobiLinearSwapWSClient, subscribe_ticker, &["BTC-USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(
-            HuobiLinearSwapWSClient,
-            subscribe_bbo,
-            &["BTC-USDT".to_string()]
-        );
+        gen_test_code!(HuobiLinearSwapWSClient, subscribe_bbo, &["BTC-USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            HuobiLinearSwapWSClient,
-            subscribe_orderbook,
-            &["BTC-USDT".to_string()]
-        );
+        gen_test_code!(HuobiLinearSwapWSClient, subscribe_orderbook, &["BTC-USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -221,9 +177,7 @@ mod huobi_linear_swap {
             ws_client.close();
         });
 
-        rx.into_iter()
-            .next()
-            .expect("should has at least 1 element");
+        rx.into_iter().next().expect("should has at least 1 element");
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -235,17 +189,13 @@ mod huobi_linear_swap {
                 Some("wss://api.hbdm.com/linear-swap-notification"),
             )
             .await;
-            ws_client
-                .send(&[r#"{"topic":"public.*.funding_rate","op":"sub"}"#.to_string()])
-                .await;
+            ws_client.send(&[r#"{"topic":"public.*.funding_rate","op":"sub"}"#.to_string()]).await;
             // run for 60 seconds at most
             let _ = tokio::time::timeout(std::time::Duration::from_secs(60), ws_client.run()).await;
             ws_client.close();
         });
 
-        rx.into_iter()
-            .next()
-            .expect("should has at least 1 element");
+        rx.into_iter().next().expect("should has at least 1 element");
     }
 }
 
@@ -264,38 +214,22 @@ mod huobi_inverse_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_trade() {
-        gen_test_code!(
-            HuobiInverseSwapWSClient,
-            subscribe_trade,
-            &["BTC-USD".to_string()]
-        );
+        gen_test_code!(HuobiInverseSwapWSClient, subscribe_trade, &["BTC-USD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            HuobiInverseSwapWSClient,
-            subscribe_ticker,
-            &["BTC-USD".to_string()]
-        );
+        gen_test_code!(HuobiInverseSwapWSClient, subscribe_ticker, &["BTC-USD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_bbo() {
-        gen_test_code!(
-            HuobiInverseSwapWSClient,
-            subscribe_bbo,
-            &["BTC-USD".to_string()]
-        );
+        gen_test_code!(HuobiInverseSwapWSClient, subscribe_bbo, &["BTC-USD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            HuobiInverseSwapWSClient,
-            subscribe_orderbook,
-            &["BTC-USD".to_string()]
-        );
+        gen_test_code!(HuobiInverseSwapWSClient, subscribe_orderbook, &["BTC-USD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -331,9 +265,7 @@ mod huobi_inverse_swap {
             ws_client.close();
         });
 
-        rx.into_iter()
-            .next()
-            .expect("should has at least 1 element");
+        rx.into_iter().next().expect("should has at least 1 element");
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -343,17 +275,13 @@ mod huobi_inverse_swap {
             let ws_client =
                 HuobiInverseSwapWSClient::new(tx, Some("wss://api.hbdm.com/swap-notification"))
                     .await;
-            ws_client
-                .send(&[r#"{"topic":"public.*.funding_rate","op":"sub"}"#.to_string()])
-                .await;
+            ws_client.send(&[r#"{"topic":"public.*.funding_rate","op":"sub"}"#.to_string()]).await;
             // run for 60 seconds at most
             let _ = tokio::time::timeout(std::time::Duration::from_secs(60), ws_client.run()).await;
             ws_client.close();
         });
 
-        rx.into_iter()
-            .next()
-            .expect("should has at least 1 element");
+        rx.into_iter().next().expect("should has at least 1 element");
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -376,10 +304,7 @@ mod huobi_option {
         gen_test_code!(
             HuobiOptionWSClient,
             subscribe,
-            &[(
-                "trade.detail".to_string(),
-                "BTC-USDT-210625-P-27000".to_string()
-            )]
+            &[("trade.detail".to_string(), "BTC-USDT-210625-P-27000".to_string())]
         );
     }
 

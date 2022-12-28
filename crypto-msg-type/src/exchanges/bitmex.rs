@@ -19,11 +19,7 @@ fn channel_symbol_to_topic(
     configs: Option<&HashMap<String, String>>,
 ) -> String {
     if channel == "tradeBin" {
-        format!(
-            "tradeBin{}:{}",
-            configs.unwrap().get("interval").unwrap(),
-            symbol
-        )
+        format!("tradeBin{}:{}", configs.unwrap().get("interval").unwrap(), symbol)
     } else {
         format!("{}:{}", channel, symbol)
     }
@@ -32,11 +28,7 @@ fn channel_symbol_to_topic(
 fn topics_to_command(topics: &[String], subscribe: bool) -> String {
     format!(
         r#"{{"op":"{}", "args":{}}}"#,
-        if subscribe {
-            "subscribe"
-        } else {
-            "unsubscribe"
-        },
+        if subscribe { "subscribe" } else { "unsubscribe" },
         serde_json::to_string(&topics).unwrap()
     )
 }
@@ -51,9 +43,7 @@ pub(crate) fn get_ws_commands(
         .iter()
         .map(|msg_type| msg_type_to_channel(*msg_type))
         .flat_map(|channel| {
-            symbols
-                .iter()
-                .map(|symbol| channel_symbol_to_topic(channel, symbol, configs))
+            symbols.iter().map(|symbol| channel_symbol_to_topic(channel, symbol, configs))
         })
         .collect::<Vec<String>>();
     vec![topics_to_command(&topics, subscribe)]
@@ -72,10 +62,7 @@ mod tests {
             None,
         );
         assert_eq!(commands.len(), 1);
-        assert_eq!(
-            r#"{"op":"subscribe", "args":["trade:XBTUSD","trade:ETHUSD"]}"#,
-            commands[0]
-        );
+        assert_eq!(r#"{"op":"subscribe", "args":["trade:XBTUSD","trade:ETHUSD"]}"#, commands[0]);
     }
 
     #[test]

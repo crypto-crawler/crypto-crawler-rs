@@ -20,10 +20,7 @@ fn fetch_spot_symbols() {
     for symbol in symbols.iter() {
         assert!(symbol.contains('/'));
         assert_eq!(*symbol, symbol.to_uppercase());
-        assert_eq!(
-            MarketType::Spot,
-            get_market_type(symbol, EXCHANGE_NAME, None)
-        );
+        assert_eq!(MarketType::Spot, get_market_type(symbol, EXCHANGE_NAME, None));
     }
 }
 
@@ -33,10 +30,7 @@ fn fetch_linear_swap_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.ends_with("-PERP"));
-        assert_eq!(
-            MarketType::LinearSwap,
-            get_market_type(symbol, EXCHANGE_NAME, None)
-        );
+        assert_eq!(MarketType::LinearSwap, get_market_type(symbol, EXCHANGE_NAME, None));
     }
 }
 
@@ -47,10 +41,7 @@ fn fetch_linear_future_symbols() {
     for symbol in symbols.iter() {
         let date = &symbol[(symbol.len() - 4)..];
         assert!(date.parse::<i64>().is_ok());
-        assert_eq!(
-            MarketType::LinearFuture,
-            get_market_type(symbol, EXCHANGE_NAME, None)
-        );
+        assert_eq!(MarketType::LinearFuture, get_market_type(symbol, EXCHANGE_NAME, None));
     }
 }
 
@@ -60,10 +51,7 @@ fn fetch_move_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.contains("-MOVE-"));
-        assert_eq!(
-            MarketType::Move,
-            get_market_type(symbol, EXCHANGE_NAME, None)
-        );
+        assert_eq!(MarketType::Move, get_market_type(symbol, EXCHANGE_NAME, None));
     }
 }
 
@@ -73,10 +61,7 @@ fn fetch_bvol_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         assert!(symbol.contains("BVOL/"));
-        assert_eq!(
-            MarketType::BVOL,
-            get_market_type(symbol, EXCHANGE_NAME, None)
-        );
+        assert_eq!(MarketType::BVOL, get_market_type(symbol, EXCHANGE_NAME, None));
     }
 }
 
@@ -85,11 +70,7 @@ fn fetch_spot_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::Spot).unwrap();
     assert!(!markets.is_empty());
 
-    let btcusdt = markets
-        .iter()
-        .find(|m| m.symbol == "BTC/USDT")
-        .unwrap()
-        .clone();
+    let btcusdt = markets.iter().find(|m| m.symbol == "BTC/USDT").unwrap().clone();
     assert!(btcusdt.contract_value.is_none());
     assert_eq!(btcusdt.precision.tick_size, 1.0);
     assert_eq!(btcusdt.precision.lot_size, 0.0001);
@@ -101,11 +82,7 @@ fn fetch_linear_swap_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
     assert!(!markets.is_empty());
 
-    let btcusd = markets
-        .iter()
-        .find(|m| m.symbol == "BTC-PERP")
-        .unwrap()
-        .clone();
+    let btcusd = markets.iter().find(|m| m.symbol == "BTC-PERP").unwrap().clone();
     assert_eq!(btcusd.contract_value, Some(1.0));
     assert_eq!(btcusd.precision.tick_size, 1.0);
     assert_eq!(btcusd.precision.lot_size, 0.0001);
@@ -117,11 +94,7 @@ fn fetch_linear_future_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearFuture).unwrap();
     assert!(!markets.is_empty());
 
-    let btcusd = markets
-        .iter()
-        .find(|m| m.symbol.starts_with("BTC-"))
-        .unwrap()
-        .clone();
+    let btcusd = markets.iter().find(|m| m.symbol.starts_with("BTC-")).unwrap().clone();
     assert_eq!(btcusd.contract_value, Some(1.0));
     assert_eq!(btcusd.precision.tick_size, 1.0);
     assert_eq!(btcusd.precision.lot_size, 0.0001);
@@ -134,11 +107,7 @@ fn fetch_move_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::Move).unwrap();
     assert!(!markets.is_empty());
 
-    let btcusd = markets
-        .iter()
-        .find(|m| m.symbol.starts_with("BTC-MOVE-"))
-        .unwrap()
-        .clone();
+    let btcusd = markets.iter().find(|m| m.symbol.starts_with("BTC-MOVE-")).unwrap().clone();
     assert_eq!(btcusd.contract_value, Some(1.0));
     assert_eq!(btcusd.precision.tick_size, 1.0);
     assert_eq!(btcusd.precision.lot_size, 0.0001);
@@ -151,11 +120,7 @@ fn fetch_bvol_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::BVOL).unwrap();
     assert!(!markets.is_empty());
 
-    let btcusd = markets
-        .iter()
-        .find(|m| m.symbol == "BVOL/USD")
-        .unwrap()
-        .clone();
+    let btcusd = markets.iter().find(|m| m.symbol == "BVOL/USD").unwrap().clone();
     assert_eq!(btcusd.contract_value, None);
     assert_eq!(btcusd.precision.tick_size, 0.025);
     assert_eq!(btcusd.precision.lot_size, 0.001);

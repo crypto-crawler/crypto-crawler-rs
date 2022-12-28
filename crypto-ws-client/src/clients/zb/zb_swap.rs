@@ -22,7 +22,8 @@ use super::EXCHANGE_NAME;
 
 const WEBSOCKET_URL: &str = "wss://fapi.zb.com/ws/public/v1";
 
-// The default limit for the number of requests for a single interface is 200 times/2s
+// The default limit for the number of requests for a single interface is 200
+// times/2s
 //
 // See https://github.com/ZBFuture/docs/blob/main/API%20V2%20_en.md#14-access-limit-frequency-rules
 const UPLINK_LIMIT: (NonZeroU32, std::time::Duration) =
@@ -118,11 +119,7 @@ impl ZbCommandTranslator {
 
 impl CommandTranslator for ZbCommandTranslator {
     fn translate_to_commands(&self, subscribe: bool, topics: &[(String, String)]) -> Vec<String> {
-        let action = if subscribe {
-            "subscribe"
-        } else {
-            "unsubscribe"
-        };
+        let action = if subscribe { "subscribe" } else { "unsubscribe" };
         topics
             .iter()
             .map(|(channel, symbol)| match channel.as_str() {
@@ -138,10 +135,9 @@ impl CommandTranslator for ZbCommandTranslator {
                     r#"{{"action":"{}", "channel":"{}.{}", "size":10}}"#,
                     action, symbol, channel,
                 ),
-                "Ticker" => format!(
-                    r#"{{"action":"{}", "channel":"{}.{}"}}"#,
-                    action, symbol, channel,
-                ),
+                "Ticker" => {
+                    format!(r#"{{"action":"{}", "channel":"{}.{}"}}"#, action, symbol, channel,)
+                }
                 _ => panic!("Unknown ZB channel {}", channel),
             })
             .collect()
@@ -152,11 +148,7 @@ impl CommandTranslator for ZbCommandTranslator {
         subscribe: bool,
         symbol_interval_list: &[(String, usize)],
     ) -> Vec<String> {
-        let action = if subscribe {
-            "subscribe"
-        } else {
-            "unsubscribe"
-        };
+        let action = if subscribe { "subscribe" } else { "unsubscribe" };
         symbol_interval_list
             .iter()
             .map(|(symbol, interval)| {

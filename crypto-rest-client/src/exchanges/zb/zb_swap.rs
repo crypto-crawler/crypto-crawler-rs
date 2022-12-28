@@ -15,10 +15,7 @@ pub struct ZbSwapRestClient {
 
 impl ZbSwapRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        ZbSwapRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        ZbSwapRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get the latest Level2 snapshot of orderbook.
@@ -30,10 +27,7 @@ impl ZbSwapRestClient {
     /// * <https://fapi.zb.com/qc/api/public/v1/depth?symbol=BTC_QC&size=200>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         if symbol.ends_with("_QC") {
-            gen_api!(format!(
-                "/qc/api/public/v1/depth?symbol={}&size=200",
-                symbol
-            ))
+            gen_api!(format!("/qc/api/public/v1/depth?symbol={}&size=200", symbol))
         } else {
             gen_api!(format!("/api/public/v1/depth?symbol={}&size=200", symbol))
         }

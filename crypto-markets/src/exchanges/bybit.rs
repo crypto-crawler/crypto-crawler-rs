@@ -77,11 +77,7 @@ fn fetch_markets_raw() -> Result<Vec<BybitMarket>> {
     let txt = http_get("https://api.bybit.com/v2/public/symbols", None)?;
     let resp = serde_json::from_str::<Response>(&txt)?;
     assert_eq!(resp.ret_code, 0);
-    Ok(resp
-        .result
-        .into_iter()
-        .filter(|m| m.status == "Trading")
-        .collect())
+    Ok(resp.result.into_iter().filter(|m| m.status == "Trading").collect())
 }
 
 fn fetch_inverse_swap_symbols() -> Result<Vec<String>> {
@@ -119,33 +115,31 @@ fn to_market(raw_market: &BybitMarket) -> Market {
         let v: Vec<&str> = pair.split('/').collect();
         (v[0].to_string(), v[1].to_string())
     };
-    let delivery_date: Option<u64> = if raw_market.name[(raw_market.name.len() - 2)..]
-        .parse::<i64>()
-        .is_ok()
-    {
-        let n = raw_market.alias.len();
-        let s = raw_market.alias.as_str();
-        let month = &s[(n - 4)..(n - 2)];
-        let day = &s[(n - 2)..];
-        let now = Utc::now();
-        let year = Utc::now().year();
-        let delivery_time = DateTime::parse_from_rfc3339(
-            format!("{}-{}-{}T00:00:00+00:00", year, month, day).as_str(),
-        )
-        .unwrap();
-        let delivery_time = if delivery_time > now {
-            delivery_time
-        } else {
-            DateTime::parse_from_rfc3339(
-                format!("{}-{}-{}T00:00:00+00:00", year + 1, month, day).as_str(),
+    let delivery_date: Option<u64> =
+        if raw_market.name[(raw_market.name.len() - 2)..].parse::<i64>().is_ok() {
+            let n = raw_market.alias.len();
+            let s = raw_market.alias.as_str();
+            let month = &s[(n - 4)..(n - 2)];
+            let day = &s[(n - 2)..];
+            let now = Utc::now();
+            let year = Utc::now().year();
+            let delivery_time = DateTime::parse_from_rfc3339(
+                format!("{}-{}-{}T00:00:00+00:00", year, month, day).as_str(),
             )
-            .unwrap()
+            .unwrap();
+            let delivery_time = if delivery_time > now {
+                delivery_time
+            } else {
+                DateTime::parse_from_rfc3339(
+                    format!("{}-{}-{}T00:00:00+00:00", year + 1, month, day).as_str(),
+                )
+                .unwrap()
+            };
+            assert!(delivery_time > now);
+            Some(delivery_time.timestamp_millis() as u64)
+        } else {
+            None
         };
-        assert!(delivery_time > now);
-        Some(delivery_time.timestamp_millis() as u64)
-    } else {
-        None
-    };
     Market {
         exchange: "bybit".to_string(),
         market_type: if raw_market.name != raw_market.alias {
@@ -188,11 +182,7 @@ fn to_market(raw_market: &BybitMarket) -> Market {
         }),
         contract_value: Some(1.0),
         delivery_date,
-        info: serde_json::to_value(raw_market)
-            .unwrap()
-            .as_object()
-            .unwrap()
-            .clone(),
+        info: serde_json::to_value(raw_market).unwrap().as_object().unwrap().clone(),
     }
 }
 

@@ -20,11 +20,7 @@ fn channel_symbol_to_topic(
     configs: Option<&HashMap<String, String>>,
 ) -> String {
     if channel == "kline" {
-        format!(
-            "{}@kline_{}",
-            symbol.to_lowercase(),
-            configs.unwrap().get("interval").unwrap()
-        )
+        format!("{}@kline_{}", symbol.to_lowercase(), configs.unwrap().get("interval").unwrap())
     } else {
         format!("{}@{}", symbol.to_lowercase(), channel)
     }
@@ -32,14 +28,11 @@ fn channel_symbol_to_topic(
 
 fn topics_to_command(topics: &[String], subscribe: bool) -> String {
     // spot requires `id`, otherwise it returns the error:
-    // {"error":{"code":2,"msg":"Invalid request: request ID must be an unsigned integer"}}
+    // {"error":{"code":2,"msg":"Invalid request: request ID must be an unsigned
+    // integer"}}
     format!(
         r#"{{"id":9527, "method":"{}","params":{}}}"#,
-        if subscribe {
-            "SUBSCRIBE"
-        } else {
-            "UNSUBSCRIBE"
-        },
+        if subscribe { "SUBSCRIBE" } else { "UNSUBSCRIBE" },
         serde_json::to_string(topics).unwrap()
     )
 }
@@ -54,9 +47,7 @@ pub(crate) fn get_ws_commands(
         .iter()
         .map(|msg_type| msg_type_to_channel(*msg_type))
         .flat_map(|channel| {
-            symbols
-                .iter()
-                .map(|symbol| channel_symbol_to_topic(channel, symbol, configs))
+            symbols.iter().map(|symbol| channel_symbol_to_topic(channel, symbol, configs))
         })
         .collect::<Vec<String>>();
     vec![topics_to_command(&topics, subscribe)]

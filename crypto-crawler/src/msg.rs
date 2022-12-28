@@ -60,13 +60,10 @@ impl Message {
 
     /// Convert to a TSV string.
     ///
-    /// The `exchange`, `market_type` and `msg_type` fields are not included to save some disk space.
+    /// The `exchange`, `market_type` and `msg_type` fields are not included to
+    /// save some disk space.
     pub fn to_tsv_string(&self) -> String {
-        let symbol = if let Some(symbol) = self.symbol.clone() {
-            symbol
-        } else {
-            "".to_string()
-        };
+        let symbol = if let Some(symbol) = self.symbol.clone() { symbol } else { "".to_string() };
         format!("{}\t{}\t{}", self.received_at, symbol, self.json)
     }
 
@@ -77,11 +74,7 @@ impl Message {
         let market_type = MarketType::from_str(market_type).unwrap();
         let msg_type = MessageType::from_str(msg_type).unwrap();
 
-        let symbol = if v[1].is_empty() {
-            None
-        } else {
-            Some(v[1].to_string())
-        };
+        let symbol = if v[1].is_empty() { None } else { Some(v[1].to_string()) };
 
         Message {
             exchange: exchange.to_string(),

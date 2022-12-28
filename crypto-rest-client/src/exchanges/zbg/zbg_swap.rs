@@ -15,10 +15,7 @@ pub struct ZbgSwapRestClient {
 
 impl ZbgSwapRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        ZbgSwapRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        ZbgSwapRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// Get the latest Level2 snapshot of orderbook.
@@ -27,10 +24,7 @@ impl ZbgSwapRestClient {
     ///
     /// For example: <https://www.zbg.com/exchange/api/v1/future/market/depth?symbol=BTC_USD-R&size=200>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!(
-            "/exchange/api/v1/future/market/depth?symbol={}&size=1000",
-            symbol
-        ))
+        gen_api!(format!("/exchange/api/v1/future/market/depth?symbol={}&size=1000", symbol))
     }
 
     /// Get open interest.
@@ -39,9 +33,6 @@ impl ZbgSwapRestClient {
     ///
     /// - <https://www.zbg.com/exchange/api/v1/future/market/ticker?symbol=BTC_USD-R>
     pub fn fetch_open_interest(symbol: &str) -> Result<String> {
-        gen_api!(format!(
-            "/exchange/api/v1/future/market/ticker?symbol={}",
-            symbol
-        ))
+        gen_api!(format!("/exchange/api/v1/future/market/ticker?symbol={}", symbol))
     }
 }

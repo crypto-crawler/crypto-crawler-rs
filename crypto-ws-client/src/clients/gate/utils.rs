@@ -20,7 +20,8 @@ impl<const MARKET_TYPE: char> MessageHandler for GateMessageHandler<MARKET_TYPE>
         let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
 
         // https://www.gate.io/docs/apiv4/ws/en/#server-response
-        // Null if the server accepts the client request; otherwise, the detailed reason why request is rejected.
+        // Null if the server accepts the client request; otherwise, the detailed reason
+        // why request is rejected.
         let error = match obj.get("error") {
             None => serde_json::Value::Null,
             Some(err) => {
@@ -66,10 +67,7 @@ impl<const MARKET_TYPE: char> MessageHandler for GateMessageHandler<MARKET_TYPE>
         } else {
             // https://www.gate.io/docs/futures/ws/en/#ping-and-pong
             // https://www.gate.io/docs/delivery/ws/en/#ping-and-pong
-            Some((
-                Message::Text(r#"{"channel":"futures.ping"}"#.to_string()),
-                60,
-            ))
+            Some((Message::Text(r#"{"channel":"futures.ping"}"#.to_string()), 60))
         }
     }
 }
@@ -94,11 +92,7 @@ impl<const MARKET_TYPE: char> GateCommandTranslator<MARKET_TYPE> {
                     format!(
                         r#"{{"channel":"{}", "event":"{}", "payload":{}}}"#,
                         channel,
-                        if subscribe {
-                            "subscribe"
-                        } else {
-                            "unsubscribe"
-                        },
+                        if subscribe { "subscribe" } else { "unsubscribe" },
                         if channel.ends_with(".order_book") {
                             if MARKET_TYPE == 'S' {
                                 serde_json::to_string(&[symbol, "20", "1000ms"]).unwrap()
@@ -125,11 +119,7 @@ impl<const MARKET_TYPE: char> GateCommandTranslator<MARKET_TYPE> {
             vec![format!(
                 r#"{{"channel":"{}", "event":"{}", "payload":{}}}"#,
                 channel,
-                if subscribe {
-                    "subscribe"
-                } else {
-                    "unsubscribe"
-                },
+                if subscribe { "subscribe" } else { "unsubscribe" },
                 serde_json::to_string(&symbols).unwrap(),
             )]
         }
@@ -151,16 +141,8 @@ impl<const MARKET_TYPE: char> GateCommandTranslator<MARKET_TYPE> {
         };
         format!(
             r#"{{"channel": "{}.candlesticks", "event": "{}", "payload" : ["{}", "{}"]}}"#,
-            if MARKET_TYPE == 'S' {
-                "spot"
-            } else {
-                "futures"
-            },
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
+            if MARKET_TYPE == 'S' { "spot" } else { "futures" },
+            if subscribe { "subscribe" } else { "unsubscribe" },
             interval_str,
             symbol
         )
@@ -182,9 +164,7 @@ impl<const MARKET_TYPE: char> CommandTranslator for GateCommandTranslator<MARKET
         }
 
         for (channel, symbols) in channel_symbols.iter() {
-            commands.extend(Self::channel_symbols_to_command(
-                channel, symbols, subscribe,
-            ));
+            commands.extend(Self::channel_symbols_to_command(channel, symbols, subscribe));
         }
 
         commands

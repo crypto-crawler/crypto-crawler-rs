@@ -19,11 +19,7 @@ async fn subscribe() {
 #[test]
 #[should_panic]
 fn subscribe_illegal_symbol() {
-    gen_test_code!(
-        BithumbWSClient,
-        subscribe,
-        &[("TRADE".to_string(), "XXX-YYY".to_string())]
-    );
+    gen_test_code!(BithumbWSClient, subscribe, &[("TRADE".to_string(), "XXX-YYY".to_string())]);
 }
 
 #[tokio::test(flavor = "multi_thread")]

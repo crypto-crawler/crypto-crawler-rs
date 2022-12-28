@@ -11,8 +11,10 @@ use strum_macros::{Display, EnumString};
 ///
 /// A market can have margin enabled or disabled.
 ///
-/// * All contract markets are margin enabled, including future, swap and option.
-/// * Most spot markets don't have margin enabled, only a few exchanges have spot market with margin enabled.
+/// * All contract markets are margin enabled, including future, swap and
+///   option.
+/// * Most spot markets don't have margin enabled, only a few exchanges have
+///   spot market with margin enabled.
 ///
 /// ## Linear VS. Inverse
 ///
@@ -61,7 +63,8 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
         "bitfinex" => vec![MarketType::Spot, MarketType::LinearSwap],
         "bitget" => vec![
             MarketType::Spot,
-            MarketType::InverseSwap, // TODO: Bitget's coin-margined swap market is a kind of mixed contract
+            MarketType::InverseSwap, /* TODO: Bitget's coin-margined swap market is a kind of
+                                      * mixed contract */
             MarketType::LinearSwap,
             MarketType::InverseFuture,
         ],
@@ -77,16 +80,8 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::QuantoFuture,
         ],
         "bitstamp" => vec![MarketType::Spot],
-        "bitz" => vec![
-            MarketType::Spot,
-            MarketType::InverseSwap,
-            MarketType::LinearSwap,
-        ],
-        "bybit" => vec![
-            MarketType::InverseSwap,
-            MarketType::LinearSwap,
-            MarketType::InverseFuture,
-        ],
+        "bitz" => vec![MarketType::Spot, MarketType::InverseSwap, MarketType::LinearSwap],
+        "bybit" => vec![MarketType::InverseSwap, MarketType::LinearSwap, MarketType::InverseFuture],
         "coinbase_pro" => vec![MarketType::Spot],
         // Deribit only accepts Bitcoin as funds to deposit.
         "deribit" => vec![
@@ -116,22 +111,14 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::InverseSwap,
             // MarketType::EuropeanOption,
         ],
-        "kraken" => vec![
-            MarketType::Spot,
-            MarketType::InverseFuture,
-            MarketType::InverseSwap,
-        ],
+        "kraken" => vec![MarketType::Spot, MarketType::InverseFuture, MarketType::InverseSwap],
         "kucoin" => vec![
             MarketType::Spot,
             MarketType::LinearSwap,
             MarketType::InverseSwap,
             MarketType::InverseFuture,
         ],
-        "mxc" | "mexc" => vec![
-            MarketType::Spot,
-            MarketType::LinearSwap,
-            MarketType::InverseSwap,
-        ],
+        "mxc" | "mexc" => vec![MarketType::Spot, MarketType::LinearSwap, MarketType::InverseSwap],
         "okex" | "okx" => vec![
             MarketType::Spot,
             MarketType::LinearFuture,
@@ -141,11 +128,7 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
             MarketType::EuropeanOption,
         ],
         "zb" => vec![MarketType::Spot, MarketType::LinearSwap],
-        "zbg" => vec![
-            MarketType::Spot,
-            MarketType::InverseSwap,
-            MarketType::LinearSwap,
-        ],
+        "zbg" => vec![MarketType::Spot, MarketType::InverseSwap, MarketType::LinearSwap],
         _ => panic!("Unknown exchange {}", exchange),
     }
 }

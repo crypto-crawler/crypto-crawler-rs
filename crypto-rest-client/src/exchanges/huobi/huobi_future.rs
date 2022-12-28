@@ -9,7 +9,8 @@ const BASE_URL: &str = "https://api.hbdm.com";
 /// * REST API doc: <https://huobiapi.github.io/docs/dm/v1/en/>
 /// * Trading at: <https://futures.huobi.com/en-us/contract/exchange/>
 /// * Rate Limits: <https://huobiapi.github.io/docs/dm/v1/en/#api-rate-limit-illustration>
-///   * For restful interfaces：all products(futures, coin margined swap, usdt margined swap ) 800 times/second for one IP at most
+///   * For restful interfaces：all products(futures, coin margined swap, usdt
+///     margined swap ) 800 times/second for one IP at most
 pub struct HuobiFutureRestClient {
     _api_key: Option<String>,
     _api_secret: Option<String>,
@@ -32,10 +33,7 @@ impl HuobiFutureRestClient {
     /// For example: <https://api.hbdm.com/api/v1/contract_open_interest?contract_code=BTC211231>
     pub fn fetch_open_interest(symbol: Option<&str>) -> Result<String> {
         if let Some(symbol) = symbol {
-            gen_api!(format!(
-                "/api/v1/contract_open_interest?contract_code={}",
-                symbol
-            ))
+            gen_api!(format!("/api/v1/contract_open_interest?contract_code={}", symbol))
         } else {
             gen_api!("/api/v1/contract_open_interest")
         }

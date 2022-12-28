@@ -30,11 +30,7 @@ mod zbg_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            ZbgSpotWSClient,
-            subscribe_orderbook,
-            &["btc_usdt".to_string()]
-        );
+        gen_test_code!(ZbgSpotWSClient, subscribe_orderbook, &["btc_usdt".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -138,10 +134,7 @@ mod zbg_inverse_swap {
         );
         gen_test_subscribe_candlestick!(
             ZbgSwapWSClient,
-            &[
-                ("BTC_USD-R".to_string(), 604800),
-                ("ETH_USD-R".to_string(), 604800)
-            ]
+            &[("BTC_USD-R".to_string(), 604800), ("ETH_USD-R".to_string(), 604800)]
         );
     }
 }
@@ -225,10 +218,7 @@ mod zbg_linear_swap {
         );
         gen_test_subscribe_candlestick!(
             ZbgSwapWSClient,
-            &[
-                ("BTC_USDT".to_string(), 604800),
-                ("ETH_USDT".to_string(), 604800)
-            ]
+            &[("BTC_USDT".to_string(), 604800), ("ETH_USDT".to_string(), 604800)]
         );
     }
 }

@@ -17,10 +17,7 @@ pub struct BitfinexRestClient {
 
 impl BitfinexRestClient {
     pub fn new(api_key: Option<String>, api_secret: Option<String>) -> Self {
-        BitfinexRestClient {
-            _api_key: api_key,
-            _api_secret: api_secret,
-        }
+        BitfinexRestClient { _api_key: api_key, _api_secret: api_secret }
     }
 
     /// /v2/trades/Symbol/hist
@@ -31,13 +28,7 @@ impl BitfinexRestClient {
         end: Option<u64>,
         sort: Option<i8>,
     ) -> Result<String> {
-        gen_api!(
-            format!("/v2/trades/{}/hist", symbol),
-            limit,
-            start,
-            end,
-            sort
-        )
+        gen_api!(format!("/v2/trades/{}/hist", symbol), limit, start, end, sort)
     }
 
     /// Get a Level2 snapshot of orderbook.

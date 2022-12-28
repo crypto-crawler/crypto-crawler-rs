@@ -45,10 +45,7 @@ fn fetch_markets_raw() -> Result<Vec<PerpetualMarket>> {
 
 pub(super) fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
     let markets = fetch_markets_raw()?;
-    let symbols = markets
-        .into_iter()
-        .map(|m| m.market)
-        .collect::<Vec<String>>();
+    let symbols = markets.into_iter().map(|m| m.market).collect::<Vec<String>>();
     Ok(symbols)
 }
 
@@ -56,11 +53,7 @@ pub(super) fn fetch_linear_swap_markets() -> Result<Vec<Market>> {
     let markets = fetch_markets_raw()?
         .into_iter()
         .map(|m| {
-            let info = serde_json::to_value(&m)
-                .unwrap()
-                .as_object()
-                .unwrap()
-                .clone();
+            let info = serde_json::to_value(&m).unwrap().as_object().unwrap().clone();
             let pair = crypto_pair::normalize_pair(&m.market, "dydx").unwrap();
             let (base, quote) = {
                 let v: Vec<&str> = pair.split('/').collect();
@@ -79,10 +72,7 @@ pub(super) fn fetch_linear_swap_markets() -> Result<Vec<Market>> {
                 active: m.status == "ONLINE",
                 margin: true,
                 // see https://trade.dydx.exchange/portfolio/fees
-                fees: Fees {
-                    maker: 0.0005,
-                    taker: 0.0001,
-                },
+                fees: Fees { maker: 0.0005, taker: 0.0001 },
                 precision: Precision {
                     tick_size: m.tickSize.parse::<f64>().unwrap(),
                     lot_size: m.stepSize.parse::<f64>().unwrap(),

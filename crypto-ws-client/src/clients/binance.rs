@@ -83,9 +83,7 @@ impl<const MARKET_TYPE: char> BinanceWSClient<MARKET_TYPE> {
                 tx,
             )
             .await,
-            translator: BinanceCommandTranslator {
-                market_type: MARKET_TYPE,
-            },
+            translator: BinanceCommandTranslator { market_type: MARKET_TYPE },
         }
     }
 }
@@ -117,10 +115,7 @@ impl<const URL: char> WSClient for BinanceWSClient<URL> {
     }
 
     async fn subscribe_l3_orderbook(&self, _symbols: &[String]) {
-        panic!(
-            "{} does NOT have the level3 websocket channel",
-            EXCHANGE_NAME
-        );
+        panic!("{} does NOT have the level3 websocket channel", EXCHANGE_NAME);
     }
 
     async fn subscribe_ticker(&self, symbols: &[String]) {
@@ -140,9 +135,8 @@ impl<const URL: char> WSClient for BinanceWSClient<URL> {
     }
 
     async fn subscribe_candlestick(&self, symbol_interval_list: &[(String, usize)]) {
-        let commands = self
-            .translator
-            .translate_to_candlestick_commands(true, symbol_interval_list);
+        let commands =
+            self.translator.translate_to_candlestick_commands(true, symbol_interval_list);
         self.client.send(&commands).await;
     }
 
@@ -182,11 +176,7 @@ impl BinanceCommandTranslator {
             .collect::<Vec<String>>();
         format!(
             r#"{{"id":9527,"method":"{}","params":{}}}"#,
-            if subscribe {
-                "SUBSCRIBE"
-            } else {
-                "UNSUBSCRIBE"
-            },
+            if subscribe { "SUBSCRIBE" } else { "UNSUBSCRIBE" },
             serde_json::to_string(&raw_topics).unwrap()
         )
     }
@@ -246,10 +236,10 @@ impl MessageHandler for BinanceMessageHandler {
         // https://binance-docs.github.io/apidocs/spot/en/#websocket-market-streams
         // https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
         // https://binance-docs.github.io/apidocs/delivery/en/#websocket-market-streams
-        // The websocket server will send a ping frame every 3 minutes. If the websocket server
-        // does not receive a pong frame back from the connection within a 10 minute period, the
-        // connection will be disconnected. Unsolicited pong frames are allowed.
-        // Send unsolicited pong frames per 3 minutes
+        // The websocket server will send a ping frame every 3 minutes. If the websocket
+        // server does not receive a pong frame back from the connection within
+        // a 10 minute period, the connection will be disconnected. Unsolicited
+        // pong frames are allowed. Send unsolicited pong frames per 3 minutes
         Some((Message::Pong(Vec::new()), 180))
     }
 }

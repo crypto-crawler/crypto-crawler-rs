@@ -36,11 +36,7 @@ mod mexc_spot {
         gen_test_code!(
             MexcSpotWSClient,
             subscribe_trade,
-            &[
-                "BTC_USDT".to_string(),
-                "ETH_USDT".to_string(),
-                "MX_USDT".to_string()
-            ]
+            &["BTC_USDT".to_string(), "ETH_USDT".to_string(), "MX_USDT".to_string()]
         );
     }
 
@@ -49,21 +45,13 @@ mod mexc_spot {
         gen_test_code!(
             MexcSpotWSClient,
             subscribe_orderbook,
-            &[
-                "BTC_USDT".to_string(),
-                "ETH_USDT".to_string(),
-                "MX_USDT".to_string()
-            ]
+            &["BTC_USDT".to_string(), "ETH_USDT".to_string(), "MX_USDT".to_string()]
         );
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            MexcSpotWSClient,
-            subscribe_orderbook_topk,
-            &["BTC_USDT".to_string()]
-        );
+        gen_test_code!(MexcSpotWSClient, subscribe_orderbook_topk, &["BTC_USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -88,11 +76,7 @@ mod mexc_spot {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_overview() {
-        gen_test_code!(
-            MexcSpotWSClient,
-            send,
-            &[r#"{"op":"sub.overview"}"#.to_string()]
-        );
+        gen_test_code!(MexcSpotWSClient, send, &[r#"{"op":"sub.overview"}"#.to_string()]);
     }
 }
 
@@ -128,29 +112,17 @@ mod mexc_linear_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_ticker() {
-        gen_test_code!(
-            MexcSwapWSClient,
-            subscribe_ticker,
-            &["BTC_USDT".to_string()]
-        );
+        gen_test_code!(MexcSwapWSClient, subscribe_ticker, &["BTC_USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            MexcSwapWSClient,
-            subscribe_orderbook,
-            &["BTC_USDT".to_string()]
-        );
+        gen_test_code!(MexcSwapWSClient, subscribe_orderbook, &["BTC_USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            MexcSwapWSClient,
-            subscribe_orderbook_topk,
-            &["BTC_USDT".to_string()]
-        );
+        gen_test_code!(MexcSwapWSClient, subscribe_orderbook_topk, &["BTC_USDT".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
@@ -176,20 +148,12 @@ mod mexc_inverse_swap {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook() {
-        gen_test_code!(
-            MexcSwapWSClient,
-            subscribe_orderbook,
-            &["BTC_USD".to_string()]
-        );
+        gen_test_code!(MexcSwapWSClient, subscribe_orderbook, &["BTC_USD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_orderbook_topk() {
-        gen_test_code!(
-            MexcSwapWSClient,
-            subscribe_orderbook_topk,
-            &["BTC_USD".to_string()]
-        );
+        gen_test_code!(MexcSwapWSClient, subscribe_orderbook_topk, &["BTC_USD".to_string()]);
     }
 
     #[tokio::test(flavor = "multi_thread")]

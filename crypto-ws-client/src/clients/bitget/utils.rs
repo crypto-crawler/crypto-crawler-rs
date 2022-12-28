@@ -60,11 +60,7 @@ impl<const MARKET_TYPE: char> BitgetCommandTranslator<MARKET_TYPE> {
             .collect::<Vec<BTreeMap<String, String>>>();
         format!(
             r#"{{"op":"{}","args":{}}}"#,
-            if subscribe {
-                "subscribe"
-            } else {
-                "unsubscribe"
-            },
+            if subscribe { "subscribe" } else { "unsubscribe" },
             serde_json::to_string(&arr).unwrap(),
         )
     }
@@ -125,13 +121,7 @@ impl MessageHandler for BitgetMessageHandler {
 
 impl<const MARKET_TYPE: char> CommandTranslator for BitgetCommandTranslator<MARKET_TYPE> {
     fn translate_to_commands(&self, subscribe: bool, topics: &[(String, String)]) -> Vec<String> {
-        ensure_frame_size(
-            topics,
-            subscribe,
-            Self::topics_to_command,
-            WS_FRAME_SIZE,
-            None,
-        )
+        ensure_frame_size(topics, subscribe, Self::topics_to_command, WS_FRAME_SIZE, None)
     }
 
     fn translate_to_candlestick_commands(
