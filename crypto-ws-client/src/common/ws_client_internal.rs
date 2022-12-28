@@ -72,17 +72,17 @@ impl<H: MessageHandler> WSClientInternal<H> {
                             tokio::time::sleep(Duration::from_secs(seconds)).await;
                         }
                     }
-                    panic!("Failed to connect to {} due to 429 too many requests", url)
+                    panic!("Failed to connect to {url} due to 429 too many requests")
                 }
-                _ => panic!("Failed to connect to {}, error: {}", url, err),
+                _ => panic!("Failed to connect to {url}, error: {err}"),
             },
         }
     }
 
     fn get_send_interval_ms(&self) -> Option<u64> {
         match self.exchange {
-            "binance" => Some(100), /* WebSocket connections have a limit of 10 incoming
-                                      * messages per second */
+            "binance" => Some(100), /* WebSocket connections have a limit of 10 incoming */
+            // messages per second
             "kucoin" => Some(100), //  Message limit sent to the server: 100 per 10 seconds
             _ => None,
         }
@@ -218,16 +218,16 @@ impl<H: MessageHandler> WSClientInternal<H> {
                             num_unanswered_ping.load(Ordering::Acquire)
                         );
                     }
-                    MiscMessage::Reconnect => break, /* fail fast, pm2 will restart, restart is
-                                                       * reconnect */
+                    MiscMessage::Reconnect => break, /* fail fast, pm2 will restart, restart is */
+                    // reconnect
                     MiscMessage::Other => (), // ignore
                 }
             }
         }
     }
 
-    pub fn close(&self) {
+    pub async fn close(&self) {
         // close the websocket connection and break the while loop in run()
-        _ = self.command_tx.send(Message::Close(None));
+        _ = self.command_tx.send(Message::Close(None)).await;
     }
 }

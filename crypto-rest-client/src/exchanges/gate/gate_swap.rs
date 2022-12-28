@@ -34,9 +34,9 @@ impl GateSwapRestClient {
         } else if symbol.ends_with("_USDT") {
             "usdt"
         } else {
-            panic!("Unknown symbol {}", symbol);
+            panic!("Unknown symbol {symbol}");
         };
-        gen_api!(format!("/futures/{}/order_book?contract={}&limit=200", settle, symbol))
+        gen_api!(format!("/futures/{settle}/order_book?contract={symbol}&limit=200"))
     }
 
     /// Get open interest.
@@ -50,8 +50,8 @@ impl GateSwapRestClient {
         } else if symbol.ends_with("_USDT") {
             "usdt"
         } else {
-            panic!("Unknown symbol {}", symbol);
+            panic!("Unknown symbol {symbol}");
         };
-        gen_api!(format!("/futures/{}/contract_stats?contract={}&interval=5m", settle, symbol))
+        gen_api!(format!("/futures/{settle}/contract_stats?contract={symbol}&interval=5m"))
     }
 }

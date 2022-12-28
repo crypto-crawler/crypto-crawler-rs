@@ -54,7 +54,7 @@ pub(super) fn fetch_inverse_future_symbols() -> Result<Vec<String>> {
                     "next_week" => "_NW",
                     "quarter" => "_CQ",
                     "next_quarter" => "_NQ",
-                    contract_type => panic!("Unknown contract_type {}", contract_type),
+                    contract_type => panic!("Unknown contract_type {contract_type}"),
                 }
         })
         .collect::<Vec<String>>();
@@ -71,7 +71,7 @@ pub(super) fn fetch_inverse_future_markets() -> Result<Vec<Market>> {
                     "next_week" => "_NW",
                     "quarter" => "_CQ",
                     "next_quarter" => "_NQ",
-                    contract_type => panic!("Unknown contract_type {}", contract_type),
+                    contract_type => panic!("Unknown contract_type {contract_type}"),
                 };
             let pair = crypto_pair::normalize_pair(&symbol, "huobi").unwrap();
             let (base, quote) = {

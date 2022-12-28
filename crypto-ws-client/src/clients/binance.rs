@@ -70,7 +70,7 @@ impl<const MARKET_TYPE: char> BinanceWSClient<MARKET_TYPE> {
                 } else if MARKET_TYPE == 'L' {
                     LINEAR_WEBSOCKET_URL
                 } else {
-                    panic!("Unknown market type {}", MARKET_TYPE);
+                    panic!("Unknown market type {MARKET_TYPE}");
                 }
             }
         };
@@ -115,7 +115,7 @@ impl<const URL: char> WSClient for BinanceWSClient<URL> {
     }
 
     async fn subscribe_l3_orderbook(&self, _symbols: &[String]) {
-        panic!("{} does NOT have the level3 websocket channel", EXCHANGE_NAME);
+        panic!("{EXCHANGE_NAME} does NOT have the level3 websocket channel");
     }
 
     async fn subscribe_ticker(&self, symbols: &[String]) {
@@ -158,8 +158,8 @@ impl<const URL: char> WSClient for BinanceWSClient<URL> {
         self.client.run().await;
     }
 
-    fn close(&self) {
-        self.client.close();
+    async fn close(&self) {
+        self.client.close().await;
     }
 }
 
@@ -201,7 +201,7 @@ impl BinanceCommandTranslator {
             2592000 => "1M",
             _ => panic!("Binance has intervals 1m,3m,5m,15m,30m,1h,2h,4h,6h,8h,12h,1d,3d,1w,1M"),
         };
-        format!("kline_{}", interval_str)
+        format!("kline_{interval_str}")
     }
 }
 
@@ -215,13 +215,13 @@ impl MessageHandler for BinanceMessageHandler {
         let obj = resp.unwrap();
 
         if obj.contains_key("error") {
-            panic!("Received {} from {}", msg, EXCHANGE_NAME);
+            panic!("Received {msg} from {EXCHANGE_NAME}");
         } else if obj.contains_key("stream") && obj.contains_key("data") {
             MiscMessage::Normal
         } else {
             if let Some(result) = obj.get("result") {
                 if serde_json::Value::Null != *result {
-                    panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                    panic!("Received {msg} from {EXCHANGE_NAME}");
                 } else {
                     info!("Received {} from {}", msg, EXCHANGE_NAME);
                 }

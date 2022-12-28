@@ -56,8 +56,7 @@ impl OrderBook for BitfinexWSClient {
         let commands = symbols
             .iter()
             .map(|symbol| {
-                format!(r#"{{"event": "subscribe","channel": "book","symbol": "{}","prec": "P0","frec": "F0","len":25}}"#,
-                    symbol,
+                format!(r#"{{"event": "subscribe","channel": "book","symbol": "{symbol}","prec": "P0","frec": "F0","len":25}}"#,
                 )
             })
             .collect::<Vec<String>>();
@@ -72,8 +71,7 @@ impl Level3OrderBook for BitfinexWSClient {
         let commands = symbols
             .iter()
             .map(|symbol| {
-                format!(r#"{{"event": "subscribe","channel": "book","symbol": "{}","prec": "R0","len": 250}}"#,
-                    symbol,
+                format!(r#"{{"event": "subscribe","channel": "book","symbol": "{symbol}","prec": "R0","len": 250}}"#,
                 )
             })
             .collect::<Vec<String>>();
@@ -145,7 +143,7 @@ impl MessageHandler for BitfinexMessageHandler {
                             // 10001: Unknown pair
                             // 10305: Reached limit of open channels
                             error!("{} from {}", txt, EXCHANGE_NAME);
-                            panic!("{} from {}", txt, EXCHANGE_NAME);
+                            panic!("{txt} from {EXCHANGE_NAME}");
                         }
                         _ => warn!("{} from {}", txt, EXCHANGE_NAME),
                     }

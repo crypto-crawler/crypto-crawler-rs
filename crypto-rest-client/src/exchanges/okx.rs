@@ -32,7 +32,7 @@ impl OkxRestClient {
     ///
     /// For example: <https://www.okx.com/api/v5/market/trades?instId=BTC-USDT&limit=500>
     pub fn fetch_trades(symbol: &str) -> Result<String> {
-        gen_api!(format!("/api/v5/market/trades?instId={}&limit=500", symbol))
+        gen_api!(format!("/api/v5/market/trades?instId={symbol}&limit=500"))
     }
 
     /// Get the latest Level2 snapshot of orderbook.
@@ -45,7 +45,7 @@ impl OkxRestClient {
     ///
     /// Rate limit: 20 requests per 2 seconds
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/api/v5/market/books?instId={}&sz=400", symbol,))
+        gen_api!(format!("/api/v5/market/books?instId={symbol}&sz=400",))
     }
 
     /// Get option underlying.
@@ -75,15 +75,12 @@ impl OkxRestClient {
             MarketType::LinearSwap => "SWAP",
             MarketType::InverseSwap => "SWAP",
             MarketType::EuropeanOption => "OPTION",
-            _ => panic!("okx {} doesn't have open interest", market_type),
+            _ => panic!("okx {market_type} doesn't have open interest"),
         };
         if let Some(inst_id) = symbol {
-            gen_api!(format!(
-                "/api/v5/public/open-interest?instType={}&instId={}",
-                inst_type, inst_id,
-            ))
+            gen_api!(format!("/api/v5/public/open-interest?instType={inst_type}&instId={inst_id}",))
         } else {
-            gen_api!(format!("/api/v5/public/open-interest?instType={}", inst_type))
+            gen_api!(format!("/api/v5/public/open-interest?instType={inst_type}"))
         }
     }
 }

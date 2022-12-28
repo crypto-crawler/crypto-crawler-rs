@@ -33,7 +33,7 @@ struct MarketsResponse {
 
 // See https://docs.dydx.exchange/#get-markets
 fn fetch_markets_raw() -> Result<Vec<PerpetualMarket>> {
-    let txt = http_get(format!("{}/v3/markets", BASE_URL).as_str(), None)?;
+    let txt = http_get(format!("{BASE_URL}/v3/markets").as_str(), None)?;
     let resp = serde_json::from_str::<MarketsResponse>(&txt)?;
     Ok(resp
         .markets

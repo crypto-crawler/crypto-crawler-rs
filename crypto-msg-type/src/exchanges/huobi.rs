@@ -27,12 +27,12 @@ fn msg_type_symbol_to_topic(
         MessageType::BBO => "bbo",
         MessageType::Ticker => "detail",
         MessageType::Candlestick => "kline",
-        _ => panic!("Unknown message type {}", msg_type),
+        _ => panic!("Unknown message type {msg_type}"),
     };
     if msg_type == MessageType::Candlestick {
         format!("market.{}.kline.{}", symbol, configs.unwrap().get("interval").unwrap())
     } else {
-        format!("market.{}.{}", symbol, channel)
+        format!("market.{symbol}.{channel}")
     }
 }
 

@@ -245,7 +245,7 @@ pub async fn crawl_trade(
         | "zbg" => {
             crawlers::crawl_event(exchange, MessageType::Trade, market_type, symbols, tx).await
         }
-        _ => panic!("{} does NOT have the trade websocket channel", exchange),
+        _ => panic!("{exchange} does NOT have the trade websocket channel"),
     }
 }
 
@@ -264,7 +264,7 @@ pub async fn crawl_l2_event(
         | "okx" | "zb" | "zbg" => {
             crawlers::crawl_event(exchange, MessageType::L2Event, market_type, symbols, tx).await
         }
-        _ => panic!("{} does NOT have the incremental level2 websocket channel", exchange),
+        _ => panic!("{exchange} does NOT have the incremental level2 websocket channel"),
     }
 }
 
@@ -279,7 +279,7 @@ pub async fn crawl_l3_event(
         "bitfinex" | "bitstamp" | "coinbase_pro" | "kucoin" => {
             crawlers::crawl_event(exchange, MessageType::L3Event, market_type, symbols, tx).await
         }
-        _ => panic!("{} does NOT have the incremental level3 websocket channel", exchange),
+        _ => panic!("{exchange} does NOT have the incremental level3 websocket channel"),
     }
 }
 
@@ -307,7 +307,7 @@ pub async fn crawl_bbo(
         "deribit" | "ftx" | "gate" | "huobi" | "kraken" | "okx" => {
             crawlers::crawl_event(exchange, MessageType::BBO, market_type, symbols, tx).await
         }
-        _ => panic!("{} does NOT have BBO websocket channel", exchange),
+        _ => panic!("{exchange} does NOT have BBO websocket channel"),
     }
 }
 
@@ -324,7 +324,7 @@ pub async fn crawl_l2_topk(
         | "mexc" | "okx" | "zb" => {
             crawlers::crawl_event(exchange, MessageType::L2TopK, market_type, symbols, tx).await
         }
-        _ => panic!("{} does NOT have the level2 top-k snapshot websocket channel", exchange),
+        _ => panic!("{exchange} does NOT have the level2 top-k snapshot websocket channel"),
     }
 }
 
@@ -356,7 +356,7 @@ pub async fn crawl_ticker(
         }
         "zb" => crawlers::zb::crawl_ticker(market_type, symbols, tx).await,
         "zbg" => crawlers::zbg::crawl_ticker(market_type, symbols, tx).await,
-        _ => panic!("{} does NOT have the ticker websocket channel", exchange),
+        _ => panic!("{exchange} does NOT have the ticker websocket channel"),
     }
 }
 
@@ -372,7 +372,7 @@ pub async fn crawl_funding_rate(
         "bitmex" => crawlers::bitmex::crawl_funding_rate(market_type, symbols, tx).await,
         "huobi" => crawlers::huobi::crawl_funding_rate(market_type, symbols, tx).await,
         "okx" => crawlers::okx::crawl_funding_rate(market_type, symbols, tx).await,
-        _ => panic!("{} does NOT have perpetual swap market", exchange),
+        _ => panic!("{exchange} does NOT have perpetual swap market"),
     }
 }
 
@@ -394,7 +394,7 @@ pub async fn crawl_candlestick(
         | "kraken" | "kucoin" | "mexc" | "okx" | "zb" | "zbg" => {
             crawlers::crawl_candlestick_ext(exchange, market_type, symbol_interval_list, tx).await
         }
-        _ => panic!("{} does NOT have the candlestick websocket channel", exchange),
+        _ => panic!("{exchange} does NOT have the candlestick websocket channel"),
     };
 }
 
@@ -420,5 +420,5 @@ pub async fn subscribe_symbol(
     let commands = crypto_msg_type::get_ws_commands(exchange, msg_types, &symbols, true, None);
     ws_client.send(&commands).await;
     ws_client.run().await;
-    ws_client.close();
+    ws_client.close().await;
 }

@@ -22,7 +22,7 @@ impl MexcSwapRestClient {
     ///
     /// For example: <https://contract.mexc.com/api/v1/contract/deals/BTC_USDT>
     pub fn fetch_trades(symbol: &str) -> Result<String> {
-        gen_api!(format!("/api/v1/contract/deals/{}", symbol))
+        gen_api!(format!("/api/v1/contract/deals/{symbol}"))
     }
 
     /// Get the latest Level2 snapshot of orderbook.
@@ -33,6 +33,6 @@ impl MexcSwapRestClient {
     ///
     /// Rate limit: 20 times /2 seconds
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/api/v1/contract/depth/{}?limit=2000", symbol))
+        gen_api!(format!("/api/v1/contract/depth/{symbol}?limit=2000"))
     }
 }

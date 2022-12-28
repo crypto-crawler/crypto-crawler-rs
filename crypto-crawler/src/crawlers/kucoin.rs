@@ -22,7 +22,7 @@ pub(crate) async fn crawl_bbo(
         let ws_client = KuCoinSpotWSClient::new(tx, None).await;
         ws_client.send(&commands).await;
         ws_client.run().await;
-        ws_client.close();
+        ws_client.close().await;
     } else {
         crawl_event(EXCHANGE_NAME, MessageType::BBO, market_type, symbols, tx).await;
     }

@@ -9,7 +9,7 @@ fn msg_type_to_channel(msg_type: MessageType) -> &'static str {
         MessageType::L2TopK => "orderBook10",
         MessageType::BBO => "quote",
         MessageType::Candlestick => "tradeBin",
-        _ => panic!("Unknown message type {}", msg_type),
+        _ => panic!("Unknown message type {msg_type}"),
     }
 }
 
@@ -21,7 +21,7 @@ fn channel_symbol_to_topic(
     if channel == "tradeBin" {
         format!("tradeBin{}:{}", configs.unwrap().get("interval").unwrap(), symbol)
     } else {
-        format!("{}:{}", channel, symbol)
+        format!("{channel}:{symbol}")
     }
 }
 

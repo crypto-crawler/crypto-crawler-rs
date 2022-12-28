@@ -34,7 +34,7 @@ struct SwapMarket {
 // See https://www.gateio.pro/docs/apiv4/zh_CN/index.html#595cd9fe3c
 fn fetch_swap_markets_raw(settle: &str) -> Result<Vec<SwapMarket>> {
     let txt = http_get(
-        format!("https://api.gateio.ws/api/v4/futures/{}/contracts", settle).as_str(),
+        format!("https://api.gateio.ws/api/v4/futures/{settle}/contracts").as_str(),
         None,
     )?;
     let markets = serde_json::from_str::<Vec<SwapMarket>>(&txt)?;

@@ -20,7 +20,7 @@ pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
         MarketType::InverseSwap => fetch_inverse_swap_symbols(),
         MarketType::LinearSwap => fetch_linear_swap_symbols(),
         MarketType::EuropeanOption => fetch_option_symbols(),
-        _ => panic!("Unsupported market_type: {}", market_type),
+        _ => panic!("Unsupported market_type: {market_type}"),
     }
 }
 
@@ -32,7 +32,7 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
         MarketType::InverseSwap => fetch_inverse_swap_markets(),
         MarketType::LinearSwap => fetch_linear_swap_markets(),
         MarketType::EuropeanOption => fetch_option_markets(),
-        _ => panic!("Unsupported market_type: {}", market_type),
+        _ => panic!("Unsupported market_type: {market_type}"),
     }
 }
 
@@ -40,14 +40,14 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
 struct RawMarket {
-    instType: String,  // Instrument type
-    instId: String,    // Instrument ID, e.g. BTC-USD-SWAP
-    uly: String,       // Underlying, e.g. BTC-USD. Only applicable to FUTURES/SWAP/OPTION
-    category: String,  // Fee schedule
-    baseCcy: String,   // Base currency, e.g. BTC inBTC-USDT. Only applicable to SPOT
-    quoteCcy: String,  // Quote currency, e.g. USDT in BTC-USDT. Only applicable to SPOT
+    instType: String, // Instrument type
+    instId: String,   // Instrument ID, e.g. BTC-USD-SWAP
+    uly: String,      // Underlying, e.g. BTC-USD. Only applicable to FUTURES/SWAP/OPTION
+    category: String, // Fee schedule
+    baseCcy: String,  // Base currency, e.g. BTC inBTC-USDT. Only applicable to SPOT
+    quoteCcy: String, // Quote currency, e.g. USDT in BTC-USDT. Only applicable to SPOT
     settleCcy: String, /* Settlement and margin currency, e.g. BTC. Only applicable to
-                        * FUTURES/SWAP/OPTION */
+                       * FUTURES/SWAP/OPTION */
     ctVal: String,    // Contract value. Only applicable to FUTURES/SWAP/OPTION
     ctMult: String,   // Contract multiplier. Only applicable to FUTURES/SWAP/OPTION
     ctValCcy: String, // Contract value currency. Only applicable to FUTURES/SWAP/OPTION
@@ -158,8 +158,7 @@ fn fetch_raw_markets_raw(inst_type: &str) -> Result<Vec<RawMarket>> {
         let mut markets = Vec::<RawMarket>::new();
         for underlying in underlying_indexes.iter() {
             let url = format!(
-                "https://www.okx.com/api/v5/public/instruments?instType=OPTION&uly={}",
-                underlying
+                "https://www.okx.com/api/v5/public/instruments?instType=OPTION&uly={underlying}"
             );
             let txt = {
                 let txt = http_get(url.as_str(), None)?;
@@ -172,7 +171,7 @@ fn fetch_raw_markets_raw(inst_type: &str) -> Result<Vec<RawMarket>> {
 
         markets
     } else {
-        let url = format!("https://www.okx.com/api/v5/public/instruments?instType={}", inst_type);
+        let url = format!("https://www.okx.com/api/v5/public/instruments?instType={inst_type}");
         let txt = {
             let txt = http_get(url.as_str(), None)?;
             let json_obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();

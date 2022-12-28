@@ -27,13 +27,13 @@ impl BithumbRestClient {
     ///
     /// For example: <https://global-openapi.bithumb.pro/openapi/v1/spot/trades?symbol=BTC-USDT>
     pub fn fetch_trades(symbol: &str) -> Result<String> {
-        gen_api!(format!("/spot/trades?symbol={}", symbol))
+        gen_api!(format!("/spot/trades?symbol={symbol}"))
     }
 
     /// Get the latest Level2 orderbook snapshot.
     ///
     /// For example: <https://global-openapi.bithumb.pro/openapi/v1/spot/orderBook?symbol=BTC-USDT>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/spot/orderBook?symbol={}", symbol))
+        gen_api!(format!("/spot/orderBook?symbol={symbol}"))
     }
 }

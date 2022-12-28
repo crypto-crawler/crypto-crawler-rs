@@ -26,7 +26,7 @@ impl BinanceOptionRestClient {
     pub fn fetch_trades(symbol: &str, start_time: Option<u64>) -> Result<String> {
         check_symbol(symbol);
         let t = start_time;
-        gen_api_binance!(format!("/vapi/v1/trades?symbol={}&limit=500", symbol), t)
+        gen_api_binance!(format!("/vapi/v1/trades?symbol={symbol}&limit=500"), t)
     }
 
     /// Get a Level2 snapshot of orderbook.

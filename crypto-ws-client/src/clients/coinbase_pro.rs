@@ -75,7 +75,7 @@ impl MessageHandler for CoinbaseProMessageHandler {
                         .unwrap()
                         .contains("is not a valid product")
                 {
-                    panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                    panic!("Received {msg} from {EXCHANGE_NAME}");
                 } else {
                     MiscMessage::Other
                 }

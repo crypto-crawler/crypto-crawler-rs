@@ -29,7 +29,7 @@ impl CoinbaseProRestClient {
     ///
     /// For example: <https://api.pro.coinbase.com/products/BTC-USD/trades>
     pub fn fetch_trades(symbol: &str) -> Result<String> {
-        gen_api!(format!("/products/{}/trades", symbol))
+        gen_api!(format!("/products/{symbol}/trades"))
     }
 
     /// Get the latest Level2 orderbook snapshot.
@@ -38,7 +38,7 @@ impl CoinbaseProRestClient {
     ///
     /// For example: <https://api.pro.coinbase.com/products/BTC-USD/book?level=2>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/products/{}/book?level=2", symbol))
+        gen_api!(format!("/products/{symbol}/book?level=2"))
     }
 
     /// Get the latest Level3 orderbook snapshot.
@@ -47,6 +47,6 @@ impl CoinbaseProRestClient {
     ///
     /// For example: <https://api.pro.coinbase.com/products/BTC-USD/book?level=3>
     pub fn fetch_l3_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/products/{}/book?level=3", symbol))
+        gen_api!(format!("/products/{symbol}/book?level=3"))
     }
 }

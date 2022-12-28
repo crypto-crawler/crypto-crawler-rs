@@ -44,7 +44,7 @@ pub fn fetch_symbols(exchange: &str, market_type: MarketType) -> Result<Vec<Stri
         "okx" => exchanges::okx::fetch_symbols(market_type),
         "zb" => exchanges::zb::fetch_symbols(market_type),
         "zbg" => exchanges::zbg::fetch_symbols(market_type),
-        _ => panic!("Unsupported exchange {}", exchange),
+        _ => panic!("Unsupported exchange {exchange}"),
     }
 }
 
@@ -86,6 +86,6 @@ pub fn fetch_markets(exchange: &str, market_type: MarketType) -> Result<Vec<Mark
         "okx" => exchanges::okx::fetch_markets(market_type),
         "zb" => exchanges::zb::fetch_markets(market_type),
         "zbg" => exchanges::zbg::fetch_markets(market_type),
-        _ => panic!("Unsupported exchange {}", exchange),
+        _ => panic!("Unsupported exchange {exchange}"),
     }
 }

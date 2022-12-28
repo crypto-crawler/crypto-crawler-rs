@@ -34,7 +34,7 @@ pub(crate) async fn crawl_l2_event(
             let ws_client = HuobiSpotWSClient::new(tx, Some("wss://api.huobi.pro/feed")).await;
             ws_client.subscribe_orderbook(&symbols).await;
             ws_client.run().await;
-            ws_client.close();
+            ws_client.close().await;
         }
         MarketType::InverseFuture
         | MarketType::LinearSwap
@@ -42,7 +42,7 @@ pub(crate) async fn crawl_l2_event(
         | MarketType::EuropeanOption => {
             crawl_event(EXCHANGE_NAME, MessageType::L2Event, market_type, symbols, tx).await
         }
-        _ => panic!("Huobi does NOT have the {} market type", market_type),
+        _ => panic!("Huobi does NOT have the {market_type} market type"),
     }
 }
 
@@ -66,7 +66,7 @@ pub(crate) async fn crawl_funding_rate(
     };
     let commands: Vec<String> = symbols
         .into_iter()
-        .map(|symbol| format!(r#"{{"topic":"public.{}.funding_rate","op":"sub"}}"#, symbol))
+        .map(|symbol| format!(r#"{{"topic":"public.{symbol}.funding_rate","op":"sub"}}"#))
         .collect();
 
     match market_type {
@@ -76,7 +76,7 @@ pub(crate) async fn crawl_funding_rate(
                     .await;
             ws_client.send(&commands).await;
             ws_client.run().await;
-            ws_client.close();
+            ws_client.close().await;
         }
         MarketType::LinearSwap => {
             let ws_client = HuobiLinearSwapWSClient::new(
@@ -86,8 +86,8 @@ pub(crate) async fn crawl_funding_rate(
             .await;
             ws_client.send(&commands).await;
             ws_client.run().await;
-            ws_client.close();
+            ws_client.close().await;
         }
-        _ => panic!("Huobi {} does NOT have funding rates", market_type),
+        _ => panic!("Huobi {market_type} does NOT have funding rates"),
     }
 }

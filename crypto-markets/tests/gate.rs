@@ -18,7 +18,7 @@ fn fetch_spot_symbols() {
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         if symbol.ends_with("_USD") {
-            println!("{}", symbol);
+            println!("{symbol}");
         }
 
         assert!(symbol.contains('_'));

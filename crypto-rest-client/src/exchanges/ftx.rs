@@ -30,7 +30,7 @@ impl FtxRestClient {
     /// For example: <https://ftx.com/api/markets/BTC-PERP/orderbook?depth=100>,
     // <https://ftx.com/api/markets/BTC/USD/orderbook?depth=100>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/markets/{}/orderbook?depth=100", symbol))
+        gen_api!(format!("/markets/{symbol}/orderbook?depth=100"))
     }
 
     /// Get open interest.

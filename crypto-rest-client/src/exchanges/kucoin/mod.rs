@@ -13,7 +13,7 @@ pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result
         MarketType::InverseSwap | MarketType::LinearSwap | MarketType::InverseFuture => {
             kucoin_swap::KuCoinSwapRestClient::fetch_l2_snapshot
         }
-        _ => panic!("Bitget unknown market_type: {}", market_type),
+        _ => panic!("Bitget unknown market_type: {market_type}"),
     };
 
     func(symbol)
@@ -25,7 +25,7 @@ pub(crate) fn fetch_l3_snapshot(market_type: MarketType, symbol: &str) -> Result
         MarketType::InverseSwap | MarketType::LinearSwap | MarketType::InverseFuture => {
             kucoin_swap::KuCoinSwapRestClient::fetch_l3_snapshot
         }
-        _ => panic!("Bitget unknown market_type: {}", market_type),
+        _ => panic!("Bitget unknown market_type: {market_type}"),
     };
 
     func(symbol)
@@ -36,6 +36,6 @@ pub(crate) fn fetch_open_interest(market_type: MarketType) -> Result<String> {
         MarketType::InverseSwap | MarketType::LinearSwap | MarketType::Unknown => {
             kucoin_swap::KuCoinSwapRestClient::fetch_open_interest()
         }
-        _ => panic!("kucoin {} does not have open interest", market_type),
+        _ => panic!("kucoin {market_type} does not have open interest"),
     }
 }

@@ -8,15 +8,15 @@ fn msg_type_symbol_to_topic(
     configs: Option<&HashMap<String, String>>,
 ) -> String {
     match msg_type {
-        MessageType::Trade => format!("trades.{}.100ms", symbol),
-        MessageType::L2Event => format!("book.{}.100ms", symbol),
-        MessageType::L2TopK => format!("book.{}.5.10.100ms", symbol),
-        MessageType::BBO => format!("quote.{}", symbol),
+        MessageType::Trade => format!("trades.{symbol}.100ms"),
+        MessageType::L2Event => format!("book.{symbol}.100ms"),
+        MessageType::L2TopK => format!("book.{symbol}.5.10.100ms"),
+        MessageType::BBO => format!("quote.{symbol}"),
         MessageType::Candlestick => {
             format!("chart.trades.{}.{}", symbol, configs.unwrap().get("interval").unwrap())
         }
-        MessageType::Ticker => format!("ticker.{}.100ms", symbol),
-        _ => panic!("Unknown message type {}", msg_type),
+        MessageType::Ticker => format!("ticker.{symbol}.100ms"),
+        _ => panic!("Unknown message type {msg_type}"),
     }
 }
 

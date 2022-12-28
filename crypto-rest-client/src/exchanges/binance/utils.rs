@@ -10,7 +10,7 @@ static SYMBOL_PATTERN: Lazy<Regex> = Lazy::new(|| Regex::new("^[A-Z0-9-_.]{1,20}
 
 pub(super) fn check_symbol(symbol: &str) {
     if !SYMBOL_PATTERN.is_match(symbol) {
-        panic!("Illegal symbol {}, legal symbol should be '^[A-Z0-9-_.]{{1,20}}$'.", symbol);
+        panic!("Illegal symbol {symbol}, legal symbol should be '^[A-Z0-9-_.]{{1,20}}$'.");
     }
 }
 

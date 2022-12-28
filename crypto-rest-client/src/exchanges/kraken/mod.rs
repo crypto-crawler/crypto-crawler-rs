@@ -10,7 +10,7 @@ pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result
         MarketType::InverseFuture | MarketType::InverseSwap => {
             kraken_futures::KrakenFuturesRestClient::fetch_l2_snapshot
         }
-        _ => panic!("Kraken unknown market_type: {}", market_type),
+        _ => panic!("Kraken unknown market_type: {market_type}"),
     };
 
     func(symbol)

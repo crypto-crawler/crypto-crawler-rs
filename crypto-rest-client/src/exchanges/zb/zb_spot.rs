@@ -24,6 +24,6 @@ impl ZbSpotRestClient {
     ///
     /// For example: <https://api.zbex.site/data/v1/depth?market=btc_usdt&size=50>,
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/data/v1/depth?market={}&size=50", symbol))
+        gen_api!(format!("/data/v1/depth?market={symbol}&size=50"))
     }
 }

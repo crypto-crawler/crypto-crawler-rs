@@ -29,13 +29,13 @@ impl KrakenFuturesRestClient {
     /// For example: <https://futures.kraken.com/derivatives/api/v3/history?symbol=PI_XBTUSD>
     #[allow(non_snake_case)]
     pub fn fetch_trades(symbol: &str, lastTime: Option<String>) -> Result<String> {
-        gen_api!(format!("/history?symbol={}", symbol), lastTime)
+        gen_api!(format!("/history?symbol={symbol}"), lastTime)
     }
 
     /// Get a Level2 snapshot of orderbook.
     ///
     /// For example: <https://futures.kraken.com/derivatives/api/v3/orderbook?symbol=PI_XBTUSD>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/orderbook?symbol={}", symbol))
+        gen_api!(format!("/orderbook?symbol={symbol}"))
     }
 }

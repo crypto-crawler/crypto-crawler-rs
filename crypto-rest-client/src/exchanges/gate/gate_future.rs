@@ -33,8 +33,8 @@ impl GateFutureRestClient {
         } else if without_date.ends_with("_USDT_") {
             "usdt"
         } else {
-            panic!("Unknown symbol {}", symbol);
+            panic!("Unknown symbol {symbol}");
         };
-        gen_api!(format!("/delivery/{}/order_book?contract={}&limit=50", settle, symbol))
+        gen_api!(format!("/delivery/{settle}/order_book?contract={symbol}&limit=50"))
     }
 }

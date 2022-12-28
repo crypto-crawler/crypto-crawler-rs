@@ -8,7 +8,7 @@ fn msg_type_to_channel(msg_type: MessageType) -> &'static str {
         MessageType::L2Event => "orderBookL2_25",
         MessageType::Ticker => "instrument_info.100ms",
         MessageType::Candlestick => "klineV2",
-        _ => panic!("Unknown message type {}", msg_type),
+        _ => panic!("Unknown message type {msg_type}"),
     }
 }
 
@@ -20,12 +20,12 @@ fn channel_symbol_to_topic(
     if channel == "klineV2" {
         let interval_str = configs.unwrap().get("interval").unwrap();
         if symbol.ends_with("USDT") {
-            format!("candle.{}.{}", interval_str, symbol)
+            format!("candle.{interval_str}.{symbol}")
         } else {
-            format!("klineV2.{}.{}", interval_str, symbol)
+            format!("klineV2.{interval_str}.{symbol}")
         }
     } else {
-        format!("{}.{}", channel, symbol)
+        format!("{channel}.{symbol}")
     }
 }
 

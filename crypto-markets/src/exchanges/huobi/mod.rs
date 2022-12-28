@@ -15,7 +15,7 @@ pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
         MarketType::InverseSwap => huobi_inverse_swap::fetch_inverse_swap_symbols(),
         MarketType::LinearSwap => huobi_linear_swap::fetch_linear_swap_symbols(),
         MarketType::EuropeanOption => huobi_option::fetch_option_symbols(),
-        _ => panic!("Unsupported market_type: {}", market_type),
+        _ => panic!("Unsupported market_type: {market_type}"),
     }
 }
 
@@ -26,6 +26,6 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
         MarketType::InverseSwap => huobi_inverse_swap::fetch_inverse_swap_markets(),
         MarketType::LinearSwap => huobi_linear_swap::fetch_linear_swap_markets(),
         MarketType::EuropeanOption => Ok(Vec::new()),
-        _ => panic!("Unsupported market_type: {}", market_type),
+        _ => panic!("Unsupported market_type: {market_type}"),
     }
 }

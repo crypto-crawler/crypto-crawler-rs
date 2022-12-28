@@ -71,7 +71,7 @@ impl BybitInverseCommandTranslator {
                 "Bybit InverseFuture has intervals 1min,5min,15min,30min,60min,4hour,1day,1week,1mon"
             ),
         };
-        format!("klineV2.{}", interval_str)
+        format!("klineV2.{interval_str}")
     }
 }
 

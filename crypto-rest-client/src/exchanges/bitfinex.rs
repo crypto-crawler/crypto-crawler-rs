@@ -28,7 +28,7 @@ impl BitfinexRestClient {
         end: Option<u64>,
         sort: Option<i8>,
     ) -> Result<String> {
-        gen_api!(format!("/v2/trades/{}/hist", symbol), limit, start, end, sort)
+        gen_api!(format!("/v2/trades/{symbol}/hist"), limit, start, end, sort)
     }
 
     /// Get a Level2 snapshot of orderbook.
@@ -40,7 +40,7 @@ impl BitfinexRestClient {
     /// Ratelimit: 90 req/min
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         let len = Some(100);
-        gen_api!(format!("/v2/book/{}/P0", symbol), len)
+        gen_api!(format!("/v2/book/{symbol}/P0"), len)
     }
 
     /// Get a Level3 snapshot of orderbook.
@@ -50,6 +50,6 @@ impl BitfinexRestClient {
     /// For example: <https://api-pub.bitfinex.com/v2/book/tBTCUSD/R0?len=100>
     pub fn fetch_l3_snapshot(symbol: &str) -> Result<String> {
         let len = Some(100);
-        gen_api!(format!("/v2/book/{}/R0", symbol), len)
+        gen_api!(format!("/v2/book/{symbol}/R0"), len)
     }
 }

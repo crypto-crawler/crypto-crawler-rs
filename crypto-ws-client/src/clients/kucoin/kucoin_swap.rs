@@ -74,7 +74,7 @@ impl KucoinCommandTranslator {
         if !valid_set.contains(&interval) {
             let joined =
                 valid_set.into_iter().map(|x| x.to_string()).collect::<Vec<String>>().join(",");
-            panic!("KuCoin Swap available intervals {}", joined);
+            panic!("KuCoin Swap available intervals {joined}");
         }
         format!("{}_{}", symbol, interval / 60)
     }

@@ -11,7 +11,7 @@ pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
         MarketType::InverseSwap => bitget_swap::fetch_inverse_swap_symbols(),
         MarketType::LinearSwap => bitget_swap::fetch_linear_swap_symbols(),
         MarketType::InverseFuture => bitget_swap::fetch_inverse_future_symbols(),
-        _ => panic!("Unsupported market_type: {}", market_type),
+        _ => panic!("Unsupported market_type: {market_type}"),
     }
 }
 
@@ -21,6 +21,6 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
         MarketType::InverseSwap => bitget_swap::fetch_inverse_swap_markets(),
         MarketType::LinearSwap => bitget_swap::fetch_linear_swap_markets(),
         MarketType::InverseFuture => bitget_swap::fetch_inverse_future_markets(),
-        _ => panic!("Unsupported market_type: {}", market_type),
+        _ => panic!("Unsupported market_type: {market_type}"),
     }
 }

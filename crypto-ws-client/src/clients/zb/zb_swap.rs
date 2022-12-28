@@ -113,7 +113,7 @@ impl ZbCommandTranslator {
             432000 => "5D",
             _ => panic!("ZB swap available intervals: 1M,5M,15M, 30M, 1H, 6H, 1D, 5D"),
         };
-        format!("{}.KLine_{}", symbol, interval_str,)
+        format!("{symbol}.KLine_{interval_str}",)
     }
 }
 
@@ -124,21 +124,18 @@ impl CommandTranslator for ZbCommandTranslator {
             .iter()
             .map(|(channel, symbol)| match channel.as_str() {
                 "Trade" => format!(
-                    r#"{{"action":"{}", "channel":"{}.{}", "size":100}}"#,
-                    action, symbol, channel,
+                    r#"{{"action":"{action}", "channel":"{symbol}.{channel}", "size":100}}"#,
                 ),
                 "Depth" => format!(
-                    r#"{{"action":"{}", "channel":"{}.{}", "size":200}}"#,
-                    action, symbol, channel,
+                    r#"{{"action":"{action}", "channel":"{symbol}.{channel}", "size":200}}"#,
                 ),
                 "DepthWhole" => format!(
-                    r#"{{"action":"{}", "channel":"{}.{}", "size":10}}"#,
-                    action, symbol, channel,
+                    r#"{{"action":"{action}", "channel":"{symbol}.{channel}", "size":10}}"#,
                 ),
                 "Ticker" => {
-                    format!(r#"{{"action":"{}", "channel":"{}.{}"}}"#, action, symbol, channel,)
+                    format!(r#"{{"action":"{action}", "channel":"{symbol}.{channel}"}}"#,)
                 }
-                _ => panic!("Unknown ZB channel {}", channel),
+                _ => panic!("Unknown ZB channel {channel}"),
             })
             .collect()
     }

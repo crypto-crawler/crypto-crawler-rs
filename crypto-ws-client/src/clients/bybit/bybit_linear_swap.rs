@@ -65,7 +65,7 @@ impl BybitLinearCommandTranslator {
                 "Bybit LinearSwap has intervals 1min,5min,15min,30min,60min,4hour,1day,1week,1mon"
             ),
         };
-        format!("candle.{}", interval_str)
+        format!("candle.{interval_str}")
     }
 }
 

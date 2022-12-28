@@ -74,9 +74,9 @@ impl ZbgCommandTranslator {
         let symbol_id = self
             .symbol_id_map
             .get(symbol.to_lowercase().as_str())
-            .unwrap_or_else(|| panic!("Failed to find symbol_id for {}", symbol));
+            .unwrap_or_else(|| panic!("Failed to find symbol_id for {symbol}"));
         if channel == "TRADE_STATISTIC_24H" {
-            format!("{}_{}", symbol_id, channel)
+            format!("{symbol_id}_{channel}")
         } else {
             format!("{}_{}_{}", symbol_id, channel, symbol.to_uppercase())
         }
@@ -98,7 +98,7 @@ impl ZbgCommandTranslator {
         let symbol_id = self
             .symbol_id_map
             .get(symbol.to_lowercase().as_str())
-            .unwrap_or_else(|| panic!("Failed to find symbol_id for {}", symbol));
+            .unwrap_or_else(|| panic!("Failed to find symbol_id for {symbol}"));
 
         format!("{}_KLINE_{}_{}", symbol_id, interval_str, symbol.to_uppercase())
     }

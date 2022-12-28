@@ -67,7 +67,7 @@ impl MessageHandler for DydxMessageHandler {
                         .unwrap()
                         .starts_with("Invalid subscription id for channel")
                 {
-                    panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                    panic!("Received {msg} from {EXCHANGE_NAME}");
                 } else {
                     MiscMessage::Other
                 }

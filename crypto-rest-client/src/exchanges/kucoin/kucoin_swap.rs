@@ -26,7 +26,7 @@ impl KuCoinSwapRestClient {
     /// For example: <https://api-futures.kucoin.com/api/v1/level2/snapshot?symbol=XBTUSDM>,
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         // the request rate limit is 30 times/3s
-        gen_api!(format!("/api/v1/level2/snapshot?symbol={}", symbol))
+        gen_api!(format!("/api/v1/level2/snapshot?symbol={symbol}"))
     }
 
     /// Get the latest Level3 snapshot of orderbook.
@@ -35,7 +35,7 @@ impl KuCoinSwapRestClient {
     ///
     /// For example: <https://api-futures.kucoin.com/api/v2/level3/snapshot?symbol=XBTUSDM>,
     pub fn fetch_l3_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/api/v2/level3/snapshot?symbol={}", symbol))
+        gen_api!(format!("/api/v2/level3/snapshot?symbol={symbol}"))
     }
 
     /// Get open interest.

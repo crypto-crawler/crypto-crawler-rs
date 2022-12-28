@@ -8,14 +8,14 @@ use std::collections::HashMap;
 pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
     match market_type {
         MarketType::Spot => fetch_spot_symbols(),
-        _ => panic!("Unsupported market_type: {}", market_type),
+        _ => panic!("Unsupported market_type: {market_type}"),
     }
 }
 
 pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
     match market_type {
         MarketType::Spot => fetch_spot_markets(),
-        _ => panic!("Unsupported market_type: {}", market_type),
+        _ => panic!("Unsupported market_type: {market_type}"),
     }
 }
 

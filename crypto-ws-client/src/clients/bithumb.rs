@@ -81,7 +81,7 @@ impl MessageHandler for BithumbMessageHandler {
                 }
             }
         } else {
-            panic!("Received {} from {}", msg, EXCHANGE_NAME);
+            panic!("Received {msg} from {EXCHANGE_NAME}");
         }
     }
 
@@ -93,7 +93,7 @@ impl MessageHandler for BithumbMessageHandler {
 impl BithumbCommandTranslator {
     fn topics_to_command(topics: &[(String, String)], subscribe: bool) -> String {
         let raw_channels: Vec<String> =
-            topics.iter().map(|(channel, symbol)| format!("{}:{}", channel, symbol)).collect();
+            topics.iter().map(|(channel, symbol)| format!("{channel}:{symbol}")).collect();
         format!(
             r#"{{"cmd":"{}","args":{}}}"#,
             if subscribe { "subscribe" } else { "unsubscribe" },

@@ -14,7 +14,7 @@ pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
         MarketType::LinearFuture => fetch_linear_future_symbols(),
         MarketType::Move => fetch_move_symbols(),
         MarketType::BVOL => fetch_bvol_symbols(),
-        _ => panic!("Unsupported market_type: {}", market_type),
+        _ => panic!("Unsupported market_type: {market_type}"),
     }
 }
 
@@ -25,7 +25,7 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
         MarketType::LinearFuture => fetch_linear_future_markets(),
         MarketType::Move => fetch_move_markets(),
         MarketType::BVOL => fetch_bvol_markets(),
-        _ => panic!("Unsupported market_type: {}", market_type),
+        _ => panic!("Unsupported market_type: {market_type}"),
     }
 }
 
@@ -145,7 +145,7 @@ fn to_market(raw_market: &FtxMarket) -> Market {
             let now = Utc::now();
             let year = Utc::now().year();
             let delivery_time = DateTime::parse_from_rfc3339(
-                format!("{}-{}-{}T00:00:00+00:00", year, month, day).as_str(),
+                format!("{year}-{month}-{day}T00:00:00+00:00").as_str(),
             )
             .unwrap();
             let delivery_time = if delivery_time > now {

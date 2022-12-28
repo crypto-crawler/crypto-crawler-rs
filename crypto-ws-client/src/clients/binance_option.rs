@@ -56,7 +56,7 @@ impl BinanceOptionCommandTranslator {
     fn topics_to_command(topics: &[(String, String)], subscribe: bool) -> String {
         let raw_topics = topics
             .iter()
-            .map(|(topic, symbol)| format!("{}@{}", symbol, topic))
+            .map(|(topic, symbol)| format!("{symbol}@{topic}"))
             .collect::<Vec<String>>();
         format!(
             r#"{{"id":9527,"method":"{}","params":{}}}"#,
@@ -78,7 +78,7 @@ impl BinanceOptionCommandTranslator {
             604800 => "1w",
             _ => panic!("Binance Option has intervals 1m,5m,15m,30m,1h4h,1d,1w"),
         };
-        format!("kline_{}", interval_str)
+        format!("kline_{interval_str}")
     }
 }
 
@@ -98,7 +98,7 @@ impl MessageHandler for BinanceOptionMessageHandler {
         let obj = resp.unwrap();
 
         if obj.contains_key("code") {
-            panic!("Received {} from {}", msg, EXCHANGE_NAME);
+            panic!("Received {msg} from {EXCHANGE_NAME}");
         }
 
         if let Some(result) = obj.get("result") {

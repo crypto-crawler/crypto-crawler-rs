@@ -26,6 +26,6 @@ impl HuobiOptionRestClient {
     ///
     /// For example: <https://api.hbdm.com/option-ex/market/depth?contract_code=BTC-USDT-210326-C-32000&type=step0>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/market/depth?contract_code={}&type=step0", symbol))
+        gen_api!(format!("/market/depth?contract_code={symbol}&type=step0"))
     }
 }

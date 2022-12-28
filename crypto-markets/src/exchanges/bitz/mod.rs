@@ -8,7 +8,7 @@ pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
         MarketType::Spot => bitz_spot::fetch_spot_symbols(),
         MarketType::InverseSwap => bitz_swap::fetch_inverse_swap_symbols(),
         MarketType::LinearSwap => bitz_swap::fetch_linear_swap_symbols(),
-        _ => panic!("Unsupported market_type: {}", market_type),
+        _ => panic!("Unsupported market_type: {market_type}"),
     }
 }
 

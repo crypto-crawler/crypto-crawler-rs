@@ -19,7 +19,7 @@ pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result
             huobi_inverse_swap::HuobiInverseSwapRestClient::fetch_l2_snapshot
         }
         MarketType::EuropeanOption => huobi_option::HuobiOptionRestClient::fetch_l2_snapshot,
-        _ => panic!("Binance unknown market_type: {}", market_type),
+        _ => panic!("Binance unknown market_type: {market_type}"),
     };
 
     func(symbol)
@@ -32,7 +32,7 @@ pub(crate) fn fetch_open_interest(market_type: MarketType, symbol: Option<&str>)
         MarketType::InverseSwap => {
             huobi_inverse_swap::HuobiInverseSwapRestClient::fetch_open_interest
         }
-        _ => panic!("Huobi {} does not have open interest", market_type),
+        _ => panic!("Huobi {market_type} does not have open interest"),
     };
 
     func(symbol)

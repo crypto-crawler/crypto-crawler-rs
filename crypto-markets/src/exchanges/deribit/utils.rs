@@ -73,8 +73,7 @@ struct Instrument {
 /// Example: <https://www.deribit.com/api/v2/public/get_instruments?currency=BTC&kind=future>
 fn fetch_instruments(currency: &str, kind: &str) -> Result<Vec<Instrument>> {
     let url = format!(
-        "https://www.deribit.com/api/v2/public/get_instruments?currency={}&kind={}",
-        currency, kind
+        "https://www.deribit.com/api/v2/public/get_instruments?currency={currency}&kind={kind}"
     );
     let txt = deribit_http_get(&url)?;
     let resp = serde_json::from_str::<DeribitResponse<Instrument>>(&txt)?;

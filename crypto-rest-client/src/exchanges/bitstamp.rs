@@ -32,7 +32,7 @@ impl BitstampRestClient {
     ///
     /// For example: <https://www.bitstamp.net/api/v2/transactions/btcusd/?time=hour>
     pub fn fetch_trades(symbol: &str, time: Option<String>) -> Result<String> {
-        gen_api!(format!("/v2/transactions/{}/", symbol), time)
+        gen_api!(format!("/v2/transactions/{symbol}/"), time)
     }
 
     /// Get a full Level2 orderbook snapshot.
@@ -41,7 +41,7 @@ impl BitstampRestClient {
     ///
     /// For example: <https://www.bitstamp.net/api/v2/order_book/btcusd/>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/v2/order_book/{}", symbol))
+        gen_api!(format!("/v2/order_book/{symbol}"))
     }
 
     /// Get a full Level3 orderbook snapshot.
@@ -50,6 +50,6 @@ impl BitstampRestClient {
     ///
     /// For example: <https://www.bitstamp.net/api/v2/order_book/btcusd/?group=2>
     pub fn fetch_l3_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/v2/order_book/{}?group=2", symbol))
+        gen_api!(format!("/v2/order_book/{symbol}?group=2"))
     }
 }

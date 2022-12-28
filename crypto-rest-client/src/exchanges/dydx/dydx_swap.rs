@@ -26,7 +26,7 @@ impl DydxSwapRestClient {
     ///
     /// For example: <https://api.dydx.exchange/v3/orderbook/BTC-USD>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/v3/orderbook/{}", symbol))
+        gen_api!(format!("/v3/orderbook/{symbol}"))
     }
 
     /// Get open interest.

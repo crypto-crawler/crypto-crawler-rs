@@ -1,6 +1,6 @@
 [package]
 name = "crypto-ws-client"
-version = "4.12.8"
+version = "4.12.9"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description = "A versatile websocket client that supports many cryptocurrency exchanges."
@@ -9,18 +9,18 @@ repository = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/cryp
 keywords = ["cryptocurrency", "blockchain", "trading", "websocket"]
 
 [dependencies]
-async-trait = "0.1.58"
-flate2 = "1.0.24"
+async-trait = "0.1.60"
+flate2 = "1.0.25"
 futures-util = "0.3.25"
-governor = "0.5.0"
+governor = "0.5.1"
 nonzero_ext = "0.3.0"
 log = "0.4.17"
 rand = "0.8.5"
-reqwest = { version = "0.11.12", features = ["gzip"] }
-serde_json = "1.0.87"
-tokio = { version = "1.21.2", features = ["rt-multi-thread", "time", "sync", "macros"] }
-tokio-tungstenite = { version = "0.17.2", features = ["rustls-tls-native-roots"] }
+reqwest = { version = "0.11.13", features = ["gzip"] }
+serde_json = "1.0.91"
+tokio = { version = "1.23.0", features = ["rt-multi-thread", "time", "sync", "macros"] }
+tokio-tungstenite = { version = "0.18.0", features = ["rustls-tls-native-roots"] }
 fast-socks5 = "0.8.1"
 
 [dev-dependencies]
-tokio = { version = "1.21.2", features = ["test-util"] }
+tokio = { version = "1.23.0", features = ["test-util"] }

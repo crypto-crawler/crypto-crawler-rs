@@ -75,15 +75,15 @@ impl MessageHandler for BitzMessageHandler {
             match status {
                 -101001 => {
                     error!("Subscription type parameter error: {}", msg);
-                    panic!("Subscription type parameter error: {}", msg);
+                    panic!("Subscription type parameter error: {msg}");
                 }
                 -101002 => {
                     error!("Fail to get subscribed symbol of trading pair: {}", msg);
-                    panic!("Fail to get subscribed symbol of trading pair: {}", msg);
+                    panic!("Fail to get subscribed symbol of trading pair: {msg}");
                 }
                 -101003 => {
                     error!("k-line scale resolution error: {}", msg);
-                    panic!("k-line scale resolution error: {}", msg);
+                    panic!("k-line scale resolution error: {msg}");
                 }
                 _ => warn!("Received {} from {}", msg, EXCHANGE_NAME),
             }

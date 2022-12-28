@@ -33,7 +33,7 @@ pub(crate) async fn crawl_trade(
         let ws_client = BinanceOptionWSClient::new(tx, None).await;
         ws_client.subscribe(&topics).await;
         ws_client.run().await;
-        ws_client.close();
+        ws_client.close().await;
     } else {
         crawl_event(EXCHANGE_NAME, MessageType::Trade, market_type, symbols, tx).await;
     }
@@ -54,19 +54,19 @@ pub(crate) async fn crawl_bbo(
                 let ws_client = BinanceSpotWSClient::new(tx, None).await;
                 ws_client.send(&commands).await;
                 ws_client.run().await;
-                ws_client.close();
+                ws_client.close().await;
             }
             MarketType::InverseFuture | MarketType::InverseSwap => {
                 let ws_client = BinanceInverseWSClient::new(tx, None).await;
                 ws_client.send(&commands).await;
                 ws_client.run().await;
-                ws_client.close();
+                ws_client.close().await;
             }
             MarketType::LinearFuture | MarketType::LinearSwap => {
                 let ws_client = BinanceLinearWSClient::new(tx, None).await;
                 ws_client.send(&commands).await;
                 ws_client.run().await;
-                ws_client.close();
+                ws_client.close().await;
             }
             _ => panic!("Binance {} market does NOT have the BBO channel", market_type),
         }
@@ -95,19 +95,19 @@ pub(crate) async fn crawl_ticker(
                 let ws_client = BinanceSpotWSClient::new(tx, None).await;
                 ws_client.send(&commands).await;
                 ws_client.run().await;
-                ws_client.close();
+                ws_client.close().await;
             }
             MarketType::InverseFuture | MarketType::InverseSwap => {
                 let ws_client = BinanceInverseWSClient::new(tx, None).await;
                 ws_client.send(&commands).await;
                 ws_client.run().await;
-                ws_client.close();
+                ws_client.close().await;
             }
             MarketType::LinearFuture | MarketType::LinearSwap => {
                 let ws_client = BinanceLinearWSClient::new(tx, None).await;
                 ws_client.send(&commands).await;
                 ws_client.run().await;
-                ws_client.close();
+                ws_client.close().await;
             }
             MarketType::EuropeanOption => {
                 let commands = vec![
@@ -117,7 +117,7 @@ pub(crate) async fn crawl_ticker(
                 let ws_client = BinanceLinearWSClient::new(tx, None).await;
                 ws_client.send(&commands).await;
                 ws_client.run().await;
-                ws_client.close();
+                ws_client.close().await;
             }
             _ => panic!("Binance {} market does NOT have the ticker channel", market_type),
         }
@@ -158,5 +158,5 @@ pub(crate) async fn crawl_funding_rate(
     };
 
     ws_client.run().await;
-    ws_client.close();
+    ws_client.close().await;
 }

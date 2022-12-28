@@ -137,5 +137,5 @@ pub trait WSClient {
     async fn run(&self);
 
     /// Close the connection and break the loop in Run().
-    fn close(&self);
+    async fn close(&self);
 }

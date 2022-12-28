@@ -27,7 +27,7 @@ pub(crate) async fn crawl_ticker(
         let ws_client = ZbSwapWSClient::new(tx, None).await;
         ws_client.send(&commands).await;
         ws_client.run().await;
-        ws_client.close();
+        ws_client.close().await;
     } else {
         crawl_event(EXCHANGE_NAME, MessageType::Ticker, market_type, symbols, tx).await;
     }

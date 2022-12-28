@@ -34,7 +34,7 @@ async fn crawl_all(msg_type: MessageType) {
             MessageType::FundingRate => {
                 crawl_funding_rate(EXCHANGE_NAME, MarketType::Unknown, None, tx).await;
             }
-            _ => panic!("unsupported message type {}", msg_type),
+            _ => panic!("unsupported message type {msg_type}"),
         };
     });
 

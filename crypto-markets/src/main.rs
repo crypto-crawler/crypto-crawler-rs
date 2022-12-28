@@ -19,6 +19,6 @@ fn main() {
     let resp = fetch_markets(exchange, market_type.unwrap());
     match resp {
         Ok(markets) => println!("{}", serde_json::to_string_pretty(&markets).unwrap()),
-        Err(err) => println!("{}", err),
+        Err(err) => println!("{err}"),
     }
 }

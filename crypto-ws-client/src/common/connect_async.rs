@@ -29,7 +29,7 @@ pub async fn connect_async(
         let proxy_url = Url::parse(&proxy_env).unwrap();
         let proxy_scheme = proxy_url.scheme().to_lowercase();
         if proxy_scheme.as_str() != "socks5" {
-            panic!("Unsupported proxy scheme {}", proxy_scheme);
+            panic!("Unsupported proxy scheme {proxy_scheme}");
         }
         let proxy_addr = format!(
             "{}:{}",

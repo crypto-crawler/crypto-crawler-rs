@@ -48,7 +48,7 @@ struct Response {
 // product_type: umcbl, LinearSwap; dmcbl, InverseSwap;
 fn fetch_swap_markets_raw(product_type: &str) -> Result<Vec<SwapMarket>> {
     let txt = http_get(
-        format!("https://api.bitget.com/api/mix/v1/market/contracts?productType={}", product_type)
+        format!("https://api.bitget.com/api/mix/v1/market/contracts?productType={product_type}")
             .as_str(),
         None,
     )?;
@@ -120,22 +120,22 @@ fn to_market(m: SwapMarket) -> Market {
     } else {
         panic!("unexpected symbol: {}", m.symbol);
     };
-    let delivery_time =
-        if market_type == MarketType::InverseFuture || market_type == MarketType::LinearFuture {
-            let date = m.symbol.split('_').last().unwrap();
-            debug_assert_eq!(date.len(), 6); // e.g., 230331
-            let year = &date[..2];
-            let month = &date[2..4];
-            let day = &date[4..];
-            let delivery_time = DateTime::parse_from_rfc3339(
-                format!("20{}-{}-{}T00:00:00+00:00", year, month, day).as_str(),
-            )
-            .unwrap()
-            .timestamp_millis() as u64;
-            Some(delivery_time)
-        } else {
-            None
-        };
+    let delivery_time = if market_type == MarketType::InverseFuture
+        || market_type == MarketType::LinearFuture
+    {
+        let date = m.symbol.split('_').last().unwrap();
+        debug_assert_eq!(date.len(), 6); // e.g., 230331
+        let year = &date[..2];
+        let month = &date[2..4];
+        let day = &date[4..];
+        let delivery_time =
+            DateTime::parse_from_rfc3339(format!("20{year}-{month}-{day}T00:00:00+00:00").as_str())
+                .unwrap()
+                .timestamp_millis() as u64;
+        Some(delivery_time)
+    } else {
+        None
+    };
     Market {
         exchange: EXCHANGE_NAME.to_string(),
         market_type,

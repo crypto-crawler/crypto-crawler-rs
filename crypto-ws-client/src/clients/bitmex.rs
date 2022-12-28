@@ -61,7 +61,7 @@ impl BitmexCommandTranslator {
     fn topics_to_command(topics: &[(String, String)], subscribe: bool) -> String {
         let raw_channels = topics
             .iter()
-            .map(|(channel, symbol)| format!("{}:{}", channel, symbol))
+            .map(|(channel, symbol)| format!("{channel}:{symbol}"))
             .collect::<Vec<String>>();
         format!(
             r#"{{"op":"{}","args":{}}}"#,
@@ -79,7 +79,7 @@ impl BitmexCommandTranslator {
             86400 => "1d",
             _ => panic!("BitMEX has intervals 1m,5m,1h,1d"),
         };
-        format!("tradeBin{}", interval_str)
+        format!("tradeBin{interval_str}")
     }
 }
 
@@ -107,7 +107,7 @@ impl MessageHandler for BitmexMessageHandler {
                 }
                 400 => {
                     if error_msg.starts_with("Unknown") {
-                        panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                        panic!("Received {msg} from {EXCHANGE_NAME}");
                     } else if error_msg.starts_with("You are already subscribed to this topic") {
                         info!("Received {} from {}", msg, EXCHANGE_NAME)
                     } else {

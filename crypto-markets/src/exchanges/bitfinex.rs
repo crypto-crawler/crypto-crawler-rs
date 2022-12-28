@@ -13,7 +13,7 @@ pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
     match market_type {
         MarketType::Spot => fetch_spot_symbols(),
         MarketType::LinearSwap => fetch_linear_swap_symbols(),
-        _ => panic!("Unsupported market_type: {}", market_type),
+        _ => panic!("Unsupported market_type: {market_type}"),
     }
 }
 
@@ -47,7 +47,7 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
         MarketType::LinearSwap => {
             raw_markets.into_iter().filter(|x| x.pair.ends_with("f0")).collect()
         }
-        _ => panic!("Unsupported market_type: {}", market_type),
+        _ => panic!("Unsupported market_type: {market_type}"),
     };
     let markets: Vec<Market> = raw_markets
         .into_iter()
@@ -67,7 +67,7 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
             Market {
                 exchange: "bitfinex".to_string(),
                 market_type,
-                symbol: format!("t{}", symbol),
+                symbol: format!("t{symbol}"),
                 base_id,
                 quote_id: quote_id.clone(),
                 settle_id: if market_type == MarketType::LinearSwap {
@@ -112,7 +112,7 @@ fn fetch_spot_symbols() -> Result<Vec<String>> {
     let symbols = pairs[0]
         .iter()
         .filter(|x| !x.starts_with("TEST"))
-        .map(|p| format!("t{}", p))
+        .map(|p| format!("t{p}"))
         .collect::<Vec<String>>();
     Ok(symbols)
 }
@@ -124,7 +124,7 @@ fn fetch_linear_swap_symbols() -> Result<Vec<String>> {
     let symbols = pairs[0]
         .iter()
         .filter(|x| !x.starts_with("TEST"))
-        .map(|p| format!("t{}", p))
+        .map(|p| format!("t{p}"))
         .collect::<Vec<String>>();
     Ok(symbols)
 }

@@ -233,7 +233,7 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
         }
         MarketType::InverseFuture => futures.iter().filter(|x| x.isInverse).cloned().collect(),
         MarketType::QuantoFuture => futures.iter().filter(|x| x.isQuanto).cloned().collect(),
-        _ => panic!("Unsupported market_type: {}", market_type),
+        _ => panic!("Unsupported market_type: {market_type}"),
     };
     Ok(filtered)
 }

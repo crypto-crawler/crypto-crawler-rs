@@ -25,6 +25,6 @@ impl HuobiSpotRestClient {
     ///
     /// For example: <https://api.huobi.pro/market/depth?symbol=btcusdt&type=step0>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/market/depth?symbol={}&type=step0", symbol))
+        gen_api!(format!("/market/depth?symbol={symbol}&type=step0"))
     }
 }

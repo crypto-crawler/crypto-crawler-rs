@@ -73,7 +73,7 @@ impl MessageHandler for BitstampMessageHandler {
             }
             "bts:error" => {
                 error!("Received {} from {}", msg, EXCHANGE_NAME);
-                panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                panic!("Received {msg} from {EXCHANGE_NAME}");
             }
             "bts:request_reconnect" => {
                 warn!("Received {}, which means Bitstamp is under maintenance", msg);

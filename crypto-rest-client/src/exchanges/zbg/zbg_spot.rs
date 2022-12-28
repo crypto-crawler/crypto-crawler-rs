@@ -24,6 +24,6 @@ impl ZbgSpotRestClient {
     ///
     /// For example: <https://kline.zbg.com/api/data/v1/entrusts?marketName=btc_usdt&dataSize=200>,
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/api/data/v1/entrusts?marketName={}&dataSize=200", symbol))
+        gen_api!(format!("/api/data/v1/entrusts?marketName={symbol}&dataSize=200"))
     }
 }

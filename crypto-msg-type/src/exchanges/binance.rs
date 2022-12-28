@@ -10,7 +10,7 @@ fn msg_type_to_channel(msg_type: MessageType) -> &'static str {
         MessageType::BBO => "bookTicker",
         MessageType::Ticker => "ticker",
         MessageType::Candlestick => "kline",
-        _ => panic!("Unknown message type {}", msg_type),
+        _ => panic!("Unknown message type {msg_type}"),
     }
 }
 

@@ -37,7 +37,7 @@ struct FutureMarket {
 // See https://www.gateio.pro/docs/apiv4/zh_CN/index.html#595cd9fe3c-2
 fn fetch_future_markets_raw(settle: &str) -> Result<Vec<FutureMarket>> {
     let txt = http_get(
-        format!("https://api.gateio.ws/api/v4/delivery/{}/contracts", settle).as_str(),
+        format!("https://api.gateio.ws/api/v4/delivery/{settle}/contracts").as_str(),
         None,
     )?;
     let markets = serde_json::from_str::<Vec<FutureMarket>>(&txt)?;

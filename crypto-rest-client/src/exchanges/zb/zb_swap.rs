@@ -27,9 +27,9 @@ impl ZbSwapRestClient {
     /// * <https://fapi.zb.com/qc/api/public/v1/depth?symbol=BTC_QC&size=200>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
         if symbol.ends_with("_QC") {
-            gen_api!(format!("/qc/api/public/v1/depth?symbol={}&size=200", symbol))
+            gen_api!(format!("/qc/api/public/v1/depth?symbol={symbol}&size=200"))
         } else {
-            gen_api!(format!("/api/public/v1/depth?symbol={}&size=200", symbol))
+            gen_api!(format!("/api/public/v1/depth?symbol={symbol}&size=200"))
         }
     }
 }

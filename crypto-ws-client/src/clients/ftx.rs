@@ -74,7 +74,7 @@ impl MessageHandler for FtxMessageHandler {
                         // Already subscribed
                         warn!("Received {} from {}", msg, EXCHANGE_NAME);
                     }
-                    _ => panic!("Received {} from {}", msg, EXCHANGE_NAME),
+                    _ => panic!("Received {msg} from {EXCHANGE_NAME}"),
                 }
                 MiscMessage::Other
             }

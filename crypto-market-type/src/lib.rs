@@ -129,6 +129,6 @@ pub fn get_market_types(exchange: &str) -> Vec<MarketType> {
         ],
         "zb" => vec![MarketType::Spot, MarketType::LinearSwap],
         "zbg" => vec![MarketType::Spot, MarketType::InverseSwap, MarketType::LinearSwap],
-        _ => panic!("Unknown exchange {}", exchange),
+        _ => panic!("Unknown exchange {exchange}"),
     }
 }

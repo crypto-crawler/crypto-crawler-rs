@@ -10,7 +10,7 @@ pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result
         MarketType::InverseSwap | MarketType::LinearSwap => {
             mexc_swap::MexcSwapRestClient::fetch_l2_snapshot
         }
-        _ => panic!("MEXC unknown market_type: {}", market_type),
+        _ => panic!("MEXC unknown market_type: {market_type}"),
     };
 
     func(symbol)

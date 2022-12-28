@@ -85,8 +85,8 @@ impl ZbgCommandTranslator {
         let contract_id = self
             .symbol_id_map
             .get(symbol)
-            .unwrap_or_else(|| panic!("Failed to find contract_id for {}", symbol));
-        format!("{}-{}", channel, contract_id)
+            .unwrap_or_else(|| panic!("Failed to find contract_id for {symbol}"));
+        format!("{channel}-{contract_id}")
     }
 
     fn to_candlestick_raw_channel(&self, pair: &str, interval: usize) -> String {
@@ -95,13 +95,13 @@ impl ZbgCommandTranslator {
         if !valid_set.contains(&interval) {
             let joined =
                 valid_set.into_iter().map(|x| x.to_string()).collect::<Vec<String>>().join(",");
-            panic!("ZBG Swap available intervals {}", joined);
+            panic!("ZBG Swap available intervals {joined}");
         }
 
         let contract_id = self
             .symbol_id_map
             .get(pair)
-            .unwrap_or_else(|| panic!("Failed to find contract_id for {}", pair));
+            .unwrap_or_else(|| panic!("Failed to find contract_id for {pair}"));
 
         format!("future_kline-{}-{}", contract_id, interval * 1000)
     }

@@ -27,7 +27,7 @@ impl MexcSpotRestClient {
     /// For example: <https://www.mexc.com/open/api/v2/market/deals?symbol=BTC_USDT&limit=1000>
     #[allow(non_snake_case)]
     pub fn fetch_trades(symbol: &str) -> Result<String> {
-        gen_api!(format!("/open/api/v2/market/deals?symbol={}&limit=1000", symbol))
+        gen_api!(format!("/open/api/v2/market/deals?symbol={symbol}&limit=1000"))
     }
 
     /// Get latest Level2 snapshot of orderbook.
@@ -36,6 +36,6 @@ impl MexcSpotRestClient {
     ///
     /// For example: <https://www.mexc.com/open/api/v2/market/depth?symbol=BTC_USDT&depth=2000>
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/open/api/v2/market/depth?symbol={}&depth=2000", symbol))
+        gen_api!(format!("/open/api/v2/market/depth?symbol={symbol}&depth=2000"))
     }
 }

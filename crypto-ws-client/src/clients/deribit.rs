@@ -90,9 +90,9 @@ impl DeribitCommandTranslator {
             21600 => "360",
             43200 => "720",
             86400 => "1D",
-            _ => panic!("Unknown interval {}", interval),
+            _ => panic!("Unknown interval {interval}"),
         };
-        format!("chart.trades.SYMBOL.{}", interval_str)
+        format!("chart.trades.SYMBOL.{interval_str}")
     }
 }
 
@@ -101,7 +101,7 @@ impl MessageHandler for DeribitMessageHandler {
         let obj = serde_json::from_str::<HashMap<String, Value>>(msg).unwrap();
 
         if obj.contains_key("error") {
-            panic!("Received {} from {}", msg, EXCHANGE_NAME);
+            panic!("Received {msg} from {EXCHANGE_NAME}");
         } else if obj.contains_key("result") {
             info!("Received {} from {}", msg, EXCHANGE_NAME);
             MiscMessage::Other

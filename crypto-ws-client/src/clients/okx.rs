@@ -124,7 +124,7 @@ impl OkxCommandTranslator {
             432000 => "candle5D",
             604800 => "candle1W",
             2592000 => "candle1M",
-            _ => panic!("Invalid OKX candlestick interval {}", interval),
+            _ => panic!("Invalid OKX candlestick interval {interval}"),
         }
     }
 }
@@ -152,7 +152,7 @@ impl MessageHandler for OkxMessageHandler {
                             // websocket while they exist in `/v3/instruments`
                             error!("Received {} from {}", msg, EXCHANGE_NAME);
                         }
-                        _ => panic!("Received {} from {}", msg, EXCHANGE_NAME),
+                        _ => panic!("Received {msg} from {EXCHANGE_NAME}"),
                     }
                 }
                 "subscribe" => info!("Received {} from {}", msg, EXCHANGE_NAME),

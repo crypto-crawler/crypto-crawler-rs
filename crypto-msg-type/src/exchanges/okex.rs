@@ -28,7 +28,7 @@ fn msg_type_to_channel(msg_type: MessageType) -> &'static str {
         MessageType::BBO => "ticker",
         MessageType::Ticker => "ticker",
         MessageType::Candlestick => "candle",
-        _ => panic!("Unknown message type {}", msg_type),
+        _ => panic!("Unknown message type {msg_type}"),
     }
 }
 
@@ -41,7 +41,7 @@ fn channel_symbol_to_topic(
     if channel == "candle" {
         format!("{}/candle{}s:{}", market_type, configs.unwrap().get("interval").unwrap(), symbol)
     } else {
-        format!("{}/{}:{}", market_type, channel, symbol)
+        format!("{market_type}/{channel}:{symbol}")
     }
 }
 

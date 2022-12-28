@@ -6,7 +6,7 @@ macro_rules! gen_test_code {
             ws_client.$func_name($symbols).await;
             // run for 60 seconds at most
             let _ = tokio::time::timeout(std::time::Duration::from_secs(60), ws_client.run()).await;
-            ws_client.close();
+            ws_client.close().await;
         });
 
         let mut messages = Vec::<String>::new();
@@ -27,7 +27,7 @@ macro_rules! gen_test_subscribe_candlestick {
             ws_client.subscribe_candlestick($symbol_interval_list).await;
             // run for 60 seconds at most
             let _ = tokio::time::timeout(std::time::Duration::from_secs(60), ws_client.run()).await;
-            ws_client.close();
+            ws_client.close().await;
         });
 
         let mut messages = Vec::<String>::new();

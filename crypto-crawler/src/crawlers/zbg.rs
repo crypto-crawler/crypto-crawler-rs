@@ -28,7 +28,7 @@ pub(crate) async fn crawl_ticker(
             let ws_client = ZbgSpotWSClient::new(tx, None).await;
             ws_client.send(&commands).await;
             ws_client.run().await;
-            ws_client.close();
+            ws_client.close().await;
         } else {
             let tx = create_conversion_thread(
                 EXCHANGE_NAME.to_string(),
@@ -42,7 +42,7 @@ pub(crate) async fn crawl_ticker(
             let ws_client = ZbgSwapWSClient::new(tx, None).await;
             ws_client.send(&commands).await;
             ws_client.run().await;
-            ws_client.close();
+            ws_client.close().await;
         }
     } else {
         crawl_event(EXCHANGE_NAME, MessageType::Ticker, market_type, symbols, tx).await;

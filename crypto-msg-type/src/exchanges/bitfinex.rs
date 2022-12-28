@@ -12,14 +12,10 @@ fn msg_type_symbol_to_command(
     match msg_type {
         MessageType::Trade | MessageType::Ticker => {
             let channel = if msg_type == MessageType::Trade { "trades" } else { "ticker" };
-            format!(
-                r#"{{"event":"{}", "channel":"{}", "symbol":"{}"}}"#,
-                sub_or_unsub, channel, symbol
-            )
+            format!(r#"{{"event":"{sub_or_unsub}", "channel":"{channel}", "symbol":"{symbol}"}}"#)
         }
         MessageType::L2Event => format!(
-            r#"{{"event":"{}", "channel":"book", "symbol":"{}", "prec":"P0", "frec":"F0", "len":25}}"#,
-            sub_or_unsub, symbol
+            r#"{{"event":"{sub_or_unsub}", "channel":"book", "symbol":"{symbol}", "prec":"P0", "frec":"F0", "len":25}}"#
         ),
         MessageType::L3Event | MessageType::BBO => format!(
             r#"{{"event":"{}", "channel":"book", "symbol": "{}", "prec":"R0", "len": {}}}"#,
@@ -33,7 +29,7 @@ fn msg_type_symbol_to_command(
             configs.unwrap().get("interval").unwrap(),
             symbol
         ),
-        _ => panic!("Unknown message type {}", msg_type),
+        _ => panic!("Unknown message type {msg_type}"),
     }
 }
 

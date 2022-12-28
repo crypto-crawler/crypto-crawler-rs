@@ -78,7 +78,7 @@ impl<const MARKET_TYPE: char> BitgetCommandTranslator<MARKET_TYPE> {
             43200 => "candle12H",
             86400 => "candle1D",
             604800 => "candle1W",
-            _ => panic!("Invalid Bitget candlestick interval {}", interval),
+            _ => panic!("Invalid Bitget candlestick interval {interval}"),
         }
     }
 }

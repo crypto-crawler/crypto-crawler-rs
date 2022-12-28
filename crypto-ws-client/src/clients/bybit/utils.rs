@@ -11,7 +11,7 @@ pub(super) const EXCHANGE_NAME: &str = "bybit";
 pub(super) fn topics_to_command(topics: &[(String, String)], subscribe: bool) -> String {
     let raw_channels = topics
         .iter()
-        .map(|(channel, symbol)| format!("{}.{}", channel, symbol))
+        .map(|(channel, symbol)| format!("{channel}.{symbol}"))
         .collect::<Vec<String>>();
     format!(
         r#"{{"op":"{}","args":{}}}"#,
@@ -39,7 +39,7 @@ impl MessageHandler for BybitMessageHandler {
                     }
                 } else {
                     error!("Received {} from {}", msg, EXCHANGE_NAME);
-                    panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                    panic!("Received {msg} from {EXCHANGE_NAME}");
                 }
             } else {
                 warn!("Received {} from {}", msg, EXCHANGE_NAME);

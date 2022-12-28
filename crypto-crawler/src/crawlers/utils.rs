@@ -56,7 +56,7 @@ pub fn fetch_symbols_retry(exchange: &str, market_type: MarketType) -> Vec<Strin
 pub(super) fn check_args(exchange: &str, market_type: MarketType, symbols: &[String]) {
     let market_types = get_market_types(exchange);
     if !market_types.contains(&market_type) {
-        panic!("{} does NOT have the {} market type", exchange, market_type);
+        panic!("{exchange} does NOT have the {market_type} market type");
     }
 
     let valid_symbols = fetch_symbols_retry(exchange, market_type);
@@ -75,17 +75,17 @@ pub(super) fn check_args(exchange: &str, market_type: MarketType, symbols: &[Str
 
 fn get_cooldown_time_per_request(exchange: &str, market_type: MarketType) -> Duration {
     let millis = match exchange {
-        "binance" => 500,      // spot weitht 1200, contract weight 2400
-        "bitget" => 100,       // 20 requests per 2 seconds
-        "bithumb" => 8 * 10,   /* 135 requests per 1 second for public APIs, multiplied by 10 to
-                                 * reduce its frequency */
-        "bitmex" => 2000, /* 60 requests per minute on all routes (reduced to 30 when
-                            * unauthenticated) */
-        "bitstamp" => 75 * 10, /* 8000 requests per 10 minutes, but bitstamp orderbook is too
-                                 * big, need to reduce its frequency */
-        "bitz" => 34,          // no more than 30 times within 1 second
-        "bybit" => 20 * 10,    /* 50 requests per second continuously for 2 minutes, multiplied
-                                 * by 10 to reduce its frequency */
+        "binance" => 500,    // spot weitht 1200, contract weight 2400
+        "bitget" => 100,     // 20 requests per 2 seconds
+        "bithumb" => 8 * 10, /* 135 requests per 1 second for public APIs, multiplied by 10 to */
+        // reduce its frequency
+        "bitmex" => 2000, /* 60 requests per minute on all routes (reduced to 30 when */
+        // unauthenticated)
+        "bitstamp" => 75 * 10, /* 8000 requests per 10 minutes, but bitstamp orderbook is too */
+        // big, need to reduce its frequency
+        "bitz" => 34,       // no more than 30 times within 1 second
+        "bybit" => 20 * 10, /* 50 requests per second continuously for 2 minutes, multiplied */
+        // by 10 to reduce its frequency
         "coinbase_pro" => 100, //  10 requests per second
         "deribit" => 50,       // 20 requests per second
         "dydx" => 100,         // 100 requests per 10 seconds
@@ -309,7 +309,7 @@ pub(crate) fn crawl_open_interest(exchange: &str, market_type: MarketType, tx: S
                     }
                 }
             }
-            _ => panic!("{} does NOT have open interest RESTful API", exchange),
+            _ => panic!("{exchange} does NOT have open interest RESTful API"),
         }
         std::thread::sleep(cooldown_time * 2); // if real_symbols is empty, CPU will be 100% without this line
     }
@@ -329,7 +329,7 @@ async fn subscribe_with_lock(
         MessageType::L3Event => ws_client.subscribe_l3_orderbook(&symbols).await,
         MessageType::L2TopK => ws_client.subscribe_orderbook_topk(&symbols).await,
         MessageType::Ticker => ws_client.subscribe_ticker(&symbols).await,
-        _ => panic!("{} {} does NOT have {} websocket channel", exchange, market_type, msg_type),
+        _ => panic!("{exchange} {market_type} does NOT have {msg_type} websocket channel"),
     };
 }
 
@@ -337,9 +337,9 @@ fn get_connection_interval_ms(exchange: &str, _market_type: MarketType) -> Optio
     match exchange {
         "bitfinex" => Some(3000), /* you cannot open more than 20 connections per minute, see https://docs.bitfinex.com/docs/requirements-and-limitations#websocket-rate-limits */
         // "bitmex" => Some(9000), // 40 per hour
-        "bitz" => Some(100), /* `cat crawler-trade-bitz-spot-error-12.log` has many "429 Too
-                               * Many Requests" */
-        "kucoin" => Some(2000), /*  Connection Limit: 30 per minute, see https://docs.kucoin.com/#connection-times */
+        "bitz" => Some(100), /* `cat crawler-trade-bitz-spot-error-12.log` has many "429 Too */
+        // Many Requests"
+        "kucoin" => Some(2000), /* Connection Limit: 30 per minute, see https://docs.kucoin.com/#connection-times */
         "okx" => Some(1000), /* Connection limit: 1 time per second, https://www.okx.com/docs-v5/en/#websocket-api-connect */
         _ => None,
     }
@@ -382,7 +382,7 @@ async fn create_ws_client_internal(
                 Arc::new(BinanceLinearWSClient::new(tx, None).await)
             }
             MarketType::EuropeanOption => Arc::new(BinanceOptionWSClient::new(tx, None).await),
-            _ => panic!("Binance does NOT have the {} market type", market_type),
+            _ => panic!("Binance does NOT have the {market_type} market type"),
         },
         "bitfinex" => Arc::new(BitfinexWSClient::new(tx, None).await),
         "bitget" => match market_type {
@@ -390,27 +390,27 @@ async fn create_ws_client_internal(
             MarketType::InverseFuture | MarketType::InverseSwap | MarketType::LinearSwap => {
                 Arc::new(BitgetSwapWSClient::new(tx, None).await)
             }
-            _ => panic!("Bitget does NOT have the {} market type", market_type),
+            _ => panic!("Bitget does NOT have the {market_type} market type"),
         },
         "bithumb" => Arc::new(BithumbWSClient::new(tx, None).await),
         "bitmex" => Arc::new(BitmexWSClient::new(tx, None).await),
         "bitstamp" => Arc::new(BitstampWSClient::new(tx, None).await),
         "bitz" => match market_type {
             MarketType::Spot => Arc::new(BitzSpotWSClient::new(tx, None).await),
-            _ => panic!("Bitz does NOT have the {} market type", market_type),
+            _ => panic!("Bitz does NOT have the {market_type} market type"),
         },
         "bybit" => match market_type {
             MarketType::InverseFuture | MarketType::InverseSwap => {
                 Arc::new(BybitInverseWSClient::new(tx, None).await)
             }
             MarketType::LinearSwap => Arc::new(BybitLinearSwapWSClient::new(tx, None).await),
-            _ => panic!("Bybit does NOT have the {} market type", market_type),
+            _ => panic!("Bybit does NOT have the {market_type} market type"),
         },
         "coinbase_pro" => Arc::new(CoinbaseProWSClient::new(tx, None).await),
         "deribit" => Arc::new(DeribitWSClient::new(tx, None).await),
         "dydx" => match market_type {
             MarketType::LinearSwap => Arc::new(DydxSwapWSClient::new(tx, None).await),
-            _ => panic!("dYdX does NOT have the {} market type", market_type),
+            _ => panic!("dYdX does NOT have the {market_type} market type"),
         },
         "ftx" => Arc::new(FtxWSClient::new(tx, None).await),
         "gate" => match market_type {
@@ -419,7 +419,7 @@ async fn create_ws_client_internal(
             MarketType::LinearSwap => Arc::new(GateLinearSwapWSClient::new(tx, None).await),
             MarketType::InverseFuture => Arc::new(GateInverseFutureWSClient::new(tx, None).await),
             MarketType::LinearFuture => Arc::new(GateLinearFutureWSClient::new(tx, None).await),
-            _ => panic!("Gate does NOT have the {} market type", market_type),
+            _ => panic!("Gate does NOT have the {market_type} market type"),
         },
         "huobi" => match market_type {
             MarketType::Spot => Arc::new(HuobiSpotWSClient::new(tx, None).await),
@@ -427,43 +427,43 @@ async fn create_ws_client_internal(
             MarketType::LinearSwap => Arc::new(HuobiLinearSwapWSClient::new(tx, None).await),
             MarketType::InverseSwap => Arc::new(HuobiInverseSwapWSClient::new(tx, None).await),
             MarketType::EuropeanOption => Arc::new(HuobiOptionWSClient::new(tx, None).await),
-            _ => panic!("Huobi does NOT have the {} market type", market_type),
+            _ => panic!("Huobi does NOT have the {market_type} market type"),
         },
         "kraken" => match market_type {
             MarketType::Spot => Arc::new(KrakenSpotWSClient::new(tx, None).await),
             MarketType::InverseFuture | MarketType::InverseSwap => {
                 Arc::new(KrakenFuturesWSClient::new(tx, None).await)
             }
-            _ => panic!("Kraken does NOT have the {} market type", market_type),
+            _ => panic!("Kraken does NOT have the {market_type} market type"),
         },
         "kucoin" => match market_type {
             MarketType::Spot => Arc::new(KuCoinSpotWSClient::new(tx, None).await),
             MarketType::InverseSwap | MarketType::LinearSwap | MarketType::InverseFuture => {
                 Arc::new(KuCoinSwapWSClient::new(tx, None).await)
             }
-            _ => panic!("KuCoin does NOT have the {} market type", market_type),
+            _ => panic!("KuCoin does NOT have the {market_type} market type"),
         },
         "mexc" => match market_type {
             MarketType::Spot => Arc::new(MexcSpotWSClient::new(tx, None).await),
             MarketType::LinearSwap | MarketType::InverseSwap => {
                 Arc::new(MexcSwapWSClient::new(tx, None).await)
             }
-            _ => panic!("MEXC does NOT have the {} market type", market_type),
+            _ => panic!("MEXC does NOT have the {market_type} market type"),
         },
         "okx" => Arc::new(OkxWSClient::new(tx, None).await),
         "zb" => match market_type {
             MarketType::Spot => Arc::new(ZbSpotWSClient::new(tx, None).await),
             MarketType::LinearSwap => Arc::new(ZbSwapWSClient::new(tx, None).await),
-            _ => panic!("ZB does NOT have the {} market type", market_type),
+            _ => panic!("ZB does NOT have the {market_type} market type"),
         },
         "zbg" => match market_type {
             MarketType::Spot => Arc::new(ZbgSpotWSClient::new(tx, None).await),
             MarketType::InverseSwap | MarketType::LinearSwap => {
                 Arc::new(ZbgSwapWSClient::new(tx, None).await)
             }
-            _ => panic!("ZBG does NOT have the {} market type", market_type),
+            _ => panic!("ZBG does NOT have the {market_type} market type"),
         },
-        _ => panic!("Unknown exchange {}", exchange),
+        _ => panic!("Unknown exchange {exchange}"),
     }
 }
 
@@ -555,8 +555,7 @@ fn create_symbol_discovery_thread(
                     }
                     if num_subscribed_of_last_client >= num_topics_per_connection {
                         panic!(
-                            "The last connection has subscribed {} topics, which is more than {}, restarting the process",
-                             num_subscribed_of_last_client, num_topics_per_connection,
+                            "The last connection has subscribed {num_subscribed_of_last_client} topics, which is more than {num_topics_per_connection}, restarting the process",
                         ); // pm2 will restart the whole process
                     }
                 }
@@ -657,7 +656,7 @@ fn create_parser_thread(
                     )
                     .unwrap()
                 }
-                _ => panic!("unknown msg type {}", msg_type),
+                _ => panic!("unknown msg type {msg_type}"),
             };
             if tx.send(parsed).is_err() {
                 break; // break the loop if there is no receiver
@@ -694,7 +693,7 @@ async fn crawl_event_one_chunk(
 
     tokio::task::spawn(async move {
         ws_client.run().await;
-        ws_client.close();
+        ws_client.close().await;
     })
 }
 
@@ -768,7 +767,7 @@ pub(crate) async fn crawl_event(
             );
         }
         ws_client.run().await;
-        ws_client.close();
+        ws_client.close().await;
     } else {
         // split to chunks
         let mut chunks: Vec<Vec<String>> = Vec::new();
@@ -874,7 +873,7 @@ async fn crawl_candlestick_one_chunk(
 
     tokio::task::spawn(async move {
         ws_client.run().await;
-        ws_client.close();
+        ws_client.close().await;
     })
 }
 
@@ -948,7 +947,7 @@ pub(crate) async fn crawl_candlestick_ext(
             );
         }
         ws_client.run().await;
-        ws_client.close();
+        ws_client.close().await;
     } else {
         // split to chunks
         let mut chunks: Vec<Vec<(String, usize)>> = Vec::new();

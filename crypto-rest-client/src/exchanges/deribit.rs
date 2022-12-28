@@ -31,8 +31,7 @@ impl DeribitRestClient {
     /// For example: <https://www.deribit.com/api/v2/public/get_last_trades_by_instrument?count=100&instrument_name=BTC-PERPETUAL>
     pub fn fetch_trades(symbol: &str) -> Result<String> {
         gen_api!(format!(
-            "/public/get_last_trades_by_instrument?count=100&instrument_name={}",
-            symbol
+            "/public/get_last_trades_by_instrument?count=100&instrument_name={symbol}"
         ))
     }
 
@@ -42,7 +41,7 @@ impl DeribitRestClient {
     ///
     /// For example: <https://www.deribit.com/api/v2/public/get_order_book?depth=2000&instrument_name=BTC-PERPETUAL>,
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/public/get_order_book?depth=2000&instrument_name={}", symbol,))
+        gen_api!(format!("/public/get_order_book?depth=2000&instrument_name={symbol}",))
     }
 
     /// Get open interest.
@@ -52,13 +51,13 @@ impl DeribitRestClient {
     /// - <https://www.deribit.com/api/v2/public/get_book_summary_by_instrument?instrument_name=BTC-PERPETUAL>
     pub fn fetch_open_interest(symbol: Option<&str>) -> Result<String> {
         if let Some(symbol) = symbol {
-            gen_api!(format!("/public/get_book_summary_by_instrument?instrument_name={}", symbol))
+            gen_api!(format!("/public/get_book_summary_by_instrument?instrument_name={symbol}"))
         } else {
             let btc = gen_api!("/public/get_book_summary_by_currency?currency=BTC")?;
             let eth = gen_api!("/public/get_book_summary_by_currency?currency=ETH")?;
             let sol = gen_api!("/public/get_book_summary_by_currency?currency=SOL")?;
             let usdc = gen_api!("/public/get_book_summary_by_currency?currency=USDC")?;
-            Ok(format!("{}\n{}\n{}\n{}", btc, eth, sol, usdc))
+            Ok(format!("{btc}\n{eth}\n{sol}\n{usdc}"))
         }
     }
 }

@@ -46,7 +46,7 @@ mod huobi_spot {
             ws_client.subscribe_orderbook(&["btcusdt".to_string()]).await;
             // run for 60 seconds at most
             let _ = tokio::time::timeout(std::time::Duration::from_secs(60), ws_client.run()).await;
-            ws_client.close();
+            ws_client.close().await;
         });
 
         rx.into_iter().next().expect("should has at least 1 element");
@@ -174,7 +174,7 @@ mod huobi_linear_swap {
                 .await;
             // run for 60 seconds at most
             let _ = tokio::time::timeout(std::time::Duration::from_secs(60), ws_client.run()).await;
-            ws_client.close();
+            ws_client.close().await;
         });
 
         rx.into_iter().next().expect("should has at least 1 element");
@@ -192,7 +192,7 @@ mod huobi_linear_swap {
             ws_client.send(&[r#"{"topic":"public.*.funding_rate","op":"sub"}"#.to_string()]).await;
             // run for 60 seconds at most
             let _ = tokio::time::timeout(std::time::Duration::from_secs(60), ws_client.run()).await;
-            ws_client.close();
+            ws_client.close().await;
         });
 
         rx.into_iter().next().expect("should has at least 1 element");
@@ -262,7 +262,7 @@ mod huobi_inverse_swap {
                 .await;
             // run for 60 seconds at most
             let _ = tokio::time::timeout(std::time::Duration::from_secs(60), ws_client.run()).await;
-            ws_client.close();
+            ws_client.close().await;
         });
 
         rx.into_iter().next().expect("should has at least 1 element");
@@ -278,7 +278,7 @@ mod huobi_inverse_swap {
             ws_client.send(&[r#"{"topic":"public.*.funding_rate","op":"sub"}"#.to_string()]).await;
             // run for 60 seconds at most
             let _ = tokio::time::timeout(std::time::Duration::from_secs(60), ws_client.run()).await;
-            ws_client.close();
+            ws_client.close().await;
         });
 
         rx.into_iter().next().expect("should has at least 1 element");

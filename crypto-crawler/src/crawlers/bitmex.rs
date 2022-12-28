@@ -20,14 +20,14 @@ async fn crawl_all(msg_type: MessageType, tx: Sender<Message>) {
         MessageType::BBO => "quote",
         MessageType::L2Snapshot => "orderBookL2",
         MessageType::FundingRate => "funding",
-        _ => panic!("unsupported message type {}", msg_type),
+        _ => panic!("unsupported message type {msg_type}"),
     };
-    let commands = vec![format!(r#"{{"op":"subscribe","args":["{}"]}}"#, channel)];
+    let commands = vec![format!(r#"{{"op":"subscribe","args":["{channel}"]}}"#)];
 
     let ws_client = BitmexWSClient::new(tx, None).await;
     ws_client.send(&commands).await;
     ws_client.run().await;
-    ws_client.close();
+    ws_client.close().await;
 }
 
 pub(crate) async fn crawl_trade(
@@ -127,9 +127,9 @@ pub(crate) async fn crawl_funding_rate(
                 let ws_client = BitmexWSClient::new(tx, None).await;
                 ws_client.subscribe(&topics).await;
                 ws_client.run().await;
-                ws_client.close();
+                ws_client.close().await;
             }
-            _ => panic!("BitMEX {} does NOT have funding rates", market_type),
+            _ => panic!("BitMEX {market_type} does NOT have funding rates"),
         }
     }
 }
@@ -155,7 +155,7 @@ pub(crate) async fn crawl_candlestick(
         let ws_client = BitmexWSClient::new(tx, None).await;
         ws_client.send(&commands).await;
         ws_client.run().await;
-        ws_client.close();
+        ws_client.close().await;
     } else {
         crawl_candlestick_ext(EXCHANGE_NAME, market_type, symbol_interval_list, tx).await;
     }

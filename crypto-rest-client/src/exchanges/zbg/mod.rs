@@ -13,7 +13,7 @@ pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result
         MarketType::InverseSwap | MarketType::LinearSwap => {
             zbg_swap::ZbgSwapRestClient::fetch_l2_snapshot
         }
-        _ => panic!("ZBG unknown market_type: {}", market_type),
+        _ => panic!("ZBG unknown market_type: {market_type}"),
     };
 
     func(symbol)
@@ -24,7 +24,7 @@ pub(crate) fn fetch_open_interest(market_type: MarketType, symbol: &str) -> Resu
         MarketType::InverseSwap | MarketType::LinearSwap => {
             zbg_swap::ZbgSwapRestClient::fetch_open_interest
         }
-        _ => panic!("ZBG {} does NOT have open interest data", market_type),
+        _ => panic!("ZBG {market_type} does NOT have open interest data"),
     };
 
     func(symbol)

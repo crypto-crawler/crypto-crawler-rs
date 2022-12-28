@@ -12,7 +12,7 @@ pub(crate) fn fetch_symbols(market_type: MarketType) -> Result<Vec<String>> {
         MarketType::InverseSwap => fetch_inverse_swap_symbols(),
         MarketType::LinearSwap => fetch_linear_swap_symbols(),
         MarketType::InverseFuture => fetch_inverse_future_symbols(),
-        _ => panic!("Unsupported market_type: {}", market_type),
+        _ => panic!("Unsupported market_type: {market_type}"),
     }
 }
 
@@ -21,7 +21,7 @@ pub(crate) fn fetch_markets(market_type: MarketType) -> Result<Vec<Market>> {
         MarketType::InverseSwap => fetch_inverse_swap_markets(),
         MarketType::LinearSwap => fetch_linear_swap_markets(),
         MarketType::InverseFuture => fetch_inverse_future_markets(),
-        _ => panic!("Unsupported market_type: {}", market_type),
+        _ => panic!("Unsupported market_type: {market_type}"),
     }
 }
 
@@ -124,7 +124,7 @@ fn to_market(raw_market: &BybitMarket) -> Market {
             let now = Utc::now();
             let year = Utc::now().year();
             let delivery_time = DateTime::parse_from_rfc3339(
-                format!("{}-{}-{}T00:00:00+00:00", year, month, day).as_str(),
+                format!("{year}-{month}-{day}T00:00:00+00:00").as_str(),
             )
             .unwrap();
             let delivery_time = if delivery_time > now {

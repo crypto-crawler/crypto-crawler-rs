@@ -73,7 +73,7 @@ impl MessageHandler for KrakenMessageHandler {
         if obj.contains_key("event") {
             let event = obj.get("event").unwrap().as_str().unwrap();
             match event {
-                "error" => panic!("Received {} from {}", msg, EXCHANGE_NAME),
+                "error" => panic!("Received {msg} from {EXCHANGE_NAME}"),
                 "info" | "subscribed" | "unsubscribed" => {
                     info!("Received {} from {}", msg, EXCHANGE_NAME);
                     MiscMessage::Other

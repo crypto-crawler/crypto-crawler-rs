@@ -13,7 +13,7 @@ pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result
         MarketType::InverseSwap | MarketType::LinearSwap => {
             bitz_swap::BitzSwapRestClient::fetch_l2_snapshot
         }
-        _ => panic!("BitZ unknown market_type: {}", market_type),
+        _ => panic!("BitZ unknown market_type: {market_type}"),
     };
 
     func(symbol)
@@ -24,7 +24,7 @@ pub(crate) fn fetch_open_interest(market_type: MarketType, symbol: Option<&str>)
         MarketType::LinearSwap | MarketType::InverseSwap => {
             bitz_swap::BitzSwapRestClient::fetch_open_interest
         }
-        _ => panic!("bitz {} does not have open interest", market_type),
+        _ => panic!("bitz {market_type} does not have open interest"),
     };
 
     func(symbol)

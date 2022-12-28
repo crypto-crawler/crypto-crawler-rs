@@ -49,7 +49,7 @@ fn get_lock_file_name(exchange: &str, market_type: MarketType, prefix: &str) -> 
             MarketType::LinearSwap | MarketType::LinearFuture => "binance_linear.lock".to_string(),
             MarketType::Spot => "binance_spot.lock".to_string(),
             MarketType::EuropeanOption => "binance_option.lock".to_string(),
-            _ => panic!("Unknown market_type {} of {}", market_type, exchange),
+            _ => panic!("Unknown market_type {market_type} of {exchange}"),
         },
         "bitfinex" => "bitfinex.lock".to_string(),
         "bitget" => match market_type {
@@ -57,13 +57,13 @@ fn get_lock_file_name(exchange: &str, market_type: MarketType, prefix: &str) -> 
                 "bitget_swap.lock".to_string()
             }
             MarketType::Spot => "bitget_spot.lock".to_string(),
-            _ => panic!("Unknown market_type {} of {}", market_type, exchange),
+            _ => panic!("Unknown market_type {market_type} of {exchange}"),
         },
         "bitmex" => "bitmex.lock".to_string(),
         "bitz" => match market_type {
             MarketType::InverseSwap | MarketType::LinearSwap => "bitz_swap.lock".to_string(),
             MarketType::Spot => "bitz_spot.lock".to_string(),
-            _ => panic!("Unknown market_type {} of {}", market_type, exchange),
+            _ => panic!("Unknown market_type {market_type} of {exchange}"),
         },
         "bybit" => {
             if prefix == "rest" {
@@ -74,7 +74,7 @@ fn get_lock_file_name(exchange: &str, market_type: MarketType, prefix: &str) -> 
                         "bybit_inverse.lock".to_string()
                     }
                     MarketType::LinearSwap => "bybit_linear.lock".to_string(),
-                    _ => panic!("Unknown market_type {} of {}", market_type, exchange),
+                    _ => panic!("Unknown market_type {market_type} of {exchange}"),
                 }
             }
         }
@@ -84,7 +84,7 @@ fn get_lock_file_name(exchange: &str, market_type: MarketType, prefix: &str) -> 
             MarketType::InverseSwap | MarketType::LinearSwap => "gate_swap.lock".to_string(),
             MarketType::InverseFuture | MarketType::LinearFuture => "gate_future.lock".to_string(),
             MarketType::Spot => "gate_spot.lock".to_string(),
-            _ => panic!("Unknown market_type {} of {}", market_type, exchange),
+            _ => panic!("Unknown market_type {market_type} of {exchange}"),
         },
         "kucoin" => {
             if prefix == "ws" {
@@ -96,29 +96,29 @@ fn get_lock_file_name(exchange: &str, market_type: MarketType, prefix: &str) -> 
                     | MarketType::InverseFuture => "kucoin_swap.lock".to_string(),
                     MarketType::Spot => "kucoin_spot.lock".to_string(),
                     MarketType::Unknown => "kucoin_unknown.lock".to_string(), // for OpenInterest
-                    _ => panic!("Unknown market_type {} of {}", market_type, exchange),
+                    _ => panic!("Unknown market_type {market_type} of {exchange}"),
                 }
             }
         }
         "mexc" => match market_type {
             MarketType::InverseSwap | MarketType::LinearSwap => "mexc_swap.lock".to_string(),
             MarketType::Spot => "mexc_spot.lock".to_string(),
-            _ => panic!("Unknown market_type {} of {}", market_type, exchange),
+            _ => panic!("Unknown market_type {market_type} of {exchange}"),
         },
         "okx" => "okx.lock".to_string(),
         "zb" => match market_type {
             MarketType::LinearSwap => "zb_swap.lock".to_string(),
             MarketType::Spot => "zb_spot.lock".to_string(),
-            _ => panic!("Unknown market_type {} of {}", market_type, exchange),
+            _ => panic!("Unknown market_type {market_type} of {exchange}"),
         },
         "zbg" => match market_type {
             MarketType::InverseSwap | MarketType::LinearSwap => "zbg_swap.lock".to_string(),
             MarketType::Spot => "zbg_spot.lock".to_string(),
-            _ => panic!("Unknown market_type {} of {}", market_type, exchange),
+            _ => panic!("Unknown market_type {market_type} of {exchange}"),
         },
-        _ => format!("{}.{}.lock", exchange, market_type),
+        _ => format!("{exchange}.{market_type}.lock"),
     };
-    format!("{}.{}", prefix, filename)
+    format!("{prefix}.{filename}")
 }
 
 fn create_lock_file(filename: &str) -> LockFile {
@@ -129,7 +129,8 @@ fn create_lock_file(filename: &str) -> LockFile {
     };
     let _ = std::fs::create_dir_all(&dir);
     let file_path = dir.join(filename);
-    LockFile::open(file_path.as_path()).expect(file_path.to_str().unwrap())
+    LockFile::open(file_path.as_path())
+        .unwrap_or_else(|_| panic!("{}", file_path.to_str().unwrap().to_string()))
 }
 
 fn create_all_lock_files_rest()

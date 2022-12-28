@@ -64,7 +64,7 @@ impl MessageHandler for MexcMessageHandler {
                 "pong" => MiscMessage::Pong,
                 "rs.error" => {
                     error!("Received {} from {}", msg, EXCHANGE_NAME);
-                    panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                    panic!("Received {msg} from {EXCHANGE_NAME}");
                 }
                 _ => {
                     if obj.contains_key("symbol") && channel.starts_with("push.") {

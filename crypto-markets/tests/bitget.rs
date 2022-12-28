@@ -52,7 +52,7 @@ fn fetch_inverse_future_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
     assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
-        println!("{}", symbol);
+        println!("{symbol}");
         assert!(symbol.contains("USD_DMCBL_"));
         assert_eq!(MarketType::InverseFuture, get_market_type(symbol, EXCHANGE_NAME, None));
     }

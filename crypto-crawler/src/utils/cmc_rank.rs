@@ -294,8 +294,7 @@ fn http_get(url: &str) -> Result<String, reqwest::Error> {
 fn get_cmc_ranks(limit: i64) -> HashMap<String, u64> {
     let mut mapping: HashMap<String, u64> = HashMap::new();
     let url = format!(
-        "https://api.coinmarketcap.com/data-api/v3/cryptocurrency/listing?start=1&limit={}&sortBy=market_cap&sortType=desc&convert=USD&cryptoType=all&tagType=all&audited=false",
-        limit
+        "https://api.coinmarketcap.com/data-api/v3/cryptocurrency/listing?start=1&limit={limit}&sortBy=market_cap&sortType=desc&convert=USD&cryptoType=all&tagType=all&audited=false"
     );
     if let Ok(txt) = http_get(&url) {
         if let Ok(json_obj) = serde_json::from_str::<HashMap<String, Value>>(&txt) {
@@ -340,7 +339,7 @@ mod tests {
         let mut v = Vec::from_iter(mapping);
         v.sort_by(|&(_, a), &(_, b)| a.cmp(&b));
         for (coin, rank) in v {
-            println!("(\"{}\", {}),", coin, rank);
+            println!("(\"{coin}\", {rank}),");
         }
     }
 

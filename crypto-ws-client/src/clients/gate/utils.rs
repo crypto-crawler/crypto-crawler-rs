@@ -38,8 +38,8 @@ impl<const MARKET_TYPE: char> MessageHandler for GateMessageHandler<MARKET_TYPE>
             // https://www.gate.io/docs/futures/ws/en/#error
             let code = err.get("code").unwrap().as_i64().unwrap();
             match code {
-                1 | 2 => panic!("Received {} from {}", msg, EXCHANGE_NAME), // client side errors
-                _ => error!("Received {} from {}", msg, EXCHANGE_NAME),     // server side errors
+                1 | 2 => panic!("Received {msg} from {EXCHANGE_NAME}"), // client side errors
+                _ => error!("Received {} from {}", msg, EXCHANGE_NAME), // server side errors
             }
             return MiscMessage::Other;
         }
@@ -79,11 +79,11 @@ impl<const MARKET_TYPE: char> GateCommandTranslator<MARKET_TYPE> {
         subscribe: bool,
     ) -> Vec<String> {
         let channel = if MARKET_TYPE == 'S' {
-            format!("spot.{}", channel)
+            format!("spot.{channel}")
         } else if MARKET_TYPE == 'F' {
-            format!("futures.{}", channel)
+            format!("futures.{channel}")
         } else {
-            panic!("unexpected market type: {}", MARKET_TYPE)
+            panic!("unexpected market type: {MARKET_TYPE}")
         };
         if channel.contains(".order_book") {
             symbols
@@ -99,7 +99,7 @@ impl<const MARKET_TYPE: char> GateCommandTranslator<MARKET_TYPE> {
                             } else if MARKET_TYPE == 'F' {
                                 serde_json::to_string(&[symbol, "20", "0"]).unwrap()
                             } else {
-                                panic!("unexpected market type: {}", MARKET_TYPE)
+                                panic!("unexpected market type: {MARKET_TYPE}")
                             }
                         } else if channel.ends_with(".order_book_update") {
                             if MARKET_TYPE == 'S' {
@@ -107,10 +107,10 @@ impl<const MARKET_TYPE: char> GateCommandTranslator<MARKET_TYPE> {
                             } else if MARKET_TYPE == 'F' {
                                 serde_json::to_string(&[symbol, "100ms", "20"]).unwrap()
                             } else {
-                                panic!("unexpected market type: {}", MARKET_TYPE)
+                                panic!("unexpected market type: {MARKET_TYPE}")
                             }
                         } else {
-                            panic!("unexpected channel: {}", channel)
+                            panic!("unexpected channel: {channel}")
                         },
                     )
                 })

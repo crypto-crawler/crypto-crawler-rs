@@ -9,10 +9,10 @@ pub(super) fn http_get(url: &str, params: Option<&HashMap<String, String>>) -> R
         let mut first = true;
         for (k, v) in params.iter() {
             if first {
-                full_url.push_str(format!("?{}={}", k, v).as_str());
+                full_url.push_str(format!("?{k}={v}").as_str());
                 first = false;
             } else {
-                full_url.push_str(format!("&{}={}", k, v).as_str());
+                full_url.push_str(format!("&{k}={v}").as_str());
             }
         }
     }

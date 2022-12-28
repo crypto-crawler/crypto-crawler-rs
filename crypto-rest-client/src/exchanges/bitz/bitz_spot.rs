@@ -24,6 +24,6 @@ impl BitzSpotRestClient {
     ///
     /// For example: <https://apiv2.bitz.com/V2/Market/depth?symbol=btc_usdt>,
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/V2/Market/depth?symbol={}", symbol))
+        gen_api!(format!("/V2/Market/depth?symbol={symbol}"))
     }
 }

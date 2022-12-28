@@ -18,7 +18,7 @@ pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result
         MarketType::InverseFuture | MarketType::LinearFuture => {
             gate_future::GateFutureRestClient::fetch_l2_snapshot
         }
-        _ => panic!("Gate unknown market_type: {}", market_type),
+        _ => panic!("Gate unknown market_type: {market_type}"),
     };
 
     func(symbol)
@@ -29,7 +29,7 @@ pub(crate) fn fetch_open_interest(market_type: MarketType, symbol: &str) -> Resu
         MarketType::InverseSwap | MarketType::LinearSwap => {
             gate_swap::GateSwapRestClient::fetch_open_interest
         }
-        _ => panic!("Gate {} does NOT have open interest data", market_type),
+        _ => panic!("Gate {market_type} does NOT have open interest data"),
     };
 
     func(symbol)

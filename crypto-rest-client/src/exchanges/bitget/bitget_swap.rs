@@ -24,7 +24,7 @@ impl BitgetSwapRestClient {
     ///
     /// Rate Limit：20 requests per 2 seconds
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/api/mix/v1/market/depth?symbol={}&limit=100", symbol))
+        gen_api!(format!("/api/mix/v1/market/depth?symbol={symbol}&limit=100"))
     }
 
     /// Get open interest.
@@ -33,6 +33,6 @@ impl BitgetSwapRestClient {
     ///
     /// - <https://api.bitget.com/api/mix/v1/market/open-interest?symbol=BTCUSDT_UMCBL>
     pub fn fetch_open_interest(symbol: &str) -> Result<String> {
-        gen_api!(format!("/api/mix/v1/market/open-interest?symbol={}", symbol))
+        gen_api!(format!("/api/mix/v1/market/open-interest?symbol={symbol}"))
     }
 }

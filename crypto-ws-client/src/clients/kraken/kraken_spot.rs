@@ -90,7 +90,7 @@ impl MessageHandler for KrakenMessageHandler {
                                 // WebSocket yet
                                 error!("Received {} from {}", msg, EXCHANGE_NAME)
                             } else {
-                                panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                                panic!("Received {msg} from {EXCHANGE_NAME}");
                             }
                         }
                         _ => warn!("Received {} from {}", msg, EXCHANGE_NAME),

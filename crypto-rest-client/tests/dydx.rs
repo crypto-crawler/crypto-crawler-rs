@@ -18,7 +18,7 @@ fn test_l2_snapshot(market_type: MarketType, symbol: &str) {
 #[test_case(MarketType::LinearSwap)]
 fn test_open_interest(market_type: MarketType) {
     let text = fetch_open_interest("dydx", market_type, None).unwrap();
-    println!("{}", text);
+    println!("{text}");
     let obj = serde_json::from_str::<HashMap<String, Value>>(&text).unwrap();
     assert!(obj.contains_key("markets"));
 }

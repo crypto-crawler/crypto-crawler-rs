@@ -49,7 +49,7 @@ pub(super) async fn fetch_ws_token() -> WebsocketToken {
     let obj = serde_json::from_str::<HashMap<String, Value>>(&txt).unwrap();
     let code = obj.get("code").unwrap().as_str().unwrap();
     if code != "200000" {
-        panic!("Failed to get token, code is {}", code);
+        panic!("Failed to get token, code is {code}");
     }
     let data = obj.get("data").unwrap().as_object().unwrap();
     let token = data.get("token").unwrap().as_str().unwrap();
@@ -119,10 +119,10 @@ impl MessageHandler for KucoinMessageHandler {
             }
             "message" => MiscMessage::Normal,
             "error" => {
-                panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                panic!("Received {msg} from {EXCHANGE_NAME}");
             }
             _ => {
-                panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                panic!("Received {msg} from {EXCHANGE_NAME}");
             }
         }
     }

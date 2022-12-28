@@ -68,7 +68,7 @@ impl MessageHandler for ZbMessageHandler {
             let code = code.as_i64().unwrap();
             if code != 1000 {
                 if code == 1007 {
-                    panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                    panic!("Received {msg} from {EXCHANGE_NAME}");
                 } else {
                     error!("Received {} from {}", msg, EXCHANGE_NAME);
                 }

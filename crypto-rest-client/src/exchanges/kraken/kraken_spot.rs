@@ -35,7 +35,7 @@ impl KrakenSpotRestClient {
             let stripped = symbol.replace('/', "");
             gen_api!(format!("/0/public/Trades?pair={}", &stripped), since)
         } else {
-            gen_api!(format!("/0/public/Trades?pair={}", symbol), since)
+            gen_api!(format!("/0/public/Trades?pair={symbol}"), since)
         }
     }
 
@@ -49,9 +49,9 @@ impl KrakenSpotRestClient {
             // websocket and RESTful API have different symbol format
             // XBT/USD -> XBTUSD
             let stripped = symbol.replace('/', "");
-            gen_api!(format!("/0/public/Depth?pair={}&count=500", stripped))
+            gen_api!(format!("/0/public/Depth?pair={stripped}&count=500"))
         } else {
-            gen_api!(format!("/0/public/Depth?pair={}&count=500", symbol))
+            gen_api!(format!("/0/public/Depth?pair={symbol}&count=500"))
         }
     }
 }

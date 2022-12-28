@@ -84,7 +84,7 @@ impl<const URL: char> HuobiWSClient<URL> {
                 } else if URL == 'O' {
                     OPTION_WEBSOCKET_URL
                 } else {
-                    panic!("Unknown URL {}", URL);
+                    panic!("Unknown URL {URL}");
                 }
             }
         };
@@ -122,7 +122,7 @@ impl<const URL: char> WSClient for HuobiWSClient<URL> {
         } else {
             let commands = symbols
                 .iter()
-                .map(|symbol| format!(r#"{{"sub":"market.{}.depth.size_20.high_freq","data_type":"incremental","id": "crypto-ws-client"}}"#, symbol))
+                .map(|symbol| format!(r#"{{"sub":"market.{symbol}.depth.size_20.high_freq","data_type":"incremental","id": "crypto-ws-client"}}"#))
                 .collect::<Vec<String>>();
             self.client.send(&commands).await;
         }
@@ -138,7 +138,7 @@ impl<const URL: char> WSClient for HuobiWSClient<URL> {
     }
 
     async fn subscribe_l3_orderbook(&self, _symbols: &[String]) {
-        panic!("{} does NOT have the level3 websocket channel", EXCHANGE_NAME);
+        panic!("{EXCHANGE_NAME} does NOT have the level3 websocket channel");
     }
 
     async fn subscribe_ticker(&self, symbols: &[String]) {
@@ -181,8 +181,8 @@ impl<const URL: char> WSClient for HuobiWSClient<URL> {
         self.client.run().await;
     }
 
-    fn close(&self) {
-        self.client.close();
+    async fn close(&self) {
+        self.client.close().await;
     }
 }
 
@@ -191,7 +191,7 @@ struct HuobiCommandTranslator {}
 
 impl HuobiCommandTranslator {
     fn topic_to_command(channel: &str, symbol: &str, subscribe: bool) -> String {
-        let raw_channel = format!("market.{}.{}", symbol, channel);
+        let raw_channel = format!("market.{symbol}.{channel}");
         format!(
             r#"{{"{}":"{}","id":"crypto-ws-client"}}"#,
             if subscribe { "sub" } else { "unsub" },
@@ -213,7 +213,7 @@ impl HuobiCommandTranslator {
             2592000 => "1mon",
             _ => panic!("Huobi has intervals 1min,5min,15min,30min,60min,4hour,1day,1week,1mon"),
         };
-        format!("kline.{}", interval_str)
+        format!("kline.{interval_str}")
     }
 }
 
@@ -260,7 +260,7 @@ impl MessageHandler for HuobiMessageHandler {
                         error!("Received {} from {}", msg, EXCHANGE_NAME);
                         let err_msg = obj.get("err-msg").unwrap().as_str().unwrap();
                         if err_msg.starts_with("invalid") {
-                            panic!("Received {} from {}", msg, EXCHANGE_NAME);
+                            panic!("Received {msg} from {EXCHANGE_NAME}");
                         }
                     }
                     _ => warn!("Received {} from {}", msg, EXCHANGE_NAME),

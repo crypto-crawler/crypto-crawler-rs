@@ -26,6 +26,6 @@ impl GateSpotRestClient {
     ///
     /// For example: <https://api.gateio.ws/api/v4/spot/order_book?currency_pair=BTC_USDT&limit=1000>,
     pub fn fetch_l2_snapshot(symbol: &str) -> Result<String> {
-        gen_api!(format!("/spot/order_book?currency_pair={}&limit=1000", symbol))
+        gen_api!(format!("/spot/order_book?currency_pair={symbol}&limit=1000"))
     }
 }

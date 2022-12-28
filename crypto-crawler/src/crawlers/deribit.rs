@@ -34,13 +34,13 @@ pub(crate) async fn crawl_trade(
             MarketType::EuropeanOption => {
                 vec![("trades.option.SYMBOL.100ms".to_string(), "any".to_string())]
             }
-            _ => panic!("Deribit does NOT have the {} market type", market_type),
+            _ => panic!("Deribit does NOT have the {market_type} market type"),
         };
 
         let ws_client = DeribitWSClient::new(tx, None).await;
         ws_client.subscribe(&topics).await;
         ws_client.run().await;
-        ws_client.close();
+        ws_client.close().await;
     } else {
         crawl_event(EXCHANGE_NAME, MessageType::Trade, market_type, symbols, tx).await;
     }

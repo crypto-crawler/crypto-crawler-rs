@@ -224,8 +224,8 @@ macro_rules! impl_ws_client_trait {
                 self.client.run().await;
             }
 
-            fn close(&self) {
-                self.client.close();
+            async fn close(&self) {
+                self.client.close().await;
             }
         }
     };

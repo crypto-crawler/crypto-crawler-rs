@@ -7,7 +7,7 @@ fn msg_type_to_channel(msg_type: MessageType) -> &'static str {
         MessageType::Trade => "trades",
         MessageType::L2Event => "orderbook",
         MessageType::BBO => "ticker",
-        _ => panic!("Unknown message type {}", msg_type),
+        _ => panic!("Unknown message type {msg_type}"),
     }
 }
 

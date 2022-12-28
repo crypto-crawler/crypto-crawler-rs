@@ -63,7 +63,7 @@ fn fetch_l2_snapshot_internal(
         "okx" => exchanges::okx::OkxRestClient::fetch_l2_snapshot(symbol),
         "zb" => exchanges::zb::fetch_l2_snapshot(market_type, symbol),
         "zbg" => exchanges::zbg::fetch_l2_snapshot(market_type, symbol),
-        _ => panic!("Unknown exchange {}", exchange),
+        _ => panic!("Unknown exchange {exchange}"),
     };
     match ret {
         Ok(s) => Ok(s.trim().to_string()),
@@ -81,7 +81,7 @@ pub fn fetch_l3_snapshot_internal(
         "bitstamp" => exchanges::bitstamp::BitstampRestClient::fetch_l3_snapshot(symbol),
         "coinbase_pro" => exchanges::coinbase_pro::CoinbaseProRestClient::fetch_l3_snapshot(symbol),
         "kucoin" => exchanges::kucoin::fetch_l3_snapshot(market_type, symbol),
-        _ => panic!("{} {} does NOT provide level3 orderbook data", exchange, market_type),
+        _ => panic!("{exchange} {market_type} does NOT provide level3 orderbook data"),
     };
     match ret {
         Ok(s) => Ok(s.trim().to_string()),
@@ -110,7 +110,7 @@ pub fn fetch_open_interest(
         "kucoin" => exchanges::kucoin::fetch_open_interest(market_type),
         "okx" => exchanges::okx::OkxRestClient::fetch_open_interest(market_type, symbol),
         "zbg" => exchanges::zbg::fetch_open_interest(market_type, symbol.unwrap()),
-        _ => panic!("{} does NOT have open interest RESTful API", exchange),
+        _ => panic!("{exchange} does NOT have open interest RESTful API"),
     };
     match ret {
         Ok(s) => Ok(s.trim().to_string()),
@@ -125,7 +125,7 @@ pub fn fetch_long_short_ratio(
 ) -> Result<String> {
     let ret = match exchange {
         "bybit" => exchanges::bybit::BybitRestClient::fetch_long_short_ratio(symbol),
-        _ => panic!("{} {} does NOT provide level3 orderbook data", exchange, market_type),
+        _ => panic!("{exchange} {market_type} does NOT provide level3 orderbook data"),
     };
     match ret {
         Ok(s) => Ok(s.trim().to_string()),
@@ -206,7 +206,6 @@ fn retriable(
         }
     }
     Err(Error(format!(
-        "Failed {} {} {} after retrying {} times",
-        exchange, market_type, symbol, retry_count
+        "Failed {exchange} {market_type} {symbol} after retrying {retry_count} times"
     )))
 }

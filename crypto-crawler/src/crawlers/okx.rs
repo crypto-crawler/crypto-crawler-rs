@@ -33,9 +33,9 @@ pub(crate) async fn crawl_funding_rate(
             let ws_client = OkxWSClient::new(tx, None).await;
             ws_client.subscribe(&topics).await;
             ws_client.run().await;
-            ws_client.close();
+            ws_client.close().await;
         }
-        _ => panic!("OKX {} does NOT have funding rates", market_type),
+        _ => panic!("OKX {market_type} does NOT have funding rates"),
     }
 }
 
@@ -69,7 +69,7 @@ pub(crate) async fn crawl_open_interest(
         let ws_client = OkxWSClient::new(tx, None).await;
         ws_client.subscribe(&topics).await;
         ws_client.run().await;
-        ws_client.close();
+        ws_client.close().await;
     } else {
         panic!("spot does NOT have open interest");
     }
