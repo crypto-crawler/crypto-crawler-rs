@@ -7,7 +7,7 @@ pub(crate) mod huobi_linear_swap;
 pub(crate) mod huobi_option;
 pub(crate) mod huobi_spot;
 
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crypto_market_type::MarketType;
 
 pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result<String> {
@@ -26,7 +26,7 @@ pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result
     match func(symbol) {
         Ok(msg) => {
             if msg == r#"{"status": "maintain"}"# {
-                Err(msg)
+                Err(Error(msg))
             } else {
                 Ok(msg)
             }
@@ -49,7 +49,7 @@ pub(crate) fn fetch_open_interest(market_type: MarketType, symbol: Option<&str>)
     match func(symbol) {
         Ok(msg) => {
             if msg == r#"{"status": "maintain"}"# {
-                Err(msg)
+                Err(Error(msg))
             } else {
                 Ok(msg)
             }
