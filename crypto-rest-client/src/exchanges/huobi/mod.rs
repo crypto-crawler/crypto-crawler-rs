@@ -22,7 +22,17 @@ pub(crate) fn fetch_l2_snapshot(market_type: MarketType, symbol: &str) -> Result
         _ => panic!("Binance unknown market_type: {market_type}"),
     };
 
-    func(symbol)
+    // if msg is {"status": "maintain"}, convert it to an error
+    match func(symbol) {
+        Ok(msg) => {
+            if msg == r#"{"status": "maintain"}"# {
+                Err(msg)
+            } else {
+                Ok(msg)
+            }
+        }
+        Err(err) => Err(err),
+    }
 }
 
 pub(crate) fn fetch_open_interest(market_type: MarketType, symbol: Option<&str>) -> Result<String> {
@@ -35,5 +45,15 @@ pub(crate) fn fetch_open_interest(market_type: MarketType, symbol: Option<&str>)
         _ => panic!("Huobi {market_type} does not have open interest"),
     };
 
-    func(symbol)
+    // if msg is {"status": "maintain"}, convert it to an error
+    match func(symbol) {
+        Ok(msg) => {
+            if msg == r#"{"status": "maintain"}"# {
+                Err(msg)
+            } else {
+                Ok(msg)
+            }
+        }
+        Err(err) => Err(err),
+    }
 }
