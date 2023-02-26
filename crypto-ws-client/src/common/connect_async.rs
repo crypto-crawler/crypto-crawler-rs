@@ -79,7 +79,16 @@ async fn connect_async_internal<S: AsyncRead + AsyncWrite + Unpin + Send + 'stat
                 match command {
                   Some(command) => {
                     match command {
-                      Message::Close(_) => {
+                      Message::Close(resp) => {
+                        match resp {
+                            Some(frame) => {
+                                warn!(
+                                    "Received a CloseFrame: code: {}, reason: {}",
+                                    frame.code, frame.reason
+                                );
+                            }
+                            None => warn!("Received an empty close message"),
+                        }
                         break; // close the connection and break the loop
                       }
                       _ => {

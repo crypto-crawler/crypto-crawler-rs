@@ -79,23 +79,11 @@ impl<H: MessageHandler> WSClientInternal<H> {
         }
     }
 
-    fn get_send_interval_ms(&self) -> Option<u64> {
-        match self.exchange {
-            "binance" => Some(100), /* WebSocket connections have a limit of 10 incoming */
-            // messages per second
-            "kucoin" => Some(100), //  Message limit sent to the server: 100 per 10 seconds
-            _ => None,
-        }
-    }
-
     pub async fn send(&self, commands: &[String]) {
         for command in commands {
             debug!("{}", command);
             if self.command_tx.send(Message::Text(command.to_string())).await.is_err() {
                 break; // break the loop if there is no receiver
-            }
-            if let Some(interval) = self.get_send_interval_ms() {
-                std::thread::sleep(Duration::from_millis(interval));
             }
         }
     }

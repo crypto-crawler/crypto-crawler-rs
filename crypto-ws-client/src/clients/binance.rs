@@ -25,14 +25,15 @@ const INVERSE_WEBSOCKET_URL: &str = "wss://dstream.binance.com/stream";
 // you'll get `code: 3001, reason: illegal request`
 const WS_FRAME_SIZE: usize = 4096;
 
-// WebSocket connections have a limit of 10 incoming messages per second
+// WebSocket connections have a limit of 5 incoming messages per second.
 //
 // See:
 //
+// * https://binance-docs.github.io/apidocs/spot/en/#limits
 // * https://binance-docs.github.io/apidocs/futures/en/#websocket-market-streams
 // * https://binance-docs.github.io/apidocs/delivery/en/#websocket-market-streams
 const UPLINK_LIMIT: (NonZeroU32, std::time::Duration) =
-    (nonzero!(10u32), std::time::Duration::from_secs(1));
+    (nonzero!(5u32), std::time::Duration::from_secs(1));
 
 // Internal unified client
 pub struct BinanceWSClient<const MARKET_TYPE: char> {
