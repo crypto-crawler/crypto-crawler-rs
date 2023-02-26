@@ -50,8 +50,10 @@ pub(crate) async fn crawl_bbo(
     if symbols.is_none() || symbols.unwrap().is_empty() {
         if market_type == MarketType::Spot {
             // spot `!bookTicker` has been removed since December 7, 2022
-            let spot_symbols = fetch_symbols_retry(EXCHANGE_NAME, market_type);
-            let mut hot_spot_symbols = get_hot_spot_symbols(EXCHANGE_NAME, &spot_symbols);
+            let mut hot_spot_symbols = tokio::task::block_in_place(move || {
+                let spot_symbols = fetch_symbols_retry(EXCHANGE_NAME, market_type);
+                get_hot_spot_symbols(EXCHANGE_NAME, &spot_symbols)
+            });
             sort_by_cmc_rank(EXCHANGE_NAME, &mut hot_spot_symbols);
             let symbols = Some(hot_spot_symbols.as_slice());
             crawl_event(EXCHANGE_NAME, MessageType::BBO, market_type, symbols, tx).await
