@@ -17,6 +17,7 @@ mod binance_spot {
         );
     }
 
+    #[ignore = "!bookTicker has been removed since December 7, 2022"]
     #[tokio::test(flavor = "multi_thread")]
     async fn subscribe_all_bbo() {
         gen_test_code!(
