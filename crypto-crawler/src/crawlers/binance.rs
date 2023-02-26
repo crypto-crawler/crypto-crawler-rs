@@ -48,31 +48,37 @@ pub(crate) async fn crawl_bbo(
     tx: Sender<Message>,
 ) {
     if symbols.is_none() || symbols.unwrap().is_empty() {
-        // spot `!bookTicker` has been removed since December 7, 2022
-        let spot_symbols = fetch_symbols_retry(EXCHANGE_NAME, market_type);
-        let mut hot_spot_symbols = get_hot_spot_symbols(EXCHANGE_NAME, &spot_symbols);
-        sort_by_cmc_rank(EXCHANGE_NAME, &mut hot_spot_symbols);
-        let symbols = Some(hot_spot_symbols.as_slice());
-        crawl_event(EXCHANGE_NAME, MessageType::BBO, market_type, symbols, tx).await
-    } else if symbols.is_none() || symbols.unwrap().is_empty() {
-        let tx =
-            create_conversion_thread(EXCHANGE_NAME.to_string(), MessageType::BBO, market_type, tx);
-        let commands =
-            vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!bookTicker"]}"#.to_string()]; // All Book Tickers Stream
-        match market_type {
-            MarketType::InverseFuture | MarketType::InverseSwap => {
-                let ws_client = BinanceInverseWSClient::new(tx, None).await;
-                ws_client.send(&commands).await;
-                ws_client.run().await;
-                ws_client.close().await;
+        if market_type == MarketType::Spot {
+            // spot `!bookTicker` has been removed since December 7, 2022
+            let spot_symbols = fetch_symbols_retry(EXCHANGE_NAME, market_type);
+            let mut hot_spot_symbols = get_hot_spot_symbols(EXCHANGE_NAME, &spot_symbols);
+            sort_by_cmc_rank(EXCHANGE_NAME, &mut hot_spot_symbols);
+            let symbols = Some(hot_spot_symbols.as_slice());
+            crawl_event(EXCHANGE_NAME, MessageType::BBO, market_type, symbols, tx).await
+        } else {
+            let tx = create_conversion_thread(
+                EXCHANGE_NAME.to_string(),
+                MessageType::BBO,
+                market_type,
+                tx,
+            );
+            let commands =
+                vec![r#"{"id":9527,"method":"SUBSCRIBE","params":["!bookTicker"]}"#.to_string()]; // All Book Tickers Stream
+            match market_type {
+                MarketType::InverseFuture | MarketType::InverseSwap => {
+                    let ws_client = BinanceInverseWSClient::new(tx, None).await;
+                    ws_client.send(&commands).await;
+                    ws_client.run().await;
+                    ws_client.close().await;
+                }
+                MarketType::LinearFuture | MarketType::LinearSwap => {
+                    let ws_client = BinanceLinearWSClient::new(tx, None).await;
+                    ws_client.send(&commands).await;
+                    ws_client.run().await;
+                    ws_client.close().await;
+                }
+                _ => panic!("Binance {} market does NOT have the BBO channel", market_type),
             }
-            MarketType::LinearFuture | MarketType::LinearSwap => {
-                let ws_client = BinanceLinearWSClient::new(tx, None).await;
-                ws_client.send(&commands).await;
-                ws_client.run().await;
-                ws_client.close().await;
-            }
-            _ => panic!("Binance {} market does NOT have the BBO channel", market_type),
         }
     } else {
         crawl_event(EXCHANGE_NAME, MessageType::BBO, market_type, symbols, tx).await;
