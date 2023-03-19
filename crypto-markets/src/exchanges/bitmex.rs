@@ -202,10 +202,10 @@ fn fetch_instruments(market_type: MarketType) -> Result<Vec<Instrument>> {
     // Quanto
     for x in instruments.iter().filter(|x| x.isQuanto) {
         assert!(x.positionCurrency.is_empty());
-        // settled in XBT, quoted in USD
+        // settled in XBT, quoted in USD or USDC
         assert_eq!(x.settlCurrency.to_uppercase(), "XBT");
         if x.typ != "FFWCSF" {
-            assert_eq!(x.quoteCurrency, "USD");
+            assert!(x.quoteCurrency == "USD" || x.quoteCurrency == "USDC");
         }
     }
     for x in instruments.iter().filter(|x| x.positionCurrency.is_empty() && x.typ != "IFXXXP") {

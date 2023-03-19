@@ -1,6 +1,6 @@
 [package]
 name = "crypto-markets"
-version = "1.3.10"
+version = "1.3.11"
 authors = ["soulmachine <soulmachine@gmail.com>"]
 edition = "2021"
 description   = "Fetch trading markets from a cryptocurrency exchange"
@@ -9,13 +9,13 @@ repository = "https://github.com/crypto-crawler/crypto-crawler-rs/tree/main/cryp
 keywords = ["cryptocurrency", "blockchain", "trading"]
 
 [dependencies]
-chrono = "0.4.22"
+chrono = "0.4.24"
 crypto-market-type = "1.1.5"
-crypto-pair = "2.3.7"
-reqwest = { version = "0.11.12", features = ["blocking", "gzip", "socks"] }
-serde = { version = "1.0.147", features = ["derive"] }
-serde_json = "1.0.87"
+crypto-pair = "2.3.13"
+reqwest = { version = "0.11.14", features = ["blocking", "gzip", "socks"] }
+serde = { version = "1.0.157", features = ["derive"] }
+serde_json = "1.0.94"
 
 [dev_dependencies]
-crypto-contract-value = "1.6.8"
+crypto-contract-value = "1.7.13"
 test-case = "1"
