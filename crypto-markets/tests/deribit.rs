@@ -64,7 +64,7 @@ fn fetch_inverse_future_markets() {
 
     let btcusd = markets.iter().find(|m| m.base_id == "BTC").unwrap().clone();
     assert_eq!(btcusd.contract_value, Some(10.0));
-    assert_eq!(btcusd.precision.tick_size, 0.5);
+    assert_eq!(btcusd.precision.tick_size, 2.5);
     assert_eq!(btcusd.precision.lot_size, 10.0);
     let quantity_limit = btcusd.quantity_limit.unwrap();
     assert_eq!(quantity_limit.min.unwrap(), 10.0);

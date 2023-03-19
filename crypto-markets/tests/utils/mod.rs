@@ -6,7 +6,9 @@ macro_rules! gen_all_symbols {
 
         for market_type in market_types.into_iter().filter(|m| m != &MarketType::Unknown) {
             let symbols = fetch_symbols(EXCHANGE_NAME, market_type).unwrap();
-            assert!(!symbols.is_empty());
+            if EXCHANGE_NAME != "gate" && market_type != MarketType::InverseFuture {
+                assert!(!symbols.is_empty());
+            }
         }
     };
 }

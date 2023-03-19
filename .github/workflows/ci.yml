@@ -7,7 +7,7 @@ env:
 
 # Stop the previous CI tasks (which is deprecated)
 # to conserve the runner resource.
-concurrency: 
+concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
@@ -43,8 +43,9 @@ jobs:
         run: |
           # Run all tests except:
           # * bitmex, because bitmex has very low rate limit
+          # * FTX, the FTX website is not operational
           # * zbg, due to the "invalid peer certificate: UnknownIssuer" error
-          cargo nextest run -E 'all() - binary(~bitmex) - binary(~zbg)'
+          cargo nextest run -E 'all() - binary(~bitmex) - binary(~ftx) - binary(~zbg)'
 
           # Run the '*bitmex*' tests in -j1.
           cargo nextest run -E 'binary(~bitmex)' -j1 || true

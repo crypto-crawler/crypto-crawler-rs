@@ -1,18 +1,19 @@
 use crypto_market_type::{get_market_types, MarketType};
 use crypto_markets::{fetch_markets, fetch_symbols};
 use crypto_pair::get_market_type;
-use test_case::test_case;
 
 #[macro_use]
 mod utils;
 
 const EXCHANGE_NAME: &str = "ftx";
 
+#[ignore = "The FTX website is not operational."]
 #[test]
 fn fetch_all_symbols() {
     gen_all_symbols!();
 }
 
+#[ignore = "The FTX website is not operational."]
 #[test]
 fn fetch_spot_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::Spot).unwrap();
@@ -24,6 +25,7 @@ fn fetch_spot_symbols() {
     }
 }
 
+#[ignore = "The FTX website is not operational."]
 #[test]
 fn fetch_linear_swap_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
@@ -34,6 +36,7 @@ fn fetch_linear_swap_symbols() {
     }
 }
 
+#[ignore = "The FTX website is not operational."]
 #[test]
 fn fetch_linear_future_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::LinearFuture).unwrap();
@@ -45,6 +48,7 @@ fn fetch_linear_future_symbols() {
     }
 }
 
+#[ignore = "The FTX website is not operational."]
 #[test]
 fn fetch_move_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::Move).unwrap();
@@ -55,6 +59,7 @@ fn fetch_move_symbols() {
     }
 }
 
+#[ignore = "The FTX website is not operational."]
 #[test]
 fn fetch_bvol_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::BVOL).unwrap();
@@ -65,6 +70,7 @@ fn fetch_bvol_symbols() {
     }
 }
 
+#[ignore = "The FTX website is not operational."]
 #[test]
 fn fetch_spot_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::Spot).unwrap();
@@ -77,6 +83,7 @@ fn fetch_spot_markets() {
     assert!(btcusdt.quantity_limit.is_none());
 }
 
+#[ignore = "The FTX website is not operational."]
 #[test]
 fn fetch_linear_swap_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearSwap).unwrap();
@@ -89,6 +96,7 @@ fn fetch_linear_swap_markets() {
     assert!(btcusd.quantity_limit.is_none());
 }
 
+#[ignore = "The FTX website is not operational."]
 #[test]
 fn fetch_linear_future_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::LinearFuture).unwrap();
@@ -102,6 +110,7 @@ fn fetch_linear_future_markets() {
     assert!(btcusd.delivery_date.is_some());
 }
 
+#[ignore = "The FTX website is not operational."]
 #[test]
 fn fetch_move_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::Move).unwrap();
@@ -115,6 +124,7 @@ fn fetch_move_markets() {
     assert!(btcusd.delivery_date.is_some());
 }
 
+#[ignore = "The FTX website is not operational."]
 #[test]
 fn fetch_bvol_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::BVOL).unwrap();
@@ -128,8 +138,9 @@ fn fetch_bvol_markets() {
     assert!(btcusd.delivery_date.is_none());
 }
 
-#[test_case(MarketType::LinearSwap)]
-#[test_case(MarketType::LinearFuture)]
-fn test_contract_values(market_type: MarketType) {
-    check_contract_values!(EXCHANGE_NAME, market_type);
-}
+// The FTX website is not operational
+// #[test_case(MarketType::LinearSwap)]
+// #[test_case(MarketType::LinearFuture)]
+// fn test_contract_values(market_type: MarketType) {
+//     check_contract_values!(EXCHANGE_NAME, market_type);
+// }

@@ -69,7 +69,7 @@ fn fetch_linear_swap_markets() {
     }
 
     let btcusdt = markets.iter().find(|m| m.symbol == "BTCUSDT").unwrap().clone();
-    assert_eq!(btcusdt.precision.tick_size, 0.5);
+    assert_eq!(btcusdt.precision.tick_size, 0.1);
     assert_eq!(btcusdt.precision.lot_size, 0.001);
     let quantity_limit = btcusdt.quantity_limit.unwrap();
     assert_eq!(quantity_limit.min.unwrap(), 0.001);

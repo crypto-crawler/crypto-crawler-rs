@@ -47,7 +47,6 @@ fn fetch_linear_swap_symbols() {
 #[test]
 fn fetch_inverse_future_symbols() {
     let symbols = fetch_symbols(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
-    assert!(!symbols.is_empty());
     for symbol in symbols.iter() {
         let date = &symbol[(symbol.len() - 8)..];
         assert!(date.parse::<i64>().is_ok());
@@ -111,6 +110,7 @@ fn fetch_linear_swap_markets() {
     assert_eq!(quantity_limit.max, Some(1000000.0));
 }
 
+#[ignore = "Gate inverse future market has no trading symbols"]
 #[test]
 fn fetch_inverse_future_markets() {
     let markets = fetch_markets(EXCHANGE_NAME, MarketType::InverseFuture).unwrap();
